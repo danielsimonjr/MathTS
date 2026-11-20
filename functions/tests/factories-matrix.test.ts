@@ -80,13 +80,15 @@ describe('MathJSDenseMatrix', () => {
     expect(m.storage()).toBe('dense');
   });
 
-  it('valueOf() returns the internal _data reference', () => {
+  it('valueOf() returns the internal _data reference, a copy of the Array data (mathjs)', () => {
     const data = [
       [1, 2],
       [3, 4],
     ];
     const m = new MathJSDenseMatrix(data);
-    expect(m.valueOf()).toBe(data);
+    expect(m.valueOf()).toBe(m._data);
+    expect(m.valueOf()).not.toBe(data);
+    expect(m.valueOf()).toEqual(data);
   });
 
   it('size() returns a copy of _size', () => {

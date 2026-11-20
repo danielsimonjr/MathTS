@@ -9,6 +9,7 @@
  */
 
 import { factoryScope } from './scope.js';
+import { replacer } from '../utils/json-replacer.js';
 import { add, multiply } from '../typed/arithmetic.js';
 import { registerDivideInverse } from '../typed/divide-inverse.js';
 import { registerExactReductions } from '../typed/exact-reductions.js';
@@ -401,7 +402,12 @@ import { createMatrixFromRows } from '../matrix/matrixFromRows.js';
 import { createCount } from '../matrix/count.js';
 import { createTrace } from '../matrix/trace.js';
 import { createDet } from '../matrix/det.js';
-import { acceleratedDet, acceleratedInv, correctEigs } from '../matrix/native-accel.js';
+import {
+  acceleratedDet,
+  acceleratedInv,
+  correctEigs,
+  correctEigsOfMatrix,
+} from '../matrix/native-accel.js';
 import { createReshape } from '../matrix/reshape.js';
 
 // Simple matrix factories (no deep dependency chains)
@@ -1084,8 +1090,8 @@ factoryScope.tau = 2 * Math.PI;
 factoryScope.i = new (factoryScope.Complex as new (re: number, im: number) => unknown)(0, 1);
 factoryScope.e = Math.E;
 
-// 'replacer' is a JSON serialization utility — provide a simple identity stub
-factoryScope.replacer = (_key: string, value: unknown) => value;
+// simplify deduplicates rule matches with JSON.stringify, so a bigint constant needs the bigint tag
+factoryScope.replacer = replacer;
 
 // 'math' for Chain — provide factoryScope itself as the math namespace
 factoryScope.math = factoryScope;
@@ -1392,12 +1398,17 @@ factoryScope.eigs = factoryEigs;
 // matrix (even triangular ones). Route the public `eigs` through the native
 // orthes/hqr2 solver, which is correct for symmetric/non-symmetric/complex spectra;
 // non-numeric inputs delegate to the factory. Internal consumers keep factoryScope.
-export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean }) =>
-  correctEigs(
-    m,
-    opts,
-    factoryEigs as unknown as (x: unknown, o?: unknown) => unknown
-  )) as unknown as typeof factoryEigs;
+export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean; matricize?: boolean }) => {
+  const factoryFn = factoryEigs as unknown as (x: unknown, o?: unknown) => unknown;
+  return coreIsMatrix(m)
+    ? correctEigsOfMatrix(
+        m as { toArray(): unknown },
+        opts,
+        factoryFn,
+        factoryScope.matrix as (data: unknown[]) => unknown
+      )
+    : correctEigs(m, opts, factoryFn);
+}) as unknown as typeof factoryEigs;
 
 export const lusolve = createLusolve(factoryScope as Parameters<typeof createLusolve>[0]);
 factoryScope.lusolve = lusolve;

@@ -1,6 +1,7 @@
 import { isInteger } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
 import { expand as algebraExpand } from '../typed/algebra.js';
+import { polyFromExpression, polyToDenseCoefficients } from '../typed/polynomial-ideal.js';
 import type {
   MathNode,
   ConstantNode,
@@ -77,6 +78,49 @@ interface PolyState {
   oper: string;
   fire: string;
   noFil?: number;
+}
+
+/**
+ * The rule engine distributes a product of sums term by term, and its cost grows with the term
+ * count of the expansion: (1+x)^3 takes 0.3 s, (1+x)^4 takes 2.7 s, and the fourth power of a
+ * trinomial does not finish. A one-variable expression whose estimated expansion is larger than
+ * this count is read with exact polynomial arithmetic instead. The count is the measured knee: every
+ * expression at or below it keeps the rule engine path and its text.
+ */
+const DIRECT_READ_TERM_LIMIT = 8;
+
+/**
+ * Upper estimate of the number of terms in the expansion of a polynomial expression: a sum adds
+ * the counts of its terms, a product multiplies the counts of its factors, a power of a sum with
+ * a non-negative integer exponent raises the count of the base to that exponent, and any other node
+ * counts as one term.
+ */
+function estimateExpandedTerms(node: MathNode): number {
+  if (node.type === 'ParenthesisNode') {
+    return estimateExpandedTerms((node as ParenthesisNode).content);
+  }
+  if (node.type !== 'OperatorNode') return 1;
+  const operator = node as OperatorNode;
+  const counts = operator.args.map(estimateExpandedTerms);
+  switch (operator.fn) {
+    case 'add':
+    case 'subtract':
+      return counts.reduce((total, count) => total + count, 0);
+    case 'multiply':
+    case 'divide':
+      return counts.reduce((total, count) => total * count, 1);
+    case 'unaryMinus':
+    case 'unaryPlus':
+      return counts[0];
+    case 'pow': {
+      const exponent = operator.args[1];
+      const power =
+        exponent.type === 'ConstantNode' ? Number((exponent as ConstantNode).value) : NaN;
+      return Number.isInteger(power) && power >= 0 ? counts[0] ** power : counts[0];
+    }
+    default:
+      return 1;
+  }
 }
 
 const name = 'rationalize';
@@ -205,7 +249,12 @@ export const createRationalize = /* #__PURE__ */ factory(
       const withExactFractions = { exactFractions: true };
       expr = polyRet.expression;
 
-      if (nVars >= 1) {
+      // A large expansion is read exactly and skips the rule engine (see DIRECT_READ_TERM_LIMIT).
+      const direct = nVars === 1 ? directCanonical(expr, polyRet.variables[0]) : null;
+
+      if (direct !== null) {
+        expr = direct;
+      } else if (nVars >= 1) {
         // If expression in not a constant
         expr = expandPower(expr); // First expand power of polynomials (cannot be made from rules!)
         let sBefore: string; // Previous expression
@@ -261,10 +310,16 @@ export const createRationalize = /* #__PURE__ */ factory(
         }
       } else {
         if (nVars === 1) {
-          if (/\^/.test(expr.toString())) {
-            expr = _parse(algebraExpand(expr.toString()));
+          // mathjs reads the near canonical form as it is. The expand step below is MathTS only:
+          // it writes a decimal coefficient as a fraction (1 / 3 * x ^ 2), which polyToCanonical
+          // rejects ("Operator / invalid"), so it runs only when the direct read fails on a power.
+          try {
+            expr = polyToCanonical(expr, coefficients);
+          } catch (error) {
+            if (!/\^/.test(expr.toString())) throw error;
+            coefficients.length = 0;
+            expr = polyToCanonical(_parse(algebraExpand(expr.toString())), coefficients);
           }
-          expr = polyToCanonical(expr, coefficients);
         }
         if (detailed) {
           retRationalize.numerator = expr;
@@ -278,6 +333,51 @@ export const createRationalize = /* #__PURE__ */ factory(
       retRationalize.variables = polyRet.variables;
       retRationalize.expression = expr;
       return retRationalize;
+    }
+
+    /**
+     * The one-variable polynomial `node` as a near canonical node (descending powers, one term
+     * per power), or null when the rule engine path must read it: the expansion is not larger than
+     * DIRECT_READ_TERM_LIMIT, or the expression is not one that the exact reader accepts.
+     * The coefficients come from exact polynomial arithmetic, so they are exact up to double rounding.
+     * The reader lives in typed/polynomial-ideal.ts: cas/syntax-tree.ts imports the evaluator, and an
+     * import of it here would make a load cycle through factories/index.ts.
+     */
+    function directCanonical(node: MathNode, variable: string): MathNode | null {
+      if (estimateExpandedTerms(node) <= DIRECT_READ_TERM_LIMIT) return null;
+      let coefficients: number[];
+      try {
+        coefficients = polyToDenseCoefficients(polyFromExpression(node.toString(), [variable]));
+      } catch {
+        // The reader accepts constants, the variable, + - * / ^, and refuses anything else (a call
+        // such as log(2), a degree or a term count over the limit): the rule engine path decides then.
+        return null;
+      }
+      if (!coefficients.every(Number.isFinite)) return null;
+
+      let text = '';
+      for (let power = coefficients.length - 1; power >= 0; power--) {
+        const coefficient = coefficients[power];
+        if (coefficient === 0) continue;
+        const magnitude = String(Math.abs(coefficient));
+        const term =
+          power === 0
+            ? magnitude
+            : power === 1
+              ? `${magnitude}*${variable}`
+              : `${magnitude}*${variable}^${power}`;
+        text +=
+          text === ''
+            ? coefficient < 0
+              ? `-${term}`
+              : term
+            : coefficient < 0
+              ? ` - ${term}`
+              : ` + ${term}`;
+      }
+      // All coefficients are zero ((x+1)^5-(x+1)^5): the polynomial is 0, and the rule engine would
+      // expand both powers term by term before it finds that out.
+      return _parse(text === '' ? '0' : text);
     }
 
     return typed(name, {

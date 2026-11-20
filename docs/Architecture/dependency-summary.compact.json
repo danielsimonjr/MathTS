@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7397, "re": 3191 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1353, "e": 7426, "re": 3194 },
   "s": {
-    "loc": 238737,
-    "cls": 62,
-    "int": 669,
-    "fn": 2579,
-    "tg": 184,
+    "loc": 242016,
+    "cls": 63,
+    "int": 675,
+    "fn": 2609,
+    "tg": 185,
     "en": 0,
-    "co": 1695,
-    "toi": 684
+    "co": 1697,
+    "toi": 685
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -352,9 +352,9 @@
         "RepeatedEigenvalue",
         "EigResult",
         "EigOptions",
+        "EigBalance",
         "ExpmOptions",
-        "LogmOptions",
-        "LUResult"
+        "LogmOptions"
       ]
     },
     "matrix/types": {
@@ -506,7 +506,7 @@
       ]
     },
     "functions/arithmetic": {
-      "f": 39,
+      "f": 40,
       "exp": [
         "createAbs",
         "createAddScalar",
@@ -525,11 +525,11 @@
         "createFix",
         "createFloorNumber",
         "createFloor",
-        "createGcd",
-        "createHypot",
-        "createInvmod"
+        "fractionGcd",
+        "fractionLcm",
+        "createGcd"
       ],
-      "int": ["MathNode"]
+      "int": ["FractionParts", "MathNode"]
     },
     "functions/bitwise": {
       "f": 8,
@@ -588,12 +588,13 @@
       ]
     },
     "functions/cas": {
-      "f": 12,
+      "f": 13,
       "exp": [
         "antiderivativeReciprocal",
         "snapRoot",
         "closedFormRoots",
         "solveElementary",
+        "isExactPolynomialIdentity",
         "detZ",
         "resultantZ",
         "rothsteinResultant",
@@ -604,14 +605,13 @@
         "collapseIdenticalFactors",
         "tryPolynomialCanonicalForm",
         "MAX_POLYNOMIAL_DEGREE",
+        "MAX_POLYNOMIAL_TERMS",
         "polynomialDegreeMessage",
+        "polynomialSizeMessage",
         "PolynomialDegreeError",
-        "RAT_ZERO",
-        "ratNormalize",
-        "ratAdd",
-        "ratSub"
+        "PolynomialSizeError"
       ],
-      "cls": ["PolynomialDegreeError"],
+      "cls": ["PolynomialDegreeError", "PolynomialSizeError"],
       "int": [
         "ElementaryDecline",
         "ElementarySolution",
@@ -654,13 +654,13 @@
     "functions/factories": {
       "f": 5,
       "exp": [
+        "replacer",
         "EVALUATE_SCOPE_OMIT",
         "parse",
         "physicsScope",
         "evaluate",
         "compileExpr",
         "parser",
-        "replacer",
         "reviver",
         "createInstanceEvaluator",
         "scalarToNode",
@@ -779,12 +779,12 @@
         "createComplexEigs",
         "createRealSymmetric",
         "createEigs",
+        "defineRemovedVectorsGetter",
         "createFft",
         "createFilter",
         "createFlatten",
         "createForEach",
-        "sparseMatrixFromVectors",
-        "vectorLength"
+        "sparseMatrixFromVectors"
       ],
       "int": [
         "Matrix",
@@ -1056,6 +1056,7 @@
         "createMin",
         "createMode",
         "nanmedian",
+        "exactOrder",
         "isFloatTyped",
         "copyToNumberArray",
         "flattenForStatistics",
@@ -1064,10 +1065,9 @@
         "readSkip",
         "parseStatOptions",
         "normalizationFromSecondArg",
-        "normalizationFromStringAndOptions",
-        "numberGrid"
+        "normalizationFromStringAndOptions"
       ],
-      "int": ["QuantileSeqOptions"]
+      "int": ["QuantileArith", "QuantilePlan", "QuantileSeqOptions", "ParsedQuantileOptions"]
     },
     "functions/stats": {
       "f": 15,
@@ -1213,7 +1213,7 @@
     },
     "functions/unit": { "f": 2, "exp": ["createTo", "createToBest"] },
     "functions/utils": {
-      "f": 44,
+      "f": 45,
       "exp": [
         "arraySize",
         "validate",
@@ -1958,17 +1958,17 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 250, "o": 15 },
+    { "p": "factories/index.ts", "i": 251, "o": 15 },
     { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 206 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
-    { "p": "utils/is.ts", "i": 0, "o": 61 },
+    { "p": "utils/is.ts", "i": 0, "o": 63 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
+    { "p": "utils/array.ts", "i": 0, "o": 53 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
-    { "p": "utils/array.ts", "i": 0, "o": 49 },
     { "p": "utils/factory.ts", "i": 1, "o": 48 },
     { "p": "utils/number.ts", "i": 0, "o": 47 },
     { "p": "utils/collection.ts", "i": 0, "o": 44 }

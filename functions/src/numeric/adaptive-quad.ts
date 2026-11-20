@@ -29,6 +29,16 @@ export interface QuadOptions {
   atol?: f64;
   /** Maximum bisection recursion depth per panel (default 50). */
   maxDepth?: i32;
+  /**
+   * Number of Gauss-Kronrod panels after which no panel is bisected (default 100000).
+   * A panel evaluated after that point counts as unresolved when its error is above the
+   * limit. The panels that wait on the recursion stack are still evaluated once each, so
+   * the integrand is called at most 15 times `maxPanels + maxDepth` times in total.
+   * A value that is not a positive integer or `Infinity` throws a RangeError.
+   * Without this limit, an oscillating integrand such as `sin(1/x)` on `[0, 1]` bisects
+   * every panel near 0 down to `maxDepth`.
+   */
+  maxPanels?: i32;
 }
 
 /** Result of {@link quad}. */
@@ -108,6 +118,8 @@ function gaussKronrod15(f: (x: f64) => f64, a: f64, b: f64): { k: f64; g: f64 } 
 }
 
 const ABS_FLOOR = 1e-14;
+/** Default for {@link QuadOptions.maxPanels}. */
+const DEFAULT_MAX_PANELS = 100000;
 /** Unresolved error allowed, relative to the sum of the panels' `|K|`. Not scaled by the caller's `tol`. */
 const CONVERGENCE_RTOL = 1e-6;
 
@@ -130,13 +142,13 @@ export function checkFiniteLimits(a: number, b: number, name: string): void {
  * embedded 7-point Gauss rule; `|K - G|` is the panel's error estimate. A
  * panel whose error exceeds `tol * |K|` (or the absolute floor, for panels
  * near zero) is bisected and each half refined recursively, up to
- * `maxDepth`. This adapts naturally to endpoint singularities and sharply
- * peaked integrands.
+ * `maxDepth`, and until `maxPanels` panels are evaluated in total. This adapts
+ * naturally to endpoint singularities and sharply peaked integrands.
  *
  * @param f - Function to integrate
  * @param a - Lower bound
  * @param b - Upper bound
- * @param opts - Options (tol, maxDepth)
+ * @param opts - Options (tol, atol, maxDepth, maxPanels)
  * @returns `{ value, error, converged }` — the estimated integral, summed panel error and convergence flag
  *
  * @example
@@ -166,18 +178,26 @@ function quadDetail(
   const tol = opts?.tol ?? 1e-10;
   const atol = opts?.atol ?? ABS_FLOOR;
   const maxDepth = opts?.maxDepth ?? 50;
+  const maxPanels = opts?.maxPanels ?? DEFAULT_MAX_PANELS;
+  if (!(maxPanels === Infinity || (Number.isInteger(maxPanels) && maxPanels >= 1))) {
+    throw new RangeError(
+      `${name}: maxPanels must be a positive integer or Infinity, got ${maxPanels}`
+    );
+  }
 
   let absSum = 0;
   let unresolved = 0;
+  let panels = 0;
 
   function panel(a: f64, b: f64, depth: i32): { value: f64; error: f64 } {
     const { k, g } = gaussKronrod15(f, a, b);
+    panels++;
     const panelError = Math.abs(k - g);
     // A NaN error never meets the tolerance, so stop here and do not bisect to maxDepth.
     if (panelError !== panelError) return { value: NaN, error: NaN };
 
     const limit = Math.max(tol * Math.abs(k), atol);
-    if (depth >= maxDepth || panelError <= limit) {
+    if (depth >= maxDepth || panels >= maxPanels || panelError <= limit) {
       absSum += Math.abs(k);
       if (panelError > limit) unresolved += panelError;
       return { value: k, error: panelError };
@@ -216,7 +236,7 @@ export function quadValue(
   }
   if (!r.converged) {
     throw new RangeError(
-      `${name}: the integral did not converge: unresolved error ${r.unresolved} is above the limit ${r.limit} (value ${r.value}, error estimate ${r.error}); raise maxDepth if the integral is convergent, or call quad for the unconverged estimate`
+      `${name}: the integral did not converge: unresolved error ${r.unresolved} is above the limit ${r.limit} (value ${r.value}, error estimate ${r.error}); raise maxDepth or maxPanels if the integral is convergent, or call quad for the unconverged estimate`
     );
   }
   return r.value;

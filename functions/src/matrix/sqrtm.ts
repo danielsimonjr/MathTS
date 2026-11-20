@@ -2,6 +2,7 @@ import { isMatrix } from '../utils/is.js';
 import { format } from '../utils/string.js';
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
+import { DenseMatrix, matrixSqrtm } from '@danielsimonjr/mathts-matrix';
 import {
   ABS_CUTOFF_LO,
   SQUARED,
@@ -9,6 +10,7 @@ import {
   entryRange,
   ldexp,
   withPow2Scale,
+  type EntryRange,
 } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
@@ -81,6 +83,10 @@ export const createSqrtm = /* #__PURE__ */ factory(
   ({ typed, abs, add, multiply, map, sqrt, subtract, inv, size, max, identity }: Dependencies) => {
     const _maxIterations = 1e3;
     const _tolerance = 1e-6;
+    // The largest `_residual` of a root. The worst value over 3,000 random matrices that
+    // Denman-Beavers solved is 1.3e-10; a value that stopped early (the matrix of #1158) is
+    // 2.3e-8, and one that is not a root (the matrix of #1163) is 2.3e-3.
+    const _residualTolerance = 1e-9;
 
     /**
      * Calculate the principal square root matrix using the Denman-Beavers iterative method
@@ -114,6 +120,41 @@ export const createSqrtm = /* #__PURE__ */ factory(
     }
 
     /**
+     * The residual of `X` as a root of `A` (plain numbers): `max|X·X - A| / (n · max|X|²)`.
+     * X and A are scaled by an exact power of 2, so the largest entry of X is in [1, 2) and
+     * X·X neither overflows nor underflows. It is 0 when both are zero, and Infinity when X
+     * has a non-finite entry or is zero while A is not.
+     */
+    function _residual(A: number[][], X: number[][]): number {
+      const n = A.length;
+      let xmax = 0;
+      let amax = 0;
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          if (!Number.isFinite(X[i][j])) return Infinity;
+          xmax = Math.max(xmax, Math.abs(X[i][j]));
+          amax = Math.max(amax, Math.abs(A[i][j]));
+        }
+      }
+      if (xmax === 0) return amax === 0 ? 0 : Infinity;
+      const p = -Math.floor(Math.log2(xmax));
+      const Xs = X.map((row) => row.map((v) => ldexp(v, p)));
+      // 2p can pass 1023, so A is scaled in two steps.
+      const As = A.map((row) => row.map((v) => ldexp(ldexp(v, p), p)));
+      let diff = 0;
+      let top = 0;
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          let sum = 0;
+          for (let k = 0; k < n; k++) sum += Xs[i][k] * Xs[k][j];
+          diff = Math.max(diff, Math.abs(sum - As[i][j]));
+          top = Math.max(top, Math.abs(Xs[i][j]));
+        }
+      }
+      return diff / (n * top * top);
+    }
+
+    /**
      * `_denmanBeavers` of a matrix of plain numbers, scaled by an even power of 2 when the
      * largest entry is outside [2^-20, 2^400]. The stop test `_tolerance` is absolute, so a
      * tiny matrix stops at once, and a huge one often does not converge. The scaled matrix
@@ -124,12 +165,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
      * sqrtm(2^e A) = 2^(e/2) sqrtm(A) (#1122).
      * An ordinary matrix is not scaled.
      */
-    function _sqrtmScaled(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
-      const data = (isMatrix(A) ? (A as Matrix).valueOf() : A) as Scalar[][];
-      if (!data.every((row) => row.every((v) => typeof v === 'number'))) {
-        return _denmanBeavers(A);
-      }
-      const range = entryRange(data as unknown as number[][]);
+    function _sqrtmWindowed(A: Scalar[][] | Matrix, range: EntryRange): Scalar[][] | Matrix {
       // True after the unscaled run failed once, so it is not made a second time.
       let unscaledFailed = false;
       return withPow2Scale(
@@ -164,6 +200,74 @@ export const createSqrtm = /* #__PURE__ */ factory(
         },
         true
       );
+    }
+
+    /**
+     * The principal square root of a square matrix. For plain numbers, a result is kept only
+     * when it is a root: `_residual` is at most `_residualTolerance`. The stop test of
+     * Denman-Beavers is an absolute step size, so it does not tell a root from a value that
+     * stopped early or at a wrong point (#1158, #1163). The paths, in order:
+     *
+     * 1. `_sqrtmWindowed`, the run of #1122 (an ordinary matrix keeps its value bit for bit).
+     * 2. A run on the matrix scaled to a largest entry in [1, 4) (a tiny matrix stops at once,
+     *    and a huge one does not converge on the absolute stop test).
+     * 3. The Schur method of `matrixSqrtm`, which does not invert an iterate: a singular
+     *    matrix with a real root, such as the zero matrix or a rank-1 matrix, has a root (#1170).
+     * 4. An error: no path found a root.
+     *
+     * A matrix with a NaN or infinite entry is not checked: it keeps the result of path 1.
+     * Entries that are not plain numbers (BigNumber, Complex) take `_denmanBeavers` as before.
+     */
+    function _sqrtmScaled(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
+      const data = (isMatrix(A) ? (A as Matrix).valueOf() : A) as Scalar[][];
+      if (!data.every((row) => row.every((v) => typeof v === 'number'))) {
+        return _denmanBeavers(A);
+      }
+      const rows = data as unknown as number[][];
+      const range = entryRange(rows);
+      if (!range.finite) return _sqrtmWindowed(A, range);
+      const isRoot = (R: Scalar[][] | Matrix): boolean =>
+        _residual(rows, (isMatrix(R) ? (R as Matrix).valueOf() : R) as unknown as number[][]) <=
+        _residualTolerance;
+
+      try {
+        const root = _sqrtmWindowed(A, range);
+        if (isRoot(root)) return root;
+      } catch {
+        // No convergence: try the next path.
+      }
+
+      if (range.amax > 0) {
+        const e = -2 * Math.floor(Math.floor(Math.log2(range.amax)) / 2);
+        // A scale that pushes the smallest entry below 2^-1022 would lose it.
+        if (e !== 0 && ldexp(range.amin, e) >= 2 ** -1022) {
+          try {
+            const scaled = _denmanBeavers(
+              map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][] | Matrix
+            );
+            if (allFinite(scaled)) {
+              const root = map(scaled, (v: unknown) => ldexp(v as number, -e / 2)) as
+                Scalar[][] | Matrix;
+              if (isRoot(root)) return root;
+            }
+          } catch {
+            // No convergence: try the next path.
+          }
+        }
+      }
+
+      try {
+        const R = matrixSqrtm(DenseMatrix.fromArray(rows)).toArray() as number[][];
+        if (_residual(rows, R) <= _residualTolerance) {
+          return isMatrix(A)
+            ? (map(A, (_v: unknown, index: number[]) => R[index[0]][index[1]]) as Matrix)
+            : R;
+        }
+      } catch {
+        // No real root by the Schur method either.
+      }
+
+      throw new Error('computing square root of matrix: iterative method could not converge');
     }
 
     /**

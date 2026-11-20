@@ -1,5 +1,6 @@
 import { isInteger } from '../utils/number.js';
 import { factory } from '../utils/factory.js';
+import { fractionGcd } from './fraction-gcd.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { AlgorithmFunction } from '../type/matrix/types.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -19,10 +20,6 @@ interface BigNumberType {
 
 interface BigNumberConstructor {
   new (value: number): BigNumberType;
-}
-
-interface FractionType {
-  gcd(other: FractionType): FractionType;
 }
 
 interface MatrixType {
@@ -124,7 +121,7 @@ export const createGcd = /* #__PURE__ */ factory(
       {
         'number, number': _gcdNumber,
         'BigNumber, BigNumber': _gcdBigNumber,
-        'Fraction, Fraction': (x: FractionType, y: FractionType): FractionType => x.gcd(y),
+        'Fraction, Fraction': fractionGcd,
       },
       matrixAlgorithmSuite({
         SS: matAlgo04xSidSid as unknown as AlgorithmFunction,

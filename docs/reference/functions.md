@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1383** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1384** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -1578,7 +1578,7 @@ the CPU implementation rather than rejecting.
 | `norm2(A)`             | Spectral norm (2-norm) of a matrix — the largest singular value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `normFro(A)`           | Frobenius norm of a matrix — `sqrt(sum(A_ij²))`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `matrixExpm(A)`        | Matrix exponential via Padé-13 scaling-and-squaring (Higham 2005)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `matrixLogm(A)`        | Principal matrix logarithm via inverse scaling-and-squaring with Gauss–Legendre quadrature; throws for non-positive/complex eigenvalues                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `matrixLogm(A)`        | Principal matrix logarithm via inverse scaling-and-squaring with Gauss–Legendre quadrature; throws for non-positive real eigenvalues; a complex-conjugate pair gives the real logarithm                                                                                                                                                                                                                                                                                                                                                                                               |
 | `matrixSqrtm(A)`       | Principal matrix square root via Newton iteration (eigendecomposition fallback); throws for negative/complex eigenvalues                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `funm(A, f, fDerivs?)` | General matrix function `f(A)` returning a complex-valued matrix `{ re, im }` — diagonal fast path, Lagrange-Sylvester interpolation for distinct eigenvalues, and confluent Hermite interpolation (Newton divided differences over repeated nodes) for defective/repeated-eigenvalue matrices. Defective matrices need derivatives of `f`: supply them analytically via optional `fDerivs` (`fDerivs[k] = f^(k+1)`, machine precision) or they are approximated numerically (~1e-6). Throws only when `f`/a derivative is singular at a repeated eigenvalue (e.g. `sqrt`/`log` at 0) |
 | `cosm(A)`              | Matrix cosine `cos(A)` via `funm`, valid for any real spectrum (unlike `matrixSqrtm`/`matrixLogm`, which require positive/real spectra)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -1760,8 +1760,9 @@ Coefficients are listed lowest degree first, e.g. `x³ − 3x + 1` is `[1, -3, 0
 
 ### Details
 
-- Polynomials are represented as coefficient arrays in **descending** degree
-  order: `[1, 0, -1]` denotes `x² − 1`.
+- Polynomials are represented as coefficient arrays in **ascending** degree
+  order (`coeffs[i]` multiplies `x^i`, the `polyval` order): `[-1, 0, 1]` denotes
+  `x² − 1`.
 - `polyval` uses Horner's method, which minimises both operation count and
   rounding error.
 - Symbolic functions (`simplify`, `collect`, …) accept either an expression
@@ -1844,6 +1845,7 @@ Symbolic calculus, transforms, and equation solving.
 | `solve(expr, var[, options])` | Finite list of the roots of an equation; throws for an identity or a periodic solution set; `{ numeric: true, range }` scans one range |
 | `solveExact(expr, var)` | Exact solution set of `a*F(p*x + q) = b` as `{ roots, period }` (`sin`, `cos`, `tan`, `exp`, `log`, `sqrt`, `abs`) |
 | `PolynomialDegreeError` | `RangeError` that `solve`, `expand` and the CAS reader throw for a polynomial of a degree above 1000 |
+| `PolynomialSizeError` | `RangeError` that `expand`, `groebnerBasis` and the CAS reader throw for a polynomial with more than 10000 terms |
 | `summation(expr, var, from, to)` | Symbolic summation |
 | `symbolicProduct(expr, var, from, to)` | Symbolic product |
 | `groebnerBasis(polys, vars)` | Gröbner basis |
@@ -2854,7 +2856,7 @@ All return structured result objects.
 | `fTest(x, y)`                                          | `FTestResult`                        | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                                                                         |
 | `jarqueBera(x)`                                        | `JarqueBeraResult`                   | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                                                                    |
 | `kruskalWallis(...groups)`                             | `KruskalResult`                      | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                                                                    |
-| `wilcoxon(x[, y])`                                     | `WilcoxonResult`                     | Wilcoxon signed-rank test (paired/one-sample); `scipy.stats.wilcoxon(mode='approx', correction=True)`                                                                                                          |
+| `wilcoxon(x[, y])`                                     | `WilcoxonResult`                     | Wilcoxon signed-rank test (paired/one-sample); matches `scipy.stats.wilcoxon` defaults (SciPy 1.16)                                                                                                            |
 | `fisherExact(table)`                                   | `FisherExactResult`                  | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                                                                       |
 | `tukeyHSD(groups[, alpha])`                            | `TukeyComparison[]`                  | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                                                                   |
 | `chi2Contingency(table[, opts])`                       | `Chi2ContingencyResult`              | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                                               |
@@ -3324,7 +3326,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1383 exports).
+> `@danielsimonjr/mathts-functions` (1384 exports).
 
 ### Functions by category
 
@@ -3352,7 +3354,7 @@ await terminatePool();
 
 **Algebra** (50): `apart`, `cancel`, `coefficientList`, `collect`, `combine`, `complexExpand`, `degree`, `derivative`, `descartesSignChanges`, `differences`, `discriminant`, `element`, `eliminate`, `expand`, `expToTrig`, `factor`, `fullSimplify`, `functionExpand`, `isolateRealRoots`, `leafCount`, `normalForm`, `parse`, `polyadd`, `polyder`, `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `polynomialRoot`, `polyval`, `powerExpand`, `rationalize`, `realRoots`, `resolve`, `resultant`, `simplify`, `simplifyConstant`, `simplifyCore`, `sturmRootCount`, `sturmSequence`, `substitute`, `symbolicEqual`, `symbolicPartialDerivative`, `tangentLine`, `together`, `trigExpand`, `trigReduce`, `trigToExp`, `variables`
 
-**Computer Algebra System (CAS)** (38): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `PolynomialDegreeError`, `series`, `seriesCoefficient`, `solve`, `solveExact`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
+**Computer Algebra System (CAS)** (39): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `PolynomialDegreeError`, `PolynomialSizeError`, `series`, `seriesCoefficient`, `solve`, `solveExact`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
 
 **Numerical Integration** (24): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `parallelGaussQuad`, `parallelRomberg`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
 

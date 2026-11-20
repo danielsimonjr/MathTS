@@ -95,7 +95,7 @@ describe('compat instance hides the internal names of the functions namespace (#
   it('has a fixed instance key count', () => {
     const math = create(all) as unknown as Record<string, unknown>;
     expect(Object.keys(math).length).toBe(317);
-    expect(forInNames(math).length).toBe(1406 - COMPAT_INTERNAL_NAMES.length);
+    expect(forInNames(math).length).toBe(1407 - COMPAT_INTERNAL_NAMES.length);
   });
 });
 

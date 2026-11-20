@@ -13,7 +13,12 @@
  */
 
 import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
-import { MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError } from '../cas/polynomial-limits.js';
+import {
+  MAX_POLYNOMIAL_DEGREE,
+  MAX_POLYNOMIAL_TERMS,
+  PolynomialDegreeError,
+  PolynomialSizeError,
+} from '../cas/polynomial-limits.js';
 
 /** One monomial: coefficient × Π varsᵢ^powersᵢ (dense exponent vector). */
 export interface Term {
@@ -63,17 +68,28 @@ function cmpPowers(a: number[], b: number[]): number {
  * that made it (see {@link COEFFICIENT_NOISE_RATIO}), sort lex-descending.
  */
 export function normalize(p: Poly): Poly {
-  const byKey = new Map<string, { coeff: number; powers: number[]; magnitude: number }>();
-  for (const t of p) {
-    const key = t.powers.join(',');
-    const existing = byKey.get(key);
-    if (existing) {
-      existing.coeff += t.coeff;
-      existing.magnitude += magnitudeOf(t);
-    } else {
-      byKey.set(key, { coeff: t.coeff, powers: [...t.powers], magnitude: magnitudeOf(t) });
-    }
+  const byKey: TermMap = new Map();
+  for (const t of p) accumulateTerm(byKey, t);
+  return finishTerms(byKey);
+}
+
+/** The terms of a polynomial being built, keyed by their exponent vector. */
+type TermMap = Map<string, { coeff: number; powers: number[]; magnitude: number }>;
+
+/** Add `t` to the term with the same exponents, or start that term. */
+function accumulateTerm(byKey: TermMap, t: Term): void {
+  const key = t.powers.join(',');
+  const existing = byKey.get(key);
+  if (existing) {
+    existing.coeff += t.coeff;
+    existing.magnitude += magnitudeOf(t);
+  } else {
+    byKey.set(key, { coeff: t.coeff, powers: [...t.powers], magnitude: magnitudeOf(t) });
   }
+}
+
+/** Drop the zero and noise coefficients of `byKey` and sort the rest lex-descending. */
+function finishTerms(byKey: TermMap): Poly {
   const out: Poly = [];
   for (const { coeff, powers, magnitude } of byKey.values()) {
     if (coeff !== 0 && Math.abs(coeff) > COEFFICIENT_NOISE_RATIO * magnitude) {
@@ -108,19 +124,27 @@ export function polySub(a: Poly, b: Poly): Poly {
 /**
  * Return the product of two multivariate polynomials, with like terms combined.
  * The result drops near-zero terms and is sorted in descending lex order.
+ *
+ * The product is combined as it is made, and the call throws a {@link PolynomialSizeError} as
+ * soon as it holds more than `MAX_POLYNOMIAL_TERMS` distinct terms. The count is of distinct
+ * terms, not of products: a dense univariate product has many products and few terms.
  */
 export function polyMul(a: Poly, b: Poly): Poly {
-  const out: Poly = [];
+  const byKey: TermMap = new Map();
   for (const ta of a) {
     for (const tb of b) {
       const powers = new Array(ta.powers.length);
       for (let i = 0; i < ta.powers.length; i++) {
         powers[i] = ta.powers[i] + tb.powers[i];
       }
-      out.push(makeTerm(ta.coeff * tb.coeff, powers, magnitudeOf(ta) * magnitudeOf(tb)));
+      accumulateTerm(
+        byKey,
+        makeTerm(ta.coeff * tb.coeff, powers, magnitudeOf(ta) * magnitudeOf(tb))
+      );
+      if (byKey.size > MAX_POLYNOMIAL_TERMS) throw new PolynomialSizeError();
     }
   }
-  return normalize(out);
+  return finishTerms(byKey);
 }
 
 function polyPow(a: Poly, n: number, nVars: number): Poly {

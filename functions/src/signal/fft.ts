@@ -355,27 +355,29 @@ export function ifft2(spectrum: ComplexNumber[][]): ComplexNumber[][] {
  * The single roll algorithm shared by every fftshift/ifftshift surface in the
  * package (the generic `<T>` toolkit members below and the public `number[]`
  * helpers in `./fft-helpers.ts` both route through this). Rotates `arr` left by
- * `count`: the first `count` elements move to the end. numpy.fft uses
- * `floor(n/2)` for fftshift and `ceil(n/2)` for ifftshift so the two are exact
- * inverses on odd lengths.
+ * `count`: the first `count` elements move to the end. numpy rolls RIGHT by `floor(n/2)` for
+ * fftshift and by `ceil(n/2)` for ifftshift, so the two are exact inverses on odd lengths. A left
+ * roll by `count` is a right roll by `n - count`: fftshift is a left roll by `ceil(n/2)` and
+ * ifftshift a left roll by `floor(n/2)`. The two agree for an even length.
  */
 export function rollBy<T>(arr: T[], count: number): T[] {
   return [...arr.slice(count), ...arr.slice(0, count)];
 }
 
 /**
- * Shift zero-frequency component to center of spectrum
+ * Shift zero-frequency component to center of spectrum, as `numpy.fft.fftshift`: for an odd
+ * length the zero-frequency sample moves to index `floor(n/2)`.
  *
  * @param spectrum - FFT spectrum
  * @returns Shifted spectrum
  */
 export function fftshift<T>(spectrum: T[]): T[] {
-  return rollBy(spectrum, Math.floor(spectrum.length / 2));
+  return rollBy(spectrum, Math.ceil(spectrum.length / 2));
 }
 
 /**
- * Inverse of fftshift
+ * Inverse of fftshift, as `numpy.fft.ifftshift`.
  */
 export function ifftshift<T>(spectrum: T[]): T[] {
-  return rollBy(spectrum, Math.ceil(spectrum.length / 2));
+  return rollBy(spectrum, Math.floor(spectrum.length / 2));
 }

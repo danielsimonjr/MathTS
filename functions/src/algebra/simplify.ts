@@ -822,7 +822,11 @@ export const createSimplify = /* #__PURE__ */ factory(
         }
         str = res.toString({ parenthesis: 'all' });
       }
-      if (/\^\s*2\b/.test(str) && /[+-]/.test(str)) {
+      // A caller that passes its own rules (rationalize does) asks for exactly those rules. The
+      // canonical (factored) form belongs to the default rule set: applied to a custom rule set it
+      // factors the polynomial that rationalize has just expanded ((x+1)*(x+2) never reaches x^2+3*x+2).
+      const usesDefaultRules = !rules || rules === simplify.rules;
+      if (usesDefaultRules && /\^\s*2\b/.test(str) && /[+-]/.test(str)) {
         const canonical = tryPolynomialCanonicalForm(str);
         if (canonical && canonical !== str) {
           return parse(canonical);

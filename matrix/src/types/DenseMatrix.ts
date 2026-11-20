@@ -14,7 +14,10 @@ import { assertDenseMatrixSize } from './dense/limits.js';
 import { contiguousDenseData } from './dense/storage.js';
 import { DENSE_MATRIX_BRAND, defineMatrixBrand } from './type-marker.js';
 
-/** Rectangular numeric matrix literal: reject empty, jagged, and non-numeric cells. */
+/**
+ * Numeric matrix literal: reject empty, jagged, and non-numeric cells.
+ * A 1-D array of numbers gives one row (a 1 x n matrix).
+ */
 function readNestedMatrix(nested: readonly unknown[]): {
   rows: number;
   cols: number;
@@ -27,7 +30,26 @@ function readNestedMatrix(nested: readonly unknown[]): {
   }
   const rows = nested.length;
   const first = nested[0];
-  if (!Array.isArray(first) || first.length === 0) {
+  if (!Array.isArray(first)) {
+    const row: number[] = [];
+    for (let j = 0; j < rows; j++) {
+      const value = nested[j];
+      if (Array.isArray(value)) {
+        throw new TypeError(
+          `DenseMatrix nested array must be rectangular; element ${j} is an array but element 0 is not`
+        );
+      }
+      if (typeof value !== 'number') {
+        throw new TypeError(
+          `DenseMatrix array must contain numbers; element ${j} is ${typeof value}`
+        );
+      }
+      row.push(value);
+    }
+    assertDenseMatrixSize(1, rows);
+    return { rows: 1, cols: rows, data: [row] };
+  }
+  if (first.length === 0) {
     throw new TypeError(
       'DenseMatrix nested array must be a non-empty rectangular array of numbers'
     );
@@ -94,12 +116,12 @@ export class DenseMatrix extends Matrix<number> {
   /**
    * Create a new DenseMatrix
    *
-   * @param rows - Number of rows
+   * @param rows - Number of rows, or a nested array of numbers. A 1-D array gives a 1 x n row matrix.
    * @param cols - Number of columns
    * @param data - Optional initial data (row-major order)
    */
   constructor(
-    rows: number | number[][],
+    rows: number | number[][] | number[],
     cols?: number,
     data?: Float64Array | number[] | number[][],
     viewConfig?: { isView: boolean; offset: number; rowStride: number }
@@ -197,9 +219,9 @@ export class DenseMatrix extends Matrix<number> {
   // =========================================================================
 
   /**
-   * Create a matrix from a nested array
+   * Create a matrix from a nested array. A 1-D array gives a 1 x n row matrix.
    */
-  static fromArray(arr: number[][]): DenseMatrix {
+  static fromArray(arr: number[][] | number[]): DenseMatrix {
     const nested = readNestedMatrix(arr);
     return new DenseMatrix(nested.rows, nested.cols, nested.data);
   }

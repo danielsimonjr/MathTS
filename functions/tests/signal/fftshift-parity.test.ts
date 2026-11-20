@@ -55,11 +55,13 @@ describe('fftshift/ifftshift — public number[] surface ≡ generic <T> surface
     }
   });
 
-  it('matches the numpy.fft convention: fftshift rolls by floor(n/2)', () => {
-    // numpy: fftshift([0,1,2,3,4,5,6,7]) -> [4,5,6,7,0,1,2,3]
+  it('matches the numpy.fft convention: fftshift rolls right by floor(n/2)', () => {
+    // numpy 2.3.5: fftshift([0,1,2,3,4,5,6,7]) -> [4,5,6,7,0,1,2,3]
     expect(fftshiftPublic([0, 1, 2, 3, 4, 5, 6, 7])).toEqual([4, 5, 6, 7, 0, 1, 2, 3]);
-    // odd length: ifftshift is the true inverse (rolls by ceil(n/2))
-    expect(fftshiftPublic([0, 1, 2, 3, 4])).toEqual([2, 3, 4, 0, 1]);
-    expect(ifftshiftPublic([2, 3, 4, 0, 1])).toEqual([0, 1, 2, 3, 4]);
+    // odd length (numpy 2.3.5): fftshift([0..4]) -> [3,4,0,1,2], ifftshift([0..4]) -> [2,3,4,0,1];
+    // the two are exact inverses. Before #1145 the two were swapped.
+    expect(fftshiftPublic([0, 1, 2, 3, 4])).toEqual([3, 4, 0, 1, 2]);
+    expect(ifftshiftPublic([0, 1, 2, 3, 4])).toEqual([2, 3, 4, 0, 1]);
+    expect(ifftshiftPublic([3, 4, 0, 1, 2])).toEqual([0, 1, 2, 3, 4]);
   });
 });

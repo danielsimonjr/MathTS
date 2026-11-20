@@ -38,6 +38,7 @@ import { mathTyped } from '@danielsimonjr/mathts-core';
 import { factoryScope } from '../factories/scope.js';
 import { isNumberMatrix } from './number-matrix.js';
 import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
+import { arraySize } from '../utils/array.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -1069,11 +1070,12 @@ export const pinv = mathTyped('pinv', {
   DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => {
     if (isDenseMatrix(A)) return matrixPinv(A);
     const nested = boxedEntries(A);
-    return new MathJSDenseMatrix(
-      (isNumberMatrix(nested)
+    const data = (
+      isNumberMatrix(nested)
         ? matrixPinv(DenseMatrix.fromArray(nested)).toArray()
-        : genericPinv(nested)) as never
-    );
+        : genericPinv(nested)
+    ) as number[][];
+    return new MathJSDenseMatrix({ data, size: arraySize(data) });
   },
   'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) => {
     if (isDenseMatrix(A)) return matrixPinv(A, opts);
@@ -1081,9 +1083,8 @@ export const pinv = mathTyped('pinv', {
     if (!isNumberMatrix(nested)) {
       throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
     }
-    return new MathJSDenseMatrix(
-      matrixPinv(DenseMatrix.fromArray(nested), opts).toArray() as never
-    );
+    const data = matrixPinv(DenseMatrix.fromArray(nested), opts).toArray() as number[][];
+    return new MathJSDenseMatrix({ data, size: arraySize(data) });
   },
   // Array in → Array out (mathjs convention). Previously `pinv([[...]])` threw
   // "expected DenseMatrix, actual Array" — the common call form was unsupported.
