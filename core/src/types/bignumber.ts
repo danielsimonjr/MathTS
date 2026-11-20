@@ -94,6 +94,8 @@ const LOG2_10_LOWER = 3.3219;
 const GUARD_DIGITS = 10;
 /** exp(x) gives Infinity (or 0) when |x| / ln(10) exceeds this decimal exponent. */
 const EXP_DECIMAL_LIMIT = 9e15;
+/** An exp argument with more integer digits than this is beyond EXP_DECIMAL_LIMIT * ln(10). */
+const EXP_ARGUMENT_DIGITS = 17;
 /**
  * `ln` divides a value into `c * 10^q`. The first 17 digits of the coefficient, as an integer at
  * or above this number (a mantissa from 3.1622776601683795), put the value in the next decade.
@@ -1222,7 +1224,38 @@ export class BigNumber implements MathTSValue {
     if (this._sign === 0) {
       return y._sign === -1 ? BigNumber.#allocate(1, 0n, 0, false, true) : this;
     }
-    return this.#guarded(() => y.multiply(this.ln()).exp());
+    return this.#guarded(() => {
+      // exp turns the absolute error of its argument into the relative error of its result. The
+      // guard digits cover an argument below 1 only, so the argument gets one more digit for each
+      // digit of its integer part. A value with an exponent of 1e9 or more reaches this since ln
+      // no longer takes time in proportion to the exponent (#1249).
+      const extra = this.#powArgumentDigits(y);
+      if (extra <= 0) return y.multiply(this.ln()).exp();
+      const saved = globalConfig;
+      setGlobalConfig({ ...saved, precision: saved.precision + extra });
+      try {
+        return y.multiply(this.ln()).exp();
+      } finally {
+        setGlobalConfig(saved);
+      }
+    });
+  }
+
+  /**
+   * The number of integer digits of `y * ln(this)`, or an upper bound of it, for a finite positive
+   * `this`. The bound comes from the orders of the two values and costs no `ln`: `|ln(this)| <
+   * (|order| + 1) * ln(10)` and `|y| < 10^orderY`. Only a bound above the range of `exp` needs the
+   * product itself, because a `this` near 1 has a small `ln`. It returns 0 when the product is
+   * outside that range: `exp` then gives Infinity or 0 with no extra digit.
+   */
+  #powArgumentDigits(y: BigNumber): number {
+    const order = this._exponent + digitCount(this._coefficient);
+    const lnDigits = Math.floor(Math.log10((Math.abs(order) + 1) * Math.LN10)) + 1;
+    const bound = y._exponent + digitCount(y._coefficient) + lnDigits;
+    if (bound <= EXP_ARGUMENT_DIGITS) return bound;
+    const product = y.multiply(this.ln());
+    const digits = product._exponent + digitCount(product._coefficient);
+    return product.isFinite() && digits <= EXP_ARGUMENT_DIGITS ? digits : 0;
   }
 
   /**

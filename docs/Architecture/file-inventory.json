@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2552,
+  "totalFiles": 2553,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1136,
+    "test": 1137,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1136,
+    "tests": 1137,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 37,
-    "@danielsimonjr/mathts-core": 148,
+    "@danielsimonjr/mathts-core": 149,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
@@ -1003,7 +1003,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2547
+      "loc": 2580
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1214,6 +1214,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 43
+    },
+    {
+      "file": "core/tests/bignumber-pow-large-exponent.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 92
     },
     {
       "file": "core/tests/bignumber-round-1118.test.ts",
