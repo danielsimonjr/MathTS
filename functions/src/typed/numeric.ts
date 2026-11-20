@@ -11,7 +11,11 @@
  * @packageDocumentation
  */
 
-import { densifyForSolver, type SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import {
+  densifyForSolver,
+  singularValues as matrixSingularValues,
+  type SparseMatrix,
+} from '@danielsimonjr/mathts-matrix';
 import {
   ABS_CUTOFF_LO,
   SQUARED,
@@ -1526,9 +1530,10 @@ export function eventDetection(
 
 /**
  * A copy of `A` scaled by an exact power of 2 so that its largest entry is inside
- * [2^-20, 2^400]. The pivot tests of `rank` and `nullspace` compare to an absolute
- * cutoff, so a matrix of tiny entries reads as zero (#1122). A matrix inside the window,
- * or one with a NaN or infinite entry, is copied unchanged.
+ * [2^-20, 2^400]. The pivot tests of `rank` (with an explicit tolerance) and of the
+ * `nullspace` elimination compare to an absolute cutoff, so a matrix of tiny entries
+ * reads as zero (#1122). A matrix inside the window, or one with a NaN or infinite
+ * entry, is copied unchanged.
  */
 function scaledCopyForAbsoluteCutoff(A: number[][]): number[][] {
   const range = entryRange(A);
@@ -1537,17 +1542,36 @@ function scaledCopyForAbsoluteCutoff(A: number[][]): number[][] {
 }
 
 /**
- * Numerical rank of a matrix using SVD-like approach.
+ * Rank of a matrix of finite entries and the cutoff that gave it: the number of singular
+ * values above `max(S) * max(m, n) * eps` (NumPy `matrix_rank`). The cutoff is relative to
+ * the matrix, so it is the same for a matrix and for any multiple of it (#1157).
+ */
+function svdRankOf(M: number[][]): { rank: i32; cut: f64 } {
+  const s = matrixSingularValues(M);
+  let largest = 0;
+  for (let i = 0; i < s.length; i++) if (s[i] > largest) largest = s[i];
+  const cut = largest * Math.max(M.length, M[0].length) * Number.EPSILON;
+  let r = 0;
+  for (let i = 0; i < s.length; i++) if (s[i] > cut) r++;
+  return { rank: r, cut };
+}
+
+/**
+ * Numerical rank of a matrix.
  *
  * @param A - Matrix (m x n)
- * @param tol - Absolute pivot tolerance. Without it, the matrix is first scaled by a power
- *   of 2 into [2^-20, 2^400] and the tolerance is 1e-10.
+ * @param tol - Explicit absolute tolerance on the pivots of a Gaussian elimination. Without
+ *   it, the rank is the number of singular values above `max(S) * max(m, n) * eps`, as NumPy
+ *   `matrix_rank` counts. A matrix with a NaN or infinite entry has no singular values, so
+ *   it is eliminated after a power-of-2 scale into [2^-20, 2^400] with the tolerance 1e-10.
  * @returns Numerical rank
  */
 export function rank(A: number[][], tol?: f64): i32 {
   const m = A.length;
   if (m === 0) return 0;
   const n = A[0].length;
+  if (n === 0) return 0;
+  if (tol === undefined && entryRange(A).finite) return svdRankOf(A).rank;
 
   // Use Gaussian elimination to count pivots
   const M = tol === undefined ? scaledCopyForAbsoluteCutoff(A) : A.map((row) => row.slice());
@@ -1577,18 +1601,19 @@ export function rank(A: number[][], tol?: f64): i32 {
 }
 
 /**
- * Null space basis of a matrix.
- *
- * @param A - Matrix (m x n)
- * @returns Array of basis vectors spanning the null space
+ * Reduced row echelon form of `M`, in place. A column is a pivot column when its largest
+ * entry below the current row satisfies `accept`, and at most `limit` columns are. An
+ * entry of a pivot column is eliminated only when its absolute value is above `elimTol`.
+ * Returns the pivot columns.
  */
-export function nullspace(A: number[][]): number[][] {
-  const m = A.length;
-  if (m === 0) return [];
-  const n = A[0].length;
-
-  // RREF
-  const M = scaledCopyForAbsoluteCutoff(A);
+function rrefPivots(
+  M: number[][],
+  accept: (maxVal: f64) => boolean,
+  limit: i32,
+  elimTol: f64
+): i32[] {
+  const m = M.length;
+  const n = M[0].length;
   const pivotCols: i32[] = [];
   let r = 0;
 
@@ -1601,14 +1626,14 @@ export function nullspace(A: number[][]): number[][] {
         maxRow = row;
       }
     }
-    if (maxVal < 1e-10) continue;
+    if (pivotCols.length >= limit || !accept(maxVal)) continue;
     if (maxRow !== r) [M[r], M[maxRow]] = [M[maxRow], M[r]];
 
     const pivot = M[r][col];
     for (let j = 0; j < n; j++) M[r][j] /= pivot;
 
     for (let row = 0; row < m; row++) {
-      if (row !== r && Math.abs(M[row][col]) > 1e-15) {
+      if (row !== r && Math.abs(M[row][col]) > elimTol) {
         const factor = M[row][col];
         for (let j = 0; j < n; j++) M[row][j] -= factor * M[r][j];
       }
@@ -1616,6 +1641,40 @@ export function nullspace(A: number[][]): number[][] {
 
     pivotCols.push(col);
     r++;
+  }
+
+  return pivotCols;
+}
+
+/**
+ * Null space basis of a matrix.
+ *
+ * For a matrix of finite entries, the number of basis vectors is `n - rank(A)`, with the
+ * rank of {@link rank}: the elimination takes at most that many pivots, and a pivot must
+ * be above the singular-value cutoff of the matrix. A matrix with a NaN or infinite entry
+ * is eliminated with the absolute pivot tolerance 1e-10.
+ *
+ * @param A - Matrix (m x n)
+ * @returns Array of basis vectors spanning the null space
+ */
+export function nullspace(A: number[][]): number[][] {
+  const m = A.length;
+  if (m === 0) return [];
+  const n = A[0].length;
+
+  const scaled = scaledCopyForAbsoluteCutoff(A);
+  let M = scaled.map((row) => row.slice());
+  let pivotCols: i32[];
+  if (n > 0 && entryRange(A).finite) {
+    const { rank: r, cut } = svdRankOf(scaled);
+    pivotCols = rrefPivots(M, (v) => v > cut, r, 0);
+    if (pivotCols.length < r) {
+      // Rounding left a pivot below the cutoff: take the largest nonzero pivots instead.
+      M = scaled.map((row) => row.slice());
+      pivotCols = rrefPivots(M, (v) => v > 0, r, 0);
+    }
+  } else {
+    pivotCols = rrefPivots(M, (v) => !(v < 1e-10), n, 1e-15);
   }
 
   // Free variables
