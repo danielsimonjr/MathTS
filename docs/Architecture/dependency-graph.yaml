@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1351
   totalModules: 82
-  totalExports: 7412
+  totalExports: 7413
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -25267,6 +25267,9 @@ modules:
         - file: ../cas/elementary-solve.js
           imports:
             - solveElementary
+        - file: ../cas/polynomial-limits.js
+          imports:
+            - PolynomialSizeError
         - file: ../cas/syntax-tree.js
           imports:
             - MAX_POLYNOMIAL_DEGREE
@@ -25304,6 +25307,7 @@ modules:
             - Complex
       exports:
         - PolynomialDegreeError
+        - PolynomialSizeError
         - CAS_BATCH_THRESHOLD
         - integrate
         - limit
@@ -47174,8 +47178,8 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1351
   totalModules: 82
-  totalLinesOfCode: 240052
-  totalExports: 7412
+  totalLinesOfCode: 240057
+  totalExports: 7413
   totalClasses: 63
   totalInterfaces: 673
   totalFunctions: 2591

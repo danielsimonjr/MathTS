@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import * as api from '../src/index.js';
 import { expand } from '../src/index.js';
 import {
   MAX_POLYNOMIAL_TERMS,
@@ -41,6 +42,14 @@ describe('#1176 the polynomial reader has a term limit', () => {
 
   it('refuses a huge power of constants and a variable at once', () => {
     expect(() => expand('(pi+e+sqrt(2)+log(2)+x)^60')).toThrow(/more than 10000 terms/);
+  });
+
+  it('throws the class that the package exports, as it does for the degree error', () => {
+    // A caller can only test `instanceof` against a class that the package exports.
+    const published = api as Record<string, unknown>;
+    expect(published.PolynomialSizeError).toBe(PolynomialSizeError);
+    expect(published.PolynomialDegreeError).toBeTypeOf('function');
+    expect(() => expand('(a+b+c+d+x)^60')).toThrow(published.PolynomialSizeError as typeof Error);
   });
 
   it('says that expand refused it', () => {

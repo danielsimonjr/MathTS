@@ -11859,6 +11859,7 @@ graph LR
 | `../cas/antiderivative.js`       | `antiderivativeReciprocal`                                                        | Import |
 | `../cas/polynomial-canonical.js` | `tryPolynomialCanonicalForm`                                                      | Import |
 | `../cas/elementary-solve.js`     | `solveElementary`                                                                 | Import |
+| `../cas/polynomial-limits.js`    | `PolynomialSizeError`                                                             | Import |
 | `../cas/syntax-tree.js`          | `MAX_POLYNOMIAL_DEGREE, PolynomialDegreeError, parseTree, polynomialCoefficients` | Import |
 | `../cas/closed-form-roots.js`    | `closedFormRoots, snapRoot`                                                       | Import |
 | `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                              | Import |
@@ -21809,8 +21810,8 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1351   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 240052 |
-| Total Exports           | 7412   |
+| Total Lines of Code     | 240057 |
+| Total Exports           | 7413   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 63     |
 | Total Interfaces        | 673    |

@@ -9235,7 +9235,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3202
+      "loc": 3207
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -12952,7 +12952,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 76
+      "loc": 85
     },
     {
       "file": "functions/tests/pow-bignumber-kernel.test.ts",
