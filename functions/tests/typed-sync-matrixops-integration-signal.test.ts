@@ -23,6 +23,10 @@ import {
 } from '../src/index.js';
 import { fftCoreFloat64 } from '../src/signal/fft-core-f64.js';
 
+// Other files that run in the same process (bun test) read the shared pool: restore its
+// configuration (a later file calls initialize() to start it again).
+const savedPoolConfig = computePool.getConfig();
+
 function sameNested(actual: number[][], expected: number[][]): void {
   expect(actual.length).toBe(expected.length);
   for (let i = 0; i < expected.length; i++) {
@@ -52,6 +56,7 @@ function lcg(seed: number): () => number {
 }
 
 afterAll(async () => {
+  computePool.updateConfig(savedPoolConfig);
   await computePool.terminate();
 });
 

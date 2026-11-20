@@ -8346,7 +8346,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 464
+      "loc": 469
     },
     {
       "file": "functions/src/signal/system-response.ts",
@@ -9515,7 +9515,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1760
+      "loc": 1776
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -10425,7 +10425,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 309
+      "loc": 313
     },
     {
       "file": "functions/tests/cov-special.test.ts",
@@ -10698,21 +10698,21 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 329
+      "loc": 343
     },
     {
       "file": "functions/tests/dogfood-1147-unwrap-numpy.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 89
+      "loc": 126
     },
     {
       "file": "functions/tests/dogfood-1153-peak-widths.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 67
+      "loc": 93
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",
@@ -12742,7 +12742,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 496
+      "loc": 501
     },
     {
       "file": "functions/tests/parallel-stat-prod.test.ts",
@@ -13190,7 +13190,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 367
+      "loc": 371
     },
     {
       "file": "functions/tests/signal/conv.test.ts",
@@ -13876,7 +13876,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 258
+      "loc": 263
     },
     {
       "file": "functions/tests/typed-sync-special-wasm-tier.test.ts",
@@ -14023,7 +14023,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 116
+      "loc": 118
     },
     {
       "file": "functions/tests/wasm-policy.test.ts",

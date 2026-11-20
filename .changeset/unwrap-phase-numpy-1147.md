@@ -10,6 +10,6 @@ The results equal `numpy.unwrap` of NumPy 2.3.5 to the last bit. A large step no
 - `unwrapPhase([0, 6.6e6])` now returns `[0, -2.35992350243032]`. It returned `[0, -2.359923502508572]`.
 - `unwrapPhase([0, 1e300])` now returns `[0, 0]`, as `numpy.unwrap` does: at that scale the correction `wrapped - diff` rounds to `-1e300`. It returned `[0, -0.7234267005270212]`.
 
-A step that is NaN, infinite or overflows still gives NaN for that entry and every later entry. Small steps keep their values. A Matrix now throws `TypeError: unwrapPhase: phase must be an array or a typed array` (it threw `phase is not iterable`). A step below π does not run the modulo, so a phase that is already continuous costs no more than before.
+A step that is NaN, infinite or overflows still gives NaN for that entry and every later entry. Small steps keep their values. A Matrix now throws `TypeError: unwrapPhase: phase must be an array or a typed array` (it threw `phase is not iterable`). A nested array, such as `[[0, 4], [8, 1]]`, returned a string entry and now throws `TypeError` too. A step below π does not run the modulo, so a phase that is already continuous costs no more than before.
 
 (Refs #1147)

@@ -326,3 +326,17 @@ describe('#1145 spectrogram of an empty signal', () => {
     expect(F.spectrogram([1, 2, 3, 4]).frequencies).toHaveLength(3);
   });
 });
+
+describe('#1145 spectrogram with a Hann window of length 2', () => {
+  it('spectrogram([5,6]) throws a RangeError, as periodogram does', () => {
+    expect(() => F.spectrogram([5, 6])).toThrow(RangeError);
+    expect(() => F.spectrogram([5, 6])).toThrow(/spectrogram/);
+  });
+  it('spectrogram([5,6,7,8], { windowSize: 2 }) throws a RangeError', () => {
+    expect(() => F.spectrogram([5, 6, 7, 8], { windowSize: 2 })).toThrow(RangeError);
+  });
+  it('a rectangular window of length 2 still works', () => {
+    const r = F.spectrogram([5, 6], { window: 'rectangular' });
+    expect(r.magnitude[0][0]).toBeCloseTo(11, 12);
+  });
+});

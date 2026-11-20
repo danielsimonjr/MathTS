@@ -86,3 +86,40 @@ describe('#1147 unwrapPhase equals numpy.unwrap', () => {
     expect(F.unwrapPhase(new Float64Array([0, 4, 8]) as never)).toEqual(F.unwrapPhase([0, 4, 8]));
   });
 });
+
+describe('#1147 unwrapPhase cost is O(n) at any phase value', () => {
+  // The old algorithm took about 2.25 s for 2,000 such samples and grows as n^2: about 225 s here.
+  it('200,000 samples alternating 0 and 6e6 equal numpy.unwrap', { timeout: 20_000 }, () => {
+    const x = Array.from({ length: 200_000 }, (_, i) => (i % 2 === 0 ? 0 : 6e6));
+    const u = F.unwrapPhase(x);
+    expect(u).toHaveLength(200_000);
+    const want: [number, number][] = [
+      [0, 0],
+      [1, -2.1453850027173758],
+      [2, -9.313225746154785e-10],
+      [3, -2.1453850036486983],
+      [99999, -2.145431567914784],
+      [100000, -4.6566128730773926e-5],
+      [199998, -9.313132613897324e-5],
+      [199999, -2.1454781340435147],
+    ];
+    for (const [i, v] of want) expect(u[i], `sample ${i}`).toBe(v);
+  });
+});
+
+describe('#1147 unwrapPhase rejects a nested array', () => {
+  it('[[0,4],[8,1]] throws a TypeError that names the function', () => {
+    expect(() =>
+      F.unwrapPhase([
+        [0, 4],
+        [8, 1],
+      ] as never)
+    ).toThrow(TypeError);
+    expect(() =>
+      F.unwrapPhase([
+        [0, 4],
+        [8, 1],
+      ] as never)
+    ).toThrow(/unwrapPhase/);
+  });
+});

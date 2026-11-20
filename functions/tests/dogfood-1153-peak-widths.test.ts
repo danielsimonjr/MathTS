@@ -64,3 +64,29 @@ describe('#1153 findPeaks prominence stops at a NaN sample, as scipy.signal.find
     expect(F.findPeaks(x, { prominence: p })).toEqual(want);
   });
 });
+
+describe('#1153 peakWidths with a typed array of peaks', () => {
+  it('an Int32Array of peaks gives the same fractional widths as an array', () => {
+    const x = [0, 1, 5, 1, 0];
+    expect(F.peakWidths(x, [2])).toEqual([1.25]);
+    const got = F.peakWidths(x, new Int32Array([2]) as never);
+    expect(Array.isArray(got)).toBe(true);
+    expect(got).toEqual([1.25]);
+  });
+});
+
+describe('findPeaks and medfilt reject a Matrix by name', () => {
+  const m = F.matrix([0, 1, 5, 1, 0]) as never;
+  it('findPeaks(matrix) throws a TypeError that names the function', () => {
+    expect(() => F.findPeaks(m)).toThrow(TypeError);
+    expect(() => F.findPeaks(m)).toThrow(/findPeaks/);
+  });
+  it('medfilt(matrix) throws a TypeError that names the function', () => {
+    expect(() => F.medfilt(m)).toThrow(TypeError);
+    expect(() => F.medfilt(m)).toThrow(/medfilt/);
+  });
+  it('the array forms are unchanged', () => {
+    expect(F.findPeaks([0, 1, 5, 1, 0])).toEqual([2]);
+    expect(F.medfilt([0, 1, 5, 1, 0])).toEqual([1, 1, 1, 1, 1]);
+  });
+});

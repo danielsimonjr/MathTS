@@ -11,4 +11,6 @@
 
 The widths now match SciPy 1.16.3 to the last bit on every probe, including plateaus, nested peaks and a `relHeight` of 1e308. The `prominence` option of `findPeaks` gives the same peaks, except for a signal that holds NaN: a NaN sample now ends the prominence walk, as in SciPy, so `findPeaks([0, NaN, 3, 4, 0], { prominence: 3 })` returns `[]` (it returned `[3]`).
 
+An `Int32Array` of peaks returned an `Int32Array` of truncated widths: `peakWidths([0, 1, 5, 1, 0], new Int32Array([2]))` returned `[1]`. It now returns the array `[1.25]`, as for an array of peaks.
+
 (Refs #1153)

@@ -21486,6 +21486,9 @@ modules:
         - file: ../typed/signal.js
           imports:
             - windowFunction
+        - file: ../utils/samples.js
+          imports:
+            - toSamples
         - file: ../signal-filter-extra.js
           imports:
             - butter
@@ -47045,7 +47048,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238502
+  totalLinesOfCode: 238523
   totalExports: 7398
   totalClasses: 62
   totalInterfaces: 669

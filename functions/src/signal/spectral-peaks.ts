@@ -13,6 +13,7 @@
 import { fft, type ComplexNumber } from './fft.js';
 import { fftExactFloat64 } from './fft-core-f64.js';
 import { windowFunction } from '../typed/signal.js';
+import { toSamples } from '../utils/samples.js';
 import { butter, filtfilt } from '../signal-filter-extra.js';
 
 // =============================================================================
@@ -109,8 +110,11 @@ function filterByDistance(x: readonly number[], peaks: number[], distance: numbe
  * @param x - Input signal
  * @param opts - `{ height?, distance?, prominence? }`
  * @returns Ascending indices of the surviving peaks
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function findPeaks(x: readonly number[], opts?: FindPeaksOptions): number[] {
+  // An array is read in place; any other value goes through toSamples, which rejects a Matrix.
+  if (!Array.isArray(x)) x = toSamples('findPeaks', x, 'x') as unknown as readonly number[];
   let peaks: number[] = [];
   for (let i = 1; i < x.length - 1; i++) {
     if (x[i - 1] < x[i] && x[i] > x[i + 1]) peaks.push(i);
@@ -158,7 +162,8 @@ export function peakWidths(
   if (!(relHeight >= 0)) {
     throw new RangeError(`peakWidths: relHeight must be a number >= 0 (got ${relHeight})`);
   }
-  return peaks.map((p, k) => {
+  // Array.from: a typed array's own map would store each fractional width back as an integer.
+  return Array.from(peaks, (p, k) => {
     // A NaN, infinite, fractional or out-of-range index made the crossing walk run forever
     // or read outside x.
     if (!(Number.isInteger(p) && p >= 0 && p < x.length)) {

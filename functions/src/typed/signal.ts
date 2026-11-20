@@ -582,9 +582,14 @@ function floatMod(a: f64, b: f64): f64 {
  *
  * @param phase - Array of phase values in radians
  * @returns Unwrapped phase array
- * @throws TypeError if `phase` is not an array or a typed array (a Matrix is rejected by name)
+ * @throws TypeError if `phase` is not a 1-D array or a typed array (a Matrix or a nested array is
+ *   rejected by name)
  */
 export function unwrapPhase(phase: number[]): number[] {
+  // A nested array is not a phase signal: its rows would be read as strings and NaN.
+  if (Array.isArray(phase) && Array.isArray(phase[0])) {
+    throw new TypeError('unwrapPhase: phase must be a 1-D array or a typed array');
+  }
   // An array is read in place: a Float64Array copy of it costs more than the loop. Any other
   // value goes through toSamples, which converts a typed array and rejects the rest by name.
   const samples: ArrayLike<number> = Array.isArray(phase)
@@ -978,6 +983,7 @@ export function hilbertTransform(x: number[]): number[] {
  * @param opts - { windowSize, hopSize, window }
  * @returns `{ magnitude: number[][], frequencies: number[], times: number[] }`
  * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
+ * @throws RangeError if the window has no power (a Hann window of length 2 is all zeros)
  */
 export function spectrogram(
   x: number[],
@@ -1000,6 +1006,14 @@ export function spectrogram(
   const nFreqs: i32 = Math.floor(nfft / 2) + 1;
 
   const win = windowFunction(windowSize, winType);
+  // A Hann window of length 2 is [0, 0]: every frame would have zero magnitude.
+  let winPower: f64 = 0;
+  for (let i: i32 = 0; i < windowSize; i++) winPower += win[i] * win[i];
+  if (!(winPower > 0)) {
+    throw new RangeError(
+      `spectrogram: the '${winType}' window of length ${windowSize} is all zeros; use another window or more samples`
+    );
+  }
 
   const frequencies: number[] = Array.from({ length: nFreqs }, (_, i) => i / nfft);
 
@@ -1324,8 +1338,10 @@ export function resample(x: number[], newRate: f64, oldRate?: f64): number[] {
  * @param x - Input signal
  * @param n - Window size (default 3, must be odd)
  * @returns Filtered signal
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function medfilt(x: number[], n: i32 = 3): number[] {
+  if (!Array.isArray(x)) x = Array.from(toSamples('medfilt', x, 'x'));
   if (n % 2 === 0) n += 1;
   const half: i32 = Math.min(Math.floor(n / 2), x.length);
   const result: number[] = new Array(x.length);

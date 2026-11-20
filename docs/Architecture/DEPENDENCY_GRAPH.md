@@ -9649,6 +9649,7 @@ graph LR
 | `./fft.js`                  | `fft, ComplexNumber` | Import |
 | `./fft-core-f64.js`         | `fftExactFloat64`    | Import |
 | `../typed/signal.js`        | `windowFunction`     | Import |
+| `../utils/samples.js`       | `toSamples`          | Import |
 | `../signal-filter-extra.js` | `butter, filtfilt`   | Import |
 
 **Exports:**
@@ -21768,7 +21769,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238502 |
+| Total Lines of Code     | 238523 |
 | Total Exports           | 7398   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
