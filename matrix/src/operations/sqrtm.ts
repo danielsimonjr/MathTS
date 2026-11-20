@@ -30,6 +30,7 @@ import {
   gaussJordanSolve,
   ldexpMatrix,
   normInf,
+  relativeDifference,
   entryRange,
   withPow2Scale,
   ABS_CUTOFF_LO,
@@ -261,6 +262,12 @@ function sqrtmGeneral(A: number[][]): number[][] {
  * form matrix. Returns null if any 1×1 diagonal block is negative (no real
  * square root on that block).
  *
+ * A negative 1×1 entry `t` with `-t <= zeroNoise · max|T|` is read as a zero eigenvalue
+ * (its root is 0) and `clamped` is set in the result: the Schur form of a singular matrix
+ * holds rounding noise of that size in place of the zero (#1163). The caller must check
+ * that U·U reproduces T, because a root built on a zero eigenvalue does not exist for a
+ * nilpotent block. `zeroNoise = 0` clamps nothing.
+ *
  * For 1×1 blocks: U_ii = sqrt(T_ii).
  * For 2×2 blocks with complex-conjugate eigenvalue pair: use the Schur-form
  *   2×2 square root formula (Björck 1983 eq. 2.2).
@@ -268,12 +275,16 @@ function sqrtmGeneral(A: number[][]): number[][] {
  *   U_ii * U_ij + U_ij * U_jj = T_ij - sum_{k=i+1}^{j-1} U_ik * U_kj
  *
  * Ref: Higham (2008) §6.2, equations (6.4)–(6.7).
- *
- * @internal Also used by `matrixLogm` for the 2×2 blocks of its inverse-scaling phase.
  */
-export function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
+function quasiTriangularRoot(
+  T: number[][],
+  zeroNoise: number
+): { U: number[][]; clamped: boolean } | null {
   const n = T.length;
   const U: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+  let tmax = 0;
+  for (const row of T) for (const v of row) tmax = Math.max(tmax, Math.abs(v));
+  let clamped = false;
 
   // Identify block structure (1×1 or 2×2 diagonal blocks)
   const blockStart: number[] = [];
@@ -303,7 +314,12 @@ export function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
     const sz = blockSize[b];
 
     if (sz === 1) {
-      if (T[r][r] < 0) return null; // no real sqrt for negative eigenvalue
+      if (T[r][r] < 0) {
+        // No real sqrt for a negative eigenvalue, unless the entry is rounding noise of a zero.
+        if (!(-T[r][r] <= zeroNoise * tmax)) return null;
+        clamped = true;
+        continue;
+      }
       U[r][r] = Math.sqrt(T[r][r]);
     } else {
       // 2×2 block: [[a, b], [c, d]] with complex eigenvalues
@@ -395,7 +411,18 @@ export function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
     }
   }
 
-  return U;
+  return { U, clamped };
+}
+
+/**
+ * The square root of a quasi-upper-triangular real Schur form (see `quasiTriangularRoot`),
+ * with no negative 1×1 entry read as zero. Null when there is no real root.
+ *
+ * @internal Also used by `matrixLogm` for the 2×2 blocks of its inverse-scaling phase.
+ */
+export function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
+  const root = quasiTriangularRoot(T, 0);
+  return root === null ? null : root.U;
 }
 
 /**
@@ -418,12 +445,16 @@ function solveLinearSystem(A: number[][], b: number[]): number[] | null {
  * 2. Compute upper-triangular U with U^2 = T via sqrtmQuasiTriangular.
  * 3. Rotate back: sqrtm(A) = Q · U · Q^T.
  *
- * Returns null if T has a 1×1 block with a negative entry (no real sqrt).
+ * Returns null if T has a 1×1 block with a negative entry (no real sqrt). A negative entry
+ * within 64·eps of max|T| is read as a zero eigenvalue (#1163); the root built on it is kept
+ * only when U·U reproduces T to 1e-12 · max|T|.
  */
 function sqrtmSchur(A: number[][]): number[][] | null {
   const { H: T, Q } = schurInternal(A);
-  const U = sqrtmQuasiTriangular(T);
-  if (U === null) return null;
+  const root = quasiTriangularRoot(T, 64 * Number.EPSILON);
+  if (root === null) return null;
+  const { U, clamped } = root;
+  if (clamped && !(relativeDifference(matMul(U, U), T) <= 1e-12)) return null;
 
   // sqrtm(A) = Q * U * Q^T
   const Qt = transpose(Q);

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7399
+    "totalExports": 7400
   },
   "entryPoints": [
     {
@@ -5573,6 +5573,7 @@
           "matSub",
           "matScale",
           "normInf",
+          "relativeDifference",
           "scaleDense",
           "norm1",
           "householder",
@@ -5605,6 +5606,7 @@
           "matSub",
           "matScale",
           "normInf",
+          "relativeDifference",
           "scaleDense",
           "norm1",
           "householder",
@@ -6029,6 +6031,7 @@
               "matInv",
               "gaussJordanContinue",
               "ldexpMatrix",
+              "relativeDifference",
               "entryRange",
               "withPow2Scale",
               "ABS_CUTOFF_LO",
@@ -6264,6 +6267,7 @@
               "gaussJordanSolve",
               "ldexpMatrix",
               "normInf",
+              "relativeDifference",
               "entryRange",
               "withPow2Scale",
               "ABS_CUTOFF_LO",
@@ -19862,6 +19866,11 @@
         ],
         "workspaceDependencies": [
           {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["DenseMatrix", "matrixSqrtm"]
+          },
+          {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": [
@@ -19870,7 +19879,8 @@
               "allFinite",
               "entryRange",
               "ldexp",
-              "withPow2Scale"
+              "withPow2Scale",
+              "EntryRange"
             ],
             "subpath": "internal"
           }
@@ -49885,11 +49895,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238490,
-    "totalExports": 7399,
+    "totalLinesOfCode": 238627,
+    "totalExports": 7400,
     "totalClasses": 62,
     "totalInterfaces": 669,
-    "totalFunctions": 2581,
+    "totalFunctions": 2582,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1695,

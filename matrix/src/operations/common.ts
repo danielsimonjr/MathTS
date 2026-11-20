@@ -265,6 +265,18 @@ export function normInf(A: number[][]): number {
   return mx;
 }
 
+/** The largest entry of `X - Y`, divided by the largest entry of `Y`. */
+export function relativeDifference(X: number[][], Y: number[][]): number {
+  let d = 0;
+  let m = 0;
+  for (let i = 0; i < Y.length; i++)
+    for (let j = 0; j < Y.length; j++) {
+      d = Math.max(d, Math.abs(X[i][j] - Y[i][j]));
+      m = Math.max(m, Math.abs(Y[i][j]));
+    }
+  return m > 0 ? d / m : d;
+}
+
 // The scale helpers live in core, so `functions` shares the one implementation (#1122).
 export {
   SQUARED,

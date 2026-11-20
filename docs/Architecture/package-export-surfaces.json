@@ -4716,6 +4716,7 @@
       "random",
       "registerBuiltinShaders",
       "registerSparseMatrixFactory",
+      "relativeDifference",
       "RepeatedEigenvalue",
       "repeatedEigenvalueReport",
       "resetConfig",
