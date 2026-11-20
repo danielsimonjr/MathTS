@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2646,
+  "totalFiles": 2650,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1332,
     "test-only": 0,
     "orphan": 0,
-    "test": 1222,
+    "test": 1226,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1358,
-    "tests": 1222,
+    "tests": 1226,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -22,13 +22,13 @@
     "@danielsimonjr/mathts-arithmetic": 4,
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
-    "@danielsimonjr/mathts-autograd": 32,
-    "@danielsimonjr/mathts-compat": 42,
+    "@danielsimonjr/mathts-autograd": 33,
+    "@danielsimonjr/mathts-compat": 43,
     "@danielsimonjr/mathts-core": 150,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 71,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1252,
+    "@danielsimonjr/mathts-functions": 1254,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3149
+      "loc": 3186
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -402,6 +402,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 173
+    },
+    {
+      "file": "autograd/tests/matmul-shared-right-992.test.ts",
+      "package": "@danielsimonjr/mathts-autograd",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 79
     },
     {
       "file": "autograd/tests/owned-copy.test.ts",
@@ -562,7 +569,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 846
+      "loc": 877
     },
     {
       "file": "compat/src/unary-fast-path.ts",
@@ -570,6 +577,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 30
+    },
+    {
+      "file": "compat/tests/arithmetic-broadcast-1007.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 40
     },
     {
       "file": "compat/tests/bignumber-collections-1112.test.ts",
@@ -9620,7 +9634,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 478
+      "loc": 488
     },
     {
       "file": "functions/src/typed/set.ts",
@@ -9641,7 +9655,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 198
+      "loc": 241
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -13858,6 +13872,13 @@
       "loc": 379
     },
     {
+      "file": "functions/tests/sparse-product-tall-1271.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 96
+    },
+    {
       "file": "functions/tests/sparse-rhs-solve.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -14514,6 +14535,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 181
+    },
+    {
+      "file": "functions/tests/unequal-unit-975.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
     },
     {
       "file": "functions/tests/unit-characterization.test.ts",

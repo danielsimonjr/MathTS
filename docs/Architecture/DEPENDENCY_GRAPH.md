@@ -12755,9 +12755,9 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Fraction, isBigNumber, isComplex, isFraction` |
+| Package                      | Import                                                                              |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-core` | `mathTyped, Complex, BigNumber, Fraction, Unit, isBigNumber, isComplex, isFraction` |
 
 **Internal Dependencies:**
 
@@ -21931,7 +21931,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1358   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 244582 |
+| Total Lines of Code     | 244703 |
 | Total Exports           | 7444   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |

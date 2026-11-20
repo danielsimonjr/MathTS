@@ -29774,6 +29774,7 @@
               "Complex",
               "BigNumber",
               "Fraction",
+              "Unit",
               "isBigNumber",
               "isComplex",
               "isFraction"
@@ -50312,7 +50313,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1358,
     "totalModules": 82,
-    "totalLinesOfCode": 244582,
+    "totalLinesOfCode": 244703,
     "totalExports": 7444,
     "totalClasses": 64,
     "totalInterfaces": 676,

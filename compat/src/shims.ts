@@ -206,11 +206,12 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
  * Create a matrix (mathjs-compatible)
  * @example
  * matrix([[1,2],[3,4]])
+ * matrix([1,2])            // a 1-D matrix of size [2]
  * matrix([[1,2],[3,4]], 'sparse')
  * matrix(sparseMatrix, 'dense')
  */
 export function matrix(
-  data?: number[][] | DenseMatrix | SparseMatrix,
+  data?: number[] | number[][] | DenseMatrix | SparseMatrix,
   format?: 'dense' | 'sparse' | string
 ): CompatMatrixValue {
   if (arguments.length === 0) {
@@ -247,9 +248,10 @@ export function sparse(data?: number[][]): CompatMatrixValue {
 // Arithmetic Function Shims
 // =============================================================================
 
-// add/subtract/multiply must be matrix-aware for mathjs parity: the
-// functions-package versions are scalar-only and throw on number[][]. Delegate
-// 2-D array / DenseMatrix operands to the matrix package, scalars to functions.
+// add/subtract/multiply send a pair that the matrix package can take (a scalar with a 2-D
+// operand, or two 2-D operands; see `matrixPackageCanTake`) to the matrix package. Every other
+// pair goes to the typed function of the functions package, which has the vector and broadcast
+// rules of mathjs.
 type MatrixLike = number[][] | DenseMatrix | CompatMatrixValue;
 
 const isMatrixLike = (x: unknown): x is MatrixLike =>
@@ -265,13 +267,38 @@ const unwrap = (r: unknown): unknown =>
       ? r.toArray()
       : r;
 
+/** The axis lengths of an Array or a matrix operand, read along the first elements; null for a scalar. */
+const axesOf = (x: unknown): number[] | null => {
+  if (isDenseMatrix(x) || isSparseMatrix(x)) return [x.rows, x.cols];
+  if (isCompatBridgeMatrix(x)) return (x as unknown as { size(): number[] }).size();
+  if (!Array.isArray(x)) return null;
+  const axes: number[] = [];
+  for (let level: unknown = x; Array.isArray(level); level = level[0]) axes.push(level.length);
+  return axes;
+};
+
+/**
+ * True when the matrix package can take the pair: a scalar with a 2-D operand, or two 2-D
+ * operands. An element-wise operation also needs equal sizes. Every other pair (a 1-D operand, a
+ * size-1 axis, another rank) needs the broadcast and vector rules of the typed function (#1007, #1302).
+ */
+const matrixPackageCanTake = (a: unknown, b: unknown, elementwise: boolean): boolean => {
+  const sa = axesOf(a);
+  const sb = axesOf(b);
+  if (sa !== null && sa.length !== 2) return false;
+  if (sb !== null && sb.length !== 2) return false;
+  return !(elementwise && sa !== null && sb !== null && (sa[0] !== sb[0] || sa[1] !== sb[1]));
+};
+
 const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
   matrixFn: (a: unknown, b: unknown) => unknown,
   a: unknown,
-  b: unknown
+  b: unknown,
+  elementwise: boolean
 ): unknown => {
   if (isMatrixLike(a) || isMatrixLike(b)) {
+    if (!matrixPackageCanTake(a, b, elementwise)) return unwrap(scalarFn(a, b));
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
     return unwrap(matrixFn(aa, bb));
@@ -287,6 +314,7 @@ const makeArithmetic =
   (
     scalarFn: (a: unknown, b: unknown) => unknown,
     matrixFn: (a: unknown, b: unknown) => unknown,
+    elementwise: boolean,
     fastNumberPair?: (a: number, b: number) => number
   ) =>
   (...args: unknown[]): unknown => {
@@ -304,7 +332,7 @@ const makeArithmetic =
     ) {
       return fastNumberPair(args[0], args[1]);
     }
-    return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next));
+    return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next, elementwise));
   };
 
 /**
@@ -332,15 +360,18 @@ type OneArg = <T>(value: T) => T;
 export const add = makeArithmetic(
   _add as (a: unknown, b: unknown) => unknown,
   _matAdd as (a: unknown, b: unknown) => unknown,
+  true,
   (a, b) => a + b
 ) as PublicAdd & OneArg;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
-  _matSubtract as (a: unknown, b: unknown) => unknown
+  _matSubtract as (a: unknown, b: unknown) => unknown,
+  true
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
   _multiply as (a: unknown, b: unknown) => unknown,
   _matMultiply as (a: unknown, b: unknown) => unknown,
+  false,
   (a, b) => a * b
 ) as typeof _multiply;
 export const divide: TypedFunction = _divide;

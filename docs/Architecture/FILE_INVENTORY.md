@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2646
+**Total files**: 2650
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1332 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1222 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1226 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2646** |                                                                                                                |
+| **Total**     | **2650** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    30 |
 | `examples` |     7 |
 | `src`      |  1358 |
-| `tests`    |  1222 |
+| `tests`    |  1226 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -43,12 +43,12 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `(root)`                               |    71 |
 | `@danielsimonjr/mathts-arithmetic`     |     4 |
 | `@danielsimonjr/mathts-ast`            |     4 |
-| `@danielsimonjr/mathts-autograd`       |    32 |
-| `@danielsimonjr/mathts-compat`         |    42 |
+| `@danielsimonjr/mathts-autograd`       |    33 |
+| `@danielsimonjr/mathts-compat`         |    43 |
 | `@danielsimonjr/mathts-core`           |   150 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   575 |
-| `@danielsimonjr/mathts-functions`      |  1252 |
+| `@danielsimonjr/mathts-functions`      |  1254 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   160 |
@@ -121,6 +121,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `autograd/tests/grad-bridge-ad.test.ts`                                           | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/issue-904-taped-rhs.test.ts`                                      | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/matmul-broadcast-992.test.ts`                                     | @danielsimonjr/mathts-autograd       | tests    | test        |
+| `autograd/tests/matmul-shared-right-992.test.ts`                                  | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/owned-copy.test.ts`                                               | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/p7-batched-matmul-contract.test.ts`                               | @danielsimonjr/mathts-autograd       | tests    | test        |
 | `autograd/tests/public-api-smoke.test.ts`                                         | @danielsimonjr/mathts-autograd       | tests    | test        |
@@ -145,6 +146,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `compat/src/parity-names.generated.ts`                                            | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/shims.ts`                                                             | @danielsimonjr/mathts-compat         | src      | build-entry |
 | `compat/src/unary-fast-path.ts`                                                   | @danielsimonjr/mathts-compat         | src      | build-entry |
+| `compat/tests/arithmetic-broadcast-1007.test.ts`                                  | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/bignumber-collections-1112.test.ts`                                 | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/chain.test.ts`                                                      | @danielsimonjr/mathts-compat         | tests    | test        |
 | `compat/tests/compat.test.ts`                                                     | @danielsimonjr/mathts-compat         | tests    | test        |
@@ -2043,6 +2045,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/sparse-bridge.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/sparse-elementwise-975.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/sparse-product-1271.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/sparse-product-tall-1271.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/sparse-rhs-solve.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/sparse-shapes-949.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/sparse-transpose-diag.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2137,6 +2140,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/typed-unit.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/typed-variadic.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/unary-f64-merge.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/unequal-unit-975.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/unit-characterization.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/unit-operators.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/upt-d1-admit-contract.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
