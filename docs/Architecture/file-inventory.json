@@ -6855,7 +6855,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1446
+      "loc": 1475
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -7485,7 +7485,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 288
+      "loc": 312
     },
     {
       "file": "functions/src/matrix/trace.ts",
@@ -10656,7 +10656,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 170
+      "loc": 191
     },
     {
       "file": "functions/tests/dogfood-1098-nan-policy.test.ts",
@@ -10929,14 +10929,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 449
+      "loc": 543
     },
     {
       "file": "functions/tests/dogfood-1279-sparse-resize.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 130
+      "loc": 149
     },
     {
       "file": "functions/tests/dogfood-1284-matrix-format.test.ts",

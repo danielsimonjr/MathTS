@@ -20,6 +20,8 @@ import {
   resize as resizeArray,
   reshape as reshapeArray,
   processSizesWildcard,
+  unsqueeze,
+  broadcastTo,
 } from '../utils/array.js';
 import { DimensionError } from '../error/DimensionError.js';
 import { assertAllocSize } from '../utils/limits.js';
@@ -367,33 +369,50 @@ export class MathJSDenseMatrix {
     if (dims.length !== this._size.length) {
       throw new DimensionError(dims.length, this._size.length);
     }
-    if (index.isScalar()) {
-      return this.set(
-        dims.map((d) => d.sel[0]),
-        replacement as number
-      );
-    }
-    const rep = (replacement as { toArray?: () => unknown } | null)?.toArray
+    let rep: unknown = (replacement as { toArray?: () => unknown } | null)?.toArray
       ? (replacement as { toArray(): unknown }).toArray()
       : replacement;
+    if (index.isScalar()) {
+      // One entry: the replacement is one value, never an Array or a matrix.
+      if (Array.isArray(rep)) throw new TypeError('Scalar expected');
+      return this.set(
+        dims.map((d) => d.sel[0]),
+        rep as number
+      );
+    }
     const selection = dims.map((d) => d.sel.length);
-    const repSize = arraySize(rep as unknown[]);
-    const offset = selection.length - repSize.length;
-    if (offset < 0 || repSize.some((n, k) => n !== selection[k + offset] && n !== 1)) {
-      throw new DimensionError(selection, repSize, '>');
+    if (Array.isArray(rep)) {
+      // The rule of the mathjs `_set`. Step 1: broadcast the replacement to the selection (a
+      // failure is not an error yet). Step 2: when the replacement has fewer axes, add axes of
+      // length 1: one outer axis for each leading axis of length 1 that only the selection has,
+      // and the others as inner axes. Step 3: compare the sizes.
+      try {
+        rep = broadcastTo(rep, selection);
+      } catch {
+        // The size check below reports the mismatch.
+      }
+      let repSize = arraySize(rep as unknown[]);
+      if (repSize.length < selection.length) {
+        let k = 0;
+        while (selection[k] === 1 && repSize[k] === 1) k++;
+        let outer = 0;
+        for (; selection[k] === 1; k++) outer++;
+        rep = unsqueeze(rep as unknown[], selection.length, outer, repSize);
+        repSize = arraySize(rep as unknown[]);
+      }
+      if (repSize.length !== selection.length || repSize.some((n, k) => n !== selection[k])) {
+        throw new DimensionError(selection, repSize, '>');
+      }
     }
     const total = selection.reduce((p, n) => p * n, 1);
     const pos = new Array<number>(selection.length).fill(0);
+    const at = new Array<number>(selection.length);
     for (let count = 0; count < total; count++) {
       let value = rep;
-      for (let k = 0; k < repSize.length; k++) {
-        value = (value as unknown[])[repSize[k] === 1 ? 0 : pos[k + offset]];
-      }
-      this.set(
-        pos.map((p, d) => dims[d].sel[p]),
-        value as number
-      );
-      // The next position, in row-major order.
+      if (Array.isArray(rep))
+        for (let k = 0; k < pos.length; k++) value = (value as unknown[])[pos[k]];
+      for (let d = 0; d < pos.length; d++) at[d] = dims[d].sel[pos[d]];
+      this.set(at, value as number);
       for (let d = pos.length - 1; d >= 0; d--) {
         if (++pos[d] < selection[d]) break;
         pos[d] = 0;
@@ -1059,6 +1078,11 @@ export class MathJSSparseMatrix {
    */
   resize(newSize: number[], defaultValue?: unknown, copy?: boolean): MathJSSparseMatrix {
     if (newSize.length !== 2) throw new Error('Only two dimensions matrix are supported');
+    if (newSize.some((n) => !Number.isInteger(n) || n < 0)) {
+      throw new TypeError(
+        `Invalid size, must contain positive integers (size: [${newSize.join(', ')}])`
+      );
+    }
     const [rows, cols] = newSize;
     const [oldRows, oldCols] = this._size;
     const value = defaultValue || 0;
@@ -1341,8 +1365,13 @@ export function createMatrixBridge() {
     }
     if (data instanceof MathJSDenseMatrix)
       return sparse ? new MathJSSparseMatrix(data._data) : data;
-    // An internal storage object. The dense constructor checks { data, size } itself.
-    if (!sparse) return new MathJSDenseMatrix(data as never);
+    // A storage object from a caller: the constructor trusts { data, size } (internal producers
+    // pass it), so check here that the data has the size, as mathjs does.
+    if (!sparse) {
+      const o = data as { data?: unknown; size?: unknown };
+      if (Array.isArray(o.data) && Array.isArray(o.size)) validate(o.data, o.size as number[]);
+      return new MathJSDenseMatrix(data as never);
+    }
     if (!isStorageObject(data)) {
       throw new TypeError(
         'Unsupported type of data: expected Array data and size, or CSC values, index, ptr and size'

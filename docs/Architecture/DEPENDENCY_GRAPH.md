@@ -6508,12 +6508,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports                                                                     | Type   |
-| ---------------------------- | --------------------------------------------------------------------------- | ------ |
-| `../utils/is.js`             | `typeOf`                                                                    | Import |
-| `../utils/array.js`          | `arraySize, validate, validateIndex, resize, reshape, processSizesWildcard` | Import |
-| `../error/DimensionError.js` | `DimensionError`                                                            | Import |
-| `../utils/limits.js`         | `assertAllocSize`                                                           | Import |
+| File                         | Imports                                                                                             | Type   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- | ------ |
+| `../utils/is.js`             | `typeOf`                                                                                            | Import |
+| `../utils/array.js`          | `arraySize, validate, validateIndex, resize, reshape, processSizesWildcard, unsqueeze, broadcastTo` | Import |
+| `../error/DimensionError.js` | `DimensionError`                                                                                    | Import |
+| `../utils/limits.js`         | `assertAllocSize`                                                                                   | Import |
 
 **Exports:**
 
@@ -7876,15 +7876,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports                                 | Type               |
-| ---------------------------- | --------------------------------------- | ------------------ |
-| `../utils/object.js`         | `clone`                                 | Import             |
-| `../utils/array.js`          | `isEmptyIndex, validateIndexSourceSize` | Import             |
-| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`      | Import             |
-| `../error/DimensionError.js` | `DimensionError`                        | Import             |
-| `../utils/factory.js`        | `factory`                               | Import             |
-| `../core/function/typed.js`  | `TypedFunction`                         | Import (type-only) |
-| `../utils/is.js`             | `Index`                                 | Import (type-only) |
+| File                         | Imports                                                            | Type               |
+| ---------------------------- | ------------------------------------------------------------------ | ------------------ |
+| `../utils/object.js`         | `clone`                                                            | Import             |
+| `../utils/array.js`          | `arraySize, broadcastSizes, isEmptyIndex, validateIndexSourceSize` | Import             |
+| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`                                 | Import             |
+| `../error/DimensionError.js` | `DimensionError`                                                   | Import             |
+| `../utils/factory.js`        | `factory`                                                          | Import             |
+| `../core/function/typed.js`  | `TypedFunction`                                                    | Import (type-only) |
+| `../utils/is.js`             | `Index`                                                            | Import (type-only) |
 
 **Exports:**
 
@@ -21773,7 +21773,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238530 |
+| Total Lines of Code     | 238583 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

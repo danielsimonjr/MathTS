@@ -127,3 +127,22 @@ describe('sparse resize needs two dimensions', () => {
     expect(a!.message).toBe(e!.message);
   });
 });
+
+describe('sparse resize checks the size, as mathjs', () => {
+  it.each([[[2.5, 2]], [[-1, 2]], [[Number.NaN, 2]], [[Infinity, 2]]])('rejects %j', (size) => {
+    const s = math.sparse([
+      [1, 0],
+      [0, 1],
+    ]) as unknown as { resize(n: number[]): unknown };
+    expect(() => s.resize(size as number[])).toThrow(
+      /Invalid size, must contain positive integers/
+    );
+    const t = mathjs.sparse([
+      [1, 0],
+      [0, 1],
+    ]) as unknown as { resize(n: number[]): unknown };
+    expect(() => t.resize(size as number[])).toThrow(
+      /Invalid size, must contain positive integers/
+    );
+  });
+});

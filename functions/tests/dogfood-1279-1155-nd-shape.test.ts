@@ -446,3 +446,97 @@ describe('#1155 subset set reads every axis', () => {
     expect(d3.toArray()).toEqual(D3);
   });
 });
+
+describe('method subset assignment of a lower-rank replacement (mathjs _set)', () => {
+  it('writes a column and a plane as mathjs does', () => {
+    const a = matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    a.subset(index([0, 1], 1), [9, 8]);
+    expect(a.toArray()).toEqual([
+      [1, 9],
+      [3, 8],
+    ]);
+    const b = matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    b.subset(index([0, 1], [1]), matrix([9, 8]));
+    expect(b.toArray()).toEqual([
+      [1, 9],
+      [3, 8],
+    ]);
+    const d3 = matrix([
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      [
+        [5, 6],
+        [7, 8],
+      ],
+    ]);
+    d3.subset(index(0, [0, 1], 1), [9, 8]);
+    expect(d3.toArray()).toEqual([
+      [
+        [1, 9],
+        [3, 8],
+      ],
+      [
+        [5, 6],
+        [7, 8],
+      ],
+    ]);
+  });
+});
+
+describe('method subset assignment: the axis rule and the scalar rule of the mathjs _set', () => {
+  // A new literal for each call: `matrix(data)` keeps the arrays that it gets.
+  const d2 = (): number[][] => [
+    [1, 2],
+    [3, 4],
+  ];
+  const d3 = (): number[][][] => [
+    d2(),
+    [
+      [5, 6],
+      [7, 8],
+    ],
+  ];
+  const both = (run: (make: typeof matrix, ix: Fn) => unknown): [() => unknown, () => unknown] => [
+    () => run(matrix, index),
+    () => run(mjMatrix, mjIndex),
+  ];
+
+  it('adds an inner axis after a leading axis of length 1 that both sizes have', () => {
+    // Selection [1, 2, 1], replacement [1, 2]: the new axis is the last one, not the first.
+    const [ours, theirs] = both((make, ix) =>
+      (make(d3()).subset(ix(0, [0, 1], 0), [[9, 8]]) as Mat).toArray()
+    );
+    expect(ours()).toEqual([
+      [
+        [9, 2],
+        [8, 4],
+      ],
+      [
+        [5, 6],
+        [7, 8],
+      ],
+    ]);
+    expect(ours()).toEqual(theirs());
+  });
+
+  it('rejects an Array for one entry', () => {
+    const [ours, theirs] = both((make, ix) => make(d2()).subset(ix(0, 0), [5]));
+    expect(ours).toThrow(TypeError);
+    expect(ours).toThrow('Scalar expected');
+    expect(theirs).toThrow('Scalar expected');
+  });
+
+  it('rejects a replacement that has another size', () => {
+    const [ours, theirs] = both((make, ix) => make(d2()).subset(ix([0, 1], [0, 1]), [5, 6, 7]));
+    expect(ours).toThrow('Dimension mismatch ([2, 2] > [3, 1])');
+    expect(theirs).toThrow('Dimension mismatch ([2, 2] > [3, 1])');
+  });
+});

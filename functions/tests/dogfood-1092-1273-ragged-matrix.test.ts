@@ -167,3 +167,24 @@ describe('#1092 validation cost: only user data is validated', () => {
     expect(isArrayCalls(() => multiply(a, b))).toBeLessThan(N * N);
   });
 });
+
+describe('matrix({ data, size }) checks that the data has the size', () => {
+  it('throws for data that does not have the size, as mathjs', () => {
+    const bad = () => math.matrix({ data: [[1, 2]], size: [2, 2] } as never);
+    expect(bad).toThrow(RangeError);
+    expect(() => mathjs.matrix({ data: [[1, 2]], size: [2, 2] } as never)).toThrow();
+  });
+  it('accepts data that has the size', () => {
+    const m = math.matrix({
+      data: [
+        [1, 2],
+        [3, 4],
+      ],
+      size: [2, 2],
+    } as never) as MathJSDenseMatrix;
+    expect(m.toArray()).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+  });
+});

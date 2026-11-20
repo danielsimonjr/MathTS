@@ -16630,6 +16630,8 @@ modules:
             - resize
             - reshape
             - processSizesWildcard
+            - unsqueeze
+            - broadcastTo
         - file: ../error/DimensionError.js
           imports:
             - DimensionError
@@ -18635,6 +18637,8 @@ modules:
             - clone
         - file: ../utils/array.js
           imports:
+            - arraySize
+            - broadcastSizes
             - isEmptyIndex
             - validateIndexSourceSize
         - file: ../utils/customs.js
@@ -47064,7 +47068,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238530
+  totalLinesOfCode: 238583
   totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669

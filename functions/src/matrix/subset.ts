@@ -1,6 +1,11 @@
 import { getStringSubset, setStringSubset } from '@danielsimonjr/mathts-expression';
 import { clone } from '../utils/object.js';
-import { isEmptyIndex, validateIndexSourceSize } from '../utils/array.js';
+import {
+  arraySize,
+  broadcastSizes,
+  isEmptyIndex,
+  validateIndexSourceSize,
+} from '../utils/array.js';
 import { getSafeProperty, setSafeProperty } from '../utils/customs.js';
 import { DimensionError } from '../error/DimensionError.js';
 import { factory } from '../utils/factory.js';
@@ -188,6 +193,25 @@ export const createSubset = /* #__PURE__ */ factory(
 
       const indexSize = index.size();
       if (indexSize.every((d: number) => d > 0)) {
+        // The sum with zeros(indexSize) has the broadcast size of the two; mathjs then rejects a
+        // replacement whose broadcast size is not the size of the index, so do the same here.
+        const rep = (replacement as { toArray?: () => unknown } | null)?.toArray
+          ? (replacement as { toArray(): unknown }).toArray()
+          : replacement;
+        if (Array.isArray(rep)) {
+          let broadcast: number[] | undefined;
+          try {
+            broadcast = broadcastSizes(arraySize(rep), indexSize);
+          } catch {
+            return replacement;
+          }
+          if (
+            broadcast.length !== indexSize.length ||
+            broadcast.some((n, k) => n !== indexSize[k])
+          ) {
+            throw new DimensionError(indexSize, broadcast, '>');
+          }
+        }
         try {
           return add(replacement, zeros(indexSize));
         } catch {
