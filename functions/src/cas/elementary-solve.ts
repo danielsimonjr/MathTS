@@ -14,7 +14,10 @@
  * small fraction, a special value of `sin`/`cos`/`tan`, or a decimal of at most 12 digits that a
  * person could have typed. The coefficient `p` may also be a rational multiple of `pi`
  * (`sin(2*pi*x) = 0` gives `0` and `1/2`), and the offset `q` may be a rational multiple of `pi`
- * (`2*sin(3*x + pi/4) = 1` gives `-pi/36` and `7*pi/36`). Any other constant, such as `sqrt(2)/3`,
+ * (`2*sin(3*x + pi/4) = 1` gives `-pi/36` and `7*pi/36`). The value that `F` must take may also be
+ * built from integers, `pi`, `sqrt(...)` and `+ - * / ^`: the solver carries its text, so
+ * `sin(x) = sqrt(2)/3` gives `asin(sqrt(2)/3)` and `pi - asin(sqrt(2)/3)`. The text is kept only
+ * when it evaluates to the value that the equation needs. Any other constant, such as `cos(1)`,
  * has no exact text here: the equation has the supported shape, so the function returns an
  * {@link ElementaryDecline} that names the constant.
  *
@@ -68,6 +71,10 @@ interface Linear<T> {
   c: number;
   k: number;
   target: T | null;
+  /** The exact text of `c`, or null when `c` has none. */
+  ct: string | null;
+  /** The exact text of `k`, or null when `k` has none. */
+  kt: string | null;
 }
 
 /** One root of `F(u) = c`, before the map back to `x`. */
@@ -184,6 +191,129 @@ function subtractFrom(whole: number, f: Fraction): Fraction {
   return makeFraction(whole * f[1] - f[0], f[1]);
 }
 
+/** The tokens of an exact constant text: numbers, `pi`, `sqrt`, `+ - * / ^` and brackets. */
+const EXACT_TEXT_TOKENS = /^(?:\d+(?:\.\d+)?|pi|sqrt|[()+\-*/^])+$/;
+
+/** True when `text` has any of `operators` outside brackets, apart from a leading sign. */
+function hasTopLevelOperator(text: string, operators: string): boolean {
+  let depth = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (depth === 0 && i > 0 && operators.includes(ch)) return true;
+  }
+  return false;
+}
+
+/** True when `text` has a `+` or `-` outside brackets, apart from a leading sign. */
+function hasTopLevelSum(text: string): boolean {
+  return hasTopLevelOperator(text, '+-');
+}
+
+/** The text without the brackets that wrap all of it: `(1 + 2)` gives `1 + 2`. */
+function stripOuterBrackets(text: string): string {
+  let t = text;
+  while (t.startsWith('(') && t.endsWith(')')) {
+    let depth = 0;
+    let wrapsAll = true;
+    for (let i = 0; i < t.length - 1; i++) {
+      if (t[i] === '(') depth++;
+      else if (t[i] === ')') depth--;
+      if (depth === 0) {
+        wrapsAll = false;
+        break;
+      }
+    }
+    if (!wrapsAll) break;
+    t = t.slice(1, -1);
+  }
+  return t;
+}
+
+/** Put one space on each side of a `+` or `-` outside brackets: `1-sqrt(2)/3` gives `1 - sqrt(2)/3`. */
+function spaceSums(text: string): string {
+  let out = '';
+  let depth = 0;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    const binary =
+      depth === 0 && i > 0 && (ch === '+' || ch === '-') && !'+-*/^('.includes(text[i - 1]);
+    out += binary ? ` ${ch} ` : ch;
+  }
+  return out;
+}
+
+/** True when `text` reads as a constant of the value `value` (to 12 digits). */
+function readsAs(text: string, value: number): boolean {
+  const tree = parseTree(text);
+  const read = tree === null ? null : constantValue(tree);
+  return read !== null && Math.abs(read - value) <= 1e-12 * Math.max(1, Math.abs(value));
+}
+
+/** True when every number in `text` has at most {@link MAX_DECIMAL_DIGITS} digits: a person typed it. */
+function numbersAreShort(text: string): boolean {
+  return (text.match(/\d+(?:\.\d+)?/g) ?? []).every(
+    (n) => n.replace('.', '').replace(/^0+/, '').length <= MAX_DECIMAL_DIGITS
+  );
+}
+
+/** The exact text of the constant subtree `node` of the value `value`, or null. */
+function constantText(node: AstNode, value: number): string | null {
+  const raw = node.toString().replace(/\s+/g, '');
+  if (!EXACT_TEXT_TOKENS.test(raw) || !numbersAreShort(raw)) return null;
+  const text = spaceSums(stripOuterBrackets(raw));
+  return readsAs(text, value) ? text : null;
+}
+
+/** `-t` as text. */
+function negText(t: string | null): string | null {
+  if (t === null) return null;
+  if (t === '0') return '0';
+  if (hasTopLevelSum(t)) return `-(${t})`;
+  return t.startsWith('-') ? stripOuterBrackets(t.slice(1)) : `-${t}`;
+}
+
+/** `a + b` as text. */
+function addText(a: string | null, b: string | null): string | null {
+  if (a === null || b === null) return null;
+  if (a === '0') return b;
+  if (b === '0') return a;
+  if (b.startsWith('-')) return hasTopLevelSum(b) ? `${a} + (${b})` : `${a} - ${b.slice(1)}`;
+  return `${a} + ${b}`;
+}
+
+/** `a * b` as text. */
+function mulText(a: string | null, b: string | null): string | null {
+  if (a === null || b === null) return null;
+  if (a === '0' || b === '0') return '0';
+  if (a === '1') return b;
+  if (b === '1') return a;
+  if (a === '-1') return negText(b);
+  if (b === '-1') return negText(a);
+  const factor = (t: string): string =>
+    t.startsWith('-') || hasTopLevelOperator(t, '+-/') ? `(${t})` : t;
+  return `${factor(a)}*${factor(b)}`;
+}
+
+/** `a / b` as text. A quotient `X/n` divided by an integer `m` is `X/(n*m)`. */
+function divText(a: string | null, b: string | null): string | null {
+  if (a === null || b === null || b === '0') return null;
+  if (a === '0') return '0';
+  if (b === '1') return a;
+  if (b === '-1') return negText(a);
+  const quotient = /^(.+)\/(\d+)$/.exec(a);
+  if (quotient !== null && /^\d+$/.test(b) && !hasTopLevelOperator(quotient[1], '+-/')) {
+    return `${quotient[1]}/${Number(quotient[2]) * Number(b)}`;
+  }
+  const top =
+    a.startsWith('-') && !hasTopLevelSum(a) ? a : hasTopLevelOperator(a, '+-/') ? `(${a})` : a;
+  const bottom = /^\d+$|^pi$/.test(b) ? b : `(${b})`;
+  return `${top}/${bottom}`;
+}
+
 /**
  * Read `node` as `c + k * target`, where a leaf of the tree (`leaf`) supplies the one target.
  * Sums, differences, negation, and products or quotients with a constant are linear; anything
@@ -196,7 +326,7 @@ function foldLinear<T>(
 ): Linear<T> | null {
   if (!containsSymbol(node, v)) {
     const c = constantValue(node);
-    return c === null ? null : { c, k: 0, target: null };
+    return c === null ? null : { c, k: 0, target: null, ct: constantText(node, c), kt: '0' };
   }
   if (node.type === 'ParenthesisNode' && node.content) return foldLinear(node.content, v, leaf);
   if (node.type !== 'OperatorNode' || !node.args) return leaf(node);
@@ -207,7 +337,9 @@ function foldLinear<T>(
   if (args.length === 1) {
     const a = fold(args[0]);
     if (a === null) return null;
-    if (op === 'unaryMinus') return { c: -a.c, k: -a.k, target: a.target };
+    if (op === 'unaryMinus') {
+      return { c: -a.c, k: -a.k, target: a.target, ct: negText(a.ct), kt: negText(a.kt) };
+    }
     if (op === 'unaryPlus') return a;
     return null;
   }
@@ -220,16 +352,46 @@ function foldLinear<T>(
     case 'subtract': {
       if (a.target !== null && b.target !== null) return null;
       const sign = op === 'add' ? 1 : -1;
-      return { c: a.c + sign * b.c, k: a.k + sign * b.k, target: a.target ?? b.target };
+      const bc = sign === 1 ? b.ct : negText(b.ct);
+      const bk = sign === 1 ? b.kt : negText(b.kt);
+      return {
+        c: a.c + sign * b.c,
+        k: a.k + sign * b.k,
+        target: a.target ?? b.target,
+        ct: addText(a.ct, bc),
+        kt: addText(a.kt, bk),
+      };
     }
     case 'multiply': {
-      if (a.target === null) return { c: a.c * b.c, k: a.c * b.k, target: b.target };
-      if (b.target === null) return { c: a.c * b.c, k: a.k * b.c, target: a.target };
+      if (a.target === null) {
+        return {
+          c: a.c * b.c,
+          k: a.c * b.k,
+          target: b.target,
+          ct: mulText(a.ct, b.ct),
+          kt: mulText(a.ct, b.kt),
+        };
+      }
+      if (b.target === null) {
+        return {
+          c: a.c * b.c,
+          k: a.k * b.c,
+          target: a.target,
+          ct: mulText(a.ct, b.ct),
+          kt: mulText(a.kt, b.ct),
+        };
+      }
       return null;
     }
     case 'divide': {
       if (b.target !== null || b.c === 0) return null;
-      return { c: a.c / b.c, k: a.k / b.c, target: a.target };
+      return {
+        c: a.c / b.c,
+        k: a.k / b.c,
+        target: a.target,
+        ct: divText(a.ct, b.ct),
+        kt: divText(a.kt, b.ct),
+      };
     }
     default:
       return null;
@@ -242,24 +404,29 @@ const FORMS: ReadonlySet<string> = new Set(['sin', 'cos', 'tan', 'exp', 'log', '
 /** Read `node` as `c + k*F(p*x + q)` for one supported `F`, or null. */
 function readCall(node: AstNode, v: string): Linear<Call> | null {
   const symbolLeaf = (n: AstNode): Linear<'x'> | null =>
-    n.type === 'SymbolNode' && n.name === v ? { c: 0, k: 1, target: 'x' } : null;
+    n.type === 'SymbolNode' && n.name === v ? { c: 0, k: 1, target: 'x', ct: '0', kt: '1' } : null;
   const callLeaf = (n: AstNode): Linear<Call> | null => {
     const name = callName(n);
     if (name === null || !FORMS.has(name) || n.args?.length !== 1) return null;
     const inner = foldLinear(n.args[0], v, symbolLeaf);
     if (inner === null || inner.target === null || inner.k === 0) return null;
     const mentionsPi = containsSymbol(n.args[0], 'pi');
-    return { c: 0, k: 1, target: { name, p: inner.k, q: inner.c, mentionsPi } };
+    return { c: 0, k: 1, target: { name, p: inner.k, q: inner.c, mentionsPi }, ct: '0', kt: '1' };
   };
   return foldLinear(node, v, callLeaf);
 }
 
 /**
  * The roots of `F(u) = c` and the period of `F`, in `u`. Returns null when `c` is neither a
- * special value nor a constant with exact text (see {@link exactText}), so that no text carries
- * a rounded digit. Returns no roots when `F` never takes the value `c` on the real line.
+ * special value nor a constant with exact text (see {@link exactText}, or `valueText`, the text
+ * that the equation itself gave for `c`), so that no text carries a rounded digit. Returns no
+ * roots when `F` never takes the value `c` on the real line.
  */
-function solveUnit(name: string, c: number): { roots: UnitRoot[]; period?: Fraction } | null {
+function solveUnit(
+  name: string,
+  c: number,
+  valueText: string | null
+): { roots: UnitRoot[]; period?: Fraction } | null {
   const special = (key: 'asin' | 'acos' | 'atan'): Fraction | null => {
     const hit = SPECIAL_VALUES.find((s) => Math.abs(Math.abs(c) - s.value) < SPECIAL_TOLERANCE);
     const angle = hit?.[key];
@@ -268,7 +435,7 @@ function solveUnit(name: string, c: number): { roots: UnitRoot[]; period?: Fract
     if (c >= 0) return angle;
     return key === 'acos' ? subtractFrom(1, angle) : makeFraction(-angle[0], angle[1]);
   };
-  const text = exactText(c);
+  const text = exactText(c) ?? valueText;
   const atOne = Math.abs(Math.abs(c) - 1) < SPECIAL_TOLERANCE;
   /** The root `inverse(c)`: a multiple of pi for a special value, else the symbolic call. */
   const principal = (key: 'asin' | 'acos' | 'atan'): UnitRoot | null => {
@@ -320,8 +487,8 @@ function solveUnit(name: string, c: number): { roots: UnitRoot[]; period?: Fract
     case 'abs': {
       if (c < 0) return { roots: [] };
       if (Math.abs(c) < SPECIAL_TOLERANCE) return { roots: [plain('0')] };
-      const positive = exactText(c);
-      const negative = exactText(-c);
+      const positive = exactText(c) ?? valueText;
+      const negative = exactText(-c) ?? negText(valueText);
       if (positive === null || negative === null) return null;
       return { roots: [plain(negative), plain(positive)] };
     }
@@ -335,18 +502,6 @@ function plainNumber(text: string): number | null {
   const m = /^(-?\d+(?:\.\d+)?)(?:\/(\d+))?$/.exec(text);
   if (!m) return null;
   return m[2] === undefined ? Number(m[1]) : Number(m[1]) / Number(m[2]);
-}
-
-/** True when `text` has a `+` or `-` outside brackets, apart from a leading sign. */
-function hasTopLevelSum(text: string): boolean {
-  let depth = 0;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '(') depth++;
-    else if (ch === ')') depth--;
-    else if (depth === 0 && i > 0 && (ch === '+' || ch === '-')) return true;
-  }
-  return false;
 }
 
 /**
@@ -475,11 +630,13 @@ export function solveElementary(
     };
   }
   const value = -linear.c / linear.k;
-  const unit = solveUnit(name, value);
+  const text = divText(negText(linear.ct), linear.kt);
+  const unit = solveUnit(name, value, text !== null && readsAs(text, value) ? text : null);
   if (unit === null) {
     return {
       declined:
-        `the value ${value} that ${name} must take has no exact text. ${EXACT_CONSTANT_RULE}, ` +
+        `the value ${value} that ${name} must take has no exact text. ${EXACT_CONSTANT_RULE}. ` +
+        'A value may also be an expression of integers, pi and sqrt(...) with + - * / ^, ' +
         'or a special value of sin, cos or tan (such as sqrt(2)/2)',
     };
   }

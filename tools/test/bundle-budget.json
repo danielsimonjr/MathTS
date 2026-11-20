@@ -20,7 +20,7 @@
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 69994,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2087025,
+    "functions/dist/index.js": 2127498,
     "functions/dist/subpath-evaluate.js": 1368849,
     "functions/package.json": 3607,
     "functions/dist/wasm/mathts-as.wasm": 64091,
@@ -203,13 +203,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1879987
+      "bytes": 1902317
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1889306
+      "bytes": 1911636
     }
   ]
 }

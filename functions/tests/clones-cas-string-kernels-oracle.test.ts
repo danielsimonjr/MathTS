@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { NoClosedFormError } from '../src/cas/no-closed-form.js';
 import {
   summation,
   symbolicProduct,
@@ -154,9 +155,9 @@ describe('clone oracle — Laplace table walk (laplace / inverseLaplace)', () =>
     expect(inverseLaplace('1/(s + 1)', 's', 't')).toBe('exp(-1*t)');
   });
 
-  it('unknown expression returns placeholder, not throw', () => {
-    expect(laplace('t*sin(t)', 't', 's')).toBe('L{t*sin(t)}(s)');
-    expect(inverseLaplace('1/(s^3+1)', 's', 't')).toBe('L^-1{1/(s^3+1)}(t)');
+  it('unknown expression throws NoClosedFormError (#1024)', () => {
+    expect(() => laplace('t*sin(t)', 't', 's')).toThrow(NoClosedFormError);
+    expect(() => inverseLaplace('1/(s^4+1)', 's', 't')).toThrow(NoClosedFormError);
   });
 
   it('whitespace is trimmed', () => {
@@ -164,8 +165,8 @@ describe('clone oracle — Laplace table walk (laplace / inverseLaplace)', () =>
     expect(inverseLaplace('  1/s  ', 's', 't')).toBe('1');
   });
 
-  it('inverse Laplace of constant not in table stays placeholder (no c/s fallback)', () => {
-    expect(inverseLaplace('5', 's', 't')).toBe('L^-1{5}(t)');
+  it('inverse Laplace of constant not in table throws (no c/s fallback)', () => {
+    expect(() => inverseLaplace('5', 's', 't')).toThrow(NoClosedFormError);
     expect(laplace('5', 't', 's')).toBe('5/s');
   });
 

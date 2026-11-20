@@ -13,7 +13,8 @@
  *    denominators.
  *  - **Integration by parts** (tabular) for `p(x)·g(a·x+b)` where `p` is a
  *    polynomial and `g ∈ {exp, sin, cos}`: `∫ x·eˣ = (x−1)·eˣ`,
- *    `∫ x·sin x = sin x − x·cos x`, etc.
+ *    `∫ x·sin x = sin x − x·cos x`, etc. Also `p(x)·log(a·x+b)`, by parts with
+ *    the antiderivative of `p` that is zero at the root of the argument.
  *  - **Full rational-function integration** (Risch Layer 1,
  *    {@link integrateRationalFunction}) for any `P(x)/Q(x)` over ℚ whose
  *    denominator factors into linear + irreducible-quadratic factors —
@@ -110,6 +111,44 @@ function linearSlope(u: string, x: string): number | null {
   }
 }
 
+/** `sin(u)` or `cos(u)` with `u = a·x + b`: the function, the argument text and the slope `a`. */
+function trigOfLinear(raw: Node, x: string): { fn: 'sin' | 'cos'; u: string; a: number } | null {
+  const node = unwrap(raw);
+  if (node.type !== 'FunctionNode') return null;
+  const fn = node.fn?.name ?? node.name ?? '';
+  const arg = (node.args ?? [])[0];
+  if ((fn !== 'sin' && fn !== 'cos') || !arg) return null;
+  const u = arg.toString();
+  const a = linearSlope(u, x);
+  return a === null ? null : { fn, u, a };
+}
+
+/**
+ * `∫ sin^n(u) dx` or `∫ cos^n(u) dx` for `u = a·x + b` (slope `a`) and an integer `n ≥ 2`, by the
+ * reduction formula
+ *   ∫cos^n u = cos^(n−1)(u)·sin(u)/(n·a) + (n−1)/n · ∫cos^(n−2) u,
+ *   ∫sin^n u = −sin^(n−1)(u)·cos(u)/(n·a) + (n−1)/n · ∫sin^(n−2) u,
+ * which ends in `x` (n = 0) or in `sin(u)/a` and `−cos(u)/a` (n = 1).
+ */
+function integrateTrigPower(fn: 'sin' | 'cos', u: string, a: number, n: number, x: string): string {
+  const other = fn === 'sin' ? 'cos' : 'sin';
+  const sign = fn === 'sin' ? -1 : 1;
+  const terms: string[] = [];
+  let factor = 1;
+  let m = n;
+  for (; m >= 2; m -= 2) {
+    const power = m === 2 ? `${fn}(${u})` : `${fn}(${u})^${m - 1}`;
+    terms.push(`${num((sign * factor) / (m * a))} * ${power} * ${other}(${u})`);
+    factor *= (m - 1) / m;
+  }
+  if (m === 1) terms.push(`${num((sign * factor) / a)} * ${other}(${u})`);
+  else terms.push(`${num(factor)} * ${x}`);
+  return terms.join(' + ').replace(/\+ -/g, '- ');
+}
+
+/** The highest power of `sin` or `cos` that {@link integrateTrigPower} reads. */
+const MAX_TRIG_POWER = 64;
+
 /** Recursively integrate `node` w.r.t. `x`, returning an expression string. */
 function integrateNode(raw: Node, x: string): string {
   const node = unwrap(raw);
@@ -171,6 +210,10 @@ function integrateNode(raw: Node, x: string): string {
         const exp = args[1];
         if (!isConst(exp, x)) throw new NotIntegrable('variable exponent');
         const n = evalConst(exp.toString());
+        const trig = trigOfLinear(base, x);
+        if (trig !== null && Number.isInteger(n) && n >= 2 && n <= MAX_TRIG_POWER) {
+          return integrateTrigPower(trig.fn, trig.u, trig.a, n, x);
+        }
         const a = linearSlope(base.toString(), x);
         if (a === null) throw new NotIntegrable('non-linear base');
         const b = `(${base.toString()})`;
@@ -187,6 +230,8 @@ function integrateNode(raw: Node, x: string): string {
       if (!u) throw new NotIntegrable(fn);
       const us = u.toString();
       if (fn === 'log' || fn === 'ln') {
+        // `log(x, 10)` is a base-10 logarithm: only the one-argument form is natural.
+        if ((node.args ?? []).length !== 1) throw new NotIntegrable('log with a base');
         if (us === x) return `${x} * log(${x}) - ${x}`; // ∫ln x = x·ln x − x
         throw new NotIntegrable('ln of non-trivial argument');
       }
@@ -311,6 +356,31 @@ function repeatedAntideriv(fn: string, u: string, m: number): { str: string; sig
 }
 
 /**
+ * `∫ p(x)·log(a·x+b) dx` for a polynomial `p`, by parts with the antiderivative `P` of `p` that is
+ * zero at the root `x0 = −b/a` of the argument `u`:
+ *   ∫ p·log u dx = P·log u − ∫ P·a/u dx = P·log u − ∫ P/(x − x0) dx.
+ * `P(x0) = 0`, so `P/(x − x0)` is a polynomial (synthetic division), and no log term remains.
+ */
+function integrateLogByParts(p: number[], u: string, a: number, x: string): string {
+  const x0 = -evaluate(u, { [x]: 0 }) / a;
+  const P = [0, ...p.map((c, i) => c / (i + 1))];
+  let atRoot = 0;
+  for (let i = P.length - 1; i >= 0; i--) atRoot = atRoot * x0 + P[i];
+  P[0] = -atRoot;
+  // S = P / (x − x0): Horner's rule from the top coefficient.
+  const S: number[] = new Array(P.length - 1);
+  let carry = 0;
+  for (let i = P.length - 1; i >= 1; i--) {
+    carry = P[i] + carry * x0;
+    S[i - 1] = carry;
+  }
+  const integralOfS = [0, ...S.map((c, i) => c / (i + 1))];
+  const head = `(${densePolyToStr(P, x)}) * log(${u})`;
+  const tail = densePolyToStr(integralOfS, x);
+  return tail === '0' ? head : `${head} - (${tail})`;
+}
+
+/**
  * Integrate `p(x)·g(a·x+b)` (`g ∈ {exp, sin, cos}`, `p` a polynomial in `x`) via
  * tabular integration by parts:
  *   ∫ p·g dx = Σ_{k≥0} (−1)ᵏ · p⁽ᵏ⁾(x) · G_{k+1}(x),
@@ -325,14 +395,17 @@ function tryByParts(expr: string, x: string): string | null {
   } catch {
     return null;
   }
-  if (root.type !== 'OperatorNode' || root.op !== '*') return null;
+  if (root.type !== 'FunctionNode' && (root.type !== 'OperatorNode' || root.op !== '*'))
+    return null;
 
   const factors = flattenMul(root);
   const gFactors = factors.filter((f) => f.type === 'FunctionNode');
   if (gFactors.length !== 1) return null;
   const g = gFactors[0];
   const fn = g.fn?.name ?? g.name ?? '';
-  if (fn !== 'exp' && fn !== 'sin' && fn !== 'cos') return null;
+  if (fn !== 'exp' && fn !== 'sin' && fn !== 'cos' && fn !== 'log' && fn !== 'ln') return null;
+  // `log(x, 2)` is a base-2 logarithm: only the one-argument form is natural.
+  if ((g.args ?? []).length !== 1) return null;
   const arg = (g.args ?? [])[0];
   if (!arg) return null;
   const u = arg.toString();
@@ -348,6 +421,7 @@ function tryByParts(expr: string, x: string): string | null {
   } catch {
     return null; // rest isn't a pure polynomial in x
   }
+  if (fn === 'log' || fn === 'ln') return integrateLogByParts(pk, u, a, x);
 
   const terms: string[] = [];
   for (let k = 0; !isZeroDense(pk); k++) {
@@ -375,7 +449,9 @@ function tryByParts(expr: string, x: string): string | null {
  * The direct recursion is tried first; on failure, partial-fraction integration
  * (for distinct-rational-root integrands), tabular integration by parts (for
  * polynomial·{exp,sin,cos}), and full rational-function integration (Risch
- * Layer 1) are attempted before giving up with the marker. Rational functions
+ * Layer 1) are attempted before giving up with the marker. Integer powers of
+ * `sin(a·x+b)` and `cos(a·x+b)` (2 to 64) use the reduction formula, and a polynomial times
+ * `log(a·x+b)` goes by parts. Rational functions
  * with irreducible-quadratic, repeated, and degree-≥3 irreducible factors
  * are integrated (Layers 1–3: rational part + `log` + `arctan` / residues).
  * Nested transcendental towers that are not elementary still return the marker.
@@ -385,6 +461,8 @@ function tryByParts(expr: string, x: string): string | null {
  * @example symbolicIntegral('1/(x^2 - 1)')  // partial fractions → sum of logs
  * @example symbolicIntegral('1/(x^2 + 1)')  // Risch Layer 1 → 'atan(...)'
  * @example symbolicIntegral('x * sin(x)')   // by parts → 'sin(x) - x*cos(x)'
+ * @example symbolicIntegral('cos(x)^2')     // reduction → '0.5 * cos(x) * sin(x) + 0.5 * x'
+ * @example symbolicIntegral('x * log(x)')   // by parts → '(0.5*x^2) * log(x) - (0.25*x^2)'
  */
 export function symbolicIntegral(expr: string, variable = 'x'): string {
   try {
