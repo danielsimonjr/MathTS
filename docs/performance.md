@@ -117,7 +117,7 @@ runs of the 2^16 case with the same protocol gave ratios within 0.07 of these. A
 the 11 rounds of `await parallelFFT(Float64Array)` range from 0.81 to 1.07, so read that entry as
 equal to `fft.js` with a plan per call. Of the public entry points, `parallelFFT` is the fastest at both sizes,
 and `fft` is 1.13 to 1.61 times slower than `fft.js`. No public entry point matches `fft.js` when
-`fft.js` keeps its plan and arrays: that case is 1.9 to 3.0 times faster than every entry point here.
+`fft.js` keeps its plan and arrays: that case is 2.0 to 3.1 times faster than every entry point here.
 
 ### 2. Batch GPU work
 
