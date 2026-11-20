@@ -70,38 +70,46 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
       return { allNumbers: true };
     }
 
-    function quickSelectNumber(arr: unknown[], k: number, cmp: NumberCompare): unknown {
+    /**
+     * Three-way quickselect: each pass splits the range into values less than, equal to and
+     * greater than a random pivot, and stops when k is in the equal band. A range of equal
+     * values therefore takes one pass, not one pass per value (#1293).
+     */
+    function selectThreeWay<T>(arr: T[], k: number, cmp: (a: T, b: T) => number): T {
       let from = 0;
       let to = arr.length - 1;
 
       while (from < to) {
-        let r = from;
-        let w = to;
-        const pivot = arr[Math.floor(Math.random() * (to - from + 1)) + from];
+        const pivot = arr[Math.floor(Math.random() * (to - from + 1)) + from] as T;
+        let lt = from;
+        let i = from;
+        let gt = to;
 
-        while (r < w) {
-          if (cmp(arr[r] as number, pivot as number) >= 0) {
-            const tmp = arr[w];
-            arr[w] = arr[r];
-            arr[r] = tmp;
-            --w;
+        while (i <= gt) {
+          const c = cmp(arr[i] as T, pivot);
+          if (c < 0) {
+            const tmp = arr[lt] as T;
+            arr[lt++] = arr[i] as T;
+            arr[i++] = tmp;
+          } else if (c > 0) {
+            const tmp = arr[gt] as T;
+            arr[gt--] = arr[i] as T;
+            arr[i] = tmp;
           } else {
-            ++r;
+            ++i;
           }
         }
 
-        if (cmp(arr[r] as number, pivot as number) > 0) {
-          --r;
-        }
-
-        if (k <= r) {
-          to = r;
+        if (k < lt) {
+          to = lt - 1;
+        } else if (k > gt) {
+          from = gt + 1;
         } else {
-          from = r + 1;
+          return arr[k] as T;
         }
       }
 
-      return arr[k];
+      return arr[k] as T;
     }
 
     /**
@@ -202,7 +210,7 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
         const cmpNum = getNumberCompare();
         if (cmpNum && (compare === asc || compare === desc)) {
           const cmp = compare === desc ? (a: number, b: number) => -cmpNum(a, b) : cmpNum;
-          return quickSelectNumber(arr, k, cmp);
+          return selectThreeWay(arr as number[], k, cmp);
         }
       }
 
@@ -213,44 +221,7 @@ export const createPartitionSelect = /* #__PURE__ */ factory(
         }
       }
 
-      let from = 0;
-      let to = arr.length - 1;
-
-      // if from == to we reached the kth element
-      while (from < to) {
-        let r = from;
-        let w = to;
-        const pivot = arr[Math.floor(Math.random() * (to - from + 1)) + from];
-
-        // stop if the reader and writer meets
-        while (r < w) {
-          // arr[r] >= pivot
-          if (compare(arr[r], pivot) >= 0) {
-            // put the large values at the end
-            const tmp = arr[w];
-            arr[w] = arr[r];
-            arr[r] = tmp;
-            --w;
-          } else {
-            // the value is smaller than the pivot, skip
-            ++r;
-          }
-        }
-
-        // if we stepped up (r++) we need to step one down (arr[r] > pivot)
-        if (compare(arr[r], pivot) > 0) {
-          --r;
-        }
-
-        // the r pointer is on the end of the first k elements
-        if (k <= r) {
-          to = r;
-        } else {
-          from = r + 1;
-        }
-      }
-
-      return arr[k];
+      return selectThreeWay(arr, k, (a, b) => Number(compare(a, b)));
     }
   }
 );

@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7400
+  totalExports: 7408
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -18282,7 +18282,7 @@ modules:
       constants:
         - createOnes
     functions/src/matrix/partitionSelect.ts:
-      description: Partition-based selection of an array or 1D matrix.
+      description: 'Three-way quickselect: each pass splits the range into values less than, equal to and'
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -22231,6 +22231,7 @@ modules:
         - file: ./numeric-data.js
           imports:
             - flattenForStatistics
+            - exactOrder
             - finiteNumbers
             - isFloatTyped
             - numberGrid
@@ -22323,8 +22324,13 @@ modules:
         - file: ../utils/array.js
           imports:
             - flatten
+        - file: ../utils/is.js
+          imports:
+            - isBigNumber
+            - isNumber
       workspaceDependencies: []
       exports:
+        - exactOrder
         - isFloatTyped
         - copyToNumberArray
         - flattenForStatistics
@@ -22340,6 +22346,7 @@ modules:
         - isConstantArrayLike
         - typedArrayPairToNumbers
       functions:
+        - exactOrder
         - isFloatTyped
         - copyToNumberArray
         - flattenForStatistics
@@ -22393,19 +22400,37 @@ modules:
         - file: ./numeric-data.js
           imports:
             - readSkip
+        - file: ../utils/median-numbers.js
+          imports:
+            - minFrom
+            - quickSelectInPlace
       workspaceDependencies: []
       exports:
+        - NUMBER_ARITH
         - assertNumpyQuantileMethod
+        - quantilePlan
+        - blendNumber
+        - orderStatistics
         - quantileOfSorted
+        - quantileOfUnsorted
         - parseQuantileThirdArg
       interfaces:
+        - QuantileArith
+        - QuantilePlan
         - QuantileSeqOptions
+        - ParsedQuantileOptions
       functions:
         - assertNumpyQuantileMethod
+        - quantilePlan
+        - blendNumber
+        - orderStatistics
         - quantileOfSorted
+        - quantileOfUnsorted
         - parseQuantileThirdArg
+      constants:
+        - NUMBER_ARITH
     functions/src/statistics/quantileSeq.ts:
-      description: Compute the prob order quantile of a matrix or a list with values.
+      description: From this many probabilities on, an unsorted number sample is sorted once, with the native
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -22428,15 +22453,22 @@ modules:
           typeOnly: true
         - file: ./numeric-data.js
           imports:
+            - exactOrder
             - isFloatTyped
-            - copyToNumberArray
             - FloatTyped
         - file: ./quantile-numpy-methods.js
           imports:
-            - assertNumpyQuantileMethod
-            - quantileOfSorted
+            - NUMBER_ARITH
+            - blendNumber
+            - orderStatistics
             - parseQuantileThirdArg
+            - quantileOfSorted
+            - quantileOfUnsorted
+            - quantilePlan
             - NumpyQuantileMethod
+            - ParsedQuantileOptions
+            - QuantileArith
+            - QuantilePlan
             - QuantileSeqOptions
       workspaceDependencies: []
       exports:
@@ -27943,6 +27975,8 @@ modules:
         - file: ../utils/median-numbers.js
           imports:
             - medianInPlace
+            - minFrom
+            - quickSelectInPlace
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
@@ -29055,9 +29089,13 @@ modules:
       exports:
         - medianNumbers
         - medianInPlace
+        - minFrom
+        - quickSelectInPlace
       functions:
         - medianNumbers
         - medianInPlace
+        - minFrom
+        - quickSelectInPlace
     functions/src/utils/node.ts:
       description: Type definitions for Math.js AST nodes
       externalDependencies: []
@@ -47068,14 +47106,14 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238738
-  totalExports: 7400
+  totalLinesOfCode: 239023
+  totalExports: 7408
   totalClasses: 62
-  totalInterfaces: 670
-  totalFunctions: 2582
+  totalInterfaces: 673
+  totalFunctions: 2589
   totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1695
+  totalConstants: 1696
   totalReExports: 3191
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2

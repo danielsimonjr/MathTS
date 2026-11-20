@@ -1,13 +1,13 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7400, "re": 3191 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1350, "e": 7408, "re": 3191 },
   "s": {
-    "loc": 238738,
+    "loc": 239023,
     "cls": 62,
-    "int": 670,
-    "fn": 2582,
+    "int": 673,
+    "fn": 2589,
     "tg": 185,
     "en": 0,
-    "co": 1695,
+    "co": 1696,
     "toi": 685
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
@@ -1056,6 +1056,7 @@
         "createMin",
         "createMode",
         "nanmedian",
+        "exactOrder",
         "isFloatTyped",
         "copyToNumberArray",
         "flattenForStatistics",
@@ -1064,10 +1065,9 @@
         "readSkip",
         "parseStatOptions",
         "normalizationFromSecondArg",
-        "normalizationFromStringAndOptions",
-        "numberGrid"
+        "normalizationFromStringAndOptions"
       ],
-      "int": ["QuantileSeqOptions"]
+      "int": ["QuantileArith", "QuantilePlan", "QuantileSeqOptions", "ParsedQuantileOptions"]
     },
     "functions/stats": {
       "f": 15,
@@ -1963,7 +1963,7 @@
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 206 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
-    { "p": "utils/is.ts", "i": 0, "o": 61 },
+    { "p": "utils/is.ts", "i": 0, "o": 62 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },

@@ -10,7 +10,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2560
+**Total files**: 2563
 
 ## Disposition counts
 
@@ -20,11 +20,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `build-entry` |     1324 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1144 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1147 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2560** |                                                                                                                |
+| **Total**     | **2563** |                                                                                                                |
 
 ## Per-area counts
 
@@ -33,7 +33,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `config`   |    30 |
 | `examples` |     7 |
 | `src`      |  1350 |
-| `tests`    |  1144 |
+| `tests`    |  1147 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -48,7 +48,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-core`           |   146 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
 | `@danielsimonjr/mathts-expression`     |   574 |
-| `@danielsimonjr/mathts-functions`      |  1188 |
+| `@danielsimonjr/mathts-functions`      |  1191 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   151 |
@@ -1591,6 +1591,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/dogfood-1114-discretelog-gcd.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1117-1119-1120-bignumber.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1122-1124-1129-extreme.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/dogfood-1130-1131-1005-quantile.test.ts`                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1135-1136-discretelog.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1157-rank-nullspace-svd-cutoff.test.ts`                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/dogfood-1157-rank-qr-certificate.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1915,7 +1916,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/public-api-smoke.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/qr-fraction-error.test.ts`                                       | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/quadrature-extra.test.ts`                                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/quantile-exact-order-1292-1293.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/quaternion.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/quickselect-structured-input.test.ts`                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/qz-hardening.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rat.test.ts`                                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rational-integrate-apart.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
