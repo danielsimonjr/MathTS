@@ -228,6 +228,15 @@ the remaining element-wise ops by up to 1.6×.
 > stay in JS where V8 JITs them faster than WASM plus the marshalling cost.
 > Results on developer hardware will differ from CI.
 
+**FFT.** Use `parallelFFT` for a real `Float64Array` on a latency path. For a `Float64Array` it returns
+a Promise, and for a `number[]` it returns the result at once. The result is
+`{ real, imag, originalLength }`, zero-padded to n rounded up to a power of two. It is not a `Complex[]`. Use `fft`
+for a spectrum of exactly n bins when n is not a power of two, or when you need a `Complex[]`. At
+2^16 and 2^20 samples `parallelFFT` took 0.89 to 1.06 and 1.02 to 1.03 times the time of `fft.js`
+4.0.4, and `fft` took 1.13 to 1.15 and 1.56 to 1.61 times. `fft.js` with a plan and arrays that it
+reuses was faster than every entry point. The table, the host and the method are in
+[`docs/performance.md`](./docs/performance.md#fft-pick-the-entry-point).
+
 Per-operation thresholds of the `computePool.*` calls (from `npm run bench:parallel`,
 default values in `parallel/src/ComputePool.ts`). The typed `Float64Array` functions
 are synchronous and do not read them:

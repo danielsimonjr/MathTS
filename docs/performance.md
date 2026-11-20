@@ -75,6 +75,50 @@ const c = backendManager.multiply(a, b);
 const d = a.multiply(b);
 ```
 
+#### FFT: pick the entry point
+
+Use `parallelFFT` for a real `Float64Array` on a latency path. Use `fft` when the spectrum must have
+exactly n bins for a length n that is not a power of two, or when the result must be a `Complex[]`.
+
+| Entry point                             | Input           | Returns                                        | Number of bins                 |
+| --------------------------------------- | --------------- | ---------------------------------------------- | ------------------------------ |
+| `parallelFFT(x)` (`number[]`)           | real samples    | `{ real, imag, originalLength }`, at once      | n rounded up to a power of two |
+| `await parallelFFT(x)` (`Float64Array`) | real samples    | `{ real, imag, originalLength }`, as a Promise | n rounded up to a power of two |
+| `fft(x)`                                | real or complex | `Complex[]`                                    | n                              |
+
+`parallelFFT` runs the optimized radix core on the calling thread. It splits the work across workers
+only when `computePool.shouldParallelize` allows it, and the tuned decision for this operation is
+"never". `fft` builds one `Complex` object for each bin.
+
+The table compares the entry points with `fft.js` 4.0.4. The tool is
+`tools/benchmark/functions/fft-entry-points.bench.mjs`; its header gives the command. Host: Node
+v26.13.0, Windows 11 x64, Intel Core i7-8850H (6 cores, 12 threads). Date: 2026-11-20. The host ran
+other jobs during the measurement, so compare the ratios and do not compare the milliseconds with
+another machine.
+
+Each round times every entry point once, in an order that alternates between rounds. The ratio of an
+entry point is its median over the per-round ratios to `fft.js` of the same round. The `fft.js` row
+"plan per call" builds `new FFT(n)` and its two work arrays inside the timed call, as
+`docs/persona-sessions/bench/2026-11-11-performance-engineer.mjs` does. The `fft.js` row "plan and
+arrays reused" builds them once, so it is the best case of `fft.js`. The input is one fixed
+pseudo-random real signal.
+
+| Entry point                       | n = 2^16: ms | ratio to `fft.js` | n = 2^20: ms | ratio to `fft.js` |
+| --------------------------------- | -----------: | ----------------: | -----------: | ----------------: |
+| `fft(number[])`                   |        29.31 |              1.15 |      1019.45 |              1.61 |
+| `fft(Float64Array)`               |        28.86 |              1.13 |      1041.70 |              1.56 |
+| `parallelFFT(number[])`           |        28.75 |              1.06 |       697.11 |              1.03 |
+| `await parallelFFT(Float64Array)` |        23.36 |              0.89 |       659.64 |              1.02 |
+| `fft.js`, plan per call           |        25.29 |              1.00 |       670.21 |              1.00 |
+| `fft.js`, plan and arrays reused  |        10.45 |              0.41 |       349.93 |              0.52 |
+
+The 2^16 column is one run of 31 rounds, and the 2^20 column is one run of 11 rounds. Three more
+runs of the 2^16 case with the same protocol gave ratios within 0.07 of these. At 2^20 the ratios of
+the 11 rounds of `await parallelFFT(Float64Array)` range from 0.81 to 1.07, so read that entry as
+equal to `fft.js` with a plan per call. Of the public entry points, `parallelFFT` is the fastest at both sizes,
+and `fft` is 1.13 to 1.61 times slower than `fft.js`. No public entry point matches `fft.js` when
+`fft.js` keeps its plan and arrays: that case is 1.9 to 3.0 times faster than every entry point here.
+
 ### 2. Batch GPU work
 
 `BatchExecutor` queues operations on **`GPUBuffer`** arguments (not matrices).
