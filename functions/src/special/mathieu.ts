@@ -99,6 +99,13 @@ function classTridiagonal(
   return { diag, off };
 }
 
+/** The parity class of the order `n` (`ce_n` or `a_n`; `se_n` or `b_n` when `sine`) and its mode index `m`. */
+function classOf(sine: boolean, n: number): { cls: MathieuClass; m: number } {
+  const even = n % 2 === 0;
+  if (!sine) return { cls: even ? 'even-cos' : 'odd-cos', m: Math.floor(n / 2) };
+  return { cls: even ? 'even-sin' : 'odd-sin', m: Math.floor((n - (even ? 2 : 1)) / 2) };
+}
+
 /**
  * Number of harmonics that a matrix needs for the characteristic value of order `n` at `q`.
  * The mode `n` spreads over about `(10 + 2√(2n+1))·|q|^{1/4}` harmonics around its own
@@ -154,10 +161,7 @@ function characteristicValue(kind: 'a' | 'b', n: number, q: f64): f64 {
     const useA = (kind === 'a') !== (q < 0 && n % 2 === 1);
     return asymptoticCharacteristic(useA ? 2 * n + 1 : 2 * n - 1, absQ);
   }
-  const even = n % 2 === 0;
-  const cls: MathieuClass =
-    kind === 'a' ? (even ? 'even-cos' : 'odd-cos') : even ? 'even-sin' : 'odd-sin';
-  const m = Math.floor((n - (kind === 'b' ? (even ? 2 : 1) : 0)) / 2);
+  const { cls, m } = classOf(kind === 'b', n);
   const size = Math.max(harmonicsNeeded(n, q), m + 40);
   const { diag, off } = classTridiagonal(cls, q, size);
   return symTridiagEigenvalue(diag, off, m);
@@ -257,6 +261,13 @@ function evalSeries(mode: MathieuMode, x: f64, basis: (t: number) => number): f6
   return s;
 }
 
+/** `ce_n(x, q)`, or `se_n(x, q)` when `sine`, for a checked order; NaN for a NaN `q`. */
+function angular(fn: string, sine: boolean, n: number, q: f64, x: f64): f64 {
+  if (Number.isNaN(q)) return NaN;
+  const { cls, m } = classOf(sine, n);
+  return evalSeries(solveMode(fn, cls, n, m, q), x, sine ? Math.sin : Math.cos);
+}
+
 /**
  * Angular Mathieu function `ce_n(x, q)` (cosine-elliptic), summed from its
  * Fourier coefficients. Normalized so `(1/π)∫₀^{2π} ce_n² = 1`; as `q → 0`,
@@ -268,10 +279,7 @@ function evalSeries(mode: MathieuMode, x: f64, basis: (t: number) => number): f6
  */
 export function mathieuCe(n: number, q: f64, x: f64): f64 {
   checkOrder(n, 0, MAX_MATHIEU_A_ORDER, 'mathieuCe');
-  if (Number.isNaN(q)) return NaN;
-  const cls: MathieuClass = n % 2 === 0 ? 'even-cos' : 'odd-cos';
-  const m = Math.floor(n / 2);
-  return evalSeries(solveMode('mathieuCe', cls, n, m, q), x, Math.cos);
+  return angular('mathieuCe', false, n, q, x);
 }
 
 /**
@@ -285,8 +293,5 @@ export function mathieuCe(n: number, q: f64, x: f64): f64 {
  */
 export function mathieuSe(n: number, q: f64, x: f64): f64 {
   checkOrder(n, 1, MAX_MATHIEU_B_ORDER, 'mathieuSe');
-  if (Number.isNaN(q)) return NaN;
-  const cls: MathieuClass = n % 2 === 0 ? 'even-sin' : 'odd-sin';
-  const m = Math.floor((n - (n % 2 === 0 ? 2 : 1)) / 2);
-  return evalSeries(solveMode('mathieuSe', cls, n, m, q), x, Math.sin);
+  return angular('mathieuSe', true, n, q, x);
 }
