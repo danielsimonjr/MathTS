@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2549,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1133,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1133,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,7 +24,7 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
     "@danielsimonjr/mathts-compat": 37,
-    "@danielsimonjr/mathts-core": 146,
+    "@danielsimonjr/mathts-core": 147,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
@@ -1003,7 +1003,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2476
+      "loc": 2542
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1172,6 +1172,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 324
+    },
+    {
+      "file": "core/tests/bignumber-add-ln-1249.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 267
     },
     {
       "file": "core/tests/bignumber-comparison-coercion.test.ts",
