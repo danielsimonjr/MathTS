@@ -213,14 +213,14 @@ export function matrix(
   data?: number[][] | DenseMatrix | SparseMatrix,
   format?: 'dense' | 'sparse' | string
 ): CompatMatrixValue {
-  if (data === undefined && format === undefined) {
+  if (arguments.length === 0) {
     return _factoryMatrix() as CompatMatrixValue;
   }
   if (isDenseMatrix(data) || isSparseMatrix(data)) {
     // A native matrix of the format that is asked for, or of no format, is returned as it is.
     if (format === undefined) return data;
     // The factory checks the format, so an unknown one throws the mathjs TypeError here too.
-    _factoryMatrix(undefined, format);
+    _factoryMatrix([], format);
     if (format === 'sparse' && isDenseMatrix(data)) {
       return _factorySparse(data.toArray()) as CompatMatrixValue;
     }
@@ -229,9 +229,7 @@ export function matrix(
     }
     return data;
   }
-  if (data === undefined) {
-    return _factoryMatrix(undefined, format) as CompatMatrixValue;
-  }
+  // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
   return _factoryMatrix(data as number[][], format) as CompatMatrixValue;
 }
 

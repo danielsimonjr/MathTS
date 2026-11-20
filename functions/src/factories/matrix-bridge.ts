@@ -1299,7 +1299,8 @@ function matrixFormat(format: unknown): 'sparse' | 'dense' | undefined {
  *   matrix(data, 'sparse') — sparse matrix from data
  *   matrix(sparse, 'dense') — dense matrix with the entries of a sparse matrix
  * The format is 'dense', 'default' or 'sparse'; any other value throws (see `matrixFormat`).
- * A matrix that already has the format is returned as it is.
+ * A matrix that already has the format is returned as it is. An explicit `undefined` data
+ * argument throws a TypeError, as in mathjs; a call with no argument is an empty matrix.
  */
 export function createMatrixBridge() {
   return function matrix(
@@ -1317,7 +1318,10 @@ export function createMatrixBridge() {
       throw new TypeError('Unknown matrix type ' + JSON.stringify(format) + '.');
     }
     const isMatrix = data instanceof MathJSSparseMatrix || data instanceof MathJSDenseMatrix;
-    if (data !== undefined && !Array.isArray(data) && !isMatrix && !isPlainObject(data)) {
+    // An explicit undefined data argument is not 'no argument': only a call with no argument
+    // gives an empty matrix.
+    const hasData = data !== undefined || arguments.length > 0;
+    if (hasData && !Array.isArray(data) && !isMatrix && !isPlainObject(data)) {
       // as in mathjs, only an Array, a Matrix, a format string or no argument is accepted
       throw new TypeError(
         'Unexpected type of argument in function matrix (expected: string or Array or Matrix or boolean, actual: ' +

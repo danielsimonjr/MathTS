@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2557,
+  "totalFiles": 2559,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1141,
+    "test": 1143,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1141,
+    "tests": 1143,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,12 +23,12 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 31,
-    "@danielsimonjr/mathts-compat": 40,
+    "@danielsimonjr/mathts-compat": 41,
     "@danielsimonjr/mathts-core": 146,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1181,
+    "@danielsimonjr/mathts-functions": 1182,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 152,
@@ -555,7 +555,7 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 848
+      "loc": 846
     },
     {
       "file": "compat/src/unary-fast-path.ts",
@@ -639,7 +639,14 @@
       "package": "@danielsimonjr/mathts-compat",
       "area": "tests",
       "disposition": "test",
-      "loc": 103
+      "loc": 106
+    },
+    {
+      "file": "compat/tests/dogfood-1284-matrix-undefined.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 66
     },
     {
       "file": "compat/tests/dogfood-1288-zeros-nd.test.ts",
@@ -6848,7 +6855,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1442
+      "loc": 1446
     },
     {
       "file": "functions/src/factories/scope.ts",
@@ -10937,6 +10944,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 143
+    },
+    {
+      "file": "functions/tests/dogfood-1284-matrix-undefined.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 76
     },
     {
       "file": "functions/tests/dogfood-688-lusolve-singular.test.ts",
