@@ -93,6 +93,45 @@ describe('quantileSeq applies the NumPy method to BigNumber, Fraction and Unit i
     expect(str(q(data, B('0.07'), 'inverted_cdf'))).toBe('7');
   });
 
+  it('does not round an index that lies within relTol of a whole number', () => {
+    // The `compare` function treats values within the config `relTol` (1e-12) as equal, so a
+    // plan that read it would take 6.000000000001 for the whole number 6. The exact index is
+    // above 6, so the next order statistic is selected, as for the number probability.
+    const data = Array.from({ length: 100 }, (_, i) => i + 1);
+    for (const p of ['0.07000000000001', '0.0700000000001', '0.07000000000000001']) {
+      expect(q(data, Number(p), 'inverted_cdf'), `number ${p}`).toBe(8);
+      expect(str(q(data, B(p), 'inverted_cdf')), `bignumber ${p}`).toBe('8');
+      expect(str(q(data.map(B), B(p), 'inverted_cdf')), `bignumber data ${p}`).toBe('8');
+    }
+    // 99 * 0.0707070707070708 = 7.0000000000000092: `higher` takes index 8.
+    expect(str(q(data, B('0.0707070707070708'), 'higher'))).toBe('9');
+    expect(q(data, 0.0707070707070708, 'higher')).toBe(9);
+  });
+
+  it('blends BigNumber values that differ below the relTol', () => {
+    // The ends differ in the 21st digit: the blend is exact, not the left end.
+    const two = [B('1'), B('1.000000000000000000002')];
+    expect(str(q(two, B('0.5'), true))).toBe('1.000000000000000000001');
+    expect(str(q(two, 0.5, true))).toBe('1.000000000000000000001');
+    const near = [B('1'), B('1.0000000000001'), B('1.0000000000002'), B('2')];
+    expect(str(q(near, B('0.5'), true))).toBe('1.00000000000015');
+    // Number ends with a BigNumber weight: the same rule (the number weight gives the same value).
+    expect(str(q([1, 1.0000000000001], B('0.5')))).toBe('1.00000000000005');
+    expect(q([1, 1.0000000000001], 0.5)).toBe(1.00000000000005);
+    expect(str(q([1, B('1.0000000000001')], B('0.5'), true))).toBe('1.00000000000005');
+    expect(str(q([B('1'), 1.0000000000001], B('0.5'), true))).toBe('1.00000000000005');
+    // Equal ends give that value without a rounding step.
+    expect(str(q([3, 3], B('0.3')))).toBe('3');
+    expect(str(q([B('2'), B('2')], B('0.3'), true))).toBe('2');
+    expect(str(q([unit(3, 'm'), unit(3, 'm')], 0.3))).toBe('3 m');
+  });
+
+  it('rejects a BigNumber probability outside 0 to 1, as the number probability does', () => {
+    expect(() => q([1, 2, 3], 1.0000000000001)).toThrow('N/prob');
+    expect(() => q([1, 2, 3], B('1.0000000000001'))).toThrow('N/prob');
+    expect(() => q([1, 2, 3], [B('-1e-30')])).toThrow('N/prob');
+  });
+
   it('accepts a method or an options object with a dimension', () => {
     expect(
       q(

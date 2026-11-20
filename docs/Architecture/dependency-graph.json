@@ -29858,7 +29858,7 @@
           },
           {
             "file": "../utils/median-numbers.js",
-            "imports": ["medianInPlace"]
+            "imports": ["medianInPlace", "minFrom", "quickSelectInPlace"]
           },
           {
             "file": "../utils/limits.js",
@@ -49919,7 +49919,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238648,
+    "totalLinesOfCode": 238679,
     "totalExports": 7404,
     "totalClasses": 62,
     "totalInterfaces": 672,

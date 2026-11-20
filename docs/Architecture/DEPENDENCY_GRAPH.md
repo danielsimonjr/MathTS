@@ -12732,11 +12732,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                          | Imports           | Type   |
-| ----------------------------- | ----------------- | ------ |
-| `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch` | Import |
-| `../utils/median-numbers.js`  | `medianInPlace`   | Import |
-| `../utils/limits.js`          | `assertAllocSize` | Import |
+| File                          | Imports                                      | Type   |
+| ----------------------------- | -------------------------------------------- | ------ |
+| `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch`                            | Import |
+| `../utils/median-numbers.js`  | `medianInPlace, minFrom, quickSelectInPlace` | Import |
+| `../utils/limits.js`          | `assertAllocSize`                            | Import |
 
 **Exports:**
 
@@ -21770,7 +21770,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238648 |
+| Total Lines of Code     | 238679 |
 | Total Exports           | 7404   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

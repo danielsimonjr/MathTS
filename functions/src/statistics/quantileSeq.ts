@@ -29,6 +29,9 @@ interface BigNumberType {
   floor(): BigNumberType;
   toNumber(): number;
   sub(n: number | BigNumberType): BigNumberType;
+  /** Exact comparison: the sign of `this - n` (-1, 0 or 1). */
+  cmp(n: BigNumberType): number;
+  eq(n: number | BigNumberType): boolean;
   isNaN(): boolean;
   valueOf(): number;
 }
@@ -399,7 +402,11 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
       return isBigNumber(p) ? (p as BigNumberType).isNaN() : Number.isNaN(p);
     }
 
-    /** The arithmetic of a BigNumber probability: exact decimal indexes. */
+    /**
+     * The arithmetic of a BigNumber probability: exact decimal indexes. `cmp` is the exact
+     * BigNumber comparison, not `compare`: `compare` treats values within `relTol` as equal, so
+     * an index of 6.000000000001 would read as the whole number 6.
+     */
     function bigNumberArith(): QuantileArith<BigNumberType> {
       return (bigArith ??= {
         ratio: (num, den = 1) =>
@@ -408,13 +415,8 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
         sub: (a, b) => subtract(a, b) as BigNumberType,
         mul: (a, b) => multiply(a, b) as BigNumberType,
         floor: (x) => x.floor().toNumber(),
-        cmp: (x, y) => sign(x, y),
+        cmp: (x, y) => x.cmp(y),
       });
-    }
-
-    /** The sign of `a - b`. `compare` returns a BigNumber for BigNumber input, so convert it. */
-    function sign(a: unknown, b: unknown): number {
-      return Number(compare(a, b));
     }
 
     /** The plan for one probability, in the arithmetic of its own type. */
@@ -429,15 +431,36 @@ export const createQuantileSeq = /* #__PURE__ */ factory(
     }
 
     /**
+     * True when the two ends are the same value. Numbers and BigNumbers compare exactly:
+     * `compare` treats values within the config `relTol` as equal, and the blend would then
+     * drop the digits after the 12th. Every other type (Fraction, Unit) uses `compare`.
+     */
+    function sameEnds(left: unknown, right: unknown): boolean {
+      if (isNumber(left) && isNumber(right)) return left === right;
+      if (isBigNumber(left) && (isBigNumber(right) || isNumber(right))) {
+        return (left as unknown as BigNumberType).eq(right as number | BigNumberType);
+      }
+      if (isNumber(left) && isBigNumber(right)) {
+        return (right as unknown as BigNumberType).eq(left);
+      }
+      return sign(left, right) === 0;
+    }
+
+    /** The sign of `a - b`. `compare` returns a BigNumber for BigNumber input, so convert it. */
+    function sign(a: unknown, b: unknown): number {
+      return Number(compare(a, b));
+    }
+
+    /**
      * Blend two observations of any type at weight `gamma`: `left * (1 - gamma) + right * gamma`.
-     * The weight 0 and equal ends give `left` without arithmetic. A BigNumber `left` with a
-     * number weight converts the weight, to avoid floating-point error.
+     * Equal ends give `left` without arithmetic. A BigNumber `left` with a number weight
+     * converts the weight, to avoid floating-point error.
      */
     function blend(left: unknown, right: unknown, gamma: Prob): unknown {
       if (isNumber(left) && isNumber(right) && isNumber(gamma)) {
         return blendNumber(left, right, gamma);
       }
-      if (sign(left, right) === 0) return left;
+      if (sameEnds(left, right)) return left;
       const g = isBigNumber(left) && isNumber(gamma) ? bignumber!(gamma) : gamma;
       return add(multiply(left, subtract(1, g)), multiply(right, g));
     }
