@@ -7233,7 +7233,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 970
+      "loc": 1068
     },
     {
       "file": "functions/src/matrix/eigs/realSymmetric.ts",

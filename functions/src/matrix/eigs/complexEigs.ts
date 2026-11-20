@@ -1,4 +1,5 @@
 import { clone } from '../../utils/object.js';
+import { realScale } from '../../utils/real-scale.js';
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
 
@@ -403,6 +404,73 @@ export function createComplexEigs({
   }
 
   /**
+   * The Wilkinson shift: the eigenvalue of the trailing 2x2 block of the active window that is
+   * nearer to its corner entry.
+   */
+  function wilkinsonShift(arr: Scalar[][], n: number): Scalar {
+    const d = arr[n - 1][n - 1];
+    const [l1, l2] = eigenvalues2x2(arr[n - 2][n - 2], arr[n - 2][n - 1], arr[n - 1][n - 2], d);
+    return lt(abs(subtract(l1, d) as Scalar) as Scalar, abs(subtract(l2, d) as Scalar) as Scalar)
+      ? l1
+      : l2;
+  }
+
+  /**
+   * One real double-shift QR step (Francis) on the n x n window `arr` of real entries, for a
+   * trailing 2x2 block with a complex conjugate pair. The two shifts are the eigenvalues of that
+   * block, so the step uses the real matrix M = arr^2 - s arr + t I, with s the trace and t the
+   * determinant of the block. The step is A' = Q^T A Q with Q from the QR decomposition of M. It
+   * returns `null` when the block has two real eigenvalues, and the caller takes the corner shift.
+   *
+   * The entries below the first subdiagonal of A' are zero in exact arithmetic; the rounding
+   * left there is set to an exact zero, so A' stays an upper Hessenberg matrix.
+   *
+   * A square of an entry of type number can leave the double range. M is therefore formed from
+   * `arr / c`, with `c` a power of 2: the scale is exact, and the QR decomposition of M / c^2
+   * gives the same Q. A BigNumber has the range, and `doScaledComplexEigs` scales its entries.
+   */
+  function doubleShiftStep(
+    arr: Scalar[][],
+    n: number,
+    big: boolean
+  ): { arr: Scalar[][]; Q: Scalar[][] } | null {
+    let down = (x: Scalar): Scalar => x;
+    if (!big) {
+      const scale = realScale(arr.flat());
+      if (scale === undefined) return null;
+      down = (x) => scale.down(x as number) as Scalar;
+    }
+    const zero: Scalar = big ? bignumber(0) : 0;
+
+    const a = down(arr[n - 2][n - 2]);
+    const b = down(arr[n - 2][n - 1]);
+    const c = down(arr[n - 1][n - 2]);
+    const d = down(arr[n - 1][n - 1]);
+    const half = multiplyScalar(subtract(a, d) as Scalar, 0.5);
+    const disc = addScalar(multiplyScalar(half, half), multiplyScalar(b, c));
+    if (!lt(disc, zero)) return null;
+
+    const s = addScalar(a, d);
+    const t = subtract(multiplyScalar(a, d), multiplyScalar(b, c)) as Scalar;
+    const scaled = arr.map((row) => row.map(down));
+    const squared = multiply(scaled, scaled) as Scalar[][];
+    const M = squared.map((row, i) =>
+      row.map((x, j) => {
+        const v = subtract(x, multiplyScalar(s, scaled[i][j])) as Scalar;
+        return i === j ? addScalar(v, t) : v;
+      })
+    );
+
+    const { Q }: QRResult = qr(M);
+    const QT = Q.map((_, j) => Q.map((row) => row[j]));
+    const next = multiply(QT, multiply(arr, Q) as Scalar[][]) as Scalar[][];
+    for (let i = 2; i < n; i++) {
+      for (let j = 0; j < i - 1; j++) next[i][j] = zero;
+    }
+    return { arr: next, Q };
+  }
+
+  /**
    * Iterate QR algorithm until matrix is block-upper-triangular
    * @see Press, Williams: Numerical recipes in Fortran 77
    * @see https://en.wikipedia.org/wiki/QR_algorithm
@@ -456,37 +524,49 @@ export function createComplexEigs({
 
       // Perform the factorization
 
-      let k = arr[n - 1][n - 1]; // TODO this is apparently a somewhat
-      // old-fashioned choice; ideally set close to an eigenvalue, or
-      // perhaps better yet switch to the implicit QR version that is sometimes
-      // specifically called the "Francis algorithm" that is alluded to
-      // in the following TODO. (Or perhaps we switch to an independently
-      // optimized third-party package for the linear algebra operations...)
+      // A real shift cannot separate a complex conjugate pair, so the corner shift alone does not
+      // deflate a matrix with one in 100 steps (#1238). A real matrix whose trailing 2x2 block has
+      // a complex pair takes a real double-shift step instead (Francis). A Complex matrix takes
+      // the eigenvalue of the trailing block nearer to the corner (Wilkinson). A step that the
+      // exceptional shift below owns keeps it, so a cyclic matrix still moves (#1202).
+      const exceptional = n >= 3 && lastConvergenceBefore % 10 === 0;
 
-      // The shift above is zero for a cyclic permutation matrix, which then
-      // never moves (QR of a unitary matrix returns the matrix). Every tenth
-      // step without convergence use an exceptional shift (EISPACK hqr, NR):
-      // the corner plus 3/4 of the sum of the two trailing subdiagonal entries.
-      if (n >= 3 && lastConvergenceBefore % 10 === 0) {
-        const w = addScalar(abs(arr[n - 1][n - 2]) as Scalar, abs(arr[n - 2][n - 3]) as Scalar);
-        k = addScalar(k, multiplyScalar(w, 0.75));
-      }
+      const doubleStep = !cplx && n >= 3 && !exceptional ? doubleShiftStep(arr, n, big) : null;
+      if (doubleStep !== null) {
+        arr = doubleStep.arr;
+        if (findVectors) {
+          Qpartial = multiply(Qpartial!, doubleStep.Q) as Scalar[][];
+        }
+      } else {
+        let k = arr[n - 1][n - 1];
 
-      for (let i = 0; i < n; i++) {
-        arr[i][i] = subtract(arr[i][i], k) as Scalar;
-      }
+        if (exceptional) {
+          // The corner is zero for a cyclic permutation matrix, which then
+          // never moves (QR of a unitary matrix returns the matrix). Every tenth
+          // step without convergence use an exceptional shift (EISPACK hqr, NR):
+          // the corner plus 3/4 of the sum of the two trailing subdiagonal entries.
+          const w = addScalar(abs(arr[n - 1][n - 2]) as Scalar, abs(arr[n - 2][n - 3]) as Scalar);
+          k = addScalar(k, multiplyScalar(w, 0.75));
+        } else if (cplx && n >= 3) {
+          k = wilkinsonShift(arr, n);
+        }
 
-      // TODO do an implicit QR transformation
-      const { Q, R }: QRResult = qr(arr);
-      arr = multiply(R, Q) as Scalar[][];
+        for (let i = 0; i < n; i++) {
+          arr[i][i] = subtract(arr[i][i], k) as Scalar;
+        }
 
-      for (let i = 0; i < n; i++) {
-        arr[i][i] = addScalar(arr[i][i], k);
-      }
+        // TODO do an implicit QR transformation
+        const { Q, R }: QRResult = qr(arr);
+        arr = multiply(R, Q) as Scalar[][];
 
-      // keep track of transformations
-      if (findVectors) {
-        Qpartial = multiply(Qpartial!, Q) as Scalar[][];
+        for (let i = 0; i < n; i++) {
+          arr[i][i] = addScalar(arr[i][i], k);
+        }
+
+        // keep track of transformations
+        if (findVectors) {
+          Qpartial = multiply(Qpartial!, Q) as Scalar[][];
+        }
       }
 
       // The rightmost diagonal element converged to an eigenvalue
@@ -688,6 +768,24 @@ export function createComplexEigs({
    * Compute the eigenvalues of a 2x2 matrix
    */
   function eigenvalues2x2(a: Scalar, b: Scalar, c: Scalar, d: Scalar): [Scalar, Scalar] {
+    // The squares below leave the double range for entries of type number or Complex above about
+    // 1e154 or below about 1e-154, and the eigenvalues are then NaN or 0. The eigenvalues of
+    // a block scaled by an exact power of 2 are the eigenvalues of the block, scaled the same way.
+    const mags = [a, b, c, d].map((x) => abs(x));
+    if (mags.every((m) => typeof m === 'number')) {
+      const top = Math.max(...(mags as number[]));
+      if (top > 0 && Number.isFinite(top) && (top > 2 ** 500 || top < 2 ** -500)) {
+        const factor = 2 ** Math.floor(Math.log2(top));
+        const [l1, l2] = eigenvalues2x2(
+          divideScalar(a, factor),
+          divideScalar(b, factor),
+          divideScalar(c, factor),
+          divideScalar(d, factor)
+        );
+        return [multiplyScalar(l1, factor), multiplyScalar(l2, factor)];
+      }
+    }
+
     // lambda_+- = 1/2 trA +- 1/2 sqrt( tr^2 A - 4 detA )
     const trA = addScalar(a, d);
     const detA = subtract(multiplyScalar(a, d), multiplyScalar(b, c)) as Scalar;

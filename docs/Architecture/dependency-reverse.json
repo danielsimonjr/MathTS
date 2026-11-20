@@ -1080,6 +1080,7 @@
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/arithmetic/norm.ts",
       "functions/src/matrix/eigs.ts",
+      "functions/src/matrix/eigs/complexEigs.ts",
       "functions/src/statistics/corr.ts",
       "functions/src/statistics/std.ts",
       "functions/src/typed/arithmetic.ts"

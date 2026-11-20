@@ -7256,9 +7256,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                    | Imports | Type   |
-| ----------------------- | ------- | ------ |
-| `../../utils/object.js` | `clone` | Import |
+| File                        | Imports     | Type   |
+| --------------------------- | ----------- | ------ |
+| `../../utils/object.js`     | `clone`     | Import |
+| `../../utils/real-scale.js` | `realScale` | Import |
 
 **Exports:**
 
@@ -21768,7 +21769,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238429 |
+| Total Lines of Code     | 238527 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

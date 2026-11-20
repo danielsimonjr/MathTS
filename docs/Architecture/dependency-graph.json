@@ -18989,6 +18989,10 @@
           {
             "file": "../../utils/object.js",
             "imports": ["clone"]
+          },
+          {
+            "file": "../../utils/real-scale.js",
+            "imports": ["realScale"]
           }
         ],
         "workspaceDependencies": [],
@@ -49885,7 +49889,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238429,
+    "totalLinesOfCode": 238527,
     "totalExports": 7397,
     "totalClasses": 62,
     "totalInterfaces": 669,
