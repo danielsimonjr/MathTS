@@ -271,11 +271,11 @@ describe('#887 one canonical polynomial form', () => {
       expect(String(simplify('3 + x^2 + 2*x'))).toBe('x ^ 2 + 2 * x + 3');
     });
 
-    it('integrate writes the power rule through the same renderer: no 1* in front of a variable', () => {
+    it('integrate writes the power rule in one canonical text: no 1* in front of a variable', () => {
       expect(integrate('3*x^2', 'x')).toBe('x^3');
-      expect(integrate('1*x^2', 'x')).toBe('1/3*x^3');
+      expect(integrate('1*x^2', 'x')).toBe('x^3/3');
       expect(integrate('2*x', 'x')).toBe('x^2');
-      expect(integrate('5*x^3', 'x')).toBe('1.25*x^4');
+      expect(integrate('5*x^3', 'x')).toBe('5*x^4/4');
       expect(integrate('x', 'x')).toBe('x^2/2');
     });
 

@@ -553,7 +553,8 @@ import {
 } from '@danielsimonjr/mathts-functions';
 
 // Symbolic integration
-integrate('x^2', 'x'); // 'x^3/3 + C'
+integrate('x^2', 'x'); // 'x^3/3'
+integrate('5*x^3', 'x'); // '5*x^4/4'
 integrate('sin(x)', 'x', 0, 3.14159); // ~2.0
 
 // Limits
@@ -587,7 +588,10 @@ no finite list holds the solutions. It never scans for roots unless you ask it t
   sample values: `sin(2*pi*x)` is zero at every integer and half-integer, and a sampled test
   reads it as the zero polynomial.
 - A polynomial of degree 1 to 3 gives its roots in closed form: integers, `sqrt(n)` radicals,
-  real numbers, or complex numbers. A polynomial of degree 4 or more gives its real roots, found
+  real numbers, or complex numbers. The radicals of a quadratic have one text and one order
+  (`x^2 - 0.5` gives `-sqrt(2)/2` and `sqrt(2)/2`; `x^2 - x - 1` gives `1/2 - sqrt(5)/2` and
+  `1/2 + sqrt(5)/2`). The root of a linear polynomial is the correctly rounded quotient of the
+  coefficients as typed (`1e-20*x - 1e-30` gives `1e-10`). A polynomial of degree 4 or more gives its real roots, found
   with Sturm sequences over the whole real line (`realRoots`). These are floating-point numbers.
   A coefficient can be any real constant (`pi*x^4 - 1`).
 - Each tolerance is relative to the size of the terms that made the value. A large root
@@ -597,9 +601,10 @@ no finite list holds the solutions. It never scans for roots unless you ask it t
   gives `1`. The polynomial reader drops a coefficient only when it is the rounding noise of the
   terms that were added into it (`0.1*x^2 - 0.3*x^2 + 0.2*x^2` is zero).
 - A polynomial of a degree above 1000 throws a `RangeError` (`PolynomialDegreeError`) that names
-  the limit. The numeric scan has no such limit.
-- An identity (`x^2 - x^2`, `0*x`, `x = x`) throws an `Error`: every value of the variable is a
-  solution, and no finite list holds them. An equation with no real root (`1 = 2`, `x^4 + 1`) gives
+  the limit. The numeric scan has no such limit. The degree counts after the zero coefficients
+  cancel: `(x - x)^1000000000` is the constant 0.
+- An identity (`x^2 - x^2`, `(x - x)^1000000000`, `sin(x) - sin(x)`, `0*x`, `x = x`) throws an
+  `Error`: every value of the variable is a solution, and no finite list holds them. An equation with no real root (`1 = 2`, `x^4 + 1`) gives
   `[]`. So `[]` always means that the equation has no root, and never that it is an identity.
 - An equation of the form `a*F(p*x + q) = b` with `F` equal to `exp`, `log`, `sqrt` or `abs` gives
   exact text roots (`exp(x) = 2` gives `'log(2)'`). The text roots are real roots: a value that
@@ -610,22 +615,24 @@ no finite list holds the solutions. It never scans for roots unless you ask it t
   holds them. `solve` throws an `Error` that names `solveExact` and the period. A value that the
   function never takes (`sin(x) = 2`) gives `[]`.
 - No digit of a root is a rounded result. A constant is exact when it is a small fraction, a
-  special value of `sin`, `cos` or `tan` (`sqrt(2)/2`), or a decimal of at most 12 digits. A
-  constant with no exact text (`sin(x) = sqrt(2)/3`) makes `solve` and `solveExact` throw an
-  `Error` that names the constant and the rule.
+  special value of `sin`, `cos` or `tan` (`sqrt(2)/2`), a decimal of at most 12 digits, or an
+  expression of integers, `pi` and `sqrt(...)` with `+ - * / ^` (`sin(x) = sqrt(2)/3` gives
+  `asin(sqrt(2)/3)`). A constant with no exact text (`sin(x) = cos(1)`) makes `solve` and
+  `solveExact` throw an `Error` that names the constant and the rule.
 - An equation with no closed form (`sin(x) = x`, `sin(x)^2 = 1/4`, `1/x = 2`) throws an
   `Error`. The message names the numeric scan. `solve` does not return `[]` for these
   equations.
 - The numeric scan runs only when you pass `{ numeric: true, range: [a, b] }`. It looks for
   sign changes on a grid of `range` and refines each one with Brent's method. It does not look
-  outside `range`. It can miss a pair of roots that are closer than one grid step, and a root
-  of even multiplicity that is not on a grid point.
+  outside `range`. It finds a root that touches zero between two grid points (the double root of
+  `(x - 1)^2`) at the point where the slope changes sign, and keeps it when `|f|` there is below
+  1e-10. It can miss a pair of roots that are closer than one grid step.
 
 ### Periodic solution sets: `solveExact`
 
 `solveExact(equation, variable)` returns the exact solution set of an equation
-`a*F(p*x + q) = b`, with `F` equal to `sin`, `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`. The
-result is a plain object, so it survives `JSON.stringify`, `structuredClone` and a worker
+`a*F(p*x + q) = b`, with `F` equal to `sin`, `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`, or of a
+polynomial equation of degree 1 or 2. The result is a plain object, so it survives `JSON.stringify`, `structuredClone` and a worker
 boundary:
 
 ```typescript
@@ -644,13 +651,16 @@ solveExact('sin(2*pi*x) = 0', 'x'); // { roots: ['0', '1/2'], period: '1' }
 solveExact('2*sin(3*x + pi/4) = 1', 'x'); // { roots: ['-pi/36', '7*pi/36'], period: '2*pi/3' }
 solveExact('exp(x) = 2', 'x'); // { roots: ['log(2)'], period: null }
 solveExact('sin(x) = 2', 'x'); // { roots: [], period: null }
+solveExact('sin(x) = sqrt(2)/3', 'x'); // { roots: ['asin(sqrt(2)/3)', 'pi - asin(sqrt(2)/3)'], period: '2*pi' }
+solveExact('x^2 + x - 1', 'x'); // { roots: ['-1/2 - sqrt(5)/2', '-1/2 + sqrt(5)/2'], period: null }
 ```
 
 - A special value gives a multiple of `pi`. Another value gives a symbolic inverse.
 - The coefficient `p` is a fraction, or a fraction of `pi`. The offset `q` is a number, or a
   fraction of `pi`.
-- `solveExact` takes only this form. A polynomial, or any other form, throws an `Error` that
-  names `solve`.
+- A polynomial of degree 1 or 2 gives its real roots as text (`2*x - 1` gives `'1/2'`). Each
+  coefficient must be an integer, a decimal or a small fraction. A polynomial of a higher degree,
+  or any other form, throws an `Error` that names `solve`.
 - A constant with no exact text throws an `Error` that names the constant.
 
 ## Global Optimisation and Scalar Solvers

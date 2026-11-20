@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1351,
     "totalModules": 82,
-    "totalExports": 7401
+    "totalExports": 7404
   },
   "entryPoints": [
     {
@@ -15136,12 +15136,29 @@
         "internalDependencies": [
           {
             "file": "./rat.js",
-            "imports": ["Rat", "ratNormalize", "ratDiv", "RAT_ZERO"]
+            "imports": ["Rat", "ratNormalize", "ratAdd", "ratSub", "ratMul", "ratDiv", "RAT_ZERO"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["decimalTextToRat", "coefficientRat", "ratText", "exactLinearRoot"],
-        "functions": ["decimalTextToRat", "coefficientRat", "ratText", "exactLinearRoot"]
+        "exports": [
+          "decimalTextToRat",
+          "coefficientRat",
+          "ratText",
+          "exactLinearRoot",
+          "exactLinearText",
+          "exactQuadraticRoots",
+          "powerRuleText"
+        ],
+        "interfaces": ["ExactQuadratic"],
+        "functions": [
+          "decimalTextToRat",
+          "coefficientRat",
+          "ratText",
+          "exactLinearRoot",
+          "exactLinearText",
+          "exactQuadraticRoots",
+          "powerRuleText"
+        ]
       },
       "functions/src/cas/layer3.ts": {
         "description": "Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula",
@@ -26878,7 +26895,12 @@
           },
           {
             "file": "../cas/exact-roots.js",
-            "imports": ["exactLinearRoot"]
+            "imports": [
+              "exactLinearRoot",
+              "exactLinearText",
+              "exactQuadraticRoots",
+              "powerRuleText"
+            ]
           },
           {
             "file": "../numeric/adaptive-quad.js",
@@ -49909,11 +49931,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1351,
     "totalModules": 82,
-    "totalLinesOfCode": 239284,
-    "totalExports": 7401,
+    "totalLinesOfCode": 239640,
+    "totalExports": 7404,
     "totalClasses": 62,
-    "totalInterfaces": 669,
-    "totalFunctions": 2583,
+    "totalInterfaces": 670,
+    "totalFunctions": 2586,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1695,

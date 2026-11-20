@@ -5741,13 +5741,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File       | Imports                               | Type   |
-| ---------- | ------------------------------------- | ------ |
-| `./rat.js` | `Rat, ratNormalize, ratDiv, RAT_ZERO` | Import |
+| File       | Imports                                                       | Type   |
+| ---------- | ------------------------------------------------------------- | ------ |
+| `./rat.js` | `Rat, ratNormalize, ratAdd, ratSub, ratMul, ratDiv, RAT_ZERO` | Import |
 
 **Exports:**
 
-- Functions: `decimalTextToRat`, `coefficientRat`, `ratText`, `exactLinearRoot`
+- Interfaces: `ExactQuadratic`
+- Functions: `decimalTextToRat`, `coefficientRat`, `ratText`, `exactLinearRoot`, `exactLinearText`, `exactQuadraticRoots`, `powerRuleText`
 
 ---
 
@@ -11841,7 +11842,7 @@ graph LR
 | `../cas/render-polynomial.js`    | `coefficientTexts, renderPolynomial`                                                                                                              | Import |
 | `../plain/number/arithmetic.js`  | `gcdNumber`                                                                                                                                       | Import |
 | `../cas/real-roots.js`           | `realRoots`                                                                                                                                       | Import |
-| `../cas/exact-roots.js`          | `exactLinearRoot`                                                                                                                                 | Import |
+| `../cas/exact-roots.js`          | `exactLinearRoot, exactLinearText, exactQuadraticRoots, powerRuleText`                                                                            | Import |
 | `../numeric/adaptive-quad.js`    | `quadValue`                                                                                                                                       | Import |
 | `../numeric/numeric-jacobian.js` | `numericJacobian, VectorField`                                                                                                                    | Import |
 | `./numeric.js`                   | `findRoot`                                                                                                                                        | Import |
@@ -21783,12 +21784,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1351   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 239284 |
-| Total Exports           | 7401   |
+| Total Lines of Code     | 239640 |
+| Total Exports           | 7404   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
-| Total Interfaces        | 669    |
-| Total Functions         | 2583   |
+| Total Interfaces        | 670    |
+| Total Functions         | 2586   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

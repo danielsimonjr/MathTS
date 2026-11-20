@@ -44,7 +44,7 @@ describe('#884 a periodic solution set is not a finite list', () => {
   it('puts no rounded digit in an exact root', () => {
     expect(solveExact('sin(pi*x)=0', 'x').roots).toEqual(['0', '1']);
     expect(() => solve('sin(x)=sqrt(2)/3', 'x')).toThrow(/sqrt\(2\)\/3|0\.4714/);
-    expect(() => solveExact('sin(x)=sqrt(2)/3', 'x')).toThrow(/no exact text/);
+    expect(() => solveExact('sin(x)=cos(1)', 'x')).toThrow(/no exact text/);
     expect(solve('sin(x)=2', 'x')).toEqual([]);
   });
 

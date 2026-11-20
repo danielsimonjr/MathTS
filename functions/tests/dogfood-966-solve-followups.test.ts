@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { solve, expand } from '../src/index.js';
+import { solve, solveExact, integrate, expand } from '../src/index.js';
 
 describe('#966 item 1: a polynomial that is identically zero is an identity, whatever its power', () => {
   it('solve((x-x)^1000000000) is an identity, not a degree error', () => {
@@ -72,6 +72,82 @@ describe('#966 item 3: the numeric scan finds an even-multiplicity root between 
   });
 });
 
+describe('#966 item 4: the radical roots of a quadratic are in canonical text', () => {
+  it('x^2-0.5', () => {
+    expect(solve('x^2-0.5', 'x')).toEqual(['-sqrt(2)/2', 'sqrt(2)/2']);
+  });
+
+  it('x^2-2 (regression)', () => {
+    expect(solve('x^2-2', 'x')).toEqual(['-sqrt(2)', 'sqrt(2)']);
+  });
+
+  it('x^2-x-1', () => {
+    expect(solve('x^2-x-1', 'x')).toEqual(['1/2 - sqrt(5)/2', '1/2 + sqrt(5)/2']);
+  });
+
+  it('2*x^2-1', () => {
+    expect(solve('2*x^2-1', 'x')).toEqual(['-sqrt(2)/2', 'sqrt(2)/2']);
+  });
+
+  it('x^2-8 reduces the radical', () => {
+    expect(solve('x^2-8', 'x')).toEqual(['-2*sqrt(2)', '2*sqrt(2)']);
+  });
+
+  it('x^2+2*x-1', () => {
+    expect(solve('x^2+2*x-1', 'x')).toEqual(['-1 - sqrt(2)', '-1 + sqrt(2)']);
+  });
+
+  it('rational roots stay numbers', () => {
+    expect(solve('x^2-4', 'x')).toEqual([-2, 2]);
+  });
+});
+
+describe('#966 item 5: solveExact keeps the text of a constant that is a root or a quotient of roots', () => {
+  it('sin(x)=sqrt(2)/3', () => {
+    expect(solveExact('sin(x)=sqrt(2)/3', 'x')).toEqual({
+      roots: ['asin(sqrt(2)/3)', 'pi - asin(sqrt(2)/3)'],
+      period: '2*pi',
+    });
+  });
+
+  it('solve still throws the periodic error, and names the value and solveExact', () => {
+    expect(() => solve('sin(x)=sqrt(2)/3', 'x')).toThrow(/solveExact/);
+    expect(() => solve('sin(x)=sqrt(2)/3', 'x')).toThrow(/sqrt\(2\)\/3|0\.4714/);
+  });
+
+  it('2*cos(x)=sqrt(3)/5', () => {
+    expect(solveExact('2*cos(x)=sqrt(3)/5', 'x')).toEqual({
+      roots: ['acos(sqrt(3)/10)', '2*pi - acos(sqrt(3)/10)'],
+      period: '2*pi',
+    });
+  });
+
+  it('exp(x)=pi', () => {
+    expect(solveExact('exp(x)=pi', 'x')).toEqual({ roots: ['log(pi)'], period: null });
+  });
+
+  it('a constant outside the text rules still has no exact text', () => {
+    expect(() => solveExact('sin(x)=cos(1)', 'x')).toThrow(/no exact text/);
+  });
+});
+
+describe('#966 item 6: integrate writes a power of x in one canonical text', () => {
+  it.each([
+    ['x^2', 'x^3/3'],
+    ['1*x^2', 'x^3/3'],
+    ['5*x^3', '5*x^4/4'],
+    ['3*x^2', 'x^3'],
+    ['2*x', 'x^2'],
+    ['x', 'x^2/2'],
+    ['0.5*x', 'x^2/4'],
+    ['x^1', 'x^2/2'],
+    ['6*x^5', 'x^6'],
+    ['2.5*x', '5*x^2/4'],
+  ])('integrate(%s)', (src, want) => {
+    expect(integrate(src, 'x')).toBe(want);
+  });
+});
+
 describe('#966 item 8: a linear root is the correctly rounded quotient', () => {
   it('1e-20*x-1e-30', () => {
     expect(solve('1e-20*x-1e-30', 'x')).toEqual([1e-10]);
@@ -91,5 +167,38 @@ describe('#966 item 8: a linear root is the correctly rounded quotient', () => {
 
   it('7*x+14 is -2', () => {
     expect(solve('7*x+14', 'x')).toEqual([-2]);
+  });
+});
+
+describe('#966 item 9: solveExact of a polynomial of degree 1 or 2', () => {
+  it('x^2+x-1', () => {
+    expect(solveExact('x^2+x-1', 'x')).toEqual({
+      roots: ['-1/2 - sqrt(5)/2', '-1/2 + sqrt(5)/2'],
+      period: null,
+    });
+  });
+
+  it('2*x-1', () => {
+    expect(solveExact('2*x-1', 'x')).toEqual({ roots: ['1/2'], period: null });
+  });
+
+  it('x^2-4 has integer roots', () => {
+    expect(solveExact('x^2-4', 'x')).toEqual({ roots: ['-2', '2'], period: null });
+  });
+
+  it('x^2+1 has no real root', () => {
+    expect(solveExact('x^2+1', 'x')).toEqual({ roots: [], period: null });
+  });
+
+  it('x^2-2*x+1 has one root', () => {
+    expect(solveExact('x^2-2*x+1', 'x')).toEqual({ roots: ['1'], period: null });
+  });
+
+  it('a polynomial identity is reported as an identity', () => {
+    expect(() => solveExact('x-x', 'x')).toThrow(/is an identity/);
+  });
+
+  it('a cubic keeps the error and names the polynomial forms', () => {
+    expect(() => solveExact('x^3-2', 'x')).toThrow(/polynomial of degree 1 or 2/);
   });
 });

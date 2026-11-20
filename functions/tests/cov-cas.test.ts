@@ -55,8 +55,8 @@ describe('integrate — coefficient and fallback branches', () => {
   it('c*x^n pattern', () => {
     // 3*x^2 -> (3/3)*x^3 = x^3: no unit coefficient, like every CAS polynomial
     expect(integrate('3*x^2', 'x')).toBe('x^3');
-    // A coefficient with an infinite decimal is an exact fraction, not a rounded decimal.
-    expect(integrate('1*x^2', 'x')).toBe('1/3*x^3');
+    // The coefficient is the reduced fraction c/(n+1), written after the power: no rounded decimal.
+    expect(integrate('1*x^2', 'x')).toBe('x^3/3');
   });
 
   it('c*x pattern', () => {

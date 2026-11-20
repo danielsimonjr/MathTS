@@ -60,7 +60,12 @@ import { closedFormRoots, snapRoot } from '../cas/closed-form-roots.js';
 import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
 import { gcdNumber } from '../plain/number/arithmetic.js';
 import { realRoots } from '../cas/real-roots.js';
-import { exactLinearRoot } from '../cas/exact-roots.js';
+import {
+  exactLinearRoot,
+  exactLinearText,
+  exactQuadraticRoots,
+  powerRuleText,
+} from '../cas/exact-roots.js';
 import { quadValue } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
@@ -420,10 +425,13 @@ export function integrate(
   }
 
   // x^n pattern
+  // The power rule has one canonical text: `x^n` and `c*x^n` give `p*x^(n+1)/q`, with `p/q` the
+  // reduced fraction `c/(n+1)`, so `5*x^3` is `5*x^4/4` and `3*x^2` is `x^3`. The coefficient is
+  // the decimal that was typed, so `0.5*x` is `x^2/4`.
   const powerMatch = trimmed.match(new RegExp(`^${varName}\\^(\\d+)$`));
   if (powerMatch) {
-    const n = parseInt(powerMatch[1]);
-    return `${varName}^${n + 1}/${n + 1}`;
+    const text = powerRuleText('1', parseInt(powerMatch[1]) + 1, varName);
+    if (text !== null) return text;
   }
 
   // Just the variable: x -> x^2/2
@@ -434,6 +442,8 @@ export function integrate(
   // c*x^n pattern
   const cPowerMatch = trimmed.match(new RegExp(`^([\\d.]+)\\*?${varName}\\^(\\d+)$`));
   if (cPowerMatch) {
+    const text = powerRuleText(cPowerMatch[1], parseInt(cPowerMatch[2]) + 1, varName);
+    if (text !== null) return text;
     const c = parseFloat(cPowerMatch[1]);
     const n = parseInt(cPowerMatch[2]);
     const newCoeff = c / (n + 1);
@@ -443,6 +453,8 @@ export function integrate(
   // c*x pattern
   const cxMatch = trimmed.match(new RegExp(`^([\\d.]+)\\*?${varName}$`));
   if (cxMatch) {
+    const text = powerRuleText(cxMatch[1], 2, varName);
+    if (text !== null) return text;
     const c = parseFloat(cxMatch[1]);
     const newCoeff = c / 2;
     return renderPolynomial([{ exps: [2], coeff: coefficientTexts([newCoeff])[0] }], [varName]);
@@ -2035,13 +2047,19 @@ function lowDegreeRoots(
   }
   const roots = closedFormRoots(dense);
   if (dense.length === 3) {
-    // Prefer exact radical forms for a quadratic (e.g. x^2 - 2 -> +-sqrt(2)).
-    const radicals = quadraticRadicals(
-      expr,
-      varName,
-      roots.filter((r): r is number => typeof r === 'number')
-    );
-    if (radicals !== null) return radicals;
+    // Irrational roots of a quadratic are one canonical text: `x^2 - 2` gives `-sqrt(2)` and
+    // `sqrt(2)`, and `x^2 - x - 1` gives `1/2 - sqrt(5)/2` and `1/2 + sqrt(5)/2`.
+    const exact = exactQuadraticRoots(dense);
+    if (exact !== null && exact.irrational) return exact.texts;
+    // A coefficient with no exact reading (such as `pi`): the radical text that `toRadicals` reads.
+    if (exact === null) {
+      const radicals = quadraticRadicals(
+        expr,
+        varName,
+        roots.filter((r): r is number => typeof r === 'number')
+      );
+      if (radicals !== null) return radicals;
+    }
   }
   return roots;
 }
@@ -2147,7 +2165,8 @@ function requireExpression(expr: string, equation: string, caller: string): void
  * sign. What it returns, by form of the equation:
  *
  * - **Polynomial, degree 1 to 3:** exact closed-form roots, real and complex: numbers,
- *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`) and complex conjugates. The
+ *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`, `x^2 - x - 1` gives
+ *   `['1/2 - sqrt(5)/2', '1/2 + sqrt(5)/2']`) and complex conjugates. The
  *   root of a linear polynomial is the correctly rounded quotient of the coefficients as typed
  *   (`1e-20*x - 1e-30` gives `1e-10`).
  * - **Polynomial, degree 4 or more:** all distinct real roots, found by Sturm isolation over
@@ -2255,13 +2274,67 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
 }
 
 /**
- * Solve an equation of the form `a*F(p*x + q) = b` exactly, and return its solution set as plain
- * data: the principal real roots as text and the period of the set.
+ * The exact solution set of a polynomial equation of degree 1 or 2, or null when `expr` is no
+ * polynomial in `varName`. Throws for an identity, and for a polynomial that has no exact text
+ * (a coefficient such as `pi`, or a degree above 2).
+ */
+function polynomialExactSolution(
+  expr: string,
+  equation: string,
+  varName: string
+): ExactSolution | null {
+  let dense: f64[] | null;
+  try {
+    dense = readPolynomial(expr, varName);
+  } catch (error) {
+    if (!(error instanceof PolynomialDegreeError)) throw error;
+    throw new PolynomialDegreeError(
+      `solveExact: "${equation}" is a polynomial of degree above ${MAX_POLYNOMIAL_DEGREE}. ` +
+        'solveExact reads a polynomial of degree 1 or 2.'
+    );
+  }
+  if (dense === null) return null;
+  if (dense.length === 1) {
+    if (dense[0] !== 0) return { roots: [], period: null };
+    throw identityError('solveExact', varName, equation);
+  }
+  if (dense.length > 3) {
+    throw new Error(
+      `solveExact: "${equation}" is a polynomial of degree ${dense.length - 1}. ` +
+        'solveExact reads a polynomial of degree 1 or 2, or an equation of the form ' +
+        `a*F(p*${varName} + q) = b. Use solve for a polynomial of a higher degree.`
+    );
+  }
+  let texts: string[] | null;
+  if (dense.length === 2) {
+    const text = exactLinearText(dense[0], dense[1]);
+    texts = text === null ? null : [text];
+  } else {
+    texts = exactQuadraticRoots(dense)?.texts ?? null;
+  }
+  if (texts === null) {
+    throw new Error(
+      `solveExact: a coefficient of "${equation}" has no exact text. ` +
+        'A coefficient must be an integer, a decimal, or a small fraction. Use solve for the roots as numbers.'
+    );
+  }
+  return { roots: texts, period: null };
+}
+
+/**
+ * Solve an equation of the form `a*F(p*x + q) = b`, or a polynomial equation of degree 1 or 2,
+ * exactly, and return its solution set as plain data: the principal real roots as text and the
+ * period of the set.
  *
  * `F` is one of `sin`, `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`. Use `solveExact` where
  * {@link solve} throws because the solutions repeat with a period. The result is a plain object
  * of strings, so it survives `JSON.stringify`, `structuredClone` and a worker boundary.
  *
+ * - A polynomial of degree 1 or 2 gives its real roots as exact text: `2*x - 1` gives `['1/2']`,
+ *   and `x^2 + x - 1` gives `['-1/2 - sqrt(5)/2', '-1/2 + sqrt(5)/2']`. The period is `null`.
+ *   Every coefficient must be an integer, a decimal or a small fraction.
+ * - The value `b` may be built from integers, `pi`, `sqrt(...)` and `+ - * / ^`:
+ *   `sin(x) = sqrt(2)/3` gives `['asin(sqrt(2)/3)', 'pi - asin(sqrt(2)/3)']`.
  * - A special value gives a multiple of `pi`: `sin(x) = 1/2` gives `['pi/6', '5*pi/6']`.
  * - Another value gives a symbolic inverse: `sin(x) = 1/3` gives `['asin(1/3)', 'pi - asin(1/3)']`.
  * - `p` is a fraction or a fraction of `pi`, and `q` is a number with exact text or a fraction of
@@ -2269,8 +2342,9 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
  *   `['-pi/36', '7*pi/36']`.
  * - The roots are real roots. A value that `F` never takes (`sin(x) = 2`) gives `roots: []`.
  * - No digit of the text is a rounded result. A constant is exact when it is an integer, a
- *   fraction with a denominator up to 100000, or a decimal of at most 12 digits. A constant with
- *   no exact text (`sqrt(2)/3`) makes `solveExact` throw an `Error` that names the constant.
+ *   fraction with a denominator up to 100000, or a decimal of at most 12 digits, or a value of
+ *   the form above. A constant with no exact text (`cos(1)`) makes `solveExact` throw an `Error`
+ *   that names the constant.
  *
  * @example
  * solveExact('sin(x) = 0', 'x');   // => { roots: ['0', 'pi'], period: '2*pi' }
@@ -2282,8 +2356,9 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
  * @param equation - Expression (`expr = 0`) or equation with one `=` sign.
  * @param varName  - Variable to solve for.
  * @returns The principal roots as text, and the period as text or `null`.
- * @throws An `Error` when the equation is not of the form `a*F(p*x + q) = b` (use {@link solve}
- *   for a polynomial), or when a constant of it has no exact text.
+ * @throws An `Error` when the equation is not of the form `a*F(p*x + q) = b` or a polynomial of
+ *   degree 1 or 2 (use {@link solve} for a polynomial of a higher degree), when every value is a
+ *   solution, or when a constant of it has no exact text.
  */
 export function solveExact(equation: unknown, varName: string): ExactSolution {
   if (typeof equation !== 'string') {
@@ -2291,12 +2366,16 @@ export function solveExact(equation: unknown, varName: string): ExactSolution {
   }
   const expr = normalizeEquation(equation, 'solveExact');
   requireExpression(expr, equation, 'solveExact');
+  const polynomial = polynomialExactSolution(expr, equation, varName);
+  if (polynomial !== null) return polynomial;
   const outcome = solveElementary(expr, varName);
   if (outcome === null) {
+    if (simplifiesToZero(expr)) throw identityError('solveExact', varName, equation);
     throw new Error(
       `solveExact: "${equation}" is not of the form a*F(p*${varName} + q) = b with F one of ` +
-        'sin, cos, tan, exp, log, sqrt or abs. Use solve for a polynomial, or ' +
-        'solve with { numeric: true, range: [a, b] } for any other equation.'
+        'sin, cos, tan, exp, log, sqrt or abs, or a polynomial of degree 1 or 2. Use solve for a ' +
+        'polynomial of a higher degree, or solve with { numeric: true, range: [a, b] } for any ' +
+        'other equation.'
     );
   }
   if ('declined' in outcome) throw new Error(`solveExact: ${outcome.declined}.`);
