@@ -407,6 +407,11 @@ describe('quantileSeq finds one probability by selection, not by a full sort (#1
     data.splice(7, 0, NaN, NaN);
     const finite = data.filter((v) => !Number.isNaN(v));
     const probs = Array.from({ length: 30 }, (_, i) => (i + 1) / 31);
+    const before = data.slice();
+    const typed = Float64Array.from(finite);
+    const typedBefore = Float64Array.from(typed);
+    const nested = [finite.slice(0, 250), finite.slice(250)];
+    const nestedBefore = nested.map((row) => row.slice());
     for (const method of METHODS) {
       for (const skipNaN of [false, true]) {
         const many = q(data, probs, { method, skipNaN }) as number[];
@@ -426,6 +431,14 @@ describe('quantileSeq finds one probability by selection, not by a full sort (#1
     const viaList = q(finite, probs, { method: 'hazen' }) as number[];
     const plain = (xs: number[]): number[] => xs.map((v) => v + 0); // -0 + 0 is 0
     expect(plain(viaN)).toEqual(plain(viaList));
+    // The one sort of the long list works on a copy: no input changes, not even a signed zero.
+    const same = (x: ArrayLike<number>, y: ArrayLike<number>): boolean =>
+      x.length === y.length && Array.from(x).every((v, i) => Object.is(v, y[i]));
+    expect(same(data, before)).toBe(true);
+    q(typed, probs, { method: 'hazen' });
+    expect(same(typed, typedBefore)).toBe(true);
+    q(nested, probs, { method: 'hazen' });
+    expect(nested.every((row, i) => same(row, nestedBefore[i] as number[]))).toBe(true);
     // A sorted input keeps its order and gives the same values.
     const sortedFinite = finite.slice().sort((a, b) => a - b);
     expect(plain(q(sortedFinite, probs, { method: 'hazen', sorted: true }) as number[])).toEqual(
