@@ -598,6 +598,8 @@ no finite list holds the solutions. It never scans for roots unless you ask it t
   terms that were added into it (`0.1*x^2 - 0.3*x^2 + 0.2*x^2` is zero).
 - A polynomial of a degree above 1000 throws a `RangeError` (`PolynomialDegreeError`) that names
   the limit. The numeric scan has no such limit.
+- A polynomial with more than 10000 terms throws a `RangeError` (`PolynomialSizeError`) that names
+  the limit. The package exports the two error classes, so a caller can test `instanceof`.
 - An identity (`x^2 - x^2`, `0*x`, `x = x`) throws an `Error`: every value of the variable is a
   solution, and no finite list holds them. An equation with no real root (`1 = 2`, `x^4 + 1`) gives
   `[]`. So `[]` always means that the equation has no root, and never that it is an identity.

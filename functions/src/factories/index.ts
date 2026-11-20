@@ -9,6 +9,7 @@
  */
 
 import { factoryScope } from './scope.js';
+import { replacer } from '../utils/json-replacer.js';
 import { add, multiply } from '../typed/arithmetic.js';
 import { registerDivideInverse } from '../typed/divide-inverse.js';
 import { registerExactReductions } from '../typed/exact-reductions.js';
@@ -1089,8 +1090,8 @@ factoryScope.tau = 2 * Math.PI;
 factoryScope.i = new (factoryScope.Complex as new (re: number, im: number) => unknown)(0, 1);
 factoryScope.e = Math.E;
 
-// 'replacer' is a JSON serialization utility — provide a simple identity stub
-factoryScope.replacer = (_key: string, value: unknown) => value;
+// simplify deduplicates rule matches with JSON.stringify, so a bigint constant needs the bigint tag
+factoryScope.replacer = replacer;
 
 // 'math' for Chain — provide factoryScope itself as the math namespace
 factoryScope.math = factoryScope;

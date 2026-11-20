@@ -3037,6 +3037,9 @@
       "PolynomialDegreeError": {
         "kind": "function"
       },
+      "PolynomialSizeError": {
+        "kind": "function"
+      },
       "Preconditioner": {
         "kind": "type"
       },

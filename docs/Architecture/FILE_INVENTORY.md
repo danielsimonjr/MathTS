@@ -10,21 +10,21 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 
 **Excluded by design (not source):** `node_modules/`, `dist/`, `*.d.ts` ambient declarations, and dot-directories (`.git/`, `.remember/`, `.changeset/`, …). The walk set equals the git-tracked `.ts` files, so there is no silent allowlist — every tracked `.ts` appears below with an explicit disposition.
 
-**Total files**: 2597
+**Total files**: 2610
 
 ## Disposition counts
 
 | Disposition   |    Count | Meaning                                                                                                        |
 | ------------- | -------: | -------------------------------------------------------------------------------------------------------------- |
 | `reachable`   |       26 | A `src/` file in the module graph, reachable from a root.                                                      |
-| `build-entry` |     1324 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
+| `build-entry` |     1327 | A detected build/subpath/`bin`/worker/`tsdown.config` root (index, internal, cli, render-file, run-worker, …). |
 | `test-only`   |        0 | A `src/` file not reachable from src roots but imported by a test.                                             |
 | `orphan`      |        0 | A `src/` file reachable from nothing — a delete/wire candidate (hard-fails the gate).                          |
-| `test`        |     1181 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
+| `test`        |     1191 | A test source file (under a `tests/` dir, or a `*.test.ts`/`*.spec.ts`).                                       |
 | `tool`        |       29 | A file under `tools/` — agent-only meta-tooling (CDG/QDG/benchmarks).                                          |
 | `config`      |       30 | A build/test config source (`*.config.ts`: vitest/tsdown, per-package or root).                                |
 | `example`     |        7 | An `examples/` or `docs/` reference/illustration source.                                                       |
-| **Total**     | **2597** |                                                                                                                |
+| **Total**     | **2610** |                                                                                                                |
 
 ## Per-area counts
 
@@ -32,8 +32,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | ---------- | ----: |
 | `config`   |    30 |
 | `examples` |     7 |
-| `src`      |  1350 |
-| `tests`    |  1181 |
+| `src`      |  1353 |
+| `tests`    |  1191 |
 | `tools`    |    29 |
 
 ## Per-package counts
@@ -47,8 +47,8 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `@danielsimonjr/mathts-compat`         |    42 |
 | `@danielsimonjr/mathts-core`           |   146 |
 | `@danielsimonjr/mathts-evaluator`      |     5 |
-| `@danielsimonjr/mathts-expression`     |   574 |
-| `@danielsimonjr/mathts-functions`      |  1211 |
+| `@danielsimonjr/mathts-expression`     |   575 |
+| `@danielsimonjr/mathts-functions`      |  1223 |
 | `@danielsimonjr/mathts-gpu`            |    22 |
 | `@danielsimonjr/mathts-linalg`         |     6 |
 | `@danielsimonjr/mathts-matrix`         |   160 |
@@ -863,6 +863,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `expression/tests/node-markdown.test.ts`                                          | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/Node.test.ts`                                                   | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/ObjectNode.test.ts`                                             | @danielsimonjr/mathts-expression     | tests    | test        |
+| `expression/tests/operator-tex-command-space-1014.test.ts`                        | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/OperatorNode-compile.test.ts`                                   | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/OperatorNode-latex.test.ts`                                     | @danielsimonjr/mathts-expression     | tests    | test        |
 | `expression/tests/OperatorNode-paren.test.ts`                                     | @danielsimonjr/mathts-expression     | tests    | test        |
@@ -973,6 +974,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/arithmetic/expm1.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/arithmetic/fix.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/arithmetic/floor.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/arithmetic/fraction-gcd.ts`                                        | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/arithmetic/gcd.ts`                                                 | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/arithmetic/hypot.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/arithmetic/invmod.ts`                                              | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1011,6 +1013,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/cas/antiderivative.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/closed-form-roots.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/elementary-solve.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/cas/exact-identity.ts`                                             | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/layer3.ts`                                                     | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/polynomial-canonical.ts`                                       | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/cas/polynomial-limits.ts`                                          | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1465,6 +1468,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/src/utils/isPositive.ts`                                               | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/isPrime.ts`                                                  | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/isZero.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
+| `functions/src/utils/json-replacer.ts`                                            | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/limits.ts`                                                   | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/map.ts`                                                      | @danielsimonjr/mathts-functions      | src      | build-entry |
 | `functions/src/utils/median-numbers.ts`                                           | @danielsimonjr/mathts-functions      | src      | build-entry |
@@ -1703,6 +1707,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/exact-pvalues.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/exact-reductions-unregistered.test.ts`                           | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/exp-integrals.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/expand-legacy-parentheses-1167.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/expression-transforms.test.ts`                                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factories-final.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/factories-leaf.test.ts`                                          | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1932,6 +1937,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/polygamma-orthopoly.test.ts`                                     | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polygon-ops.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/polynomial-gcd-exact.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/polynomial-term-limit-1176.test.ts`                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/pow-bignumber-kernel.test.ts`                                    | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/predicates.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/propagate-uncertainty-constants.test.ts`                         | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1955,6 +1961,9 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/rational-integrate.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rational-nullspace.test.ts`                                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/rational-surd.test.ts`                                           | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/rationalize-product-of-sums-1177.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/rationalize-simplify-1177.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/rationalize-zero-polynomial-1177.test.ts`                        | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/real-roots.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/reductions-exact-public-types-1049.test.ts`                      | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/reductions-exact-types.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -1988,8 +1997,11 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/signal/conv.test.ts`                                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal/fft.test.ts`                                              | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/signal/fftshift-parity.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/simplify-decimal-ratio-1175.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/simplify-exact-fractions.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/simplify-foreign-nodes.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/simplify-gcd-lcm-fraction-1321.test.ts`                          | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/small-cas-defects-1014.test.ts`                                  | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/solve-ode-tspan-all-methods.test.ts`                             | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/solveode-events.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/solveode-jspath.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
@@ -2027,6 +2039,7 @@ Every tracked `.ts` file in the repo — package `src/` and `tests/`, the repo-r
 | `functions/tests/summation-symbolic-bound.test.ts`                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/svd-orth.test.ts`                                                | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/svds.test.ts`                                                    | @danielsimonjr/mathts-functions      | tests    | test        |
+| `functions/tests/symbolic-equal-exact-1178.test.ts`                               | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts`                   | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/system-response.test.ts`                                         | @danielsimonjr/mathts-functions      | tests    | test        |
 | `functions/tests/taylor-exact.test.ts`                                            | @danielsimonjr/mathts-functions      | tests    | test        |

@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2597,
+  "totalFiles": 2610,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1324,
+    "build-entry": 1327,
     "test-only": 0,
     "orphan": 0,
-    "test": 1181,
+    "test": 1191,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1350,
-    "tests": 1181,
+    "src": 1353,
+    "tests": 1191,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -27,8 +27,8 @@
     "@danielsimonjr/mathts-core": 146,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
-    "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1211,
+    "@danielsimonjr/mathts-expression": 575,
+    "@danielsimonjr/mathts-functions": 1223,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -4874,7 +4874,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 954
+      "loc": 964
     },
     {
       "file": "expression/src/node/ParenthesisNode.ts",
@@ -5598,6 +5598,13 @@
       "loc": 257
     },
     {
+      "file": "expression/tests/operator-tex-command-space-1014.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 31
+    },
+    {
       "file": "expression/tests/OperatorNode-compile.test.ts",
       "package": "@danielsimonjr/mathts-expression",
       "area": "tests",
@@ -5987,7 +5994,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 802
+      "loc": 902
     },
     {
       "file": "functions/src/algebra/resolve.ts",
@@ -6001,7 +6008,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1395
+      "loc": 1399
     },
     {
       "file": "functions/src/algebra/simplify/util.ts",
@@ -6022,7 +6029,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 709
+      "loc": 744
     },
     {
       "file": "functions/src/algebra/simplifyCore.ts",
@@ -6267,7 +6274,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 89
+      "loc": 97
     },
     {
       "file": "functions/src/arithmetic/abs.ts",
@@ -6368,11 +6375,18 @@
       "loc": 300
     },
     {
+      "file": "functions/src/arithmetic/fraction-gcd.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 31
+    },
+    {
       "file": "functions/src/arithmetic/gcd.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 204
+      "loc": 201
     },
     {
       "file": "functions/src/arithmetic/hypot.ts",
@@ -6393,7 +6407,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 144
+      "loc": 141
     },
     {
       "file": "functions/src/arithmetic/log.ts",
@@ -6634,6 +6648,13 @@
       "loc": 498
     },
     {
+      "file": "functions/src/cas/exact-identity.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 425
+    },
+    {
       "file": "functions/src/cas/layer3.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
@@ -6652,7 +6673,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 27
+      "loc": 48
     },
     {
       "file": "functions/src/cas/rat.ts",
@@ -6673,7 +6694,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 154
+      "loc": 189
     },
     {
       "file": "functions/src/cas/render-coeff-times.ts",
@@ -6848,14 +6869,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 642
+      "loc": 634
     },
     {
       "file": "functions/src/factories/index.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1945
+      "loc": 1946
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -9228,7 +9249,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1942
+      "loc": 2026
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -9256,7 +9277,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3202
+      "loc": 3207
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -9515,7 +9536,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 549
+      "loc": 573
     },
     {
       "file": "functions/src/typed/probability.ts",
@@ -9810,6 +9831,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 75
+    },
+    {
+      "file": "functions/src/utils/json-replacer.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 14
     },
     {
       "file": "functions/src/utils/limits.ts",
@@ -10292,7 +10320,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 178
+      "loc": 180
     },
     {
       "file": "functions/tests/clones-fit-orthogonal-series-pin.test.ts",
@@ -11476,6 +11504,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 59
+    },
+    {
+      "file": "functions/tests/expand-legacy-parentheses-1167.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 107
     },
     {
       "file": "functions/tests/expression-transforms.test.ts",
@@ -13081,6 +13116,13 @@
       "loc": 108
     },
     {
+      "file": "functions/tests/polynomial-term-limit-1176.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 91
+    },
+    {
       "file": "functions/tests/pow-bignumber-kernel.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -13242,11 +13284,32 @@
       "loc": 42
     },
     {
+      "file": "functions/tests/rationalize-product-of-sums-1177.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 46
+    },
+    {
+      "file": "functions/tests/rationalize-simplify-1177.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 152
+    },
+    {
+      "file": "functions/tests/rationalize-zero-polynomial-1177.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
+    },
+    {
       "file": "functions/tests/real-roots.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 73
+      "loc": 105
     },
     {
       "file": "functions/tests/reductions-exact-public-types-1049.test.ts",
@@ -13473,6 +13536,13 @@
       "loc": 68
     },
     {
+      "file": "functions/tests/simplify-decimal-ratio-1175.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 65
+    },
+    {
       "file": "functions/tests/simplify-exact-fractions.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -13485,6 +13555,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "functions/tests/simplify-gcd-lcm-fraction-1321.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 65
+    },
+    {
+      "file": "functions/tests/small-cas-defects-1014.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 65
     },
     {
       "file": "functions/tests/solve-ode-tspan-all-methods.test.ts",
@@ -13744,6 +13828,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 122
+    },
+    {
+      "file": "functions/tests/symbolic-equal-exact-1178.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 129
     },
     {
       "file": "functions/tests/symbolic-equal-tail-review-2026-10-15.test.ts",
