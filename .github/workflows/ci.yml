@@ -90,8 +90,23 @@ jobs:
       # docs/Architecture/duplicate-baseline.json fails). The steps below read the reports:
       # `docs:functions:check` reads package-export-surfaces.json and `check:browser-safety`
       # reads dependency-graph.json. It needs the wasm that `bun run build` wrote.
+      #
+      # The first two commands hold the invariants that a merge of main can break with no
+      # conflict left to see: git tracks no file that .gitignore names in docs/Architecture (a
+      # merge that takes main's side of a deleted report brings the report back), and no tracked
+      # document there has a claim row for a count that moves with a file, an export or a line.
       - name: Dependency graph and file census
         run: |
+          tracked=$(git ls-files -ci --exclude-standard -- docs/Architecture)
+          if [ -n "$tracked" ]; then
+            echo "::error::git tracks a generated report that .gitignore names. Run: git rm --cached <file>"
+            echo "$tracked"
+            exit 1
+          fi
+          if git grep -nE '^\| *(totalExports|totalTypeScriptFiles|totalLinesOfCode) *\|' -- docs/Architecture; then
+            echo "::error::a document in docs/Architecture claims a file, export or line count (the rows above). Delete the rows."
+            exit 1
+          fi
           bun run docs:deps
           bun run check:duplicates:fast
 
