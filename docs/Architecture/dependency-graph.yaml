@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1356
+  totalFiles: 1358
   totalModules: 82
-  totalExports: 7438
+  totalExports: 7444
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -15403,6 +15403,9 @@ modules:
         - file: ../typed/divide-inverse.js
           imports:
             - registerDivideInverse
+        - file: ../typed/collection-relational.js
+          imports:
+            - registerCollectionRelational
         - file: ../typed/exact-reductions.js
           imports:
             - registerExactReductions
@@ -25110,6 +25113,7 @@ modules:
         - file: ../utils/array.js
           imports:
             - arraySize
+            - broadcastTo
         - file: ./invalid-scalar-guards.js
           imports:
             - withBinaryScalarGuards
@@ -25122,6 +25126,12 @@ modules:
         - file: ./divide-inverse.js
           imports:
             - divideInverse
+        - file: ./sparse-product.js
+          imports:
+            - sparseProduct
+        - file: ./collection-relational.js
+          imports:
+            - collectionRelationalRows
         - file: ./exact-reductions.js
           imports:
             - exactReductions
@@ -25171,6 +25181,7 @@ modules:
             - Dual
             - DimensionMismatchError
             - extrema
+            - isComplex
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -25599,6 +25610,20 @@ modules:
         - runCentralityRestarts
       constants:
         - CENTRALITY_WORKER_THRESHOLD
+    functions/src/typed/collection-relational.ts:
+      description: 'The collection rows of the comparison functions (#975, #1307).'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - registerCollectionRelational
+        - collectionRelational
+        - collectionRelationalRows
+      functions:
+        - registerCollectionRelational
+        - collectionRelational
+        - collectionRelationalRows
     functions/src/typed/combinatorics.ts:
       description: Extended Combinatorics Functions
       externalDependencies: []
@@ -27852,6 +27877,9 @@ modules:
         - file: ../utils/number.js
           imports:
             - nearlyEqual
+        - file: ./collection-relational.js
+          imports:
+            - collectionRelationalRows
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -28044,6 +28072,36 @@ modules:
         - parallelXCorr
         - parallelAutoCorr
         - typedSignal
+    functions/src/typed/sparse-product.ts:
+      description: Sparse x sparse matrix product that reads the stored entries only (#1271).
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../factories/matrix-bridge.js
+          imports:
+            - MathJSDenseMatrix
+            - MathJSSparseMatrix
+        - file: ../factories/sparse-adapter.js
+          imports:
+            - csrToCsc
+            - cscToPublic
+        - file: ../utils/array.js
+          imports:
+            - arraySize
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-matrix'
+          directory: matrix
+          imports:
+            - SparseMatrix
+            - isSparseMatrix
+      exports:
+        - assertInnerDimensions
+        - cscProduct
+        - sparseProduct
+      functions:
+        - assertInnerDimensions
+        - cscProduct
+        - sparseProduct
     functions/src/typed/special.ts:
       description: Typed Special Functions
       externalDependencies: []
@@ -46604,6 +46662,7 @@ dependencyGraph:
         - functions/src/typed/call-rewrite.ts
         - functions/src/typed/cas.ts
         - functions/src/typed/centrality-restarts.ts
+        - functions/src/typed/collection-relational.ts
         - functions/src/typed/combinatorics.ts
         - functions/src/typed/complex-promotion.ts
         - functions/src/typed/complex.ts
@@ -46645,6 +46704,7 @@ dependencyGraph:
         - functions/src/typed/relational.ts
         - functions/src/typed/set.ts
         - functions/src/typed/signal.ts
+        - functions/src/typed/sparse-product.ts
         - functions/src/typed/special.ts
         - functions/src/typed/statistics.ts
         - functions/src/typed/string-derivative.ts
@@ -47391,13 +47451,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1356
+  totalTypeScriptFiles: 1358
   totalModules: 82
-  totalLinesOfCode: 243486
-  totalExports: 7438
+  totalLinesOfCode: 244109
+  totalExports: 7444
   totalClasses: 64
   totalInterfaces: 676
-  totalFunctions: 2618
+  totalFunctions: 2624
   totalTypeGuards: 185
   totalEnums: 0
   totalConstants: 1698

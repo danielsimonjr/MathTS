@@ -18,7 +18,7 @@
     "matrix/dist/wasm/mathts-as.wasm": 64091,
     "tensor/dist/index.js": 87222,
     "tensor/package.json": 2215,
-    "autograd/dist/index.js": 69994,
+    "autograd/dist/index.js": 72478,
     "autograd/package.json": 2250,
     "functions/dist/index.js": 2127498,
     "functions/dist/subpath-evaluate.js": 1368849,

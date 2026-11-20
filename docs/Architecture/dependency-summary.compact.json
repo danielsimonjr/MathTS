@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1356, "e": 7438, "re": 3194 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1358, "e": 7444, "re": 3194 },
   "s": {
-    "loc": 243486,
+    "loc": 244109,
     "cls": 64,
     "int": 676,
-    "fn": 2618,
+    "fn": 2624,
     "tg": 185,
     "en": 0,
     "co": 1698,
@@ -1175,7 +1175,7 @@
       ]
     },
     "functions/typed": {
-      "f": 57,
+      "f": 59,
       "exp": [
         "aggregateRestartVectors",
         "typedAlgebra",
@@ -1959,7 +1959,7 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 251, "o": 15 },
+    { "p": "factories/index.ts", "i": 252, "o": 15 },
     { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 206 },
@@ -1967,7 +1967,7 @@
     { "p": "utils/is.ts", "i": 0, "o": 63 },
     { "p": "core/config.ts", "i": 0, "o": 57 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
-    { "p": "utils/array.ts", "i": 0, "o": 53 },
+    { "p": "utils/array.ts", "i": 0, "o": 54 },
     { "p": "physicalConstants/index.ts", "i": 51, "o": 1 },
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/factory.ts", "i": 1, "o": 48 },

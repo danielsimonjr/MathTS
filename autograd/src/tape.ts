@@ -785,50 +785,33 @@ export class TapedTensor {
   }
 
   /**
-   * Reverse-mode AD over batched matmul.
+   * Reverse-mode AD over matmul with the NumPy `matmul` rules, as `Tensor.matmul` (#992).
    *
-   * Accepts operands of rank ≥ 2. Convention: trailing 2 axes are the matrix
-   * dims (rows × cols); all leading axes are batch dims (must be broadcast-
-   * compatible). For rank-2 inputs this is classical matrix multiplication.
+   * - Two operands of rank 2 or more with equal batch axes take the specialised loops below
+   *   (the same path as before).
+   * - A rank-1 left operand gets a leading axis, a rank-1 right operand gets a trailing axis,
+   *   and each added axis is removed from the result. The batch axes are right-aligned and
+   *   broadcast: an axis of size 1 or a missing axis repeats against the other operand.
    *
    * Adjoint derivation (classical matrix calc, extended to batched):
    *   Y = A @ B  (A: ...×m×k, B: ...×k×n  →  Y: ...×m×n)
    *   dA = dY @ Bᵀ       (dA: ...×m×k)
    *   dB = Aᵀ @ dY       (dB: ...×k×n)
-   *
-   * Implemented via `Tensor.einsum` with a dynamically-built spec:
-   *   forward:  '...ik,...kj->...ij'
-   *   dA:       '...ij,...kj->...ik'   (contract dY with B on j)
-   *   dB:       '...ki,...kj->...ij'   (contract A on k with dY on k)
+   * With broadcast, both adjoints are computed on the broadcast batch and each one is summed
+   * over the axes that its operand repeated.
    */
   matmul(other: TapedTensor): TapedTensor {
     assertSameTape(this, other);
     const rankA = this.shape.length;
     const rankB = other.shape.length;
 
-    if (rankA < 2) {
-      throw new Error(`TapedTensor.matmul: 'this' operand must have rank ≥ 2, got rank ${rankA}`);
-    }
-    if (rankB < 2) {
-      throw new Error(`TapedTensor.matmul: 'other' operand must have rank ≥ 2, got rank ${rankB}`);
-    }
-
-    // The batch rank is (rank - 2); both operands must agree on batch dims.
-    const batchRankA = rankA - 2;
-    const batchRankB = rankB - 2;
-    if (batchRankA !== batchRankB) {
+    if (rankA < 1 || rankB < 1) {
       throw new Error(
-        `TapedTensor.matmul: batch rank mismatch (${batchRankA} vs ${batchRankB}); ` +
-          `both operands must have the same rank`
+        `TapedTensor.matmul: both operands must have rank ≥ 1 (got ${rankA} and ${rankB})`
       );
     }
-    for (let b = 0; b < batchRankA; b++) {
-      if (this.shape[b] !== other.shape[b]) {
-        throw new Error(
-          `TapedTensor.matmul: batch dimension ${b} mismatch ` +
-            `(${this.shape[b]} vs ${other.shape[b]})`
-        );
-      }
+    if (rankA < 2 || rankB < 2 || !_sameBatchAxes(this.shape, other.shape)) {
+      return this._matmulBroadcast(other);
     }
 
     const m = this.shape[rankA - 2];
@@ -842,7 +825,7 @@ export class TapedTensor {
     // Forward pass: Y[...ij] = Σ_k A[...ik] * B[...kj].
     const aShape = [...this.shape];
     const bShape = [...other.shape];
-    const batchShape = aShape.slice(0, batchRankA);
+    const batchShape = aShape.slice(0, rankA - 2);
     const yShape = [...batchShape, m, n];
 
     const aPrimalData = new Float64Array(this.primal);
@@ -870,6 +853,59 @@ export class TapedTensor {
       }
     );
 
+    return new TapedTensor(yShape, new Float64Array(yData), this.tape, id);
+  }
+
+  /**
+   * `matmul` for a rank-1 operand or batch axes that differ (#992). Each operand is read as
+   * `[...batch, rows, cols]` (a rank-1 left operand is `[1, k]`, a rank-1 right operand is
+   * `[k, 1]`, which keeps the flat layout). Both operands are expanded to the broadcast batch,
+   * the product and the two adjoints run on the expanded data, and each adjoint is summed back
+   * into its operand through the index map of the expansion.
+   */
+  private _matmulBroadcast(other: TapedTensor): TapedTensor {
+    const rankA = this.shape.length;
+    const rankB = other.shape.length;
+    const aShape2 = rankA === 1 ? [1, this.shape[0]] : [...this.shape];
+    const bShape2 = rankB === 1 ? [other.shape[0], 1] : [...other.shape];
+    const m = aShape2[aShape2.length - 2];
+    const k = aShape2[aShape2.length - 1];
+    const k2 = bShape2[bShape2.length - 2];
+    const n = bShape2[bShape2.length - 1];
+    if (k !== k2) {
+      throw new Error(`TapedTensor.matmul: inner dimension mismatch (${k} vs ${k2})`);
+    }
+    const batchShape = Tensor.broadcastShape(aShape2.slice(0, -2), bShape2.slice(0, -2));
+    const aFull = [...batchShape, m, k];
+    const bFull = [...batchShape, k, n];
+    const yFull = [...batchShape, m, n];
+
+    const aMap = _broadcastIndexMap(aShape2, aFull);
+    const bMap = _broadcastIndexMap(bShape2, bFull);
+    const aPrimal = new Float64Array(this.primal);
+    const bPrimal = new Float64Array(other.primal);
+    const aExpanded = _expandByMap(aPrimal, aMap);
+    const bExpanded = _expandByMap(bPrimal, bMap);
+    const yData = _batchedMatmul(aExpanded, bExpanded, aFull, bFull);
+
+    const aGradSlot = this.inputSlot();
+    const bGradSlot = this.tape.getInputGrad(other.id)!;
+
+    const { id } = this.tape.record(
+      [this.id, other.id],
+      yData.length,
+      (outputGrad: Float64Array) => {
+        const dA = _batchedMatmulGradA(outputGrad, bExpanded, yFull, bFull);
+        for (let i = 0; i < dA.length; i++) aGradSlot[aMap[i]] += dA[i];
+        const dB = _batchedMatmulGradB(aExpanded, outputGrad, aFull, yFull);
+        for (let i = 0; i < dB.length; i++) bGradSlot[bMap[i]] += dB[i];
+      }
+    );
+
+    // The result drops the axis that a rank-1 operand added.
+    const yShape = [...batchShape];
+    if (rankA > 1) yShape.push(m);
+    if (rankB > 1) yShape.push(n);
     return new TapedTensor(yShape, new Float64Array(yData), this.tape, id);
   }
 
@@ -2101,6 +2137,54 @@ export class TapedTensor {
 // ---------------------------------------------------------------------------
 // Module-level helpers (not exported; private to this module)
 // ---------------------------------------------------------------------------
+
+/** True when two shapes of rank 2 or more have equal batch axes (every axis but the last two). */
+function _sameBatchAxes(a: ReadonlyArray<number>, b: ReadonlyArray<number>): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length - 2; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * For each flat index of `fullShape` (a broadcast of `ownShape`), the flat index in `ownShape`
+ * that it reads: the axes are right-aligned, and an axis of size 1 or a missing axis has stride 0.
+ */
+function _broadcastIndexMap(
+  ownShape: ReadonlyArray<number>,
+  fullShape: ReadonlyArray<number>
+): Int32Array {
+  const rank = fullShape.length;
+  const offset = rank - ownShape.length;
+  const ownStrides = Tensor.rowMajorStrides(ownShape);
+  const strides = new Array<number>(rank).fill(0);
+  for (let axis = 0; axis < rank; axis++) {
+    const own = axis - offset;
+    if (own >= 0 && ownShape[own] !== 1) strides[axis] = ownStrides[own];
+  }
+  let size = 1;
+  for (let axis = 0; axis < rank; axis++) size *= fullShape[axis];
+  const map = new Int32Array(size);
+  const coords = new Array<number>(rank).fill(0);
+  for (let n = 0; n < size; n++) {
+    let flat = 0;
+    for (let axis = 0; axis < rank; axis++) flat += coords[axis] * strides[axis];
+    map[n] = flat;
+    for (let axis = rank - 1; axis >= 0; axis--) {
+      if (++coords[axis] < fullShape[axis]) break;
+      coords[axis] = 0;
+    }
+  }
+  return map;
+}
+
+/** `out[i] = data[map[i]]`. */
+function _expandByMap(data: Float64Array, map: Int32Array): Float64Array {
+  const out = new Float64Array(map.length);
+  for (let i = 0; i < map.length; i++) out[i] = data[map[i]];
+  return out;
+}
 
 function sameTensorShape(a: ReadonlyArray<number>, b: ReadonlyArray<number>): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);

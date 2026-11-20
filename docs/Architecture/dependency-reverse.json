@@ -1337,6 +1337,7 @@
       "functions/src/typed/matrix-ops.ts",
       "functions/src/typed/probability.ts",
       "functions/src/typed/set.ts",
+      "functions/src/typed/sparse-product.ts",
       "functions/src/utils/optimizeCallback.ts"
     ],
     "functions/src/algebra/sparse/csIpvec.ts": ["functions/src/algebra/solver/lusolve.ts"],
@@ -1346,7 +1347,8 @@
       "functions/src/factories/sparse-adapter.ts",
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/matrix-ops.ts",
-      "functions/src/typed/probability.ts"
+      "functions/src/typed/probability.ts",
+      "functions/src/typed/sparse-product.ts"
     ],
     "functions/src/algebra/solver/pivot-tolerance.ts": [
       "functions/src/algebra/solver/lusolve.ts",
@@ -2447,6 +2449,11 @@
       "functions/src/factories/index.ts",
       "functions/src/typed/arithmetic.ts"
     ],
+    "functions/src/typed/collection-relational.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/typed/arithmetic.ts",
+      "functions/src/typed/relational.ts"
+    ],
     "functions/src/typed/exact-reductions.ts": [
       "functions/src/factories/index.ts",
       "functions/src/typed/arithmetic.ts"
@@ -2688,7 +2695,10 @@
       "functions/src/numeric/propagate-uncertainty.ts"
     ],
     "functions/src/typed/typed-bridge.ts": ["functions/src/factories/scope.ts"],
-    "functions/src/factories/sparse-adapter.ts": ["functions/src/factories/scope.ts"],
+    "functions/src/factories/sparse-adapter.ts": [
+      "functions/src/factories/scope.ts",
+      "functions/src/typed/sparse-product.ts"
+    ],
     "functions/src/geometry/circumcircle.ts": [
       "functions/src/geometry/alpha-shape.ts",
       "functions/src/geometry/voronoi.ts"
@@ -2951,6 +2961,7 @@
       "functions/src/typed/trigonometry.ts"
     ],
     "functions/src/typed/invalid-scalar-guards.ts": ["functions/src/typed/arithmetic.ts"],
+    "functions/src/typed/sparse-product.ts": ["functions/src/typed/arithmetic.ts"],
     "functions/src/wasm/bitwise/wasm-bridge.ts": ["functions/src/typed/bitwise.ts"],
     "functions/src/cas/antiderivative.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/elementary-solve.ts": ["functions/src/typed/cas.ts"],

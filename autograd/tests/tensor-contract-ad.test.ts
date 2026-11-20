@@ -592,8 +592,8 @@ describe('TapedTensor.matmul — rank-3 batched', () => {
   });
 });
 
-describe('TapedTensor.matmul — error handling', () => {
-  it('throws when this is rank-1', () => {
+describe('TapedTensor.matmul — rank-1 operands and errors', () => {
+  it('a rank-1 this gives a result without the leading axis (#992)', () => {
     const aTensor = new Tensor([3], new Float64Array(3).fill(1));
     const bTensor = new Tensor([3, 2], new Float64Array(6).fill(1));
 
@@ -601,10 +601,12 @@ describe('TapedTensor.matmul — error handling', () => {
     const A = TapedTensor.fromTensorAsInput(aTensor, tape);
     const B = TapedTensor.fromTensorAsInput(bTensor, tape);
 
-    expect(() => A.matmul(B)).toThrow(/rank ≥ 2/);
+    const Y = A.matmul(B);
+    expect(Y.shape).toEqual([2]);
+    expect([...Y.primal]).toEqual([3, 3]);
   });
 
-  it('throws when other is rank-1', () => {
+  it('a rank-1 other gives a result without the trailing axis (#992)', () => {
     const aTensor = new Tensor([2, 3], new Float64Array(6).fill(1));
     const bTensor = new Tensor([3], new Float64Array(3).fill(1));
 
@@ -612,7 +614,20 @@ describe('TapedTensor.matmul — error handling', () => {
     const A = TapedTensor.fromTensorAsInput(aTensor, tape);
     const B = TapedTensor.fromTensorAsInput(bTensor, tape);
 
-    expect(() => A.matmul(B)).toThrow(/rank ≥ 2/);
+    const Y = A.matmul(B);
+    expect(Y.shape).toEqual([2]);
+    expect([...Y.primal]).toEqual([3, 3]);
+  });
+
+  it('throws when an operand has rank 0', () => {
+    const aTensor = new Tensor([], new Float64Array([2]));
+    const bTensor = new Tensor([3, 2], new Float64Array(6).fill(1));
+
+    const tape = new Tape();
+    const A = TapedTensor.fromTensorAsInput(aTensor, tape);
+    const B = TapedTensor.fromTensorAsInput(bTensor, tape);
+
+    expect(() => A.matmul(B)).toThrow(/rank ≥ 1/);
   });
 });
 
