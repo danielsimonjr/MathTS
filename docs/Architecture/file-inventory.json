@@ -338,7 +338,7 @@
       "package": "@danielsimonjr/mathts-autograd",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3186
+      "loc": 3191
     },
     {
       "file": "autograd/tests/ad-wasm-interop.test.ts",
@@ -9655,7 +9655,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 241
+      "loc": 244
     },
     {
       "file": "functions/src/typed/special.ts",
@@ -14541,7 +14541,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 30
+      "loc": 34
     },
     {
       "file": "functions/tests/unit-characterization.test.ts",
