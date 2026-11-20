@@ -10207,31 +10207,33 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                | Imports    | Type   |
-| ------------------- | ---------- | ------ |
-| `./numeric-data.js` | `readSkip` | Import |
+| File                         | Imports                       | Type   |
+| ---------------------------- | ----------------------------- | ------ |
+| `./numeric-data.js`          | `readSkip`                    | Import |
+| `../utils/median-numbers.js` | `minFrom, quickSelectInPlace` | Import |
 
 **Exports:**
 
-- Interfaces: `QuantileSeqOptions`
+- Interfaces: `QuantileArith`, `QuantilePlan`, `QuantileSeqOptions`, `ParsedQuantileOptions`
 - Types: `NumpyQuantileMethod`
-- Functions: `assertNumpyQuantileMethod`, `quantileOfSorted`, `parseQuantileThirdArg`
+- Functions: `assertNumpyQuantileMethod`, `quantilePlan`, `blendNumber`, `orderStatistics`, `quantileOfSorted`, `quantileOfUnsorted`, `parseQuantileThirdArg`
+- Constants: `NUMBER_ARITH`
 
 ---
 
-### `functions/src/statistics/quantileSeq.ts` - Compute the prob order quantile of a matrix or a list with values.
+### `functions/src/statistics/quantileSeq.ts` - From this many probabilities on, an unsorted number sample is sorted once, with the native
 
 **Internal Dependencies:**
 
-| File                          | Imports                                                                                                       | Type               |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `../utils/is.js`              | `isNumber, isBigNumber`                                                                                       | Import             |
-| `../utils/array.js`           | `flatten`                                                                                                     | Import             |
-| `../utils/factory.js`         | `factory`                                                                                                     | Import             |
-| `../utils/limits.js`          | `assertLoopOrder`                                                                                             | Import             |
-| `../core/function/typed.js`   | `TypedFunction`                                                                                               | Import (type-only) |
-| `./numeric-data.js`           | `isFloatTyped, copyToNumberArray, FloatTyped`                                                                 | Import             |
-| `./quantile-numpy-methods.js` | `assertNumpyQuantileMethod, quantileOfSorted, parseQuantileThirdArg, NumpyQuantileMethod, QuantileSeqOptions` | Import             |
+| File                          | Imports                                                                                                                                                                                                              | Type               |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `../utils/is.js`              | `isNumber, isBigNumber`                                                                                                                                                                                              | Import             |
+| `../utils/array.js`           | `flatten`                                                                                                                                                                                                            | Import             |
+| `../utils/factory.js`         | `factory`                                                                                                                                                                                                            | Import             |
+| `../utils/limits.js`          | `assertLoopOrder`                                                                                                                                                                                                    | Import             |
+| `../core/function/typed.js`   | `TypedFunction`                                                                                                                                                                                                      | Import (type-only) |
+| `./numeric-data.js`           | `isFloatTyped, FloatTyped`                                                                                                                                                                                           | Import             |
+| `./quantile-numpy-methods.js` | `NUMBER_ARITH, blendNumber, orderStatistics, parseQuantileThirdArg, quantileOfSorted, quantileOfUnsorted, quantilePlan, NumpyQuantileMethod, ParsedQuantileOptions, QuantileArith, QuantilePlan, QuantileSeqOptions` | Import             |
 
 **Exports:**
 
@@ -13297,7 +13299,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `medianNumbers`, `medianInPlace`
+- Functions: `medianNumbers`, `medianInPlace`, `minFrom`, `quickSelectInPlace`
 
 ---
 
@@ -21768,12 +21770,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238390 |
-| Total Exports           | 7397   |
+| Total Lines of Code     | 238646 |
+| Total Exports           | 7404   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
-| Total Interfaces        | 669    |
-| Total Functions         | 2579   |
+| Total Interfaces        | 672    |
+| Total Functions         | 2585   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

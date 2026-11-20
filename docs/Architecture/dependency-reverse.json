@@ -2832,6 +2832,7 @@
     ],
     "functions/src/utils/median-numbers.ts": [
       "functions/src/statistics/median.ts",
+      "functions/src/statistics/quantile-numpy-methods.ts",
       "functions/src/typed/statistics.ts"
     ],
     "functions/src/statistics/quantile-numpy-methods.ts": [

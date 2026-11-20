@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2548,
+  "totalFiles": 2549,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1132,
+    "test": 1133,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1132,
+    "tests": 1133,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1176,
+    "@danielsimonjr/mathts-functions": 1177,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -3985,7 +3985,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 19
+      "loc": 23
     },
     {
       "file": "expression/src/embeddedDocs/function/statistics/std.ts",
@@ -5084,7 +5084,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 57
+      "loc": 55
     },
     {
       "file": "expression/src/transform/range.transform.ts",
@@ -8577,14 +8577,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 202
+      "loc": 316
     },
     {
       "file": "functions/src/statistics/quantileSeq.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 402
+      "loc": 529
     },
     {
       "file": "functions/src/statistics/std.ts",
@@ -9795,7 +9795,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 98
+      "loc": 111
     },
     {
       "file": "functions/src/utils/node.ts",
@@ -10628,7 +10628,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 185
+      "loc": 186
     },
     {
       "file": "functions/tests/dogfood-1104-norm-fro.test.ts",
@@ -10685,6 +10685,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 426
+    },
+    {
+      "file": "functions/tests/dogfood-1130-1131-1005-quantile.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 431
     },
     {
       "file": "functions/tests/dogfood-1135-1136-discretelog.test.ts",

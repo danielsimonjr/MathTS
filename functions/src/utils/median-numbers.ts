@@ -43,12 +43,20 @@ export function medianInPlace(work: Float64Array): number {
   if (n % 2 === 1) return lower;
   // After the select at `mid`, every value right of it is >= work[mid]: the next order
   // statistic is the smallest of them.
-  let upper = work[mid + 1];
-  for (let i = mid + 2; i < n; i++) {
-    const v = work[i];
-    if (v < upper) upper = v;
+  return middleOf(lower, minFrom(work, mid + 1));
+}
+
+/**
+ * The smallest value of `a` from index `start` to the end. `start` must be below `a.length`.
+ * After a select at `k`, `minFrom(a, k + 1)` is the next order statistic.
+ */
+export function minFrom(a: Float64Array, start: number): number {
+  let m = a[start];
+  for (let i = start + 1; i < a.length; i++) {
+    const v = a[i];
+    if (v < m) m = v;
   }
-  return middleOf(lower, upper);
+  return m;
 }
 
 /**
@@ -63,7 +71,12 @@ function middleOf(lower: number, upper: number): number {
   return lower + (upper - lower) / 2;
 }
 
-function quickSelectInPlace(a: Float64Array, lo: number, hi: number, k: number): number {
+/**
+ * Quickselect: reorder `a[lo..hi]` so that `a[k]` is its k-th smallest value, every value left of
+ * `k` is not above it and every value right of `k` is not below it. Returns `a[k]`. `a` must hold
+ * no NaN.
+ */
+export function quickSelectInPlace(a: Float64Array, lo: number, hi: number, k: number): number {
   while (lo < hi) {
     const mid = (lo + hi) >>> 1;
     if (a[mid] < a[lo]) swap(a, lo, mid);
