@@ -14674,7 +14674,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 607
+      "loc": 623
     },
     {
       "file": "matrix/src/operations/lstsq.ts",
@@ -15059,7 +15059,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 58
+      "loc": 73
     },
     {
       "file": "matrix/tests/dogfood-1171-schur-deflation.test.ts",
@@ -15073,7 +15073,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 159
+      "loc": 185
     },
     {
       "file": "matrix/tests/dogfood-1191-eig-issymmetric.test.ts",

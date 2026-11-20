@@ -258,6 +258,16 @@ function scalePow2(v: number, e: number): number {
 }
 
 /**
+ * A small eigenvalue (at most 1e-8 of the largest diagonal entry) must be at least this many
+ * times the backward error of the Schur form. The noise of a zero eigenvalue is of the size
+ * of that error and passed the check on a second Schur form by chance in about 1 of 1,500
+ * singular matrices, always with a ratio near 1; the limit 2 rejected all 16 such results of
+ * 16,000. On 1,716 matrices Q·T·Qᵀ with a small eigenvalue it rejected 6 more accurate
+ * results and 38 inaccurate ones than the second form alone (#1174).
+ */
+const NOISE_FACTOR = 2;
+
+/**
  * Schur-Padé logm: Higham (2008) Algorithm 11.10.
  *
  * 1. Schur decompose A = Q · T · Q^T.
@@ -311,6 +321,9 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
           throw nonPositiveEigenvalue(m, ', a complex pair that is not above the floor 1e-14');
       }
       if (!(m > 1e-8 * dmax)) {
+        if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
+        if (m < NOISE_FACTOR * backwardError)
+          throw nonPositiveEigenvalue(m, ', a complex pair not above the Schur backward error');
         second ??= secondSchurForm(A);
         if (!blockConfirmedBySecondForm(m, second))
           throw nonPositiveEigenvalue(m, ', a complex pair not confirmed by a second Schur form');
@@ -326,6 +339,9 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
         throw nonPositiveEigenvalue(d, ', which is not above the floor 1e-14');
     }
     if (d <= 1e-8 * dmax) {
+      if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
+      if (d < NOISE_FACTOR * backwardError)
+        throw nonPositiveEigenvalue(d, ', which is not above the Schur backward error');
       second ??= secondSchurForm(A);
       if (!confirmedBySecondForm(d, second))
         throw nonPositiveEigenvalue(d, ', not confirmed by a second Schur form');

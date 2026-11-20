@@ -156,3 +156,29 @@ describe('#1174 a cluster of zero eigenvalues is not read as a complex pair', ()
     expect(relativeError(got, want)).toBeLessThan(1e-5);
   });
 });
+
+describe('#1174 the noise of a zero eigenvalue at the size of the Schur backward error', () => {
+  // Rank-1 products B·C (2x1 by 1x2) times 2^e, rounded to double. The smallest Schur entry
+  // is noise of the size of the backward error of the Schur form, and the second Schur form
+  // confirmed it by chance; the logarithm came back finite and wrong (trace(logm) off from
+  // the exact log det of the rounded matrix by 0.27 to 2.4).
+  const cases: Rows[] = [
+    [
+      [1.2744418459349503e23, 6.818511722364847e22],
+      [3.62852854865626e23, 1.941333339207621e23],
+    ],
+    [
+      [-7.024299048882065e57, -1.6922427494737978e59],
+      [1.642557209557675e58, 3.9571286887511854e59],
+    ],
+    [
+      [4.7576937831371107e23, 5.153793437333309e24],
+      [1.6080630218277685e23, 1.7419415848259278e24],
+    ],
+  ];
+  for (const A of cases) {
+    it(`throws for ${JSON.stringify(A)}`, () => {
+      expect(() => matrixLogm(DenseMatrix.fromArray(A))).toThrow(/non-positive eigenvalue/);
+    });
+  }
+});
