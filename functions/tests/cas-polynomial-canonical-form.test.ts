@@ -110,9 +110,9 @@ describe('#887 one canonical polynomial form', () => {
       expect(coefficientTexts([1 / 3, 0.5])).toEqual(['1/3', '1/2']);
     });
 
-    it('keeps the decimals when every fraction has a finite decimal', () => {
-      expect(coefficientTexts([0.5, 0.25, 2])).toEqual(['0.5', '0.25', '2']);
-      expect(coefficientTexts([0.1 + 0.2])).toEqual(['0.3']);
+    it('writes a fraction with a finite decimal as a fraction too (#966)', () => {
+      expect(coefficientTexts([0.5, 0.25, 2])).toEqual(['1/2', '1/4', '2']);
+      expect(coefficientTexts([0.1 + 0.2])).toEqual(['3/10']);
     });
 
     it('keeps a small coefficient: only an exact zero is zero', () => {
@@ -174,9 +174,9 @@ describe('#887 one canonical polynomial form', () => {
       expect(expand('x/3+1/2')).toBe('1/3*x + 1/2');
       expect(expand('2/3*x^2-1/6')).toBe('2/3*x^2 - 1/6');
       expect(expand('(x+1)/3')).toBe('1/3*x + 1/3');
-      // a coefficient with a finite decimal keeps the decimal
-      expect(expand('0.5*x+0.25')).toBe('0.5*x + 0.25');
-      expect(expand('x/2')).toBe('0.5*x');
+      // a coefficient with a finite decimal is a fraction too (#966)
+      expect(expand('0.5*x+0.25')).toBe('1/2*x + 1/4');
+      expect(expand('x/2')).toBe('1/2*x');
     });
 
     it('expand keeps a small coefficient instead of dropping it', () => {
@@ -200,7 +200,7 @@ describe('#887 one canonical polynomial form', () => {
       expect(expand('0*x + 3')).toBe('3');
       expect(expand('x*0')).toBe('0');
       for (const input of ['(x+1)^2 - (x-1)^2', '2*x*(x-1) - 2*x^2 + 3*x']) {
-        expect(expand(input)).not.toMatch(/-0\*|0\*/);
+        expect(expand(input)).not.toMatch(/-0\*|\b0\*/);
       }
     });
 

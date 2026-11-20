@@ -6,6 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { solve, solveExact, integrate, expand } from '../src/index.js';
+import { coefficientTexts } from '../src/cas/render-polynomial.js';
 
 describe('#966 item 1: a polynomial that is identically zero is an identity, whatever its power', () => {
   it('solve((x-x)^1000000000) is an identity, not a degree error', () => {
@@ -243,5 +244,34 @@ describe('#966 item 7: a power is refused by its term count, not only by its tot
 
   it('(x+y+z)^40 stays inside the limit (861 terms)', () => {
     expect(expand('(x+y+z)^40').startsWith('x^40 + ')).toBe(true);
+  });
+});
+
+describe('#966 item 10: coefficientTexts writes each coefficient on its own', () => {
+  it('[0.5, 0.25, 2] gives fractions', () => {
+    expect(coefficientTexts([0.5, 0.25, 2])).toEqual(['1/2', '1/4', '2']);
+  });
+
+  it('[1/3, 0.5, 2] gives the same text for 0.5 as [0.5, 2]', () => {
+    expect(coefficientTexts([1 / 3, 0.5, 2])).toEqual(['1/3', '1/2', '2']);
+    expect(coefficientTexts([0.5, 2])).toEqual(['1/2', '2']);
+  });
+
+  it('a decimal with no small fraction keeps its decimal text', () => {
+    expect(coefficientTexts([0.123456, 2])).toEqual(['0.123456', '2']);
+  });
+
+  it('a coefficient below the fraction noise stays a decimal, never 0/1', () => {
+    // Every fraction is now written as a fraction, so a fixed tolerance would match 0/1 to 1e-20.
+    expect(coefficientTexts([1e-14, 1e-15, 1e-20])).toEqual(['1e-14', '1e-15', '1e-20']);
+    expect(expand('1e-20*x + 1')).toBe('1e-20*x + 1');
+    expect(coefficientTexts([1 / 10000, 1 / 10001])).toEqual(['1/10000', '0.0000999900009999']);
+  });
+
+  it('the text of a coefficient does not depend on its neighbours', () => {
+    for (const c of [0.5, 0.25, 0.1, 1 / 3, 7 / 12, 0.123456]) {
+      expect(coefficientTexts([c, 1 / 3])[0]).toBe(coefficientTexts([c])[0]);
+      expect(coefficientTexts([c, 0.5])[0]).toBe(coefficientTexts([c])[0]);
+    }
   });
 });

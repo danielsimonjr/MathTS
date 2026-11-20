@@ -6659,7 +6659,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 183
+      "loc": 173
     },
     {
       "file": "functions/src/cas/syntax-tree.ts",
@@ -10936,7 +10936,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 248
+      "loc": 278
     },
     {
       "file": "functions/tests/dogfood-978-eigs-complex-vectors.test.ts",
