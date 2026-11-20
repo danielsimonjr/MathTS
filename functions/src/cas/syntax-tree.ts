@@ -117,6 +117,22 @@ function scalePoly(a: Poly, factor: number): Poly {
   return { c: a.c.map((v) => v * factor), m: a.m.map((v) => v * Math.abs(factor)) };
 }
 
+/** True when coefficient `i` of `p` is rounding noise: no larger than the noise ratio of its own terms. */
+function isNoise(p: Poly, i: number): boolean {
+  return Number.isFinite(p.m[i]) && Math.abs(p.c[i]) <= COEFFICIENT_NOISE_RATIO * p.m[i];
+}
+
+/**
+ * `p` without its high-degree coefficients that read as zero (exact zeros and rounding noise). The
+ * constant term stays, so the result is never empty. `x - x` has the degree 1 as built and the
+ * degree 0 here, so `(x - x)^1000000000` is a constant and not a polynomial above the degree limit.
+ */
+function trimNoise(p: Poly): Poly {
+  let n = p.c.length;
+  while (n > 1 && isNoise(p, n - 1)) n--;
+  return n === p.c.length ? p : { c: p.c.slice(0, n), m: p.m.slice(0, n) };
+}
+
 /** The result of two parts: a part that is no polynomial decides first, then a degree that is too high. */
 function both(a: Built, b: Built, join: (x: Poly, y: Poly) => Built): Built {
   if (a === null || b === null) return null;
@@ -161,13 +177,17 @@ function buildPoly(node: AstNode, variable: string): Built {
     if (a === 'degree') return a;
     if (op === 'divide') return scalar === 0 ? null : scalePoly(a, 1 / scalar);
     if (!Number.isInteger(scalar) || scalar < 0) return null;
+    // The degree of the base is the degree after its zero coefficients are dropped.
+    const base = trimNoise(a);
     // A constant base needs no loop, and a base of degree d gives degree d*scalar: refuse a
     // power above the limit before the loop, so that `(x^0)^1e9` cannot run for long.
-    if (a.c.length === 1) return { c: [a.c[0] ** scalar], m: [a.m[0] ** scalar] };
-    if (scalar * (a.c.length - 1) > MAX_POLYNOMIAL_DEGREE) return 'degree';
+    if (base.c.length === 1) {
+      return { c: [(isNoise(base, 0) ? 0 : base.c[0]) ** scalar], m: [base.m[0] ** scalar] };
+    }
+    if (scalar * (base.c.length - 1) > MAX_POLYNOMIAL_DEGREE) return 'degree';
     let power: Built = { c: [1], m: [1] };
     for (let i = 0; i < scalar && power !== null && power !== 'degree'; i++) {
-      power = multiplyPolys(power, a);
+      power = multiplyPolys(power, base);
     }
     return power;
   }
@@ -213,7 +233,5 @@ export function polynomialCoefficients(node: AstNode, variable: string): number[
   const built = buildPoly(node, variable);
   if (built === null) return null;
   if (built === 'degree') throw new PolynomialDegreeError();
-  return built.c.map((c, i) =>
-    Number.isFinite(built.m[i]) && Math.abs(c) <= COEFFICIENT_NOISE_RATIO * built.m[i] ? 0 : c
-  );
+  return built.c.map((c, i) => (isNoise(built, i) ? 0 : c));
 }
