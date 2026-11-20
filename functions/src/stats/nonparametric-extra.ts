@@ -4,6 +4,7 @@
  */
 import { chiSquaredSF } from '../distribution-functions.js';
 import { normalCDF as _normalCDF } from '../typed/distributions.js';
+import { binomialTest } from '../typed/hypothesis.js';
 import { hasNaN, numberVector } from '../typed/number-matrix.js';
 import { medianOf as median } from './robust-stats.js';
 
@@ -28,16 +29,9 @@ export function signTest(
   }
   const n = nPos + nNeg;
   if (n === 0) return { statistic: 0, pValue: 1, nPos, nNeg };
-  const k = Math.min(nPos, nNeg);
-  let tail = 0;
-  for (let i = 0; i <= k; i++) tail += binomCoef(n, i) / 2 ** n;
-  return { statistic: nPos, pValue: Math.min(1, 2 * tail), nPos, nNeg };
-}
-
-function binomCoef(n: number, k: number): number {
-  let c = 1;
-  for (let i = 1; i <= k; i++) c = (c * (n - k + i)) / i;
-  return c;
+  // The binomial coefficients of the old sum overflowed for n above 1,029 (p-value NaN) and
+  // each of the k + 1 terms cost O(k). `binomialTest` sums the pmf in log space around n / 2.
+  return { statistic: nPos, pValue: binomialTest(nPos, n, 0.5).pValue, nPos, nNeg };
 }
 
 /**

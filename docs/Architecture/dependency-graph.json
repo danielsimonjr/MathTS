@@ -24190,6 +24190,10 @@
             "imports": ["normalCDF"]
           },
           {
+            "file": "../typed/hypothesis.js",
+            "imports": ["binomialTest"]
+          },
+          {
             "file": "../typed/number-matrix.js",
             "imports": ["hasNaN", "numberVector"]
           },
@@ -49893,7 +49897,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238631,
+    "totalLinesOfCode": 238635,
     "totalExports": 7397,
     "totalClasses": 62,
     "totalInterfaces": 669,

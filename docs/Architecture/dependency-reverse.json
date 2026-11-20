@@ -2844,6 +2844,11 @@
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/typed/dist-objects.ts"
     ],
+    "functions/src/typed/hypothesis.ts": [
+      "functions/src/stats/nonparametric-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/utils/print.ts": [
       "functions/src/string/print.ts",
       "functions/src/typed/string.ts"
@@ -2959,10 +2964,6 @@
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/graph.ts": [
-      "functions/src/typed/expression-eval-barrel.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/hypothesis.ts": [
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],

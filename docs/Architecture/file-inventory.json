@@ -8626,7 +8626,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 141
+      "loc": 151
     },
     {
       "file": "functions/src/stats/distributions-extra.ts",
@@ -8689,7 +8689,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 154
+      "loc": 148
     },
     {
       "file": "functions/src/stats/power-analysis.ts",
@@ -10698,7 +10698,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 157
+      "loc": 207
     },
     {
       "file": "functions/tests/dogfood-1148-mw-wilcoxon-scipy.test.ts",

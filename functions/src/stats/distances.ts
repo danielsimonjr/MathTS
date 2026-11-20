@@ -17,8 +17,8 @@ export function wassersteinDistance(
   const uv = numberVector('wassersteinDistance', u);
   const vv = numberVector('wassersteinDistance', v);
   if (uv.length === 0 || vv.length === 0) throw new RangeError('wassersteinDistance: empty sample');
-  const uw = normWeights('wassersteinDistance', uv, opts?.uWeights);
-  const vw = normWeights('wassersteinDistance', vv, opts?.vWeights);
+  const uw = checkedWeights('wassersteinDistance', uv, opts?.uWeights);
+  const vw = checkedWeights('wassersteinDistance', vv, opts?.vWeights);
   // ∫|F_u − F_v| dt over the merged support, sweeping both sorted samples
   // once (O(n log n)); the two CDFs are running weight sums.
   // SciPy gives NaN. A NaN sample point cannot be ordered, and the sweep below would not advance.
@@ -36,6 +36,11 @@ export function wassersteinDistance(
   if (posInf > 1 || negInf > 1) return NaN;
   const su = sortedWithWeights(uv, uw);
   const sv = sortedWithWeights(vv, vw);
+  // Each total is the sum in sorted order, the order of the running sums below (SciPy divides
+  // the cumulative weights by their last value). So the last running sum equals its total bit
+  // for bit and the CDF ends at 1 exactly; a total in input order can differ in the last bit.
+  const uTotal = su.reduce((acc, pair) => acc + pair[1], 0);
+  const vTotal = sv.reduce((acc, pair) => acc + pair[1], 0);
   let iu = 0;
   let iv = 0;
   let cu = 0;
@@ -44,7 +49,11 @@ export function wassersteinDistance(
   let prev = Number.NaN;
   while (iu < su.length || iv < sv.length) {
     const t = iu < su.length && (iv >= sv.length || su[iu][0] <= sv[iv][0]) ? su[iu][0] : sv[iv][0];
-    if (!Number.isNaN(prev) && t > prev) total += Math.abs(cu - cv) * (t - prev);
+    // A sample whose remaining weight is 0 has the CDF 1 exactly, so a gap of Infinity times a
+    // CDF difference of 0 gives NaN, as in SciPy, and not Infinity.
+    if (!Number.isNaN(prev) && t > prev) {
+      total += Math.abs(cu / uTotal - cv / vTotal) * (t - prev);
+    }
     while (iu < su.length && su[iu][0] === t) cu += su[iu++][1];
     while (iv < sv.length && sv[iv][0] === t) cv += sv[iv++][1];
     prev = t;
@@ -56,14 +65,15 @@ function sortedWithWeights(x: number[], w: number[]): Array<[number, number]> {
   return x.map((v, i): [number, number] => [v, w[i]]).sort((a, b) => a[0] - b[0]);
 }
 
-function normWeights(name: string, x: number[], w: Vec | undefined): number[] {
-  if (!w) return x.map(() => 1 / x.length);
+/** The validated weights (all 1 when absent). They are not normalised. */
+function checkedWeights(name: string, x: number[], w: Vec | undefined): number[] {
+  if (!w) return x.map(() => 1);
   const ws = numberVector(name, w);
   if (ws.length !== x.length) throw new RangeError('weights must match sample length');
   if (ws.some((v) => v < 0)) throw new RangeError('weights must be non-negative');
   const s = ws.reduce((acc, v) => acc + v, 0);
   if (s === 0) throw new RangeError('weights must not sum to zero');
-  return ws.map((v) => v / s);
+  return ws;
 }
 
 /**

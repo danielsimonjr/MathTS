@@ -40,6 +40,20 @@ describe('NaN input returns NaN (#1146)', () => {
     expect(r.pValue).toBeCloseTo(0.625, 12);
   });
 
+  // Oracle: scipy.stats.binomtest(k, n, 0.5).pvalue (the two-sided sign test p-value). The sum of
+  // binomial coefficients overflowed above n = 1,029: NaN at n = 1,100 and 0 at n = 1,030.
+  it.each([
+    [2000, 1001, 0.9821609888541463],
+    [1100, 551, 0.9759483422317677],
+    [1030, 400, 7.794704932486994e-13],
+    [20000, 10001, 0.9943581746877801],
+  ])('signTest: %i values with %i positive give the exact p-value', (n, k, p) => {
+    const x = Array.from({ length: n }, (_, i) => (i < k ? 1 : -1));
+    const r = signTest(x);
+    expect(r.nPos).toBe(k);
+    expect(Math.abs(r.pValue - p) / p).toBeLessThan(1e-9);
+  });
+
   it('moodMedianTest: scipy.stats.median_test gives nan, nan, nan', () => {
     const r = moodMedianTest([
       [1, NaN, 2, 3],
@@ -135,6 +149,42 @@ describe('infinite input (#1146)', () => {
   it('wassersteinDistance: a zero weight on an infinite value still gives NaN (0 * Infinity)', () => {
     expect(wassersteinDistance([1, Infinity], [1, 2], { uWeights: [1, 0] })).toBeNaN();
     expect(wassersteinDistance([Infinity, 2], [Infinity, 3], { uWeights: [0, 1] })).toBeNaN();
+  });
+
+  // SciPy 1.16.3 gives nan for both: the CDF of each sample is exactly 1 before the infinite
+  // gap (the infinite value has weight 0), and 0 * Infinity is NaN. Normalised weights summed
+  // to 1 - 1e-16 and gave Infinity.
+  it('wassersteinDistance: a zero weight on an infinite value gives NaN for any other weights', () => {
+    expect(
+      wassersteinDistance([-2, -2, 1, Infinity, -3], [3, 1, 0, 0], {
+        uWeights: [1, 2, 1, 0, 2],
+        vWeights: [1, 0, 0, 0],
+      })
+    ).toBeNaN();
+    expect(
+      wassersteinDistance([3, 1, 0, 0], [-2, -2, 1, Infinity, -3], {
+        uWeights: [1, 0, 0, 0],
+        vWeights: [1, 2, 1, 0, 2],
+      })
+    ).toBeNaN();
+  });
+
+  // SciPy 1.16.3 gives nan for each. The weights 0.1, 0.2, 0.3 sum to 0.6000000000000001 in
+  // input order and to 0.6 in sorted order, so a total in input order gave a CDF of
+  // 0.9999999999999998 before the infinite gap, and the result was Infinity.
+  it('wassersteinDistance: the CDF ends at 1 exactly for weights whose sum depends on the order', () => {
+    expect(
+      wassersteinDistance([3, 1, 2, Infinity], [0, 1], { uWeights: [0.1, 0.2, 0.3, 0] })
+    ).toBeNaN();
+    expect(
+      wassersteinDistance([0, 1], [3, 1, 2, Infinity], { vWeights: [0.1, 0.2, 0.3, 0] })
+    ).toBeNaN();
+    expect(wassersteinDistance([1, 2, Infinity], [1, 2], { uWeights: [0.1, 0.2, 0] })).toBeNaN();
+    // SciPy: 1.333333333333333.
+    expect(wassersteinDistance([3, 1, 2], [0, 1], { uWeights: [0.1, 0.2, 0.3] })).toBeCloseTo(
+      1.333333333333333,
+      14
+    );
   });
 
   it('wassersteinDistance: finite input is unchanged', () => {
