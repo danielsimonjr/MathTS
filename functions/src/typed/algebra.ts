@@ -1001,10 +1001,13 @@ export function expand(expr: string): string {
   // Split a factor into its additive terms, treating binary subtraction as a
   // signed term: "x - 2" → ["x", "-2"] (NOT ["x - 2"]). Without this the minus
   // dangled and `x*(x-2)` distributed to "x*x - 2" instead of "x*x + x*-2".
+  // A minus after an operator is a sign, not a subtraction: the sum of an earlier product holds
+  // terms such as "1*-4", and a cut there leaves "1*" and "-4" (the text "1**5"). The sign of an
+  // exponent ("2e-3", "2.5E+2") is part of the number literal: a cut there leaves "2e" and "-3".
   const splitTerms = (factor: string): string[] =>
     factor
-      .replace(/\s*-\s*/g, ' + -')
-      .split(/\s*\+\s*/)
+      .replace(/(?<=[\w.)])\s*(?<!(?<![\w.])[\d.]+[eE])-\s*/g, ' + -')
+      .split(/\s*(?<!(?<![\w.])[\d.]+[eE])\+\s*/)
       .map((t) => t.trim())
       .filter((t) => t !== '');
 

@@ -55,6 +55,41 @@ describe('#1167 expand fallback keeps the parentheses', () => {
     }
   });
 
+  it('keeps the value of a chain of three sums that hold a subtraction', () => {
+    // The sum of the first two sums holds terms such as "1*-4". The next product splits that sum
+    // again, and a minus that follows an operator is a sign, not a subtraction: the split once
+    // cut "1*-4" into "1*" and "-4" and wrote "1**5".
+    const inputs = [
+      '(1-2)*(3-4)*(5+6)',
+      '(1+2)*(3-4)*(5+6)',
+      '(5-3)*(7-7)*(0.5)',
+      '(1-2)*(3-4)*(5-6)*(2+1)',
+      '2*(1-2)*(3-4)*(5+6)',
+      '(1-2)*(3-4)*(5+6)/2',
+      '(a-b)*(c-d)*(e+f)*sin(x)',
+      '(a+b)*(c-d)*(e+f)*sin(x)',
+    ];
+    for (const input of inputs) {
+      expectSameValue(input);
+      expect(expand(input), input).not.toContain('**');
+    }
+  });
+
+  it('does not cut the sign of an exponent literal', () => {
+    // "2e-3" and "2.5E+2" are one number: the split once left "2e" and "-3", which does not parse.
+    const inputs = [
+      '(2e-3+1)*(3+4)',
+      '(1-2e-3)*(3+4)',
+      '(2.5E-2-1)*(3+4)',
+      '(1+2)*(3e-3+4)',
+      '(1e+3+1)*(3+4)',
+      '(1e-3+1)*(3-4)*(5+6)',
+      '(1-2)*(3-4)*(5e-1+6)',
+      '(1e-3+sin(2))*(3+4)*(5+6)',
+    ];
+    for (const input of inputs) expectSameValue(input);
+  });
+
   it('expands a plain product of two sums as before', () => {
     expect(expand('(a+b)*(c+d)')).toBe('a*c + a*d + b*c + b*d');
   });

@@ -9207,7 +9207,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2023
+      "loc": 2026
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -11342,7 +11342,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 72
+      "loc": 107
     },
     {
       "file": "functions/tests/expression-transforms.test.ts",
