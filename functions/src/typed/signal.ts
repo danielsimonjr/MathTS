@@ -30,6 +30,7 @@ import {
   goertzelDispatch,
   welchPSDDispatch,
   welchPSDJS,
+  windowTypeCode,
   WASM_SIGNAL_THRESHOLD,
 } from '../wasm/signal/wasm-bridge.js';
 import { dwtPeriodization } from '../signal/wavelet-filters.js';
@@ -555,43 +556,64 @@ export function groupDelay(
 // =============================================================================
 
 /**
- * Largest difference that `unwrapPhase` reduces by repeated subtraction of 2π: 2^20 turns.
- * The difference is `phase[i]` minus the previous unwrapped value, not the raw sample
- * step, so a long ramp of small steps also reaches the limit. A larger difference is
- * reduced with one exact remainder. Results at or below the limit are bit-identical to
- * the repeated subtraction.
+ * Floating-point remainder with the sign of the divisor, as `numpy.mod` (`npy_divmod`) for
+ * floats. A zero result is +0 for a positive divisor. A NaN or an infinite dividend gives NaN.
+ * `((a % b) + b) % b` is not the same: its addition rounds.
  */
-const UNWRAP_SUBTRACT_LIMIT: f64 = 2 * Math.PI * 2 ** 20;
+function floatMod(a: f64, b: f64): f64 {
+  let r: f64 = a % b;
+  if (r !== 0) {
+    if (r < 0 !== b < 0) r += b;
+  } else {
+    // A zero remainder takes the sign of the divisor (`copysign(0, b)` in `npy_divmod`).
+    r = b < 0 ? -0 : 0;
+  }
+  return r;
+}
 
 /**
- * Unwrap phase angles by adding +/-2*pi to remove discontinuities.
+ * Unwrap phase angles by adding multiples of 2*pi, so no step between neighbours exceeds pi.
  *
- * A non-finite step (NaN, Infinity, or a difference that overflows) has no wrapped
- * value: that entry and every later entry are NaN, as in `numpy.unwrap`.
+ * This is `numpy.unwrap` with period 2*pi and `discont = pi`: each correction comes from the
+ * raw difference of two neighbours, and the corrections add up in one pass, so the cost is
+ * O(n) at any phase value. A step of exactly -pi becomes +pi when the raw step was positive.
+ * Values equal `numpy.unwrap` to the last bit. A step that is NaN, infinite or overflows has
+ * no wrapped value: that entry and every later entry are NaN, as in NumPy.
  *
  * @param phase - Array of phase values in radians
  * @returns Unwrapped phase array
+ * @throws TypeError if `phase` is not a 1-D array or a typed array (a Matrix or a nested array is
+ *   rejected by name)
  */
 export function unwrapPhase(phase: number[]): number[] {
-  if (phase.length === 0) return [];
-  const result = [...phase];
-  for (let i: i32 = 1; i < result.length; i++) {
-    let diff: f64 = result[i] - result[i - 1];
-    if (!Number.isFinite(diff)) {
-      result[i] = NaN;
-      continue;
+  // A nested array is not a phase signal: its rows would be read as strings and NaN.
+  if (Array.isArray(phase) && Array.isArray(phase[0])) {
+    throw new TypeError('unwrapPhase: phase must be a 1-D array or a typed array');
+  }
+  // An array is read in place: a Float64Array copy of it costs more than the loop. Any other
+  // value goes through toSamples, which converts a typed array and rejects the rest by name.
+  const samples: ArrayLike<number> = Array.isArray(phase)
+    ? phase
+    : toSamples('unwrapPhase', phase, 'phase');
+  const n: i32 = samples.length;
+  if (n === 0) return [];
+  const period: f64 = 2 * Math.PI;
+  const result: number[] = new Array<number>(n);
+  let previous: f64 = samples[0];
+  result[0] = previous;
+  let cumulative: f64 = 0;
+  for (let i: i32 = 1; i < n; i++) {
+    const current: f64 = samples[i];
+    const diff: f64 = current - previous;
+    previous = current;
+    // A step below pi keeps its value: its correction is exactly zero, so the remainder (a slow
+    // fmod) runs only for a step of pi or more, or a NaN step, whose correction is NaN.
+    if (!(Math.abs(diff) < Math.PI)) {
+      let wrapped: f64 = floatMod(diff + Math.PI, period) - Math.PI;
+      if (wrapped === -Math.PI && diff > 0) wrapped = Math.PI;
+      cumulative += wrapped - diff;
     }
-    if (Math.abs(diff) > UNWRAP_SUBTRACT_LIMIT) {
-      // `%` is exact and leaves |diff| < 2π, so one correction is sufficient. Subtraction
-      // in a loop needs |diff| / 2π turns, and does not end when 2π is below one ulp of diff.
-      diff %= 2 * Math.PI;
-      if (diff > Math.PI) diff -= 2 * Math.PI;
-      else if (diff < -Math.PI) diff += 2 * Math.PI;
-    } else {
-      while (diff > Math.PI) diff -= 2 * Math.PI;
-      while (diff < -Math.PI) diff += 2 * Math.PI;
-    }
-    result[i] = result[i - 1] + diff;
+    result[i] = current + cumulative;
   }
   return result;
 }
@@ -609,18 +631,20 @@ export function unwrapPhase(phase: number[]): number[] {
  *
  * @param x - Input signal
  * @returns DCT coefficients
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
  *
  * @example
  * dct([1, 2, 3, 4]) // DCT-II coefficients
  */
 export function dct(x: number[]): number[] {
-  const N: i32 = x.length;
+  const samples = toSamples('dct', x);
+  const N: i32 = samples.length;
 
   const result = new Array(N);
   for (let k: i32 = 0; k < N; k++) {
     let sum: f64 = 0;
     for (let n: i32 = 0; n < N; n++) {
-      sum += x[n] * Math.cos((Math.PI / N) * (n + 0.5) * k);
+      sum += samples[n] * Math.cos((Math.PI / N) * (n + 0.5) * k);
     }
     result[k] = sum * (k === 0 ? Math.sqrt(1 / N) : Math.sqrt(2 / N));
   }
@@ -632,15 +656,17 @@ export function dct(x: number[]): number[] {
  *
  * @param X - DCT coefficients
  * @returns Reconstructed signal
+ * @throws TypeError if `X` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function idct(X: number[]): number[] {
-  const N: i32 = X.length;
+  const coeffs = toSamples('idct', X);
+  const N: i32 = coeffs.length;
 
   const result = new Array(N);
   for (let n: i32 = 0; n < N; n++) {
-    let sum: f64 = X[0] * Math.sqrt(1 / N);
+    let sum: f64 = coeffs[0] * Math.sqrt(1 / N);
     for (let k: i32 = 1; k < N; k++) {
-      sum += X[k] * Math.sqrt(2 / N) * Math.cos((Math.PI / N) * (n + 0.5) * k);
+      sum += coeffs[k] * Math.sqrt(2 / N) * Math.cos((Math.PI / N) * (n + 0.5) * k);
     }
     result[n] = sum;
   }
@@ -656,15 +682,17 @@ export function idct(X: number[]): number[] {
  *
  * @param x - Input signal
  * @returns DST coefficients
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function dst(x: number[]): number[] {
-  const N: i32 = x.length;
+  const samples = toSamples('dst', x);
+  const N: i32 = samples.length;
 
   const result = new Array(N);
   for (let k: i32 = 0; k < N; k++) {
     let sum: f64 = 0;
     for (let n: i32 = 0; n < N; n++) {
-      sum += x[n] * Math.sin((Math.PI / N) * (n + 0.5) * (k + 1));
+      sum += samples[n] * Math.sin((Math.PI / N) * (n + 0.5) * (k + 1));
     }
     result[k] = sum * Math.sqrt(2 / N);
   }
@@ -676,16 +704,18 @@ export function dst(x: number[]): number[] {
  *
  * @param X - DST coefficients
  * @returns Reconstructed signal
+ * @throws TypeError if `X` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function idst(X: number[]): number[] {
-  const N: i32 = X.length;
+  const coeffs = toSamples('idst', X);
+  const N: i32 = coeffs.length;
 
   const result = new Array(N);
   for (let n: i32 = 0; n < N; n++) {
     let sum: f64 = 0;
     for (let k: i32 = 0; k < N; k++) {
       const factor = k === N - 1 ? Math.sqrt(1 / N) : Math.sqrt(2 / N);
-      sum += X[k] * factor * Math.sin((Math.PI / N) * (n + 0.5) * (k + 1));
+      sum += coeffs[k] * factor * Math.sin((Math.PI / N) * (n + 0.5) * (k + 1));
     }
     result[n] = sum;
   }
@@ -898,14 +928,16 @@ export function invFourier(F: (omega: f64) => { re: f64; im: f64 }, omega: numbe
  *
  * @param x - Real input signal
  * @returns Imaginary part of the analytic signal
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
  */
 export function hilbertTransform(x: number[]): number[] {
-  const n: i32 = x.length;
+  const samples = toSamples('hilbertTransform', x);
+  const n: i32 = samples.length;
   const N: i32 = nextPowerOf2(n);
 
   const real = new Float64Array(N);
   const imag = new Float64Array(N);
-  for (let i: i32 = 0; i < n; i++) real[i] = x[i];
+  for (let i: i32 = 0; i < n; i++) real[i] = samples[i];
 
   const spectrum = fftCoreFloat64(real, imag, false);
 
@@ -945,16 +977,21 @@ export function hilbertTransform(x: number[]): number[] {
  * A defaulted `windowSize` is 256 clamped to the signal length, as for {@link welchPSD}; a
  * defaulted `hopSize` is half the window, and at least 1. An explicit `windowSize` longer than
  * the signal returns no frames. `windowSize` and `hopSize` must be integers of at least 1.
+ * An empty signal has no frames and no frequencies, as for {@link welchPSD}.
  *
  * @param x - Input signal
  * @param opts - { windowSize, hopSize, window }
  * @returns `{ magnitude: number[][], frequencies: number[], times: number[] }`
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
+ * @throws RangeError if the window has no power (a Hann window of length 2 is all zeros)
  */
 export function spectrogram(
   x: number[],
   opts?: { windowSize?: i32; hopSize?: i32; window?: string }
 ): { magnitude: number[][]; frequencies: number[]; times: number[] } {
-  const windowSize: i32 = resolvePsdFrameLength(x.length, opts?.windowSize);
+  const samples = toSamples('spectrogram', x);
+  if (samples.length === 0) return { magnitude: [], frequencies: [], times: [] };
+  const windowSize: i32 = resolvePsdFrameLength(samples.length, opts?.windowSize);
   const hopSize: i32 = opts?.hopSize ?? Math.max(1, Math.floor(windowSize / 2));
   if (!Number.isInteger(windowSize) || windowSize < 1) {
     throw new RangeError(
@@ -969,12 +1006,20 @@ export function spectrogram(
   const nFreqs: i32 = Math.floor(nfft / 2) + 1;
 
   const win = windowFunction(windowSize, winType);
+  // A Hann window of length 2 is [0, 0]: every frame would have zero magnitude.
+  let winPower: f64 = 0;
+  for (let i: i32 = 0; i < windowSize; i++) winPower += win[i] * win[i];
+  if (!(winPower > 0)) {
+    throw new RangeError(
+      `spectrogram: the '${winType}' window of length ${windowSize} is all zeros; use another window or more samples`
+    );
+  }
 
   const frequencies: number[] = Array.from({ length: nFreqs }, (_, i) => i / nfft);
 
   // Collect every frame start offset; each frame is an independent FFT.
   const starts: i32[] = [];
-  for (let start: i32 = 0; start + windowSize <= x.length; start += hopSize) {
+  for (let start: i32 = 0; start + windowSize <= samples.length; start += hopSize) {
     starts.push(start);
   }
   const frameCount: i32 = starts.length;
@@ -995,7 +1040,7 @@ export function spectrogram(
     const real = new Float64Array(nfft);
     const imag = new Float64Array(nfft);
     for (let i: i32 = 0; i < windowSize; i++) {
-      real[i] = x[start + i] * win[i];
+      real[i] = samples[start + i] * win[i];
     }
 
     const result = fftCoreFloat64(real, imag, false);
@@ -1051,6 +1096,12 @@ export function periodogram(
   let winPower: f64 = 0;
   for (let i: i32 = 0; i < n; i++) winPower += win[i] * win[i];
   winPower /= n;
+  // A Hann window of length 2 is [0, 0]: no power, so the periodogram would be 0 / 0 (NaN).
+  if (!(winPower > 0)) {
+    throw new RangeError(
+      `periodogram: the '${winType}' window of length ${n} is all zeros; use another window or more samples`
+    );
+  }
 
   const real = new Float64Array(nfft);
   const imag = new Float64Array(nfft);
@@ -1282,26 +1333,41 @@ export function resample(x: number[], newRate: f64, oldRate?: f64): number[] {
 // =============================================================================
 
 /**
- * Apply a median filter to a signal.
+ * Apply a median filter to a signal, as `scipy.signal.medfilt` does.
+ *
+ * The signal is padded with zeros at both ends, so every window holds `n` values. A window
+ * longer than the signal is allowed; its padded values are zeros.
  *
  * @param x - Input signal
- * @param n - Window size (default 3, must be odd)
+ * @param n - Window size (default 3). An even size is increased by one.
  * @returns Filtered signal
+ * @throws TypeError if `x` is not an array or a typed array (a Matrix is rejected by name)
+ * @throws RangeError if `n` is not a positive integer
  */
 export function medfilt(x: number[], n: i32 = 3): number[] {
+  if (!Array.isArray(x)) x = Array.from(toSamples('medfilt', x, 'x'));
+  if (!(Number.isInteger(n) && n >= 1)) {
+    throw new RangeError(`medfilt: n must be a positive integer (got ${n})`);
+  }
   if (n % 2 === 0) n += 1;
-  const half: i32 = Math.min(Math.floor(n / 2), x.length);
-  const result: number[] = new Array(x.length);
+  const half: i32 = Math.floor(n / 2);
+  const len: i32 = x.length;
+  const result: number[] = new Array(len);
 
-  for (let i: i32 = 0; i < x.length; i++) {
-    const window: number[] = [];
-    for (let j: i32 = i - half; j <= i + half; j++) {
-      if (j >= 0 && j < x.length) {
-        window.push(x[j]);
-      }
-    }
+  for (let i: i32 = 0; i < len; i++) {
+    // The in-range values of the window. The other n - window.length values are zero padding,
+    // which is counted and never stored, so a huge n allocates nothing more.
+    const lo: i32 = Math.max(0, i - half);
+    const hi: i32 = Math.min(len - 1, i + half);
+    const window: number[] = x.slice(lo, hi + 1);
     window.sort((a, b) => a - b);
-    result[i] = window[Math.floor(window.length / 2)];
+    const zeros: i32 = n - window.length;
+    // The sorted window with the zeros in place: the negative values, the zeros, the rest.
+    let negatives: i32 = 0;
+    while (negatives < window.length && window[negatives] < 0) negatives++;
+    if (half < negatives) result[i] = window[half];
+    else if (half < negatives + zeros) result[i] = 0;
+    else result[i] = window[half - zeros];
   }
 
   return result;
@@ -1487,9 +1553,14 @@ function packPsd(
  * Welch PSD measures slower on WASM than JS (`functions/src/wasm/policy.ts` header);
  * bridges may be consulted but `wasmPolicyAllows` keeps welch/bartlett on JS.
  *
+ * The window is symmetric, so a Hann window of length 2 is `[0, 0]`: it has no power, and the
+ * PSD would be NaN. That case throws.
+ *
  * @param signal - Input signal samples
  * @param opts - { frameLength, overlap, window }
  * @returns `{ psd: number[], frequencies: number[], frameLength: number }`
+ * @throws RangeError if the frame is shorter than 2, longer than the signal, or a Hann window of
+ *   length 2
  */
 export function welchPSD(
   signal: number[] | Float64Array,
@@ -1504,6 +1575,11 @@ export function welchPSD(
   if (samples.length > 0 && overlap >= frameLength) {
     throw new RangeError(
       `welchPSD: overlap (${overlap}) must be less than frameLength (${frameLength})`
+    );
+  }
+  if (samples.length > 0 && frameLength === 2 && windowTypeCode(window) === 0) {
+    throw new RangeError(
+      "welchPSD: a 'hann' window of length 2 is all zeros; use frameLength >= 3 or another window"
     );
   }
   return packPsd(samples, frameLength, (s, fl) => welchPSDDispatch(s, fl, overlap, window));
@@ -1539,10 +1615,18 @@ export function bartlettPSD(
  * For large inputs, each tapered periodogram uses the Welch dispatch (JS path per
  * `wasmPolicyAllows`; see `functions/src/wasm/policy.ts`).
  *
+ * When `nfft` is larger than the signal, each taper is zero-padded to `nfft`, so bin `i` is at
+ * the frequency `i / nfft` and the PSD is the periodogram `|X|^2 / n` of the `n` samples.
+ *
+ * When `nfft` is smaller than the signal, each tapered signal is cut into `floor(n / nfft)`
+ * frames of `nfft` samples with no overlap, and a tail shorter than `nfft` is dropped. The
+ * per-taper PSD is then the mean of the periodograms of these frames (Welch's method with a
+ * rectangular window), and bin `i` is at the frequency `i / nfft`.
+ *
  * @param signal - Input signal samples
  * @param opts - { nfft, K } (K = number of tapers, default 5)
  * @returns `{ psd: number[], frequencies: number[] }`; empty for an empty signal
- * @throws RangeError if the signal has exactly one sample
+ * @throws RangeError if the signal has exactly one sample, or if `nfft` or `K` is not a positive integer
  */
 export function multiTaperPSD(
   signal: number[] | Float64Array,
@@ -1556,38 +1640,47 @@ export function multiTaperPSD(
   }
   const nfft: i32 = opts?.nfft ?? (Math.pow(2, Math.ceil(Math.log2(n))) as i32);
   const K: i32 = opts?.K ?? 5;
+  if (!(Number.isInteger(nfft) && nfft >= 1)) {
+    throw new RangeError(`multiTaperPSD: nfft must be a positive integer (got ${nfft})`);
+  }
+  if (!(Number.isInteger(K) && K >= 1)) {
+    throw new RangeError(`multiTaperPSD: K must be a positive integer (got ${K})`);
+  }
 
   // Approximate Slepian tapers via discrete cosine windows.
   // Taper k: w_k[n] = sin((k+1) * pi * n / (N+1)) — a sine-family taper.
   const psdLen: i32 = Math.floor(nfft / 2) + 1;
   const accumPsd = new Float64Array(psdLen);
 
+  // An nfft above n zero-pads each taper to nfft (the tail of this buffer stays zero), so the
+  // frame has nfft samples and bin i is at i / nfft. A frame of n samples would put bin i at i / n.
+  const tapered = new Float64Array(nfft > n ? nfft : n);
+
   for (let k: i32 = 0; k < K; k++) {
     // Build taper k and apply to signal
-    const tapered = new Float64Array(n);
     for (let j: i32 = 0; j < n; j++) {
       const w: f64 = Math.sin(((k + 1) * Math.PI * (j + 1)) / (n + 1));
       tapered[j] = samples[j] * w;
     }
 
-    // Per-taper PSD via Welch (single frame = full signal, no overlap)
-    let frameLen: i32 = nfft;
-    if (frameLen > n) frameLen = n;
+    // Per-taper PSD via Welch: frames of nfft samples, no overlap (one frame when nfft >= n)
     const taperPsd =
       n >= WASM_SIGNAL_THRESHOLD
-        ? welchPSDDispatch(tapered, frameLen, 0, 'rect')
-        : welchPSDJS(tapered, frameLen, 0, 3);
+        ? welchPSDDispatch(tapered, nfft, 0, 'rect')
+        : welchPSDJS(tapered, nfft, 0, 3);
 
     for (let i: i32 = 0; i < psdLen && i < taperPsd.length; i++) {
       accumPsd[i] += taperPsd[i];
     }
   }
 
-  // Average over tapers
+  // Average over tapers. The kernel divides by its frame length (nfft); the periodogram of the
+  // n samples divides by n, so a padded frame is scaled by nfft / n.
+  const padScale: f64 = nfft > n ? nfft / n : 1;
   const psd: number[] = [];
   const frequencies: number[] = [];
   for (let i: i32 = 0; i < psdLen; i++) {
-    psd.push(accumPsd[i] / K);
+    psd.push((accumPsd[i] / K) * padScale);
     frequencies.push(i / nfft);
   }
   return { psd, frequencies };

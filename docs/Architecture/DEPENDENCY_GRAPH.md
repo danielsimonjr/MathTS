@@ -1913,7 +1913,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `scaleDense`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
+- Functions: `eye`, `cloneMatrix`, `transpose`, `matInv`, `gaussJordanSolve`, `gaussJordanContinue`, `isSymmetric`, `matMul`, `matAdd`, `matSub`, `matScale`, `normInf`, `relativeDifference`, `scaleDense`, `norm1`, `householder`, `applyHouseholderLeft`, `applyHouseholderRight`
 - Re-exports: `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `EntryRange`
 
 ---
@@ -2059,18 +2059,18 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                                        | Type   |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                  | Import |
-| `./eig.js`                | `eig`                                                                                                                                          | Import |
-| `./schur.js`              | `schurInternal`                                                                                                                                | Import |
-| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
-| `./sqrtm.js`              | `matrixSqrtNewtonInternal`                                                                                                                     | Import |
+| File                      | Imports                                                                                                                                                            | Type   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                                      | Import |
+| `./eig.js`                | `eig`                                                                                                                                                              | Import |
+| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                                                             | Import |
+| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
+| `./sqrtm.js`              | `matrixSqrtNewtonInternal, sqrtmQuasiTriangular`                                                                                                                   | Import |
 
 **Exports:**
 
 - Interfaces: `LogmOptions`
-- Functions: `matrixLogm`
+- Functions: `logPade`, `matrixLogm`, `assertFiniteLogm`
 
 ---
 
@@ -2195,7 +2195,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `SchurResult`, `SchurOptions`
-- Functions: `matrixSchur`, `schurInternal`
+- Functions: `negligibleSubdiagonal`, `matrixSchur`, `schurInternal`
 
 ---
 
@@ -2203,17 +2203,17 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                     | Type   |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                               | Import |
-| `./eig.js`                | `eig`                                                                                                                       | Import |
-| `./schur.js`              | `schurInternal`                                                                                                             | Import |
-| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, normInf, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
+| File                      | Imports                                                                                                                                         | Type   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                   | Import |
+| `./eig.js`                | `eig`                                                                                                                                           | Import |
+| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                                          | Import |
+| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, normInf, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
 
 **Exports:**
 
 - Interfaces: `SqrtmOptions`
-- Functions: `matrixSqrtm`, `matrixSqrtNewtonInternal`
+- Functions: `sqrtmQuasiTriangular`, `matrixSqrtm`, `matrixSqrtNewtonInternal`
 
 ---
 
@@ -7835,9 +7835,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import                                                                |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core` | `ABS_CUTOFF_LO, SQUARED, allFinite, entryRange, ldexp, withPow2Scale` |
+| Package                        | Import                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `DenseMatrix, matrixSqrtm`                                                        |
+| `@danielsimonjr/mathts-core`   | `ABS_CUTOFF_LO, SQUARED, allFinite, entryRange, ldexp, withPow2Scale, EntryRange` |
 
 **Internal Dependencies:**
 
@@ -9543,7 +9544,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `rfft`, `rfft`, `rfft`, `rfft`, `irfft`, `fftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `fftn`, `fftn`, `fftn`
+- Functions: `rfft`, `rfft`, `rfft`, `rfft`, `irfft`, `fftshift`, `fftshift`, `fftshift`, `ifftshift`, `ifftshift`, `ifftshift`, `fftfreq`, `rfftfreq`, `fftn`, `fftn`, `fftn`, `fftn`
 
 ---
 
@@ -9657,6 +9658,7 @@ graph LR
 | `./fft.js`                  | `fft, ComplexNumber` | Import |
 | `./fft-core-f64.js`         | `fftExactFloat64`    | Import |
 | `../typed/signal.js`        | `windowFunction`     | Import |
+| `../utils/samples.js`       | `toSamples`          | Import |
 | `../signal-filter-extra.js` | `butter, filtfilt`   | Import |
 
 **Exports:**
@@ -12692,16 +12694,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports                                                                                                                                    | Type               |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| `../utils/limits.js`            | `assertAllocSize`                                                                                                                          | Import             |
-| `../utils/samples.js`           | `toSamples`                                                                                                                                | Import             |
-| `./public-type-exports.js`      | `PublicParallelFFT`                                                                                                                        | Import (type-only) |
-| `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                          | Import             |
-| `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                           | Import             |
-| `./parallel-map.js`             | `mapBinaryF64`                                                                                                                             | Import             |
-| `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, WASM_SIGNAL_THRESHOLD` | Import             |
-| `../signal/wavelet-filters.js`  | `dwtPeriodization`                                                                                                                         | Import             |
+| File                            | Imports                                                                                                                                                    | Type               |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `../utils/limits.js`            | `assertAllocSize`                                                                                                                                          | Import             |
+| `../utils/samples.js`           | `toSamples`                                                                                                                                                | Import             |
+| `./public-type-exports.js`      | `PublicParallelFFT`                                                                                                                                        | Import (type-only) |
+| `../signal/fft-core-f64.js`     | `fftCoreFloat64, fftExactFloat64`                                                                                                                          | Import             |
+| `../gpu/fft-gpu.js`             | `fftGpuDispatch`                                                                                                                                           | Import             |
+| `./parallel-map.js`             | `mapBinaryF64`                                                                                                                                             | Import             |
+| `../wasm/signal/wasm-bridge.js` | `applyWindowDispatch, bartlettPSDDispatch, chirpZTransformDispatch, goertzelDispatch, welchPSDDispatch, welchPSDJS, windowTypeCode, WASM_SIGNAL_THRESHOLD` | Import             |
+| `../signal/wavelet-filters.js`  | `dwtPeriodization`                                                                                                                                         | Import             |
 
 **Exports:**
 
@@ -13721,7 +13723,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `applyWindowJS`, `goertzelJS`, `welchPSDJS`, `bartlettPSDJS`, `chirpZTransformJS`, `applyWindowDispatch`, `welchPSDDispatch`, `bartlettPSDDispatch`, `goertzelDispatch`, `chirpZTransformDispatch`
+- Functions: `windowTypeCode`, `applyWindowJS`, `goertzelJS`, `welchPSDJS`, `bartlettPSDJS`, `chirpZTransformJS`, `applyWindowDispatch`, `welchPSDDispatch`, `bartlettPSDDispatch`, `goertzelDispatch`, `chirpZTransformDispatch`
 - Constants: `WASM_SIGNAL_THRESHOLD`
 
 ---
@@ -21788,12 +21790,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 239672 |
-| Total Exports           | 7408   |
+| Total Lines of Code     | 240228 |
+| Total Exports           | 7414   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 673    |
-| Total Functions         | 2593   |
+| Total Functions         | 2603   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

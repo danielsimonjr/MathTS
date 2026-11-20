@@ -81,7 +81,9 @@ describe('managed-ABI calls keep WASM memory bounded', () => {
     await assertBounded('bitAnd', () => bitAnd(a, b));
   });
 
-  it('welchPSD (a kernel that allocates its own result)', async () => {
+  // 200 welchPSD calls of 65,536 samples take 4 to 6 s on a loaded host; bun test has a 5 s
+  // default, vitest the 30 s of vitest.config.ts. This states the same 30 s for both runners.
+  it('welchPSD (a kernel that allocates its own result)', { timeout: 30_000 }, async () => {
     const signal = Float64Array.from({ length: 65536 }, (_, i) => Math.sin(i / 10));
     const { counts } = countExportCalls(['welch_psd_f64'], () =>
       welchPSD(signal, { frameLength: 256 })

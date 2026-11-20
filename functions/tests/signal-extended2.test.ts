@@ -29,6 +29,10 @@ import {
   correlate,
 } from '../src/typed/signal.js';
 
+// Other files that run in the same process (bun test) read the shared pool: restore its
+// configuration (a later file calls initialize() to start it again).
+const savedPoolConfig = computePool.getConfig();
+
 const EPSILON = 1e-6;
 
 function expectClose(actual: number, expected: number, tol = EPSILON) {
@@ -43,7 +47,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  computePool.updateConfig({ thresholdElements: 1_000_000 });
+  computePool.updateConfig(savedPoolConfig);
   await computePool.terminate();
 });
 

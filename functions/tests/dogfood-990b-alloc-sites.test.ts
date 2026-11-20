@@ -186,8 +186,9 @@ describe('dogfood #990 allocation sites', () => {
     expect(dirichletSample([1, 1], 3, { seed: 1 })).toHaveLength(3);
   });
 
-  it('medfilt clamps a huge window to the signal length', () => {
-    expect(medfilt([1, 2, 3], 1e9)).toEqual([2, 2, 2]);
+  it('medfilt takes a huge window without allocating it (the zero padding is counted)', () => {
+    // scipy.signal.medfilt([1, 2, 3], 1000000001) is [0, 0, 0]: the window is mostly zeros.
+    expect(medfilt([1, 2, 3], 1e9)).toEqual([0, 0, 0]);
   });
 
   it('stirlingS2 with a long n and a small k does not build a table', () => {

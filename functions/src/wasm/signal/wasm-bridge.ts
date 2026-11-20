@@ -43,8 +43,12 @@ export const WASM_SIGNAL_THRESHOLD = 4096;
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-/** Map string window name → integer type code. */
-function windowTypeCode(name: string): number {
+/**
+ * Map string window name → integer type code (0 Hann, 1 Hamming, 2 Blackman, 3 rectangular).
+ * An unknown name is rectangular. Every caller that needs the Hann aliases asks this function,
+ * so the alias list lives in one place.
+ */
+export function windowTypeCode(name: string): number {
   switch (name) {
     case 'hann':
     case 'hanning':
@@ -236,8 +240,10 @@ export function welchPSDJS(
 
   const norm = numFrames * frameLength * winPower;
   for (let k = 0; k < psdLen; k++) psd[k] /= norm;
-  // Double one-sided bins
-  for (let k = 1; k < psdLen - 1; k++) psd[k] *= 2;
+  // Double the one-sided bins. DC is never doubled. The last bin is the Nyquist bin, and so is
+  // left single, only for an even frame; for an odd frame it lies below Nyquist and is doubled.
+  const doubleEnd = frameLength % 2 === 0 ? psdLen - 1 : psdLen;
+  for (let k = 1; k < doubleEnd; k++) psd[k] *= 2;
   return psd;
 }
 
