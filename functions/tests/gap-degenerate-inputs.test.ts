@@ -127,9 +127,12 @@ describe('hypothesis-extra — degenerate input guards', () => {
     expect(kruskalWallis([1, 2, 3], [4, 5, 6]).df).toBe(1); // happy path
   });
 
-  it('wilcoxon throws on unequal-length pairs and all-zero differences', () => {
+  it('wilcoxon throws on unequal-length pairs; all-zero differences give p = 1 as in SciPy', () => {
     expect(() => wilcoxon([1, 2, 3], [1, 2])).toThrow(/equal length|length/i);
-    expect(() => wilcoxon([3, 3, 3], [3, 3, 3])).toThrow(/differences are zero|zero/i);
+    // scipy.stats.wilcoxon([3, 3, 3], [3, 3, 3]) (1.16.3): statistic 0.0, p 1.0.
+    const r = wilcoxon([3, 3, 3], [3, 3, 3]);
+    expect(r.statistic).toBe(0);
+    expect(r.pValue).toBe(1);
   });
 
   it('tukeyHSD throws on <2 groups or non-positive residual df', () => {

@@ -10424,6 +10424,9 @@ modules:
           imports:
             - hasNaN
             - numberVector
+        - file: ./utils/limits.js
+          imports:
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - fTest
@@ -22868,8 +22871,12 @@ modules:
         - file: ../typed/distributions.js
           imports:
             - normalCDF
+        - file: ../typed/hypothesis.js
+          imports:
+            - binomialTest
         - file: ../typed/number-matrix.js
           imports:
+            - hasNaN
             - numberVector
         - file: ./robust-stats.js
           imports:
@@ -26529,7 +26536,9 @@ modules:
             - multipleTest
         - file: ../utils/limits.js
           imports:
+            - assertAllocSize
             - assertLoopOrder
+            - MAX_LOOP_ORDER
         - file: ./number-matrix.js
           imports:
             - hasNaN
@@ -27980,6 +27989,9 @@ modules:
         - file: ../utils/limits.js
           imports:
             - assertAllocSize
+        - file: ./number-matrix.js
+          imports:
+            - hasNaN
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -47106,7 +47118,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 239023
+  totalLinesOfCode: 239306
   totalExports: 7408
   totalClasses: 62
   totalInterfaces: 673

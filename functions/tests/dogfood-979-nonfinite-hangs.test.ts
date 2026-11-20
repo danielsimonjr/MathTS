@@ -198,7 +198,8 @@ describe('#979 non-finite input returns instead of hanging', () => {
       expect(e.error, name).toBe('RangeError');
       expect(e.message, name).toMatch(/^fisherExact:/);
     }
-    expect((value('fisherValid') as { pValue: number }).pValue).toBe(0.24242424242424324);
+    // The exact value is 8 / 33 (a sum of log-gamma terms gave 0.24242424242424324).
+    expect((value('fisherValid') as { pValue: number }).pValue).toBeCloseTo(8 / 33, 15);
   });
   it('fisherExact throws a RangeError for a table whose loop does not end', () => {
     expect(error('fisherHuge').message).toBe(
@@ -210,7 +211,9 @@ describe('#979 non-finite input returns instead of hanging', () => {
     }
   });
   it('pin: fisherExact accepts a large entry when the margins keep the loop short', () => {
-    expect((value('fisherWideMargin') as { pValue: number }).pValue).toBe(8.823114100281055e-33);
+    // The exact value, from integers (math.comb). A sum of log-gamma terms gave 8.823e-33:
+    // log-gamma of 2^40 has an absolute error of about 3e-3.
+    expect((value('fisherWideMargin') as { pValue: number }).pValue).toBe(8.847240681642632e-33);
   });
   it('peakWidths throws a RangeError for an index that is not an integer in range', () => {
     const cases: [string, number][] = [
