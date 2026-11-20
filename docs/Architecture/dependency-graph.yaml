@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1358
+  totalFiles: 1359
   totalModules: 82
-  totalExports: 7445
+  totalExports: 7453
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -14819,7 +14819,7 @@ modules:
       constants:
         - createBellNumbers
     functions/src/combinatorics/catalan.ts:
-      description: The Catalan Numbers enumerate combinatorial structures of many different types.
+      description: The smallest `n` whose Catalan number is above the largest double (C_519 = 1.4e308 is the
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -19456,6 +19456,9 @@ modules:
           imports:
             - assertAllocSize
             - assertLoopOrder
+        - file: ./tridiagonal-eigen.js
+          imports:
+            - symTridiagEigenvalues
       workspaceDependencies: []
       exports:
         - rootsHermite
@@ -19920,6 +19923,20 @@ modules:
         - SvdsResult
       functions:
         - svds
+    functions/src/numeric/tridiagonal-eigen.ts:
+      description: Eigenvalues and eigenvectors of a real symmetric tridiagonal matrix.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - symTridiagEigenvalues
+        - symTridiagEigenvalue
+        - symTridiagEigenvector
+      functions:
+        - symTridiagEigenvalues
+        - symTridiagEigenvalue
+        - symTridiagEigenvector
   functions/plain:
     functions/src/plain/number/arithmetic.ts:
       description: Calculate gcd for numbers
@@ -21926,6 +21943,10 @@ modules:
         - file: ./spheroidal.js
           imports:
             - ferrersP
+        - file: ../utils/limits.js
+          imports:
+            - MAX_FERRERS_ORDER
+            - assertLoopOrder
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -22040,12 +22061,15 @@ modules:
       description: 'Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the'
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
-      workspaceDependencies:
-        - package: '@danielsimonjr/mathts-matrix'
-          directory: matrix
+      internalDependencies:
+        - file: ../numeric/tridiagonal-eigen.js
           imports:
-            - eig
+            - symTridiagEigenvalue
+            - symTridiagEigenvector
+        - file: ../utils/limits.js
+          imports:
+            - MAX_MATHIEU_HARMONICS
+      workspaceDependencies: []
       exports:
         - mathieuA
         - mathieuB
@@ -22175,6 +22199,10 @@ modules:
         - file: ./hypergeometric.js
           imports:
             - hyp1f1
+        - file: ../utils/limits.js
+          imports:
+            - MAX_SIEGEL_Z_T
+            - assertLoopOrder
       workspaceDependencies: []
       exports:
         - siegelZ
@@ -28129,6 +28157,12 @@ modules:
         - file: ./parallel-map.js
           imports:
             - kernelSource
+        - file: ../utils/limits.js
+          imports:
+            - MAX_CHEBYSHEV_ORDER
+            - MAX_LAGUERRE_ORDER
+            - MAX_RECURRENCE_ORDER
+            - assertArrayWork
         - file: ./worker-kernels.js
           imports:
             - numberLiteral
@@ -28178,6 +28212,7 @@ modules:
             - besselY0Dispatch
             - besselY1Dispatch
             - besselYDispatch
+            - assertBesselArrayWork
             - airyAiDispatch
             - airyBiDispatch
             - ellipticKDispatch
@@ -29371,12 +29406,17 @@ modules:
         - MAX_FERRERS_ORDER
         - MAX_EXPN_ORDER
         - MAX_LAGUERRE_ORDER
+        - MAX_CHEBYSHEV_ORDER
         - MAX_SPHERICAL_BESSEL_ORDER
         - MAX_BESSEL_J_SWEEP
+        - MAX_SIEGEL_Z_T
+        - MAX_MATHIEU_HARMONICS
         - assertAllocSize
+        - assertArrayWork
         - assertLoopOrder
       functions:
         - assertAllocSize
+        - assertArrayWork
         - assertLoopOrder
       constants:
         - MAX_ALLOC_ELEMENTS
@@ -29387,8 +29427,11 @@ modules:
         - MAX_FERRERS_ORDER
         - MAX_EXPN_ORDER
         - MAX_LAGUERRE_ORDER
+        - MAX_CHEBYSHEV_ORDER
         - MAX_SPHERICAL_BESSEL_ORDER
         - MAX_BESSEL_J_SWEEP
+        - MAX_SIEGEL_Z_T
+        - MAX_MATHIEU_HARMONICS
     functions/src/utils/map.ts:
       description: A `Map`-facade over a bare object (`ObjectWrappingMap`), a two-partition
       externalDependencies: []
@@ -30386,6 +30429,8 @@ modules:
         - file: ../../utils/limits.js
           imports:
             - MAX_BESSEL_J_SWEEP
+            - MAX_RECURRENCE_ORDER
+            - assertArrayWork
       workspaceDependencies: []
       exports:
         - WASM_SPECIAL_THRESHOLD
@@ -30406,6 +30451,7 @@ modules:
         - besselYnJS
         - airyAiJS
         - airyBiJS
+        - assertBesselArrayWork
         - besselJDispatch
         - besselYDispatch
         - lgammaJS
@@ -30445,6 +30491,7 @@ modules:
         - besselYnJS
         - airyAiJS
         - airyBiJS
+        - assertBesselArrayWork
         - besselJDispatch
         - besselYDispatch
         - lgammaJS
@@ -46460,6 +46507,7 @@ dependencyGraph:
         - functions/src/numeric/solveParabolicPDE.ts
         - functions/src/numeric/structured-solvers.ts
         - functions/src/numeric/svds.ts
+        - functions/src/numeric/tridiagonal-eigen.ts
     - name: Functions/plain
       files:
         - functions/src/plain/number/arithmetic.ts
@@ -47460,16 +47508,16 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1358
+  totalTypeScriptFiles: 1359
   totalModules: 82
-  totalLinesOfCode: 244736
-  totalExports: 7445
+  totalLinesOfCode: 245798
+  totalExports: 7453
   totalClasses: 64
   totalInterfaces: 676
-  totalFunctions: 2625
+  totalFunctions: 2630
   totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1698
+  totalConstants: 1701
   totalReExports: 3194
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2

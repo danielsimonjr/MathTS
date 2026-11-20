@@ -141,7 +141,7 @@ The codebase is organized into the following modules:
 - **functions/matrix**: 49 files
 - **functions/ml**: 6 files
 - **functions/numbertheory**: 6 files
-- **functions/numeric**: 33 files
+- **functions/numeric**: 34 files
 - **functions/plain**: 10 files
 - **functions/probability**: 17 files
 - **functions/relational**: 14 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 595            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 596            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -5985,7 +5985,7 @@ graph LR
 
 ---
 
-### `functions/src/combinatorics/catalan.ts` - The Catalan Numbers enumerate combinatorial structures of many different types.
+### `functions/src/combinatorics/catalan.ts` - The smallest `n` whose Catalan number is above the largest double (C_519 = 1.4e308 is the
 
 **Internal Dependencies:**
 
@@ -8378,9 +8378,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports                            | Type   |
-| -------------------- | ---------------------------------- | ------ |
-| `../utils/limits.js` | `assertAllocSize, assertLoopOrder` | Import |
+| File                     | Imports                            | Type   |
+| ------------------------ | ---------------------------------- | ------ |
+| `../utils/limits.js`     | `assertAllocSize, assertLoopOrder` | Import |
+| `./tridiagonal-eigen.js` | `symTridiagEigenvalues`            | Import |
 
 **Exports:**
 
@@ -8707,6 +8708,14 @@ graph LR
 
 - Interfaces: `SvdsOptions`, `SvdsResult`
 - Functions: `svds`
+
+---
+
+### `functions/src/numeric/tridiagonal-eigen.ts` - Eigenvalues and eigenvectors of a real symmetric tridiagonal matrix.
+
+**Exports:**
+
+- Functions: `symTridiagEigenvalues`, `symTridiagEigenvalue`, `symTridiagEigenvector`
 
 ---
 
@@ -9871,9 +9880,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports    | Type   |
-| ----------------- | ---------- | ------ |
-| `./spheroidal.js` | `ferrersP` | Import |
+| File                 | Imports                              | Type   |
+| -------------------- | ------------------------------------ | ------ |
+| `./spheroidal.js`    | `ferrersP`                           | Import |
+| `../utils/limits.js` | `MAX_FERRERS_ORDER, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -9945,11 +9955,12 @@ graph LR
 
 ### `functions/src/special/mathieu.ts` - Mathieu functions: the characteristic values `a_n(q)` / `b_n(q)` and the
 
-**Workspace Dependencies:**
+**Internal Dependencies:**
 
-| Package                        | Import |
-| ------------------------------ | ------ |
-| `@danielsimonjr/mathts-matrix` | `eig`  |
+| File                              | Imports                                       | Type   |
+| --------------------------------- | --------------------------------------------- | ------ |
+| `../numeric/tridiagonal-eigen.js` | `symTridiagEigenvalue, symTridiagEigenvector` | Import |
+| `../utils/limits.js`              | `MAX_MATHIEU_HARMONICS`                       | Import |
 
 **Exports:**
 
@@ -10032,10 +10043,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports   | Type   |
-| ---------------------------- | --------- | ------ |
-| `../wasm/special/scalars.js` | `_lgamma` | Import |
-| `./hypergeometric.js`        | `hyp1f1`  | Import |
+| File                         | Imports                           | Type   |
+| ---------------------------- | --------------------------------- | ------ |
+| `../wasm/special/scalars.js` | `_lgamma`                         | Import |
+| `./hypergeometric.js`        | `hyp1f1`                          | Import |
+| `../utils/limits.js`         | `MAX_SIEGEL_Z_T, assertLoopOrder` | Import |
 
 **Exports:**
 
@@ -12861,15 +12873,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type   |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../plain/number/index.js`           | `gammaG, gammaP`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import |
-| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
-| `./f64-kernels.js`                   | `f64Unary`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import |
-| `./parallel-map.js`                  | `kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Import |
-| `./worker-kernels.js`                | `numberLiteral, registerWorkerKernels`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Import |
-| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, factorial, upperGammaQ, incompleteBetaFraction, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJRealOrder, besselYRealOrder, besselHankelReal, besselGammaAux, besselJYTemme, airyUCoeffs, airyAsymPQ, airyScalar, erfcScalar, betaScalar, gammaincScalar, gammaincpScalar, betaincScalar, besselIScalar, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyAiScalar, airyBiScalar, ellipticKScalar, ellipticECompleteScalar`                                                                                                                              | Import |
-| `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
+| File                                 | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Type   |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../plain/number/index.js`           | `gammaG, gammaP`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import |
+| `../wasm/elementwise/wasm-bridge.js` | `elementwiseUnaryDispatch`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Import |
+| `./f64-kernels.js`                   | `f64Unary`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Import |
+| `./parallel-map.js`                  | `kernelSource`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Import |
+| `../utils/limits.js`                 | `MAX_CHEBYSHEV_ORDER, MAX_LAGUERRE_ORDER, MAX_RECURRENCE_ORDER, assertArrayWork`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import |
+| `./worker-kernels.js`                | `numberLiteral, registerWorkerKernels`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Import |
+| `../wasm/special/scalars.js`         | `_lgamma, erfcSelfContained, factorial, upperGammaQ, incompleteBetaFraction, besselHankel, besselJ0Series, besselJ1Series, besselY0Series, besselY1Series, besselJRealOrder, besselYRealOrder, besselHankelReal, besselGammaAux, besselJYTemme, airyUCoeffs, airyAsymPQ, airyScalar, erfcScalar, betaScalar, gammaincScalar, gammaincpScalar, betaincScalar, besselIScalar, besselJ0Scalar, besselJ1Scalar, besselY0Scalar, besselY1Scalar, besselJScalar, besselYScalar, airyAiScalar, airyBiScalar, ellipticKScalar, ellipticECompleteScalar`                                                                                                                                                     | Import |
+| `../wasm/special/wasm-bridge.js`     | `WASM_SPECIAL_THRESHOLD, besselJ0Dispatch, besselJ1Dispatch, besselJDispatch, besselY0Dispatch, besselY1Dispatch, besselYDispatch, assertBesselArrayWork, airyAiDispatch, airyBiDispatch, ellipticKDispatch, ellipticEDispatch, lgammaDispatch, carlsonRCDispatch, carlsonRFDispatch, carlsonRDDispatch, carlsonRJDispatch, ellipticFIncompleteDispatch, ellipticEIncompleteDispatch, ellipticPiIncompleteDispatch, carlsonRCJS, carlsonRFJS, carlsonRDJS, carlsonRJJS, ellipticFIncompleteJS, ellipticEIncompleteJS, ellipticPiIncompleteJS, carlsonRCScalar, carlsonRFScalar, carlsonRDScalar, carlsonRJScalar, ellipticFIncompleteScalar, ellipticEIncompleteScalar, ellipticPiIncompleteScalar` | Import |
 
 **Exports:**
 
@@ -13441,8 +13454,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `assertAllocSize`, `assertLoopOrder`
-- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`
+- Functions: `assertAllocSize`, `assertArrayWork`, `assertLoopOrder`
+- Constants: `MAX_ALLOC_ELEMENTS`, `MAX_LOOP_ORDER`, `MAX_RECURRENCE_ORDER`, `MAX_JACOBI_ORDER`, `MAX_GEGENBAUER_ORDER`, `MAX_FERRERS_ORDER`, `MAX_EXPN_ORDER`, `MAX_LAGUERRE_ORDER`, `MAX_CHEBYSHEV_ORDER`, `MAX_SPHERICAL_BESSEL_ORDER`, `MAX_BESSEL_J_SWEEP`, `MAX_SIEGEL_Z_T`, `MAX_MATHIEU_HARMONICS`
 
 ---
 
@@ -13909,11 +13922,11 @@ graph LR
 | `../bridges/common.js`  | `getWasm, isAsWasm, withAsF64, asReadReturnedF64, makeUnaryArrayDispatch, RawWasm`                                                                                            | Import |
 | `./scalars.js`          | `_lgamma, besselJ0Scalar, besselJ1Scalar, besselJScalar, besselY0Scalar, besselY1Scalar, besselYScalar, airyAiScalar, airyBiScalar, ellipticKScalar, ellipticECompleteScalar` | Import |
 | `../policy.js`          | `wasmPolicyAllows`                                                                                                                                                            | Import |
-| `../../utils/limits.js` | `MAX_BESSEL_J_SWEEP`                                                                                                                                                          | Import |
+| `../../utils/limits.js` | `MAX_BESSEL_J_SWEEP, MAX_RECURRENCE_ORDER, assertArrayWork`                                                                                                                   | Import |
 
 **Exports:**
 
-- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `airyAiJS`, `airyBiJS`, `besselJDispatch`, `besselYDispatch`, `lgammaJS`, `carlsonRCJS`, `carlsonRFJS`, `carlsonRDJS`, `carlsonRJJS`, `ellipticFIncompleteJS`, `ellipticEIncompleteJS`, `ellipticPiIncompleteJS`, `carlsonRCScalar`, `carlsonRFScalar`, `carlsonRDScalar`, `carlsonRJScalar`, `ellipticFIncompleteScalar`, `ellipticEIncompleteScalar`, `ellipticPiIncompleteScalar`, `carlsonRCDispatch`, `carlsonRFDispatch`, `carlsonRDDispatch`, `carlsonRJDispatch`, `ellipticFIncompleteDispatch`, `ellipticEIncompleteDispatch`, `ellipticPiIncompleteDispatch`, `resetBesselWasm`, `resetAiryWasm`, `resetEllipticWasm`, `resetLgammaWasm`, `ellipticKJS`, `ellipticEJS`
+- Functions: `besselJ0JS`, `besselJ1JS`, `besselJnJS`, `besselY0JS`, `besselY1JS`, `besselYnJS`, `airyAiJS`, `airyBiJS`, `assertBesselArrayWork`, `besselJDispatch`, `besselYDispatch`, `lgammaJS`, `carlsonRCJS`, `carlsonRFJS`, `carlsonRDJS`, `carlsonRJJS`, `ellipticFIncompleteJS`, `ellipticEIncompleteJS`, `ellipticPiIncompleteJS`, `carlsonRCScalar`, `carlsonRFScalar`, `carlsonRDScalar`, `carlsonRJScalar`, `ellipticFIncompleteScalar`, `ellipticEIncompleteScalar`, `ellipticPiIncompleteScalar`, `carlsonRCDispatch`, `carlsonRFDispatch`, `carlsonRDDispatch`, `carlsonRJDispatch`, `ellipticFIncompleteDispatch`, `ellipticEIncompleteDispatch`, `ellipticPiIncompleteDispatch`, `resetBesselWasm`, `resetAiryWasm`, `resetEllipticWasm`, `resetLgammaWasm`, `ellipticKJS`, `ellipticEJS`
 - Constants: `WASM_SPECIAL_THRESHOLD`, `besselJ0Dispatch`, `besselJ1Dispatch`, `besselY0Dispatch`, `besselY1Dispatch`, `airyAiDispatch`, `airyBiDispatch`, `lgammaDispatch`, `ellipticKDispatch`, `ellipticEDispatch`
 
 ---
@@ -21006,9 +21019,9 @@ graph LR
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
+| `functions/src/utils/limits`                           | 0 files      | 47 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 44 files   |
-| `functions/src/utils/limits`                           | 0 files      | 43 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -21406,7 +21419,7 @@ graph TD
         N231[finite-differences]
         N232[fsolve]
         N233[gauss-legendre4]
-        N234[...23 more]
+        N234[...24 more]
     end
 
     subgraph Functions/plain
@@ -21935,14 +21948,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1358   |
+| Total TypeScript Files  | 1359   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 244736 |
-| Total Exports           | 7445   |
+| Total Lines of Code     | 245798 |
+| Total Exports           | 7453   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |
 | Total Interfaces        | 676    |
-| Total Functions         | 2625   |
+| Total Functions         | 2630   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

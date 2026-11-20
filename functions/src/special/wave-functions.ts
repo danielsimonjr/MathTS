@@ -18,11 +18,7 @@
 
 import { _lgamma } from '../wasm/special/scalars.js';
 import { hyp1f1 } from './hypergeometric.js';
-/**
- * Smallest Borwein term count `n` whose coefficients overflow. From n = 76 the zeta sum is
- * NaN, so `siegelZ` returns NaN at once instead of summing n^2 terms.
- */
-const SIEGEL_NAN_TERMS = 76;
+import { MAX_SIEGEL_Z_T, assertLoopOrder } from '../utils/limits.js';
 
 /** 64-bit float (default for decimals) */
 type f64 = number;
@@ -181,35 +177,150 @@ function zetaCriticalLine(t: f64): Cx {
 }
 
 /**
+ * Largest |t| for which the Borwein series is accurate (1e-13 absolute, `borweinTerms(40) = 56`).
+ * Above it, `siegelZ` uses the Euler–Maclaurin sum, which is accurate for every larger t.
+ */
+const SIEGEL_BORWEIN_MAX_T = 40;
+
+/** The even Bernoulli numbers B_2, B_4, ..., B_34 of the Euler–Maclaurin correction terms. */
+const BERNOULLI_EVEN: readonly f64[] = [
+  1 / 6,
+  -1 / 30,
+  1 / 42,
+  -1 / 30,
+  5 / 66,
+  -691 / 2730,
+  7 / 6,
+  -3617 / 510,
+  43867 / 798,
+  -174611 / 330,
+  854513 / 138,
+  -236364091 / 2730,
+  8553103 / 6,
+  -23749461029 / 870,
+  8615841276005 / 14322,
+  -7709321041217 / 510,
+  2577687858367 / 6,
+];
+
+/**
+ * ζ(1/2 + it) for t > 40 by the Euler–Maclaurin formula
+ *
+ *   ζ(s) = Σ_{n<N} n^{-s} + N^{1-s}/(s-1) + N^{-s}/2 + Σ_k B_{2k}/(2k)! · s(s+1)…(s+2k-2) · N^{-s-2k+1}
+ *
+ * with N = ceil(t/2) + 20. The terms of the correction sum shrink by the factor (|s|/(2πN))²
+ * (about 0.1 at N = t/2, so 17 terms are more than enough); the sum stops at the first term that
+ * grows or falls below 1e-17 of the total. A smaller N, for example t/(2π), leaves an error of 0.2.
+ * The cost is about t/2 terms.
+ */
+function zetaCriticalLineEulerMaclaurin(t: f64): Cx {
+  const N = Math.ceil(t / 2) + 20;
+  let re = 0;
+  let im = 0;
+  for (let n = 1; n < N; n++) {
+    const phase = t * Math.log(n);
+    const magnitude = 1 / Math.sqrt(n);
+    re += magnitude * Math.cos(phase);
+    im -= magnitude * Math.sin(phase);
+  }
+  // N^{-s} = N^{-1/2} e^{-it ln N}
+  const logN = Math.log(N);
+  const magN = 1 / Math.sqrt(N);
+  const powRe = magN * Math.cos(t * logN);
+  const powIm = -magN * Math.sin(t * logN);
+  // N^{1-s}/(s-1) = N · N^{-s} / (-1/2 + it)
+  const denom = 0.25 + t * t;
+  const numRe = N * powRe;
+  const numIm = N * powIm;
+  re += (-0.5 * numRe + t * numIm) / denom;
+  im += (-0.5 * numIm - t * numRe) / denom;
+  re += powRe / 2;
+  im += powIm / 2;
+  // Running factor s(s+1)…(s+2k-2) · N^{-s-2k+1} / (2k)!, from k = 1: s · N^{-s-1} / 2.
+  let fRe = (0.5 * powRe - t * powIm) / (2 * N);
+  let fIm = (0.5 * powIm + t * powRe) / (2 * N);
+  let previous = Infinity;
+  for (let k = 1; k <= BERNOULLI_EVEN.length; k++) {
+    const termRe = BERNOULLI_EVEN[k - 1] * fRe;
+    const termIm = BERNOULLI_EVEN[k - 1] * fIm;
+    const size = Math.hypot(termRe, termIm);
+    if (size > previous) break;
+    re += termRe;
+    im += termIm;
+    previous = size;
+    if (size < 1e-17 * Math.hypot(re, im)) break;
+    // Next factor: multiply by (s+2k-1)(s+2k) / ((2k+1)(2k+2) N^2).
+    const a1 = 0.5 + 2 * k - 1;
+    const a2 = 0.5 + 2 * k;
+    const xRe = a1 * a2 - t * t;
+    const xIm = t * (a1 + a2);
+    const scale = 1 / ((2 * k + 1) * (2 * k + 2) * N * N);
+    const nextRe = (fRe * xRe - fIm * xIm) * scale;
+    const nextIm = (fRe * xIm + fIm * xRe) * scale;
+    fRe = nextRe;
+    fIm = nextIm;
+  }
+  return { re, im };
+}
+
+/**
+ * The Riemann–Siegel theta function θ(t) for t > 40 by its asymptotic series
+ * (t/2) ln(t/2π) − t/2 − π/8 + 1/(48t) + 7/(5760 t³) + 31/(80640 t⁵). The next term is below
+ * 3e-17 at t = 40. The first terms are large for a large t, so θ(t) is rounded to about
+ * 1e-16 · t · ln t; this is the error source of `siegelZ` for a large t.
+ */
+function riemannSiegelThetaAsymptotic(t: f64): f64 {
+  const t2 = t * t;
+  return (
+    (t / 2) * Math.log(t / (2 * Math.PI)) -
+    t / 2 -
+    Math.PI / 8 +
+    1 / (48 * t) +
+    7 / (5760 * t * t2) +
+    31 / (80640 * t * t2 * t2)
+  );
+}
+
+/**
  * Riemann–Siegel Z-function Z(t) = e^{iθ(t)} ζ(1/2 + it), the real-valued
  * function on the critical line whose real zeros coincide with the imaginary
  * parts of the non-trivial zeros of ζ. Z is even: Z(−t) = Z(t), and
  * Z(0) = ζ(1/2) ≈ −1.4603545088.
  *
- * Computed by evaluating ζ(1/2 + it) via the Borwein-accelerated series and
- * the theta function via the complex log-gamma, then taking the (real) product
- * — i.e. Z(t) = cos θ · Re ζ − sin θ · Im ζ. This exact-theta approach is
- * accurate for all t (the classical Riemann–Siegel asymptotic expansion, by
- * contrast, is inaccurate for the small t of the first few zeros).
+ * For |t| ≤ 40, ζ(1/2 + it) comes from the Borwein-accelerated series and θ(t)
+ * from the complex log-gamma, so the value is exact down to the first zeros
+ * (the classical Riemann–Siegel asymptotic expansion is inaccurate for the
+ * small t of the first few zeros). For |t| > 40, ζ(1/2 + it) comes from the
+ * Euler–Maclaurin formula with N = ⌈t/2⌉ + 20 terms and θ(t) from its
+ * asymptotic series. The cost is about |t|/2 terms, so |t| above
+ * `MAX_SIEGEL_Z_T` (a call of about 20 s) throws a RangeError. Z(t) has no
+ * limit as |t| grows, so an infinite t returns NaN.
  *
- * Verified against `mpmath.siegelz` (dps=30): relative error < 1e-11 for
- * O(1)-magnitude values and absolute error < 1e-9 near the first zeros
- * (t ≈ 14.13, 21.02, 25.01), for |t| up to ~40.
+ * Verified against `mpmath.siegelz` (dps=30): absolute error < 1e-12 for
+ * |t| ≤ 100, < 1e-10 at t = 1000, < 1e-9 at t = 1e4 and t = 1e6, 1e-8 at
+ * t = 1e7 and 2e-7 at t = 1e8. The error grows with t because θ(t) is rounded to
+ * about 1e-16 · t · ln t.
  *
  * @param t - Height on the critical line (real; any sign)
  * @returns Z(t)
+ * @throws RangeError if |t| is above `MAX_SIEGEL_Z_T`
  *
  * @example
  * siegelZ(15) // ~0.7199423913
  * siegelZ(14.134725) // ~-1.12e-7 (near the first zeta zero)
+ * siegelZ(1000) // ~0.9977946375
  */
 export function siegelZ(t: f64): f64 {
-  // Z(t) oscillates with no limit as |t| grows, and the zeta sum never ends at Infinity.
   if (!Number.isFinite(t)) return NaN;
   const at = Math.abs(t);
-  if (borweinTerms(at) >= SIEGEL_NAN_TERMS) return NaN;
-  const z = zetaCriticalLine(at);
-  const th = riemannSiegelTheta(at);
+  if (at <= SIEGEL_BORWEIN_MAX_T) {
+    const z = zetaCriticalLine(at);
+    const th = riemannSiegelTheta(at);
+    return Math.cos(th) * z.re - Math.sin(th) * z.im;
+  }
+  assertLoopOrder('siegelZ', '|t|', at, MAX_SIEGEL_Z_T);
+  const z = zetaCriticalLineEulerMaclaurin(at);
+  const th = riemannSiegelThetaAsymptotic(at);
   return Math.cos(th) * z.re - Math.sin(th) * z.im;
 }
 

@@ -178,8 +178,8 @@ describe('spherical Bessel functions (#989)', () => {
   it('sphericalBesselK(3, 2.5) matches mpmath', () => {
     expect(Math.abs(sphericalBesselK(3, 2.5) / 0.3486505539304314 - 1)).toBeLessThan(1e-14);
   });
-  it('sphericalBesselY(4e8, 5) is NaN at the first overflow (hang before the fix)', () => {
-    expect(sphericalBesselY(4e8, 5)).toBeNaN();
+  it('sphericalBesselY(4e8, 5) is -Infinity at the first overflow (hang before the fix)', () => {
+    expect(sphericalBesselY(4e8, 5)).toBe(-Infinity);
   });
   it('sphericalBesselK(4e8, 5) is Infinity at the first overflow (hang before the fix)', () => {
     expect(sphericalBesselK(4e8, 5)).toBe(Infinity);
@@ -240,8 +240,10 @@ describe('sums and exponential integrals (#989)', () => {
   it('expn(2, 1) is unchanged', () => {
     expect(expn(2, 1)).toBeCloseTo(0.14849550677592205, 14);
   });
-  it('siegelZ(1e6) is NaN at once: the Borwein coefficients overflow (hang before the fix)', () => {
-    expect(siegelZ(1e6)).toBeNaN();
+  it('siegelZ(1e6) is the value of mpmath, and a huge t is refused (hang before the fix)', () => {
+    // The Borwein sum took n^2 terms. The Euler-Maclaurin sum has t / 2 terms and a limit (#1102).
+    expect(Math.abs(siegelZ(1e6) - -2.8061338784306984)).toBeLessThan(1e-8);
+    expect(() => siegelZ(1e12)).toThrow(RangeError);
   });
   it('siegelZ(15) is unchanged', () => {
     expect(siegelZ(15)).toBeCloseTo(0.7199423913, 6);
@@ -266,8 +268,8 @@ describe('sums and exponential integrals (#989)', () => {
     const n = MAX_EXPN_ORDER;
     expect(expn(n, 1e-300)).toBe(Math.exp(-1e-300) / (n - 1));
   });
-  it('sphericalBesselK(limit, 1e4) is 0 at two zeros in a row', () => {
-    expect(sphericalBesselK(MAX_SPHERICAL_BESSEL_ORDER, 1e4)).toBe(0);
+  it('sphericalBesselK(limit, 1e4) is Infinity: k_n grows with n and overflows at once', () => {
+    expect(sphericalBesselK(MAX_SPHERICAL_BESSEL_ORDER, 1e4)).toBe(Infinity);
   });
   it('binomialTest refuses n above 1e11', () => {
     expect(() => binomialTest(5, 1e11 + 2)).toThrow(RangeError);
@@ -312,8 +314,8 @@ describe('Mathieu order and discrete logarithm (#989)', () => {
     expect(() => mathieuCe(100, 0, 1)).toThrow('order n must be at most 99, got 100');
     expect(() => mathieuSe(101, 0, 1)).toThrow('order n must be at most 100, got 101');
   });
-  it('mathieuA(99, 1) matches SciPy', () => {
-    expect(Math.abs(mathieuA(99, 1) / 9801.002551012194 - 1)).toBeLessThan(1e-12);
+  it('mathieuA(99, 1) matches SciPy mathieu_a (the 50-harmonic matrix gave 9801.0025510, #1105)', () => {
+    expect(Math.abs(mathieuA(99, 1) / 9801.00005102041 - 1)).toBeLessThan(1e-12);
   });
   it('discreteLog refuses a modulus that needs more than 2^24 baby steps (hang before the fix)', () => {
     const q = 2 ** 53 - 111; // a prime, and the order of g = 3 is above 2^24

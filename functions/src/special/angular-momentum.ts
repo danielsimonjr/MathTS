@@ -8,6 +8,7 @@
 
 import { Complex } from '@danielsimonjr/mathts-core';
 import { ferrersP } from './spheroidal.js';
+import { MAX_FERRERS_ORDER, assertLoopOrder } from '../utils/limits.js';
 
 function assertHalfInteger(value: number, name: string): void {
   if (!Number.isFinite(value) || !Number.isInteger(2 * value)) {
@@ -171,11 +172,67 @@ export function wigner6j(
 }
 
 /**
+ * The largest `l + |m|` for which the factorial form of `sphericalHarmonic` is used:
+ * `171!` is above the largest double, so `(l − m)! / (l + m)!` is lost from `l + |m| = 171`.
+ */
+const YLM_FACTORIAL_MAX = 170;
+
+/**
+ * The normalised associated Legendre function
+ * `P̄_l^m(cos θ) = √((2l+1)/(4π) · (l−m)!/(l+m)!) · P_l^m(cos θ)` for `0 ≤ m ≤ l`, with the
+ * Condon–Shortley phase, by the upward recurrence in `l` on the normalised functions
+ * `P̄_k = f_k (x P̄_{k−1} − P̄_{k−2} / f_{k−1})`, `f_k = √((4k²−1)/(k²−m²))`. The start value
+ * `P̄_m^m = (−1)^m √((2m+1)/(4π) · (2m−1)!!/(2m)!!) · sin^m θ` is kept as a logarithm, and the
+ * recurrence rescales by `1e-250` above `1e250`, so no step overflows or underflows.
+ * At a pole (`sin θ = 0`) the function is 0 for `m ≠ 0`.
+ */
+function normalizedLegendre(l: number, m: number, theta: number): number {
+  const x = Math.cos(theta);
+  let logScale = 0.5 * (Math.log(2 * m + 1) - Math.log(4 * Math.PI));
+  if (m > 0) {
+    const s2 = Math.sin(theta) ** 2;
+    if (s2 === 0) return 0;
+    for (let i = 1; i <= m; i += 1) logScale += 0.5 * Math.log((2 * i - 1) / (2 * i));
+    logScale += 0.5 * m * Math.log(s2);
+  }
+  let older = m % 2 === 1 ? -1 : 1;
+  let current = older;
+  if (l > m) {
+    let oldFactor = Math.sqrt(2 * m + 3);
+    current = x * oldFactor * older;
+    for (let k = m + 2; k <= l; k += 1) {
+      const factor = Math.sqrt((4 * k * k - 1) / (k * k - m * m));
+      const next = (x * current - older / oldFactor) * factor;
+      older = current;
+      current = next;
+      oldFactor = factor;
+      if (Math.abs(current) > 1e250) {
+        current *= 1e-250;
+        older *= 1e-250;
+        logScale += 250 * Math.LN10;
+      }
+    }
+  }
+  // Two factors of exp(logScale / 2) keep the product finite when exp(logScale) alone is not.
+  const half = Math.exp(logScale / 2);
+  return current * half * half;
+}
+
+/**
  * Spherical harmonic `Y_l^m(θ, φ)` with the Condon–Shortley phase.
  * `θ` is the polar angle and `φ` the azimuth. Returns zero when `|m| > l`.
  *
+ * For `l + |m| ≤ 170` the value comes from the associated Legendre function and the
+ * factorial normalisation. Above that the factorials overflow, so the normalised recurrence
+ * of `normalizedLegendre` computes the value; the cost is `l` steps, so `l` above
+ * `MAX_FERRERS_ORDER` throws a RangeError.
+ *
+ * @throws RangeError if `l` is not a non-negative integer, `m` is not an integer, or
+ *   `l + |m| > 170` and `l` is above `MAX_FERRERS_ORDER`
+ *
  * @example
  * sphericalHarmonic(0, 0, 0.3, 1.2) // re 0.28209479177387814, im 0
+ * sphericalHarmonic(200, 0, 1, 1) // re 0.07676429162435205, im 0
  */
 export function sphericalHarmonic(l: number, m: number, theta: number, phi: number): Complex {
   if (!Number.isInteger(l) || l < 0 || !Number.isInteger(m)) {
@@ -183,11 +240,17 @@ export function sphericalHarmonic(l: number, m: number, theta: number, phi: numb
   }
   const mAbs = Math.abs(m);
   if (mAbs > l) return new Complex(0, 0);
-  // ferrersP already carries the (−1)^m Condon–Shortley factor.
-  const p = ferrersP(l, mAbs, Math.cos(theta));
-  const norm = Math.sqrt(((2 * l + 1) / (4 * Math.PI)) * (fact(l - mAbs) / fact(l + mAbs)));
-  const re = norm * p * Math.cos(mAbs * phi);
-  const im = norm * p * Math.sin(mAbs * phi);
+  let amplitude: number;
+  if (l + mAbs <= YLM_FACTORIAL_MAX) {
+    // ferrersP already carries the (−1)^m Condon–Shortley factor.
+    const p = ferrersP(l, mAbs, Math.cos(theta));
+    amplitude = Math.sqrt(((2 * l + 1) / (4 * Math.PI)) * (fact(l - mAbs) / fact(l + mAbs))) * p;
+  } else {
+    assertLoopOrder('sphericalHarmonic', 'l', l, MAX_FERRERS_ORDER);
+    amplitude = normalizedLegendre(l, mAbs, theta);
+  }
+  const re = amplitude * Math.cos(mAbs * phi);
+  const im = amplitude * Math.sin(mAbs * phi);
   if (m >= 0) return new Complex(re, im);
   // Y_l^{-m} = (−1)^m · conj(Y_l^m)
   const s = phase(mAbs);
