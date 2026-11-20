@@ -90,10 +90,12 @@ export function owensT(h: number, a: number): number {
     const ah = a * h;
     return (Phi(h) * Phi(-ah) + Phi(ah) * Phi(-h)) / 2 - owensT(ah, 1 / a);
   }
-  const integral = quad((x: number) => Math.exp((-h * h * (1 + x * x)) / 2) / (1 + x * x), 0, a, {
+  // exp(-h^2 / 2) is taken out of the integral (#1294). Inside it, the integrand is near
+  // 1e-196 at h = 30 and every panel meets the absolute floor of quad, so digits are lost.
+  const integral = quad((x: number) => Math.exp((-h * h * x * x) / 2) / (1 + x * x), 0, a, {
     tol: 1e-12,
   });
-  return integral.value / (2 * Math.PI);
+  return (Math.exp((-h * h) / 2) * integral.value) / (2 * Math.PI);
 }
 
 /** Skew-normal PDF: 2φ(z)Φ(αz)/scale with z = (x − loc)/scale. */
