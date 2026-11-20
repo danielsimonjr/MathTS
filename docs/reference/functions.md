@@ -1760,8 +1760,9 @@ Coefficients are listed lowest degree first, e.g. `x³ − 3x + 1` is `[1, -3, 0
 
 ### Details
 
-- Polynomials are represented as coefficient arrays in **descending** degree
-  order: `[1, 0, -1]` denotes `x² − 1`.
+- Polynomials are represented as coefficient arrays in **ascending** degree
+  order (`coeffs[i]` multiplies `x^i`, the `polyval` order): `[-1, 0, 1]` denotes
+  `x² − 1`.
 - `polyval` uses Horner's method, which minimises both operation count and
   rounding error.
 - Symbolic functions (`simplify`, `collect`, …) accept either an expression

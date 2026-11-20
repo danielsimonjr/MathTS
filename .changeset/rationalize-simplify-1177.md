@@ -9,4 +9,6 @@
 - `simplify('factorial(5)/7')` and `simplify('atan2(1,1)*x')` gave a 64-digit BigNumber. A function that gets Fractions and has no Fraction signature takes the core conversion to BigNumber. When no argument holds a BigNumber, the function is now called again with numbers, as mathjs does. The results are `120 / 7` and `0.7853981633974483 * x`.
 - `simplify('det([1,2;3,4])*x')` stayed unevaluated, because the rows of a matrix literal were Matrices and so the matrix had the size `[2]`. The rows are now unwrapped: the result is `-(2 * x)`. `simplify('size([1,2])')` threw `m.valueOf(...).map is not a function`; it now returns `[2]`, as mathjs does.
 - `variables('1e3*x')` returned `['e3', 'x']`. The exponent of a number literal is no longer read as a name.
+- `rationalize('(x+1)*(x-1)')` threw `Invalid - placing` and `rationalize('x^2+3*x+2')` threw `Invalid + placing`. `simplify` applied its factored form after the rules of `rationalize`, so the expanded polynomial was factored again. The factored form now applies to the default rules only. The results are the mathjs texts: `x ^ 2 - 1` and `x ^ 2 + 3 * x + 2`.
+- `rationalize('(x+1)^5-(x+1)^5')` did not finish. The exact reader now returns `0` for a polynomial that cancels.
 - Pinned, already correct on main: `simplify('complex(2,0)*x')` is `2 * x` and `simplify('log(8,2)/3')` is `1`. (Refs #1177)

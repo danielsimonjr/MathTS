@@ -13372,7 +13372,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 59
+      "loc": 65
     },
     {
       "file": "functions/tests/simplify-exact-fractions.test.ts",

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import FractionJS from 'fraction.js';
 import { simplify } from '../src/index.js';
 
 // #1175: simplify printed a decimal as a ratio of two large numbers (66079.39738442015 became
@@ -44,9 +45,14 @@ describe('#1175 simplify keeps a decimal that has no small exact fraction', () =
     };
     for (let i = 0; i < 400; i++) {
       const v = Math.exp(12 * next());
-      // The printed text is the decimal, or a fraction "n / d" that has the value v: it never
-      // rounds the number to a ratio of numbers with fewer digits.
-      expect(valueOfPrinted(text(String(v))), String(v)).toBe(v);
+      // mathjs prints a ratio "n / d" exactly when fraction.js reproduces the number, and the
+      // decimal otherwise. A ratio of two large numbers has the value v too (6977852205 / 105598
+      // is 66079.39738442015), so the value alone cannot tell the two forms apart: pin the form.
+      const printed = text(String(v));
+      expect(printed.includes('/'), `${v} printed as ${printed}`).toBe(
+        new FractionJS(v).valueOf() === v
+      );
+      expect(valueOfPrinted(printed), String(v)).toBe(v);
     }
   });
 });
