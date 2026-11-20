@@ -34,6 +34,7 @@ export interface QuadOptions {
    * A panel evaluated after that point counts as unresolved when its error is above the
    * limit. The panels that wait on the recursion stack are still evaluated once each, so
    * the integrand is called at most 15 times `maxPanels + maxDepth` times in total.
+   * A value that is not a positive integer or `Infinity` throws a RangeError.
    * Without this limit, an oscillating integrand such as `sin(1/x)` on `[0, 1]` bisects
    * every panel near 0 down to `maxDepth`.
    */
@@ -178,6 +179,11 @@ function quadDetail(
   const atol = opts?.atol ?? ABS_FLOOR;
   const maxDepth = opts?.maxDepth ?? 50;
   const maxPanels = opts?.maxPanels ?? DEFAULT_MAX_PANELS;
+  if (!(maxPanels === Infinity || (Number.isInteger(maxPanels) && maxPanels >= 1))) {
+    throw new RangeError(
+      `${name}: maxPanels must be a positive integer or Infinity, got ${maxPanels}`
+    );
+  }
 
   let absSum = 0;
   let unresolved = 0;

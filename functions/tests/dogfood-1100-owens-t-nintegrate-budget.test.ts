@@ -88,3 +88,17 @@ describe('#1100 quad stops after maxPanels panels', () => {
     expect(() => nintegrate(oscillating, 0, 1, { maxPanels: 50 })).toThrow(RangeError);
   });
 });
+
+describe('C1 F6: quad and nintegrate check maxPanels', () => {
+  const f = (x: number): number => x;
+  it.each([0, -1, 2.5, NaN])('quad refuses maxPanels %s', (m) => {
+    expect(() => quad(f, 0, 1, { maxPanels: m })).toThrow(/quad: maxPanels/);
+  });
+  it('nintegrate names itself in the error', () => {
+    expect(() => nintegrate(f, 0, 1, { maxPanels: 0 })).toThrow(/nintegrate: maxPanels/);
+  });
+  it('accepts a positive integer and Infinity', () => {
+    expect(quad(f, 0, 1, { maxPanels: 1 }).value).toBeCloseTo(0.5, 14);
+    expect(quad(f, 0, 1, { maxPanels: Infinity }).value).toBeCloseTo(0.5, 14);
+  });
+});
