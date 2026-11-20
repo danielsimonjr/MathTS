@@ -76,8 +76,8 @@ export const MAX_SIEGEL_Z_T = 80_000_000;
 /**
  * Maximum number of harmonics (the size of the tridiagonal matrix) of one `mathieuCe` or
  * `mathieuSe` call. The matrix, its LU factors and the coefficients are about nine arrays of
- * this length, so 1e6 harmonics hold about 70 MB. The size grows with `|q|^(1/4)`, so the limit
- * covers `|q|` up to about 1e19.
+ * this length, so 1e6 harmonics hold about 70 MB. The size grows with `(10 + 2 sqrt(2n + 1)) |q|^(1/4)`,
+ * so the limit covers `|q|` up to about 1.8e19 at `n = 3` and about 5e17 at `n = 99`.
  */
 export const MAX_MATHIEU_HARMONICS = 1_000_000;
 

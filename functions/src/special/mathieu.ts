@@ -170,6 +170,9 @@ function characteristicValue(kind: 'a' | 'b', n: number, q: f64): f64 {
 /** Entries of the mode cache. The cache keeps the last modes, because a plot calls `ce` once per `x`. */
 const MODE_CACHE_SIZE = 32;
 
+/** The largest mode that the cache keeps (800 KB), so the cache holds at most 26 MB. */
+const MODE_CACHE_MAX_COEFFS = 100_000;
+
 /** Modes by `cls:q:m`, oldest first. */
 const modeCache = new Map<string, MathieuMode>();
 
@@ -212,8 +215,11 @@ function solveMode(fn: string, cls: MathieuClass, n: number, m: number, q: f64):
   for (let k = 0; k < size; k++) coeffs[k] *= scale;
 
   const mode: MathieuMode = { cls, coeffs };
-  if (modeCache.size >= MODE_CACHE_SIZE) modeCache.delete(modeCache.keys().next().value as string);
-  modeCache.set(key, mode);
+  if (size <= MODE_CACHE_MAX_COEFFS) {
+    if (modeCache.size >= MODE_CACHE_SIZE)
+      modeCache.delete(modeCache.keys().next().value as string);
+    modeCache.set(key, mode);
+  }
   return mode;
 }
 

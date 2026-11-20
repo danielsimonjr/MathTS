@@ -667,6 +667,12 @@ describe('#1289 mathieuCe and mathieuSe at large q and high order', () => {
     expect(mathieuCe(3, NaN, 0.5)).toBeNaN();
     expect(mathieuSe(3, NaN, 0.5)).toBeNaN();
   });
+  it('a mode of more than 100000 coefficients is not cached, and a second call gives the same value', () => {
+    // n = 3 and q = 1e16 need 153000 harmonics.
+    const first = mathieuCe(3, 1e16, 0.3);
+    expect(Number.isFinite(first)).toBe(true);
+    expect(mathieuCe(3, 1e16, 0.3)).toBe(first);
+  });
   it('a call after 40 other q values gives the same result (the cache is bounded)', () => {
     const first = mathieuCe(3, 7.5, 0.4);
     for (let i = 1; i <= 40; i++) mathieuCe(3, 7.5 + i, 0.4);
