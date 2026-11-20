@@ -7748,7 +7748,10 @@ modules:
         - createSimplify
     functions/src/algebra/simplifyConstant.ts:
       description: simplifyConstant() takes a mathjs expression (either a Node representing
-      externalDependencies: []
+      externalDependencies:
+        - package: fraction.js
+          imports:
+            - FractionJS
       nodeDependencies: []
       internalDependencies:
         - file: ../utils/is.js
@@ -47051,7 +47054,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238562
+  totalLinesOfCode: 238574
   totalExports: 7400
   totalClasses: 63
   totalInterfaces: 669

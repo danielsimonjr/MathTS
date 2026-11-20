@@ -3258,6 +3258,12 @@ graph LR
 
 ### `functions/src/algebra/simplifyConstant.ts` - simplifyConstant() takes a mathjs expression (either a Node representing
 
+**External Dependencies:**
+
+| Package       | Import       |
+| ------------- | ------------ |
+| `fraction.js` | `FractionJS` |
+
 **Internal Dependencies:**
 
 | File                        | Imports                                                                                                           | Type               |
@@ -21769,7 +21775,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238562 |
+| Total Lines of Code     | 238574 |
 | Total Exports           | 7400   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 63     |

@@ -1,3 +1,4 @@
+import FractionJS from 'fraction.js';
 import {
   isComplex,
   isFraction,
@@ -280,12 +281,24 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
       return _toNode(thing);
     }
 
+    // The Fraction of a number, or null when the number has no exact fraction. mathjs asks
+    // fraction.js, so this asks it too: a MathTS Fraction reproduces more doubles than fraction.js
+    // does (66079.39738442015 is 6977852205/105598 there), and each of those would print as a
+    // ratio of large numbers, where mathjs keeps the decimal. fraction.js gives the numerator
+    // and the denominator; a MathTS Fraction is built from that text.
+    function _fractionOfNumber(n: number): FractionLike | null {
+      const exact = new FractionJS(n);
+      if (exact.valueOf() !== n || fraction === undefined) return null;
+      return fraction(`${exact.s < 0n ? '-' : ''}${exact.n}/${exact.d}`);
+    }
+
     // convert a number to a fraction only if it can be expressed exactly,
     // and when both numerator and denominator are small enough
     function _exactFraction(n: unknown, options: Options): unknown {
       const exactFractions = options && options.exactFractions !== false;
       if (exactFractions && isBounded(n) && fraction) {
-        const f = fraction(n);
+        const f = typeof n === 'number' ? _fractionOfNumber(n) : fraction(n);
+        if (f === null) return n;
         const fractionsLimit =
           options && typeof options.fractionsLimit === 'number' ? options.fractionsLimit : Infinity; // no limit by default
 

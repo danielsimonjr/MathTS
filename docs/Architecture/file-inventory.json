@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2553,
+  "totalFiles": 2554,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1137,
+    "test": 1138,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1137,
+    "tests": 1138,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1180,
+    "@danielsimonjr/mathts-functions": 1181,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -5994,7 +5994,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 709
+      "loc": 722
     },
     {
       "file": "functions/src/algebra/simplifyCore.ts",
@@ -9200,7 +9200,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2024
+      "loc": 2023
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -13219,6 +13219,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 66
+    },
+    {
+      "file": "functions/tests/simplify-decimal-ratio-1175.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 59
     },
     {
       "file": "functions/tests/simplify-exact-fractions.test.ts",
