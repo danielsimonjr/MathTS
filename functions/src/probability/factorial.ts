@@ -6,20 +6,27 @@ import type { TypedFunction } from '../core/function/typed.js';
 interface BigNumberType {
   add(n: number): BigNumberType;
   isNegative(): boolean;
+  isInteger(): boolean;
+  toNumber(): number;
+}
+
+interface BigNumberConstructor {
+  fromNumber(n: number): BigNumberType;
 }
 
 interface FactorialDependencies {
   typed: TypedFunction;
   gamma: TypedFunction;
+  BigNumber?: BigNumberConstructor;
 }
 
 const name = 'factorial';
-const dependencies = ['typed', 'gamma'];
+const dependencies = ['typed', 'gamma', '?BigNumber'];
 
 export const createFactorial = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, gamma }: FactorialDependencies) => {
+  ({ typed, gamma, BigNumber }: FactorialDependencies) => {
     /**
      * Compute the factorial of a value
      *
@@ -56,7 +63,15 @@ export const createFactorial = /* #__PURE__ */ factory(
           throw new Error('Value must be non-negative');
         }
 
-        return gamma(n.add(1)); // core BigNumber uses `.add`, not decimal.js's `.plus`
+        // `add` rounds to the precision, so an n with more digits than the precision gave the
+        // factorial of the rounded n + 1: at precision 5, factorial(100000) was 99999!. The
+        // BigNumber constructor is an optional dependency, so a scope without it keeps `add`.
+        const value = n.toNumber();
+        return gamma(
+          BigNumber && n.isInteger() && Number.isSafeInteger(value)
+            ? BigNumber.fromNumber(value + 1)
+            : n.add(1)
+        );
       },
 
       'Array | Matrix': typed.referToSelf(

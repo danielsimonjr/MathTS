@@ -8935,7 +8935,7 @@ graph LR
 
 ---
 
-### `functions/src/probability/gamma.ts` - Compute the gamma function of a value using Lanczos approximation for
+### `functions/src/probability/gamma.ts` - The tangent numbers T(1) to T(count) (1, 2, 16, 272, 7936, ...), by the integer algorithm of
 
 **Internal Dependencies:**
 
@@ -10062,12 +10062,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-| `../core/config.js`         | `ConfigOptions` | Import (type-only) |
-| `../types.js`               | `BigNumber`     | Import (type-only) |
+| File                                   | Imports                           | Type               |
+| -------------------------------------- | --------------------------------- | ------------------ |
+| `../utils/factory.js`                  | `factory`                         | Import             |
+| `../core/function/typed.js`            | `TypedFunction`                   | Import (type-only) |
+| `../types.js`                          | `BigNumber`                       | Import (type-only) |
+| `../utils/bignumber/work-precision.js` | `atWorkPrecision, PrecisionClass` | Import             |
 
 **Exports:**
 
@@ -20995,7 +20995,7 @@ graph LR
 | `functions/src/index`                                  | 138 files    | 0 files    |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 63 files   |
-| `functions/src/core/config`                            | 0 files      | 57 files   |
+| `functions/src/core/config`                            | 0 files      | 56 files   |
 | `functions/src/utils/array`                            | 0 files      | 54 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
@@ -21931,7 +21931,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1358   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 244109 |
+| Total Lines of Code     | 244582 |
 | Total Exports           | 7444   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |
@@ -21939,7 +21939,7 @@ graph TD
 | Total Functions         | 2624   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
-| Type-only Imports       | 686    |
+| Type-only Imports       | 685    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

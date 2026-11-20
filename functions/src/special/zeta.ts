@@ -1,7 +1,7 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
-import type { ConfigOptions } from '../core/config.js';
 import type { BigNumber as BigNumberType } from '../types.js';
+import { atWorkPrecision, type PrecisionClass } from '../utils/bignumber/work-precision.js';
 
 // Type definitions for zeta function
 interface ComplexType {
@@ -14,19 +14,46 @@ interface ComplexConstructor {
   (re: number, im?: number): ComplexType;
 }
 
-interface BigNumberConstructor {
+interface BigNumberConstructor extends PrecisionClass {
   new (value: number | string): BigNumberType;
   (value: number | string): BigNumberType;
+  piAt(): BigNumberType;
 }
 
+/** The BigNumber methods that the exact checks of `zeta` use. */
+interface ExactBigNumber {
+  isNaN(): boolean;
+  isFinite(): boolean;
+  isZero(): boolean;
+  isNegative(): boolean;
+  isInteger(): boolean;
+  equals(n: number): boolean;
+  sub(n: number): ExactBigNumber;
+  abs(): ExactBigNumber;
+  mod(n: number): ExactBigNumber;
+  /** The decimal exponent of the leading digit. */
+  readonly e: number;
+}
+
+/** log10(3 + sqrt(8)): the Borwein series gains this many digits per term. */
+const BORWEIN_DIGITS_PER_TERM = Math.log10(3 + Math.sqrt(8));
+/** Guard digits of the Borwein series of a BigNumber: once in the term count, twice in the work precision. */
+const BORWEIN_GUARD_DIGITS = 10;
+/** The Euler-Mascheroni constant: zeta(s) = 1 / (s - 1) + EULER_GAMMA + O(s - 1) next to the pole. */
+const EULER_GAMMA = 0.5772156649015329;
+
 type NumericValue = number | BigNumberType | ComplexType;
+
+/** d(k, n) of the Borwein series for an integer k from 0 to n. */
+type DFn = (k: NumericValue) => NumericValue;
+/** Builds the d(k, n) function for one n, with a faster method than the sum of factorials. */
+type DTable = (n: number, createValue: (value: number) => NumericValue) => DFn;
 
 /** A scalar arithmetic op used here within the NumericValue domain. */
 type NumericFn = (...args: NumericValue[]) => NumericValue;
 
 interface ZetaDependencies {
   typed: TypedFunction;
-  config: ConfigOptions;
   multiply: NumericFn;
   pow: NumericFn;
   divide: NumericFn;
@@ -47,7 +74,6 @@ interface ZetaDependencies {
 const name = 'zeta';
 const dependencies = [
   'typed',
-  'config',
   'multiply',
   'pow',
   'divide',
@@ -70,7 +96,6 @@ export const createZeta = /* #__PURE__ */ factory(
   dependencies,
   ({
     typed,
-    config,
     multiply,
     pow,
     divide,
@@ -122,23 +147,104 @@ export const createZeta = /* #__PURE__ */ factory(
       return zetaNumeric(
         s,
         (value: number) => value,
-        () => 20
+        () => 20,
+        () => pi as number
       );
     }
 
     return typed(name, {
       number: zetaNumber,
-      BigNumber: (s: BigNumberType): BigNumberType =>
-        zetaNumeric(
-          s,
-          (value: number) => new BigNumber!(value),
-          () => {
-            // relTol is for example 1e-12. Extract the positive exponent 12 from that
-            return Math.abs(Math.log10(config.relTol));
-          }
-        ),
+      BigNumber: (s: BigNumberType): BigNumberType => {
+        const x = s as unknown as ExactBigNumber;
+        const createValue = (value: number): BigNumberType => new BigNumber!(value);
+        if (x.isNaN()) return createValue(NaN);
+        if (!x.isFinite()) return createValue(x.isNegative() ? NaN : 1);
+        const negative = x.isNegative() && !x.isZero();
+        // A negative even integer is a trivial zero. The reflection formula gives a sin(pi * s / 2)
+        // of the size of the work precision there, times a factor of up to (1 - s)!: not 0.
+        if (negative && x.isInteger() && x.mod(2).isZero()) return createValue(0);
+        // The error of n Borwein terms is about (3 + sqrt(8))^-n, so n follows the precision of
+        // the BigNumber and not config.relTol: 12 digits of relTol gave 8 correct digits (#1166).
+        // The terms d(k, n) are sums of positive numbers and the alternating sum is of the size of
+        // its first term, so the series does not cancel: a few guard digits are enough.
+        const precision = BigNumber!.precision;
+        const digits = Math.ceil((precision + BORWEIN_GUARD_DIGITS) / BORWEIN_DIGITS_PER_TERM);
+        if (negative) return reflectedZeta(s, x, precision, digits);
+        // A BigNumber is exact: 0 and 1 are the only special values. zetaNumeric compares with
+        // config.relTol and config.absTol (1e-12), so it gave NaN for 1 + 1e-25 and -0.5 for 1e-40.
+        if (x.isZero()) return createValue(-0.5);
+        if (x.equals(1)) return createValue(NaN);
+        // 1 - 2^(1 - s) loses one digit for each digit of |s - 1| below 1.
+        const closeToOne = Math.max(0, -x.sub(1).abs().e);
+        // At this distance EULER_GAMMA is at or below the last digit of 1 / (s - 1), and the next
+        // term of the Laurent series is closeToOne digits below it. The Borwein series would need
+        // closeToOne extra digits: 3000 digits gave no result in 170 s.
+        if (closeToOne >= precision) {
+          return atWorkPrecision(BigNumber!, precision + BORWEIN_GUARD_DIGITS, () =>
+            createValue(1).div(s.minus(1)).plus(createValue(EULER_GAMMA))
+          );
+        }
+        return atWorkPrecision(
+          BigNumber!,
+          precision + 2 * BORWEIN_GUARD_DIGITS + closeToOne,
+          () =>
+            zeta(
+              s,
+              createValue,
+              () => digits,
+              (value: BigNumberType) => value as unknown as number,
+              () => BigNumber!.piAt(),
+              borweinD
+            ) as BigNumberType
+        );
+      },
       Complex: zetaComplex,
     });
+
+    /**
+     * zeta(s) of a negative BigNumber s that is not an even integer, by the reflection formula
+     * of `zeta`. The work precision holds three losses: 1 - 2^s of zeta(1 - s) next to the pole
+     * (one digit for each digit of |s| below 1), sin(pi s / 2) next to a trivial zero (one digit
+     * for each digit of the distance to the nearest even integer below |s|), and the integer
+     * digits of s in the arguments of sin and pow. An infinite factor (gamma(1 - s) above the
+     * exponent range) gives NaN; the value is then infinite with the sign of sin(pi s / 2),
+     * because the other factors are positive.
+     * @param {BigNumber} s   the argument
+     * @param {ExactBigNumber} x   s with the exact methods
+     * @param {number} precision   the precision of the result
+     * @param {number} digits   the number of Borwein terms
+     * @returns {BigNumber} zeta(s) to the precision
+     */
+    function reflectedZeta(
+      s: BigNumberType,
+      x: ExactBigNumber,
+      precision: number,
+      digits: number
+    ): BigNumberType {
+      const integerDigits = Math.max(0, x.e + 1);
+      const guess = precision + 2 * BORWEIN_GUARD_DIGITS + integerDigits;
+      // s / 2 minus its nearest integer: the distance to the nearest even integer, halved.
+      const evenDistance = atWorkPrecision(BigNumber!, guess + 5, () => {
+        const half = s.div(2);
+        return half.minus(half.round()).abs();
+      });
+      const poleDigits = Math.max(0, -x.e);
+      const zeroDigits = evenDistance.isZero() ? 0 : Math.max(0, x.e - evenDistance.e) + 1;
+      const workPrecision = guess + poleDigits + zeroDigits;
+      return atWorkPrecision(BigNumber!, workPrecision, () => {
+        const value = zeta(
+          s,
+          (v: number): BigNumberType => new BigNumber!(v),
+          () => digits,
+          (v: BigNumberType) => v as unknown as number,
+          () => BigNumber!.piAt(),
+          borweinD
+        ) as BigNumberType;
+        if (!value.isNaN()) return value;
+        const sine = BigNumber!.piAt().mul(s).div(2).sin();
+        return new BigNumber!(sine.isNegative() ? -Infinity : Infinity);
+      });
+    }
 
     /**
      * Compute the Riemann zeta function of a real number or BigNumber `s`.
@@ -151,7 +257,9 @@ export const createZeta = /* #__PURE__ */ factory(
     function zetaNumeric<T extends number | BigNumberType>(
       s: T,
       createValue: (value: number) => T,
-      determineDigits: (value: T) => number
+      determineDigits: (value: T) => number,
+      getPi: () => NumericValue,
+      dTable?: DTable
     ): T {
       // NaN is the only value not equal to itself. Without the guard, !isBounded(NaN) gives 1.
       if (!equal(s, s)) {
@@ -167,7 +275,7 @@ export const createZeta = /* #__PURE__ */ factory(
         return isNegative(s) ? createValue(NaN) : createValue(1);
       }
 
-      return zeta(s, createValue, determineDigits, (s: T) => s as number) as T;
+      return zeta(s, createValue, determineDigits, (s: T) => s as number, getPi, dTable) as T;
     }
 
     /**
@@ -197,7 +305,8 @@ export const createZeta = /* #__PURE__ */ factory(
         s,
         (value: number) => value,
         (s: ComplexType) => Math.round(1.3 * 15 + 0.9 * Math.abs(s.im)),
-        (s: ComplexType) => s.re
+        (s: ComplexType) => s.re,
+        () => pi as number
       ) as ComplexType;
     }
 
@@ -215,7 +324,9 @@ export const createZeta = /* #__PURE__ */ factory(
       s: T,
       createValue: (value: number) => NumericValue,
       determineDigits: (value: T) => number,
-      getRe: (value: T) => number
+      getRe: (value: T) => number,
+      getPi: () => NumericValue,
+      dTable?: DTable
     ): NumericValue {
       const n = determineDigits(s);
       // Reflect for the entire left half-plane (Re(s) < 0), not just Re(s) ≤ -(n-1)/2. The direct
@@ -225,13 +336,23 @@ export const createZeta = /* #__PURE__ */ factory(
       // accurate) times an accurate prefactor. Re(s) ≥ 0 keeps the verified-accurate direct path
       // (critical strip included).
       if (getRe(s) >= 0) {
-        return f(s, createValue(n), createValue);
+        return f(
+          s,
+          createValue(n),
+          createValue,
+          dTable?.(n, createValue),
+          dTable ? integerPowers(s, n, createValue) : undefined
+        );
       } else {
         // Function Equation for reflection to x < 1
-        let c = multiply(pow(2, s), pow(createValue(pi as number), subtract(s, 1)));
-        c = multiply(c, sin(multiply(divide(createValue(pi as number), 2), s)));
+        const piValue = getPi();
+        let c = multiply(pow(2, s), pow(piValue, subtract(s, 1)));
+        c = multiply(c, sin(multiply(divide(piValue, 2), s)));
         c = multiply(c, gamma(subtract(1, s)));
-        return multiply(c, zeta(subtract(1, s) as T, createValue, determineDigits, getRe));
+        return multiply(
+          c,
+          zeta(subtract(1, s) as T, createValue, determineDigits, getRe, getPi, dTable)
+        );
       }
     }
 
@@ -264,14 +385,70 @@ export const createZeta = /* #__PURE__ */ factory(
     function f(
       s: NumericValue,
       n: NumericValue,
-      createValue: (value: number) => NumericValue
+      createValue: (value: number) => NumericValue,
+      dAt: DFn = (k) => d(k, n),
+      powAt: DFn = (k) => pow(k, s)
     ): NumericValue {
-      const c = divide(1, multiply(d(createValue(0), n), subtract(1, pow(2, subtract(1, s)))));
+      const c = divide(1, multiply(dAt(createValue(0)), subtract(1, pow(2, subtract(1, s)))));
       let S = createValue(0);
       for (let k = createValue(1); smallerEq(k, n); k = add(k, 1)) {
-        S = add(S, divide(multiply((-1) ** ((k as number) - 1), d(k, n)), pow(k, s)));
+        S = add(S, divide(multiply((-1) ** ((k as number) - 1), dAt(k)), powAt(k)));
       }
       return multiply(c, S);
+    }
+
+    /**
+     * The values k^s for k = 1 to n. The power is completely multiplicative, so only a prime k
+     * needs a `pow` (an exp and a ln at the work precision when s is not an integer): a composite
+     * k is the product of its smallest prime factor and the quotient. A table of n = 275 terms
+     * (precision 200) then needs 58 powers and not 275.
+     * @param {number | BigNumber} s
+     * @param {number} n   the number of terms
+     * @param {(number) => number | BigNumber} createValue
+     * @returns {(k: number | BigNumber) => number | BigNumber}   k^s for an integer k from 1 to n
+     */
+    function integerPowers(
+      s: NumericValue,
+      n: number,
+      createValue: (value: number) => NumericValue
+    ): DFn {
+      const smallestFactor = new Array<number>(n + 1).fill(0);
+      const table: NumericValue[] = new Array<NumericValue>(n + 1);
+      table[1] = createValue(1);
+      for (let k = 2; k <= n; k++) {
+        if (smallestFactor[k] === 0) {
+          for (let m = k; m <= n; m += k) if (smallestFactor[m] === 0) smallestFactor[m] = k;
+          table[k] = pow(createValue(k), s);
+        } else {
+          table[k] = multiply(table[smallestFactor[k]], table[k / smallestFactor[k]]);
+        }
+      }
+      return (k: NumericValue): NumericValue => table[Number(k)];
+    }
+
+    /**
+     * The values d(0, n) to d(n, n) at once. The term t(j) = (n + j - 1)! 4^j / ((n - j)! (2j)!)
+     * follows t(j - 1) by the ratio 4 (n + j - 1) (n - j + 1) / (2j (2j - 1)), so the table needs
+     * n steps and not n^2 factorials. All terms are positive, and d(k, n) = n (k + t(k) + ... +
+     * t(n)), so the suffix sums have no cancellation.
+     * @param {number} n   the number of terms
+     * @param {(number) => number | BigNumber} createValue
+     * @returns {(k: number | BigNumber) => number | BigNumber}   d(k, n) for an integer k from 0 to n
+     */
+    function borweinD(n: number, createValue: (value: number) => NumericValue): DFn {
+      const terms: NumericValue[] = [divide(createValue(1), createValue(n))];
+      for (let j = 1; j <= n; j++) {
+        terms.push(
+          divide(multiply(terms[j - 1], 4 * (n + j - 1) * (n - j + 1)), 2 * j * (2 * j - 1))
+        );
+      }
+      const table: NumericValue[] = new Array<NumericValue>(n + 1);
+      let suffix = createValue(0);
+      for (let k = n; k >= 0; k--) {
+        suffix = add(suffix, terms[k]);
+        table[k] = multiply(createValue(n), add(suffix, createValue(k)));
+      }
+      return (k: NumericValue): NumericValue => table[Number(k)];
     }
   }
 );

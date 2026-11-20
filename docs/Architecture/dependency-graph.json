@@ -21620,7 +21620,7 @@
         "constants": ["createFactorial"]
       },
       "functions/src/probability/gamma.ts": {
-        "description": "Compute the gamma function of a value using Lanczos approximation for",
+        "description": "The tangent numbers T(1) to T(count) (1, 2, 16, 272, 7936, ...), by the integer algorithm of",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -23528,14 +23528,13 @@
             "typeOnly": true
           },
           {
-            "file": "../core/config.js",
-            "imports": ["ConfigOptions"],
-            "typeOnly": true
-          },
-          {
             "file": "../types.js",
             "imports": ["BigNumber"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
           }
         ],
         "workspaceDependencies": [],
@@ -50313,7 +50312,7 @@
   "statistics": {
     "totalTypeScriptFiles": 1358,
     "totalModules": 82,
-    "totalLinesOfCode": 244109,
+    "totalLinesOfCode": 244582,
     "totalExports": 7444,
     "totalClasses": 64,
     "totalInterfaces": 676,
@@ -50322,7 +50321,7 @@
     "totalEnums": 0,
     "totalConstants": 1698,
     "totalReExports": 3194,
-    "totalTypeOnlyImports": 686,
+    "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,

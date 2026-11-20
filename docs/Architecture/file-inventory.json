@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2636,
+  "totalFiles": 2646,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1332,
     "test-only": 0,
     "orphan": 0,
-    "test": 1212,
+    "test": 1222,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1358,
-    "tests": 1212,
+    "tests": 1222,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -24,11 +24,11 @@
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 32,
     "@danielsimonjr/mathts-compat": 42,
-    "@danielsimonjr/mathts-core": 146,
+    "@danielsimonjr/mathts-core": 150,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 71,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1246,
+    "@danielsimonjr/mathts-functions": 1252,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -1045,7 +1045,7 @@
       "package": "@danielsimonjr/mathts-core",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2476
+      "loc": 2580
     },
     {
       "file": "core/src/types/complex.ts",
@@ -1216,6 +1216,13 @@
       "loc": 324
     },
     {
+      "file": "core/tests/bignumber-add-ln-1249.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 267
+    },
+    {
       "file": "core/tests/bignumber-comparison-coercion.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1251,6 +1258,20 @@
       "loc": 43
     },
     {
+      "file": "core/tests/bignumber-overflow-rounding.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 30
+    },
+    {
+      "file": "core/tests/bignumber-pow-large-exponent.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 92
+    },
+    {
       "file": "core/tests/bignumber-round-1118.test.ts",
       "package": "@danielsimonjr/mathts-core",
       "area": "tests",
@@ -1263,6 +1284,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 156
+    },
+    {
+      "file": "core/tests/bignumber-sinh-expm1-1166.test.ts",
+      "package": "@danielsimonjr/mathts-core",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 101
     },
     {
       "file": "core/tests/bignumber-sqrt-range-1201.test.ts",
@@ -8017,14 +8045,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 70
+      "loc": 85
     },
     {
       "file": "functions/src/probability/gamma.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 174
+      "loc": 330
     },
     {
       "file": "functions/src/probability/kldivergence.ts",
@@ -8570,14 +8598,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 278
+      "loc": 455
     },
     {
       "file": "functions/src/statistics/corr.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 207
+      "loc": 227
     },
     {
       "file": "functions/src/statistics/cumsum.ts",
@@ -9284,7 +9312,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3264
+      "loc": 3265
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -10204,11 +10232,32 @@
       "loc": 61
     },
     {
+      "file": "functions/tests/bignumber-factorial-1115.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 112
+    },
+    {
+      "file": "functions/tests/bignumber-factorial-low-precision-1115.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 33
+    },
+    {
       "file": "functions/tests/bignumber-factory-1043.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
       "loc": 126
+    },
+    {
+      "file": "functions/tests/bignumber-gamma-zeta-negative-1291.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 229
     },
     {
       "file": "functions/tests/bignumber-mod-gcd-1118.test.ts",
@@ -10230,6 +10279,27 @@
       "area": "tests",
       "disposition": "test",
       "loc": 81
+    },
+    {
+      "file": "functions/tests/bignumber-zeta-exact-1166.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 56
+    },
+    {
+      "file": "functions/tests/bignumber-zeta-expm1-1166.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 95
+    },
+    {
+      "file": "functions/tests/bignumber-zeta-noninteger-1166.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 47
     },
     {
       "file": "functions/tests/bin-hex-oct-bignumber.test.ts",
@@ -10432,7 +10502,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 144
+      "loc": 145
     },
     {
       "file": "functions/tests/constrained.test.ts",
