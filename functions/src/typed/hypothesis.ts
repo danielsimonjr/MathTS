@@ -21,10 +21,9 @@
  * Bootstrap fan-out (Slice 5.11):
  * - All four two-sample / goodness-of-fit tests accept `{ bootstrap: N }`.
  * - When set, N permuted resamples are drawn from the combined data pool and the
- *   statistic is recomputed for each.  The N tasks are fanned out via
- *   `Promise.all` so the JS event-loop can interleave them (embarrassingly
- *   parallel at the microtask level; each individual run uses the existing
- *   Slice-3.10 worker dispatch if the resample is large enough).
+ *   statistic is recomputed for each.  The N resamples run in a plain loop: each one is
+ *   synchronous, so a promise per resample gave no concurrency and held about 350 bytes
+ *   (1e6 resamples of `kolmogorovSmirnovTest` took 3 s and 350 MB, and 5e6 took over 250 s).
  * - `bootstrapSeed` enables fully deterministic resampling via Mulberry32 PRNG.
  *
  * @packageDocumentation
@@ -220,9 +219,11 @@ const HYPOTHESIS_THRESHOLD = 4096;
 
 /**
  * Maximum number of multinomial draws that the `chiSquareTest` bootstrap makes: the bootstrap
- * count times the total observed count. At 10^9 draws the loop runs for tens of seconds.
+ * count times the total observed count. The loop makes about 1.1e7 draws per second
+ * (3e8 draws took 27 s), so 2e8 draws take about 18 s: the limit of `utils/limits.ts` is the order
+ * that returns in about 20 s.
  */
-const CHI_BOOTSTRAP_MAX_DRAWS = 100 * MAX_LOOP_ORDER;
+const CHI_BOOTSTRAP_MAX_DRAWS = 20 * MAX_LOOP_ORDER;
 
 /**
  * Draw `n` indices with replacement from an ascending `sorted` array and return
@@ -613,14 +614,11 @@ export async function chiSquareTest(
     return stat;
   }
 
+  // A plain loop: each resample is synchronous, so B promises and closures only held memory
+  // (350 bytes each: 1e6 resamples of `kolmogorovSmirnovTest` took 3 s and 350 MB, 5e6 took
+  // over 250 s) and gave the same order of rng draws and the same statistics.
   const bootstrapStats = new Float64Array(B);
-  // Fan out B resamples using Promise.all for event-loop concurrency.
-  const tasks = Array.from({ length: B }, (_, idx) =>
-    Promise.resolve().then(() => {
-      bootstrapStats[idx] = _chiSquareBootstrapOnce();
-    })
-  );
-  await Promise.all(tasks);
+  for (let idx = 0; idx < B; idx++) bootstrapStats[idx] = _chiSquareBootstrapOnce();
 
   let countGe = 0;
   for (let i = 0; i < B; i++) {
@@ -845,12 +843,7 @@ export async function kolmogorovSmirnovTest(
   }
 
   const bootstrapStats = new Float64Array(B);
-  const tasks = Array.from({ length: B }, (_, idx) =>
-    Promise.resolve().then(() => {
-      bootstrapStats[idx] = _ksBootstrapOnce();
-    })
-  );
-  await Promise.all(tasks);
+  for (let idx = 0; idx < B; idx++) bootstrapStats[idx] = _ksBootstrapOnce();
 
   let countGe = 0;
   for (let i = 0; i < B; i++) {
@@ -1267,12 +1260,7 @@ export async function shapiroWilkTest(
   }
 
   const bootstrapStats = new Float64Array(B);
-  const tasks = Array.from({ length: B }, (_, idx) =>
-    Promise.resolve().then(() => {
-      bootstrapStats[idx] = _swBootstrapOnce();
-    })
-  );
-  await Promise.all(tasks);
+  for (let idx = 0; idx < B; idx++) bootstrapStats[idx] = _swBootstrapOnce();
 
   // Small W → non-normal, so empirical p-value = fraction of resampled W ≤ base W
   let countLe = 0;

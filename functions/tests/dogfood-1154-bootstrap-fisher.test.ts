@@ -69,6 +69,39 @@ describe.each(Object.entries(RUNNERS))('%s validates the bootstrap count (#1154)
   });
 });
 
+describe('seeded resamples keep their order of rng draws (#1154)', () => {
+  // The resamples run in a loop, not as one promise each. The values are those of the
+  // promise version (same seed, same order of draws).
+  const opts = { bootstrap: 5, bootstrapSeed: 7 };
+
+  it('kolmogorovSmirnovTest', async () => {
+    const r = (await kolmogorovSmirnovTest([0.1, 0.5, 0.9, 0.3, 0.7], undefined, opts)) as {
+      bootstrapStatistics: Float64Array;
+    };
+    expect(Array.from(r.bootstrapStatistics)).toEqual([
+      0.539827837277029, 0.6179114221889526, 0.539827837277029, 0.6179114221889526,
+      0.539827837277029,
+    ]);
+  });
+
+  it('shapiroWilkTest', async () => {
+    const r = (await shapiroWilkTest([1, 2, 3, 4, 5.5, 9, 2.2], opts)) as {
+      bootstrapStatistics: Float64Array;
+    };
+    expect(Array.from(r.bootstrapStatistics)).toEqual([
+      0.8027355528828096, 0.7664370164276403, 0.5501303115397279, 0.7242876997894997,
+      0.8436553859889866,
+    ]);
+  });
+
+  it('chiSquareTest', async () => {
+    const r = (await chiSquareTest([10, 20, 30], [20, 20, 20], opts)) as {
+      bootstrapStatistics: Float64Array;
+    };
+    expect(Array.from(r.bootstrapStatistics)).toEqual([1.3, 5.7, 2.0999999999999996, 3.1, 4.9]);
+  });
+});
+
 describe('bootstrap validation runs before an early return (#1154)', () => {
   it('mannWhitneyTest: a NaN in a sample does not hide an invalid count', async () => {
     await expect(mannWhitneyTest([1, NaN], [2, 3], { bootstrap: 2.5 })).rejects.toThrow(RangeError);
@@ -104,12 +137,12 @@ describe('bootstrap validation runs before an early return (#1154)', () => {
 
 describe('chiSquareTest bounds the bootstrap work (#1154)', () => {
   // Each resample draws as many values as the total count: 2 * 4e9 draws would not end.
-  it('rejects bootstrap * total count above 1,000,000,000 draws', async () => {
+  it('rejects bootstrap * total count above 200,000,000 draws', async () => {
     await expect(chiSquareTest([1e9, 1e9], [1e9, 1e9], { bootstrap: 2 })).rejects.toThrow(
       RangeError
     );
     await expect(chiSquareTest([1e9, 1e9], [1e9, 1e9], { bootstrap: 2 })).rejects.toThrow(
-      /^chiSquareTest: bootstrap \* total count = 4000000000 exceeds the supported maximum of 1000000000/
+      /^chiSquareTest: bootstrap \* total count = 4000000000 exceeds the supported maximum of 200000000/
     );
   });
 

@@ -9403,7 +9403,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2197
+      "loc": 2185
     },
     {
       "file": "functions/src/typed/index.ts",
@@ -10712,7 +10712,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 304
+      "loc": 337
     },
     {
       "file": "functions/tests/dogfood-1168-qr-small-matrix.test.ts",
