@@ -20,8 +20,9 @@
 #   - FNREF (docs:functions): same gate — the generator refuses a missing/stale dist and exits
 #     before rewriting docs/api or docs/reference; `sh -e` aborts the commit. Rebuild that package
 #     and commit again. Still ~8s and build-free when dist is fresh.
-# A commit that changes another .ts file (tests, tools, config) or the coverage policy runs
-# docs:deps and the duplicate gate only: the file census and TEST_COVERAGE.md read those files. A
+# A commit that changes another .ts file (tests, tools, config), the coverage policy, the
+# duplicate baseline or the duplicate allowlist runs docs:deps and the duplicate gate only: the
+# file census and TEST_COVERAGE.md read the first two, and the duplicate gate reads the last two. A
 # commit with no such file skips these steps: it adds no .ts file and no symbol, so the census and
 # the duplicate report cannot change.
 
@@ -52,7 +53,7 @@ if printf '%s\n' "$staged" | grep -qE '(^|/)src/|^assembly/'; then
   # `node tools/test/check-export-lock.mjs --write` and stage the lock.
   echo "pre-commit: source changed → checking the public export-name lock (check-export-lock)"
   node tools/test/check-export-lock.mjs
-elif printf '%s\n' "$staged" | grep -qE '\.ts$|^docs/Architecture/coverage-policy\.json$'; then
+elif printf '%s\n' "$staged" | grep -qE '\.ts$|^docs/Architecture/(coverage-policy|duplicate-baseline)\.json$|^tools/create-dependency-graph/duplicate-allowlist\.json$'; then
   # Non-src .ts changed (tests/docs/tools/config). The FILE CENSUS (file-inventory.json) tracks EVERY
   # tracked .ts, so adding/removing a test/doc/tool .ts changes it even though the module graph is
   # unchanged, and docs:deps fails the commit if the census and the repo disagree.

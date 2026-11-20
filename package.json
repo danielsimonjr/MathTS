@@ -59,7 +59,6 @@
     "bench:matrix": "bun tools/benchmark/wasm/matrix.bench.ts",
     "bench:backends:build": "bunx esbuild tools/benchmark/gpu/bench-3way.entry.ts --bundle --platform=browser --format=esm --outfile=tools/benchmark/gpu/bench-3way.bundle.js --external:fs --external:util --external:url --external:node:url --external:crypto --external:path --external:node:fs --external:node:path --external:node:crypto --external:node:util",
     "bench:backends:serve": "bun run bench:backends:build && bunx http-server . -p 8099 -c-1 -s -o /tools/benchmark/gpu/bench-3way.html",
-    "precommit:refresh": "bun run build:wasm && bun run docs:deps",
     "docs:deps": "bun tools/create-dependency-graph/create-dependency-graph.ts --root=. --include-tests && bun run docs:deps:derive",
     "docs:deps:full": "bun run docs:deps",
     "docs:deps:derive": "node tools/query-dependency-graph/query-dependency-graph.mjs --emit",
