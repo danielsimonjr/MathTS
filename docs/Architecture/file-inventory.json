@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2578,
+  "totalFiles": 2585,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1162,
+    "test": 1169,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1162,
+    "tests": 1169,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,10 +28,10 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1203,
+    "@danielsimonjr/mathts-functions": 1204,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 153,
+    "@danielsimonjr/mathts-matrix": 159,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -7450,7 +7450,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 232
+      "loc": 336
     },
     {
       "file": "functions/src/matrix/squeeze.ts",
@@ -10769,6 +10769,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 111
+    },
+    {
+      "file": "functions/tests/dogfood-1158-1163-1170-sqrtm.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 242
     },
     {
       "file": "functions/tests/dogfood-1162-inv-wide-range.test.ts",
@@ -14695,7 +14702,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 400
+      "loc": 412
     },
     {
       "file": "matrix/src/operations/condest.ts",
@@ -14758,7 +14765,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 479
+      "loc": 675
     },
     {
       "file": "matrix/src/operations/lstsq.ts",
@@ -14814,14 +14821,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 430
+      "loc": 468
     },
     {
       "file": "matrix/src/operations/sqrtm.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 579
+      "loc": 625
     },
     {
       "file": "matrix/src/operations/svd-wasm.ts",
@@ -15132,6 +15139,34 @@
       "loc": 553
     },
     {
+      "file": "matrix/tests/dogfood-1163-sqrtm-zero-noise.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 112
+    },
+    {
+      "file": "matrix/tests/dogfood-1171-extreme-block-ratio.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 73
+    },
+    {
+      "file": "matrix/tests/dogfood-1171-schur-deflation.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 249
+    },
+    {
+      "file": "matrix/tests/dogfood-1174-logm-singular-large.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 237
+    },
+    {
       "file": "matrix/tests/dogfood-1191-eig-issymmetric.test.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
@@ -15165,6 +15200,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 61
+    },
+    {
+      "file": "matrix/tests/dogfood-logm-finite-guard.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 29
+    },
+    {
+      "file": "matrix/tests/dogfood-logm-pade-one-solve.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 72
     },
     {
       "file": "matrix/tests/eig-balance-1240.test.ts",
@@ -15339,7 +15388,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "tests",
       "disposition": "test",
-      "loc": 302
+      "loc": 314
     },
     {
       "file": "matrix/tests/operations/lu-qr-oracle.test.ts",

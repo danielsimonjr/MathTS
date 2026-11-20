@@ -6,8 +6,10 @@
  *   (Algorithm 11.10).
  *
  * Algorithm (general Schur-based path, Slice 6.1):
- *   1. Schur decompose: A = Q · T · Q^T.
- *   2. Repeatedly take matrix square roots of T (Björck recurrence on upper-
+ *   1. Schur decompose: A = Q · T · Q^T. T is quasi-upper-triangular: a complex-
+ *      conjugate eigenvalue pair is a 2×2 block, balanced by a power-of-2 diagonal
+ *      similarity so that its two off-diagonal entries have about the same size.
+ *   2. Repeatedly take matrix square roots of T (Björck recurrence on quasi-upper-
  *      triangular matrices) until ||T^{1/2^k} - I||_1 < 0.25.
  *   3. Evaluate log(I + X) via 16-point Gauss-Legendre quadrature.
  *   4. Scale back by 2^k; rotate by Q: logm(A) = Q · (2^k · log(T^{1/2^k})) · Q^T.
@@ -18,7 +20,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eig } from './eig.js';
-import { schurInternal } from './schur.js';
+import { schurInternal, negligibleSubdiagonal } from './schur.js';
 import {
   eye,
   matMul,
@@ -29,12 +31,13 @@ import {
   matInv,
   gaussJordanContinue,
   ldexpMatrix,
+  relativeDifference,
   entryRange,
   withPow2Scale,
   ABS_CUTOFF_LO,
   FOURTH,
 } from './common.js';
-import { matrixSqrtNewtonInternal } from './sqrtm.js';
+import { matrixSqrtNewtonInternal, sqrtmQuasiTriangular } from './sqrtm.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -72,23 +75,24 @@ const GL16_WEIGHTS = [
 ];
 /* eslint-enable no-loss-of-precision */
 
-/** Solve (M) * x = b where M is n×n and b is n×1 (returns x). */
-function solveCol(M: number[][], b: number[]): number[] {
-  const n = M.length;
-  const Aug = M.map((row, i) => [...row, b[i]]);
-  gaussJordanContinue(Aug, n, 1e-30);
-  return Aug.map((row) => row[n]);
-}
-
 /**
  * Evaluate log(I + X) via 16-point Gauss-Legendre quadrature:
  *   log(I + X) = X * integral_0^1 (I + t*X)^{-1} dt
  *
- * Each quadrature point requires solving an n×n linear system per column.
+ * Each quadrature point requires one n×n linear system with n right-hand sides.
  * Requires ||X|| < 1 for accuracy (inverse-scaling ensures this).
  * 16-point GL gives ~32nd-order accuracy for smooth integrands.
+ *
+ * @param X - The n×n matrix, with a norm below 1.
+ * @param eliminate - The elimination of an augmented matrix. The default is
+ *   `gaussJordanContinue`; a test passes a counting copy, to pin one elimination per node.
+ * @returns log(I + X).
+ * @internal
  */
-function logPade(X: number[][]): number[][] {
+export function logPade(
+  X: number[][],
+  eliminate: typeof gaussJordanContinue = gaussJordanContinue
+): number[][] {
   const n = X.length;
   const result: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
   const I = eye(n);
@@ -102,13 +106,13 @@ function logPade(X: number[][]): number[][] {
       Array.from({ length: n }, (_, j) => I[i][j] + t * X[i][j])
     );
 
-    // Solve M * col_j(Y) = col_j(X) for each column j
+    // Solve M * Y = X for all columns in one elimination of the augmented matrix [M | X]:
+    // O(n³) per node, where one elimination per column cost O(n⁴). The pivots depend on M
+    // only, so every column of Y is the value that a solve of that column alone gives.
     // Then result += w * Y
-    for (let j = 0; j < n; j++) {
-      const xCol = X.map((row) => row[j]);
-      const yCol = solveCol(M, xCol);
-      for (let i = 0; i < n; i++) result[i][j] += w * yCol[i];
-    }
+    const aug = M.map((row, i) => [...row, ...X[i]]);
+    eliminate(aug, n, 1e-30);
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) result[i][j] += w * aug[i][n + j];
   }
 
   return result;
@@ -124,58 +128,165 @@ function schurBackwardError(A: number[][], T: number[][], Q: number[][]): number
 }
 
 // ---------------------------------------------------------------------------
-// Upper-triangular square root (Björck recurrence) for Schur-based logm
+// Block structure of the quasi-triangular Schur form
 // ---------------------------------------------------------------------------
 
 /**
- * Compute the upper-triangular square root U of an upper-triangular matrix T
- * (T assumed to be a 1×1 or all-real-diagonal block — i.e., T is strictly
- * upper triangular with positive diagonal entries).
+ * Marks the rows of each 2×2 diagonal block of a quasi-upper-triangular Schur form T: a
+ * subdiagonal entry that the Schur deflation test (`negligibleSubdiagonal`) keeps is the
+ * entry of a block, so the reader finds the blocks that Schur left standing (#1171).
  *
- * Diagonal: U_ii = sqrt(T_ii).
- * Super-diagonal: U_ij = (T_ij - sum_{k=i+1}^{j-1} U_ik * U_kj) / (U_ii + U_jj).
- *
- * Used by the inverse-scaling phase in logmSchur to take repeated square roots
- * of an upper-triangular Schur factor. Only applicable when all diagonal
- * entries are strictly positive (no 2×2 complex-eigenvalue blocks).
- *
- * Ref: Björck & Hammarling (1983); Higham (2008) §6.2 eq. (6.4)–(6.5).
+ * Returns null when two blocks overlap, or when a block has no complex-conjugate eigenvalue
+ * pair (`((a-d)/2)² + bc >= 0`): such a matrix goes to the eigenvalue path. A complex pair
+ * is never on the closed negative real axis, so its principal logarithm is real.
  */
-function sqrtUpperTriangular(T: number[][]): number[][] | null {
+function complexBlockMask(T: number[][]): boolean[] | null {
   const n = T.length;
-  const U: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
-
-  for (let i = 0; i < n; i++) {
-    if (T[i][i] < 0) return null;
-    U[i][i] = Math.sqrt(T[i][i]);
+  const mask = new Array<boolean>(n).fill(false);
+  for (let i = 1; i < n; i++) {
+    if (negligibleSubdiagonal(T, i)) continue;
+    if (mask[i - 1]) return null;
+    const a = T[i - 1][i - 1];
+    const b = T[i - 1][i];
+    const c = T[i][i - 1];
+    const d = T[i][i];
+    if (!(((a - d) / 2) ** 2 + b * c < 0)) return null;
+    mask[i - 1] = true;
+    mask[i] = true;
   }
+  return mask;
+}
 
-  for (let j = 1; j < n; j++) {
-    for (let i = j - 1; i >= 0; i--) {
-      let sum = 0;
-      for (let k = i + 1; k < j; k++) sum += U[i][k] * U[k][j];
-      const denom = U[i][i] + U[j][j];
-      U[i][j] = denom === 0 ? 0 : (T[i][j] - sum) / denom;
-    }
-  }
-
-  return U;
+/** The error for a 1×1 block of the Schur form that is not told from a non-positive value. */
+function nonPositiveEigenvalue(d: number, detail = ''): Error {
+  return new Error(
+    'matrixLogm: non-positive eigenvalue detected — principal logarithm is undefined ' +
+      '(eigenvalue ≈ ' +
+      d +
+      detail +
+      ')'
+  );
 }
 
 /**
- * Check whether a quasi-upper-triangular Schur form T has any 2×2 blocks
- * (i.e. any complex-conjugate eigenvalue pair). Returns true if all diagonal
- * blocks are 1×1 (all real eigenvalues).
+ * The error for an eigenvalue (or complex pair) of modulus `d` above 0 that is not told from
+ * zero: `d` is at the rounding noise of the Schur form, whose backward error is `be`. Every
+ * eigenvalue of the matrix is then within about n · be of 0, so no float64 test can decide
+ * between a small positive eigenvalue and the noise of a zero one. The error has the name
+ * `MatrixLogmNumericallySingularError` and says what to do (#1174).
  */
-function isStrictlyUpperTriangular(T: number[][]): boolean {
-  const n = T.length;
-  for (let i = 1; i < n; i++) {
-    // Compared with the neighbouring diagonal, like the Schur deflation test (#1125).
-    if (Math.abs(T[i][i - 1]) > 1e-12 * (Math.abs(T[i][i]) + Math.abs(T[i - 1][i - 1])))
-      return false;
-  }
-  return true;
+function numericallySingular(d: number, be: number, detail: string): Error {
+  const err = nonPositiveEigenvalue(
+    d,
+    detail +
+      '; the matrix is numerically singular: the eigenvalue is within the rounding noise of the ' +
+      'Schur form (backward error ≈ ' +
+      be +
+      ') and cannot be told from 0. To get a logarithm, shift the spectrum (A + δI with δ well ' +
+      'above that noise) or give an input whose small eigenvalues are well above it'
+  );
+  err.name = 'MatrixLogmNumericallySingularError';
+  return err;
 }
+
+/**
+ * The Schur form of `D·A·D⁻¹` with `D = diag(2^(i mod 2))`: an exact similarity copy of A (a
+ * power-of-2 scale is exact in floating point), whose rounding noise differs from that of the
+ * Schur form of A. A full grading `2^i` loses accuracy for large n, and a reversal leaves a
+ * symmetric matrix unchanged, so the alternating scale is used.
+ */
+function secondSchurForm(A: number[][]): { T2: number[][]; mask2: boolean[] | null } {
+  const A2 = A.map((row, r) => row.map((v, c) => v * 2 ** ((r % 2) - (c % 2))));
+  const T2 = schurInternal(A2).H;
+  return { T2, mask2: complexBlockMask(T2) };
+}
+
+/**
+ * True when the eigenvalue `d` of the first Schur form is confirmed by the second: the
+ * nearest 1×1 entry `d2` of T2 is positive and within 1e-3 of `d` in relative size. The
+ * rounding noise of a zero eigenvalue is of the size of 1e-16 · max|A| and changes sign and
+ * size between the two forms, so a singular matrix at a large scale does not pass. Over
+ * 2,000 random matrices of the sweep, the largest relative gap of an accurate eigenvalue
+ * was 9.6e-5, and the smallest gap of a singular matrix 7.3e-2: the limit 1e-3 is 10 times
+ * above the first and 73 times below the second (#1174).
+ */
+function confirmedBySecondForm(
+  d: number,
+  second: { T2: number[][]; mask2: boolean[] | null }
+): boolean {
+  const { T2, mask2 } = second;
+  if (mask2 === null) return false;
+  let d2 = NaN;
+  let gap = Infinity;
+  for (let r = 0; r < T2.length; r++) {
+    if (mask2[r]) continue;
+    const g = Math.abs(T2[r][r] - d);
+    if (g < gap) {
+      gap = g;
+      d2 = T2[r][r];
+    }
+  }
+  return d2 > 0 && Math.abs(d - d2) <= 1e-3 * d;
+}
+
+/**
+ * The modulus of the complex-conjugate pair of the 2×2 block of T at rows `r`, `r + 1`. The
+ * determinant is above 0 in exact arithmetic (the block has a negative discriminant); if
+ * rounding makes it negative the result is NaN, and every test of it is written so that NaN
+ * fails closed.
+ */
+function blockModulus(T: number[][], r: number): number {
+  return Math.sqrt(T[r][r] * T[r + 1][r + 1] - T[r][r + 1] * T[r + 1][r]);
+}
+
+/**
+ * True when the complex pair of modulus `m` of the first Schur form is confirmed by the
+ * second: the nearest 2×2 block of T2 has a modulus within 1e-3 of `m` in relative size. The
+ * rounding noise of a cluster of zero eigenvalues can form a 2×2 block of modulus
+ * 1e-16 · max|A|, which changes between two forms like the noise of one zero eigenvalue (#1174).
+ */
+function blockConfirmedBySecondForm(
+  m: number,
+  second: { T2: number[][]; mask2: boolean[] | null }
+): boolean {
+  const { T2, mask2 } = second;
+  if (mask2 === null) return false;
+  let gap = Infinity;
+  let m2 = NaN;
+  // The mask marks both rows of a block and blocks do not overlap, so a marked row that
+  // follows the end of the block before it is the first row of a block. Two blocks can be
+  // adjacent: the walk steps over both rows of each block.
+  for (let r = 0; r + 1 < T2.length; r++) {
+    if (!mask2[r]) continue;
+    const g = Math.abs(blockModulus(T2, r) - m);
+    if (g < gap) {
+      gap = g;
+      m2 = blockModulus(T2, r);
+    }
+    r++;
+  }
+  return m2 > 0 && Math.abs(m - m2) <= 1e-3 * m;
+}
+
+/**
+ * `v · 2^e` in two exact power-of-2 steps, so that a large |e| neither overflows 2^e to
+ * Infinity nor gives Infinity · 0 = NaN for a zero entry.
+ */
+function scalePow2(v: number, e: number): number {
+  if (v === 0 || e === 0) return v;
+  const h = Math.trunc(e / 2);
+  return v * 2 ** h * 2 ** (e - h);
+}
+
+/**
+ * A small eigenvalue (at most 1e-8 of the largest diagonal entry) must be at least this many
+ * times the backward error of the Schur form. The noise of a zero eigenvalue is of the size
+ * of that error and passed the check on a second Schur form by chance in about 1 of 1,500
+ * singular matrices, always with a ratio near 1; the limit 2 rejected all 16 such results of
+ * 16,000. On 1,716 matrices Q·T·Qᵀ with a small eigenvalue it rejected 6 more accurate
+ * results and 38 inaccurate ones than the second form alone (#1174).
+ */
+const NOISE_FACTOR = 2;
 
 /**
  * Schur-Padé logm: Higham (2008) Algorithm 11.10.
@@ -186,40 +297,112 @@ function isStrictlyUpperTriangular(T: number[][]): boolean {
  * 4. Scale back: logm(T) = 2^k · log(T^{1/2^k}).
  * 5. Rotate: logm(A) = Q · logm(T) · Q^T.
  *
- * Restricted to matrices whose Schur form T has all-positive diagonal (i.e.
- * no 2×2 blocks — complex eigenvalues — and no negative 1×1 blocks). If T
- * has complex-conjugate 2×2 blocks, falls through to the eig-based path.
+ * The 1×1 blocks of T must be positive (a non-positive real eigenvalue has no principal
+ * logarithm). A 2×2 block with a complex-conjugate pair is handled in real arithmetic by the
+ * quasi-triangular square root; its principal logarithm is real (#1171).
  *
- * Returns null if the matrix cannot be handled by the Schur-triangular path.
+ * Returns null if the matrix cannot be handled by the Schur path. Throws when a 1×1 block is
+ * not told from a non-positive eigenvalue: the Newton path would read the same matrix with its
+ * own rounding noise and could return a finite matrix for a matrix with no logarithm (#1174).
  */
 function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boolean } | null {
   const { H: T, Q } = schurInternal(A);
 
-  // Only handle all-real-diagonal Schur forms here. Complex-eigenvalue blocks
-  // require a more involved 2×2 block log (deferred; eig path throws instead).
-  if (!isStrictlyUpperTriangular(T)) return null;
-  // A subdiagonal entry above an absolute 1e-12 that passed the relative test is residue
+  const inBlock = complexBlockMask(T);
+  if (inBlock === null) return null;
+  // A subdiagonal entry above an absolute 1e-12 that is not the entry of a block is residue
   // of the Schur form of a large matrix.
   let residue = false;
-  for (let i = 1; i < T.length; i++) if (Math.abs(T[i][i - 1]) > 1e-12) residue = true;
+  for (let i = 1; i < T.length; i++)
+    if (negligibleSubdiagonal(T, i) && Math.abs(T[i][i - 1]) > 1e-12) residue = true;
 
-  // Check that all diagonal entries are strictly positive
+  // Check that all 1×1 diagonal entries are strictly positive
   // A positive eigenvalue at or below 1e-14 is accepted only when it is 1e8 times above the
   // backward error of the Schur form, so its logarithm has a relative error of at most
   // 1e-8 (#1125). The rounding noise of a zero eigenvalue is of the size of that error.
+  // An eigenvalue at most 1e-8 of the largest diagonal entry is also confirmed on a second
+  // Schur form (#1174): the noise of a zero eigenvalue is 1e-16 · max|A|, above 1e-14 from a
+  // scale of 2^10 up, so the absolute test alone passes it.
   const n = T.length;
   let backwardError = -1;
+  let dmax = 0;
+  for (let i = 0; i < n; i++) dmax = Math.max(dmax, Math.abs(T[i][i]));
+  // An infinite eigenvalue is neither positive nor non-positive: leave it to the Newton path,
+  // whose `eig` names the non-finite entry (NaN keeps its NaN result).
+  if (dmax === Infinity) return null;
+  let second: { T2: number[][]; mask2: boolean[] | null } | null = null;
   for (let i = 0; i < n; i++) {
+    if (inBlock[i]) {
+      // A 2×2 block holds a complex pair of modulus m. It is checked like a 1×1 entry of
+      // that size: noise of a zero eigenvalue cluster forms such a block (#1174).
+      const m = blockModulus(T, i);
+      if (!(m > 1e-14)) {
+        if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
+        if (!(m > 0)) throw nonPositiveEigenvalue(m, ', a complex pair');
+        if (!(m >= 1e8 * backwardError))
+          throw numericallySingular(
+            m,
+            backwardError,
+            ', a complex pair that is not above the floor 1e-14'
+          );
+      }
+      if (!(m > 1e-8 * dmax)) {
+        if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
+        if (m < NOISE_FACTOR * backwardError)
+          throw numericallySingular(
+            m,
+            backwardError,
+            ', a complex pair not above the Schur backward error'
+          );
+        second ??= secondSchurForm(A);
+        if (!blockConfirmedBySecondForm(m, second))
+          throw numericallySingular(
+            m,
+            backwardError,
+            ', a complex pair not confirmed by a second Schur form'
+          );
+      }
+      i++;
+      continue;
+    }
     const d = T[i][i];
     if (d <= 1e-14) {
-      if (d <= 0) return null;
+      if (d <= 0) throw nonPositiveEigenvalue(d);
       if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
-      if (d < 1e8 * backwardError) return null;
+      if (d < 1e8 * backwardError)
+        throw numericallySingular(d, backwardError, ', which is not above the floor 1e-14');
+    }
+    if (d <= 1e-8 * dmax) {
+      if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
+      if (d < NOISE_FACTOR * backwardError)
+        throw numericallySingular(
+          d,
+          backwardError,
+          ', which is not above the Schur backward error'
+        );
+      second ??= secondSchurForm(A);
+      if (!confirmedBySecondForm(d, second))
+        throw numericallySingular(d, backwardError, ', not confirmed by a second Schur form');
     }
   }
 
-  // Inverse-scaling phase: repeatedly take upper-triangular sqrt of T
-  let M = T;
+  // Balance each 2×2 block by an exact power-of-2 diagonal similarity D, so that its two
+  // off-diagonal entries have about the same size: log(T) = D⁻¹ · log(D·T·D⁻¹) · D. A
+  // non-normal block loses the accuracy of its diagonal in the square-root phase otherwise.
+  const dexp = new Array<number>(n).fill(0);
+  for (let i = 1; i < n; i++) {
+    const secondRowOfBlock = !negligibleSubdiagonal(T, i);
+    dexp[i] =
+      dexp[i - 1] +
+      (secondRowOfBlock
+        ? Math.round(0.5 * (Math.log2(Math.abs(T[i - 1][i])) - Math.log2(Math.abs(T[i][i - 1]))))
+        : 0);
+  }
+  // The difference of two logarithms cannot overflow, where the ratio b/c can (#1171).
+  const Tb = T.map((row, r) => row.map((v, c) => scalePow2(v, dexp[r] - dexp[c])));
+
+  // Inverse-scaling phase: repeatedly take the quasi-upper-triangular sqrt of T
+  let M = Tb;
   let numSqrt = 0;
   const maxSqrt = 64;
 
@@ -227,7 +410,7 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
     const MminI = M.map((row, i) => row.map((v, j) => v - (i === j ? 1 : 0)));
     if (norm1(MminI) < tol) break;
 
-    const sqrtM = sqrtUpperTriangular(M);
+    const sqrtM = sqrtmQuasiTriangular(M);
     if (sqrtM === null || !isFinite(normInf(sqrtM))) break;
 
     M = sqrtM;
@@ -246,21 +429,12 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
     logT = logT.map((row) => row.map((v) => v * scale));
   }
 
+  // Undo the balance
+  logT = logT.map((row, r) => row.map((v, c) => scalePow2(v, dexp[c] - dexp[r])));
+
   // Rotate: logm(A) = Q * logm(T) * Q^T
   const Qt = transpose(Q);
   return { logm: matMul(matMul(Q, logT), Qt), residue };
-}
-
-/** The largest entry of `X - Y`, divided by the largest entry of `Y`. */
-function relativeDifference(X: number[][], Y: number[][]): number {
-  let d = 0;
-  let m = 0;
-  for (let i = 0; i < Y.length; i++)
-    for (let j = 0; j < Y.length; j++) {
-      d = Math.max(d, Math.abs(X[i][j] - Y[i][j]));
-      m = Math.max(m, Math.abs(Y[i][j]));
-    }
-  return m > 0 ? d / m : d;
 }
 
 // ---------------------------------------------------------------------------
@@ -371,16 +545,20 @@ export interface LogmOptions {
  * Falls back to eigendecomposition if the square-root sequence diverges
  * (i.e., if the matrix has no non-positive eigenvalues and is diagonalisable).
  *
- * Limitations (deferred to Slice 5.9b):
- *   - Matrices with non-positive real eigenvalues: principal log is undefined.
- *   - Matrices with complex eigenvalues: throws.
- *   - Non-diagonalisable (defective) matrices: eig-fallback also throws.
- *   - Full Schur-based inverse-scaling-and-squaring for general non-normal
- *     matrices.
+ * A real matrix with a complex-conjugate eigenvalue pair and no eigenvalue on the closed
+ * negative real axis has a real principal logarithm. The Schur path computes it in real
+ * arithmetic from the 2×2 blocks of the real Schur form (#1171).
  *
- * @param A - Square DenseMatrix with positive real eigenvalues.
+ * Limitations:
+ *   - Matrices with non-positive real eigenvalues: principal log is undefined.
+ *   - The Newton fallback (taken when the Schur path cannot start) throws for complex
+ *     eigenvalues.
+ *
+ * @param A - Square DenseMatrix with no eigenvalue on the closed negative real axis.
  * @returns logm(A) as a DenseMatrix.
- * @throws Error for matrices with non-positive or complex eigenvalues.
+ * @throws Error for matrices with non-positive real eigenvalues. When a small eigenvalue is
+ *   at the rounding noise of the Schur form, the error has the name
+ *   `MatrixLogmNumericallySingularError` and its message gives the remedy.
  *
  * @example
  * // logm(I) = 0
@@ -401,7 +579,8 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
   // The Schur-Padé path forms fourth powers and its cutoffs are absolute, so the
   // window is [2^ABS_CUTOFF_LO, 2^FOURTH] (#1104). logm(2^e · A) = logm(A) + e·ln 2 · I,
   // so the shift is taken off the diagonal.
-  const logM = withPow2Scale(entryRange(A.toFloat64Array()), ABS_CUTOFF_LO, FOURTH, (e) => {
+  const entries = A.toFloat64Array();
+  const logM = withPow2Scale(entryRange(entries), ABS_CUTOFF_LO, FOURTH, (e) => {
     const Aarr = A.toArray();
     if (e === 0) return logmKernel(Aarr, tol);
     ldexpMatrix(Aarr, e);
@@ -412,14 +591,31 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
 
   const data = new Float64Array(n * n);
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = logM[i][j];
+  assertFiniteLogm(data, entries);
   return new DenseMatrix(n, n, data);
+}
+
+/**
+ * Last line of defence: a finite matrix never gets a non-finite logarithm back (a NaN result
+ * once came from an overflow in the block balance, #1171). A NaN or infinite input keeps its
+ * non-finite result.
+ *
+ * @param result - The entries of the computed logarithm.
+ * @param input - The entries of the input matrix.
+ * @throws Error when `result` has a non-finite entry and `input` has none.
+ * @internal
+ */
+export function assertFiniteLogm(result: Float64Array, input: Float64Array): void {
+  if (!result.every(Number.isFinite) && input.every(Number.isFinite))
+    throw new Error('matrixLogm: the result is not finite for a finite matrix (internal overflow)');
 }
 
 /** The logarithm of an n×n array (n ≥ 1), without scaling. */
 function logmKernel(Aarr: number[][], tol: number): number[][] {
   // ----- Schur-Padé path (Slice 6.1) -----
-  // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices.
-  // Falls through (returns null) for complex-eigenvalue Schur blocks.
+  // Handles: real positive eigenvalues, repeated eigenvalues, defective matrices and
+  // complex-conjugate pairs (2×2 blocks). Falls through (returns null) for a Schur form
+  // that is not a block-triangular form of that kind.
   const schur = logmSchur(Aarr, tol);
   if (schur !== null) {
     if (!schur.residue) return schur.logm;

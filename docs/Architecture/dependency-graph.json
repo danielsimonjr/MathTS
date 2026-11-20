@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7413
+    "totalExports": 7418
   },
   "entryPoints": [
     {
@@ -5573,6 +5573,7 @@
           "matSub",
           "matScale",
           "normInf",
+          "relativeDifference",
           "scaleDense",
           "norm1",
           "householder",
@@ -5605,6 +5606,7 @@
           "matSub",
           "matScale",
           "normInf",
+          "relativeDifference",
           "scaleDense",
           "norm1",
           "householder",
@@ -6021,7 +6023,7 @@
           },
           {
             "file": "./schur.js",
-            "imports": ["schurInternal"]
+            "imports": ["schurInternal", "negligibleSubdiagonal"]
           },
           {
             "file": "./common.js",
@@ -6035,6 +6037,7 @@
               "matInv",
               "gaussJordanContinue",
               "ldexpMatrix",
+              "relativeDifference",
               "entryRange",
               "withPow2Scale",
               "ABS_CUTOFF_LO",
@@ -6043,13 +6046,13 @@
           },
           {
             "file": "./sqrtm.js",
-            "imports": ["matrixSqrtNewtonInternal"]
+            "imports": ["matrixSqrtNewtonInternal", "sqrtmQuasiTriangular"]
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["matrixLogm"],
+        "exports": ["logPade", "matrixLogm", "assertFiniteLogm"],
         "interfaces": ["LogmOptions"],
-        "functions": ["matrixLogm"]
+        "functions": ["logPade", "matrixLogm", "assertFiniteLogm"]
       },
       "matrix/src/operations/lstsq.ts": {
         "description": "Linear least squares by column-pivoted Householder QR and a complete",
@@ -6239,9 +6242,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["matrixSchur", "schurInternal"],
+        "exports": ["negligibleSubdiagonal", "matrixSchur", "schurInternal"],
         "interfaces": ["SchurResult", "SchurOptions"],
-        "functions": ["matrixSchur", "schurInternal"]
+        "functions": ["negligibleSubdiagonal", "matrixSchur", "schurInternal"]
       },
       "matrix/src/operations/sqrtm.ts": {
         "description": "Matrix Square Root — Hybrid approach (Slices 5.9a + 6.1)",
@@ -6258,7 +6261,7 @@
           },
           {
             "file": "./schur.js",
-            "imports": ["schurInternal"]
+            "imports": ["schurInternal", "negligibleSubdiagonal"]
           },
           {
             "file": "./common.js",
@@ -6270,6 +6273,7 @@
               "gaussJordanSolve",
               "ldexpMatrix",
               "normInf",
+              "relativeDifference",
               "entryRange",
               "withPow2Scale",
               "ABS_CUTOFF_LO",
@@ -6278,9 +6282,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["matrixSqrtm", "matrixSqrtNewtonInternal"],
+        "exports": ["sqrtmQuasiTriangular", "matrixSqrtm", "matrixSqrtNewtonInternal"],
         "interfaces": ["SqrtmOptions"],
-        "functions": ["matrixSqrtm", "matrixSqrtNewtonInternal"]
+        "functions": ["sqrtmQuasiTriangular", "matrixSqrtm", "matrixSqrtNewtonInternal"]
       },
       "matrix/src/operations/svd-wasm.ts": {
         "description": "`svdWasm` — thin wrapper kept for API compatibility (consumed by `tensor` and `linalg`).",
@@ -19911,6 +19915,11 @@
         ],
         "workspaceDependencies": [
           {
+            "package": "@danielsimonjr/mathts-matrix",
+            "directory": "matrix",
+            "imports": ["DenseMatrix", "matrixSqrtm"]
+          },
+          {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": [
@@ -19919,7 +19928,8 @@
               "allFinite",
               "entryRange",
               "ldexp",
-              "withPow2Scale"
+              "withPow2Scale",
+              "EntryRange"
             ],
             "subpath": "internal"
           }
@@ -50003,11 +50013,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 240018,
-    "totalExports": 7413,
+    "totalLinesOfCode": 240414,
+    "totalExports": 7418,
     "totalClasses": 62,
     "totalInterfaces": 674,
-    "totalFunctions": 2596,
+    "totalFunctions": 2601,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1696,
