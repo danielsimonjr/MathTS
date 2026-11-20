@@ -11,25 +11,16 @@ import { kendallTauTest } from '../src/index.js';
  * renames `coefficient` → `tau` to match the `*Test` result-object
  * convention used elsewhere in this file.
  *
- * Mann-Whitney / KS-2samp exact small-n p-values: investigated but NOT
- * wired into `mannWhitneyTest`/`kolmogorovSmirnov2Test`'s default `pValue`.
- * Making the exact U-distribution / KS lattice-path p the default for
- * n1*n2 <= 400 is a REAL regression against two pre-existing, deliberately
- * pinned oracle tests:
- *   - functions/tests/gap-hypothesis-oracle.test.ts ("mannWhitneyTest —
- *     external oracle"): pins the *normal-approximation* p for
- *     [1,2,3] vs [4,5,6] (n1*n2=9) into (0.04, 0.055). scipy's exact p for
- *     this case (mannwhitneyu(..., method='exact')) is 0.1 — outside that
- *     bound.
- *   - functions/tests/gap-stats-completeness.test.ts ("Wave 1:
- *     kolmogorovSmirnov2Test vs scipy.ks_2samp"): pins the kstwobign
- *     ASYMPTOTIC p for n=8,8 and n=10,10 (both <= 400) with an explicit
- *     comment that this was a deliberate choice over scipy's
- *     version-specific small-n exact p.
- * Changing either default would silently invalidate a documented design
- * decision (ADR-level), so this was left for the parent/user to decide
- * rather than resolved unilaterally. See session report for scipy-verified
- * values on both sides.
+ * Mann-Whitney exact p-values: `mannWhitneyTest` chooses its method as
+ * `scipy.stats.mannwhitneyu` does (`_mwu_choose_method`): the exact U
+ * distribution when there are no ties and one sample has 8 or fewer
+ * values, otherwise the normal approximation (#1148; pinned in
+ * dogfood-1148-mw-wilcoxon-scipy.test.ts).
+ *
+ * KS-2samp: `kolmogorovSmirnov2Test` keeps the kstwobign ASYMPTOTIC p for
+ * small samples (pinned in gap-stats-completeness.test.ts, "Wave 1:
+ * kolmogorovSmirnov2Test vs scipy.ks_2samp"), a documented choice over
+ * SciPy's small-n exact p.
  */
 describe('exact p-values — Kendall tau (new export)', () => {
   it('kendallTauTest: perfect concordance -> tau=1, small p', () => {

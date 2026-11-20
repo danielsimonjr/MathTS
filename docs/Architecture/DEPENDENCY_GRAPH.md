@@ -4997,6 +4997,7 @@ graph LR
 | `./typed/distributions.js`    | `normalCDF, normalPDF`         | Import |
 | `./typed/special.js`          | `lgamma`                       | Import |
 | `./typed/number-matrix.js`    | `hasNaN, numberVector`         | Import |
+| `./utils/limits.js`           | `assertLoopOrder`              | Import |
 
 **Exports:**
 
@@ -10504,12 +10505,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                           | Imports        | Type   |
-| ------------------------------ | -------------- | ------ |
-| `../distribution-functions.js` | `chiSquaredSF` | Import |
-| `../typed/distributions.js`    | `normalCDF`    | Import |
-| `../typed/number-matrix.js`    | `numberVector` | Import |
-| `./robust-stats.js`            | `medianOf`     | Import |
+| File                           | Imports                | Type   |
+| ------------------------------ | ---------------------- | ------ |
+| `../distribution-functions.js` | `chiSquaredSF`         | Import |
+| `../typed/distributions.js`    | `normalCDF`            | Import |
+| `../typed/hypothesis.js`       | `binomialTest`         | Import |
+| `../typed/number-matrix.js`    | `hasNaN, numberVector` | Import |
+| `./robust-stats.js`            | `medianOf`             | Import |
 
 **Exports:**
 
@@ -12324,7 +12326,7 @@ graph LR
 | `./parallel-map.js`            | `kernelSource`                                                                  | Import |
 | `../distribution-functions.js` | `studentTQuantile, normalQuantile`                                              | Import |
 | `../stats/inference-extra.js`  | `multipleTest`                                                                  | Import |
-| `../utils/limits.js`           | `assertLoopOrder`                                                               | Import |
+| `../utils/limits.js`           | `assertAllocSize, assertLoopOrder, MAX_LOOP_ORDER`                              | Import |
 | `./number-matrix.js`           | `hasNaN`                                                                        | Import |
 
 **Exports:**
@@ -12750,6 +12752,7 @@ graph LR
 | `../wasm/sort/wasm-bridge.js` | `sortF64Dispatch`                            | Import |
 | `../utils/median-numbers.js`  | `medianInPlace, minFrom, quickSelectInPlace` | Import |
 | `../utils/limits.js`          | `assertAllocSize`                            | Import |
+| `./number-matrix.js`          | `hasNaN`                                     | Import |
 
 **Exports:**
 
@@ -20856,7 +20859,7 @@ graph LR
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 44 files   |
-| `functions/src/utils/limits`                           | 0 files      | 42 files   |
+| `functions/src/utils/limits`                           | 0 files      | 43 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
@@ -20870,9 +20873,9 @@ graph LR
 | `functions/src/typed/arithmetic`                       | 16 files     | 10 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
+| `functions/src/typed/number-matrix`                    | 0 files      | 24 files   |
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
-| `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `functions/src/typed/numeric`                          | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
@@ -21785,7 +21788,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 239389 |
+| Total Lines of Code     | 239672 |
 | Total Exports           | 7408   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
