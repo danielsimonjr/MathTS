@@ -1211,7 +1211,6 @@
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts",
       "functions/src/relational/unequal.ts",
-      "functions/src/special/zeta.ts",
       "functions/src/statistics/extreme.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/min.ts",
@@ -1792,6 +1791,7 @@
       "functions/src/combinatorics/catalan.ts",
       "functions/src/probability/bigint-binomial.ts",
       "functions/src/probability/gamma.ts",
+      "functions/src/special/zeta.ts",
       "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/utils/bigint.ts": [

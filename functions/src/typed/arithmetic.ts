@@ -1300,7 +1300,8 @@ export const log1p = mathTyped('log1p', {
  */
 export const expm1 = mathTyped('expm1', {
   number: (a: f64): f64 => Math.expm1(a),
-  BigNumber: (a: BigNumber): BigNumber => a.exp().subtract(1),
+  // The method keeps a small argument: exp(x) - 1 rounds it to 0 (#1166).
+  BigNumber: (a: BigNumber): BigNumber => a.expm1(),
 
   // Float64Array expm1 (synchronous)
   Float64Array: (a: Float64Array): Float64Array =>

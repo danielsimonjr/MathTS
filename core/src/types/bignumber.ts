@@ -94,6 +94,13 @@ const LOG2_10_LOWER = 3.3219;
 const GUARD_DIGITS = 10;
 /** exp(x) gives Infinity (or 0) when |x| / ln(10) exceeds this decimal exponent. */
 const EXP_DECIMAL_LIMIT = 9e15;
+/** An exp argument with more integer digits than this is beyond EXP_DECIMAL_LIMIT * ln(10). */
+const EXP_ARGUMENT_DIGITS = 17;
+/**
+ * `ln` divides a value into `c * 10^q`. The first 17 digits of the coefficient, as an integer at
+ * or above this number (a mantissa from 3.1622776601683795), put the value in the next decade.
+ */
+const LN_DECADE_SPLIT = 31622776601683795n;
 
 /**
  * The safety limit on the terms of a series. Each series rounds its terms and partial sums to the
@@ -978,16 +985,56 @@ export class BigNumber implements MathTSValue {
     if (this._sign === 0) return b.roundToPrecision(precision);
     if (b._sign === 0) return this.roundToPrecision(precision);
 
-    // Align exponents
-    const [aCoef, bCoef, exp] = this.alignExponents(this, b);
+    // A far smaller operand cannot change the rounded sum except through its sign and its
+    // presence, so a sticky value of the same sign replaces it. The alignment then multiplies by
+    // a small power of ten, and not by 10^gap (#1249).
+    const gap = this._exponent - b._exponent;
+    if (gap > precision + 3 || gap < -precision - 3) {
+      const [x, y] = BigNumber.#stickyOperands(this, b, precision);
+      return BigNumber.#addAligned(x, y);
+    }
+    return BigNumber.#addAligned(this, b);
+  }
 
-    if (this._sign === b._sign) {
+  /** The rounded sum of two finite nonzero values: align the exponents, then add or subtract. */
+  static #addAligned(x: BigNumber, y: BigNumber): BigNumber {
+    const [xCoef, yCoef, exp] = x.alignExponents(x, y);
+
+    if (x._sign === y._sign) {
       // Same sign: add coefficients
-      return this.rounded(this._sign, aCoef + bCoef, exp);
+      return x.rounded(x._sign, xCoef + yCoef, exp);
     }
     // Different signs: subtract coefficients
-    if (aCoef >= bCoef) return this.rounded(this._sign, aCoef - bCoef, exp);
-    return this.rounded(b._sign, bCoef - aCoef, exp);
+    if (xCoef >= yCoef) return x.rounded(x._sign, xCoef - yCoef, exp);
+    return x.rounded(y._sign, yCoef - xCoef, exp);
+  }
+
+  /**
+   * The two operands of an `add`, where the operand of the smaller order is replaced by a sticky
+   * value when the larger operand dominates the sum. The result of the sum then needs no `10^gap`.
+   *
+   * Let `L` be the operand of the larger order `orderL`, and `m = min(L.exponent, orderL -
+   * precision - 2)`. When the other operand `s` has `|s| < 10^m`, the sum `L + s` lies strictly
+   * between `L` and `L +- 10^m`, with the sign of `s`. `L` is a multiple of `10^m`. Every rounding
+   * boundary of the sum (a grid point or a midpoint at `precision` digits, also after a borrow
+   * from a power of ten) is a multiple of `5 * 10^(orderL - precision - 2)`, so a multiple of
+   * `10^m` too. No boundary lies inside that interval, and every `s` of that size rounds to the
+   * same result in every rounding mode. The sticky value `10^(m - 1)` has the sign of `s` and
+   * belongs to that interval. It is built with `#construct`, because `#allocate` returns 0 for an
+   * order below `minExponent`, and that loses the sticky bit in the directed modes.
+   */
+  static #stickyOperands(x: BigNumber, y: BigNumber, precision: number): [BigNumber, BigNumber] {
+    const orderX = x._exponent + digitCount(x._coefficient);
+    const orderY = y._exponent + digitCount(y._coefficient);
+    const largeIsX = orderX >= orderY;
+    const large = largeIsX ? x : y;
+    const small = largeIsX ? y : x;
+    const orderLarge = largeIsX ? orderX : orderY;
+    const orderSmall = largeIsX ? orderY : orderX;
+    const m = Math.min(large._exponent, orderLarge - precision - 2);
+    if (orderSmall > m) return [x, y];
+    const sticky = BigNumber.#construct(small._sign, 1n, m - 1, false, false);
+    return largeIsX ? [x, sticky] : [sticky, y];
   }
 
   /**
@@ -1177,7 +1224,38 @@ export class BigNumber implements MathTSValue {
     if (this._sign === 0) {
       return y._sign === -1 ? BigNumber.#allocate(1, 0n, 0, false, true) : this;
     }
-    return this.#guarded(() => y.multiply(this.ln()).exp());
+    return this.#guarded(() => {
+      // exp turns the absolute error of its argument into the relative error of its result. The
+      // guard digits cover an argument below 1 only, so the argument gets one more digit for each
+      // digit of its integer part. A value with an exponent of 1e9 or more reaches this since ln
+      // no longer takes time in proportion to the exponent (#1249).
+      const extra = this.#powArgumentDigits(y);
+      if (extra <= 0) return y.multiply(this.ln()).exp();
+      const saved = globalConfig;
+      setGlobalConfig({ ...saved, precision: saved.precision + extra });
+      try {
+        return y.multiply(this.ln()).exp();
+      } finally {
+        setGlobalConfig(saved);
+      }
+    });
+  }
+
+  /**
+   * The number of integer digits of `y * ln(this)`, or an upper bound of it, for a finite positive
+   * `this`. The bound comes from the orders of the two values and costs no `ln`: `|ln(this)| <
+   * (|order| + 1) * ln(10)` and `|y| < 10^orderY`. Only a bound above the range of `exp` needs the
+   * product itself, because a `this` near 1 has a small `ln`. It returns 0 when the product is
+   * outside that range: `exp` then gives Infinity or 0 with no extra digit.
+   */
+  #powArgumentDigits(y: BigNumber): number {
+    const order = this._exponent + digitCount(this._coefficient);
+    const lnDigits = Math.floor(Math.log10((Math.abs(order) + 1) * Math.LN10)) + 1;
+    const bound = y._exponent + digitCount(y._coefficient) + lnDigits;
+    if (bound <= EXP_ARGUMENT_DIGITS) return bound;
+    const product = y.multiply(this.ln());
+    const digits = product._exponent + digitCount(product._coefficient);
+    return product.isFinite() && digits <= EXP_ARGUMENT_DIGITS ? digits : 0;
   }
 
   /**
@@ -1817,7 +1895,7 @@ export class BigNumber implements MathTSValue {
   // ============================================================
 
   /**
-   * Hyperbolic sine: sinh(x) = (e^x - e^(-x)) / 2
+   * Hyperbolic sine: sinh(x) = (e^x - e^(-x)) / 2, computed through expm1 to keep a small x
    */
   sinh(): BigNumber {
     return this.#guarded(() => this.#sinhImpl());
@@ -1828,9 +1906,14 @@ export class BigNumber implements MathTSValue {
     if (this._isInfinite) return this;
     if (this._sign === 0) return this;
 
-    const ex = this.exp();
-    const enx = this.negate().exp();
-    return ex.subtract(enx).divide(BigNumber.fromNumber(2));
+    // sinh(|x|) = (e + e / (e + 1)) / 2 with e = expm1(|x|). Both terms are positive, so a small
+    // x keeps its digits: exp(x) - exp(-x) cancels them (#1166). A large |x| gives e / (e + 1) = 1.
+    const one = BigNumber.fromNumber(1);
+    const e = this.abs().expm1();
+    // Beyond the exponent range expm1 is Infinity, and Infinity / Infinity below is NaN.
+    if (!e.isFinite()) return this._sign === 1 ? e : e.negate();
+    const magnitude = e.add(e.divide(e.add(one))).divide(BigNumber.fromNumber(2));
+    return this._sign === 1 ? magnitude : magnitude.negate();
   }
 
   /**
@@ -2040,11 +2123,29 @@ export class BigNumber implements MathTSValue {
     return this.#guarded(() => this.#lnSeries(one));
   }
 
-  /** The series part of `ln`, at the current (raised) precision. */
+  /**
+   * The series part of `ln`, at the current (raised) precision.
+   *
+   * The value splits as `this = c * 10^q` with `1/sqrt(10) <= c < sqrt(10)`, so `ln(this) =
+   * ln(c) + q * ln(10)`. The number of reduction steps then does not depend on the exponent, as
+   * it did when the loop below halved `this` (#1249). A value with `q = 0` keeps its own series.
+   */
   #lnSeries(one: BigNumber): BigNumber {
+    const digits = digitCount(this._coefficient);
+    // this = m * 10^e with 1 <= m < 10. The first 17 digits of m decide whether c = m or m / 10.
+    const lead =
+      digits >= 17
+        ? this._coefficient / pow10(digits - 17)
+        : this._coefficient * pow10(17 - digits);
+    const shift = lead >= LN_DECADE_SPLIT ? 1 : 0;
+    const q = this._exponent + digits - 1 + shift;
+
     // Argument reduction: ln(x) = ln(x / 2^k) + k * ln(2)
     // Bring x into range [0.5, 2] for better convergence
-    let x = this.clone();
+    let x =
+      q === 0
+        ? this.clone()
+        : BigNumber.#construct(1, this._coefficient, 1 - digits - shift, false, false);
     let k = 0;
     const two = BigNumber.fromNumber(2);
     const half = BigNumber.fromNumber(0.5);
@@ -2061,9 +2162,12 @@ export class BigNumber implements MathTSValue {
     // Series: ln(x) = 2 * sum_{n=0}^{inf} (1/(2n+1)) * ((x-1)/(x+1))^(2n+1)
     let sum = x.subtract(one).divide(x.add(one)).#twiceAtanhSeries();
 
-    // Add back reduction: k * ln(2)
+    // Add back reduction: k * ln(2) + q * ln(10)
     if (k !== 0) {
       sum = sum.add(BigNumber.ln2At().multiply(BigNumber.fromNumber(k)));
+    }
+    if (q !== 0) {
+      sum = sum.add(BigNumber.ln10At().multiply(BigNumber.fromNumber(q)));
     }
 
     return sum;
@@ -2415,10 +2519,10 @@ export class BigNumber implements MathTSValue {
       return this.normalize(sign, coefficient, exponent);
     }
     // The rounding step strips the trailing zeros, so the exact value needs no normalize first.
-    return BigNumber.#allocate(sign, coefficient, exponent).roundExcessDigits(
-      precision,
-      globalConfig.rounding
-    );
+    // A value above maxExponent is already infinite: rounding it would read the zero coefficient
+    // of Infinity and give 0 (an operand with more digits than the precision reached this).
+    const exact = BigNumber.#allocate(sign, coefficient, exponent);
+    return exact.isFinite() ? exact.roundExcessDigits(precision, globalConfig.rounding) : exact;
   }
 
   private normalize(sign: 1 | -1 | 0, coefficient: bigint, exponent: number): BigNumber {
