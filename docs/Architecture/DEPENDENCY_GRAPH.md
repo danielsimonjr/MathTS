@@ -3366,6 +3366,7 @@ graph LR
 | `../../utils/is.js`                | `isArray, isDenseMatrix, isMatrix, isSparseMatrix`                   | Import             |
 | `../../utils/factory.js`           | `factory`                                                            | Import             |
 | `../../utils/string.js`            | `format`                                                             | Import             |
+| `../../utils/array.js`             | `arraySize`                                                          | Import             |
 | `./utils/solveValidation.js`       | `createSolveValidation, denseRightHandSide, nonSquareSolveError`     | Import             |
 | `../sparse/csIpvec.js`             | `csIpvec`                                                            | Import             |
 | `../../core/function/typed.js`     | `TypedFunction`                                                      | Import (type-only) |
@@ -6558,11 +6559,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports           | Type   |
-| -------------------- | ----------------- | ------ |
-| `../utils/is.js`     | `typeOf`          | Import |
-| `../utils/array.js`  | `arraySize`       | Import |
-| `../utils/limits.js` | `assertAllocSize` | Import |
+| File                         | Imports                                                                                             | Type   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- | ------ |
+| `../utils/is.js`             | `typeOf`                                                                                            | Import |
+| `../utils/array.js`          | `arraySize, validate, validateIndex, resize, reshape, processSizesWildcard, unsqueeze, broadcastTo` | Import |
+| `../error/DimensionError.js` | `DimensionError`                                                                                    | Import |
+| `../utils/limits.js`         | `assertAllocSize`                                                                                   | Import |
 
 **Exports:**
 
@@ -7935,15 +7937,15 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                         | Imports                                 | Type               |
-| ---------------------------- | --------------------------------------- | ------------------ |
-| `../utils/object.js`         | `clone`                                 | Import             |
-| `../utils/array.js`          | `isEmptyIndex, validateIndexSourceSize` | Import             |
-| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`      | Import             |
-| `../error/DimensionError.js` | `DimensionError`                        | Import             |
-| `../utils/factory.js`        | `factory`                               | Import             |
-| `../core/function/typed.js`  | `TypedFunction`                         | Import (type-only) |
-| `../utils/is.js`             | `Index`                                 | Import (type-only) |
+| File                         | Imports                                                            | Type               |
+| ---------------------------- | ------------------------------------------------------------------ | ------------------ |
+| `../utils/object.js`         | `clone`                                                            | Import             |
+| `../utils/array.js`          | `arraySize, broadcastSizes, isEmptyIndex, validateIndexSourceSize` | Import             |
+| `../utils/customs.js`        | `getSafeProperty, setSafeProperty`                                 | Import             |
+| `../error/DimensionError.js` | `DimensionError`                                                   | Import             |
+| `../utils/factory.js`        | `factory`                                                          | Import             |
+| `../core/function/typed.js`  | `TypedFunction`                                                    | Import (type-only) |
+| `../utils/is.js`             | `Index`                                                            | Import (type-only) |
 
 **Exports:**
 
@@ -11822,6 +11824,7 @@ graph LR
 | `../utils/real-scale.js`               | `isDegenerate, rescaled`                                                                                                                                                                                                                      | Import             |
 | `../statistics/numeric-data.js`        | `finiteNumbers, normalizationFromSecondArg, normalizationFromStringAndOptions, reduceNumericMatrix, StatReduceOptions, NumericVectorInput, VarianceRequest`                                                                                   | Import             |
 | `../factories/matrix-bridge.js`        | `MathJSDenseMatrix, MathJSSparseMatrix`                                                                                                                                                                                                       | Import             |
+| `../utils/array.js`                    | `arraySize`                                                                                                                                                                                                                                   | Import             |
 | `./invalid-scalar-guards.js`           | `withBinaryScalarGuards`                                                                                                                                                                                                                      | Import             |
 | `../utils/bignumber/work-precision.js` | `atWorkPrecision`                                                                                                                                                                                                                             | Import             |
 | `../utils/bignumber-hypot.js`          | `pNormSumInRange`                                                                                                                                                                                                                             | Import             |
@@ -12557,6 +12560,7 @@ graph LR
 | `../factories/scope.js`         | `factoryScope`      | Import |
 | `./number-matrix.js`            | `isNumberMatrix`    | Import |
 | `../factories/matrix-bridge.js` | `MathJSDenseMatrix` | Import |
+| `../utils/array.js`             | `arraySize`         | Import |
 
 **Exports:**
 
@@ -12670,6 +12674,7 @@ graph LR
 | `../utils/limits.js`                  | `assertAllocSize, assertLoopOrder` | Import |
 | `../plain/number/probability.js`      | `gammaNumber`                      | Import |
 | `../factories/matrix-bridge.js`       | `MathJSDenseMatrix`                | Import |
+| `../utils/array.js`                   | `arraySize`                        | Import |
 | `../probability/multinomial-exact.js` | `multinomialExact`                 | Import |
 
 **Exports:**
@@ -20356,13 +20361,13 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                           | Import                                                                                                                                                                                                |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                                                               |
-| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                                                                       |
-| `@danielsimonjr/mathts-functions` | `PublicAbs, PublicAdd, PublicCos, PublicExp, PublicLog, PublicMean, PublicSin, PublicSqrt, PublicTan`                                                                                                 |
-| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse, transpose, bignumber, complex` |
-| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, isDenseMatrix, isSparseMatrix, add, subtract, multiply`                                                                                                                   |
+| Package                           | Import                                                                                                                                                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@danielsimonjr/mathts-core`      | `Complex, Fraction, BigNumber, I, COMPLEX_ZERO, isComplex, isFraction, isBigNumber, isNumber, LN2, LN10, LOG2E, LOG10E, SQRT2, SQRT1_2`                                                                            |
+| `@danielsimonjr/mathts-core`      | `TypedFunction`                                                                                                                                                                                                    |
+| `@danielsimonjr/mathts-functions` | `PublicAbs, PublicAdd, PublicCos, PublicExp, PublicLog, PublicMean, PublicSin, PublicSqrt, PublicTan`                                                                                                              |
+| `@danielsimonjr/mathts-functions` | `add, subtract, multiply, divide, pow, sqrt, abs, exp, log, sin, cos, tan, asin, acos, atan, atan2, sum, mean, min, max, gcd, lcm, round, floor, ceil, matrix, sparse, zeros, ones, transpose, bignumber, complex` |
+| `@danielsimonjr/mathts-matrix`    | `DenseMatrix, SparseMatrix, isDenseMatrix, isSparseMatrix, add, subtract, multiply`                                                                                                                                |
 
 **Internal Dependencies:**
 
@@ -20373,7 +20378,7 @@ graph LR
 **Exports:**
 
 - Types: `CompatMatrixValue`
-- Functions: `complex`, `fraction`, `bignumber`, `bignumber`, `bignumber`, `matrix`, `sparse`, `variance`, `std`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
+- Functions: `complex`, `fraction`, `bignumber`, `bignumber`, `bignumber`, `matrix`, `sparse`, `variance`, `std`, `conj`, `re`, `im`, `arg`, `transpose`, `det`, `identity`, `zeros`, `zeros`, `zeros`, `ones`, `ones`, `ones`, `size`, `isComplex_`, `isFraction_`, `isBigNumber_`, `isNumber_`, `isMatrix`
 - Constants: `add`, `subtract`, `multiply`, `divide`, `pow`, `sqrt`, `abs`, `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `sum`, `mean`, `min`, `max`, `gcd`, `lcm`, `round`, `floor`, `ceil`, `i`, `pi`, `e`, `phi`, `tau`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2`, `SQRT1_2`, `Infinity_`, `NaN_`, `shims`
 
 ---
@@ -20914,9 +20919,9 @@ graph LR
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 63 files   |
 | `functions/src/core/config`                            | 0 files      | 57 files   |
+| `functions/src/utils/array`                            | 0 files      | 53 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
-| `functions/src/utils/array`                            | 0 files      | 49 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/number`                           | 0 files      | 47 files   |
 | `functions/src/utils/collection`                       | 0 files      | 44 files   |
@@ -20931,8 +20936,8 @@ graph LR
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
+| `functions/src/typed/arithmetic`                       | 16 files     | 10 files   |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
-| `functions/src/typed/arithmetic`                       | 15 files     | 10 files   |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
 | `functions/src/typed/number-matrix`                    | 0 files      | 24 files   |
 | `core/src/internal`                                    | 23 files     | 0 files    |
@@ -21849,12 +21854,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1353   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 241197 |
+| Total Lines of Code     | 241563 |
 | Total Exports           | 7426   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 63     |
 | Total Interfaces        | 675    |
-| Total Functions         | 2605   |
+| Total Functions         | 2609   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 686    |

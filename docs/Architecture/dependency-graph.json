@@ -8257,6 +8257,10 @@
             "imports": ["format"]
           },
           {
+            "file": "../../utils/array.js",
+            "imports": ["arraySize"]
+          },
+          {
             "file": "./utils/solveValidation.js",
             "imports": ["createSolveValidation", "denseRightHandSide", "nonSquareSolveError"]
           },
@@ -17843,7 +17847,20 @@
           },
           {
             "file": "../utils/array.js",
-            "imports": ["arraySize"]
+            "imports": [
+              "arraySize",
+              "validate",
+              "validateIndex",
+              "resize",
+              "reshape",
+              "processSizesWildcard",
+              "unsqueeze",
+              "broadcastTo"
+            ]
+          },
+          {
+            "file": "../error/DimensionError.js",
+            "imports": ["DimensionError"]
           },
           {
             "file": "../utils/limits.js",
@@ -20065,7 +20082,7 @@
           },
           {
             "file": "../utils/array.js",
-            "imports": ["isEmptyIndex", "validateIndexSourceSize"]
+            "imports": ["arraySize", "broadcastSizes", "isEmptyIndex", "validateIndexSourceSize"]
           },
           {
             "file": "../utils/customs.js",
@@ -26701,6 +26718,10 @@
             "imports": ["MathJSDenseMatrix", "MathJSSparseMatrix"]
           },
           {
+            "file": "../utils/array.js",
+            "imports": ["arraySize"]
+          },
+          {
             "file": "./invalid-scalar-guards.js",
             "imports": ["withBinaryScalarGuards"]
           },
@@ -29125,6 +29146,10 @@
           {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["arraySize"]
           }
         ],
         "workspaceDependencies": [
@@ -29552,6 +29577,10 @@
           {
             "file": "../factories/matrix-bridge.js",
             "imports": ["MathJSDenseMatrix"]
+          },
+          {
+            "file": "../utils/array.js",
+            "imports": ["arraySize"]
           },
           {
             "file": "../probability/multinomial-exact.js",
@@ -47062,6 +47091,8 @@
               "ceil",
               "matrix",
               "sparse",
+              "zeros",
+              "ones",
               "transpose",
               "bignumber",
               "complex"
@@ -47162,6 +47193,10 @@
           "det",
           "identity",
           "zeros",
+          "zeros",
+          "zeros",
+          "ones",
+          "ones",
           "ones",
           "size",
           "isComplex_",
@@ -50133,11 +50168,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1353,
     "totalModules": 82,
-    "totalLinesOfCode": 241197,
+    "totalLinesOfCode": 241563,
     "totalExports": 7426,
     "totalClasses": 63,
     "totalInterfaces": 675,
-    "totalFunctions": 2605,
+    "totalFunctions": 2609,
     "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1697,
