@@ -3369,12 +3369,12 @@ graph LR
 
 ---
 
-### `functions/src/algebra/solver/pivot-tolerance.ts` - Pivot floor relative to the scale of the pivot row — the same factor `linsolve` uses
+### `functions/src/algebra/solver/pivot-tolerance.ts` - Safety factor on `n * eps` in {@link pivotTolerance}.
 
 **Exports:**
 
-- Functions: `isBadLuFactorPivot`
-- Constants: `LU_PIVOT_TOL`, `LUSOLVE_SINGULAR_MESSAGE`
+- Functions: `pivotTolerance`, `isBadLuFactorPivot`
+- Constants: `PIVOT_EPS_FACTOR`, `LUSOLVE_SINGULAR_MESSAGE`
 
 ---
 
@@ -12524,18 +12524,19 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                               | Imports                                                                                                                            | Type      |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `../numeric/numeric-jacobian.js`   | `numericJacobian`                                                                                                                  | Import    |
-| `../numeric/solveODE.js`           | `rosenbrockSolve`                                                                                                                  | Import    |
-| `../numeric/ode-step-limit.js`     | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                                                                              | Import    |
-| `../numeric/adaptive-quad.js`      | `quadValue`                                                                                                                        | Import    |
-| `../optimization-extra.js`         | `levenbergMarquardt, nelderMead`                                                                                                   | Import    |
-| `../numeric/rational-nullspace.js` | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
-| `../numeric/solveParabolicPDE.js`  | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
-| `../numeric/solveDAE.js`           | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
-| `../numeric/solveDDE.js`           | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
-| `../numeric/gauss-legendre4.js`    | `gaussLegendre4, GL4_A, GL4_B, GL4_C, GL4ConvergenceError, GaussLegendre4Options, GaussLegendre4Solution`                          | Re-export |
+| File                                   | Imports                                                                                                                            | Type      |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `../algebra/solver/pivot-tolerance.js` | `pivotTolerance`                                                                                                                   | Import    |
+| `../numeric/numeric-jacobian.js`       | `numericJacobian`                                                                                                                  | Import    |
+| `../numeric/solveODE.js`               | `rosenbrockSolve`                                                                                                                  | Import    |
+| `../numeric/ode-step-limit.js`         | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                                                                              | Import    |
+| `../numeric/adaptive-quad.js`          | `quadValue`                                                                                                                        | Import    |
+| `../optimization-extra.js`             | `levenbergMarquardt, nelderMead`                                                                                                   | Import    |
+| `../numeric/rational-nullspace.js`     | `rationalNullspace, RationalNullspaceOptions, RationalNullspaceResult`                                                             | Re-export |
+| `../numeric/solveParabolicPDE.js`      | `solveParabolicPDE, SolveParabolicPDEOptions, ParabolicPDESolution, ParabolicBC, SpaceCoefficient, BoundaryDatum, ParabolicSource` | Re-export |
+| `../numeric/solveDAE.js`               | `solveDAE, SolveDAEOptions, DAESolution, DAEDifferential, DAEConstraint, DAEJacobianBlocks`                                        | Re-export |
+| `../numeric/solveDDE.js`               | `solveDDE, SolveDDEOptions, DDESolution, DDEForcing, DDEHistory`                                                                   | Re-export |
+| `../numeric/gauss-legendre4.js`        | `gaussLegendre4, GL4_A, GL4_B, GL4_C, GL4ConvergenceError, GaussLegendre4Options, GaussLegendre4Solution`                          | Re-export |
 
 **Exports:**
 
@@ -20859,9 +20860,9 @@ graph LR
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `functions/src/typed/number-matrix`                    | 0 files      | 23 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
+| `functions/src/typed/numeric`                          | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
-| `functions/src/typed/numeric`                          | 10 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
 | `expression/src/node/default-node`                     | 3 files      | 16 files   |
 | `expression/src/parse-defaults`                        | 18 files     | 1 file     |
@@ -21770,12 +21771,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238566 |
-| Total Exports           | 7398   |
+| Total Lines of Code     | 238576 |
+| Total Exports           | 7399   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |
 | Total Interfaces        | 670    |
-| Total Functions         | 2580   |
+| Total Functions         | 2581   |
 | Total Type Guards       | 184    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -71,16 +71,29 @@ describe('UPT N5 leastSquares', () => {
 });
 
 describe('UPT N5 linsolve public limit', () => {
-  it('still throws on a pivot below 1e-15 of its row', () => {
+  it('still throws on a pivot that a cancellation left without digits', () => {
+    // The second pivot is (1 + 2^-52) - 1 = 2^-52: one unit in the last place of the terms.
     expect(() =>
       linsolve(
         [
-          [1e-16, 1],
-          [0, 1],
+          [1, 1],
+          [1, 1 + Number.EPSILON],
         ],
         [1, 1]
       )
     ).toThrow(/singular/);
+  });
+
+  it('solves a small pivot that no term cancelled (exact answer [0, 1])', () => {
+    // Column 1 is small, the matrix is regular: x2 = 1 and x1 = (1 - 1) / 1e-16 = 0.
+    const x = linsolve(
+      [
+        [1e-16, 1],
+        [0, 1],
+      ],
+      [1, 1]
+    );
+    expect(x).toEqual([0, 1]);
   });
 
   it('solves a pivot that is small only against other rows (#1169)', () => {

@@ -17,34 +17,33 @@ type Factor = DenseMatrix | SparseMatrix | unknown[][];
 
 /**
  * Reject non-finite coefficients and singular upper-triangular factors before
- * backward substitution. A pivot is judged against the scale of its own row, so a
- * small pivot in a small row is valid (see {@link isBadLuFactorPivot}).
+ * backward substitution. A pivot is judged against the largest term that the elimination
+ * subtracted from it (see {@link isBadLuFactorPivot}).
  *
- * The row scale comes from the two factors alone, so it also serves a factorization
- * that the caller made earlier: with `umax[k]` the largest absolute entry of row `k`
- * of `U`, the scale of row `i` is `max(umax[i], max over k < i of |L[i][k]| * umax[k])`.
- * A row of `L` holds the multipliers that took the pivot row out of the rows above it, so
- * a pivot that is small against `|L[i][k]| * umax[k]` has lost its digits by cancellation.
+ * That scale comes from the two factors alone, so it also serves a factorization that the
+ * caller made earlier: for the pivot `U[i][i]` it is `max over k < i of |L[i][k] * U[k][i]|`.
  *
  * @param U Upper-triangular factor (Array, DenseMatrix or SparseMatrix).
  * @param L Unit lower-triangular factor, with the rows aligned to the rows of `U`.
  */
 export function validateUpperTriangularPivots(U: Factor, L: Factor): void {
   const n = factorRows(U);
-  const umax = new Array<number>(n).fill(0);
-  forEachNumber(U, (i, _j, v) => {
-    if (!Number.isFinite(v)) failSingular();
-    const a = Math.abs(v);
-    if (a > umax[i]) umax[i] = a;
-  });
-  const scale = umax.slice();
+  // |L[i][k]| below the diagonal, keyed by i * n + k.
+  const lower = new Map<number, number>();
   forEachNumber(L, (i, k, v) => {
+    if (k < i && v !== 0) lower.set(i * n + k, Math.abs(v));
+  });
+  const scale = new Float64Array(n);
+  forEachNumber(U, (k, i, v) => {
+    if (!Number.isFinite(v)) failSingular();
     if (k >= i || i >= n) return;
-    const t = Math.abs(v) * umax[k];
+    const l = lower.get(i * n + k);
+    if (l === undefined) return;
+    const t = l * Math.abs(v);
     if (t > scale[i]) scale[i] = t;
   });
   for (let i = 0; i < n; i++) {
-    if (isBadLuFactorPivot(diagonalOf(U, i), scale[i])) failSingular();
+    if (isBadLuFactorPivot(diagonalOf(U, i), scale[i], n)) failSingular();
   }
 }
 
@@ -55,9 +54,9 @@ function failSingular(): never {
 /**
  * Packed twin of {@link validateUpperTriangularPivots} for row-major `n x n`
  * `Float64Array` factors (the storage of a matrix-package `DenseMatrix`). It applies the
- * same rule in two passes over the storage and builds no nested array: every entry of `U`
- * must be finite, and no diagonal entry of `U` may be zero or smaller than `LU_PIVOT_TOL`
- * times the scale of its row.
+ * same rule over the storage and builds no nested array: every entry of `U` must be finite,
+ * and no diagonal entry of `U` may be zero or below the pivot floor times its cancellation
+ * scale.
  *
  * @param data Row-major storage of the factor `U`, of length `n * n`.
  * @param n Number of rows and columns.
@@ -69,24 +68,16 @@ export function validatePackedUpperTriangularPivots(
   n: number,
   lower: Float64Array
 ): void {
-  const umax = new Float64Array(n);
-  for (let i = 0; i < n; i++) {
-    let m = 0;
-    for (let j = 0, at = i * n; j < n; j++, at++) {
-      const v = data[at];
-      if (!Number.isFinite(v)) failSingular();
-      const a = Math.abs(v);
-      if (a > m) m = a;
-    }
-    umax[i] = m;
+  for (let at = 0; at < data.length; at++) {
+    if (!Number.isFinite(data[at])) failSingular();
   }
   for (let i = 0; i < n; i++) {
-    let scale = umax[i];
-    for (let k = 0, at = i * n; k < i; k++, at++) {
-      const t = Math.abs(lower[at]) * umax[k];
+    let scale = 0;
+    for (let k = 0; k < i; k++) {
+      const t = Math.abs(lower[i * n + k] * data[k * n + i]);
       if (t > scale) scale = t;
     }
-    if (isBadLuFactorPivot(data[i * n + i], scale)) failSingular();
+    if (isBadLuFactorPivot(data[i * n + i], scale, n)) failSingular();
   }
 }
 

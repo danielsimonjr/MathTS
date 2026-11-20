@@ -442,9 +442,9 @@ export const createLusolve = /* #__PURE__ */ factory(
      * An empty (0 x 0) system returns the empty solution.
      *
      * Throws when the factorization is singular or contains non-finite values, including
-     * rank-deficient but consistent systems. The pivot cutoff is `1e-15` times the scale of
-     * the pivot row of the factorization, so a small pivot in a small row is valid (the
-     * diagonal matrix `diag(1e10, 1e-7)` is regular). Numeric systems whose entries are all
+     * rank-deficient but consistent systems. The pivot cutoff is `8 * n * eps` times the largest
+     * term that the elimination subtracted from the pivot, so a small pivot that no term
+     * cancelled is valid (the diagonal matrix `diag(1e10, 1e-7)` is regular). Numeric systems whose entries are all
      * smaller than 1 are equilibrated first.
      */
     return typed(name, {

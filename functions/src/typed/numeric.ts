@@ -23,6 +23,7 @@ import {
   ldexp,
   pow2ScaleExponent,
 } from '@danielsimonjr/mathts-core/internal';
+import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
@@ -212,30 +213,24 @@ export function linsolve(A: number[][] | SparseMatrix, b: number[]): number[] {
   if (n === 0) throw new Error('linsolve: empty matrix');
   if (dense[0].length !== n) throw new Error('linsolve: matrix must be square');
   if (b.length !== n) throw new Error('linsolve: dimension mismatch');
-  return solvePivoted(dense, b, 1e-15);
+  return solvePivoted(dense, b, pivotTolerance(n));
 }
 
 /**
- * Gaussian elimination with partial pivoting. It throws when the pivot is zero or is
- * below `pivotTol` times the largest entry of the pivot row of `A` (before elimination),
- * so a matrix that is only small (or only large) is not judged singular.
+ * Gaussian elimination with partial pivoting. It throws when the pivot is zero, or is
+ * below `pivotTol` times the largest term that the elimination subtracted from the pivot
+ * entry. The rounding error of the pivot is about eps times that term, so a smaller pivot
+ * holds no digits (a rank-deficient matrix leaves such a pivot). A pivot that no term
+ * cancelled is valid at any size, so the test does not change when a row or a column of
+ * `A` is multiplied by a constant. `lusolve` applies the same rule to its factors
+ * (`isBadLuFactorPivot`).
  */
 function solvePivoted(A: number[][], b: number[], pivotTol: number): number[] {
   const n = A.length;
 
-  // Augmented matrix
+  // Augmented matrix. After step `col`, the entries of a row below the diagonal hold its
+  // multipliers (the factor L), which the pivot test reads.
   const M = A.map((row, i) => [...row, b[i]]);
-
-  // Largest entry of each row of A. It moves with its row when the rows swap.
-  const rowScale: number[] = new Array(n);
-  for (let i = 0; i < n; i++) {
-    let s = 0;
-    for (let j = 0; j < n; j++) {
-      const a = Math.abs(A[i][j]);
-      if (a > s) s = a;
-    }
-    rowScale[i] = s;
-  }
 
   // Forward elimination with partial pivoting
   for (let col = 0; col < n; col++) {
@@ -247,17 +242,23 @@ function solvePivoted(A: number[][], b: number[], pivotTol: number): number[] {
         maxRow = row;
       }
     }
-    if (maxVal === 0 || maxVal < pivotTol * rowScale[maxRow]) {
+    // Largest term subtracted from the pivot entry: the multiplier of step k times the
+    // entry of pivot row k in this column.
+    let cancelScale = 0;
+    const pivotRow = M[maxRow];
+    for (let k = 0; k < col; k++) {
+      const term = Math.abs(pivotRow[k] * M[k][col]);
+      if (term > cancelScale) cancelScale = term;
+    }
+    if (maxVal === 0 || maxVal < pivotTol * cancelScale) {
       throw new Error('linsolve: singular matrix');
     }
-    if (maxRow !== col) {
-      [M[col], M[maxRow]] = [M[maxRow], M[col]];
-      [rowScale[col], rowScale[maxRow]] = [rowScale[maxRow], rowScale[col]];
-    }
+    if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
 
     for (let row = col + 1; row < n; row++) {
       const factor = M[row][col] / M[col][col];
-      for (let j = col; j <= n; j++) {
+      M[row][col] = factor;
+      for (let j = col + 1; j <= n; j++) {
         M[row][j] -= factor * M[col][j];
       }
     }
@@ -370,7 +371,8 @@ export function globalMinimize(
 
 /**
  * Pivot limit for the column-equilibrated normal equations of {@link leastSquares}.
- * The diagonal of the scaled AᵀA is 1, so the limit is relative to the column scale.
+ * The diagonal of the scaled AᵀA is 1, and a pivot is compared with the largest term that
+ * cancelled in it, so the limit is relative to the column scale.
  */
 const LEAST_SQUARES_PIVOT_TOL = 1e-13;
 

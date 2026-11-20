@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7398
+  totalExports: 7399
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -7938,19 +7938,21 @@ modules:
       constants:
         - createLusolve
     functions/src/algebra/solver/pivot-tolerance.ts:
-      description: Pivot floor relative to the scale of the pivot row — the same factor `linsolve` uses
+      description: Safety factor on `n * eps` in {@link pivotTolerance}.
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
       workspaceDependencies: []
       exports:
-        - LU_PIVOT_TOL
+        - PIVOT_EPS_FACTOR
         - LUSOLVE_SINGULAR_MESSAGE
+        - pivotTolerance
         - isBadLuFactorPivot
       functions:
+        - pivotTolerance
         - isBadLuFactorPivot
       constants:
-        - LU_PIVOT_TOL
+        - PIVOT_EPS_FACTOR
         - LUSOLVE_SINGULAR_MESSAGE
     functions/src/algebra/solver/usolve.ts:
       description: >-
@@ -27188,6 +27190,9 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../algebra/solver/pivot-tolerance.js
+          imports:
+            - pivotTolerance
         - file: ../numeric/numeric-jacobian.js
           imports:
             - numericJacobian
@@ -47043,11 +47048,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238566
-  totalExports: 7398
+  totalLinesOfCode: 238576
+  totalExports: 7399
   totalClasses: 62
   totalInterfaces: 670
-  totalFunctions: 2580
+  totalFunctions: 2581
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1695

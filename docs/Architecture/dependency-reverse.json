@@ -1276,7 +1276,8 @@
     "functions/src/algebra/solver/pivot-tolerance.ts": [
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/solver/validate-u-pivots.ts"
+      "functions/src/algebra/solver/validate-u-pivots.ts",
+      "functions/src/typed/numeric.ts"
     ],
     "functions/src/algebra/solver/validate-u-pivots.ts": [
       "functions/src/algebra/solver/lusolve.ts"

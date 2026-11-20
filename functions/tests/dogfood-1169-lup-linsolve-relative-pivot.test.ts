@@ -4,7 +4,7 @@
  * lup compared each entry with an absolute tolerance, so every entry of a 1e-100 matrix
  * read as zero: no row swap, no multiplier, and an all-zero U for a sparse input. linsolve
  * tested its pivot against the absolute value 1e-15 and threw "singular" for a regular matrix.
- * The pivot of each of them is now relative to its own matrix (lup) or its own row (linsolve).
+ * The pivot of each of them is now relative to its own matrix (lup) or the terms that cancelled in it (linsolve).
  * Expected values: SciPy `lu` of the matrix scaled by 1e100, and the exact solution [0, 1].
  */
 import { describe, it, expect } from 'vitest';

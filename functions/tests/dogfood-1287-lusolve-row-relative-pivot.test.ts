@@ -5,7 +5,7 @@
  * 1e-15 times the largest entry 1e10 of the factor. The matrix is a regular diagonal matrix
  * with the exact solution [1e-10, 1e7]. The pivot is now judged against the scale of its own
  * row of the factorization, so a small pivot in a small row is valid, and a pivot that lost
- * its digits by cancellation against its own row is still singular. Every storage path of
+ * its digits by cancellation is still singular. Every storage path of
  * lusolve is covered: Array, DenseMatrix, SparseMatrix (lup and slu) and a prefactored lup.
  */
 import { describe, it, expect } from 'vitest';
