@@ -182,3 +182,55 @@ describe('#1174 the noise of a zero eigenvalue at the size of the Schur backward
     });
   }
 });
+
+describe('#1174 a refusal at the noise level is a named error that says what to do', () => {
+  // An eigenvalue at the size of the Schur backward error cannot be told from zero in float64:
+  // the matrix is that close to a singular matrix. The refusal names the cause and the remedy.
+  const L: Rows = [
+    [2, -1, -1],
+    [-1, 2, -1],
+    [-1, -1, 2],
+  ];
+  const inputs: Array<[string, Rows]> = [
+    ['L · 2^30', scale(L, 2 ** 30)],
+    [
+      'a rounded rank-1 product',
+      [
+        [1.2744418459349503e23, 6.818511722364847e22],
+        [3.62852854865626e23, 1.941333339207621e23],
+      ],
+    ],
+  ];
+  for (const [label, A] of inputs) {
+    it(`${label} throws MatrixLogmNumericallySingularError`, () => {
+      let caught: unknown;
+      try {
+        matrixLogm(DenseMatrix.fromArray(A));
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught).toBeInstanceOf(Error);
+      const err = caught as Error;
+      expect(err.name).toBe('MatrixLogmNumericallySingularError');
+      expect(err.message).toMatch(/non-positive eigenvalue/);
+      expect(err.message).toMatch(/numerically singular/);
+      expect(err.message).toMatch(/A \+ δI/);
+    });
+  }
+
+  it('an exactly zero eigenvalue keeps the plain error', () => {
+    let caught: unknown;
+    try {
+      matrixLogm(
+        DenseMatrix.fromArray([
+          [1, 0],
+          [0, 0],
+        ])
+      );
+    } catch (e) {
+      caught = e;
+    }
+    expect((caught as Error).name).toBe('Error');
+    expect((caught as Error).message).toMatch(/non-positive eigenvalue/);
+  });
+});

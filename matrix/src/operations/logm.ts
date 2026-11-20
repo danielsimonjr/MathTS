@@ -169,6 +169,27 @@ function nonPositiveEigenvalue(d: number, detail = ''): Error {
 }
 
 /**
+ * The error for an eigenvalue (or complex pair) of modulus `d` above 0 that is not told from
+ * zero: `d` is at the rounding noise of the Schur form, whose backward error is `be`. Every
+ * eigenvalue of the matrix is then within about n · be of 0, so no float64 test can decide
+ * between a small positive eigenvalue and the noise of a zero one. The error has the name
+ * `MatrixLogmNumericallySingularError` and says what to do (#1174).
+ */
+function numericallySingular(d: number, be: number, detail: string): Error {
+  const err = nonPositiveEigenvalue(
+    d,
+    detail +
+      '; the matrix is numerically singular: the eigenvalue is within the rounding noise of the ' +
+      'Schur form (backward error ≈ ' +
+      be +
+      ') and cannot be told from 0. To get a logarithm, shift the spectrum (A + δI with δ well ' +
+      'above that noise) or give an input whose small eigenvalues are well above it'
+  );
+  err.name = 'MatrixLogmNumericallySingularError';
+  return err;
+}
+
+/**
  * The Schur form of `D·A·D⁻¹` with `D = diag(2^(i mod 2))`: an exact similarity copy of A (a
  * power-of-2 scale is exact in floating point), whose rounding noise differs from that of the
  * Schur form of A. A full grading `2^i` loses accuracy for large n, and a reversal leaves a
@@ -317,16 +338,29 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
       const m = blockModulus(T, i);
       if (!(m > 1e-14)) {
         if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
-        if (!(m > 0 && m >= 1e8 * backwardError))
-          throw nonPositiveEigenvalue(m, ', a complex pair that is not above the floor 1e-14');
+        if (!(m > 0)) throw nonPositiveEigenvalue(m, ', a complex pair');
+        if (!(m >= 1e8 * backwardError))
+          throw numericallySingular(
+            m,
+            backwardError,
+            ', a complex pair that is not above the floor 1e-14'
+          );
       }
       if (!(m > 1e-8 * dmax)) {
         if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
         if (m < NOISE_FACTOR * backwardError)
-          throw nonPositiveEigenvalue(m, ', a complex pair not above the Schur backward error');
+          throw numericallySingular(
+            m,
+            backwardError,
+            ', a complex pair not above the Schur backward error'
+          );
         second ??= secondSchurForm(A);
         if (!blockConfirmedBySecondForm(m, second))
-          throw nonPositiveEigenvalue(m, ', a complex pair not confirmed by a second Schur form');
+          throw numericallySingular(
+            m,
+            backwardError,
+            ', a complex pair not confirmed by a second Schur form'
+          );
       }
       i++;
       continue;
@@ -336,15 +370,19 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
       if (d <= 0) throw nonPositiveEigenvalue(d);
       if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
       if (d < 1e8 * backwardError)
-        throw nonPositiveEigenvalue(d, ', which is not above the floor 1e-14');
+        throw numericallySingular(d, backwardError, ', which is not above the floor 1e-14');
     }
     if (d <= 1e-8 * dmax) {
       if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
       if (d < NOISE_FACTOR * backwardError)
-        throw nonPositiveEigenvalue(d, ', which is not above the Schur backward error');
+        throw numericallySingular(
+          d,
+          backwardError,
+          ', which is not above the Schur backward error'
+        );
       second ??= secondSchurForm(A);
       if (!confirmedBySecondForm(d, second))
-        throw nonPositiveEigenvalue(d, ', not confirmed by a second Schur form');
+        throw numericallySingular(d, backwardError, ', not confirmed by a second Schur form');
     }
   }
 
@@ -518,7 +556,9 @@ export interface LogmOptions {
  *
  * @param A - Square DenseMatrix with no eigenvalue on the closed negative real axis.
  * @returns logm(A) as a DenseMatrix.
- * @throws Error for matrices with non-positive real eigenvalues.
+ * @throws Error for matrices with non-positive real eigenvalues. When a small eigenvalue is
+ *   at the rounding noise of the Schur form, the error has the name
+ *   `MatrixLogmNumericallySingularError` and its message gives the remedy.
  *
  * @example
  * // logm(I) = 0
@@ -539,7 +579,8 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
   // The Schur-Padé path forms fourth powers and its cutoffs are absolute, so the
   // window is [2^ABS_CUTOFF_LO, 2^FOURTH] (#1104). logm(2^e · A) = logm(A) + e·ln 2 · I,
   // so the shift is taken off the diagonal.
-  const logM = withPow2Scale(entryRange(A.toFloat64Array()), ABS_CUTOFF_LO, FOURTH, (e) => {
+  const entries = A.toFloat64Array();
+  const logM = withPow2Scale(entryRange(entries), ABS_CUTOFF_LO, FOURTH, (e) => {
     const Aarr = A.toArray();
     if (e === 0) return logmKernel(Aarr, tol);
     ldexpMatrix(Aarr, e);
@@ -550,12 +591,23 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
 
   const data = new Float64Array(n * n);
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = logM[i][j];
-  // Last line of defence: a finite matrix never gets a non-finite logarithm back (a NaN
-  // result once came from an overflow in the block balance, #1171). A NaN or infinite input
-  // keeps its non-finite result.
-  if (!data.every(Number.isFinite) && A.toFloat64Array().every(Number.isFinite))
-    throw new Error('matrixLogm: the result is not finite for a finite matrix (internal overflow)');
+  assertFiniteLogm(data, entries);
   return new DenseMatrix(n, n, data);
+}
+
+/**
+ * Last line of defence: a finite matrix never gets a non-finite logarithm back (a NaN result
+ * once came from an overflow in the block balance, #1171). A NaN or infinite input keeps its
+ * non-finite result.
+ *
+ * @param result - The entries of the computed logarithm.
+ * @param input - The entries of the input matrix.
+ * @throws Error when `result` has a non-finite entry and `input` has none.
+ * @internal
+ */
+export function assertFiniteLogm(result: Float64Array, input: Float64Array): void {
+  if (!result.every(Number.isFinite) && input.every(Number.isFinite))
+    throw new Error('matrixLogm: the result is not finite for a finite matrix (internal overflow)');
 }
 
 /** The logarithm of an n×n array (n ≥ 1), without scaling. */

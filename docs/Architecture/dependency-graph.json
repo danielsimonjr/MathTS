@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7412
+    "totalExports": 7413
   },
   "entryPoints": [
     {
@@ -6044,9 +6044,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["logPade", "matrixLogm"],
+        "exports": ["logPade", "matrixLogm", "assertFiniteLogm"],
         "interfaces": ["LogmOptions"],
-        "functions": ["logPade", "matrixLogm"]
+        "functions": ["logPade", "matrixLogm", "assertFiniteLogm"]
       },
       "matrix/src/operations/lstsq.ts": {
         "description": "Linear least squares by column-pivoted Householder QR and a complete",
@@ -49970,11 +49970,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 239367,
-    "totalExports": 7412,
+    "totalLinesOfCode": 239419,
+    "totalExports": 7413,
     "totalClasses": 62,
     "totalInterfaces": 673,
-    "totalFunctions": 2593,
+    "totalFunctions": 2594,
     "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1696,

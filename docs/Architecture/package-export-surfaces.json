@@ -4496,6 +4496,7 @@
       "AS_ID_FLOAT64_ARRAY",
       "AS_ID_INT32_ARRAY",
       "assertDenseMatrixSize",
+      "assertFiniteLogm",
       "BackendHints",
       "backendManager",
       "BackendManager",
