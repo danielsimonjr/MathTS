@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { simplify, replacer } from '../src/index.js';
+import { simplify, replacer, reviver } from '../src/index.js';
 import { createGcd } from '../src/arithmetic/gcd.js';
 import { createLcm } from '../src/arithmetic/lcm.js';
 import { factoryScope } from '../src/factories/scope.js';
@@ -55,5 +55,10 @@ describe('#1321 a bigint constant in simplify and in replacer', () => {
   it('the factory scope uses the same replacer', () => {
     const scoped = (factoryScope as unknown as { replacer: typeof replacer }).replacer;
     expect(JSON.stringify([5n], scoped)).toBe('[{"mathjs":"bigint","value":"5"}]');
+  });
+
+  it('reviver reads back the bigint tag that replacer writes', () => {
+    const text = JSON.stringify({ a: 5n, b: -12345678901234567890n, c: Infinity }, replacer);
+    expect(JSON.parse(text, reviver)).toEqual({ a: 5n, b: -12345678901234567890n, c: Infinity });
   });
 });

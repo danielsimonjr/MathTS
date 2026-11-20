@@ -504,7 +504,7 @@ export function parser(options?: PhysicsEvaluateOptions) {
 export { replacer } from '../utils/json-replacer.js';
 
 /**
- * `JSON.parse` reviver that reconstructs `Complex`, `Fraction`, and
+ * `JSON.parse` reviver that reconstructs `Complex`, `Fraction`, bigint values and
  * non-finite numbers tagged by {@link replacer} / the types' own `toJSON()`.
  */
 export function reviver(_key: string, value: unknown): unknown {
@@ -549,6 +549,9 @@ export function reviver(_key: string, value: unknown): unknown {
         if (tagged.value === '-Infinity') return -Infinity;
         if (tagged.value === 'NaN') return NaN;
         return Number(tagged.value);
+      case 'bigint':
+        if (typeof tagged.value === 'string') return BigInt(tagged.value);
+        break;
     }
   }
   return value;
