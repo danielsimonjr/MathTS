@@ -107,7 +107,6 @@ interface Dependencies {
   reshape: TypedFunction<Scalar[]>;
   qr: TypedFunction<{ Q: Scalar[][]; R: Scalar[][] }>;
   usolve: TypedFunction<Scalar[]>;
-  usolveAll: TypedFunction<Scalar[][]>;
   im: TypedFunction<number | BigNumber>;
   re: TypedFunction<number | BigNumber>;
   matrixFromColumns: TypedFunction<Scalar[][]>;
@@ -143,7 +142,6 @@ const dependencies = [
   'reshape',
   'qr',
   'usolve',
-  'usolveAll',
   'im',
   're',
   'matrixFromColumns',
@@ -179,7 +177,6 @@ export const createEigs = /* #__PURE__ */ factory(
     reshape,
     qr,
     usolve,
-    usolveAll,
     im,
     re,
     matrixFromColumns,
@@ -216,7 +213,6 @@ export const createEigs = /* #__PURE__ */ factory(
       qr,
       inv,
       usolve,
-      usolveAll,
       complex,
       matrixFromColumns,
       dot,

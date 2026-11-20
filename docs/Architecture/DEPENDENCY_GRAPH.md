@@ -7245,7 +7245,7 @@ graph LR
 
 ---
 
-### `functions/src/matrix/eigs/complexEigs.ts` - Create the `complexEigs` function, which computes the eigenvalues and the optional
+### `functions/src/matrix/eigs/complexEigs.ts` - A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
 
 **External Dependencies:**
 
@@ -21769,7 +21769,7 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1350   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 238527 |
+| Total Lines of Code     | 238615 |
 | Total Exports           | 7397   |
 | Total Re-exports        | 3191   |
 | Total Classes           | 62     |

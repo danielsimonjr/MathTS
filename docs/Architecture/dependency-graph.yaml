@@ -17786,7 +17786,7 @@ modules:
       constants:
         - createDot
     functions/src/matrix/eigs/complexEigs.ts:
-      description: Create the `complexEigs` function, which computes the eigenvalues and the optional
+      description: A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
       externalDependencies:
         - package: bignumber.js
           imports:
@@ -47041,7 +47041,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238527
+  totalLinesOfCode: 238615
   totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669

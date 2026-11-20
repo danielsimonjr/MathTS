@@ -7226,14 +7226,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 551
+      "loc": 547
     },
     {
       "file": "functions/src/matrix/eigs/complexEigs.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1068
+      "loc": 1160
     },
     {
       "file": "functions/src/matrix/eigs/realSymmetric.ts",

@@ -48,7 +48,6 @@ interface Dependencies {
   inv: (x: Scalar[][]) => Scalar[][];
   qr: (x: Scalar[][]) => QRResult;
   usolve: (A: Scalar[][], b: Scalar[]) => Scalar[];
-  usolveAll: (A: Scalar[][], b: Scalar[]) => Scalar[][];
   complex: (re: number | Scalar, im?: number) => Complex;
   matrixFromColumns: (...cols: Scalar[][]) => Scalar[][];
   dot: (a: Scalar[], b: Scalar[]) => Scalar;
@@ -56,6 +55,17 @@ interface Dependencies {
 
 /** Supported data types for eigenvalue computation */
 type DataType = 'number' | 'BigNumber' | 'Complex';
+
+/**
+ * A coupling of an upper triangular row is rounding noise when it is below this fraction of `prec`,
+ * relative to the row (`nullSpaceUpper`). Measured: the rounding of a dense matrix with a double
+ * eigenvalue is 5e-15 of the row for entries of type Complex (up to 2e-13 for a badly conditioned
+ * one), and a coupling of 1e-13 is a coupling (a test of #1202). One hundredth of the default
+ * precision 1e-12 lies between these. A larger noise drops an eigenvector, which inverse iteration
+ * may find again; it never gives a false one, because the residual of a read zero is below the
+ * tolerance.
+ */
+const COUPLING_FRACTION_OF_PREC = 0.01;
 
 /**
  * Create the `complexEigs` function, which computes the eigenvalues and the optional
@@ -77,7 +87,6 @@ export function createComplexEigs({
   inv,
   qr,
   usolve,
-  usolveAll,
   complex,
   matrixFromColumns: _matrixFromColumns,
   dot,
@@ -711,7 +720,6 @@ export function createComplexEigs({
 
     const vectors: EigenvectorResult[] = [];
     const len = uniqueValues.length;
-    const b: Scalar[] = Array(N).fill(zero);
     const E = diag(Array(N).fill(one));
 
     for (let i = 0; i < len; i++) {
@@ -722,13 +730,12 @@ export function createComplexEigs({
         multiply(lambda, E) as unknown as Scalar[]
       ) as unknown as Scalar[][];
 
-      // usolveAll reads a diagonal entry as zero with an absolute tolerance.
       // The null space does not change when a row is divided by a number, so
       // give it a diagonal of exact zeros (where U_jj matches lambda, relative
       // to their size) and ones (every other row divided by its diagonal).
       // Then the diagonal test does not depend on the scale of the matrix
       // (#1202). The other entries of a matching row keep that scale, and
-      // usolveAll still reads them with an absolute tolerance (#1242).
+      // `nullSpaceUpper` reads them relative to the row (#1242).
       const Snull = T.map((row, j) =>
         close(U[j][j], lambda, prec)
           ? row.map((x, k) => (k === j ? zero : x))
@@ -738,8 +745,7 @@ export function createComplexEigs({
       // inverse iteration compares with prec, so it works on the scale-1 matrix
       const S = T.map((row) => row.map((x) => divideScalar(x, scale)));
 
-      let solutions = usolveAll(Snull, b);
-      solutions.shift(); // ignore the null vector
+      let solutions = nullSpaceUpper(Snull, U, prec, zero, one);
 
       // looks like we missed something, try inverse iteration
       // But if that fails, just presume that the original matrix truly
@@ -752,16 +758,102 @@ export function createComplexEigs({
         solutions.push(approxVec);
       }
 
-      // Transform back into original array coordinates
+      // Transform back into original array coordinates. The product needs a column.
       const correction = multiply(inv(R!), C) as Scalar[][];
-      solutions = solutions.map(
-        (v) => multiply(correction, v as unknown as Scalar[][]) as unknown as Scalar[]
+      solutions = solutions.map((v) =>
+        flatten(
+          multiply(
+            correction,
+            v.map((x) => [x])
+          ) as Scalar[][]
+        )
       );
 
-      vectors.push(...solutions.map((v) => ({ value: lambda, vector: flatten(v) })));
+      vectors.push(...solutions.map((v) => ({ value: lambda, vector: v })));
     }
 
     return vectors;
+  }
+
+  /**
+   * A basis of the null space of an upper triangular matrix `T`, by backward substitution with
+   * a zero right-hand side: one vector for each zero diagonal entry whose row is consistent. A
+   * diagonal entry is zero only when it is an exact zero (`findEigenvectors` gives the rows that
+   * match lambda an exact zero and every other row a one).
+   *
+   * The row of a zero diagonal entry is consistent for a solution x when the residual of the row,
+   * `|x_i|` after the substitution, is rounding noise: it is at most `COUPLING_FRACTION_OF_PREC *
+   * prec` times the largest entry of that row of `U` times the largest component of x solved so
+   * far. The test is relative, so a coupling of 1e-18 in a matrix of that scale is a coupling
+   * (#1242), and the rounding of a dense row (about 1e-15 of the row) is not. A consistent row
+   * sets x_i to an exact zero, so the rounding does not enter the vector. An inconsistent row
+   * drops the vector.
+   * @returns the vectors as plain arrays; the null vector is not among them
+   */
+  function nullSpaceUpper(
+    T: Scalar[][],
+    U: Scalar[][],
+    prec: Scalar,
+    zero: Scalar,
+    one: Scalar
+  ): Scalar[][] {
+    const N = T.length;
+    const tolerance = multiplyScalar(prec, COUPLING_FRACTION_OF_PREC);
+    const rowTop = U.map((row) => {
+      let top = abs(row[0]) as Scalar;
+      for (const x of row) {
+        const ax = abs(x) as Scalar;
+        if (lt(top, ax)) top = ax;
+      }
+      return top;
+    });
+
+    // B[0] is the null vector; each later vector adds a free variable
+    const B: Scalar[][] = [Array(N).fill(zero)];
+
+    for (let i = N - 1; i >= 0; i--) {
+      let L = B.length;
+
+      for (let k = 0; k < L; k++) {
+        const b = B[k];
+
+        if (!isExactZero(abs(T[i][i]) as Scalar)) {
+          b[i] = divideScalar(b[i], T[i][i]);
+          for (let j = i - 1; j >= 0; j--) {
+            b[j] = subtract(b[j], multiplyScalar(b[i], T[j][i])) as Scalar;
+          }
+          continue;
+        }
+
+        // zero diagonal entry: the row needs a residual of rounding size
+        let solved = abs(zero) as Scalar;
+        for (let m = i + 1; m < N; m++) {
+          const am = abs(b[m]) as Scalar;
+          if (lt(solved, am)) solved = am;
+        }
+        const limit = multiplyScalar(tolerance, multiplyScalar(rowTop[i], solved));
+        if (!le(abs(b[i]) as Scalar, limit)) {
+          // this vector has no solution, but other vectors may have one
+          B.splice(k, 1);
+          k -= 1;
+          L -= 1;
+          continue;
+        }
+        b[i] = zero;
+
+        if (k === 0) {
+          // a free variable: a new vector with x_i = 1
+          const bNew = [...b];
+          bNew[i] = one;
+          for (let j = i - 1; j >= 0; j--) {
+            bNew[j] = subtract(bNew[j], T[j][i]) as Scalar;
+          }
+          B.push(bNew);
+        }
+      }
+    }
+
+    return B.slice(1);
   }
 
   /**
