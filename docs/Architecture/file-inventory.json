@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2550,
+  "totalFiles": 2551,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1324,
     "test-only": 0,
     "orphan": 0,
-    "test": 1134,
+    "test": 1135,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1350,
-    "tests": 1134,
+    "tests": 1135,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 574,
-    "@danielsimonjr/mathts-functions": 1178,
+    "@danielsimonjr/mathts-functions": 1179,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -6617,7 +6617,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 27
+      "loc": 48
     },
     {
       "file": "functions/src/cas/rat.ts",
@@ -9193,7 +9193,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1966
+      "loc": 1980
     },
     {
       "file": "functions/src/typed/arithmetic.ts",
@@ -9480,7 +9480,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 549
+      "loc": 573
     },
     {
       "file": "functions/src/typed/probability.ts",
@@ -11216,7 +11216,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 70
+      "loc": 72
     },
     {
       "file": "functions/tests/expression-transforms.test.ts",
@@ -12820,6 +12820,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 108
+    },
+    {
+      "file": "functions/tests/polynomial-term-limit-1176.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 76
     },
     {
       "file": "functions/tests/pow-bignumber-kernel.test.ts",

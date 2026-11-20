@@ -34,7 +34,12 @@ import { polyGcdZ } from './factorization/integer-poly.js';
 import { euclidSnap } from './euclid.js';
 import { toSamples } from '../utils/samples.js';
 import { renderPolynomial } from '../cas/render-polynomial.js';
-import { PolynomialDegreeError, polynomialDegreeMessage } from '../cas/polynomial-limits.js';
+import {
+  PolynomialDegreeError,
+  PolynomialSizeError,
+  polynomialDegreeMessage,
+  polynomialSizeMessage,
+} from '../cas/polynomial-limits.js';
 import { derivativeOfAdditiveTerms } from './string-derivative.js';
 import {
   rewriteCalls,
@@ -911,6 +916,10 @@ function abstractConstantCalls(expr: string): {
  * `expand('(pi+x)^2')` → `'pi^2 + 2*pi*x + x^2'`.
  * Each constant adds to the size of the result as a variable does.
  *
+ * A polynomial above the degree limit (1000) or with more than 10000 terms has no fallback: the
+ * call throws a `RangeError` (`PolynomialDegreeError` or `PolynomialSizeError`) at once.
+ * `expand('(a+b+c+d+x)^20')` has 10626 terms and throws; `expand('(a+b+c+d+x)^19')` has 8855.
+ *
  * Everything else (a function call that contains a variable, such as `sin(x)`, non-integer
  * exponents, division by a variable or by a constant call) falls back to the original
  * regex-based distributor below, which does NOT collect like terms.
@@ -938,6 +947,8 @@ export function expand(expr: string): string {
           const out = idealPolyToString(polyFromExpression(text, names), names);
           return out.replace(placeholder, (name) => atoms.get(name) ?? name);
         } catch (error) {
+          // Any other error (also a PolynomialSizeError: this is the exact reading of the input,
+          // so a polynomial with too many terms has no other reading) goes to the outer catch.
           if (!(error instanceof PolynomialDegreeError)) throw error;
           // Above the degree limit with the constants as factors: read the text without them
           // below, so the degree error is thrown only for a polynomial in the variables.
@@ -948,6 +959,9 @@ export function expand(expr: string): string {
       // A polynomial above the degree limit has no fallback: say so, as the CAS reader does.
       if (error instanceof PolynomialDegreeError) {
         throw new PolynomialDegreeError(`expand: ${polynomialDegreeMessage()}`);
+      }
+      if (error instanceof PolynomialSizeError) {
+        throw new PolynomialSizeError(`expand: ${polynomialSizeMessage()}`);
       }
       // Not a pure polynomial in these variables (function call, non-integer
       // exponent, division by a non-constant, ...) — fall back below.
