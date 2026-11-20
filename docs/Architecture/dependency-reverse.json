@@ -1048,6 +1048,7 @@
       "functions/src/matrix/ifft.ts",
       "functions/src/matrix/inv.ts",
       "functions/src/matrix/mapSlices.ts",
+      "functions/src/matrix/native-accel.ts",
       "functions/src/matrix/partitionSelect.ts",
       "functions/src/matrix/pinv.ts",
       "functions/src/matrix/resize.ts",

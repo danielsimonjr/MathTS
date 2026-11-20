@@ -152,7 +152,7 @@ describe('eigs of seeded random matrices (#1238)', () => {
   });
 });
 
-describe('eigs with Fraction entries (factory number path)', () => {
+describe('eigs with Fraction entries (the native solver since #1179)', () => {
   it('[[0,-1],[1,0]] gives +-i (#1179 item 1)', () => {
     const r = run([
       [fraction(0), fraction(-1)],

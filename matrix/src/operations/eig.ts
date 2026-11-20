@@ -152,6 +152,113 @@ function orthesGeneral(H: Float64Array, V: Float64Array, ort: Float64Array, nn: 
   }
 }
 
+/** The balance of a matrix before its eigendecomposition: see {@link balanceForEig}. */
+export interface EigBalance {
+  /** Row `i` of the permuted matrix is row `perm[i]` of the input. */
+  perm: number[];
+  /** First row and column of the active block of the permuted matrix. */
+  low: number;
+  /** Last row and column of the active block of the permuted matrix. */
+  high: number;
+  /** The power-of-2 scale of row and column `i` of the permuted matrix (1 outside the block). */
+  scale: number[];
+}
+
+/** The scale of a row stays in [1 / BALANCE_SCALE_LIMIT, BALANCE_SCALE_LIMIT], so the square of a scaled eigenvector entry stays finite. */
+const BALANCE_SCALE_LIMIT = 2 ** 200;
+
+/**
+ * The balance of a matrix before its eigendecomposition (EISPACK `balanc`, LAPACK `dgebal`
+ * job `B`). The balanced matrix `B[i][j] = A[perm[i]][perm[j]] * scale[j] / scale[i]` is similar
+ * to `A`, so it has the same eigenvalues.
+ *
+ * Step 1, permutation. A row with no nonzero entry off the diagonal, inside the active window,
+ * goes to the bottom. A column with no nonzero entry off the diagonal, inside the active window,
+ * goes to the top. The permuted matrix is block upper triangular. Its rows and columns
+ * `low..high` are the active block, and each other diagonal entry is an eigenvalue. An entry that
+ * couples the block to an isolated eigenvalue then does not mix into the QR steps (#1240).
+ *
+ * Step 2, scaling. Each row and column of the active block is scaled by a power of 2, which is
+ * exact, until the off-diagonal sums of each row and its column are within a factor of 2. A huge
+ * entry that couples two parts of the block then no longer sets the rounding of the small part.
+ *
+ * @param {number[][]} a A square matrix of finite numbers.
+ * @returns {EigBalance} The permutation, the active block and the scale of each row.
+ */
+export function balanceForEig(a: number[][]): EigBalance {
+  const n = a.length;
+  const perm = Array.from({ length: n }, (_, i) => i);
+  const at = (i: number, j: number): number => a[perm[i]][perm[j]];
+  const swap = (i: number, j: number): void => {
+    const t = perm[i];
+    perm[i] = perm[j];
+    perm[j] = t;
+  };
+  let low = 0;
+  let high = n - 1;
+  // Rows that isolate an eigenvalue go to the bottom.
+  for (let found = true; found && high > 0;) {
+    found = false;
+    for (let j = high; j >= 0; j--) {
+      let zero = true;
+      for (let i = 0; i <= high && zero; i++) if (i !== j && at(j, i) !== 0) zero = false;
+      if (zero) {
+        swap(j, high);
+        high--;
+        found = true;
+        break;
+      }
+    }
+  }
+  // Columns that isolate an eigenvalue go to the top.
+  for (let found = true; found && low < high;) {
+    found = false;
+    for (let j = low; j <= high; j++) {
+      let zero = true;
+      for (let i = low; i <= high && zero; i++) if (i !== j && at(i, j) !== 0) zero = false;
+      if (zero) {
+        swap(j, low);
+        low++;
+        found = true;
+        break;
+      }
+    }
+  }
+  // Scaling of the active block. Each pass lowers the sum c + r of some row by at least 5%, and
+  // each scale stays inside the limit, so the loop ends.
+  const scale = new Array<number>(n).fill(1);
+  for (let changed = true; changed;) {
+    changed = false;
+    for (let i = low; i <= high; i++) {
+      let c = 0;
+      let r = 0;
+      for (let j = low; j <= high; j++) {
+        if (j === i) continue;
+        c += Math.abs(at(j, i) * (scale[i] / scale[j]));
+        r += Math.abs(at(i, j) * (scale[j] / scale[i]));
+      }
+      if (c === 0 || r === 0) continue;
+      const sum = c + r;
+      let f = 1;
+      while (c < r / 2 && scale[i] * f < BALANCE_SCALE_LIMIT) {
+        c *= 2;
+        r /= 2;
+        f *= 2;
+      }
+      while (c >= r * 2 && scale[i] * f > 1 / BALANCE_SCALE_LIMIT) {
+        c /= 2;
+        r *= 2;
+        f /= 2;
+      }
+      if (c + r < 0.95 * sum) {
+        scale[i] *= f;
+        changed = true;
+      }
+    }
+  }
+  return { perm, low, high, scale };
+}
+
 /** QR iterations allowed for one eigenvalue; convergent matrices need fewer than 30. */
 const MAX_QR_ITERATIONS = 1000;
 
@@ -179,15 +286,27 @@ function eigGeneral(
 ): EigResult {
   const nn = A.length;
   const eps = EIG_GEN_EPS;
-  // hqr2 squares entries, so they are scaled into [2^-400, 2^400]. Scaling by a power of 2
-  // is exact; the eigenvalues are scaled back at the end.
-  const range = entryRange(A);
-  const scE = range.finite ? pow2ScaleExponent(range.amax, -SQUARED, SQUARED) : 0;
+  // The solver works on the balanced matrix (balanceForEig). An entry that couples an isolated
+  // eigenvalue then lies above the diagonal, out of the QR steps of the active block, and a huge
+  // entry inside the block no longer sets the rounding of its small part. The eigenvectors are
+  // scaled and permuted back at the end.
+  const { perm, low: blockLow, high: blockHigh, scale } = balanceForEig(A);
+  const B = perm.map((pi, i) => perm.map((pj, j) => A[pi][pj] * (scale[j] / scale[i])));
+  // hqr2 squares the entries of the active block, so they are scaled into [2^-400, 2^400]. The
+  // scale is that of the block: an isolated eigenvalue of 1e300 must not push a pair of order 1
+  // below the square range. The exponent is capped so that no entry of the whole matrix leaves
+  // 2^1000. Scaling by a power of 2 is exact; the eigenvalues are scaled back at the end.
+  const range = entryRange(
+    B.slice(blockLow, blockHigh + 1).map((row) => row.slice(blockLow, blockHigh + 1))
+  );
+  const whole = entryRange(B);
+  const cap = whole.amax > 0 ? 1000 - Math.ceil(Math.log2(whole.amax)) : 0;
+  const scE = range.finite ? Math.min(pow2ScaleExponent(range.amax, -SQUARED, SQUARED), cap) : 0;
 
   // Working Hessenberg/Schur matrix H, transform V, eigenvalue parts d/e.
   const H = new Float64Array(nn * nn);
   for (let i = 0; i < nn; i++) {
-    for (let j = 0; j < nn; j++) H[i * nn + j] = ldexp(A[i][j], scE);
+    for (let j = 0; j < nn; j++) H[i * nn + j] = ldexp(B[i][j], scE);
   }
   const V = new Float64Array(nn * nn);
   for (let i = 0; i < nn; i++) V[i * nn + i] = 1.0;
@@ -374,13 +493,14 @@ function eigGeneral(
           q = H[(k + 1) * nn + (k - 1)];
           r = notlast ? H[(k + 2) * nn + (k - 1)] : 0.0;
           x = Math.abs(p) + Math.abs(q) + Math.abs(r);
-          if (x !== 0.0) {
-            p = p / x;
-            q = q / x;
-            r = r / x;
-          }
+          // A zero bulge column needs no reflector at this k (EISPACK hqr2, `go to 260`). The test
+          // belongs to this branch only: at k = m, `x` still holds the shift, and a shift of exactly
+          // 0 skipped the whole QR step, so the iteration never moved (JAMA port defect, #1240).
+          if (x === 0.0) continue;
+          p = p / x;
+          q = q / x;
+          r = r / x;
         }
-        if (x === 0.0) break;
         s = Math.sqrt(p * p + q * q + r * r);
         if (p < 0) s = -s;
         if (s !== 0) {
@@ -561,6 +681,13 @@ function eigGeneral(
     }
   }
 
+  // An eigenvector y of the balanced matrix gives the eigenvector D y of the permuted matrix.
+  if (computeVectors) {
+    for (let i = 0; i < nn; i++) {
+      if (scale[i] !== 1) for (let j = 0; j < nn; j++) V[i * nn + j] *= scale[i];
+    }
+  }
+
   // --- Assemble EigResult ---------------------------------------------------
   const values: Array<{ re: number; im: number }> = [];
   for (let j = 0; j < nn; j++) values.push({ re: ldexp(d[j], -scE), im: ldexp(e[j], -scE) });
@@ -578,9 +705,9 @@ function eigGeneral(
         for (let i = 0; i < nn; i++) colNorm += V[i * nn + j] * V[i * nn + j];
         colNorm = Math.sqrt(colNorm);
         if (colNorm > 1e-300) {
-          for (let i = 0; i < nn; i++) vec[i] = V[i * nn + j] / colNorm;
+          for (let i = 0; i < nn; i++) vec[perm[i]] = V[i * nn + j] / colNorm;
         } else {
-          for (let i = 0; i < nn; i++) vec[i] = V[i * nn + j];
+          for (let i = 0; i < nn; i++) vec[perm[i]] = V[i * nn + j];
         }
         vectors.push(vec);
         vectorsIm.push(new Array<number>(nn).fill(0));
@@ -603,13 +730,13 @@ function eigGeneral(
         colNorm = Math.sqrt(colNorm);
         if (colNorm > 1e-300) {
           for (let i = 0; i < nn; i++) {
-            vecRe[i] = V[i * nn + j] / colNorm;
-            vecIm[i] = V[i * nn + (j + 1)] / colNorm;
+            vecRe[perm[i]] = V[i * nn + j] / colNorm;
+            vecIm[perm[i]] = V[i * nn + (j + 1)] / colNorm;
           }
         } else {
           for (let i = 0; i < nn; i++) {
-            vecRe[i] = V[i * nn + j];
-            vecIm[i] = V[i * nn + (j + 1)];
+            vecRe[perm[i]] = V[i * nn + j];
+            vecIm[perm[i]] = V[i * nn + (j + 1)];
           }
         }
         vectors.push(vecRe);

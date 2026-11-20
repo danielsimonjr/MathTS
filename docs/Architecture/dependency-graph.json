@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-20",
     "totalFiles": 1350,
     "totalModules": 82,
-    "totalExports": 7399
+    "totalExports": 7402
   },
   "entryPoints": [
     {
@@ -5712,9 +5712,9 @@
           }
         ],
         "workspaceDependencies": [],
-        "exports": ["eig", "eigvals", "powerIteration"],
-        "interfaces": ["EigResult", "EigOptions"],
-        "functions": ["eig", "eigvals", "powerIteration"]
+        "exports": ["balanceForEig", "eig", "eigvals", "powerIteration"],
+        "interfaces": ["EigResult", "EigOptions", "EigBalance"],
+        "functions": ["balanceForEig", "eig", "eigvals", "powerIteration"]
       },
       "matrix/src/operations/expm.ts": {
         "description": "Matrix Exponential — Scaling-and-Squaring with Padé-13 Approximant",
@@ -5763,6 +5763,8 @@
               "eig",
               "eigvals",
               "powerIteration",
+              "balanceForEig",
+              "EigBalance",
               "EigResult",
               "EigOptions",
               "RepeatedEigenvalue"
@@ -5881,6 +5883,8 @@
           "eig",
           "eigvals",
           "powerIteration",
+          "balanceForEig",
+          "EigBalance",
           "EigResult",
           "EigOptions",
           "RepeatedEigenvalue",
@@ -5943,6 +5947,8 @@
           "eig",
           "eigvals",
           "powerIteration",
+          "balanceForEig",
+          "EigBalance",
           "EigResult",
           "EigOptions",
           "RepeatedEigenvalue",
@@ -19466,13 +19472,17 @@
           {
             "file": "./eigs.js",
             "imports": ["defineRemovedVectorsGetter"]
+          },
+          {
+            "file": "../utils/is.js",
+            "imports": ["isFraction"]
           }
         ],
         "workspaceDependencies": [
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["DenseMatrix", "lu", "eig"]
+            "imports": ["DenseMatrix", "lu", "eig", "balanceForEig"]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -49897,15 +49907,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1350,
     "totalModules": 82,
-    "totalLinesOfCode": 238775,
-    "totalExports": 7399,
+    "totalLinesOfCode": 238939,
+    "totalExports": 7402,
     "totalClasses": 62,
-    "totalInterfaces": 669,
-    "totalFunctions": 2581,
+    "totalInterfaces": 670,
+    "totalFunctions": 2582,
     "totalTypeGuards": 184,
     "totalEnums": 0,
     "totalConstants": 1695,
-    "totalReExports": 3191,
+    "totalReExports": 3193,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,

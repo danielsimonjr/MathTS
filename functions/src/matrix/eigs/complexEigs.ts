@@ -61,10 +61,12 @@ type DataType = 'number' | 'BigNumber' | 'Complex';
  * relative to the row (`nullSpaceUpper`). The two limits meet here. A coupling of 1e-13 is a
  * coupling (a test of #1202), so the limit lies below 1e-13. The rounding of a dense matrix with a
  * repeated eigenvalue reaches 4e-14 of the row for BigNumber entries and 2e-13 for Complex entries
- * (160 seeded matrices of order 3 to 5 at the scales 1, 2^40 and 2^-60, in the tests of #1242).
- * One twentieth of the default precision 1e-12, 5e-14, keeps all 160 BigNumber matrices whole, and
- * keeps the Complex matrices whole at 1 and 2^40. At 2^-60, 9 of the 160 Complex matrices lose an
- * eigenvector. A lost eigenvector is a missing one, never a false one.
+ * (seeded matrices of order 3 to 5 at the scales 1, 2^40 and 2^-60). The limit is one twentieth
+ * of the default precision 1e-12, 5e-14, and it is a trade. On 60 dense matrices `P D P^-1` with a
+ * double eigenvalue per scale, the count of matrices that keep every eigenvector is 60/60/52 for
+ * BigNumber entries (60/59/59 with the former absolute tolerance) and 56/57/53 for Complex entries
+ * (46/41/60 before). A count can change by 1 between runs (inverse iteration starts from a random
+ * vector). A lost eigenvector is a missing one, never a false one.
  */
 const COUPLING_FRACTION_OF_PREC = 0.05;
 

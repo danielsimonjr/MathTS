@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-20'
   totalFiles: 1350
   totalModules: 82
-  totalExports: 7399
+  totalExports: 7402
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5481,13 +5481,16 @@ modules:
             - DecompositionMatrixInput
       workspaceDependencies: []
       exports:
+        - balanceForEig
         - eig
         - eigvals
         - powerIteration
       interfaces:
         - EigResult
         - EigOptions
+        - EigBalance
       functions:
+        - balanceForEig
         - eig
         - eigvals
         - powerIteration
@@ -5539,6 +5542,8 @@ modules:
             - eig
             - eigvals
             - powerIteration
+            - balanceForEig
+            - EigBalance
             - EigResult
             - EigOptions
             - RepeatedEigenvalue
@@ -5655,6 +5660,8 @@ modules:
         - eig
         - eigvals
         - powerIteration
+        - balanceForEig
+        - EigBalance
         - EigResult
         - EigOptions
         - RepeatedEigenvalue
@@ -5716,6 +5723,8 @@ modules:
         - eig
         - eigvals
         - powerIteration
+        - balanceForEig
+        - EigBalance
         - EigResult
         - EigOptions
         - RepeatedEigenvalue
@@ -18231,6 +18240,9 @@ modules:
         - file: ./eigs.js
           imports:
             - defineRemovedVectorsGetter
+        - file: ../utils/is.js
+          imports:
+            - isFraction
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-matrix'
           directory: matrix
@@ -18238,6 +18250,7 @@ modules:
             - DenseMatrix
             - lu
             - eig
+            - balanceForEig
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -47050,15 +47063,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238775
-  totalExports: 7399
+  totalLinesOfCode: 238939
+  totalExports: 7402
   totalClasses: 62
-  totalInterfaces: 669
-  totalFunctions: 2581
+  totalInterfaces: 670
+  totalFunctions: 2582
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1695
-  totalReExports: 3191
+  totalReExports: 3193
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3

@@ -16,9 +16,10 @@
  * singular matrix — is handled correctly (a singular matrix has det 0), verified
  * against numpy.
  */
-import { DenseMatrix, lu, eig } from '@danielsimonjr/mathts-matrix';
+import { DenseMatrix, lu, eig, balanceForEig } from '@danielsimonjr/mathts-matrix';
 import { Complex } from '@danielsimonjr/mathts-core';
 import { defineRemovedVectorsGetter } from './eigs.js';
+import { isFraction } from '../utils/is.js';
 
 /** Below this dimension the factory path is already sub-millisecond; native
  *  conversion overhead isn't worth it and the well-tested factory path runs. */
@@ -139,34 +140,40 @@ function maxAbsEntry(a: number[][]): number {
  * The test that an eigenvalue of `a` is real: its imaginary part is rounding noise, `|im| <=
  * 8 n eps scale`. The scale is local (#1240). A scale of the whole matrix, its largest entry,
  * reads `1e-5 +- i` beside an entry of 1e20 as real, because the noise of the huge entry is far
- * above 1. Every eigenvalue lies in the Gershgorin disc of some row, `|l - a_ii| <= R_i` with R_i
- * the sum of the other entries of the row. The scale of an eigenvalue is the largest entry of the
- * rows whose disc holds it. The discs have a slack of the noise of the largest entry, `8 n eps
- * max|a|`, so a value that rounding moved from its disc still finds its rows. When no row holds
- * the value, the scale is the largest entry of the matrix. The test uses the eigenvalue alone, so
+ * above 1. The test reads the matrix that the solver reads: the active block of the balanced
+ * matrix (`balanceForEig`). An isolated eigenvalue has an im of exactly 0. Every eigenvalue of the
+ * block lies in the Gershgorin disc of some row of the block, `|l - b_ii| <= R_i` with R_i the sum
+ * of the other entries of the row. The scale of an eigenvalue is the largest entry of the rows
+ * whose disc holds it. The discs have a slack of the noise of the largest block entry, `8 n eps
+ * max|b|`, so a value that rounding moved from its disc still finds its rows. When no row holds
+ * the value, the scale is the largest block entry. The test uses the eigenvalue alone, so
  * `values` does not depend on `eigenvectors`.
  */
 function makeIsReal(a: number[][]): (v: { re: number; im: number }) => boolean {
-  const n = a.length;
-  const noise = 8 * n * Number.EPSILON;
-  const global = maxAbsEntry(a);
+  const noise = 8 * a.length * Number.EPSILON;
+  const { perm, low, high, scale } = balanceForEig(a);
+  const block = perm.slice(low, high + 1);
+  const d = scale.slice(low, high + 1);
+  const b = block.map((pi, i) => block.map((pj, j) => a[pi][pj] * (d[j] / d[i])));
+  const global = maxAbsEntry(b);
   const slack = noise * global;
-  const rows = a.map((row, i) => {
+  const rows = b.map((row, i) => {
     let radius = 0;
     let top = 0;
-    for (let j = 0; j < n; j++) {
-      const x = Math.abs(row[j]);
+    row.forEach((y, j) => {
+      const x = Math.abs(y);
       if (j !== i) radius += x;
       if (x > top) top = x;
-    }
+    });
     return { centre: row[i], radius: radius + slack, top };
   });
   return (v) => {
-    let scale = 0;
+    if (v.im === 0) return true;
+    let local = 0;
     for (const { centre, radius, top } of rows) {
-      if (top > scale && Math.hypot(v.re - centre, v.im) <= radius) scale = top;
+      if (top > local && Math.hypot(v.re - centre, v.im) <= radius) local = top;
     }
-    return Math.abs(v.im) <= noise * (scale > 0 ? scale : global);
+    return Math.abs(v.im) <= noise * (local > 0 ? local : global);
   };
 }
 
@@ -327,6 +334,30 @@ function nativeEigs(a: number[][], options: EigsOptions | undefined): NativeEigs
 }
 
 /**
+ * The matrix as `number[][]` when the factory `eigs` would solve it in its `number` type: a square
+ * array whose entries are numbers or Fractions (`coerceTypes` converts a Fraction to a number).
+ * Otherwise `undefined`. A Fraction among the entries then takes the native solver too, whose
+ * eigenvectors are accurate to rounding; the factory gave a residual of 2.3e-6 (#1179).
+ */
+function asNumberSquare(a: unknown): number[][] | undefined {
+  if (!Array.isArray(a) || a.length < 1) return undefined;
+  const n = a.length;
+  const out: number[][] = [];
+  for (const row of a) {
+    if (!Array.isArray(row) || row.length !== n) return undefined;
+    const r = new Array<number>(n);
+    for (let j = 0; j < n; j++) {
+      const x: unknown = row[j];
+      if (typeof x === 'number') r[j] = x;
+      else if (isFraction(x)) r[j] = Number(x);
+      else return undefined;
+    }
+    out.push(r);
+  }
+  return out;
+}
+
+/**
  * Correct eigendecomposition for the public `eigs`.
  *
  * The activated mathjs factory `eigs` returns WRONG eigenvalues for *every*
@@ -344,7 +375,8 @@ export function correctEigs(
   options: EigsOptions | undefined,
   factoryEigs: (m: unknown, o?: unknown) => unknown
 ): unknown {
-  const native = isNumericSquare(a) ? nativeEigs(a, options) : undefined;
+  const nums = asNumberSquare(a);
+  const native = nums === undefined ? undefined : nativeEigs(nums, options);
   if (native !== undefined) return native;
   return options === undefined ? factoryEigs(a) : factoryEigs(a, options);
 }
@@ -362,7 +394,8 @@ export function correctEigsOfMatrix(
   toMatrix: (data: unknown[]) => unknown
 ): unknown {
   const arr = m.toArray();
-  const native = isNumericSquare(arr) ? nativeEigs(arr, options) : undefined;
+  const nums = asNumberSquare(arr);
+  const native = nums === undefined ? undefined : nativeEigs(nums, options);
   if (native === undefined) return options === undefined ? factoryEigs(m) : factoryEigs(m, options);
   const wrap = options?.matricize !== false ? toMatrix : (data: unknown[]) => data;
   const wrapped: Record<string, unknown> = {

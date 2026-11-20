@@ -229,7 +229,7 @@ describe('eigs of a Matrix (#1179)', () => {
     }
   });
 
-  it('a Matrix of Fractions still goes to the factory and converges', () => {
+  it('a Matrix of Fractions converges (it takes the native solver, #1179)', () => {
     const A = [
       [0, -1],
       [1, 0],
