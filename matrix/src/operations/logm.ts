@@ -248,6 +248,16 @@ function blockConfirmedBySecondForm(
 }
 
 /**
+ * `v · 2^e` in two exact power-of-2 steps, so that a large |e| neither overflows 2^e to
+ * Infinity nor gives Infinity · 0 = NaN for a zero entry.
+ */
+function scalePow2(v: number, e: number): number {
+  if (v === 0 || e === 0) return v;
+  const h = Math.trunc(e / 2);
+  return v * 2 ** h * 2 ** (e - h);
+}
+
+/**
  * Schur-Padé logm: Higham (2008) Algorithm 11.10.
  *
  * 1. Schur decompose A = Q · T · Q^T.
@@ -330,9 +340,12 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
     const secondRowOfBlock = !negligibleSubdiagonal(T, i);
     dexp[i] =
       dexp[i - 1] +
-      (secondRowOfBlock ? Math.round(0.5 * Math.log2(Math.abs(T[i - 1][i] / T[i][i - 1]))) : 0);
+      (secondRowOfBlock
+        ? Math.round(0.5 * (Math.log2(Math.abs(T[i - 1][i])) - Math.log2(Math.abs(T[i][i - 1]))))
+        : 0);
   }
-  const Tb = T.map((row, r) => row.map((v, c) => v * 2 ** (dexp[r] - dexp[c])));
+  // The difference of two logarithms cannot overflow, where the ratio b/c can (#1171).
+  const Tb = T.map((row, r) => row.map((v, c) => scalePow2(v, dexp[r] - dexp[c])));
 
   // Inverse-scaling phase: repeatedly take the quasi-upper-triangular sqrt of T
   let M = Tb;
@@ -363,7 +376,7 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
   }
 
   // Undo the balance
-  logT = logT.map((row, r) => row.map((v, c) => v * 2 ** (dexp[c] - dexp[r])));
+  logT = logT.map((row, r) => row.map((v, c) => scalePow2(v, dexp[c] - dexp[r])));
 
   // Rotate: logm(A) = Q * logm(T) * Q^T
   const Qt = transpose(Q);
@@ -521,6 +534,11 @@ export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
 
   const data = new Float64Array(n * n);
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) data[i * n + j] = logM[i][j];
+  // Last line of defence: a finite matrix never gets a non-finite logarithm back (a NaN
+  // result once came from an overflow in the block balance, #1171). A NaN or infinite input
+  // keeps its non-finite result.
+  if (!data.every(Number.isFinite) && A.toFloat64Array().every(Number.isFinite))
+    throw new Error('matrixLogm: the result is not finite for a finite matrix (internal overflow)');
   return new DenseMatrix(n, n, data);
 }
 

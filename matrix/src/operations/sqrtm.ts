@@ -357,7 +357,9 @@ function quasiTriangularRoot(
       if (tauSq < 0) return null;
       const tau = Math.sqrt(tauSq);
 
-      if (Math.abs(tau) < 1e-14) return null;
+      // Scale-free: tau^2 = tr + 2 sqrt(det) > 0 for every block with complex eigenvalues. An
+      // absolute cutoff rejected a block whose diagonal a power-of-2 window brought to 2^-105.
+      if (!(tau > 0)) return null;
 
       U[r][r] = (a + sqrtDet) / tau;
       U[r][r + 1] = b2 / tau;
