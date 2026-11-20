@@ -61,3 +61,25 @@ describe('#1023 regressions and guards', () => {
     expect(text.startsWith('1 + x + 0.5*x^2')).toBe(true);
   });
 });
+
+describe('#1023 coefficient text keeps the exponent of a small or large value', () => {
+  it('taylor(exp(x), x, 0, 14) writes x^13 as 1.605904384e-10', () => {
+    expect(taylor('exp(x)', 'x', 0, 14)).toContain('+ 1.605904384e-10*x^13');
+  });
+
+  it('taylor(sin(1e-3*x), x, 0, 3) writes x^3 as -1.666666667e-10', () => {
+    expect(taylor('sin(1e-3*x)', 'x', 0, 3)).toBe('0.001*x - 1.666666667e-10*x^3');
+  });
+
+  it('taylor(exp(x), x, 0, 14) writes x^14 as 1/14! and not as 0', () => {
+    // mpmath: 1/14! = 1.14707455977e-11
+    const text = taylor('exp(x)', 'x', 0, 14);
+    expect(text.endsWith('+ 1.14707456e-11*x^14')).toBe(true);
+    expect(text).not.toContain('0*x^14');
+  });
+
+  it('a 10-digit integer mantissa keeps its trailing zero', () => {
+    // 1234567890.4 has the 10-digit text 1234567890: no decimal point, so no zero is dropped.
+    expect(taylor('1234567890.4*x', 'x', 0, 1)).toBe('1234567890*x');
+  });
+});

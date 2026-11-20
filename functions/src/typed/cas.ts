@@ -337,9 +337,15 @@ function factorial(n: number): f64 {
  */
 function formatCoeff(c: f64): string {
   if (Math.abs(c) < 1e-12) return '0';
-  if (Math.abs(c - Math.round(c)) < 1e-10) return String(Math.round(c));
-  // Show up to 10 significant digits
-  return c.toPrecision(10).replace(/\.?0+$/, '');
+  // A value within 1e-10 of a non-zero integer is that integer. A value near 0 keeps its digits
+  // (`1.147e-11` is not `0`): `buildTerm` already drops what is below 1e-12.
+  const nearest = Math.round(c);
+  if (nearest !== 0 && Math.abs(c - nearest) < 1e-10) return String(nearest);
+  // Show up to 10 significant digits. Only the mantissa loses its trailing zeros: the exponent
+  // of `1.605904384e-10` ends in 0 too, and `e-1` is a different number.
+  const [mantissa, exponent] = c.toPrecision(10).split('e');
+  const digits = mantissa.includes('.') ? mantissa.replace(/\.?0+$/, '') : mantissa;
+  return exponent === undefined ? digits : `${digits}e${exponent}`;
 }
 
 /**

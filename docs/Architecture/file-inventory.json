@@ -6575,7 +6575,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 476
+      "loc": 480
     },
     {
       "file": "functions/src/cas/antiderivative.ts",
@@ -9228,7 +9228,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3979
+      "loc": 3985
     },
     {
       "file": "functions/src/typed/centrality-restarts.ts",
@@ -10635,14 +10635,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 64
+      "loc": 86
     },
     {
       "file": "functions/tests/dogfood-1024-transforms.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 176
+      "loc": 197
     },
     {
       "file": "functions/tests/dogfood-1087-exptotrig.test.ts",
