@@ -12,6 +12,7 @@ import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
 import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
 import { hasNaN, numberVector } from './typed/number-matrix.js';
+import { assertLoopOrder } from './utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
 const sampleVar = (x: number[]): number => _variance(x) as number; // default: unbiased (n−1)
@@ -138,7 +139,7 @@ export function kruskalWallis(...groups: Vec[]): KruskalResult {
 
 /**
  * Result of `wilcoxon`: the statistic `min(W+, W-)`, the two-sided p-value, and the
- * normal-approximation z statistic.
+ * normal-approximation z statistic (without a continuity correction).
  */
 export interface WilcoxonResult {
   statistic: number;
@@ -147,10 +148,58 @@ export interface WilcoxonResult {
 }
 
 /**
+ * Two-sided exact signed-rank p-value for `n` nonzero differences without ties:
+ * `2 * P(W <= w)`, capped at 1. The null distribution counts the subsets of the ranks `1..n`
+ * by their sum, so the counts need `n(n+1)/2 + 1` entries and are exact doubles for `n <= 50`.
+ */
+function signedRankExactP(n: number, w: number): number {
+  const max = (n * (n + 1)) / 2;
+  const counts = new Float64Array(max + 1);
+  counts[0] = 1;
+  for (let r = 1; r <= n; r++) {
+    for (let s = max; s >= r; s--) counts[s] += counts[s - r];
+  }
+  let cumulative = 0;
+  for (let s = 0; s <= Math.floor(w); s++) cumulative += counts[s];
+  return Math.min(1, (2 * cumulative) / 2 ** n);
+}
+
+/**
+ * Two-sided permutation p-value of `W+` for the ranks `ranks` (ties and zeros give ranks that
+ * the exact distribution does not cover): every one of the `2^n` sign assignments is
+ * enumerated, so the result is deterministic. A relative tolerance of 1e-14 on the observed
+ * sum decides which sums count as equal, as in `scipy.stats.permutation_test`.
+ */
+function signedRankPermutationP(ranks: readonly number[], observed: number): number {
+  const n = ranks.length;
+  const sums = new Float64Array(2 ** n);
+  let size = 1; // sums[0] = 0 is the assignment where every rank has a negative sign
+  for (const r of ranks) {
+    for (let i = 0; i < size; i++) sums[size + i] = sums[i] + r;
+    size *= 2;
+  }
+  const gamma = 1e-14 * Math.abs(observed);
+  let less = 0;
+  let greater = 0;
+  for (let i = 0; i < size; i++) {
+    if (sums[i] <= observed + gamma) less++;
+    if (sums[i] >= observed - gamma) greater++;
+  }
+  return Math.min(1, (2 * Math.min(less, greater)) / size);
+}
+
+/**
  * Wilcoxon signed-rank test (paired, or one-sample vs 0). Drops zero differences,
- * ranks |d|, and uses the normal approximation with continuity correction
- * (matching `scipy.stats.wilcoxon(mode='approx', correction=True)`). Statistic is
- * `min(W⁺, W⁻)`.
+ * ranks |d|, and chooses the p-value method as `scipy.stats.wilcoxon(x, y)` does with its
+ * defaults (SciPy 1.16: `zero_method='wilcox'`, `correction=False`, `method='auto'`):
+ *
+ * - more than 50 differences (zeros included): the normal approximation;
+ * - no zeros and no ties among |d|: the exact distribution of the signed-rank sum;
+ * - up to 13 differences with zeros or ties: the permutation distribution over all sign
+ *   assignments;
+ * - otherwise: the normal approximation, with the tie correction of the variance.
+ *
+ * The normal approximation has no continuity correction. Statistic is `min(W⁺, W⁻)`.
  */
 export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
   const a = numberVector('wilcoxon', x);
@@ -161,10 +210,17 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
     );
   const diffs = yy !== undefined ? a.map((v, i) => v - yy[i]) : a;
   if (hasNaN(diffs)) return { statistic: NaN, pValue: NaN, zStatistic: NaN };
+  const nAll = diffs.length;
   const d = diffs.filter((v) => v !== 0);
   const n = d.length;
-  if (n === 0) throw new Error('wilcoxon: all differences are zero (test undefined)');
-  const ranks = rankdata(d.map(Math.abs));
+  if (n === 0) {
+    // SciPy 1.16.3 (method 'auto'): the permutation path for 2 to 13 differences gives p = 1,
+    // and the normal approximation for more gives 0 / 0. A single difference has no permutation.
+    if (nAll < 2) throw new Error('wilcoxon: all differences are zero (test undefined)');
+    return { statistic: 0, pValue: nAll <= 13 ? 1 : NaN, zStatistic: NaN };
+  }
+  const absD = d.map(Math.abs);
+  const ranks = rankdata(absD);
   let wPlus = 0;
   let wMinus = 0;
   for (let i = 0; i < n; i++) {
@@ -172,11 +228,17 @@ export function wilcoxon(x: Vec, y?: Vec): WilcoxonResult {
     else wMinus += ranks[i];
   }
   const statistic = Math.min(wPlus, wMinus);
+  const tie = tieTerm(absD);
   const mn = (n * (n + 1)) / 4;
-  const se = Math.sqrt((n * (n + 1) * (2 * n + 1)) / 24 - tieTerm(d.map(Math.abs)) / 48);
-  const corr = 0.5 * Math.sign(statistic - mn);
-  const zStatistic = (statistic - mn - corr) / se;
-  return { statistic, pValue: 2 * normalCDF(-Math.abs(zStatistic)), zStatistic };
+  const se = Math.sqrt((n * (n + 1) * (2 * n + 1)) / 24 - tie / 48);
+  const zStatistic = (statistic - mn) / se;
+  const hasZerosOrTies = n < nAll || tie > 0;
+  let pValue: number;
+  if (nAll > 50) pValue = 2 * normalCDF(-Math.abs(zStatistic));
+  else if (!hasZerosOrTies) pValue = signedRankExactP(n, statistic);
+  else if (nAll <= 13) pValue = signedRankPermutationP(ranks, wPlus);
+  else pValue = 2 * normalCDF(-Math.abs(zStatistic));
+  return { statistic, pValue, zStatistic };
 }
 
 /** Result of `fisherExact`: the sample odds ratio and the two-sided p-value. */
@@ -185,10 +247,78 @@ export interface FisherExactResult {
   pValue: number;
 }
 
-/** log C(n, k) via lgamma — stable for the hypergeometric enumeration below. */
-function logChoose(n: number, k: number): number {
-  if (k < 0 || k > n) return -Infinity;
-  return lgamma(n + 1) - lgamma(k + 1) - lgamma(n - k + 1);
+/**
+ * Rescale factor of the `fisherExact` walk and its reciprocal. They are powers of two, so a
+ * rescale is exact.
+ */
+const FISHER_SHIFT = 2 ** 400;
+const FISHER_TINY = 2 ** -400;
+
+/**
+ * Maximum number of steps of the `fisherExact` walk (measured: about 50 ns for each step at
+ * full machine load, so the maximum takes about 20 s).
+ */
+const FISHER_MAX_STEPS = 400_000_000;
+
+/** A table counts when its probability is at most the observed one times this (SciPy: 1e-14). */
+const FISHER_TOLERANCE = 1 + 1e-14;
+
+/**
+ * P(k + step) / P(k) for the 2×2 table with `k` in the first cell, row total `r1`, column
+ * total `c1` and `e = r2 - c1` (the last cell is `e + k`). `step` is 1 or -1. The ratio is a
+ * quotient of integers, so it needs no log-gamma.
+ */
+function fisherRatio(r1: number, c1: number, e: number, k: number, step: number): number {
+  return step === 1
+    ? ((r1 - k) * (c1 - k)) / ((k + 1) * (e + k + 1))
+    : (k * (e + k)) / ((r1 - k + 1) * (c1 - k + 1));
+}
+
+/**
+ * Walk from the mode table to `end` in the direction `step` and add to `sums`: `sums[0]` is the
+ * sum of all tables in units of the mode table, and `sums[1]` is the sum of the tables that
+ * count, in units of the observed table. A probability is `term * 2^(-400 * scale)` in units of
+ * the mode table, with `term` in [2^-400, 1], and the observed one is
+ * `observed * 2^(-400 * observedScale)`. This is a module function with number parameters,
+ * because a closure that writes to variables of `fisherExact` ran many times slower in V8.
+ */
+function fisherWalk(
+  r1: number,
+  c1: number,
+  e: number,
+  mode: number,
+  end: number,
+  step: number,
+  observed: number,
+  observedScale: number,
+  sums: Float64Array
+): void {
+  const perObserved = 1 / observed;
+  let total = 0;
+  let counted = sums[1];
+  let term = 1;
+  let scale = 0;
+  for (let k = mode; k !== end; k += step) {
+    term *= fisherRatio(r1, c1, e, k, step);
+    if (term < FISHER_TINY) {
+      term *= FISHER_SHIFT;
+      if (++scale > observedScale + 1) break; // below 2^-400 of the observed probability
+    }
+    if (scale === 0) total += term;
+    if (scale < observedScale - 1) continue; // above 2^400 times the observed probability
+    const units =
+      scale === observedScale
+        ? term * perObserved
+        : scale > observedScale
+          ? term * FISHER_TINY * perObserved
+          : term * FISHER_SHIFT * perObserved;
+    if (units <= FISHER_TOLERANCE) {
+      counted += units;
+      if (units <= 1e-17 * counted) break; // the terms fall away from the mode
+    }
+  }
+  sums[0] += total;
+  sums[1] = counted;
 }
 
 /**
@@ -197,41 +327,99 @@ function logChoose(n: number, k: number): number {
  * observed table's), matching `scipy.stats.fisher_exact`. `oddsRatio` is the sample
  * ratio `ad/bc` (SciPy reports the conditional-MLE estimate; the p-value matches).
  *
- * @throws A `RangeError` when an entry is not a finite number `>= 0`, or when the smaller
- *   of the first row total and the first column total is above 2^53 - 1.
+ * The probability of the table with `k` in the first cell rises to the mode of the
+ * hypergeometric distribution and falls after it, and the ratio of two neighbours is a
+ * quotient of integers. So the function walks away from the mode in both directions and keeps
+ * each probability as a running product relative to the mode table. It needs no log-gamma,
+ * whose rounding error grows with the counts (about 1e-5 at counts of 1e9). A product that
+ * falls below 2^-400 is multiplied by 2^400 and the number of rescales is kept, so a
+ * probability far below the smallest double keeps its full precision, and the only rounding
+ * to a subnormal is in the result. The cost grows with the standard deviation of the
+ * distribution and with the distance of the observed table from the mode, not with the size of
+ * the counts.
+ *
+ * As in SciPy, a table counts when its probability is at most the observed one times
+ * `1 + 1e-14`. The result is 0 only when the p-value is below half of the smallest double.
+ *
+ * @throws A `RangeError` when an entry is not a non-negative integer (SciPy casts a float to
+ *   an integer without a message, but a count has no meaning for 3.7), when the smaller
+ *   of the first row total and the first column total is above 2^53 - 1, when the sum of
+ *   the entries is not finite, or when the walk needs more than 400,000,000 steps (counts above
+ *   about 1e14 in each cell).
  */
 export function fisherExact(
   table: readonly [readonly number[], readonly number[]]
 ): FisherExactResult {
   const [[a, b], [c, d]] = table;
-  // SciPy raises for a negative entry. A NaN or an infinite entry made the loop below run forever.
+  // SciPy raises for a negative entry. A NaN or an infinite entry made the old loop run forever.
   for (const v of [a, b, c, d]) {
-    if (!(Number.isFinite(v) && v >= 0)) {
-      throw new RangeError('fisherExact: every table entry must be a finite number >= 0');
+    if (!(Number.isInteger(v) && v >= 0)) {
+      throw new RangeError('fisherExact: every table entry must be a non-negative integer');
     }
   }
   const r1 = a + b;
   const r2 = c + d;
   const c1 = a + c;
-  const N = a + b + c + d;
-  const logHyper = (k: number): number =>
-    logChoose(r1, k) + logChoose(r2, c1 - k) - logChoose(N, c1);
-  const logPObs = logHyper(a);
+  const c2 = b + d;
+  const N = r1 + r2;
   const lo = Math.max(0, c1 - r2);
   const hi = Math.min(r1, c1);
-  // `k++` does not change a `k` above 2^53, so the loop below would not end.
+  // `k++` does not change a `k` above 2^53, so a loop over `k` would not end.
   if (hi > Number.MAX_SAFE_INTEGER) {
     throw new RangeError(
       `fisherExact: a marginal total of ${hi} exceeds the supported maximum of 2^53 - 1`
     );
   }
-  let p = 0;
-  for (let k = lo; k <= hi; k++) {
-    const lp = logHyper(k);
-    if (lp <= logPObs + 1e-7) p += Math.exp(lp);
+  // An infinite sum gives a NaN mode, and the walk from a NaN mode would not end.
+  if (!Number.isFinite(N)) {
+    throw new RangeError('fisherExact: the sum of the table entries must be finite');
   }
   const oddsRatio = b * c === 0 ? Infinity : (a * d) / (b * c);
-  return { oddsRatio, pValue: Math.min(1, p) };
+  // Serfling: the observed table has a probability of at most exp(-2 t^2 / (n (1 - (n - 1) / N))),
+  // where t is its distance from the mean and n is a marginal total. At most 2^53 tables count,
+  // each with at most that probability, so when the exponent is below -800 the p-value is below
+  // 2^53 exp(-800), which is less than half of the smallest double: the correct result is 0.
+  const spread = Math.min(...[r1, r2, c1, c2].map((n) => n * (1 - (n - 1) / N)));
+  const distance = Math.abs(a - r1 * (c1 / N));
+  if (spread > 0 && 2 * distance * distance > 800 * spread) return { oddsRatio, pValue: 0 };
+  const e = r2 - c1;
+  // The mode is floor((c1 + 1)(r1 + 1) / (N + 2)). Rounding can move the quotient across an
+  // integer, so the two loops move the estimate to the table that no neighbour exceeds.
+  let mode = Math.min(hi, Math.max(lo, Math.floor((c1 + 1) * ((r1 + 1) / (N + 2)))));
+  while (mode < hi && fisherRatio(r1, c1, e, mode, 1) > 1) mode++;
+  while (mode > lo && fisherRatio(r1, c1, e, mode, -1) > 1) mode--;
+  // The walk goes three times from the mode to the observed table, and it sums the body of the
+  // distribution, about 8.5 standard deviations on each side of the mode.
+  const deviation = Math.sqrt((r1 / N) * (r2 / N) * c1 * (c2 / Math.max(N - 1, 1)));
+  assertLoopOrder(
+    'fisherExact',
+    'the number of steps for this table (3 * distance from the mode + 17 * standard deviation)',
+    Math.round(3 * Math.abs(a - mode) + 17 * deviation),
+    FISHER_MAX_STEPS
+  );
+
+  // The probability of the observed table is observed * 2^(-400 * observedScale) in units of
+  // the mode table.
+  let observed = 1;
+  let observedScale = 0;
+  const toObserved = a > mode ? 1 : -1;
+  for (let k = mode; k !== a; k += toObserved) {
+    observed *= fisherRatio(r1, c1, e, k, toObserved);
+    if (observed < FISHER_TINY) {
+      observed *= FISHER_SHIFT;
+      // Below 2^-1200 of the mode probability, 2^53 tables sum to less than 2^-1075: the result is 0.
+      if (++observedScale > 2) return { oddsRatio, pValue: 0 };
+    }
+  }
+  // Every table has at most the probability of the mode table, so every table counts.
+  if (observedScale === 0 && observed * FISHER_TOLERANCE >= 1) return { oddsRatio, pValue: 1 };
+
+  const sums = new Float64Array([1, 0]); // the mode table is in the sum of all tables
+  fisherWalk(r1, c1, e, mode, hi, 1, observed, observedScale, sums);
+  fisherWalk(r1, c1, e, mode, lo, -1, observed, observedScale, sums);
+  // One rounding to a subnormal at most: the product before the power of two is above 2^-460.
+  const pValue = observed * (sums[1] / sums[0]) * 2 ** (-400 * observedScale);
+  return { oddsRatio, pValue: Math.min(1, pValue) };
 }
 
 // --- Studentized range distribution + Tukey's HSD (Wave D / remaining) ----------

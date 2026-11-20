@@ -1,7 +1,7 @@
 import { factory } from '../../utils/factory.js';
 import { format } from '../../utils/string.js';
 import { isExactZero } from '../../utils/isExactZero.js';
-import { findTypedImpl } from '../../utils/typed-impl.js';
+import { createNumberFieldOps, type NumberFieldOps } from '../../utils/typed-impl.js';
 import type { TypedFunction } from '../../core/function/typed.js';
 import { isBigNumber, isComplex, isFraction } from '../../utils/is.js';
 import { realScale, squaresLeaveRange } from '../../utils/real-scale.js';
@@ -128,32 +128,14 @@ export const createQr = /* #__PURE__ */ factory(
     subtractScalar,
     complex,
   }: Dependencies) => {
-    type QRNumberOp = (a: number, b: number) => number;
-    type QRNumberConj = (a: number) => number;
-    type QRNumberOps = {
-      add: QRNumberOp;
-      mul: QRNumberOp;
-      sub: QRNumberOp;
-      div: QRNumberOp;
-      conj: QRNumberConj;
-    };
+    type QRNumberOps = NumberFieldOps<'conj'>;
 
-    /** Cached once per factory; `undefined` = uninitialized, `null` = find failed. */
-    let cachedQrNumberOps: QRNumberOps | null | undefined;
-
-    function getQrNumberOps(): QRNumberOps | null {
-      if (cachedQrNumberOps === undefined) {
-        const nn = ['number', 'number'];
-        const add = findTypedImpl<[number, number], number>(typed, addScalar, nn);
-        const mul = findTypedImpl<[number, number], number>(typed, multiplyScalar, nn);
-        const sub = findTypedImpl<[number, number], number>(typed, subtractScalar, nn);
-        const div = findTypedImpl<[number, number], number>(typed, divideScalar, nn);
-        const conjNum = findTypedImpl<[number], number>(typed, conj, ['number']);
-        cachedQrNumberOps =
-          add && mul && sub && div && conjNum ? { add, mul, sub, div, conj: conjNum } : null;
-      }
-      return cachedQrNumberOps;
-    }
+    const getQrNumberOps = createNumberFieldOps(
+      typed,
+      { addScalar, multiplyScalar, subtractScalar, divideScalar },
+      'conj',
+      conj
+    );
 
     function matrixAllNumbers(data: unknown[][]): boolean {
       for (let r = 0; r < data.length; r++) {

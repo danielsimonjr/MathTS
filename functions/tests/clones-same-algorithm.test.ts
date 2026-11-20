@@ -151,11 +151,11 @@ describe('matrixRank edges used by the Jordan walk', () => {
 });
 
 describe('cummax and cummin', () => {
-  it('handles empty input, NaN, and infinities without replacing on NaN', () => {
+  it('handles empty input and infinities, and a NaN stays the extreme as in NumPy (#1146)', () => {
     expect(cummax([])).toEqual([]);
     expect(cummin([])).toEqual([]);
-    expect(cummax([NaN, 1, NaN])).toEqual([-Infinity, 1, 1]);
-    expect(cummin([NaN, 1, NaN])).toEqual([Infinity, 1, 1]);
+    expect(cummax([NaN, 1, NaN])).toEqual([NaN, NaN, NaN]);
+    expect(cummin([NaN, 1, NaN])).toEqual([NaN, NaN, NaN]);
     expect(cummax([-Infinity, -1])).toEqual([-Infinity, -1]);
     expect(cummin([Infinity, 1])).toEqual([Infinity, 1]);
     expect(cummax(new Float64Array([1, 3, 2]))).toEqual([1, 3, 3]);

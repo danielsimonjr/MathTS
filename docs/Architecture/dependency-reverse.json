@@ -788,6 +788,16 @@
       "functions/src/utils/parseNumber.ts",
       "functions/src/utils/typeOf.ts"
     ],
+    "functions/src/utils/isExactZero.ts": [
+      "functions/src/algebra/decomposition/lup.ts",
+      "functions/src/algebra/decomposition/qr.ts",
+      "functions/src/algebra/solver/lsolve.ts",
+      "functions/src/algebra/solver/lsolveAll.ts",
+      "functions/src/algebra/solver/usolve.ts",
+      "functions/src/algebra/solver/usolveAll.ts",
+      "functions/src/matrix/inv.ts",
+      "functions/src/type/matrix/Spa.ts"
+    ],
     "functions/src/utils/typed-impl.ts": [
       "functions/src/algebra/decomposition/lup.ts",
       "functions/src/algebra/decomposition/qr.ts",
@@ -1009,10 +1019,6 @@
       "functions/src/utils/typeOf.ts",
       "functions/src/utils/typed-impl.ts"
     ],
-    "functions/src/utils/isExactZero.ts": [
-      "functions/src/algebra/decomposition/qr.ts",
-      "functions/src/matrix/inv.ts"
-    ],
     "functions/src/utils/is.ts": [
       "functions/src/algebra/decomposition/qr.ts",
       "functions/src/algebra/derivative.ts",
@@ -1063,6 +1069,7 @@
       "functions/src/relational/compareNatural.ts",
       "functions/src/scalar-node-bridge.ts",
       "functions/src/signal/fft-helpers.ts",
+      "functions/src/statistics/numeric-data.ts",
       "functions/src/statistics/quantileSeq.ts",
       "functions/src/statistics/std.ts",
       "functions/src/statistics/utils/improveErrorMessage.ts",
@@ -1287,7 +1294,8 @@
     "functions/src/algebra/solver/pivot-tolerance.ts": [
       "functions/src/algebra/solver/lusolve.ts",
       "functions/src/algebra/solver/usolve.ts",
-      "functions/src/algebra/solver/validate-u-pivots.ts"
+      "functions/src/algebra/solver/validate-u-pivots.ts",
+      "functions/src/typed/numeric.ts"
     ],
     "functions/src/algebra/solver/validate-u-pivots.ts": [
       "functions/src/algebra/solver/lusolve.ts"
@@ -1781,6 +1789,7 @@
       "functions/src/combinatorics/stirlingS2.ts",
       "functions/src/descriptive-stats.ts",
       "functions/src/factories/matrix-bridge.ts",
+      "functions/src/hypothesis-extra.ts",
       "functions/src/linalg-extra.ts",
       "functions/src/linalg-special-matrices.ts",
       "functions/src/matrix/diag.ts",
@@ -2006,7 +2015,8 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/hypothesis.ts",
       "functions/src/typed/integration.ts",
-      "functions/src/typed/matrix-ops.ts"
+      "functions/src/typed/matrix-ops.ts",
+      "functions/src/typed/statistics.ts"
     ],
     "functions/src/statistics/numeric-data.ts": [
       "functions/src/descriptive-stats.ts",
@@ -2844,6 +2854,7 @@
     ],
     "functions/src/utils/median-numbers.ts": [
       "functions/src/statistics/median.ts",
+      "functions/src/statistics/quantile-numpy-methods.ts",
       "functions/src/typed/statistics.ts"
     ],
     "functions/src/statistics/quantile-numpy-methods.ts": [
@@ -2853,6 +2864,11 @@
     "functions/src/probability/util/gammaSample.ts": [
       "functions/src/stats/multivariate-sampling.ts",
       "functions/src/typed/dist-objects.ts"
+    ],
+    "functions/src/typed/hypothesis.ts": [
+      "functions/src/stats/nonparametric-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
     ],
     "functions/src/utils/print.ts": [
       "functions/src/string/print.ts",
@@ -2969,10 +2985,6 @@
       "functions/src/typed/index.ts"
     ],
     "functions/src/typed/graph.ts": [
-      "functions/src/typed/expression-eval-barrel.ts",
-      "functions/src/typed/index.ts"
-    ],
-    "functions/src/typed/hypothesis.ts": [
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
