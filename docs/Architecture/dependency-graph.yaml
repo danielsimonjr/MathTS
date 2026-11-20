@@ -44222,6 +44222,8 @@ modules:
             - ceil
             - matrix
             - sparse
+            - zeros
+            - ones
             - transpose
             - bignumber
             - complex
@@ -44315,6 +44317,10 @@ modules:
         - det
         - identity
         - zeros
+        - zeros
+        - zeros
+        - ones
+        - ones
         - ones
         - size
         - isComplex_
@@ -47058,11 +47064,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1350
   totalModules: 82
-  totalLinesOfCode: 238464
+  totalLinesOfCode: 238489
   totalExports: 7397
   totalClasses: 62
   totalInterfaces: 669
-  totalFunctions: 2579
+  totalFunctions: 2583
   totalTypeGuards: 184
   totalEnums: 0
   totalConstants: 1695

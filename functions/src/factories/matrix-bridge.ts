@@ -1051,48 +1051,61 @@ export class MathJSSparseMatrix {
   }
 
   /**
-   * Resize the matrix. Truncates or extends as needed.
+   * Resize the matrix to two dimensions (mathjs `SparseMatrix.resize`). A new entry gets
+   * `defaultValue` (0 when it is not given or falsy, which stores nothing). With `copy` the
+   * matrix is not changed and the result is a new matrix; without `copy` the matrix is changed
+   * and returned.
+   * @throws Error when the size does not have two dimensions
    */
-  resize(newSize: number[], _defaultValue?: unknown): MathJSSparseMatrix {
-    const [newRows, newCols] = newSize;
-    const oldCols = this._size[1];
-
-    // Truncate columns if shrinking
-    if (newCols < oldCols) {
-      const nnzKeep = this._ptr[newCols];
-      this._values = this._values ? this._values.slice(0, nnzKeep) : null;
-      this._index = this._index.slice(0, nnzKeep);
-      this._ptr = this._ptr.slice(0, newCols + 1);
-    } else if (newCols > oldCols) {
-      // Extend columns
-      const lastNnz = this._ptr[this._ptr.length - 1];
-      while (this._ptr.length <= newCols) {
-        this._ptr.push(lastNnz);
-      }
-    }
-
-    // Truncate rows if shrinking
-    if (newRows < this._size[0]) {
-      // Remove entries with row index >= newRows
-      const vals: unknown[] = [];
-      const idx: number[] = [];
-      const ptr: number[] = [0];
-      const cols = Math.min(newCols, this._ptr.length - 1);
-      for (let j = 0; j < cols; j++) {
+  resize(newSize: number[], defaultValue?: unknown, copy?: boolean): MathJSSparseMatrix {
+    if (newSize.length !== 2) throw new Error('Only two dimensions matrix are supported');
+    const [rows, cols] = newSize;
+    const [oldRows, oldCols] = this._size;
+    const value = defaultValue || 0;
+    const fill = value !== 0;
+    if (fill) assertAllocSize('resize', newSize);
+    // A pattern matrix (no values) gets values when a nonzero entry is added: its entries are 1.
+    const hasValues = this._values !== null || fill;
+    const values: unknown[] = [];
+    const index: number[] = [];
+    const ptr: number[] = [0];
+    const keepCols = Math.min(cols, oldCols);
+    for (let j = 0; j < cols; j++) {
+      if (j < keepCols) {
         for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
-          if (this._index[k] < newRows) {
-            if (this._values) vals.push(this._values[k]);
-            idx.push(this._index[k]);
+          if (this._index[k] >= rows) continue;
+          index.push(this._index[k]);
+          if (hasValues) values.push(this._values ? this._values[k] : 1);
+        }
+        // The new rows of a kept column come after its stored rows, which are below oldRows.
+        if (fill) {
+          for (let i = oldRows; i < rows; i++) {
+            index.push(i);
+            values.push(value);
           }
         }
-        ptr.push(idx.length);
+      } else if (fill) {
+        for (let i = 0; i < rows; i++) {
+          index.push(i);
+          values.push(value);
+        }
       }
-      this._values = this._values ? vals : null;
-      this._index = idx;
-      this._ptr = ptr;
+      ptr.push(index.length);
     }
-
-    this._size = [newRows, newCols];
+    if (copy) {
+      const m = new MathJSSparseMatrix({
+        values: hasValues ? values : null,
+        index,
+        ptr,
+        size: [rows, cols],
+      });
+      m._datatype = this._datatype;
+      return m;
+    }
+    this._values = hasValues ? values : null;
+    this._index = index;
+    this._ptr = ptr;
+    this._size = [rows, cols];
     return this;
   }
 
