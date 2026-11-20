@@ -2950,6 +2950,9 @@
       "NnlsResult": {
         "kind": "type"
       },
+      "NoClosedFormError": {
+        "kind": "function"
+      },
       "NormalityTestResult": {
         "kind": "type"
       },

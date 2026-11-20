@@ -1211,7 +1211,6 @@
       "functions/src/relational/smaller.ts",
       "functions/src/relational/smallerEq.ts",
       "functions/src/relational/unequal.ts",
-      "functions/src/special/zeta.ts",
       "functions/src/statistics/extreme.ts",
       "functions/src/statistics/max.ts",
       "functions/src/statistics/min.ts",
@@ -1792,6 +1791,7 @@
       "functions/src/combinatorics/catalan.ts",
       "functions/src/probability/bigint-binomial.ts",
       "functions/src/probability/gamma.ts",
+      "functions/src/special/zeta.ts",
       "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/utils/bigint.ts": [
@@ -2383,6 +2383,7 @@
     "functions/src/core/create.ts": ["functions/src/types.ts"],
     "functions/src/cas/syntax-tree.ts": [
       "functions/src/cas/elementary-solve.ts",
+      "functions/src/cas/taylor-jet.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/typed/factorization/multi-poly.ts": [
@@ -2398,16 +2399,17 @@
       "functions/src/typed/cas.ts",
       "functions/src/typed/polynomial-ideal.ts"
     ],
+    "functions/src/cas/rat.ts": [
+      "functions/src/cas/exact-roots.ts",
+      "functions/src/cas/layer3.ts",
+      "functions/src/cas/rational-integrate.ts",
+      "functions/src/cas/render-coeff-times.ts"
+    ],
     "functions/src/typed/factorization/zassenhaus.ts": [
       "functions/src/cas/layer3.ts",
       "functions/src/cas/rational-integrate.ts",
       "functions/src/typed/factorization/index.ts",
       "functions/src/typed/factorization/kronecker-factor.ts"
-    ],
-    "functions/src/cas/rat.ts": [
-      "functions/src/cas/layer3.ts",
-      "functions/src/cas/rational-integrate.ts",
-      "functions/src/cas/render-coeff-times.ts"
     ],
     "functions/src/cas/render-coeff-times.ts": [
       "functions/src/cas/layer3.ts",
@@ -2961,6 +2963,9 @@
     "functions/src/cas/antiderivative.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/elementary-solve.ts": ["functions/src/typed/cas.ts"],
     "functions/src/cas/closed-form-roots.ts": ["functions/src/typed/cas.ts"],
+    "functions/src/cas/taylor-jet.ts": ["functions/src/typed/cas.ts"],
+    "functions/src/cas/exact-roots.ts": ["functions/src/typed/cas.ts"],
+    "functions/src/cas/no-closed-form.ts": ["functions/src/typed/cas.ts"],
     "functions/src/typed/aggregate-restart.ts": [
       "functions/src/typed/centrality-restarts.ts",
       "functions/src/typed/graph.ts"

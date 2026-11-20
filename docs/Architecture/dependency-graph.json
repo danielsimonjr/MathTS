@@ -3,9 +3,9 @@
     "name": "mathts",
     "version": "0.1.0",
     "lastUpdated": "2026-11-20",
-    "totalFiles": 1354,
+    "totalFiles": 1357,
     "totalModules": 82,
-    "totalExports": 7434
+    "totalExports": 7446
   },
   "entryPoints": [
     {
@@ -15245,6 +15245,37 @@
         "exports": ["isExactPolynomialIdentity"],
         "functions": ["isExactPolynomialIdentity"]
       },
+      "functions/src/cas/exact-roots.ts": {
+        "description": "Exact roots of a polynomial of degree 1 or 2, and the exact power rule for a decimal literal.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./rat.js",
+            "imports": ["Rat", "ratNormalize", "ratAdd", "ratSub", "ratMul", "ratDiv", "RAT_ZERO"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": [
+          "decimalTextToRat",
+          "coefficientRat",
+          "ratText",
+          "exactLinearRoot",
+          "exactLinearText",
+          "exactQuadraticRoots",
+          "powerRuleText"
+        ],
+        "interfaces": ["ExactQuadratic"],
+        "functions": [
+          "decimalTextToRat",
+          "coefficientRat",
+          "ratText",
+          "exactLinearRoot",
+          "exactLinearText",
+          "exactQuadraticRoots",
+          "powerRuleText"
+        ]
+      },
       "functions/src/cas/layer3.ts": {
         "description": "Risch Layer 3 — Hermite reduction + Rothstein–Trager / residue formula",
         "externalDependencies": [],
@@ -15306,6 +15337,15 @@
           "rothsteinTrager",
           "integrateLayer3"
         ]
+      },
+      "functions/src/cas/no-closed-form.ts": {
+        "description": "The error of a CAS transform that has no rule for its input.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "workspaceDependencies": [],
+        "exports": ["NoClosedFormError"],
+        "classes": ["NoClosedFormError"]
       },
       "functions/src/cas/polynomial-canonical.ts": {
         "description": "Canonical polynomial forms for CAS simplify / factor (G21).",
@@ -15533,6 +15573,21 @@
           "polynomialCoefficients"
         ],
         "constants": ["COEFFICIENT_NOISE_RATIO"]
+      },
+      "functions/src/cas/taylor-jet.ts": {
+        "description": "Taylor coefficients by truncated power-series (\"jet\") arithmetic on the syntax tree.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./syntax-tree.js",
+            "imports": ["AstNode", "operatorName", "callName", "containsSymbol", "constantValue"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["JET_NOISE_RATIO", "jetCoefficients", "jetValueIsZero"],
+        "functions": ["jetCoefficients", "jetValueIsZero"],
+        "constants": ["JET_NOISE_RATIO"]
       }
     },
     "functions/combinatorics": {
@@ -21574,7 +21629,7 @@
         "constants": ["createFactorial"]
       },
       "functions/src/probability/gamma.ts": {
-        "description": "Compute the gamma function of a value using Lanczos approximation for",
+        "description": "The tangent numbers T(1) to T(count) (1, 2, 16, 272, 7936, ...), by the integer algorithm of",
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [
@@ -23493,14 +23548,13 @@
             "typeOnly": true
           },
           {
-            "file": "../core/config.js",
-            "imports": ["ConfigOptions"],
-            "typeOnly": true
-          },
-          {
             "file": "../types.js",
             "imports": ["BigNumber"],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/bignumber/work-precision.js",
+            "imports": ["atWorkPrecision", "PrecisionClass"]
           }
         ],
         "workspaceDependencies": [],
@@ -27077,7 +27131,7 @@
           },
           {
             "file": "../factories/index.js",
-            "imports": ["derivative"]
+            "imports": ["derivative", "simplify"]
           },
           {
             "file": "../cas/antiderivative.js",
@@ -27098,8 +27152,13 @@
           {
             "file": "../cas/syntax-tree.js",
             "imports": [
+              "AstNode",
               "MAX_POLYNOMIAL_DEGREE",
               "PolynomialDegreeError",
+              "callName",
+              "constantValue",
+              "containsSymbol",
+              "operatorName",
               "parseTree",
               "polynomialCoefficients"
             ]
@@ -27121,6 +27180,19 @@
             "imports": ["realRoots"]
           },
           {
+            "file": "../cas/taylor-jet.js",
+            "imports": ["jetCoefficients", "jetValueIsZero"]
+          },
+          {
+            "file": "../cas/exact-roots.js",
+            "imports": [
+              "exactLinearRoot",
+              "exactLinearText",
+              "exactQuadraticRoots",
+              "powerRuleText"
+            ]
+          },
+          {
             "file": "../numeric/adaptive-quad.js",
             "imports": ["quadValue"]
           },
@@ -27131,6 +27203,10 @@
           {
             "file": "./numeric.js",
             "imports": ["findRoot"]
+          },
+          {
+            "file": "../cas/no-closed-form.js",
+            "imports": ["NoClosedFormError"]
           }
         ],
         "workspaceDependencies": [
@@ -27143,6 +27219,7 @@
         "exports": [
           "PolynomialDegreeError",
           "PolynomialSizeError",
+          "NoClosedFormError",
           "CAS_BATCH_THRESHOLD",
           "integrate",
           "limit",
@@ -48882,7 +48959,9 @@
           "functions/src/cas/closed-form-roots.ts",
           "functions/src/cas/elementary-solve.ts",
           "functions/src/cas/exact-identity.ts",
+          "functions/src/cas/exact-roots.ts",
           "functions/src/cas/layer3.ts",
+          "functions/src/cas/no-closed-form.ts",
           "functions/src/cas/polynomial-canonical.ts",
           "functions/src/cas/polynomial-limits.ts",
           "functions/src/cas/rat.ts",
@@ -48890,7 +48969,8 @@
           "functions/src/cas/real-roots.ts",
           "functions/src/cas/render-coeff-times.ts",
           "functions/src/cas/render-polynomial.ts",
-          "functions/src/cas/syntax-tree.ts"
+          "functions/src/cas/syntax-tree.ts",
+          "functions/src/cas/taylor-jet.ts"
         ]
       },
       {
@@ -50210,18 +50290,18 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1354,
+    "totalTypeScriptFiles": 1357,
     "totalModules": 82,
-    "totalLinesOfCode": 242625,
-    "totalExports": 7434,
-    "totalClasses": 63,
-    "totalInterfaces": 675,
-    "totalFunctions": 2614,
+    "totalLinesOfCode": 245021,
+    "totalExports": 7446,
+    "totalClasses": 64,
+    "totalInterfaces": 676,
+    "totalFunctions": 2623,
     "totalTypeGuards": 185,
     "totalEnums": 0,
-    "totalConstants": 1700,
+    "totalConstants": 1701,
     "totalReExports": 3194,
-    "totalTypeOnlyImports": 686,
+    "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,
     "unusedFilesCount": 0,

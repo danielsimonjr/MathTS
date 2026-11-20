@@ -38,14 +38,22 @@ import {
 } from './algebra.js';
 
 import { Complex } from '@danielsimonjr/mathts-core';
-import { derivative as factoryDerivative } from '../factories/index.js';
+import {
+  derivative as factoryDerivative,
+  simplify as factorySimplify,
+} from '../factories/index.js';
 import { antiderivativeReciprocal } from '../cas/antiderivative.js';
 import { tryPolynomialCanonicalForm } from '../cas/polynomial-canonical.js';
 import { solveElementary } from '../cas/elementary-solve.js';
 import { PolynomialSizeError } from '../cas/polynomial-limits.js';
 import {
+  type AstNode,
   MAX_POLYNOMIAL_DEGREE,
   PolynomialDegreeError,
+  callName,
+  constantValue,
+  containsSymbol,
+  operatorName,
   parseTree,
   polynomialCoefficients,
 } from '../cas/syntax-tree.js';
@@ -53,9 +61,17 @@ import { closedFormRoots, snapRoot } from '../cas/closed-form-roots.js';
 import { coefficientTexts, renderPolynomial } from '../cas/render-polynomial.js';
 import { gcdNumber } from '../plain/number/arithmetic.js';
 import { realRoots } from '../cas/real-roots.js';
+import { jetCoefficients, jetValueIsZero } from '../cas/taylor-jet.js';
+import {
+  exactLinearRoot,
+  exactLinearText,
+  exactQuadraticRoots,
+  powerRuleText,
+} from '../cas/exact-roots.js';
 import { quadValue } from '../numeric/adaptive-quad.js';
 import { numericJacobian, type VectorField } from '../numeric/numeric-jacobian.js';
 import { findRoot } from './numeric.js';
+import { NoClosedFormError } from '../cas/no-closed-form.js';
 
 /**
  * The errors that a CAS function throws for a polynomial of a degree above 1000
@@ -63,6 +79,9 @@ import { findRoot } from './numeric.js';
  * `RangeError`.
  */
 export { PolynomialDegreeError, PolynomialSizeError };
+
+/** The error that `laplace` and `inverseLaplace` throw for an input outside their rules. */
+export { NoClosedFormError };
 
 // =============================================================================
 // Type Aliases
@@ -216,50 +235,123 @@ function numericalDerivative(
   return (deriv1 - deriv2) / (2 * h);
 }
 
+/** The contour sum starts with at least this many points. */
+const CONTOUR_MIN_POINTS = 64;
+/** The contour sum doubles its points up to this many. */
+const CONTOUR_MAX_POINTS = 4096;
+/** Two successive contour sums agree when they differ by at most this fraction of max|f|. */
+const CONTOUR_TOLERANCE = 1e-13;
+/** The contour radii, tried in order while the sum does not converge. */
+const CONTOUR_RADII = [0.5, 0.25, 0.125];
+
 /**
- * Exact Taylor coefficients a_0..a_n of expr around x0 via the Cauchy
- * integral on the circle |z - x0| = r, discretized at N roots of unity:
+ * Taylor coefficients a_0..a_n of expr around x0 via the Cauchy integral on the circle
+ * |z - x0| = r, discretized at N roots of unity:
  *
  *   a_k = (1 / (N * r^k)) * sum_{j=0}^{N-1} Re[ f(z_j) * e^{-2*pi*i*j*k/N} ]
  *   where z_j = x0 + r * e^{2*pi*i*j/N}
  *
- * Reuses the expression evaluator's complex-number support (sin/cos/exp/
- * log/sqrt/pow all have complex overloads) instead of finite-difference
- * derivatives, whose error explodes with order. a[k] IS the Taylor
- * coefficient f^(k)(x0)/k! already — do not divide by k! again.
+ * The sum aliases: a_k also receives a_(k+N) * r^N + .... So N doubles (from
+ * {@link CONTOUR_MIN_POINTS}) until two successive sums agree to {@link CONTOUR_TOLERANCE}
+ * times max|f| on the contour. At {@link CONTOUR_MAX_POINTS} the radius halves (a
+ * singularity is near the contour). A coefficient below its rounding size,
+ * CONTOUR_TOLERANCE * max|f| / r^k, is 0. The last tier of {@link taylorCoefficients}.
+ */
+function contourTaylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
+  const compiled = compileExpr(expr);
+  const sum = (N: number, r: f64): { a: f64[]; fmax: f64 } => {
+    const fRe = new Array<f64>(N);
+    const fIm = new Array<f64>(N);
+    let fmax = 0;
+    for (let j = 0; j < N; j++) {
+      const ang = (2 * Math.PI * j) / N;
+      const z = new Complex(x0 + r * Math.cos(ang), r * Math.sin(ang));
+      const val = compiled.evaluate({ [varName]: z }) as Complex | f64;
+      fRe[j] = typeof val === 'number' ? val : val.re;
+      fIm[j] = typeof val === 'number' ? 0 : val.im;
+      fmax = Math.max(fmax, Math.hypot(fRe[j], fIm[j]));
+    }
+    const a: f64[] = new Array(n + 1);
+    for (let k = 0; k <= n; k++) {
+      let sRe = 0;
+      for (let j = 0; j < N; j++) {
+        const ang = (-2 * Math.PI * ((j * k) % N)) / N;
+        sRe += fRe[j] * Math.cos(ang) - fIm[j] * Math.sin(ang);
+      }
+      a[k] = sRe / (N * Math.pow(r, k));
+    }
+    return { a, fmax };
+  };
+  const clean = (a: f64[], fmax: f64, r: f64): f64[] =>
+    a.map((c, k) => (Math.abs(c) <= (CONTOUR_TOLERANCE * fmax) / Math.pow(r, k) ? 0 : c));
+  const start = Math.max(CONTOUR_MIN_POINTS, 1 << Math.ceil(Math.log2(4 * (n + 1))));
+  let last: { a: f64[]; fmax: f64; r: f64 } | null = null;
+  for (const r of CONTOUR_RADII) {
+    let prev = sum(start, r);
+    for (let N = 2 * start; N <= Math.max(CONTOUR_MAX_POINTS, 2 * start); N *= 2) {
+      const next = sum(N, r);
+      const bound = CONTOUR_TOLERANCE * Math.max(next.fmax, Number.MIN_VALUE);
+      const agree = next.a.every((c, k) => Math.abs(c - prev.a[k]) * Math.pow(r, k) <= bound);
+      prev = next;
+      if (agree) return clean(next.a, next.fmax, r);
+    }
+    last = { ...prev, r };
+  }
+  return clean(last!.a, last!.fmax, last!.r);
+}
+
+/** The symbolic Taylor pass stops when the text of the current derivative is longer than this. */
+const TAYLOR_DERIVATIVE_TEXT_LIMIT = 200;
+/** The symbolic Taylor pass gives at most this many orders above zero. */
+const TAYLOR_SYMBOLIC_MAX_ORDER = 24;
+
+/**
+ * Taylor coefficients a_0..a_k of expr around x0 from symbolic derivatives:
+ * a_k = f^(k)(x0) / k!, where f^(k) is the k-th symbolic derivative evaluated at x0.
  *
- * r=0.5 is fixed: it keeps the contour clear of the nearest singularity for
- * the entire/analytic functions this module targets (sin, cos, exp,
- * polynomials); a fully adaptive radius is out of scope.
+ * The pass stops early (and returns the coefficients found so far) when a derivative
+ * cannot be built or evaluated, when a value is not finite, when the text of the current
+ * derivative is longer than {@link TAYLOR_DERIVATIVE_TEXT_LIMIT} characters (the cost of
+ * a derivative grows fast with the text, for example exp(sin(x))), or after
+ * {@link TAYLOR_SYMBOLIC_MAX_ORDER} orders.
+ */
+function symbolicTaylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
+  const out: f64[] = [];
+  let d = expr;
+  for (let k = 0; k <= n && k <= TAYLOR_SYMBOLIC_MAX_ORDER; k++) {
+    let v: unknown;
+    try {
+      v = evalAt(d, varName, x0);
+    } catch {
+      break;
+    }
+    if (typeof v !== 'number' || !Number.isFinite(v)) break;
+    out.push(v / factorial(k));
+    if (k === n || d.length > TAYLOR_DERIVATIVE_TEXT_LIMIT) break;
+    try {
+      d = _casDerivativeOne(d, varName);
+    } catch {
+      break;
+    }
+  }
+  return out;
+}
+
+/**
+ * Taylor coefficients a_0..a_n of expr around x0. a[k] IS the coefficient f^(k)(x0)/k!.
+ * Three tiers, in order: jet arithmetic on the syntax tree ({@link jetCoefficients}, exact
+ * to rounding, for + - * / ^ and the elementary functions); the symbolic derivatives
+ * ({@link symbolicTaylorCoefficients}) for the orders that they give; the contour sum
+ * ({@link contourTaylorCoefficients}) for the orders above them.
  */
 function taylorCoefficients(expr: string, varName: string, x0: f64, n: number): f64[] {
-  const N = Math.max(1 << Math.ceil(Math.log2(2 * (n + 1))), 16); // >= 2(n+1), power of two
-  const r = 0.5; // contour radius
-  const fRe = new Array<f64>(N);
-  const fIm = new Array<f64>(N);
-  for (let j = 0; j < N; j++) {
-    const ang = (2 * Math.PI * j) / N;
-    const z = new Complex(x0 + r * Math.cos(ang), r * Math.sin(ang));
-    const val = evaluate(expr, { [varName]: z }) as Complex | f64;
-    if (typeof val === 'number') {
-      fRe[j] = val;
-      fIm[j] = 0;
-    } else {
-      fRe[j] = val.re;
-      fIm[j] = val.im;
-    }
-  }
-  const a: f64[] = new Array(n + 1);
-  for (let k = 0; k <= n; k++) {
-    let sRe = 0;
-    for (let j = 0; j < N; j++) {
-      const ang = (-2 * Math.PI * j * k) / N;
-      // Re[ (fRe + i fIm) * (cos ang + i sin ang) ]
-      sRe += fRe[j] * Math.cos(ang) - fIm[j] * Math.sin(ang);
-    }
-    a[k] = sRe / (N * Math.pow(r, k));
-  }
-  return a; // a[k] is already the Taylor coefficient f^(k)(x0)/k!
+  const tree = parseTree(expr);
+  const jets = tree === null ? null : jetCoefficients(tree, varName, x0, n);
+  if (jets !== null) return jets;
+  const exact = symbolicTaylorCoefficients(expr, varName, x0, n);
+  if (exact.length === n + 1) return exact;
+  const contour = contourTaylorCoefficients(expr, varName, x0, n);
+  return contour.map((c, k) => (k < exact.length ? exact[k] : c));
 }
 
 /**
@@ -277,17 +369,30 @@ function factorial(n: number): f64 {
  */
 function formatCoeff(c: f64): string {
   if (Math.abs(c) < 1e-12) return '0';
-  if (Math.abs(c - Math.round(c)) < 1e-10) return String(Math.round(c));
-  // Show up to 10 significant digits
-  return c.toPrecision(10).replace(/\.?0+$/, '');
+  return formatCoeffDigits(c);
+}
+
+/**
+ * The text of a non-zero coefficient, with no floor near 0: a value within 1e-10 of a non-zero
+ * integer is that integer, and a small value keeps its digits (`7.647163732e-13`).
+ */
+function formatCoeffDigits(c: f64): string {
+  const nearest = Math.round(c);
+  if (nearest !== 0 && Math.abs(c - nearest) < 1e-10) return String(nearest);
+  // Show up to 10 significant digits. Only the mantissa loses its trailing zeros: the exponent
+  // of `1.605904384e-10` ends in 0 too, and `e-1` is a different number.
+  const [mantissa, exponent] = c.toPrecision(10).split('e');
+  const digits = mantissa.includes('.') ? mantissa.replace(/\.?0+$/, '') : mantissa;
+  return exponent === undefined ? digits : `${digits}e${exponent}`;
 }
 
 /**
  * Build a polynomial term string.
  */
 function buildTerm(c: f64, varName: string, x0: f64, power: number): string {
-  if (Math.abs(c) < 1e-12) return '';
-  const cs = formatCoeff(c);
+  // Each tier of `taylorCoefficients` gives exactly 0 for a coefficient that is rounding noise.
+  if (c === 0) return '';
+  const cs = formatCoeffDigits(c);
   if (power === 0) return cs;
 
   const xPart = x0 === 0 ? varName : `(${varName} - ${formatCoeff(x0)})`;
@@ -365,10 +470,13 @@ export function integrate(
   }
 
   // x^n pattern
+  // The power rule has one canonical text: `x^n` and `c*x^n` give `p*x^(n+1)/q`, with `p/q` the
+  // reduced fraction `c/(n+1)`, so `5*x^3` is `5*x^4/4` and `3*x^2` is `x^3`. The coefficient is
+  // the decimal that was typed, so `0.5*x` is `x^2/4`.
   const powerMatch = trimmed.match(new RegExp(`^${varName}\\^(\\d+)$`));
   if (powerMatch) {
-    const n = parseInt(powerMatch[1]);
-    return `${varName}^${n + 1}/${n + 1}`;
+    const text = powerRuleText('1', parseInt(powerMatch[1]) + 1, varName);
+    if (text !== null) return text;
   }
 
   // Just the variable: x -> x^2/2
@@ -379,6 +487,8 @@ export function integrate(
   // c*x^n pattern
   const cPowerMatch = trimmed.match(new RegExp(`^([\\d.]+)\\*?${varName}\\^(\\d+)$`));
   if (cPowerMatch) {
+    const text = powerRuleText(cPowerMatch[1], parseInt(cPowerMatch[2]) + 1, varName);
+    if (text !== null) return text;
     const c = parseFloat(cPowerMatch[1]);
     const n = parseInt(cPowerMatch[2]);
     const newCoeff = c / (n + 1);
@@ -388,6 +498,8 @@ export function integrate(
   // c*x pattern
   const cxMatch = trimmed.match(new RegExp(`^([\\d.]+)\\*?${varName}$`));
   if (cxMatch) {
+    const text = powerRuleText(cxMatch[1], 2, varName);
+    if (text !== null) return text;
     const c = parseFloat(cxMatch[1]);
     const newCoeff = c / 2;
     return renderPolynomial([{ exps: [2], coeff: coefficientTexts([newCoeff])[0] }], [varName]);
@@ -409,22 +521,189 @@ export function integrate(
   return `integral(${trimmed}, ${varName})`;
 }
 
+/** `quotientLimit` takes at most this many L'Hopital steps. */
+const LIMIT_RULE_MAX_STEPS = 8;
+/** `quotientLimit` stops when the text of the numerator or the denominator is longer than this. */
+const LIMIT_RULE_TEXT_LIMIT = 200;
 /**
- * Compute symbolic limits using numerical approach and L'Hopital's rule.
+ * A value of the numerator or the denominator is zero when it is at most this fraction of the
+ * magnitude of its own evaluation (rounding noise, `sin(pi)`), or, for an expression with no
+ * jet rule, of the values just beside the point.
+ */
+const LIMIT_ZERO_RATIO = 1e-14;
+/**
+ * In the sampling path of `limit`, steps of one sign where each is at least this fraction of the
+ * step before diverge (a convergent sequence has steps that shrink by much more per sample).
+ */
+const LIMIT_DIVERGENT_STEP_RATIO = 0.9;
+/**
+ * In the sampling path of `limit`, samples whose size falls by at least this factor at every step
+ * (the steps of the distance are factors of 100) go to 0: `x*log(x)` falls by about 67 per step,
+ * `sqrt(x)*log(x)` by about 7. A sequence that falls by a factor of 2 at each of three steps
+ * cannot converge to a value other than 0.
+ */
+const LIMIT_VANISHING_STEP_FACTOR = 2;
+/**
+ * In the sampling path of `limit`, a divergent one-sign sequence moves by at least this fraction
+ * of its last value at each step: `log(x)` moves by 4.6 at -23, but `x^0.001` (converging to 1)
+ * moves by 0.0045 at 0.98.
+ */
+const LIMIT_DIVERGENT_STEP_SIZE = 0.1;
+/**
+ * In the sampling path of `limit`, samples that change sign at least twice, while the two nearest
+ * the point are at least this fraction of the largest sample, oscillate: the limit does not
+ * exist (`sin(1/x)` at 0).
+ */
+const LIMIT_OSCILLATION_SIZE_RATIO = 1e-3;
+/** The distance from the point at which `quotientLimit` reads the sign of a pole. */
+const LIMIT_POLE_OFFSET = 1e-8;
+/** The distances from the point at which a finite L'Hopital result is checked against a sample. */
+const LIMIT_CHECK_OFFSETS = [1e-2, 1e-3, 1e-4];
+/** A finite L'Hopital result must agree with a sample within this fraction of `max(1, |result|)`. */
+const LIMIT_CHECK_TOLERANCE = 5e-2;
+
+/** The node inside any number of parentheses. */
+function unwrapParens(node: AstNode): AstNode {
+  return node.type === 'ParenthesisNode' && node.content ? unwrapParens(node.content) : node;
+}
+
+/** The sign of `v` as -1, 0 or 1; NaN gives 0. */
+function signOf(v: f64): number {
+  return v > 0 ? 1 : v < 0 ? -1 : 0;
+}
+
+/**
+ * The limit of a quotient `N/D` at `value` by L'Hopital's rule, or `undefined` when the rule
+ * does not apply and the caller must sample.
  *
- * Handles standard limits, 0/0 indeterminate forms via L'Hopital,
- * and one-sided limits.
+ * Each step evaluates `N` and `D` at `value`. A pair of zeros (0/0) is replaced by the pair of
+ * the symbolic derivatives, up to {@link LIMIT_RULE_MAX_STEPS} times. A finite quotient is the
+ * limit. A zero denominator with a non-zero numerator (c/0) is a pole: the sign of the current
+ * pair just beside `value` gives +Infinity or -Infinity for each side, and `NaN` when the two
+ * sides disagree. The rule reads the limit of `N'/D'` as `N'(a)/D'(a)`, which holds only when
+ * both derivatives are continuous at `a`; so a finite result must agree with a sample of the
+ * original expression on each requested side that has a finite sample (otherwise the result is
+ * discarded). The inf/inf form has no step here: a non-finite `N` or `D` gives `undefined`.
+ */
+function quotientLimit(
+  expr: string,
+  varName: string,
+  value: f64,
+  dir: 'left' | 'right' | undefined
+): f64 | undefined {
+  const parsed = parseTree(expr);
+  if (parsed === null) return undefined;
+  const root = unwrapParens(parsed);
+  if (operatorName(root) !== 'divide' || root.args?.length !== 2) return undefined;
+  let num = root.args[0].toString();
+  let den = root.args[1].toString();
+
+  const real = (text: string, x: f64): f64 | undefined => {
+    try {
+      const v: unknown = evalAt(text, varName, x);
+      return typeof v === 'number' ? v : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  const sides = dir === 'right' ? [1] : dir === 'left' ? [-1] : [1, -1];
+  /**
+   * The sign of the current quotient just beside `value`, on side `d` (0 when it has none), for
+   * a pole: the numerator is not zero at `value`, so its sign there holds beside it too (a sample
+   * of it at an offset can have the other sign: `x^3 - 1e-30` at 1e-8).
+   */
+  const sideSign = (d: number, nv: f64): number => {
+    const b = real(den, value + d * LIMIT_POLE_OFFSET);
+    return b === undefined ? 0 : signOf(nv) * signOf(b);
+  };
+  /** The result `L` when each requested side with a finite sample has a sample close to it. */
+  const checked = (L: f64): f64 | undefined => {
+    let sidesChecked = 0;
+    for (const d of sides) {
+      let finite = 0;
+      let agrees = false;
+      for (const h of LIMIT_CHECK_OFFSETS) {
+        const sample = real(expr, value + d * h);
+        if (sample === undefined || !Number.isFinite(sample)) continue;
+        finite++;
+        if (Math.abs(sample - L) <= LIMIT_CHECK_TOLERANCE * Math.max(1, Math.abs(L))) agrees = true;
+      }
+      if (finite === 0) continue;
+      if (!agrees) return undefined;
+      sidesChecked++;
+    }
+    return sidesChecked > 0 ? L : undefined;
+  };
+
+  /**
+   * True when `v`, the value of `text` at `value`, is zero. The test is relative: a small
+   * constant (`1e-15/x`) is not zero, and the rounding noise of `sin(pi)` is.
+   */
+  const isZero = (text: string, v: f64): boolean => {
+    if (v === 0) return true;
+    const tree = parseTree(text);
+    const byJet = tree === null ? null : jetValueIsZero(tree, varName, value, LIMIT_ZERO_RATIO);
+    if (byJet !== null) return byJet;
+    let beside = 0;
+    for (const h of LIMIT_CHECK_OFFSETS) {
+      for (const d of [1, -1]) {
+        const w = real(text, value + d * h);
+        if (w !== undefined && Number.isFinite(w)) beside = Math.max(beside, Math.abs(w));
+      }
+    }
+    return Math.abs(v) <= LIMIT_ZERO_RATIO * beside;
+  };
+
+  for (let step = 0; step <= LIMIT_RULE_MAX_STEPS; step++) {
+    const nv = real(num, value);
+    const dv = real(den, value);
+    if (nv === undefined || dv === undefined || !Number.isFinite(nv) || !Number.isFinite(dv)) {
+      return undefined;
+    }
+    if (!isZero(den, dv)) return checked(nv / dv);
+    if (!isZero(num, nv)) {
+      // c/0: a pole. The sign of each side comes from the current pair, not from the original
+      // expression, which may round to 0 beside `value` (1 - cos(x) at 1e-8).
+      const signs = sides.map((d) => sideSign(d, nv));
+      if (signs.some((s) => s === 0)) return undefined;
+      return signs.every((s) => s === signs[0]) ? signs[0] * Infinity : NaN;
+    }
+    // 0/0: take the derivative of both parts.
+    if (step === LIMIT_RULE_MAX_STEPS) return undefined;
+    if (num.length > LIMIT_RULE_TEXT_LIMIT || den.length > LIMIT_RULE_TEXT_LIMIT) return undefined;
+    try {
+      num = _casDerivativeOne(num, varName);
+      den = _casDerivativeOne(den, varName);
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Compute a limit of an expression at a finite point or at infinity.
+ *
+ * Direct evaluation comes first. A quotient `N/D` that is 0/0 or c/0 at the point then takes
+ * L'Hopital's rule with symbolic derivatives (see {@link quotientLimit}): up to 8 steps, with a
+ * check of a finite result against a sample, and `+-Infinity` for a pole. Every other
+ * expression (and the inf/inf form) is sampled at distances 1e-4 to 1e-10 from the point: the
+ * sample sequence gives `+-Infinity` when its values grow without bound, 0 when they fall in size
+ * by 2 times or more at each step (`x*log(x)` at 0+), `NaN` when they change sign twice or more
+ * without falling in size (`sin(1/x)` at 0+), otherwise the value at which two successive samples
+ * differ least. A limit at +-Infinity is sampled at 1e2 to 1e8.
  *
  * @param expr - Expression string
  * @param varName - Variable approaching the limit
  * @param value - Value being approached (can be Infinity or -Infinity)
- * @param dir - Direction: 'left', 'right', or undefined for both
- * @returns The limit value
+ * @param dir - Direction: 'left', 'right', or undefined for both. Two sides that disagree give NaN.
+ * @returns The limit value: a number, `Infinity`, `-Infinity`, or `NaN` when it does not exist
  *
  * @example
- * limit('sin(x)/x', 'x', 0)        // => 1
- * limit('1/x', 'x', 0, 'right')    // => Infinity
- * limit('(x^2-1)/(x-1)', 'x', 1)   // => 2
+ * limit('sin(x)/x', 'x', 0)               // => 1
+ * limit('(1-cos(x))/x^2', 'x', 0)         // => 0.5
+ * limit('1/x', 'x', 0, 'right')           // => Infinity
+ * limit('(x^2-1)/(x-1)', 'x', 1)          // => 2
  */
 export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 'right'): f64 {
   const eps = 1e-10;
@@ -459,6 +738,10 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
     // Fall through to numerical approach
   }
 
+  // L'Hopital's rule for a 0/0 or c/0 quotient
+  const byRule = quotientLimit(expr, varName, value, dir);
+  if (byRule !== undefined) return byRule;
+
   // Numerical approach from the specified direction
   const approach = (direction: number): f64 => {
     const vals: f64[] = [];
@@ -469,9 +752,69 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
         vals.push(NaN);
       }
     }
+    // The two samples nearest the point overflow to one infinity (exp(1/x)): the limit is it.
+    const [nearA, nearB] = vals.slice(-2);
+    if (nearA === nearB && (nearA === Infinity || nearA === -Infinity)) return nearA;
     const valid = vals.filter((v) => isFinite(v) && !isNaN(v));
     if (valid.length === 0) return NaN;
-    return valid[valid.length - 1];
+    if (valid.length === 1) return valid[0];
+    const last = valid[valid.length - 1];
+    // Values that fall in size by a factor of 2 or more at every step go to 0: the nearest
+    // sample is only the size of the function at 1e-10 (x*log(x) gives -2.3e-9 there).
+    if (
+      valid.length >= 3 &&
+      valid.every(
+        (v, i) =>
+          v !== 0 &&
+          (i === 0 || LIMIT_VANISHING_STEP_FACTOR * Math.abs(v) <= Math.abs(valid[i - 1]))
+      )
+    ) {
+      return 0;
+    }
+    // Values that change sign twice or more and do not fall in size oscillate: no limit.
+    const largest = Math.max(...valid.map(Math.abs));
+    let signChanges = 0;
+    for (let i = 1; i < valid.length; i++) if (valid[i] * valid[i - 1] < 0) signChanges++;
+    if (
+      signChanges >= 2 &&
+      Math.max(Math.abs(last), Math.abs(valid[valid.length - 2])) >=
+        LIMIT_OSCILLATION_SIZE_RATIO * largest
+    ) {
+      return NaN;
+    }
+    // Values that grow at every step, by 100 times in all and at least 2 times in the last
+    // step, diverge: the limit is infinite, and the last sample is only its size at 1e-10.
+    if (
+      valid.length >= 3 &&
+      valid.every((v, i) => i === 0 || Math.abs(v) > Math.abs(valid[i - 1])) &&
+      Math.abs(last) >= 100 * Math.abs(valid[0]) &&
+      Math.abs(last) >= 2 * Math.abs(valid[valid.length - 2])
+    ) {
+      return last > 0 ? Infinity : -Infinity;
+    }
+    // Values that move by one sign at every step, with steps that do not shrink, diverge
+    // (log(x) moves by -4.6 for each factor of 100). A convergent sequence has shrinking steps.
+    if (valid.length >= 3) {
+      const d = valid.slice(1).map((v, i) => v - valid[i]);
+      const oneSign = d.every((s) => s > 0) || d.every((s) => s < 0);
+      const notShrinking = d.every(
+        (s, i) => i === 0 || Math.abs(s) >= LIMIT_DIVERGENT_STEP_RATIO * Math.abs(d[i - 1])
+      );
+      const large = Math.abs(d[d.length - 1]) >= LIMIT_DIVERGENT_STEP_SIZE * Math.abs(last);
+      if (oneSign && notShrinking && large) return d[0] > 0 ? Infinity : -Infinity;
+    }
+    // Converged values: take the sample that differs least from the one before it. The last
+    // sample is not safe, because a difference of two close values (1 - cos(h)) rounds to 0.
+    let best = valid.length - 1;
+    let bestDiff = Math.abs(valid[best] - valid[best - 1]);
+    for (let i = valid.length - 2; i >= 1; i--) {
+      const diff = Math.abs(valid[i] - valid[i - 1]);
+      if (diff < bestDiff) {
+        best = i;
+        bestDiff = diff;
+      }
+    }
+    return valid[best];
   };
 
   if (dir === 'right') return approach(1);
@@ -484,6 +827,9 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
   if (isNaN(fromRight) && isNaN(fromLeft)) return NaN;
   if (isNaN(fromRight)) return fromLeft;
   if (isNaN(fromLeft)) return fromRight;
+
+  // Two infinities of one sign agree (their difference is NaN)
+  if (fromRight === fromLeft) return fromRight;
 
   // Check if limits agree
   if (Math.abs(fromRight - fromLeft) < Math.max(1e-6, eps * Math.abs(fromRight))) {
@@ -504,12 +850,18 @@ export function limit(expr: string, varName: string, value: f64, dir?: 'left' | 
  * @param varName - Variable to differentiate with respect to
  * @param scope - Variable values at which to evaluate
  * @returns Numerical value of the partial derivative
+ * @throws TypeError when `scope` is not an object
  *
  * @example
  * partialDerivative('x^2 + y^2', 'x', { x: 3, y: 4 }) // => 6
  * partialDerivative('sin(x*y)', 'x', { x: 0, y: 1 })   // => 1
  */
 export function partialDerivative(expr: string, varName: string, scope: Record<string, f64>): f64 {
+  if (typeof scope !== 'object' || scope === null) {
+    throw new TypeError(
+      'partialDerivative(expr, varName, scope): scope must be an object that gives a value to each variable'
+    );
+  }
   const x0 = scope[varName];
   if (x0 === undefined) {
     throw new Error(`Variable '${varName}' not found in scope`);
@@ -779,22 +1131,185 @@ function firstTransformHit(
   return undefined;
 }
 
+/** One term `c * t^n * exp(alpha*t) * [sin|cos](b*t)` of a time-domain sum. */
+interface LaplaceTerm {
+  c: f64;
+  n: number;
+  alpha: f64;
+  trig: { fn: 'sin' | 'cos'; b: f64 } | null;
+}
+
+/** The highest power of `t` that {@link laplace} reads in one term (its factorial stays finite). */
+const LAPLACE_MAX_POWER = 170;
+
+/** `u = a*t + q`: the slope and the offset of the text `u` as a linear function of `t`, or null. */
+function linearIn(u: string, t: string): { a: f64; q: f64 } | null {
+  try {
+    const q = evalAt(u, t, 0);
+    const a = evalAt(u, t, 1) - q;
+    const scale = Math.max(1, Math.abs(a), Math.abs(q));
+    for (const x of [2, 5]) {
+      if (!(Math.abs(evalAt(u, t, x) - q - x * a) <= 1e-9 * scale)) return null;
+    }
+    return Number.isFinite(a) && Number.isFinite(q) ? { a, q } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Multiply `term` by the factor in `node`; false when the factor is outside the supported forms. */
+function readLaplaceFactor(node: AstNode, t: string, term: LaplaceTerm): boolean {
+  if (!containsSymbol(node, t)) {
+    const v = constantValue(node);
+    if (v === null) return false;
+    term.c *= v;
+    return true;
+  }
+  if (node.type === 'ParenthesisNode') {
+    return node.content !== undefined && readLaplaceFactor(node.content, t, term);
+  }
+  if (node.type === 'SymbolNode') {
+    term.n += 1; // the node holds `t`, and no other symbol (see the test above)
+    return true;
+  }
+  const op = operatorName(node);
+  const args = node.args ?? [];
+  if (op === 'multiply' && args.length === 2) {
+    return readLaplaceFactor(args[0], t, term) && readLaplaceFactor(args[1], t, term);
+  }
+  if (op === 'divide' && args.length === 2 && !containsSymbol(args[1], t)) {
+    const divisor = constantValue(args[1]);
+    if (divisor === null || divisor === 0) return false;
+    term.c /= divisor;
+    return readLaplaceFactor(args[0], t, term);
+  }
+  if ((op === 'unaryMinus' || op === 'unaryPlus') && args.length === 1) {
+    if (op === 'unaryMinus') term.c = -term.c;
+    return readLaplaceFactor(args[0], t, term);
+  }
+  if (op === 'pow' && args.length === 2 && !containsSymbol(args[1], t)) {
+    const base = unwrapParens(args[0]);
+    const e = constantValue(args[1]);
+    if (base.type !== 'SymbolNode' || base.name !== t || e === null) return false;
+    if (!Number.isInteger(e) || e < 0) return false;
+    term.n += e;
+    return true;
+  }
+  const name = callName(node);
+  if (name !== null && node.args?.length === 1) {
+    const lin = linearIn(node.args[0].toString(), t);
+    if (lin === null) return false;
+    if (name === 'exp') {
+      term.alpha += lin.a;
+      term.c *= Math.exp(lin.q);
+      return true;
+    }
+    if ((name === 'sin' || name === 'cos') && term.trig === null && lin.q === 0 && lin.a !== 0) {
+      if (name === 'sin' && lin.a < 0) term.c = -term.c;
+      term.trig = { fn: name, b: Math.abs(lin.a) };
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Split `node` over `+` and `-` into terms (with the sign) and read each; false on any miss. */
+function readLaplaceTerms(node: AstNode, t: string, sign: number, out: LaplaceTerm[]): boolean {
+  if (node.type === 'ParenthesisNode') {
+    return node.content !== undefined && readLaplaceTerms(node.content, t, sign, out);
+  }
+  const op = operatorName(node);
+  const args = node.args ?? [];
+  if (op === 'add' && args.length === 2) {
+    return readLaplaceTerms(args[0], t, sign, out) && readLaplaceTerms(args[1], t, sign, out);
+  }
+  if (op === 'subtract' && args.length === 2) {
+    return readLaplaceTerms(args[0], t, sign, out) && readLaplaceTerms(args[1], t, -sign, out);
+  }
+  if (op === 'unaryMinus' && args.length === 1) {
+    return readLaplaceTerms(args[0], t, -sign, out);
+  }
+  const term: LaplaceTerm = { c: sign, n: 0, alpha: 0, trig: null };
+  if (!readLaplaceFactor(node, t, term) || term.n > LAPLACE_MAX_POWER) return false;
+  out.push(term);
+  return true;
+}
+
+/**
+ * The text of the Laplace transform of one term, or `''` for a zero term, or null when the term
+ * has no rule. With `a = alpha`: `c*n!/(s - a)^(n+1)`, `c*b/((s - a)^2 + b^2)` for `sin(b*t)` and
+ * `c*(s - a)/((s - a)^2 + b^2)` for `cos(b*t)`; a power of `t` with a `sin` or `cos` has no rule.
+ */
+function laplaceTermText(term: LaplaceTerm, s: string): string | null {
+  const shift =
+    term.alpha === 0
+      ? s
+      : term.alpha < 0
+        ? `(${s} + ${formatPrecise(-term.alpha)})`
+        : `(${s} - ${formatPrecise(term.alpha)})`;
+  if (term.trig === null) {
+    const coeff = formatPrecise(term.c * factorial(term.n));
+    if (coeff === '0') return '';
+    return `${coeff}/${term.n === 0 ? shift : `${shift}^${term.n + 1}`}`;
+  }
+  if (term.n !== 0) return null;
+  const { fn, b } = term.trig;
+  const den = `(${term.alpha === 0 ? `${s}^2` : `${shift}^2`} + ${formatPrecise(b * b)})`;
+  if (fn === 'sin') {
+    const coeff = formatPrecise(term.c * b);
+    return coeff === '0' ? '' : `${coeff}/${den}`;
+  }
+  const coeff = formatPrecise(term.c);
+  if (coeff === '0') return '';
+  return `${coeff === '1' ? '' : coeff === '-1' ? '-' : `${coeff}*`}${shift}/${den}`;
+}
+
+/** Join the texts of the terms of a sum: skip the empty ones, and write `+ -` as `-`. */
+function joinTerms(texts: string[]): string {
+  const kept = texts.filter((text) => text !== '');
+  return kept.length === 0 ? '0' : kept.join(' + ').replace(/\+ -/g, '- ');
+}
+
+/**
+ * The Laplace transform of a sum of terms `c * t^n * exp(alpha*t) * [sin|cos](b*t)`, by linearity,
+ * the shift theorem and `L{t^n} = n!/s^(n+1)`. Null when any term is outside these forms.
+ */
+function laplaceOfTerms(trimmed: string, t: string, s: string): string | null {
+  const tree = parseTree(trimmed);
+  if (tree === null) return null;
+  const terms: LaplaceTerm[] = [];
+  if (!readLaplaceTerms(tree, t, 1, terms)) return null;
+  const texts: string[] = [];
+  for (const term of terms) {
+    const text = laplaceTermText(term, s);
+    if (text === null) return null;
+    texts.push(text);
+  }
+  return joinTerms(texts);
+}
+
 /**
  * Compute the Laplace transform of an expression.
  *
- * Uses a table-based approach for common functions: constants, polynomials,
- * exponentials, sin, cos.
+ * A table gives the common single forms (constants, `t^n`, `exp(a*t)`, `sin(a*t)`, `cos(a*t)`) in
+ * a fixed text. Any other sum of terms `c * t^n * exp(alpha*t)`, `c * exp(alpha*t) * sin(b*t)` and
+ * `c * exp(alpha*t) * cos(b*t)` has its transform by linearity and the shift theorem (`n` an integer
+ * of 0 or more; `n` must be 0 for `sin` and `cos`). Any other input, such as `t*sin(t)` or
+ * `1/t`, throws a {@link NoClosedFormError}.
  *
  * @param expr - Time-domain expression string
  * @param t - Time variable name
  * @param s - Frequency variable name
  * @returns Laplace transform as an expression string
+ * @throws NoClosedFormError When the input is outside these forms
  *
  * @example
  * laplace('1', 't', 's')           // => '1/s'
  * laplace('t^2', 't', 's')         // => '2/s^3'
  * laplace('sin(t)', 't', 's')      // => '1/(s^2 + 1)'
  * laplace('exp(-t)', 't', 's')     // => '1/(s + 1)'
+ * laplace('t*exp(-t)', 't', 's')   // => '1/(s + 1)^2'
+ * laplace('exp(-2*t)*sin(3*t)', 't', 's') // => '3/((s + 2)^2 + 9)'
  */
 export function laplace(expr: string, t: string, s: string): string {
   const trimmed = expr.trim();
@@ -809,7 +1324,9 @@ export function laplace(expr: string, t: string, s: string): string {
     return `${trimmed}/${s}`;
   }
 
-  return `L{${trimmed}}(${s})`;
+  const text = laplaceOfTerms(trimmed, t, s);
+  if (text === null) throw new NoClosedFormError(`laplace: no closed form for ${trimmed}`);
+  return text;
 }
 
 /**
@@ -874,19 +1391,320 @@ const inverseLaplaceTable: InverseLaplaceEntry[] = [
   },
 ];
 
+/** The highest degree of the denominator that {@link inverseLaplace} inverts as a rational function. */
+const INVERSE_LAPLACE_MAX_DEGREE = 4;
+
+/**
+ * A number as text with 15 significant digits (an integer without a decimal point), `'0'` for a
+ * value that is rounding noise. {@link formatCoeff} keeps 10 digits, which is too few for a pole or
+ * a frequency inside `exp(...)` and `cos(...)`: an error of 1e-10 in the argument shows at once.
+ */
+function formatPrecise(c: f64): string {
+  if (Math.abs(c) < 1e-12) return '0';
+  if (Math.abs(c - Math.round(c)) <= 1e-13 * Math.max(1, Math.abs(c))) return String(Math.round(c));
+  return String(Number(c.toPrecision(15)));
+}
+
+/** Divide the dense ascending polynomial `p` by `(s - r)`: the quotient and the remainder `p(r)`. */
+function divideByRoot(p: readonly f64[], r: f64): { quotient: f64[]; remainder: f64 } {
+  const quotient: f64[] = new Array(Math.max(p.length - 1, 0));
+  let carry = 0;
+  for (let i = p.length - 1; i >= 1; i--) {
+    carry = p[i] + carry * r;
+    quotient[i - 1] = carry;
+  }
+  return { quotient, remainder: p[0] + carry * r };
+}
+
+/** The first `count` Taylor coefficients `p^(j)(r)/j!` of the dense ascending polynomial `p`. */
+function taylorAt(p: readonly f64[], r: f64, count: number): f64[] {
+  const out: f64[] = [];
+  let rest: f64[] = [...p];
+  for (let j = 0; j < count; j++) {
+    if (rest.length === 0) {
+      out.push(0);
+      continue;
+    }
+    const { quotient, remainder } = divideByRoot(rest, r);
+    out.push(remainder);
+    rest = quotient;
+  }
+  return out;
+}
+
+/** `sum |p_i| |r|^i`: the size of the terms that Horner's rule adds for `p(r)`. */
+function termMagnitude(p: readonly f64[], r: f64): f64 {
+  let total = 0;
+  for (let i = p.length - 1; i >= 0; i--) total = total * Math.abs(r) + Math.abs(p[i]);
+  return total;
+}
+
+/** The value of the dense ascending polynomial `p` at the complex point `re + im*i`. */
+function complexHorner(p: readonly f64[], re: f64, im: f64): [f64, f64] {
+  let vr = 0;
+  let vi = 0;
+  for (let i = p.length - 1; i >= 0; i--) {
+    const nextRe = vr * re - vi * im + p[i];
+    vi = vr * im + vi * re;
+    vr = nextRe;
+  }
+  return [vr, vi];
+}
+
+/** The dense ascending coefficients of `node` as a polynomial in `s`, or null. */
+function densePolynomialIn(node: AstNode, s: string): f64[] | null {
+  try {
+    return readPolynomial(node.toString(), s);
+  } catch {
+    return null;
+  }
+}
+
+/** A coefficient times a product of factors, as text; `''` when the coefficient is noise. */
+function productText(c: f64, factors: string[]): string {
+  const coeff = formatPrecise(c);
+  if (coeff === '0') return '';
+  if (factors.length === 0) return coeff;
+  const product = factors.join('*');
+  return coeff === '1' ? product : coeff === '-1' ? `-${product}` : `${coeff}*${product}`;
+}
+
+/** One term `coef/(s - pole)^k` of a partial fraction. */
+interface PoleTerm {
+  pole: f64;
+  k: number;
+  coef: f64;
+}
+
+/**
+ * The inverse Laplace transform of `sign * N(s)/D(s)`, for polynomials `N` and `D` in `s` with
+ * `deg N < deg D <= 4`, as the text of a function of `t`; null when the fraction is outside that
+ * form (see {@link inverseLaplace}).
+ *
+ * `D` splits into its real roots with their multiplicities and at most one conjugate pair of simple
+ * complex roots. A real root `r` of multiplicity `m` gives `sum_k A_k t^(k-1)/(k-1)! e^(r t)`,
+ * where `A_k` is the `(m - k)`-th Taylor coefficient at `r` of `N/Q` and `Q = D/(s - r)^m` (dense
+ * polynomial arithmetic, no sampling). A simple pair `a +- b*i` with residue `R` at `a + b*i` gives
+ * `2 e^(a t) (Re R cos(b t) - Im R sin(b t))`. The partial fractions are checked against `N/D`
+ * at three points, so a multiplicity that the root finder got wrong gives null, never a wrong text.
+ */
+/** True when `node` is `N/D` with `N` and `D` polynomials in `s` (finite real coefficients). */
+function isPolynomialQuotient(node: AstNode, s: string): boolean {
+  const root = unwrapParens(node);
+  if (operatorName(root) !== 'divide' || root.args?.length !== 2) return false;
+  return densePolynomialIn(root.args[0], s) !== null && densePolynomialIn(root.args[1], s) !== null;
+}
+
+/** Two real poles closer than this fraction of max(1, |pole|) are too close to separate. */
+const INVERSE_LAPLACE_ROOT_SEPARATION = 1e-6;
+
+/**
+ * The distinct real roots of the polynomial `coefficients` (constant first), or null when the
+ * Sturm sequence fails or two roots are closer than {@link INVERSE_LAPLACE_ROOT_SEPARATION}.
+ */
+function separatedRealRoots(coefficients: f64[]): f64[] | null {
+  let distinct: f64[];
+  try {
+    distinct = sturmRoots(coefficients);
+  } catch {
+    return null;
+  }
+  const sorted = [...distinct].sort((a, b) => a - b);
+  for (let i = 1; i < sorted.length; i++) {
+    const size = Math.max(Math.abs(sorted[i]), Math.abs(sorted[i - 1]), 1);
+    if (sorted[i] - sorted[i - 1] <= INVERSE_LAPLACE_ROOT_SEPARATION * size) return null;
+  }
+  return distinct;
+}
+
+/**
+ * True when `node` is a quotient of two polynomials in `s` whose denominator has two real poles
+ * too close to separate. The sampled table of {@link inverseLaplaceTransform} cannot see such a
+ * pair: at its sample points `1/(s^2-1e-14)` equals `1/s^2` to 15 digits.
+ */
+function hasInseparablePoles(node: AstNode, s: string): boolean {
+  if (!isPolynomialQuotient(node, s)) return false;
+  const denominator = densePolynomialIn(unwrapParens(node).args![1], s);
+  return denominator !== null && denominator.length > 2 && separatedRealRoots(denominator) === null;
+}
+
+function inverseLaplaceRational(node: AstNode, s: string, t: string, sign: number): string | null {
+  const root = unwrapParens(node);
+  if (operatorName(root) !== 'divide' || root.args?.length !== 2) return null;
+  const numerator = densePolynomialIn(root.args[0], s);
+  const denominator = densePolynomialIn(root.args[1], s);
+  if (numerator === null || denominator === null) return null;
+  const degree = denominator.length - 1;
+  if (degree < 1 || degree > INVERSE_LAPLACE_MAX_DEGREE || numerator.length - 1 >= degree) {
+    return null;
+  }
+  if (numerator.every((c) => c === 0)) return '0';
+  const lead = denominator[degree];
+  const D = denominator.map((c) => c / lead);
+  const N = numerator.map((c) => (sign * c) / lead);
+
+  // The real roots that the Sturm sequence separates, each with its multiplicity. Two of them
+  // closer than INVERSE_LAPLACE_ROOT_SEPARATION (relative to their size) are past the accuracy of
+  // the multiplicity test, so the transform keeps its marker: merging them read the two poles
+  // +-1e-7 of 1/(s^2-1e-14) as one.
+  const distinct = separatedRealRoots(denominator);
+  if (distinct === null) return null;
+  let probe: f64[] = [...D];
+  const real: Array<{ r: f64; m: number }> = [];
+  for (const found of distinct) {
+    let m = 0;
+    for (;;) {
+      const { quotient, remainder } = divideByRoot(probe, found);
+      if (probe.length < 2 || !(Math.abs(remainder) <= 1e-9 * termMagnitude(probe, found))) break;
+      probe = quotient;
+      m++;
+    }
+    if (m === 0) return null;
+    // A root of multiplicity m is only good to about eps^(1/m) in D, but it is a simple root of the
+    // (m-1)-th derivative of D: polish it there.
+    let flat: f64[] = D;
+    for (let i = 1; i < m; i++) flat = flat.slice(1).map((c, j) => c * (j + 1));
+    real.push({ r: m === 1 ? found : polishRoot(flat, found), m });
+  }
+  let rest: f64[] = [...D];
+  for (const { r, m } of real) {
+    for (let i = 0; i < m; i++) rest = divideByRoot(rest, r).quotient;
+  }
+  // What is left after the real roots: a constant, or one quadratic with a negative discriminant.
+  let pair: { re: f64; im: f64 } | null = null;
+  if (rest.length === 3) {
+    const discriminant = rest[1] * rest[1] - 4 * rest[2] * rest[0];
+    if (!(discriminant < -1e-12 * (rest[1] * rest[1] + Math.abs(4 * rest[2] * rest[0]))))
+      return null;
+    pair = { re: -rest[1] / (2 * rest[2]), im: Math.sqrt(-discriminant) / (2 * rest[2]) };
+  } else if (rest.length !== 1) {
+    return null;
+  }
+
+  // Partial fractions.
+  const terms: PoleTerm[] = [];
+  for (const { r, m } of real) {
+    let Q: f64[] = [...D];
+    for (let i = 0; i < m; i++) Q = divideByRoot(Q, r).quotient;
+    const nT = taylorAt(N, r, m);
+    const qT = taylorAt(Q, r, m);
+    if (!(Math.abs(qT[0]) > 1e-12 * termMagnitude(Q, r))) return null;
+    const g: f64[] = [];
+    for (let j = 0; j < m; j++) {
+      let acc = nT[j];
+      for (let i = 1; i <= j; i++) acc -= qT[i] * g[j - i];
+      g.push(acc / qT[0]);
+    }
+    for (let k = 1; k <= m; k++) terms.push({ pole: r, k, coef: g[m - k] });
+  }
+  let residue: [f64, f64] | null = null;
+  if (pair !== null) {
+    const slope = D.slice(1).map((c, i) => c * (i + 1));
+    const [nr, ni] = complexHorner(N, pair.re, pair.im);
+    const [dr, di] = complexHorner(slope, pair.re, pair.im);
+    const norm = dr * dr + di * di;
+    if (!(norm > 0)) return null;
+    residue = [(nr * dr + ni * di) / norm, (ni * dr - nr * di) / norm];
+  }
+
+  // Check: the partial fractions must equal N/D at three real points to the right of every pole.
+  const rightmost = Math.max(pair?.re ?? -Infinity, ...real.map((p) => p.r));
+  for (const offset of [1.5, 2.5, 4.1]) {
+    const x = rightmost + offset;
+    const want = polynomialValue(N, x) / polynomialValue(D, x);
+    let got = 0;
+    let size = Math.abs(want);
+    for (const { pole, k, coef } of terms) {
+      const term = coef / (x - pole) ** k;
+      got += term;
+      size += Math.abs(term);
+    }
+    if (pair !== null && residue !== null) {
+      const dx = x - pair.re;
+      const term = (2 * (residue[0] * dx - residue[1] * pair.im)) / (dx * dx + pair.im * pair.im);
+      got += term;
+      size += Math.abs(term);
+    }
+    if (!(Math.abs(got - want) <= 1e-8 * size)) return null;
+  }
+
+  // The time-domain text.
+  const texts: string[] = [];
+  for (const { pole, k, coef } of terms) {
+    const factors: string[] = [];
+    if (k === 2) factors.push(t);
+    else if (k > 2) factors.push(`${t}^${k - 1}`);
+    if (pole !== 0) factors.push(`exp(${formatPrecise(pole)}*${t})`);
+    texts.push(productText(coef / factorial(k - 1), factors));
+  }
+  if (pair !== null && residue !== null) {
+    const grow = pair.re === 0 ? [] : [`exp(${formatPrecise(pair.re)}*${t})`];
+    const angle = formatPrecise(pair.im);
+    texts.push(productText(2 * residue[0], [...grow, `cos(${angle}*${t})`]));
+    texts.push(productText(-2 * residue[1], [...grow, `sin(${angle}*${t})`]));
+  }
+  return joinTerms(texts);
+}
+
+/** The value of the dense ascending polynomial `p` at `x`. */
+function polynomialValue(p: readonly f64[], x: f64): f64 {
+  let v = 0;
+  for (let i = p.length - 1; i >= 0; i--) v = v * x + p[i];
+  return v;
+}
+
+/** Split `node` over `+` and `-`, and invert each fraction; false when one is outside the form. */
+function inverseLaplaceSum(
+  node: AstNode,
+  s: string,
+  t: string,
+  sign: number,
+  out: string[]
+): boolean {
+  if (node.type === 'ParenthesisNode') {
+    return node.content !== undefined && inverseLaplaceSum(node.content, s, t, sign, out);
+  }
+  const op = operatorName(node);
+  const args = node.args ?? [];
+  if (op === 'add' && args.length === 2) {
+    return (
+      inverseLaplaceSum(args[0], s, t, sign, out) && inverseLaplaceSum(args[1], s, t, sign, out)
+    );
+  }
+  if (op === 'subtract' && args.length === 2) {
+    return (
+      inverseLaplaceSum(args[0], s, t, sign, out) && inverseLaplaceSum(args[1], s, t, -sign, out)
+    );
+  }
+  if (op === 'unaryMinus' && args.length === 1) return inverseLaplaceSum(args[0], s, t, -sign, out);
+  const text = inverseLaplaceRational(node, s, t, sign);
+  if (text === null) return false;
+  out.push(text);
+  return true;
+}
+
 /**
  * Compute the inverse Laplace transform of an expression.
  *
- * Uses table lookup and partial fraction patterns.
+ * Three steps, in this order. (1) A table gives the common fractions in a fixed text (`1/s`,
+ * `1/(s + a)`, `1/(s - a)`, `s/(s^2 + a)`, ...), written with the spacing shown. (2) A sum of
+ * fractions `N(s)/D(s)` with polynomials `N` and `D` of `deg N < deg D <= 4` is inverted by partial
+ * fractions: `D` may have any real roots, repeated ones included, and one simple pair of complex
+ * roots (`1/(s+1)^2` gives `t*exp(-1*t)`, `1/(s^2 + 2*s + 5)` gives `0.5*exp(-1*t)*sin(2*t)`). A
+ * repeated complex pair (`1/(s^2+1)^2`) is outside this step. (3) The lookup table of
+ * {@link inverseLaplaceTransform} gives the other forms it knows. Any other input throws a
+ * {@link NoClosedFormError}.
  *
  * @param expr - Frequency-domain expression string
  * @param s - Frequency variable name
  * @param t - Time variable name
  * @returns Inverse Laplace transform as an expression string
+ * @throws NoClosedFormError When no step gives a closed form
  *
  * @example
  * inverseLaplace('1/s', 's', 't')         // => '1'
  * inverseLaplace('1/(s + 1)', 's', 't')   // => 'exp(-1*t)'
+ * inverseLaplace('1/(s+1)^2', 's', 't')   // => 't*exp(-1*t)'
  */
 export function inverseLaplace(expr: string, s: string, t: string): string {
   const trimmed = expr.trim();
@@ -896,7 +1714,27 @@ export function inverseLaplace(expr: string, s: string, t: string): string {
     return hit;
   }
 
-  return `L^-1{${trimmed}}(${t})`;
+  const tree = parseTree(trimmed);
+  if (tree !== null) {
+    const texts: string[] = [];
+    if (inverseLaplaceSum(tree, s, t, 1, texts)) return joinTerms(texts);
+    // A quotient of two polynomials in `s` belongs to the exact reader. When it refuses (poles
+    // too close to separate), the sampled table must not answer: it reads 1/(s^2-1e-14) as 1/s^2.
+    if (isPolynomialQuotient(tree, s)) throw noInverse(trimmed);
+  }
+
+  try {
+    return inverseLaplaceTransform(trimmed, s, t);
+  } catch {
+    // Not in the lookup table either.
+  }
+
+  throw noInverse(trimmed);
+}
+
+/** The error of `inverseLaplace` for an input that no step inverts. */
+function noInverse(expr: string): NoClosedFormError {
+  return new NoClosedFormError(`inverseLaplace: no closed form for ${expr}`);
 }
 
 /**
@@ -995,23 +1833,46 @@ export function zTransform(expr: string, n: string, z: string): string {
 // =============================================================================
 
 /**
+ * The center of an expansion as a finite real number: a BigNumber or a Fraction is its value,
+ * and a Complex with a zero imaginary part is its real part.
+ *
+ * @throws TypeError for a Complex off the real line or a value that is not a finite number
+ */
+function realCenter(fnName: string, x0: unknown): f64 {
+  let v: unknown = x0;
+  if (v instanceof Complex) {
+    if (v.im !== 0) throw new TypeError(`${fnName}: the center must be real, got ${v.toString()}`);
+    v = v.re;
+  }
+  const n = Number(v);
+  if (!Number.isFinite(n)) throw new TypeError(`${fnName}: the center must be a finite number`);
+  return n;
+}
+
+/**
  * Compute the Taylor series expansion of an expression around a point.
  *
- * Coefficients are computed exactly via the Cauchy integral on a complex
- * contour around x0 (see {@link taylorCoefficients}), not finite
- * differences — machine-precise for analytic expressions.
+ * The coefficients come from three tiers (see {@link taylorCoefficients}). First, power-series
+ * arithmetic on the syntax tree handles + - * / ^ and exp, log, sqrt, sin, cos, tan, sinh,
+ * cosh, tanh, asin, acos and atan, so `1/(1-x)` has the coefficients 1, 1, 1, ... at any
+ * order. Next, symbolic derivatives evaluated at x0 (f^(k)(x0) / k!) give the coefficients of
+ * other functions up to order 24. Last, the Cauchy integral on a complex contour around x0
+ * fills the remaining orders; it doubles its points until the sum converges. A coefficient
+ * that is rounding noise is left out; a small true coefficient (1/15!) stays.
  *
  * @param expr - Expression string
  * @param varName - Variable name
  * @param x0 - Center of expansion (default 0, i.e., Maclaurin series)
  * @param n - Order of expansion (default 5)
  * @returns Taylor polynomial as an expression string
+ * @throws TypeError when `x0` is not a finite real number (a BigNumber or Fraction is accepted)
  *
  * @example
  * taylor('sin(x)', 'x', 0, 5)  // => 'x - 0.1666666667*x^3 + 0.008333333333*x^5'
  * taylor('exp(x)', 'x', 0, 4)  // => '1 + x + 0.5*x^2 + 0.1666666667*x^3 + 0.04166666667*x^4'
  */
 export function taylor(expr: string, varName: string, x0: f64 = 0, n: number = 5): string {
+  x0 = realCenter('taylor', x0);
   const coeffs = taylorCoefficients(expr, varName, x0, n);
 
   const terms = coeffs.map((c, k) => buildTerm(c, varName, x0, k)).filter(Boolean);
@@ -1126,6 +1987,7 @@ export function series(expr: string, varName: string, x0: f64 = 0, n: number = 5
  * seriesCoefficient('sin(x)', 'x', 0, 1) // => 1
  */
 export function seriesCoefficient(expr: string, varName: string, x0: f64, k: number): f64 {
+  x0 = realCenter('seriesCoefficient', x0);
   return taylorCoefficients(expr, varName, x0, k)[k];
 }
 
@@ -1228,12 +2090,13 @@ function refineBracket(f: (x: f64) => f64, a: f64, b: f64): f64 {
  * The scan samples `range` on an even grid (see {@link SCAN_TARGET_STEP}) and refines every
  * sign change with Brent's method, so it finds a root of any size, such as the `+-1e-10` of
  * `x^2 - 1e-20`. It never looks outside `range`. A grid point where `f` is exactly zero is a
- * root. A grid point with a tiny `|f|` (below {@link SCAN_TOUCH_LIMIT}), a local minimum of
- * `|f|` and no sign change on either side, is a root that touches zero, such as the double root
- * of `(x - 1)^2`. The scan does not detect a pair of roots that are closer than one grid step
- * (no sign change), or an even-multiplicity root away from a grid point. A sign change at a
- * pole (`tan(x)` at `pi/2`) is not a root: the refined point is kept only when `|f|` there is
- * not above the larger `|f|` at the bracket ends.
+ * root. A grid point that is a local minimum of `|f|` with no sign change on either side may sit
+ * beside a root that touches zero, such as the double root of `(x - 1)^2`. The root is the point
+ * where the slope of `f` changes sign inside the two intervals beside that grid point (slope from
+ * the symbolic derivative, or a 5-point stencil, refined with Brent's method), and it counts when `|f|` there is below
+ * {@link SCAN_TOUCH_LIMIT}. The scan does not detect a pair of roots that are closer than one grid
+ * step (no sign change). A sign change at a pole (`tan(x)` at `pi/2`) is not a root: the refined
+ * point is kept only when `|f|` there is not above the larger `|f|` at the bracket ends.
  */
 function numericRealRoots(expr: string, varName: string, range: readonly [number, number]): f64[] {
   const [lo, hi] = range;
@@ -1264,6 +2127,54 @@ function numericRealRoots(expr: string, varName: string, range: readonly [number
     xs[i] = i === 0 ? lo : i === intervals ? hi : lo + (width * i) / intervals;
     fs[i] = sample(xs[i]);
   }
+  // The step of the difference for the slope of `f`: far below the grid step.
+  const slopeWidth = (width / intervals) * 1e-3;
+  /**
+   * The slope of `f` at `x`: the symbolic derivative when it can be built, so the zero of the
+   * slope (a touching root) is exact to rounding. Otherwise the 5-point stencil
+   * (f(x-2h) - 8f(x-h) + 8f(x+h) - f(x+2h))/(12h), with an O(h^4) error; the 3-point difference
+   * had an O(h^2) error that moved the touching root of `(x^2-1)^2` by 1.8e-11. Near an end of
+   * the range, the stencil moves inside it.
+   */
+  let derivative: ((x: f64) => f64) | null | undefined;
+  const slopeAt = (x: f64): f64 => {
+    if (derivative === undefined) {
+      try {
+        derivative = compileAt(_casDerivativeOne(expr, varName), varName);
+      } catch {
+        derivative = null;
+      }
+    }
+    if (derivative !== null) {
+      try {
+        const v: unknown = derivative(x);
+        if (typeof v === 'number' && Number.isFinite(v)) return v;
+      } catch {
+        // the stencil below
+      }
+    }
+    const c = Math.min(hi - 2 * slopeWidth, Math.max(lo + 2 * slopeWidth, x));
+    const h = slopeWidth;
+    return (
+      (sample(c - 2 * h) - 8 * sample(c - h) + 8 * sample(c + h) - sample(c + 2 * h)) / (12 * h)
+    );
+  };
+  /**
+   * The root that touches zero beside grid point `i` (a local minimum of `|f|` with no sign
+   * change beside it), or null. At the ends of the range there is no bracket for the slope, so the
+   * grid point itself counts when `|f|` there is below the limit.
+   */
+  const touchingRoot = (i: number): f64 | null => {
+    if (i > 0 && i < intervals) {
+      const slopeLeft = slopeAt(xs[i - 1]);
+      const slopeRight = slopeAt(xs[i + 1]);
+      if (Number.isFinite(slopeLeft) && Number.isFinite(slopeRight) && slopeLeft * slopeRight < 0) {
+        const root = refineBracket(slopeAt, xs[i - 1], xs[i + 1]);
+        return Math.abs(sample(root)) < SCAN_TOUCH_LIMIT ? root : null;
+      }
+    }
+    return Math.abs(fs[i]) < SCAN_TOUCH_LIMIT ? xs[i] : null;
+  };
   /** True when the samples `i` and `j` are finite and have opposite signs. */
   const changesSign = (i: number, j: number): boolean =>
     i >= 0 &&
@@ -1282,12 +2193,12 @@ function numericRealRoots(expr: string, varName: string, range: readonly [number
       const root = refineBracket(f, xs[i], xs[i + 1]);
       if (Math.abs(sample(root)) <= Math.max(Math.abs(fx), Math.abs(fs[i + 1]))) addRoot(root);
     } else if (
-      Math.abs(fx) < SCAN_TOUCH_LIMIT &&
       !changesSign(i - 1, i) &&
       (i === 0 || !(Math.abs(fs[i - 1]) < Math.abs(fx))) &&
       (i === intervals || !(Math.abs(fs[i + 1]) < Math.abs(fx)))
     ) {
-      addRoot(xs[i]);
+      const touch = touchingRoot(i);
+      if (touch !== null) addRoot(touch);
     }
   }
   roots.sort((a, b) => a - b);
@@ -1360,15 +2271,27 @@ function lowDegreeRoots(
   expr: string,
   varName: string
 ): Array<f64 | Complex | string> {
+  if (dense.length === 2) {
+    // The root of `c0 + c1*x` is the correctly rounded quotient of the two coefficients as typed:
+    // `1e-20*x - 1e-30` gives `1e-10`, and not the quotient of two rounded doubles.
+    const exact = exactLinearRoot(dense[0], dense[1]);
+    if (exact !== null) return [exact];
+  }
   const roots = closedFormRoots(dense);
   if (dense.length === 3) {
-    // Prefer exact radical forms for a quadratic (e.g. x^2 - 2 -> +-sqrt(2)).
-    const radicals = quadraticRadicals(
-      expr,
-      varName,
-      roots.filter((r): r is number => typeof r === 'number')
-    );
-    if (radicals !== null) return radicals;
+    // Irrational roots of a quadratic are one canonical text: `x^2 - 2` gives `-sqrt(2)` and
+    // `sqrt(2)`, and `x^2 - x - 1` gives `1/2 - sqrt(5)/2` and `1/2 + sqrt(5)/2`.
+    const exact = exactQuadraticRoots(dense);
+    if (exact !== null && exact.irrational) return exact.texts;
+    // A coefficient with no exact reading (such as `pi`): the radical text that `toRadicals` reads.
+    if (exact === null) {
+      const radicals = quadraticRadicals(
+        expr,
+        varName,
+        roots.filter((r): r is number => typeof r === 'number')
+      );
+      if (radicals !== null) return radicals;
+    }
   }
   return roots;
 }
@@ -1441,6 +2364,23 @@ function normalizeEquation(equation: string, caller: string): string {
   return `${parts[0].trim()} - (${parts[1].trim()})`;
 }
 
+/** The error for an equation that every value of the variable solves, so that no finite list holds its solutions. */
+function identityError(caller: string, varName: string, equation: string): Error {
+  return new Error(
+    `${caller}: every value of ${varName} is a solution of "${equation}" ` +
+      '(the equation is an identity), so no finite list holds its solutions.'
+  );
+}
+
+/** True when the simplifier reduces `expr` to 0, so that `expr = 0` holds for every value of the variable. */
+function simplifiesToZero(expr: string): boolean {
+  try {
+    return String(factorySimplify(expr)) === '0';
+  } catch {
+    return false;
+  }
+}
+
 /** Throw a `SyntaxError` when `expr` is not an expression, so that no other message hides that. */
 function requireExpression(expr: string, equation: string, caller: string): void {
   if (parseTree(expr) === null) {
@@ -1457,12 +2397,16 @@ function requireExpression(expr: string, equation: string, caller: string): void
  * sign. What it returns, by form of the equation:
  *
  * - **Polynomial, degree 1 to 3:** exact closed-form roots, real and complex: numbers,
- *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`) and complex conjugates.
+ *   `sqrt(n)` radicals (`x^2 - 2` gives `['-sqrt(2)', 'sqrt(2)']`, `x^2 - x - 1` gives
+ *   `['1/2 - sqrt(5)/2', '1/2 + sqrt(5)/2']`) and complex conjugates. The
+ *   root of a linear polynomial is the correctly rounded quotient of the coefficients as typed
+ *   (`1e-20*x - 1e-30` gives `1e-10`).
  * - **Polynomial, degree 4 or more:** all distinct real roots, found by Sturm isolation over
  *   the whole real line, sorted ascending. These are floating-point numbers.
  *   A coefficient may be any real constant (`pi*x^4 - 1`). `solve` reads the polynomial from
  *   the syntax tree of the equation, not from sample values.
- * - **Polynomial with every coefficient zero** (`x^2 - x^2`, `0*x = 0`): every value is a
+ * - **Polynomial with every coefficient zero** (`x^2 - x^2`, `(x - x)^1000000000`, `0*x = 0`),
+ *   or any expression that the simplifier reduces to 0 (`sin(x) - sin(x)`): every value is a
  *   solution, so no finite list holds the set. `solve` throws an `Error`. It never returns `[]`
  *   for an identity, because `[]` means that the equation has no real roots (`1 = 2`).
  * - **Polynomial of degree above 1000:** `solve` throws a `PolynomialDegreeError` (a
@@ -1529,16 +2473,16 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
     if (dense.length === 1) {
       // A constant. Zero is zero at every value of the variable; any other constant never is.
       if (dense[0] !== 0) return [];
-      throw new Error(
-        `solve: every value of ${varName} is a solution of "${equation}" ` +
-          '(the equation is an identity), so no finite list holds its solutions.'
-      );
+      throw identityError('solve', varName, equation);
     }
     return dense.length <= 4 ? lowDegreeRoots(dense, expr, varName) : sturmRoots(dense);
   }
 
   const outcome = solveElementary(expr, varName);
   if (outcome === null) {
+    // A difference that the simplifier reduces to 0 (`sin(x) - sin(x)`) is an identity, not a
+    // form that has no solution.
+    if (simplifiesToZero(expr)) throw identityError('solve', varName, equation);
     throw new Error(
       `solve: no closed-form solution found for "${equation}". ` +
         'Pass { numeric: true, range: [a, b] } to scan that range for real roots.'
@@ -1562,13 +2506,67 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
 }
 
 /**
- * Solve an equation of the form `a*F(p*x + q) = b` exactly, and return its solution set as plain
- * data: the principal real roots as text and the period of the set.
+ * The exact solution set of a polynomial equation of degree 1 or 2, or null when `expr` is no
+ * polynomial in `varName`. Throws for an identity, and for a polynomial that has no exact text
+ * (a coefficient such as `pi`, or a degree above 2).
+ */
+function polynomialExactSolution(
+  expr: string,
+  equation: string,
+  varName: string
+): ExactSolution | null {
+  let dense: f64[] | null;
+  try {
+    dense = readPolynomial(expr, varName);
+  } catch (error) {
+    if (!(error instanceof PolynomialDegreeError)) throw error;
+    throw new PolynomialDegreeError(
+      `solveExact: "${equation}" is a polynomial of degree above ${MAX_POLYNOMIAL_DEGREE}. ` +
+        'solveExact reads a polynomial of degree 1 or 2.'
+    );
+  }
+  if (dense === null) return null;
+  if (dense.length === 1) {
+    if (dense[0] !== 0) return { roots: [], period: null };
+    throw identityError('solveExact', varName, equation);
+  }
+  if (dense.length > 3) {
+    throw new Error(
+      `solveExact: "${equation}" is a polynomial of degree ${dense.length - 1}. ` +
+        'solveExact reads a polynomial of degree 1 or 2, or an equation of the form ' +
+        `a*F(p*${varName} + q) = b. Use solve for a polynomial of a higher degree.`
+    );
+  }
+  let texts: string[] | null;
+  if (dense.length === 2) {
+    const text = exactLinearText(dense[0], dense[1]);
+    texts = text === null ? null : [text];
+  } else {
+    texts = exactQuadraticRoots(dense)?.texts ?? null;
+  }
+  if (texts === null) {
+    throw new Error(
+      `solveExact: a coefficient of "${equation}" has no exact text. ` +
+        'A coefficient must be an integer, a decimal, or a small fraction. Use solve for the roots as numbers.'
+    );
+  }
+  return { roots: texts, period: null };
+}
+
+/**
+ * Solve an equation of the form `a*F(p*x + q) = b`, or a polynomial equation of degree 1 or 2,
+ * exactly, and return its solution set as plain data: the principal real roots as text and the
+ * period of the set.
  *
  * `F` is one of `sin`, `cos`, `tan`, `exp`, `log`, `sqrt` or `abs`. Use `solveExact` where
  * {@link solve} throws because the solutions repeat with a period. The result is a plain object
  * of strings, so it survives `JSON.stringify`, `structuredClone` and a worker boundary.
  *
+ * - A polynomial of degree 1 or 2 gives its real roots as exact text: `2*x - 1` gives `['1/2']`,
+ *   and `x^2 + x - 1` gives `['-1/2 - sqrt(5)/2', '-1/2 + sqrt(5)/2']`. The period is `null`.
+ *   Every coefficient must be an integer, a decimal or a small fraction.
+ * - The value `b` may be built from integers, `pi`, `sqrt(...)` and `+ - * / ^`:
+ *   `sin(x) = sqrt(2)/3` gives `['asin(sqrt(2)/3)', 'pi - asin(sqrt(2)/3)']`.
  * - A special value gives a multiple of `pi`: `sin(x) = 1/2` gives `['pi/6', '5*pi/6']`.
  * - Another value gives a symbolic inverse: `sin(x) = 1/3` gives `['asin(1/3)', 'pi - asin(1/3)']`.
  * - `p` is a fraction or a fraction of `pi`, and `q` is a number with exact text or a fraction of
@@ -1576,8 +2574,9 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
  *   `['-pi/36', '7*pi/36']`.
  * - The roots are real roots. A value that `F` never takes (`sin(x) = 2`) gives `roots: []`.
  * - No digit of the text is a rounded result. A constant is exact when it is an integer, a
- *   fraction with a denominator up to 100000, or a decimal of at most 12 digits. A constant with
- *   no exact text (`sqrt(2)/3`) makes `solveExact` throw an `Error` that names the constant.
+ *   fraction with a denominator up to 100000, or a decimal of at most 12 digits, or a value of
+ *   the form above. A constant with no exact text (`cos(1)`) makes `solveExact` throw an `Error`
+ *   that names the constant.
  *
  * @example
  * solveExact('sin(x) = 0', 'x');   // => { roots: ['0', 'pi'], period: '2*pi' }
@@ -1589,8 +2588,9 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
  * @param equation - Expression (`expr = 0`) or equation with one `=` sign.
  * @param varName  - Variable to solve for.
  * @returns The principal roots as text, and the period as text or `null`.
- * @throws An `Error` when the equation is not of the form `a*F(p*x + q) = b` (use {@link solve}
- *   for a polynomial), or when a constant of it has no exact text.
+ * @throws An `Error` when the equation is not of the form `a*F(p*x + q) = b` or a polynomial of
+ *   degree 1 or 2 (use {@link solve} for a polynomial of a higher degree), when every value is a
+ *   solution, or when a constant of it has no exact text.
  */
 export function solveExact(equation: unknown, varName: string): ExactSolution {
   if (typeof equation !== 'string') {
@@ -1598,12 +2598,16 @@ export function solveExact(equation: unknown, varName: string): ExactSolution {
   }
   const expr = normalizeEquation(equation, 'solveExact');
   requireExpression(expr, equation, 'solveExact');
+  const polynomial = polynomialExactSolution(expr, equation, varName);
+  if (polynomial !== null) return polynomial;
   const outcome = solveElementary(expr, varName);
   if (outcome === null) {
+    if (simplifiesToZero(expr)) throw identityError('solveExact', varName, equation);
     throw new Error(
       `solveExact: "${equation}" is not of the form a*F(p*${varName} + q) = b with F one of ` +
-        'sin, cos, tan, exp, log, sqrt or abs. Use solve for a polynomial, or ' +
-        'solve with { numeric: true, range: [a, b] } for any other equation.'
+        'sin, cos, tan, exp, log, sqrt or abs, or a polynomial of degree 1 or 2. Use solve for a ' +
+        'polynomial of a higher degree, or solve with { numeric: true, range: [a, b] } for any ' +
+        'other equation.'
     );
   }
   if ('declined' in outcome) throw new Error(`solveExact: ${outcome.declined}.`);
@@ -2539,7 +3543,8 @@ function iltMatchPattern(node: MathNode, sVar: string, pattern: string): boolean
     const v1 = iltEvalAt(node, sVar, p);
     const v2 = iltEvalAt(checkNode, sVar, p);
     if (v1 === null || v2 === null) return false;
-    if (Math.abs(v1 - v2) > 1e-9) return false;
+    // Relative to the values: an absolute 1e-9 read 1/(s - 1e-9) as 1/s.
+    if (Math.abs(v1 - v2) > 1e-12 * Math.max(Math.abs(v1), Math.abs(v2))) return false;
   }
   return true;
 }
@@ -2842,6 +3847,14 @@ export function inverseLaplaceTransform(
     node = parse(expr);
   } else {
     node = expr;
+  }
+  const tree = parseTree(node.toString());
+  if (tree !== null && hasInseparablePoles(tree, sVar)) {
+    throw new Error(
+      'inverseLaplaceTransform: the poles of "' +
+        node.toString() +
+        '" are too close to separate; the lookup table cannot match it.'
+    );
   }
   return _inverseLaplaceNode(node, sVar, tVar);
 }

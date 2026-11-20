@@ -135,8 +135,9 @@ describe('#1002 BigNumber isInteger is false for NaN and Infinity: dependent res
   it('pow, gamma, factorial, format and gcd', () => {
     const p = fn('pow')(b(-2), b(NaN)) as { re: number };
     expect(Number.isNaN(p.re)).toBe(true);
-    expect(Number(fn('gamma')(b(NaN)))).toBe(Infinity);
-    expect(Number(fn('factorial')(b(NaN)))).toBe(Infinity);
+    // mathjs gives Infinity here. #1291 gives NaN, as the number signature of both libraries does.
+    expect(Number(fn('gamma')(b(NaN)))).toBeNaN();
+    expect(Number(fn('factorial')(b(NaN)))).toBeNaN();
     expect(fn('format')(b(NaN), { notation: 'bin', wordSize: 8 })).toBe('NaN');
     expect(() => fn('gcd')(2n, b(0.1))).toThrow();
   });
