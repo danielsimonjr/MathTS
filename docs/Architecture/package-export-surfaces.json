@@ -2775,6 +2775,8 @@
       "fQuantile",
       "fraction",
       "fractionalMatrixPower",
+      "fractionGcd",
+      "fractionLcm",
       "frechetDistance",
       "FrequencyResponse",
       "freqz",

@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-20'
-  totalFiles: 1351
+  totalFiles: 1353
   totalModules: 82
-  totalExports: 7413
+  totalExports: 7416
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -8939,6 +8939,23 @@ modules:
       constants:
         - createFloorNumber
         - createFloor
+    functions/src/arithmetic/fraction-gcd.ts:
+      description: 'The gcd of two fractions, as fraction.js defines it: gcd(a/b, c/d) = gcd(a, c) / lcm(b, d).'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../typed/factorization/integer-poly.js
+          imports:
+            - bigintGcd
+      workspaceDependencies: []
+      exports:
+        - fractionGcd
+        - fractionLcm
+      interfaces:
+        - FractionParts
+      functions:
+        - fractionGcd
+        - fractionLcm
     functions/src/arithmetic/gcd.ts:
       description: Calculate the greatest common divisor for two or more values or arrays.
       externalDependencies: []
@@ -8950,6 +8967,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./fraction-gcd.js
+          imports:
+            - fractionGcd
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -9045,6 +9065,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ./fraction-gcd.js
+          imports:
+            - fractionLcm
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -15216,6 +15239,10 @@ modules:
         - file: ../typed/expression-eval-barrel.js
           imports:
             - '* as typedFns'
+        - file: ../utils/json-replacer.js
+          imports:
+            - replacer
+          reExport: true
       workspaceDependencies:
         - package: '@danielsimonjr/mathts-expression'
           directory: expression
@@ -15240,15 +15267,17 @@ modules:
             - Unit
             - UnitInstance
       exports:
+        - replacer
         - EVALUATE_SCOPE_OMIT
         - parse
         - physicsScope
         - evaluate
         - compileExpr
         - parser
-        - replacer
         - reviver
         - createInstanceEvaluator
+      reExported:
+        - replacer
       interfaces:
         - PhysicsEvaluateOptions
         - PhysicsScopeOptions
@@ -15259,7 +15288,6 @@ modules:
         - evaluate
         - compileExpr
         - parser
-        - replacer
         - reviver
         - createInstanceEvaluator
       constants:
@@ -15273,6 +15301,9 @@ modules:
         - file: ./scope.js
           imports:
             - factoryScope
+        - file: ../utils/json-replacer.js
+          imports:
+            - replacer
         - file: ../typed/arithmetic.js
           imports:
             - add
@@ -29083,6 +29114,16 @@ modules:
         - createIsZero
       constants:
         - createIsZero
+    functions/src/utils/json-replacer.ts:
+      description: '`JSON.stringify` replacer that preserves non-finite numbers and bigint values, with the tags'
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      workspaceDependencies: []
+      exports:
+        - replacer
+      functions:
+        - replacer
     functions/src/utils/limits.ts:
       description: Shared size limits that guard allocation and loop length (DoS guard).
       externalDependencies: []
@@ -45916,6 +45957,7 @@ dependencyGraph:
         - functions/src/arithmetic/expm1.ts
         - functions/src/arithmetic/fix.ts
         - functions/src/arithmetic/floor.ts
+        - functions/src/arithmetic/fraction-gcd.ts
         - functions/src/arithmetic/gcd.ts
         - functions/src/arithmetic/hypot.ts
         - functions/src/arithmetic/invmod.ts
@@ -46471,6 +46513,7 @@ dependencyGraph:
         - functions/src/utils/isPositive.ts
         - functions/src/utils/isPrime.ts
         - functions/src/utils/isZero.ts
+        - functions/src/utils/json-replacer.ts
         - functions/src/utils/limits.ts
         - functions/src/utils/map.ts
         - functions/src/utils/median-numbers.ts
@@ -47176,17 +47219,17 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1351
+  totalTypeScriptFiles: 1353
   totalModules: 82
-  totalLinesOfCode: 240057
-  totalExports: 7413
+  totalLinesOfCode: 240092
+  totalExports: 7416
   totalClasses: 63
-  totalInterfaces: 673
-  totalFunctions: 2591
+  totalInterfaces: 674
+  totalFunctions: 2593
   totalTypeGuards: 186
   totalEnums: 0
   totalConstants: 1697
-  totalReExports: 3191
+  totalReExports: 3192
   totalTypeOnlyImports: 686
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3

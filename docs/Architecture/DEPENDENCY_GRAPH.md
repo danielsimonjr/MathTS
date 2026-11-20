@@ -124,7 +124,7 @@ The codebase is organized into the following modules:
 - **tensor/operations**: 18 files
 - **autograd**: 7 files
 - **functions/algebra**: 49 files
-- **functions/arithmetic**: 39 files
+- **functions/arithmetic**: 40 files
 - **functions/bitwise**: 8 files
 - **functions**: 36 files
 - **functions/cas**: 13 files
@@ -155,7 +155,7 @@ The codebase is organized into the following modules:
 - **functions/type**: 32 files
 - **functions/typed**: 57 files
 - **functions/unit**: 2 files
-- **functions/utils**: 44 files
+- **functions/utils**: 45 files
 - **functions/wasm**: 13 files
 - **expression**: 14 files
 - **expression/compiler**: 2 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 588            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 590            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4101,6 +4101,21 @@ graph LR
 
 ---
 
+### `functions/src/arithmetic/fraction-gcd.ts` - The gcd of two fractions, as fraction.js defines it: gcd(a/b, c/d) = gcd(a, c) / lcm(b, d).
+
+**Internal Dependencies:**
+
+| File                                     | Imports     | Type   |
+| ---------------------------------------- | ----------- | ------ |
+| `../typed/factorization/integer-poly.js` | `bigintGcd` | Import |
+
+**Exports:**
+
+- Interfaces: `FractionParts`
+- Functions: `fractionGcd`, `fractionLcm`
+
+---
+
 ### `functions/src/arithmetic/gcd.ts` - Calculate the greatest common divisor for two or more values or arrays.
 
 **Internal Dependencies:**
@@ -4109,6 +4124,7 @@ graph LR
 | ---------------------------------------------- | ---------------------------- | ------------------ |
 | `../utils/number.js`                           | `isInteger`                  | Import             |
 | `../utils/factory.js`                          | `factory`                    | Import             |
+| `./fraction-gcd.js`                            | `fractionGcd`                | Import             |
 | `../core/function/typed.js`                    | `TypedFunction`              | Import (type-only) |
 | `../type/matrix/types.js`                      | `AlgorithmFunction`          | Import (type-only) |
 | `../core/config.js`                            | `ConfigOptions`              | Import (type-only) |
@@ -4172,6 +4188,7 @@ graph LR
 | File                                           | Imports                           | Type               |
 | ---------------------------------------------- | --------------------------------- | ------------------ |
 | `../utils/factory.js`                          | `factory`                         | Import             |
+| `./fraction-gcd.js`                            | `fractionLcm`                     | Import             |
 | `../core/function/typed.js`                    | `TypedFunction`                   | Import (type-only) |
 | `../type/matrix/types.js`                      | `AlgorithmFunction`               | Import (type-only) |
 | `../type/matrix/utils/matAlgo02xDS0.js`        | `createMatAlgo02xDS0`             | Import             |
@@ -6237,18 +6254,20 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                                 | Imports                   | Type   |
-| ------------------------------------ | ------------------------- | ------ |
-| `./scope.js`                         | `factoryScope`            | Import |
-| `./index.js`                         | `* as activatedFactories` | Import |
-| `../typed/expression-eval-barrel.js` | `* as typedFns`           | Import |
+| File                                 | Imports                   | Type      |
+| ------------------------------------ | ------------------------- | --------- |
+| `./scope.js`                         | `factoryScope`            | Import    |
+| `./index.js`                         | `* as activatedFactories` | Import    |
+| `../typed/expression-eval-barrel.js` | `* as typedFns`           | Import    |
+| `../utils/json-replacer.js`          | `replacer`                | Re-export |
 
 **Exports:**
 
 - Interfaces: `PhysicsEvaluateOptions`, `PhysicsScopeOptions`
 - Types: `PhysicsCharge`
-- Functions: `physicsScope`, `evaluate`, `evaluate`, `evaluate`, `compileExpr`, `parser`, `replacer`, `reviver`, `createInstanceEvaluator`
+- Functions: `physicsScope`, `evaluate`, `evaluate`, `evaluate`, `compileExpr`, `parser`, `reviver`, `createInstanceEvaluator`
 - Constants: `EVALUATE_SCOPE_OMIT`, `parse`
+- Re-exports: `replacer`
 
 ---
 
@@ -6268,6 +6287,7 @@ graph LR
 | File                                     | Imports                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Type                  |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | `./scope.js`                             | `factoryScope`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Import                |
+| `../utils/json-replacer.js`              | `replacer`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Import                |
 | `../typed/arithmetic.js`                 | `add, multiply`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
 | `../typed/divide-inverse.js`             | `registerDivideInverse`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Import                |
 | `../typed/exact-reductions.js`           | `registerExactReductions`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Import                |
@@ -13301,6 +13321,14 @@ graph LR
 **Exports:**
 
 - Constants: `createIsZero`
+
+---
+
+### `functions/src/utils/json-replacer.ts` - `JSON.stringify` replacer that preserves non-finite numbers and bigint values, with the tags
+
+**Exports:**
+
+- Functions: `replacer`
 
 ---
 
@@ -20868,7 +20896,7 @@ graph LR
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
-| `functions/src/factories/index`                        | 248 files    | 15 files   |
+| `functions/src/factories/index`                        | 249 files    | 15 files   |
 | `functions/src/utils/factory`                          | 1 file       | 261 files  |
 | `functions/src/core/function/typed`                    | 3 files      | 206 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
@@ -21120,7 +21148,7 @@ graph TD
         N123[dotDivide]
         N124[dotMultiply]
         N125[dotPow]
-        N126[...29 more]
+        N126[...30 more]
     end
 
     subgraph Functions/bitwise
@@ -21459,7 +21487,7 @@ graph TD
         N369[clone]
         N370[collection]
         N371[complex]
-        N372[...34 more]
+        N372[...35 more]
     end
 
     subgraph Functions/wasm
@@ -21808,14 +21836,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1351   |
+| Total TypeScript Files  | 1353   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 240057 |
-| Total Exports           | 7413   |
-| Total Re-exports        | 3191   |
+| Total Lines of Code     | 240092 |
+| Total Exports           | 7416   |
+| Total Re-exports        | 3192   |
 | Total Classes           | 63     |
-| Total Interfaces        | 673    |
-| Total Functions         | 2591   |
+| Total Interfaces        | 674    |
+| Total Functions         | 2593   |
 | Total Type Guards       | 186    |
 | Total Enums             | 0      |
 | Type-only Imports       | 686    |

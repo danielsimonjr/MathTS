@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-20",
-  "totalFiles": 2576,
+  "totalFiles": 2579,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1325,
+    "build-entry": 1327,
     "test-only": 0,
     "orphan": 0,
-    "test": 1159,
+    "test": 1160,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1351,
-    "tests": 1159,
+    "src": 1353,
+    "tests": 1160,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -28,7 +28,7 @@
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 70,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1203,
+    "@danielsimonjr/mathts-functions": 1206,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 151,
@@ -6340,11 +6340,18 @@
       "loc": 300
     },
     {
+      "file": "functions/src/arithmetic/fraction-gcd.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 37
+    },
+    {
       "file": "functions/src/arithmetic/gcd.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 204
+      "loc": 201
     },
     {
       "file": "functions/src/arithmetic/hypot.ts",
@@ -6365,7 +6372,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 144
+      "loc": 141
     },
     {
       "file": "functions/src/arithmetic/log.ts",
@@ -6827,14 +6834,14 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 642
+      "loc": 631
     },
     {
       "file": "functions/src/factories/index.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1935
+      "loc": 1936
     },
     {
       "file": "functions/src/factories/matrix-bridge.ts",
@@ -9789,6 +9796,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 75
+    },
+    {
+      "file": "functions/src/utils/json-replacer.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 14
     },
     {
       "file": "functions/src/utils/limits.ts",
@@ -13127,7 +13141,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 125
+      "loc": 137
     },
     {
       "file": "functions/tests/rationalize-zero-polynomial-1177.test.ts",
@@ -13387,6 +13401,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 39
+    },
+    {
+      "file": "functions/tests/simplify-gcd-lcm-fraction-1321.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 60
     },
     {
       "file": "functions/tests/small-cas-defects-1014.test.ts",
