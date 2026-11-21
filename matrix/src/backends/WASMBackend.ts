@@ -83,6 +83,13 @@ const PIVOT_REL_TOL = 1e-14;
 const TINY_COLUMN = 2 ** -500;
 
 /**
+ * 2^500. A column whose largest finite entry is above it has squares that can overflow (they do
+ * above about 1.34e154), so its norm is taken the same way. Same value as `HUGE_COLUMN` in
+ * `assembly/src/algebra/decomposition.ts`.
+ */
+const HUGE_COLUMN = 2 ** 500;
+
+/**
  * The cancellation sum `S = sum_{j<k} |L[row][j]| * |U[j][k]|` of the pivot candidate of step `k`
  * in row `row`. `data` is the in-place LU storage (row-major, n x n): row `row` holds the
  * multipliers in columns before `k`, and column `k` of the rows before `k` holds U. The
@@ -858,7 +865,7 @@ export class WASMBackend implements MatrixBackend {
       // below the diagonal of R, and the squares of an entry under 2.2e-162 underflow, so
       // `norm === 0` is not an exact-zero test (#1172). A NaN column is not skipped.
       if (amax === 0.0 && norm === 0.0) continue;
-      if (amax < TINY_COLUMN) {
+      if (amax < TINY_COLUMN || (amax > HUGE_COLUMN && amax !== Infinity)) {
         let scaled = 0.0;
         for (let i = k; i < m; i++) {
           const t = r[i * n + k] / amax;

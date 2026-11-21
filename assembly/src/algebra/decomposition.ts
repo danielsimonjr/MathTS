@@ -42,6 +42,15 @@ const PIVOT_REL_TOL: f64 = 1e-14;
 const TINY_COLUMN: f64 = 3.0549363634996047e-151;
 
 /**
+ * 2^500. A column whose largest finite entry is above it has squares that can overflow (they do
+ * above about 1.34e154), so its norm is computed the same way: from the entries divided by the
+ * largest one. Without it the norm is Infinity, the reflector is zero, and the factorization is
+ * finite and wrong (a column of three 1e200 gives R[0] = -1e200, not -1.73e200). An infinite
+ * largest entry keeps the plain path: its norm is Infinity there, and the result carries it.
+ */
+const HUGE_COLUMN: f64 = 3.273390607896142e150;
+
+/**
  * Whether `pivot` (the magnitude of the pivot candidate of step `k` in row `row` of the in-place
  * LU storage `work`, row-major n*n) is zero by the rule above. `S` is summed in ascending j,
  * as in the JS twin `cancellationSum` of `WASMBackend.ts`, so both give the same verdict. A NaN
@@ -213,8 +222,9 @@ export function matrix_qr_decompose(
     if (amax == 0.0 && norm == 0.0) {
       continue;
     }
-    if (amax < TINY_COLUMN) {
-      // The squares may underflow: take the norm of the entries divided by the largest one.
+    if (amax < TINY_COLUMN || (amax > HUGE_COLUMN && amax <= f64.MAX_VALUE)) {
+      // The squares may underflow or overflow: take the norm of the entries divided by the
+      // largest one.
       let scaled: f64 = 0.0;
       for (let i = k; i < m; i++) {
         const t = r_out[i * n + k] / amax;

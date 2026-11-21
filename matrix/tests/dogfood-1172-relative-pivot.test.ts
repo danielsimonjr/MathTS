@@ -392,6 +392,33 @@ describe.each(PATHS)('#1172 $name', ({ backend }) => {
   });
 });
 
+describe('#1172 the JS Householder kernel takes the norm of a huge column by scaling', () => {
+  // `qrDecomposition` scales a huge matrix into range before it calls a kernel (#1123), so the
+  // kernel is called directly: a column above 2^500 has squares that overflow above about 1.34e154.
+  const kernel = (a: number[][]): { q: DenseMatrix; r: DenseMatrix } =>
+    (
+      new WASMBackend() as unknown as {
+        qrDecompositionJS(m: DenseMatrix): { q: DenseMatrix; r: DenseMatrix };
+      }
+    ).qrDecompositionJS(dm(a));
+
+  it.each([
+    ['three 1e200', [[1e200], [1e200], [1e200]], -Math.sqrt(3) * 1e200],
+    [
+      'a 1e300 column and a unit column',
+      [
+        [1e300, 1],
+        [1e300, 2],
+      ],
+      -Math.sqrt(2) * 1e300,
+    ],
+  ] as Array<[string, number[][], number]>)('%s', (_label, A, r00) => {
+    const R = nested(kernel(A).r);
+    expect(Math.abs(R[0][0] / r00 - 1)).toBeLessThan(4e-16);
+    for (let i = 1; i < R.length; i++) expect(R[i][0]).toBe(0);
+  });
+});
+
 /** Partial-pivoting elimination with no floor and no scaling: the reference of test 6. */
 function eliminate(A: number[][]): { lu: number[]; perm: number[] } {
   const n = A.length;
