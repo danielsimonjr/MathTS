@@ -311,8 +311,10 @@ export const toDegrees = mathTyped('toDegrees', {
  */
 export const hypot = mathTyped('hypot', {
   number: (a: number) => Math.abs(a),
-  'number, number': (a: number, b: number) => Math.hypot(a, b),
-  'number, number, ...number': (a: number, b: number, rest: number[]) => Math.hypot(a, b, ...rest),
+  'number, number': (a: number, b: number) =>
+    Number.isNaN(a) || Number.isNaN(b) ? NaN : Math.hypot(a, b),
+  'number, number, ...number': (a: number, b: number, rest: number[]) =>
+    hypotNumbers([a, b, ...rest]),
   // BigNumber arguments keep a BigNumber result at the configured precision (#1043). A number
   // mixed with a BigNumber converts to a BigNumber.
   '...BigNumber': (xs: BigNumber[]) => (xs.length === 1 ? xs[0].abs() : bigHypot(xs)),
@@ -321,11 +323,19 @@ export const hypot = mathTyped('hypot', {
   // An array or a matrix counts all of its entries, as in mathjs.
   'Array | Matrix': (input: unknown[] | { toArray(): unknown }) => {
     const arr = (Array.isArray(input) ? input : (input.toArray() as unknown[])).flat(Infinity);
-    return arr.every((x) => typeof x === 'number')
-      ? Math.hypot(...(arr as number[]))
-      : bigHypot(arr);
+    return arr.every((x) => typeof x === 'number') ? hypotNumbers(arr as number[]) : bigHypot(arr);
   },
 });
+
+/**
+ * `sqrt(Σ x²)` of numbers. A NaN argument gives NaN, also with an infinite argument, as in mathjs
+ * (#1259). `Math.hypot` follows IEEE 754 and gives Infinity there.
+ * @param xs - the numbers
+ */
+function hypotNumbers(xs: readonly number[]): number {
+  for (const x of xs) if (Number.isNaN(x)) return NaN;
+  return Math.hypot(...xs);
+}
 
 /** `sqrt(Σ x²)` over BigNumber (or number) values, at the configured precision (scaled, #1255). */
 function bigHypot(xs: readonly unknown[]): BigNumber {

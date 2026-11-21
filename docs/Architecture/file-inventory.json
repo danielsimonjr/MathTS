@@ -1,19 +1,19 @@
 {
   "generated": "2026-11-21",
-  "totalFiles": 2655,
+  "totalFiles": 2657,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1333,
     "test-only": 0,
     "orphan": 0,
-    "test": 1230,
+    "test": 1232,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1359,
-    "tests": 1230,
+    "tests": 1232,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,12 +23,12 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 33,
-    "@danielsimonjr/mathts-compat": 44,
+    "@danielsimonjr/mathts-compat": 45,
     "@danielsimonjr/mathts-core": 150,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 71,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1258,
+    "@danielsimonjr/mathts-functions": 1259,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -738,6 +738,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 63
+    },
+    {
+      "file": "compat/tests/hypot-nan-1259.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 23
     },
     {
       "file": "compat/tests/instance-config-isolation.test.ts",
@@ -9711,7 +9718,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 376
+      "loc": 387
     },
     {
       "file": "functions/src/typed/typed-bridge.ts",
@@ -12722,6 +12729,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 21
+    },
+    {
+      "file": "functions/tests/hypot-nan-1259.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 95
     },
     {
       "file": "functions/tests/hypothesis.test.ts",
