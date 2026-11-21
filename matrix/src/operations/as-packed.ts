@@ -7,6 +7,7 @@
 
 import { DenseMatrix, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
+import { arraySize } from '@danielsimonjr/mathts-core/internal';
 import { densifyForSolver } from './densify.js';
 import { denseReader } from '../types/dense/storage.js';
 
@@ -96,6 +97,20 @@ function nestedFromPacked(data: Float64Array, rows: number, cols: number): numbe
   return nested;
 }
 
+/**
+ * Throw for a nested array that has an Array as an entry. The size comes from `arraySize`, which
+ * follows the first entry of each level: a size of three or more is a tensor (a `RangeError`, the
+ * message of the `qr` of `@danielsimonjr/mathts-functions`), and a size of two means that only some
+ * entries are Arrays (a jagged array, the `TypeError` of the row check).
+ */
+function rejectArrayEntry(input: number[][], row: number): never {
+  const size = arraySize(input);
+  if (size.length > 2) {
+    throw new RangeError(`Matrix must be two dimensional (size: [${size.join(', ')}])`);
+  }
+  throw new TypeError(`Matrix decomposition: jagged nested array at row ${row}`);
+}
+
 function resolveDimensions(input: DecompositionMatrixInput): {
   rows: number;
   cols: number;
@@ -112,8 +127,14 @@ function resolveDimensions(input: DecompositionMatrixInput): {
     const rows = input.length;
     const cols = input[0]?.length ?? 0;
     for (let i = 0; i < rows; i++) {
-      if (!Array.isArray(input[i]) || input[i].length !== cols) {
+      const row = input[i];
+      if (!Array.isArray(row) || row.length !== cols) {
         throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
+      }
+      // A row of Arrays is a tensor or a jagged array, not a matrix. Later arithmetic would read
+      // `[2]` as 2 and `[1, 2]` as NaN (#1260).
+      for (let j = 0; j < cols; j++) {
+        if (Array.isArray(row[j])) rejectArrayEntry(input, i);
       }
     }
     return { rows, cols, nested: input };
