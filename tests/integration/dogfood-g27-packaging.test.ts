@@ -41,13 +41,23 @@ function bundledBytes(importLine: string, outfile: string, platform: 'neutral' |
 }
 
 describe('G27 packaging (#707 #708 #736 #791 #792)', () => {
-  it('#708 neutral esbuild bundles matrix and functions evaluate without Node builtin resolve errors', () => {
-    execFileSync('node', ['tools/test/browser-bundle-neutral.mjs'], {
-      cwd: REPO,
-      stdio: 'pipe',
-    });
-    // Four esbuild bundles of the package graphs: several seconds on Windows.
-  }, 120_000);
+  // The bundles (four esbuild runs of the package graphs) do not run in this pool, where a
+  // wall-clock limit would measure the load of the other processes (#1185). The Compile & Lint
+  // job runs `tools/test/browser-bundle-neutral.mjs` as its own step (#708); this test pins that
+  // step, so removing the step fails here.
+  it('#708 the Compile & Lint job bundles matrix and functions evaluate for the browser', () => {
+    const lines = readFileSync(join(REPO, '.github', 'workflows', 'ci.yml'), 'utf8').split('\n');
+    const at = lines.findIndex((line) =>
+      /^\s+(?:run:\s+)?node tools\/test\/browser-bundle-neutral\.mjs\s*$/.test(line)
+    );
+    expect(at, 'ci.yml does not run the neutral browser bundles').toBeGreaterThanOrEqual(0);
+    // A commented-out command, or a step that cannot fail the job or that never runs, is no gate.
+    let first = at;
+    while (first > 0 && !/^ {6}- name:/.test(lines[first] ?? '')) first--;
+    let last = at + 1;
+    while (last < lines.length && !/^ {6}(?:- |#)|^ {2}[a-z]/.test(lines[last] ?? '')) last++;
+    expect(lines.slice(first, last).join('\n')).not.toMatch(/continue-on-error|^\s+if:/m);
+  });
 
   it('#930 evaluate subpath is not a size saving: within 5% of the barrel, and far above mathts-expression', () => {
     const out = mkdtempSync(join(tmpdir(), 'mathts-g27-'));

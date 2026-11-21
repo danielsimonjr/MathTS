@@ -117,18 +117,23 @@ describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
     }
   });
 
-  // The script packs and installs every public package (24 tarballs) and type-checks every entry
-  // point. Measured: 83 s on an idle machine, and it ran past 120 s in two full-suite runs under
-  // load. The limit is about 3.6 times the idle cost.
-  it('#697 consumer typecheck without @types/node', () => {
-    execFileSync('node', ['tools/test/consumer-typecheck-no-node.mjs', '--skip-build'], {
-      cwd: REPO,
-      stdio: 'pipe',
-      env: {
-        ...process.env,
-        NODE_OPTIONS: '',
-        PATH: `${process.env.HOME}/.bun/bin:${process.env.PATH}`,
-      },
-    });
-  }, 300_000);
+  // The no-node consumer type check packs and installs every public package (24 tarballs) and
+  // type-checks every entry point: 83 s on an idle machine. It does not run in this pool, where
+  // its wall-clock limit would measure the load of the other processes (#1185). The Compile & Lint
+  // job runs it as its own step (#697); this test pins that step, so removing the step fails here.
+  it('#697 the Compile & Lint job runs the consumer typecheck without @types/node', () => {
+    const lines = readFileSync(join(REPO, '.github', 'workflows', 'ci.yml'), 'utf8').split('\n');
+    const at = lines.findIndex((line) =>
+      /^\s+(?:run:\s+)?node tools\/test\/consumer-typecheck-no-node\.mjs --skip-build\s*$/.test(
+        line
+      )
+    );
+    expect(at, 'ci.yml does not run the no-node consumer type check').toBeGreaterThanOrEqual(0);
+    // A commented-out command, or a step that cannot fail the job or that never runs, is no gate.
+    let first = at;
+    while (first > 0 && !/^ {6}- name:/.test(lines[first] ?? '')) first--;
+    let last = at + 1;
+    while (last < lines.length && !/^ {6}(?:- |#)|^ {2}[a-z]/.test(lines[last] ?? '')) last++;
+    expect(lines.slice(first, last).join('\n')).not.toMatch(/continue-on-error|^\s+if:/m);
+  });
 });
