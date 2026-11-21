@@ -32,11 +32,11 @@ const LSTSQ_EPS = 2.220446049250313e-16;
  *   (a 1-D array or a typed array of numbers), an `m x k` nested array, a `DenseMatrix` or a
  *   `SparseMatrix` (`m` rows: an `m x k` right side; one row and `m` columns: a vector), or an
  *   object with a `toArray` method (the MathJS matrix). An entry that is a numeric string, a
- *   boolean, a bigint, a Fraction or a BigNumber is read as its number.
+ *   boolean or a bigint is read as its number; `null` and `undefined` are 0.
  * @returns The `n`-vector `x` for a vector `b`, or the `n x k` nested array for a matrix `b`.
  * @throws {RangeError} if `b` has the wrong length or any entry is not finite.
- * @throws {TypeError} if `A` or `b` is not rectangular, `b` is not a vector or a matrix, or an
- *   entry of `b` has no conversion to number.
+ * @throws {TypeError} if `A` or `b` is not rectangular, `b` is not a vector or a matrix, an
+ *   entry of `b` has no conversion to number, or an entry is a BigNumber, Fraction or Complex.
  */
 export function lstsq(A: DecompositionMatrixInput, b: readonly number[] | Float64Array): number[];
 export function lstsq(A: DecompositionMatrixInput, b: readonly (readonly number[])[]): number[][];

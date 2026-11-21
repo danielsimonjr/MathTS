@@ -25,11 +25,10 @@ import {
   entryRange,
   ldexp,
   pow2ScaleExponent,
-  notSquareError,
 } from '@danielsimonjr/mathts-core/internal';
 import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
 import type { Matrix as MathJSMatrix } from '../utils/is.js';
-import { matrixRows, type MatrixArgument } from './number-matrix.js';
+import { collectionSize, matrixRows, squareOrder, type MatrixArgument } from './number-matrix.js';
 import { factoryScope } from '../factories/scope.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
@@ -267,11 +266,10 @@ export function linsolve(
   b: unknown[] | NumberTypedArray | unknown[][] | DenseMatrix | SparseMatrix | MathJSMatrix
 ): unknown[] {
   const rows = matrixRows('linsolve', A);
-  const n = rows.length;
+  // The nested rows of a matrix with no rows are `[]`, so the order comes from the size that the
+  // matrix reports (B2): a 0 x 3 matrix is not square.
+  const n = squareOrder('linsolve', collectionSize(A));
   if (n === 0) throw new Error('linsolve: empty matrix');
-  if ((rows[0] as unknown[] | undefined)?.length !== n) {
-    throw notSquareError('linsolve: matrix must be square');
-  }
   const rhs = readRightHandSide('linsolve', b, n);
   let values: readonly unknown[];
   if (rhs.kind === 'vector') values = rhs.values;
