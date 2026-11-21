@@ -289,16 +289,16 @@ describe('#1327 and D1: zeta of a negative argument by the symmetric functional 
 });
 
 /**
- * The bound B1 of the large-x engine (x >= 25): 2 * 2^-52 * max(x, an) * max(amplitude, |true|) + 4 ulp.
- * Measured: the worst of the 31 table and issue values uses 0.083 of the bound (J and Y of order
- * -99.9999999 at x = 40); the values at x >= 5000 use under 1e-3 of it (relative error 6e-16).
+ * The bound B1 of the large-x engine (x >= 25): 2^-52 * max(amplitude, |true|) * (8 + 0.4 an) + 4 ulp.
+ * The engine measures 0.2 to 4 u (u = 2^-52 * amplitude) at every table point, and 546 u at the long
+ * recurrence (1999.75, 2000), where the bound is 808 u. The phase x - A rounded in double
+ * (the code that the exact angle addition replaces) measures up to 234750 u at (0.5, 1e6), so it fails.
  */
 const expectB1 = (got: unknown, want: number, x: number, an: number): void => {
   const g = got as number;
   const ulp = Math.max(Math.abs(want) * 2 ** -52, 5e-324);
   const tol =
-    2 * 2 ** -52 * Math.max(x, an) * Math.max(Math.sqrt(2 / (Math.PI * x)), Math.abs(want)) +
-    4 * ulp;
+    2 ** -52 * Math.max(Math.sqrt(2 / (Math.PI * x)), Math.abs(want)) * (8 + 0.4 * an) + 4 * ulp;
   expect(Number.isFinite(g), `got ${g}, want ${want}`).toBe(true);
   expect(Math.abs(g - want), `got ${g}, want ${want}`).toBeLessThanOrEqual(tol);
 };

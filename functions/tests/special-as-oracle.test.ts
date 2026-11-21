@@ -63,7 +63,7 @@ import {
   airyAiDispatch,
   airyBiDispatch,
 } from '../src/wasm/special/wasm-bridge.js';
-import { AS_WASM_PATH } from './helpers/wasm-spy.js';
+import { AS_WASM_PATH, countExportCalls } from './helpers/wasm-spy.js';
 import { overrideWasmPolicy } from '../src/wasm/policy.js';
 
 const REL = 1e-12;
@@ -81,17 +81,22 @@ function expectOracle(got: number, expected: number, label: string): void {
 }
 
 /** AS pin table from CORE_SPRINT_PLAN PR 8 (mpmath dps=25). */
+// The bridge consults an AS kernel only from WASM_SPECIAL_THRESHOLD elements, so every wasm input is
+// that long: a shorter array runs the JS fallback and would not test the AS code.
 const AS_ORACLE: readonly {
   label: string;
   expected: number;
   js: () => number;
+  /** The AS export that `wasm` must call: a row that runs the JS fallback proves nothing. */
+  kernel: string;
   wasm: () => number;
 }[] = [
   {
     label: 'lgamma(2.5)',
     expected: 0.28468287047291916,
     js: () => lgamma(2.5) as number,
-    wasm: () => lgammaDispatch(new Float64Array([2.5]))[0]!,
+    kernel: 'lgamma_f64',
+    wasm: () => lgammaDispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(2.5))[0]!,
   },
   {
     // Batch I2 D1: the reflection used Math.sin(Math.PI * x), which kept 5 digits next to a
@@ -99,57 +104,64 @@ const AS_ORACLE: readonly {
     label: 'lgamma(-1.0000001) next to a pole',
     expected: 16.118095608096032,
     js: () => lgamma(-1.0000001) as number,
-    // The bridge consults the AS kernel only from WASM_SPECIAL_THRESHOLD elements, so the input
-    // is that long; a shorter array runs the JS fallback and would not test the AS code.
+    kernel: 'lgamma_f64',
     wasm: () => lgammaDispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(-1.0000001))[0]!,
   },
   {
     label: 'besselJ0(2.5)',
     expected: -0.048383776468197996,
     js: () => besselJ0(2.5) as number,
-    wasm: () => besselJ0Dispatch(new Float64Array([2.5]))[0]!,
+    kernel: 'bessel_j0_f64',
+    wasm: () => besselJ0Dispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(2.5))[0]!,
   },
   {
     label: 'besselJ1(2.5)',
     expected: 0.49709410246427404,
     js: () => besselJ1(2.5) as number,
-    wasm: () => besselJ1Dispatch(new Float64Array([2.5]))[0]!,
+    kernel: 'bessel_j1_f64',
+    wasm: () => besselJ1Dispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(2.5))[0]!,
   },
   {
     label: 'besselY0(2.5)',
     expected: 0.49807035961523189,
     js: () => besselY0(2.5) as number,
-    wasm: () => besselY0Dispatch(new Float64Array([2.5]))[0]!,
+    kernel: 'bessel_y0_f64',
+    wasm: () => besselY0Dispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(2.5))[0]!,
   },
   {
     label: 'besselY1(2.5)',
     expected: 0.1459181379667858,
     js: () => besselY1(2.5) as number,
-    wasm: () => besselY1Dispatch(new Float64Array([2.5]))[0]!,
+    kernel: 'bessel_y1_f64',
+    wasm: () => besselY1Dispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(2.5))[0]!,
   },
   {
     label: 'airyAi(1.2)',
     expected: 0.10612576226331254,
     js: () => airyAi(1.2) as number,
-    wasm: () => airyAiDispatch(new Float64Array([1.2]))[0]!,
+    kernel: 'airy_ai_f64',
+    wasm: () => airyAiDispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(1.2))[0]!,
   },
   {
     label: 'airyBi(1.2)',
     expected: 1.4211336756103481,
     js: () => airyBi(1.2) as number,
-    wasm: () => airyBiDispatch(new Float64Array([1.2]))[0]!,
+    kernel: 'airy_bi_f64',
+    wasm: () => airyBiDispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(1.2))[0]!,
   },
   {
     label: 'ellipticK(0.5) parameter m',
     expected: 1.8540746773013719,
     js: () => ellipticK(0.5) as number,
-    wasm: () => ellipticKDispatch(new Float64Array([0.5]))[0]!,
+    kernel: 'elliptic_k_f64',
+    wasm: () => ellipticKDispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(0.5))[0]!,
   },
   {
     label: 'ellipticE(0.5) complete E(m)',
     expected: 1.3506438810476755,
     js: () => ellipticE(0.5) as number,
-    wasm: () => ellipticEDispatch(new Float64Array([0.5]))[0]!,
+    kernel: 'elliptic_e_f64',
+    wasm: () => ellipticEDispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(0.5))[0]!,
   },
 ];
 
@@ -253,7 +265,9 @@ describeIfAS('special AS dispatch vs the same mpmath oracle (not JS)', () => {
 
   for (const row of AS_ORACLE) {
     it(`wasm ${row.label}`, () => {
-      expectOracle(row.wasm(), row.expected, `AS ${row.label}`);
+      const { result, counts } = countExportCalls([row.kernel], row.wasm);
+      expect(counts[row.kernel], `${row.kernel}: the AS kernel ran`).toBeGreaterThan(0);
+      expectOracle(result, row.expected, `AS ${row.label}`);
     });
   }
 });
