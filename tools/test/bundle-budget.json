@@ -7,7 +7,7 @@
   "files": {
     "packages/typed-function/dist/index.js": 4566,
     "packages/typed-function/package.json": 2215,
-    "packages/workerpool/dist/index.js": 55218,
+    "packages/workerpool/dist/index.js": 57873,
     "packages/workerpool/dist/worker.js": 25655,
     "packages/workerpool/package.json": 2745,
     "core/dist/index.js": 257162,
@@ -21,7 +21,7 @@
     "autograd/dist/index.js": 73674,
     "autograd/package.json": 2250,
     "functions/dist/index.js": 2174747,
-    "functions/dist/subpath-evaluate.js": 1395643,
+    "functions/dist/subpath-evaluate.js": 1415619,
     "functions/package.json": 3607,
     "functions/dist/wasm/mathts-as.wasm": 64091,
     "expression/dist/index.js": 365157,
@@ -46,7 +46,7 @@
     "statistics/package.json": 2468,
     "signal/dist/index.js": 560,
     "signal/package.json": 2156,
-    "parallel/dist/index.js": 50286,
+    "parallel/dist/index.js": 51418,
     "parallel/package.json": 2283,
     "workbook/dist/index.js": 49720,
     "workbook/package.json": 2123,
@@ -179,19 +179,19 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1293525
+      "bytes": 1309215
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1293892
+      "bytes": 1309582
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1303496
+      "bytes": 1319182
     },
     {
       "label": "expression evaluate",

@@ -826,6 +826,22 @@ export class ComputePool {
   }
 
   /**
+   * The shared body of the entries that take a plain array: map, reduce, filter, find and sort.
+   * The data guard runs before the entry picks the sequential or the parallel path.
+   */
+  private async runOnArray<T, R>(
+    op: string,
+    data: T[],
+    run: (items: T[], task: TaskOptions | undefined) => Promise<WorkerParallelResult<R>>,
+    force?: DispatchOptions
+  ): Promise<ParallelResult<R>> {
+    this.assertActive();
+    const items = toArrayData<T>(op, data);
+    await this.ensureInitializedForParallel(items.length, undefined, force);
+    return toParallelResult(await run(items, await this.forceTask(items.length, undefined, force)));
+  }
+
+  /**
    * Parallel element-wise operation
    */
   async elementwise(
@@ -934,15 +950,12 @@ export class ComputePool {
     fn: (item: T) => R,
     force?: DispatchOptions
   ): Promise<ParallelResult<R[]>> {
-    this.assertActive();
-    data = toArrayData<T>('map', data);
-    await this.ensureInitializedForParallel(data.length, undefined, force);
-    const result = await this.workerPool.map(
+    return this.runOnArray(
+      'map',
       data,
-      fn,
-      await this.forceTask(data.length, undefined, force)
+      (items, task) => this.workerPool.map(items, fn, task),
+      force
     );
-    return toParallelResult(result);
   }
 
   /**
@@ -954,16 +967,12 @@ export class ComputePool {
     initial: R,
     force?: DispatchOptions
   ): Promise<ParallelResult<R>> {
-    this.assertActive();
-    data = toArrayData<T>('reduce', data);
-    await this.ensureInitializedForParallel(data.length, undefined, force);
-    const result = await this.workerPool.reduce(
+    return this.runOnArray(
+      'reduce',
       data,
-      fn,
-      initial,
-      await this.forceTask(data.length, undefined, force)
+      (items, task) => this.workerPool.reduce(items, fn, initial, task),
+      force
     );
-    return toParallelResult(result);
   }
 
   /**
@@ -974,15 +983,12 @@ export class ComputePool {
     predicate: (item: T) => boolean,
     force?: DispatchOptions
   ): Promise<ParallelResult<T[]>> {
-    this.assertActive();
-    data = toArrayData<T>('filter', data);
-    await this.ensureInitializedForParallel(data.length, undefined, force);
-    const result = await this.workerPool.filter(
+    return this.runOnArray(
+      'filter',
       data,
-      predicate,
-      await this.forceTask(data.length, undefined, force)
+      (items, task) => this.workerPool.filter(items, predicate, task),
+      force
     );
-    return toParallelResult(result);
   }
 
   // =========================================================================
@@ -1484,15 +1490,12 @@ export class ComputePool {
     predicate: (item: T) => boolean,
     force?: DispatchOptions
   ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
-    this.assertActive();
-    data = toArrayData<T>('find', data);
-    await this.ensureInitializedForParallel(data.length, undefined, force);
-    const result = await this.workerPool.find(
+    return this.runOnArray(
+      'find',
       data,
-      predicate,
-      await this.forceTask(data.length, undefined, force)
+      (items, task) => this.workerPool.find(items, predicate, task),
+      force
     );
-    return toParallelResult(result);
   }
 
   /**
@@ -1503,15 +1506,12 @@ export class ComputePool {
     compare?: (a: T, b: T) => number,
     force?: DispatchOptions
   ): Promise<ParallelResult<T[]>> {
-    this.assertActive();
-    data = toArrayData<T>('sort', data);
-    await this.ensureInitializedForParallel(data.length, undefined, force);
-    const result = await this.workerPool.sort(
+    return this.runOnArray(
+      'sort',
       data,
-      compare,
-      await this.forceTask(data.length, undefined, force)
+      (items, task) => this.workerPool.sort(items, compare, task),
+      force
     );
-    return toParallelResult(result);
   }
 
   // =========================================================================
