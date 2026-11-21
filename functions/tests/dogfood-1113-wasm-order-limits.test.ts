@@ -295,12 +295,14 @@ function jnBatch(cases: [number, number[]][], timeoutMs = 30_000): number[][] | 
 }
 
 describeIfBindings('#1113 kernel: early exits and signs match the JS scalar', () => {
-  it('bessel_yn_f64 and bessel_jn_f64 stop at the first NaN', () => {
-    // Before the fix each call ran the whole recurrence: about 2 s for an order of 1e8.
+  it('bessel_yn_f64 and bessel_jn_f64 of x = Infinity return the limit 0 at once', () => {
+    // Before #1113 each call ran the whole recurrence: about 2 s for an order of 1e8. It then
+    // stopped at the first NaN (J0 and Y0 of Infinity were NaN). Now J_n and Y_n of Infinity
+    // are 0, the limit (the amplitude sqrt(2 / (pi x)) -> 0), before any loop.
     for (const r of [jn(1_000_000_000, Infinity), yn(100_000_000, Infinity)]) {
       expect(r.timedOut).toBe(false);
       expect(r.ok).toBe(true);
-      expect(r.value).toBeNaN();
+      expect(r.value).toBe(0);
       expect(r.ms).toBeLessThan(500);
     }
   }, 60_000);

@@ -36,7 +36,6 @@ import {
   erfcSelfContained,
   upperGammaQ,
   incompleteBetaFraction,
-  besselHankel,
   besselJ0Series,
   besselJ1Series,
   besselY0Series,
@@ -66,8 +65,10 @@ import {
   besselIScalar,
   besselIPlan,
   besselIPositive,
+  besselKGate,
   besselKReal,
   besselKScalar,
+  besselUniformExponent,
   besselJ0Scalar,
   besselJ1Scalar,
   besselY0Scalar,
@@ -89,6 +90,7 @@ import {
   besselYDispatch,
   assertBesselArrayWork,
   assertBesselIArrayWork,
+  assertBesselKArrayWork,
   airyAiDispatch,
   airyBiDispatch,
   ellipticKDispatch,
@@ -179,7 +181,7 @@ function digammaScalar(x: f64): f64 {
 }
 
 // ---------------------------------------------------------------------------
-// Bessel J0/J1/Y0/Y1 scalars (besselHankel/besselJ*Series/besselY*Series and
+// Bessel J0/J1/Y0/Y1 scalars (besselHankelReal, besselJYTemme, besselJ*Series/besselY*Series and
 // besselJ0/J1/Y0/Y1/J/Y scalars) live in ../wasm/special/scalars.ts — single
 // source of truth shared with the WASM-bridge JS fallbacks. They stay
 // self-contained (inlined literals) so kernelSource can serialize them.
@@ -875,14 +877,20 @@ export const besselI = mathTyped('besselI', {
 /**
  * Modified Bessel function of the second kind, K_nu(x), for a real order (K_(-nu) = K_nu).
  *
+ * A value far outside the double range returns 0 or Infinity at once (`besselKGate`). Otherwise
+ * the work of one call is about |nu| steps; an order above 2500000000 throws a RangeError, and
+ * the array form counts the total of its elements.
+ *
  * @param n - Order (real)
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns K_n(x)
  */
 export const besselK = mathTyped('besselK', {
   'number, number': besselKScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => besselKScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselKArrayWork(n, x);
+    return f64Unary(x, (v) => besselKScalar(n, v));
+  },
 });
 
 // =============================================================================
@@ -1446,19 +1454,67 @@ registerWorkerKernels({
   besselJ0: [
     0,
     0,
-    () => kernelSource([besselHankel, besselJ0Series, besselJ0Scalar], '(x) => besselJ0Scalar(x)'),
+    () =>
+      kernelSource(
+        [
+          besselJ0Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselJ0Scalar,
+        ],
+        '(x) => besselJ0Scalar(x)'
+      ),
   ],
   besselJ1: [
     0,
     0,
-    () => kernelSource([besselHankel, besselJ1Series, besselJ1Scalar], '(x) => besselJ1Scalar(x)'),
+    () =>
+      kernelSource(
+        [
+          besselJ1Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselJ1Scalar,
+        ],
+        '(x) => besselJ1Scalar(x)'
+      ),
   ],
   besselY0: [
     0,
     0,
     () =>
       kernelSource(
-        [besselHankel, besselJ0Series, besselY0Series, besselY0Scalar],
+        [
+          besselJ0Series,
+          besselY0Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselY0Scalar,
+        ],
         '(x) => besselY0Scalar(x)'
       ),
   ],
@@ -1467,7 +1523,21 @@ registerWorkerKernels({
     0,
     () =>
       kernelSource(
-        [besselHankel, besselJ1Series, besselY1Series, besselY1Scalar],
+        [
+          besselJ1Series,
+          besselY1Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselY1Scalar,
+        ],
         '(x) => besselY1Scalar(x)'
       ),
   ],
@@ -1477,7 +1547,6 @@ registerWorkerKernels({
     (n: number) =>
       kernelSource(
         [
-          besselHankel,
           besselJ0Series,
           besselJ1Series,
           besselJ0Scalar,
@@ -1508,7 +1577,6 @@ registerWorkerKernels({
     (n: number) =>
       kernelSource(
         [
-          besselHankel,
           besselJ0Series,
           besselJ1Series,
           besselY0Series,
@@ -1549,6 +1617,8 @@ registerWorkerKernels({
           _lgamma,
           rgammaScalar,
           besselGammaAux,
+          besselUniformExponent,
+          besselKGate,
           besselKReal,
           besselIPlan,
           besselIPositive,
@@ -1562,7 +1632,7 @@ registerWorkerKernels({
     1,
     (n: number) =>
       kernelSource(
-        [besselGammaAux, besselKReal, besselKScalar],
+        [besselGammaAux, besselUniformExponent, besselKGate, besselKReal, besselKScalar],
         `(x) => besselKScalar(${numberLiteral(n)}, x)`
       ),
   ],

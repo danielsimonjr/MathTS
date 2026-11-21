@@ -49,6 +49,7 @@ import {
   besselJUnderflows,
   besselYLogBound,
   besselIPlan,
+  besselKGate,
   besselJ0Scalar,
   besselJ1Scalar,
   besselJScalar,
@@ -330,6 +331,24 @@ export function assertBesselIArrayWork(n: number, xs: Float64Array): void {
     if (n < 0 && !integer) steps += Math.min(an, 2 * Math.ceil(ax) + 2000);
   }
   assertArrayWork('besselI', n, xs.length, Math.ceil(steps), MAX_RECURRENCE_ORDER);
+}
+
+/**
+ * The array guard of besselK: the recurrence runs about |n| steps for each element that the gate
+ * (`besselKGate`) does not decide, and the total is held to MAX_RECURRENCE_ORDER. An order
+ * above the limit is left to the scalar (its gate or its RangeError).
+ */
+export function assertBesselKArrayWork(n: number, xs: Float64Array): void {
+  const an = Math.abs(n);
+  if (!Number.isFinite(n) || an > SCALAR_ORDER_LIMIT || an * xs.length <= MAX_RECURRENCE_ORDER) {
+    return;
+  }
+  let steps = 0;
+  for (let i = 0; i < xs.length; i++) {
+    const x = xs[i];
+    if (x > 0 && x < Infinity && besselKGate(an, x, 1) === 0) steps += an;
+  }
+  assertArrayWork('besselK', n, xs.length, Math.ceil(steps), MAX_RECURRENCE_ORDER);
 }
 
 /** Order-`n` (`n ≥ 2`) variant of an AS managed `<name>(order, xs)` kernel. */

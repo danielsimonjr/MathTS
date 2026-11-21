@@ -141,8 +141,10 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   it('besselK(MAX, 2) is Infinity at the first overflow (no order limit)', () => {
     expect(besselK(MAX, 2)).toBe(Infinity);
   });
-  it('besselK(MAX, 1e4) is 0 at two zeros in a row (no order limit)', () => {
-    expect(besselK(MAX, 1e4)).toBe(0);
+  it('besselK(MAX, 1e4) is Infinity at once (the gate of #1362; no order limit)', () => {
+    // K_nu(x) grows with nu: ln K_MAX(1e4) is about MAX ln(2 MAX / 1e4). The old pin 0 came from
+    // the underflowed start values (exp(-1e4) is 0) and the stop at two zeros in a row.
+    expect(besselK(MAX, 1e4)).toBe(Infinity);
   });
   // hermiteH had no order limit and gave NaN at the first overflow (a few hundred steps). The sign
   // of H_n(x) oscillates with n, so since #1332 it runs the full degree on a rescaled recurrence

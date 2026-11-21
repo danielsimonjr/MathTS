@@ -656,8 +656,10 @@ describe('#1289 besselY: an overflow is -Infinity, not NaN', () => {
     expect(rel(besselY(-20.5, 1) as number, 6.01429082926e-26)).toBeLessThan(1e-9);
     expect(rel(besselY(-60.5, 2) as number, 1.51700688916e-83)).toBeLessThan(1e-9);
   });
-  it('a non-finite x still gives NaN', () => {
-    expect(besselY(1e8, Infinity)).toBeNaN();
+  it('x = Infinity gives the limit 0; a NaN, zero or negative x gives NaN', () => {
+    // Y_nu(x) -> 0 as x -> Infinity (the amplitude sqrt(2 / (pi x)) -> 0; mpmath gives 0). The
+    // scalar returned NaN from sin(Infinity) before the limit was a rule.
+    expect(besselY(1e8, Infinity)).toBe(0);
     expect(besselY(5, NaN)).toBeNaN();
     expect(besselY(400, 0)).toBeNaN();
     expect(besselY(400, -1)).toBeNaN();

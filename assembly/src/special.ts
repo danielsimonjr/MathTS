@@ -9,8 +9,8 @@
  * All exported functions accept / return Float64Array and use the same
  * typed-array calling convention as the other AS kernels (tridiag.ts, poly.ts).
  *
- * Bessel J0/J1/Y0/Y1: ascending series for |x| <= 13, Hankel asymptotic
- *   above; Jn via Miller backward / forward recurrence, Yn via forward
+ * Bessel J0/J1/Y0/Y1: ascending series for |x| <= 4, CF1 and Steed's CF2 below
+ *   17, the Hankel expansion with the exact phase above; Jn via Miller backward / forward recurrence, Yn via forward
  *   recurrence. Validated to <1e-9 vs mpmath (tests/diff-special.test.mjs).
  * Airy Ai/Bi: convergent series for |x| <= 5, asymptotic (with in-loop
  *   generated u_k coefficients) beyond. Validated to <1e-9 vs mpmath.
@@ -101,9 +101,10 @@ export function lgamma_f64(xs: Float64Array): Float64Array {
 const _EULER_GAMMA: f64 = 0.5772156649015328606;
 const _TWO_OVER_PI: f64 = 0.63661977236758134308;
 const _ONE_OVER_PI: f64 = 0.31830988618379067154;
-// |x| at or below this uses the convergent ascending series; above it, the
-// Hankel asymptotic. 13 keeps both sides at f64 accuracy across the crossover.
-const _BESSEL_SERIES_MAX: f64 = 13.0;
+// The ascending series runs to x = 4, CF1 and CF2 (_besselJYSteed) below 17, and the Hankel
+// expansion from 17 (its smallest term is below 1e-15 there). The same rule as the JS scalars.
+const _BESSEL_SERIES_MAX: f64 = 4.0;
+const _BESSEL_HANKEL_MIN: f64 = 17.0;
 
 // Hankel asymptotic expansion shared by J_nu and Y_nu (nu = 0 or 1), large x:
 //   J_nu ~ sqrt(2/(pi x)) [P cos(chi) - Q sin(chi)]
@@ -131,11 +132,100 @@ function _besselHankel(nu: f64, x: f64, wantY: bool): f64 {
     if ((k & 1) == 1) Q += s * t;
     else P += s * t;
   }
-  const chi: f64 = x - (nu * 0.5 + 0.25) * Math.PI;
-  const amp: f64 = Math.sqrt(2.0 / (Math.PI * x));
-  return wantY
-    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
-    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+  // chi = x - pi/4 (nu = 0) or x - 3 pi/4 (nu = 1) from the exactly reduced sin x and cos x: a
+  // rounded chi costs ulp(x) / 2 of phase (J0(22926.8125) was 5586 units of the amplitude off).
+  const sx: f64 = Math.sin(x);
+  const cx: f64 = Math.cos(x);
+  const r: f64 = Math.SQRT1_2;
+  const cosChi: f64 = nu == 0.0 ? (cx + sx) * r : (sx - cx) * r;
+  const sinChi: f64 = nu == 0.0 ? (sx - cx) * r : -(sx + cx) * r;
+  // 2 / pi / x: the product pi * x is Infinity above x = 5.7e307, and the amplitude was 0.
+  const amp: f64 = Math.sqrt(2.0 / Math.PI / x);
+  return wantY ? amp * (P * sinChi + Q * cosChi) : amp * (P * cosChi - Q * sinChi);
+}
+
+// J_nu(x) or Y_nu(x) for nu = 0 or 1 and 4 < x < 17: CF1 (Lentz) for J'/J, Steed's CF2 for
+// p + i q, and the Wronskian (Numerical Recipes `bessjy`, the x >= 2 branch with no recurrence).
+// The same steps as besselJYTemme of functions/src/wasm/special/scalars.ts for these orders. The
+// ascending series cancels from about x = 6 (88820 units of 2^-52 for Y1(12.999999)), and the
+// Hankel expansion is not accurate below 17.
+function _besselJYSteed(nu: f64, x: f64, wantY: bool): f64 {
+  const EPS: f64 = 1e-16;
+  const FPMIN: f64 = 1e-300;
+  const xi: f64 = 1.0 / x;
+  const xi2: f64 = 2.0 * xi;
+  const w: f64 = xi2 / Math.PI;
+  // CF1 for h = J'_nu / J_nu, with the sign of J_nu relative to the seed.
+  let isign: f64 = 1.0;
+  let h: f64 = nu * xi;
+  if (h < FPMIN) h = FPMIN;
+  let b: f64 = xi2 * nu;
+  let d: f64 = 0.0;
+  let c: f64 = h;
+  let ok: bool = false;
+  for (let i: i32 = 1; i <= 100000; i++) {
+    b += xi2;
+    d = b - d;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = b - 1.0 / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1.0 / d;
+    const del: f64 = c * d;
+    h = del * h;
+    if (d < 0.0) isign = -isign;
+    if (Math.abs(del - 1.0) < EPS) {
+      ok = true;
+      break;
+    }
+  }
+  if (!ok) return NaN;
+  const f: f64 = h;
+  // CF2 (Steed) for p + i q.
+  let a: f64 = 0.25 - nu * nu;
+  let p: f64 = -0.5 * xi;
+  let q: f64 = 1.0;
+  const br: f64 = 2.0 * x;
+  let bi: f64 = 2.0;
+  let fct: f64 = (a * xi) / (p * p + q * q);
+  let cr: f64 = br + q * fct;
+  let ci: f64 = bi + p * fct;
+  let den: f64 = br * br + bi * bi;
+  let dr: f64 = br / den;
+  let di: f64 = -bi / den;
+  let dlr: f64 = cr * dr - ci * di;
+  let dli: f64 = cr * di + ci * dr;
+  let temp: f64 = p * dlr - q * dli;
+  q = p * dli + q * dlr;
+  p = temp;
+  ok = false;
+  for (let i: i32 = 2; i <= 100000; i++) {
+    a += <f64>(2 * (i - 1));
+    bi += 2.0;
+    dr = a * dr + br;
+    di = a * di + bi;
+    if (Math.abs(dr) + Math.abs(di) < FPMIN) dr = FPMIN;
+    fct = a / (cr * cr + ci * ci);
+    cr = br + cr * fct;
+    ci = bi - ci * fct;
+    if (Math.abs(cr) + Math.abs(ci) < FPMIN) cr = FPMIN;
+    den = dr * dr + di * di;
+    dr /= den;
+    di /= -den;
+    dlr = cr * dr - ci * di;
+    dli = cr * di + ci * dr;
+    temp = p * dlr - q * dli;
+    q = p * dli + q * dlr;
+    p = temp;
+    if (Math.abs(dlr - 1.0) + Math.abs(dli) < EPS) {
+      ok = true;
+      break;
+    }
+  }
+  if (!ok) return NaN;
+  const gam: f64 = (p - f) / q;
+  let rjmu: f64 = Math.sqrt(w / ((p - f) * gam + q));
+  if (isign < 0.0) rjmu = -rjmu;
+  return wantY ? rjmu * gam : rjmu;
 }
 
 // J0 = sum_{k>=0} (-1)^k (x^2/4)^k/(k!)^2.
@@ -215,7 +305,9 @@ function _besselY1Series(x: f64): f64 {
 
 function _besselJ0(x: f64): f64 {
   const ax: f64 = Math.abs(x);
-  return ax <= _BESSEL_SERIES_MAX ? _besselJ0Series(ax) : _besselHankel(0.0, ax, false);
+  if (ax == Infinity) return 0.0;
+  if (ax <= _BESSEL_SERIES_MAX) return _besselJ0Series(ax);
+  return ax < _BESSEL_HANKEL_MIN ? _besselJYSteed(0.0, ax, false) : _besselHankel(0.0, ax, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -225,8 +317,13 @@ function _besselJ0(x: f64): f64 {
 function _besselJ1(x: f64): f64 {
   const sign: f64 = x < 0.0 ? -1.0 : 1.0; // J1 is odd
   const ax: f64 = Math.abs(x);
+  if (ax == Infinity) return sign * 0.0;
   const val: f64 =
-    ax <= _BESSEL_SERIES_MAX ? _besselJ1Series(ax) : _besselHankel(1.0, ax, false);
+    ax <= _BESSEL_SERIES_MAX
+      ? _besselJ1Series(ax)
+      : ax < _BESSEL_HANKEL_MIN
+        ? _besselJYSteed(1.0, ax, false)
+        : _besselHankel(1.0, ax, false);
   return sign * val;
 }
 
@@ -236,7 +333,9 @@ function _besselJ1(x: f64): f64 {
 
 function _besselY0(x: f64): f64 {
   if (x <= 0.0) return NaN;
-  return x <= _BESSEL_SERIES_MAX ? _besselY0Series(x) : _besselHankel(0.0, x, true);
+  if (x == Infinity) return 0.0;
+  if (x <= _BESSEL_SERIES_MAX) return _besselY0Series(x);
+  return x < _BESSEL_HANKEL_MIN ? _besselJYSteed(0.0, x, true) : _besselHankel(0.0, x, true);
 }
 
 // ---------------------------------------------------------------------------
@@ -245,7 +344,9 @@ function _besselY0(x: f64): f64 {
 
 function _besselY1(x: f64): f64 {
   if (x <= 0.0) return NaN;
-  return x <= _BESSEL_SERIES_MAX ? _besselY1Series(x) : _besselHankel(1.0, x, true);
+  if (x == Infinity) return 0.0;
+  if (x <= _BESSEL_SERIES_MAX) return _besselY1Series(x);
+  return x < _BESSEL_HANKEL_MIN ? _besselJYSteed(1.0, x, true) : _besselHankel(1.0, x, true);
 }
 
 // ---------------------------------------------------------------------------
@@ -274,7 +375,7 @@ function _besselJn(n: i32, x: f64): f64 {
   if (isNaN(x)) return NaN;
   const nf: f64 = <f64>ni;
   const ax: f64 = Math.abs(x);
-  if (ax == 0.0) return sign * 0.0;
+  if (ax == 0.0 || ax == Infinity) return sign * 0.0;
   // |J_n(x)| <= (|x|/2)^n / n! and ln n! >= n ln n - n, so below ln(2^-1075) = -745.14 the
   // value rounds to 0. This test comes before the limits, as in the JS scalar
   // (besselJUnderflows, the same expression).
@@ -353,6 +454,20 @@ function _besselYn(n: i32, x: f64): f64 {
   const sign: f64 = n < 0 && ni % 2 != 0 ? -1.0 : 1.0;
   if (ni == 0) return sign * _besselY0(x);
   if (ni == 1) return sign * _besselY1(x);
+  if (x == Infinity) return sign * 0.0;
+  // The lower bound of ln|Y_n(x)| of besselYLogBound (functions/src/wasm/special/scalars.ts):
+  // Y_n(x) < 0 and |Y_n(x)| >= 2^n Gamma(n) / (pi x^n) for 0 < x <= n - 1. Above 709.79 the value
+  // is -Infinity (Y2(5e-324) was NaN: Y0 and Y1 of that x are NaN).
+  const nf: f64 = <f64>ni;
+  if (
+    x <= nf - 1.0 &&
+    nf * (Math.log(nf) - 1.0 + Math.LN2 - Math.log(x)) -
+      0.5 * Math.log(nf) +
+      0.5 * Math.log(2.0 * Math.PI) -
+      Math.log(Math.PI) >
+      709.79
+  )
+    return sign * -Infinity;
   let yPrev: f64 = _besselY0(x);
   let yCurr: f64 = _besselY1(x);
   for (let k: i32 = 1; k < ni; k++) {

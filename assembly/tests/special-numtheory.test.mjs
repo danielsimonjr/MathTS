@@ -113,6 +113,49 @@ check('integerDigits(255, 16) = [15,15]', arrEq(readArr(exports.integerDigits(25
   exports.__unpin(mods);
 }
 
+// Integer-order Bessel kernels at the edges of the double range. The oracle is mpmath 1.3.0
+// (exact doubles). The Hankel phase used a rounded x - pi / 4 (J0(22926.8125) was 5586 units of
+// the amplitude off), the amplitude sqrt(2 / (pi x)) was 0 above x = 5.7e307, and Y_n(x) of
+// x = 5e-324 was NaN.
+{
+  const xs = makeArray([22926.8125, 5.8e307]);
+  const j0 = readArr(exports.bessel_j0_f64(xs));
+  const near = (got, want) => Math.abs(got / want - 1) < 1e-12;
+  check('J0(22926.8125) = 1.3277085041525044e-3', near(j0[0], 1.3277085041525044e-3));
+  check('J0(5.8e307) = 9.272445391618778e-155', near(j0[1], 9.272445391618778e-155));
+  const tiny = makeArray([5e-324, 1e-300]);
+  const y2 = readArr(exports.bessel_yn_f64(2, tiny));
+  check('Y2(5e-324) and Y2(1e-300) are -Infinity', y2[0] === -Infinity && y2[1] === -Infinity);
+  exports.__unpin(xs);
+  exports.__unpin(tiny);
+}
+
+// CF1 and Steed's CF2 for 4 < x < 17 (the ascending series cancelled: Y1(12.999999) was 88820
+// units of 2^-52 off), the exact phase (J1(1e17) had the wrong sign), and the limit 0 at
+// x = Infinity. mpmath 1.3.0 on the exact doubles.
+{
+  const xs = makeArray([12.999999, 8, 1e17, Infinity]);
+  const y1 = readArr(exports.bessel_y1_f64(xs));
+  const j1 = readArr(exports.bessel_j1_f64(xs));
+  const j0 = readArr(exports.bessel_j0_f64(xs));
+  const y0 = readArr(exports.bessel_y0_f64(xs));
+  const amp = (x) => 2 ** -52 * Math.sqrt(2 / Math.PI / x);
+  const within = (got, want, x) => Math.abs(got - want) / amp(x) <= 40;
+  check('Y1(12.999999) = -0.21008134637283055', within(y1[0], -0.21008134637283055, 12.999999));
+  check('J0(8) = 0.1716508071375539', within(j0[1], 0.1716508071375539, 8));
+  check('Y0(8) = 0.22352148938756622', within(y0[1], 0.22352148938756622, 8));
+  check('J1(8) = 0.23463634685391463', within(j1[1], 0.23463634685391463, 8));
+  check('J1(1e17) = 7.511648229358563e-10', within(j1[2], 7.511648229358563e-10, 1e17));
+  check(
+    'J0, J1, Y0, Y1 of Infinity are 0',
+    j0[3] === 0 && j1[3] === 0 && y0[3] === 0 && y1[3] === 0
+  );
+  const jn = readArr(exports.bessel_jn_f64(3, xs));
+  const yn = readArr(exports.bessel_yn_f64(3, xs));
+  check('J3 and Y3 of Infinity are 0', jn[3] === 0 && yn[3] === 0);
+  exports.__unpin(xs);
+}
+
 console.log('\n============================');
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);
