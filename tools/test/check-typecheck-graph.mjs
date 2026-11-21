@@ -11,7 +11,7 @@
 // The same holds for `test` and `test:coverage`: a test imports a workspace package by name, or
 // reads its `dist/` by path, and that build must finish before the test starts (#1185). A
 // hand-kept map of such reads misses every new one, so this gate derives them: it scans the
-// `tests/` folder of each package for a quoted specifier of a workspace package (`import`,
+// `tests/` folder, the `tsconfig.test.json` and the `vitest.config.ts` of each package for a quoted specifier of a workspace package (`import`,
 // `import()`, `require`, a tsconfig `paths` key), for a path that holds `<workspace dir>/dist`,
 // and for a relative string that resolves into the `src`, `dist` or `build` folder (or the root
 // folder) of another workspace package. A test that imports `../../functions/src/x.js` runs the
@@ -78,7 +78,13 @@ export function findMissingEdges(tasks, packages) {
 const SKIPPED_FOLDERS = new Set(['node_modules', 'dist', 'coverage']);
 
 /** Files that can name a workspace package: code and tsconfig files. */
-const SCANNED_FILE = /\.(?:ts|mts|mjs|js|json)$/;
+const SCANNED_FILE = /\.(?:ts|mts|cts|tsx|mjs|cjs|js|jsx|json)$/;
+
+/** Package files outside `tests/` that can point a test at another package's build. */
+const TEST_CONFIG_FILES = ['tsconfig.test.json', 'vitest.config.ts'];
+
+/** The most files that a message names for one input. */
+const MAX_READERS = 3;
 
 /**
  * Escape a text for use inside a regular expression.
@@ -162,26 +168,30 @@ function* scannedFiles(folder) {
  * Read which workspace packages the tests of each package read.
  * @param {{name: string, dir: string}[]} packages  every workspace package
  * @param {string} [root]  repository root; defaults to this checkout (tests pass a fixture)
- * @returns {{name: string, inputs: Map<string, string>}[]} per package with at least one input:
- *   the packages that its `tests/` folder reads, each with the first file that reads it (a path
- *   relative to `root`, with `/`). A package never lists itself.
+ * @returns {{name: string, inputs: Map<string, string[]>}[]} per package with at least one input:
+ *   the packages that its `tests/` folder, its `tsconfig.test.json` and its `vitest.config.ts`
+ *   read, each with the first three files that read it (paths relative to `root`, with `/`).
+ *   A package never lists itself.
  */
 export function readTestInputs(packages, root = repoRoot) {
   const found = [];
   for (const { name, dir } of packages) {
     const folder = join(root, dir, 'tests');
-    if (!existsSync(folder)) continue;
+    const files = TEST_CONFIG_FILES.map((f) => join(root, dir, f)).filter((f) => existsSync(f));
+    if (existsSync(folder)) files.push(...scannedFiles(folder));
     const inputs = new Map();
-    for (const file of scannedFiles(folder)) {
+    for (const file of files) {
       const text = readFileSync(file, 'utf8');
       const read = [
         ...workspaceInputs(text, packages),
         ...relativeInputs(text, file, packages, root),
       ];
       for (const input of read) {
-        if (input !== name && !inputs.has(input)) {
-          inputs.set(input, relative(root, file).split(sep).join('/'));
-        }
+        if (input === name) continue;
+        const readers = inputs.get(input) ?? [];
+        const path = relative(root, file).split(sep).join('/');
+        if (readers.length < MAX_READERS && !readers.includes(path)) readers.push(path);
+        inputs.set(input, readers);
       }
     }
     if (inputs.size > 0) found.push({ name, inputs });
@@ -211,7 +221,7 @@ function closureOf(direct, deps) {
  * Compare the test and typecheck task graph with the builds that the tests read.
  * @param {{taskId: string, dependencies: string[]}[]} tasks  `tasks` of `turbo run typecheck test test:coverage --dry=json`
  * @param {{name: string, scripts: Record<string, string>, hasTestTsconfig: boolean}[]} packages
- * @param {{name: string, inputs: Map<string, string>}[]} inputs  result of `readTestInputs`
+ * @param {{name: string, inputs: Map<string, string[]>}[]} inputs  result of `readTestInputs`
  * @returns {string[]} one message per missing edge or missing task; empty when the graph is sound
  */
 export function findMissingInputEdges(tasks, packages, inputs) {
@@ -233,10 +243,10 @@ export function findMissingInputEdges(tasks, packages, inputs) {
         continue;
       }
       const closure = closureOf(direct, deps);
-      for (const [input, file] of reads.get(name) ?? []) {
+      for (const [input, files] of reads.get(name) ?? []) {
         if (!byName.get(input)?.scripts.build) continue;
         if (!closure.has(`${input}#build`)) {
-          problems.push(`${task} does not wait for ${input}#build (read by ${file})`);
+          problems.push(`${task} does not wait for ${input}#build (read by ${files.join(', ')})`);
         }
       }
     }

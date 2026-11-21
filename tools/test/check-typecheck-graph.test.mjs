@@ -148,6 +148,12 @@ test('readTestInputs reads the tests folders, skips build output, drops the own 
     writeFileSync(join(root, path), text);
   };
   put('functions/tests/b.test.ts', `import '${UNITS}'; import '${FUNCTIONS}';`);
+  put('functions/tests/c.test.tsx', `import '${UNITS}';`);
+  put('functions/tests/d.test.cts', `require('${UNITS}');`);
+  put('functions/tests/e.test.jsx', `import '${CORE}';`);
+  put('functions/tests/f.test.cjs', `require('${COMPAT}');`);
+  put('functions/tsconfig.test.json', '{ "paths": { "@x/y": ["../units/dist/index.d.ts"] } }');
+  put('compat/vitest.config.ts', "export default { alias: { x: '../units/dist/index.js' } };");
   put('functions/tests/a.test.ts', `import '${UNITS}';`);
   put('functions/tests/notes.md', `import '${COMPAT}';`);
   put('functions/tests/node_modules/x/index.js', `import '${COMPAT}';`);
@@ -157,9 +163,30 @@ test('readTestInputs reads the tests folders, skips build output, drops the own 
   const found = readTestInputs(workspace, root);
   // The result follows the order of `workspace`: units, functions, compat.
   assert.deepEqual(found, [
-    { name: UNITS, inputs: new Map([[CORE, 'units/tests/u.test.ts']]) },
-    { name: FUNCTIONS, inputs: new Map([[UNITS, 'functions/tests/a.test.ts']]) },
-    { name: COMPAT, inputs: new Map([[FUNCTIONS, 'compat/tests/c.test.ts']]) },
+    { name: UNITS, inputs: new Map([[CORE, ['units/tests/u.test.ts']]]) },
+    {
+      name: FUNCTIONS,
+      // The config file comes first; a fourth reader of units is not named.
+      inputs: new Map([
+        [
+          UNITS,
+          [
+            'functions/tsconfig.test.json',
+            'functions/tests/a.test.ts',
+            'functions/tests/b.test.ts',
+          ],
+        ],
+        [CORE, ['functions/tests/e.test.jsx']],
+        [COMPAT, ['functions/tests/f.test.cjs']],
+      ]),
+    },
+    {
+      name: COMPAT,
+      inputs: new Map([
+        [UNITS, ['compat/vitest.config.ts']],
+        [FUNCTIONS, ['compat/tests/c.test.ts']],
+      ]),
+    },
   ]);
 });
 
@@ -169,7 +196,12 @@ const typed = (name, extra = {}) => ({
   hasTestTsconfig: true,
   ...extra,
 });
-const withInputs = [{ name: FUNCTIONS, inputs: new Map([[UNITS, 'functions/tests/g33.test.ts']]) }];
+const withInputs = [
+  {
+    name: FUNCTIONS,
+    inputs: new Map([[UNITS, ['functions/tests/g33.test.ts', 'functions/tests/x.ts']]]),
+  },
+];
 const inputPackages = () => [typed(FUNCTIONS), typed(UNITS), typed(COMPAT)];
 const task = (taskId, dependencies) => ({ taskId, dependencies });
 /** A graph in which functions waits for units, and the units build exists. */
@@ -195,7 +227,7 @@ test('control: a test task that does not wait for a build its tests read is repo
   const tasks = soundInputs();
   tasks[2].dependencies = []; // functions#test loses units#build
   assert.deepEqual(findMissingInputEdges(tasks, inputPackages(), withInputs), [
-    `${FUNCTIONS}#test does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts)`,
+    `${FUNCTIONS}#test does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts, functions/tests/x.ts)`,
   ]);
 });
 
@@ -203,9 +235,9 @@ test('control: test, test:coverage and typecheck are each reported', () => {
   const tasks = soundInputs();
   for (const t of tasks) if (t.taskId.startsWith(`${FUNCTIONS}#`)) t.dependencies = [];
   assert.deepEqual(findMissingInputEdges(tasks, inputPackages(), withInputs), [
-    `${FUNCTIONS}#test does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts)`,
-    `${FUNCTIONS}#test:coverage does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts)`,
-    `${FUNCTIONS}#typecheck does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts)`,
+    `${FUNCTIONS}#test does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts, functions/tests/x.ts)`,
+    `${FUNCTIONS}#test:coverage does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts, functions/tests/x.ts)`,
+    `${FUNCTIONS}#typecheck does not wait for ${UNITS}#build (read by functions/tests/g33.test.ts, functions/tests/x.ts)`,
   ]);
 });
 
