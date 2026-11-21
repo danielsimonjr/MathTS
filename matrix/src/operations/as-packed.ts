@@ -132,9 +132,18 @@ function resolveDimensions(input: DecompositionMatrixInput): {
         throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
       }
       // A row of Arrays is a tensor or a jagged array, not a matrix. Later arithmetic would read
-      // `[2]` as 2 and `[1, 2]` as NaN (#1260).
+      // `[2]` as 2 and `[1, 2]` as NaN (#1260). An `undefined` entry (a hole, or a value that
+      // is missing) is no number of any type and gives a result full of NaN without a sign. The
+      // other entry types stay: `lusolve` reads an entry that is a BigNumber, a Complex, a Fraction or
+      // a numeric string on its typed path, and asks this function for the shape only.
       for (let j = 0; j < cols; j++) {
-        if (Array.isArray(row[j])) rejectArrayEntry(input, i);
+        const entry: unknown = row[j];
+        if (Array.isArray(entry)) rejectArrayEntry(input, i);
+        if (entry === undefined) {
+          throw new TypeError(
+            `Matrix decomposition: nested array must contain numbers; row ${i} column ${j} is undefined`
+          );
+        }
       }
     }
     return { rows, cols, nested: input };

@@ -131,6 +131,23 @@ describe('#1260 decompositions reject a nested array that is not two dimensional
       expect((error as Error).message).toMatch(/jagged nested array at row 1/);
     });
 
+    it('an undefined entry throws a TypeError that names the position', async () => {
+      const error = await outcome(call, [
+        [1, undefined],
+        [2, 3],
+      ]);
+      expect(error).toBeInstanceOf(TypeError);
+      expect((error as Error).message).toMatch(/must contain numbers; row 0 column 1 is undefined/);
+    });
+
+    it('a hole in a row throws a TypeError that names the position', async () => {
+      const holey = [3, 4];
+      delete holey[1];
+      const error = await outcome(call, [[1, 2], holey]);
+      expect(error).toBeInstanceOf(TypeError);
+      expect((error as Error).message).toMatch(/must contain numbers; row 1 column 1 is undefined/);
+    });
+
     it('a flat array keeps its TypeError', async () => {
       const error = await outcome(call, [1, 2]);
       expect(error).toBeInstanceOf(TypeError);
@@ -147,6 +164,20 @@ describe('#1260 decompositions reject a nested array that is not two dimensional
         )
       ).toBeUndefined();
     });
+  });
+
+  it('an entry that is not a number but is not missing still passes the shape check', () => {
+    // `lusolve` (functions) asks this function for the shape of an Array that holds BigNumber,
+    // Complex, Fraction or numeric string entries and reads those on its typed path (#1219).
+    expect(
+      decompositionInputToNestedArray([
+        ['1', 2],
+        [3, 4],
+      ] as unknown as number[][])
+    ).toEqual([
+      ['1', 2],
+      [3, 4],
+    ]);
   });
 
   it('the table lists every function whose parameter is a DecompositionMatrixInput', () => {
