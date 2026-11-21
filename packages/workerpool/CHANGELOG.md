@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-workerpool
 
+## 0.5.2
+
+### Patch Changes
+
+- 3b2ffe6: `hypot`, the modulus of a Complex (`abs`), `norm` (the vector 2-norm, the Frobenius norm and the matrix 2-norm) and `distance` follow one rule on every path and type: the IEEE 754 rule of `hypot`. An infinite argument gives `Infinity`, also when another argument is `NaN`. Else a `NaN` argument gives `NaN`. Before, the paths did not agree: `hypot(Infinity, Infinity)` was `NaN` on the factory path, `hypot(bignumber(Infinity), bignumber(NaN))` was `NaN`, `norm([Infinity, Infinity])` and `distance([0, 0], [Infinity, Infinity])` were `NaN` for numbers and `Infinity` for BigNumbers. This rule is different from mathjs, which gives `NaN` for `hypot(Infinity, NaN)` and for `hypot(Infinity, Infinity)`. `hypot` of a list longer than 32768 numbers no longer overflows the call stack, and `distance2D`, `distance3D` and `distanceND` no longer overflow to `Infinity` for a large finite difference. The AssemblyScript `complex_abs`, `complex_to_polar` and `complex_array_abs` squared each part before the sum (Infinity above about 1e154, 0 below about 1e-162, NaN for an infinite part with a NaN part) and now take `Math.hypot`. Typed `hypot` of a BigNumber with two or more other arguments converted the BigNumber to a number; it now returns a BigNumber, as with one other argument. `gradientDescent` and the complex eigenvector of `eig` spread their vector into `Math.hypot`, which threw `RangeError` for a long vector; they now use the same long-list `hypot`. (Refs #1259)
+
 ## 0.5.1
 
 ### Patch Changes
