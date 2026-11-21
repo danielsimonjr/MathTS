@@ -356,6 +356,16 @@ describe('#1331: real-order J and Y at a large order or a large argument', () =>
       expectB1(besselY(400.5, 1.5e5), 9.532123532783423e-4, 1.5e5, 400.5);
       expectB1(besselJ(1000.5, 9e4), -2.3309866009074991e-3, 9e4, 1000.5);
     });
+    it('the amplitude is not 0 above x = 5.7e307, where pi * x is Infinity', () => {
+      // The head before this test returned 0 for each of the six values.
+      const MAX = 1.7976931348623157e308;
+      expectRel(besselJ(0.5, 5.8e307), 3.108146590703153e-155, 1e-14);
+      expectRel(besselY(0.5, 5.8e307), -1.0005071438488026e-154, 1e-14);
+      expectRel(besselJ(2.25, MAX), 2.250000477195952e-155, 1e-14);
+      expectRel(besselY(2.25, MAX), -5.509142236792925e-155, 1e-14);
+      expectRel(besselJ(-2.25, MAX), 5.4865424292557276e-155, 1e-14);
+      expectRel(besselY(-2.25, MAX), -2.304561239059276e-155, 1e-14);
+    });
     it('guards that main already had right: besselJ(2.5, 30), besselY(0.75, 100)', () => {
       expectB1(besselJ(2.5, 30), 0.14120285879928212, 30, 2.5);
       expectB1(besselY(0.75, 100), -0.048204317525488324, 100, 0.75);

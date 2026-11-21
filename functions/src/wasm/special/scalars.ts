@@ -650,7 +650,8 @@ export function besselHankelReal(nu: f64, x: f64, y: boolean): f64 {
   const cx = Math.cos(x);
   const sinChi = sx * ca - cx * sa;
   const cosChi = cx * ca + sx * sa;
-  const amp = Math.sqrt(2 / (Math.PI * x));
+  // (2 / pi) / x: the product pi * x is Infinity for x above 5.7e307, and the amplitude was 0.
+  const amp = Math.sqrt(2 / Math.PI / x);
   return y ? amp * (P * sinChi + Q * cosChi) : amp * (P * cosChi - Q * sinChi);
 }
 
@@ -768,10 +769,12 @@ export function besselJRealOrder(nu: f64, x: f64): f64 {
   return cosPiScalar(an) * jy[0] + jy[1];
 }
 
-/** Y_nu(x) for non-integer real order nu and x > 0 (see besselJRealOrder). */
+/**
+ * Y_nu(x) for non-integer real order nu and x > 0 (see besselJRealOrder). The caller
+ * (besselYScalar) returns NaN for x <= 0 before the call.
+ */
 export function besselYRealOrder(nu: f64, x: f64): f64 {
   if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
-  if (x === 0) return -Infinity;
   const an = Math.abs(nu);
   const bound = besselYLogBound(an, x);
   if (nu > 0) {
