@@ -1,5 +1,0 @@
----
-'@danielsimonjr/mathts-functions': patch
----
-
-`signTest`, `moodMedianTest`, `cummax`, `cummin` and `medianSelect` return NaN for a NaN input, as SciPy and NumPy do. `ecdf` throws a `RangeError` for a NaN input. `wassersteinDistance` returns NaN when the same infinite value occurs twice, or when an infinite value has the weight 0. `signTest` gives the exact p-value for more than 1,029 values (it gave NaN or 0). For up to 1,000 values, `signTest` sums the binomial coefficients directly, so `signTest([Infinity, -Infinity, 1, 2])` gives 0.625 exactly (the log-gamma sum gave 0.6250000000000006). `fisherExact` walks from the mode of the distribution with exact ratios, so its time grows with the square root of the counts and not with the counts (`[[1e9, 1e9 + 1e5], [1e9, 1e9]]` takes less than 1 s). A p-value that a double can hold is not 0. A table counts when its probability is at most the observed one times 1 + 1e-14, as in SciPy (the tolerance was 1e-7). `fisherExact` throws a `RangeError` when the walk needs more than 400,000,000 steps, or when the sum of the entries is not finite. (Refs #1146)
