@@ -191,12 +191,12 @@ describe('round (nearest)', () => {
   it('round(BigNumber 2.6) = 3', () => {
     expect((round(B(2.6)) as BigNumber).equals(B(3))).toBe(true);
   });
-  it('negative half-integers round CONSISTENTLY across types (half toward +∞ = −2)', () => {
-    // Guards the BigNumber default (halfUp = away-from-zero → −3) from diverging
-    // from Math.round/Fraction.round (half toward +∞ → −2).
-    expect(round(-2.5)).toBe(-2);
+  it('round at a negative tie follows the mathjs rule of each type (#996)', () => {
+    // mathjs 15.2.0: a number and a BigNumber round a tie away from zero (−3); a Fraction
+    // (fraction.js) rounds it toward +∞ (−2). A Complex rounds each part toward +∞.
+    expect(round(-2.5)).toBe(-3);
     expect((round(F(-5, 2)) as Fraction).equals(F(-2))).toBe(true);
-    expect((round(B(-2.5)) as BigNumber).equals(B(-2))).toBe(true);
+    expect((round(B(-2.5)) as BigNumber).equals(B(-3))).toBe(true);
   });
 });
 

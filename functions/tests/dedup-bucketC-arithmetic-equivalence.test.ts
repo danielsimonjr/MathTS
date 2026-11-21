@@ -8,7 +8,7 @@
  *
  *   pow(bignumber(2), 0.5)  -> 1     (should be ~1.4142)  — unguarded a.pow(0.5)
  *   pow(fraction(3), 2.9)   -> 27    (should be ~24.19)   — silently floored exponent
- *   round(bignumber(-2.5))  -> -3    (should be -2)       — half-away vs core's halfCeil
+ *   round(bignumber(-2.5))  -> -3    (mathjs gives -3; core gave -2 until #996)
  *   equal(0.1+0.2, 0.3)     -> false (should be true)     — strict === vs tolerance
  *
  * The fix delegates those rich-type / policy cases to core's oracle-pinned primitive
@@ -26,6 +26,7 @@ import fc from 'fast-check';
 import {
   pow,
   round,
+  factory_round,
   fix,
   equal,
   add,
@@ -79,8 +80,8 @@ describe('Bucket C — the fixed public-API bugs', () => {
     expect((r as BigNumber).toNumber()).toBeCloseTo(32, 12);
   });
 
-  it('round(bignumber(-2.5)) = -2 (halfCeil; was -3)', () => {
-    expect(asNum(round(bn(-2.5)))).toBe(-2);
+  it('round(bignumber(-2.5)) = -3 (half away from zero, as mathjs; #996)', () => {
+    expect(asNum(round(bn(-2.5)))).toBe(-3);
   });
 
   it('round(bignumber(2.5)) = 3', () => {
@@ -131,15 +132,17 @@ const eqNum = (a: unknown, b: unknown): boolean => {
 };
 
 describe('Bucket C — typed dispatcher ≡ core scalar primitive', () => {
-  it('round(BigNumber) matches core', () => {
+  // The typed row adds the live relTol snap that core has no config for, so the oracle is the
+  // factory round, which carries the same snap (#996).
+  it('round(BigNumber) matches the factory round', () => {
     fc.assert(
       fc.property(fc.double({ min: -1e6, max: 1e6, noNaN: true }), (x) => {
-        expect(eqNum(round(bn(x)), coreRound(bn(x)))).toBe(true);
+        expect(eqNum(round(bn(x)), factory_round(bn(x)))).toBe(true);
       })
     );
     // edge corpus
     for (const x of [-2.5, 2.5, -0.5, 0.5, 0, -0, 1.5, -1.5, 100.5]) {
-      expect(eqNum(round(bn(x)), coreRound(bn(x)))).toBe(true);
+      expect(eqNum(round(bn(x)), factory_round(bn(x)))).toBe(true);
     }
   });
 

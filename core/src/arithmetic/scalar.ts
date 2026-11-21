@@ -20,7 +20,7 @@
  * Unit's internal arithmetic actually produces) stay exact.
  */
 import { DEFAULT_CONFIG } from '../config.js';
-import { nearlyEqual } from '../number.js';
+import { nearlyEqual, roundNumberWide } from '../number.js';
 import { BigNumber, isBigNumber } from '../types/bignumber.js';
 import { Complex, isComplex } from '../types/complex.js';
 import { Fraction, isFraction } from '../types/fraction.js';
@@ -175,19 +175,33 @@ export function fix(x: NumericScalar): NumericScalar {
 }
 
 /**
- * Round to the nearest integer, half toward +∞ — matching `Math.round` and
- * `Fraction.round`. `BigNumber.round` defaults to half-away-from-zero, so it is
- * given `'halfCeil'` explicitly; otherwise negative half-integers would round
- * type-dependently (`round(-2.5)` = −2 for number/Fraction but −3 for BigNumber).
- * Complex components are rounded independently.
+ * Round to `decimals` decimal places (default 0), with the rule of mathjs 15.2.0 for each type:
+ * | Type | Tie |
+ * | --- | --- |
+ * | number | Away from zero, after a snap to `relTol` (`round(-2.5)` is -3, `round(1.005, 2)` is 1.01). |
+ * | BigNumber | Away from zero (`round(-2.5)` is -3). Core has no `relTol` snap; the typed `round` of `functions` has it. |
+ * | Fraction | Toward +Infinity (`round(-5/2)` is -2). |
+ * | Complex | Toward +Infinity in each part (`round(-2.5 + 2.5i)` is -2 + 3i). |
+ *
+ * A number takes the live `relTol` and `absTol` of `DEFAULT_CONFIG`. A `decimals` that is not an
+ * integer throws a TypeError for a BigNumber, a Fraction and a Complex; a number takes it as an
+ * extension (it scales by 10^decimals). A bigint is returned as it is.
+ * @param x - the value to round
+ * @param decimals - the number of decimal places; a negative count rounds to tens, hundreds, and so on
+ * @returns the rounded value, of the type of `x`
  */
-export function round(x: NumericScalar): NumericScalar {
-  if (typeof x === 'number') return Math.round(x);
+export function round(x: NumericScalar, decimals: number = 0): NumericScalar {
+  if (typeof x === 'number') {
+    return roundNumberWide(x, decimals, DEFAULT_CONFIG.relTol, DEFAULT_CONFIG.absTol);
+  }
   if (typeof x === 'bigint') return x;
   assertNumericScalar(x, 'round');
-  if (isComplex(x)) return new Complex(Math.round(x.re), Math.round(x.im));
-  if (isBigNumber(x)) return x.round(0, 'halfCeil');
-  return x.round();
+  if (!Number.isInteger(decimals)) {
+    throw new TypeError('Number of decimals in function round must be an integer');
+  }
+  if (isComplex(x)) return x.round(decimals);
+  if (isBigNumber(x)) return x.round(decimals, 'halfUp');
+  return x.round(decimals);
 }
 
 // --- comparison + predicates ---------------------------------------------------

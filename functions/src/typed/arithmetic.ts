@@ -59,6 +59,7 @@ import {
   fix as coreFix,
   equal as coreEqual,
 } from '@danielsimonjr/mathts-core';
+import { roundNumberTol, roundNumberWide } from '@danielsimonjr/mathts-core/internal';
 // The Unit is now the single merged class; use its instance type in type position.
 import type { UnitInstance as Unit, TypedFunction } from '@danielsimonjr/mathts-core';
 import {
@@ -1421,6 +1422,20 @@ function roundBigNumberLive(a: BigNumber, decimals: number): BigNumber {
   return roundBigNumberDecimals(a, decimals, relTol, absTol);
 }
 
+/**
+ * A number rounded to `decimals` places with the live `relTol` and `absTol`. A count from 0 to 15
+ * takes the mathjs kernel; any other count scales by 10^decimals (an extension, #996).
+ */
+function roundNumberLive(a: f64, decimals: f64): f64 {
+  const { relTol, absTol } = liveConfig();
+  return roundNumberWide(a, decimals, relTol, absTol);
+}
+
+/** Throws the mathjs TypeError for a decimal count that is not an integer. */
+function assertIntegerDecimals(decimals: f64): void {
+  if (!Number.isInteger(decimals)) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+}
+
 export const log = mathTyped('log', {
   number: (a: f64): f64 | Complex => logReal(a),
   Complex: (a: Complex): Complex => a.log(),
@@ -1511,29 +1526,48 @@ export const expm1 = mathTyped('expm1', {
 // =============================================================================
 
 /**
- * Round to nearest integer
+ * Round to a decimal count (default 0), with the tie rule of mathjs 15.2.0 for each type (#996):
+ * a number and a BigNumber round a tie away from zero, after a snap to the live `relTol`
+ * (`round(-2.5)` is -3, `round(1.005, 2)` is 1.01); a Fraction rounds it toward +Infinity
+ * (fraction.js); a Complex rounds each part toward +Infinity (complex.js).
  */
 export const round = mathTyped('round', {
-  number: (a: f64): f64 => Math.round(a),
-  // Rich-type policy cases DELEGATE to core's scalar `round`, which uses `halfCeil`
-  // for BigNumber so round(bignumber(-2.5)) = -2 (type-consistent with number/Fraction),
-  // not the -3 the old inline `a.round()` (half-away-from-zero) produced.
+  number: (a: f64): f64 => roundNumberLive(a, 0),
   Fraction: (a: Fraction): Fraction => coreRound(a) as Fraction,
-  BigNumber: (a: BigNumber): BigNumber => coreRound(a) as BigNumber,
+  BigNumber: (a: BigNumber): BigNumber => roundBigNumberLive(a, 0),
   Complex: (a: Complex): Complex => coreRound(a) as Complex,
-  'number, number': (a: f64, decimals: f64): f64 => {
-    const factor = Math.pow(10, decimals);
-    return Math.round(a * factor) / factor;
-  },
+  'number, number': (a: f64, decimals: f64): f64 => roundNumberLive(a, decimals),
   'BigNumber, number': (a: BigNumber, decimals: f64): BigNumber => roundBigNumberLive(a, decimals),
   'BigNumber, BigNumber': (a: BigNumber, decimals: BigNumber): BigNumber => {
     if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
     return roundBigNumberLive(a, decimals.toNumber());
   },
+  // Without this row the Complex and Fraction rows below take `round(2.55, bignumber(1))`,
+  // because the number converts to Complex before it converts to BigNumber.
+  'number, BigNumber': (a: f64, decimals: BigNumber): BigNumber => {
+    if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+    return roundBigNumberLive(BigNumber.fromNumber(a), decimals.toNumber());
+  },
+  'Fraction, number': (a: Fraction, decimals: f64): Fraction => a.round(decimals),
+  'Fraction, BigNumber': (a: Fraction, decimals: BigNumber): Fraction => {
+    if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+    return a.round(decimals.toNumber());
+  },
+  'Complex, number': (a: Complex, decimals: f64): Complex => {
+    assertIntegerDecimals(decimals);
+    return a.round(decimals);
+  },
+  'Complex, BigNumber': (a: Complex, decimals: BigNumber): Complex => {
+    if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+    return a.round(decimals.toNumber());
+  },
 
-  // Float64Array round, synchronous (nearest integer, matching the 'number' overload)
-  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.round(x)),
-  'Array | Matrix': unaryCollection({ real: Math.round }),
+  // Float64Array round, synchronous (the 'number' overload; the config is read once per call)
+  Float64Array: (a: Float64Array): Float64Array => {
+    const { relTol, absTol } = liveConfig();
+    return f64Unary(a, (x) => roundNumberTol(x, 0, relTol, absTol));
+  },
+  'Array | Matrix': unaryCollection({ real: (x: f64): f64 => roundNumberLive(x, 0) }),
 });
 
 /**

@@ -1,11 +1,11 @@
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
-import { nearlyEqual, splitNumber } from '../utils/number.js';
+import { splitNumber } from '../utils/number.js';
 import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
-import { roundNumber } from '../plain/number/index.js';
+import { roundNumberTol } from '@danielsimonjr/mathts-core/internal';
 import type { BigNumber } from '@danielsimonjr/mathts-core';
 import {
   ROUND_DECIMALS_NOT_INTEGER,
@@ -125,22 +125,12 @@ export const createRound = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: function (x: number): number {
-        // Handle round off errors by first rounding to relTol precision
-        const xEpsilon = roundNumber(x, toExponent(config.relTol));
-        const xSelected = nearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
-        return roundNumber(xSelected);
+        // The shared kernel: a snap to the relTol decimals first, then half away from zero (#996).
+        return roundNumberTol(x, 0, config.relTol, config.absTol);
       },
 
       'number, number': function (x: number, n: number): number {
-        // Same as number: unless user specifies more decimals than relTol
-        const epsilonExponent = toExponent(config.relTol);
-        if (n >= epsilonExponent) {
-          return roundNumber(x, n);
-        }
-
-        const xEpsilon = roundNumber(x, epsilonExponent);
-        const xSelected = nearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
-        return roundNumber(xSelected, n);
+        return roundNumberTol(x, n, config.relTol, config.absTol);
       },
 
       'number, BigNumber': function (x: number, n: BigNumberType): BigNumberType {
