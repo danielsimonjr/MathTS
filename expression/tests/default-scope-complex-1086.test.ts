@@ -9,41 +9,40 @@
  * the functions layer (decision D6).
  */
 import { describe, it, expect } from 'vitest';
+import { evaluate as mathjsEvaluate } from 'mathjs';
 import { isComplex } from '@danielsimonjr/mathts-core';
 import { evaluate, parse, compileExpression } from '../src/index.js';
 
-/** Distance in representable doubles (0 for equal values, Infinity when only one is NaN). */
-function ulpDistance(a: number, b: number): number {
-  if (Object.is(a, b) || (Number.isNaN(a) && Number.isNaN(b))) return 0;
-  if (Number.isNaN(a) || Number.isNaN(b)) return Infinity;
-  const view = new DataView(new ArrayBuffer(8));
-  const ordered = (x: number): bigint => {
-    view.setFloat64(0, Math.abs(x));
-    const bits = view.getBigInt64(0);
-    return x < 0 ? -bits : bits;
-  };
-  const gap = ordered(a) - ordered(b);
-  return Number(gap < 0n ? -gap : gap);
+/** Two numbers are the same value: `Object.is`, and a NaN equals a NaN. */
+function sameNumber(a: number, b: number): boolean {
+  return Object.is(a, b) || (Number.isNaN(a) && Number.isNaN(b));
 }
 
 /**
- * The libm of JavaScriptCore (`bun test`) can differ from V8 (Node, the engine of CI and of the
- * mathjs values below) by one ulp in `exp`, `log`, `sin`, `cos` and `pow`. A row that calls them is
- * exact on V8 and within 2 ulp on another engine. A row with no libm call is exact everywhere.
+ * The expected value is the result of the mathjs 15.2.0 `evaluate`, computed in the same process.
+ * The default scope and complex.js use the same steps (hypot, atan2, exp, cos, sin), so both read
+ * the one libm of the running engine, and the two agree to the last bit on V8 and on
+ * JavaScriptCore. A fixed table of numbers cannot do this: `Math.exp(-0.5 * Math.log(2))` is
+ * 0.7071067811865475 on V8 and 0.7071067811865476 on JavaScriptCore, so a literal is right on one
+ * engine only, and a tolerance for the other engine would also pass a real one-ulp drift of the
+ * algorithm.
  */
-const IS_V8 = (process.versions as Record<string, string | undefined>).bun === undefined;
-
-function expectPart(expr: string, name: string, got: number, want: number, libm: boolean): void {
-  const limit = libm && !IS_V8 ? 2 : 0;
-  expect(ulpDistance(got, want), `${expr} ${name} ${got}, want ${want}`).toBeLessThanOrEqual(limit);
+function oracle(expr: string): { re: number; im: number } {
+  return mathjsEvaluate(expr) as { re: number; im: number };
 }
 
-function expectComplex(expr: string, re: number, im: number, libm = false): void {
+function expectComplex(expr: string, re?: number, im?: number): void {
   const value = evaluate(expr);
   expect(isComplex(value), `${expr} is a Complex, got ${String(value)}`).toBe(true);
   const z = value as { re: number; im: number };
-  expectPart(expr, 're', z.re, re, libm);
-  expectPart(expr, 'im', z.im, im, libm);
+  const want = oracle(expr);
+  expect(sameNumber(z.re, want.re), `${expr} re ${z.re}, mathjs ${want.re}`).toBe(true);
+  expect(sameNumber(z.im, want.im), `${expr} im ${z.im}, mathjs ${want.im}`).toBe(true);
+  // A row with no libm call has one value on every engine: pin it as well.
+  if (re !== undefined && im !== undefined) {
+    expect(sameNumber(z.re, re), `${expr} re ${z.re}, want ${re}`).toBe(true);
+    expect(sameNumber(z.im, im), `${expr} im ${z.im}, want ${im}`).toBe(true);
+  }
 }
 
 function expectNumber(expr: string, want: number): void {
@@ -53,27 +52,39 @@ function expectNumber(expr: string, want: number): void {
 }
 
 describe('default scope returns a Complex outside the real domain (#1086)', () => {
-  // [expression, re, im, the row calls a libm function]
-  const complexRows: Array<[string, number, number, boolean]> = [
-    ['sqrt(-4)', 0, 2, false],
-    ['(-8)^(1/3)', 1, 1.732050807568877, true],
-    ['pow(-8, 1/3)', 1, 1.732050807568877, true],
-    ['log(-1)', 0, 3.141592653589793, false],
-    ['(-8)^0.5', 1.7319121124709863e-16, 2.82842712474619, true],
-    ['(-2)^(-0.5)', 4.329780281177466e-17, -0.7071067811865475, true],
-    ['(-8)^(-1/3)', 0.2500000000000001, -0.4330127018922194, true],
-    ['sqrt(-Infinity)', 0, Infinity, false],
-    ['log(-Infinity)', Infinity, 3.141592653589793, false],
-    ['(-8)^(2/3)', -1.9999999999999987, 3.464101615137754, true],
-    ['sqrt(-4) + 1', 1, 2, false],
-    ['(-8)^NaN', NaN, NaN, false],
-    ['(-8)^Infinity', NaN, NaN, false],
-    ['(-1)^Infinity', NaN, NaN, false],
-    ['(-0.5)^(-Infinity)', NaN, NaN, false],
+  // [expression, re, im]: the pinned value is given only for a row with no libm call. A row that
+  // calls exp, log, sin, cos or pow compares to the live mathjs value alone.
+  const pinnedRows: Array<[string, number, number]> = [
+    ['sqrt(-4)', 0, 2],
+    ['log(-1)', 0, 3.141592653589793],
+    ['sqrt(-Infinity)', 0, Infinity],
+    ['log(-Infinity)', Infinity, 3.141592653589793],
+    ['sqrt(-4) + 1', 1, 2],
+    ['(-8)^NaN', NaN, NaN],
+    ['(-8)^Infinity', NaN, NaN],
+    ['(-1)^Infinity', NaN, NaN],
+    ['(-0.5)^(-Infinity)', NaN, NaN],
   ];
-  for (const [expr, re, im, libm] of complexRows) {
+  const libmRows = [
+    '(-8)^(1/3)', // mathjs 15.2.0 on V8: 1 + 1.732050807568877i
+    'pow(-8, 1/3)',
+    '(-8)^0.5', // 1.7319121124709863e-16 + 2.82842712474619i on V8
+    '(-2)^(-0.5)', // 4.329780281177466e-17 - 0.7071067811865475i on V8, ...467e-17 and ...476 on JSC
+    '(-8)^(-1/3)',
+    '(-8)^(2/3)',
+    '(-3)^0.25',
+    '(-10)^0.1',
+    '(-7)^2.5',
+    '(-0.3)^(-0.7)',
+  ];
+  for (const [expr, re, im] of pinnedRows) {
     it(`${expr} is ${re} + ${im}i`, () => {
-      expectComplex(expr, re, im, libm);
+      expectComplex(expr, re, im);
+    });
+  }
+  for (const expr of libmRows) {
+    it(`${expr} equals the mathjs value to the last bit`, () => {
+      expectComplex(expr);
     });
   }
 
@@ -86,8 +97,32 @@ describe('default scope returns a Complex outside the real domain (#1086)', () =
   it('the one-argument compileExpression returns a Complex', () => {
     const value = compileExpression('(-8)^(1/3)').evaluate();
     expect(isComplex(value)).toBe(true);
-    expectPart('(-8)^(1/3)', 're', (value as { re: number }).re, 1, true);
-    expectPart('(-8)^(1/3)', 'im', (value as { im: number }).im, 1.732050807568877, true);
+    const want = oracle('(-8)^(1/3)');
+    expect(sameNumber((value as { re: number }).re, want.re)).toBe(true);
+    expect(sameNumber((value as { im: number }).im, want.im)).toBe(true);
+  });
+
+  // The mathjs value of a power of a negative real is complex.js's `exp(w * log(z))`. A seeded
+  // corpus compares the whole path (sign, magnitude, rounding) with the live oracle, exactly.
+  it('a seeded corpus of negative bases and fractional exponents equals mathjs to the last bit', () => {
+    let state = 2026;
+    const next = (): number => {
+      state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+      return state / 4294967296;
+    };
+    for (let i = 0; i < 300; i++) {
+      const a = -(next() * 10 ** Math.floor(next() * 6 - 2));
+      const b = (next() - 0.5) * 10 ** Math.floor(next() * 3 - 1);
+      if (Number.isInteger(b)) continue;
+      const expr = `(${a})^(${b})`;
+      expectComplex(expr);
+      expectComplex(`pow(${a}, ${b})`);
+    }
+    for (let i = 0; i < 100; i++) {
+      const a = -(next() * 10 ** Math.floor(next() * 8 - 3));
+      expectComplex(`sqrt(${a})`);
+      expectComplex(`log(${a})`);
+    }
   });
 });
 

@@ -194,9 +194,12 @@ const SPECIALS = [
   -Infinity,
 ];
 
-/** Calls `visit(x, decimals)` on a corpus of ties, snap windows, guard boundaries and specials. */
-function corpus(iterations: number, visit: (x: number, d: number) => void): void {
-  const rnd = lcg(2026);
+/**
+ * Calls `visit(x, decimals)` on a corpus of ties, snap windows, guard boundaries and specials. The
+ * seed picks the ties: two seeds give two corpora, so every test below takes its own.
+ */
+function corpus(iterations: number, seed: number, visit: (x: number, d: number) => void): void {
+  const rnd = lcg(seed);
   for (const x of SPECIALS) for (let d = 0; d <= 15; d++) visit(x, d);
   for (let i = 0; i < iterations; i++) {
     const d = Math.floor(rnd() * 16);
@@ -222,21 +225,23 @@ function corpus(iterations: number, visit: (x: number, d: number) => void): void
 }
 
 describe('roundNumberTol against the decimal-string path (#996)', () => {
-  const pairs: Array<[number, number]> = [
-    [1e-12, 1e-15],
-    [1e-10, 1e-15],
-    [5e-11, 0],
-    [1e-9, 1e-15],
+  // [relTol, absTol, seed]. Each pair has its own seed: four tests on one seed are one corpus run
+  // four times, and a fast path whose guard had lost its `t * 2^-50` term passed all four.
+  const pairs: Array<[number, number, number]> = [
+    [1e-12, 1e-15, 2026],
+    [1e-10, 1e-15, 2027],
+    [5e-11, 0, 2028],
+    [1e-9, 1e-15, 2029],
   ];
 
   // One test for each pair: the exact path costs about 55 microseconds a call, so the four pairs
   // together went over the 5 s default of `bun test` (6.2 s measured). Each test keeps its own budget.
   it.each(pairs)(
     'equals the exact path on a seeded corpus, relTol %s and absTol %s',
-    (relTol, absTol) => {
+    (relTol, absTol, seed) => {
       let total = 0;
       let first: string | undefined;
-      corpus(80, (x, d) => {
+      corpus(80, seed, (x, d) => {
         total++;
         const got = roundNumberTol(x, d, relTol, absTol);
         const want = roundNumberTolExact(x, d, relTol, absTol);
@@ -267,12 +272,47 @@ describe('roundNumberTol against the decimal-string path (#996)', () => {
       return roundNumberTolExact(x, d, REL, ABS);
     }
     let mismatches = 0;
-    corpus(40, (x, d) => {
+    corpus(40, 2026, (x, d) => {
       if (!Object.is(withoutTinyTest(x, d), roundNumberTolExact(x, d, REL, ABS))) mismatches++;
     });
     expect(mismatches).toBeGreaterThan(0);
     same(withoutTinyTest(-1e-16, 0), -0, 'copy of the fast path, round(-1e-16)');
     same(roundNumberTolExact(-1e-16, 0, REL, ABS), 0, 'exact path, round(-1e-16)');
+  });
+
+  it('can fail: a guard without the term that grows with the value is caught by the corpora', () => {
+    // Local copy of the fast path with the guard `1e-10 * p` alone (no `t * 2^-50`). `t` is the
+    // scaled value: its spacing near 2^k is 2^(k-52), so for a large `t` that guard is below one ulp
+    // of `t * p`, and the fast path rounds a value that the exact path decides. The corpora of the
+    // four pairs above must catch the copy. With one seed on every pair they did not.
+    function withoutScaledGuard(x: number, d: number, relTol: number, absTol: number): number {
+      if (!Number.isFinite(x)) return x;
+      if (x === 0) return 0;
+      const a = Math.abs(x);
+      const p = 10 ** d;
+      const t = a * p;
+      const guard = d === 0 ? 1e-9 : 1e-10 * p;
+      if (d < 10 && relTol <= 1e-10 && a >= 1e-9 && Math.abs(t - Math.floor(t) - 0.5) > guard) {
+        if (t >= 2 ** 52) return x;
+        const r = Math.round(t) / p;
+        return x < 0 ? -r : r;
+      }
+      return roundNumberTolExact(x, d, relTol, absTol);
+    }
+    let caught = 0;
+    for (const [relTol, absTol, seed] of pairs) {
+      corpus(80, seed, (x, d) => {
+        if (
+          !Object.is(
+            withoutScaledGuard(x, d, relTol, absTol),
+            roundNumberTolExact(x, d, relTol, absTol)
+          )
+        ) {
+          caught++;
+        }
+      });
+    }
+    expect(caught).toBeGreaterThan(0);
   });
 });
 
