@@ -6,6 +6,7 @@ import { factory } from '../utils/factory.js';
 // Type definitions
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Scalar types supported by det */
 type Scalar = number | BigNumber | Complex;
@@ -147,7 +148,7 @@ export const createDet = /* #__PURE__ */ factory(
             if (size[0] === 0) {
               return 1; // det of an empty matrix is per definition 1
             } else {
-              throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
+              throw notSquareError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
             }
 
           case 2: {
@@ -160,7 +161,7 @@ export const createDet = /* #__PURE__ */ factory(
               }
               return _det(matrixValue.clone().valueOf() as Scalar[][], rows, cols);
             }
-            throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
+            throw notSquareError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
           }
 
           default:

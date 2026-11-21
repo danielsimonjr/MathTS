@@ -5,6 +5,7 @@
  */
 import { eigs as _eigsRaw } from './factories/index.js';
 import { laplacianMatrix } from './linalg-extra.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 const _eigs = _eigsRaw as unknown as (m: number[][]) => {
   values: Array<number | { re: number; im: number }>;
@@ -113,7 +114,7 @@ export function spectralClustering(
   // non-square input otherwise reaches the eigensolver and loops forever, so fail fast.
   const n0 = adjacency.length;
   if (n0 === 0 || adjacency.some((row) => row.length !== n0)) {
-    throw new Error(
+    throw notSquareError(
       `spectralClustering: adjacency must be a square n×n matrix (got ${n0}×${adjacency[0]?.length ?? 0})`
     );
   }

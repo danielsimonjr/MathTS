@@ -22,6 +22,7 @@ import { Tensor } from '../Tensor.js';
 import { eig as matrixEig, eigWasm } from '@danielsimonjr/mathts-matrix';
 import type { EigResult } from '@danielsimonjr/mathts-matrix';
 import { reshapeByRowAxes } from './reshape-axes.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Configures the symmetry hint and eigenvector computation for `tensorEig`. */
 export interface TensorEigOpts {
@@ -84,7 +85,7 @@ function prepareEigMatrix(
   });
 
   if (numRows !== numCols) {
-    throw new Error(`tensorEig: reshaped matrix must be square (got ${numRows}×${numCols})`);
+    throw notSquareError(`tensorEig: reshaped matrix must be square (got ${numRows}×${numCols})`);
   }
 
   const n = numRows;

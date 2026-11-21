@@ -17,6 +17,7 @@
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { flatten as flattenArray } from '../utils/array.js';
+import { denseOfSize } from '../factories/matrix-bridge.js';
 
 // =============================================================================
 // Internal helpers
@@ -307,18 +308,31 @@ export const setPowerset = mathTyped('setPowerset', {
  * ```
  */
 export const setDistinct = mathTyped('setDistinct', {
-  Array: (a: unknown[]): unknown[] => {
-    const b = toFlatArray(a).sort(naturalCompare);
-    if (b.length === 0) return [];
-    const result: unknown[] = [b[0]];
-    for (let i = 1; i < b.length; i++) {
-      if (naturalCompare(b[i], b[i - 1]) !== 0) {
-        result.push(b[i]);
-      }
-    }
-    return result;
+  Array: (a: unknown[]): unknown[] => distinctOf(a),
+  // A Matrix gives a 1-D dense matrix, as mathjs does.
+  Matrix: (a: unknown) => {
+    const result = distinctOf(a);
+    return denseOfSize(result, [result.length]);
   },
 });
+
+/**
+ * The distinct entries of a flattened multiset, in natural order.
+ *
+ * @param a - An Array or a matrix.
+ * @returns The distinct entries.
+ */
+function distinctOf(a: unknown): unknown[] {
+  const b = toFlatArray(a).sort(naturalCompare);
+  if (b.length === 0) return [];
+  const result: unknown[] = [b[0]];
+  for (let i = 1; i < b.length; i++) {
+    if (naturalCompare(b[i], b[i - 1]) !== 0) {
+      result.push(b[i]);
+    }
+  }
+  return result;
+}
 
 // =============================================================================
 // setSize — count elements in a multiset

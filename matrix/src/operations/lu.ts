@@ -15,6 +15,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Result of `lu`: the factors L and U and the row permutation P.
@@ -41,7 +42,7 @@ export function lu(A: DecompositionMatrixInput): LUResult {
   const dense = decompositionInputToDenseMatrix(A);
   const n = dense.rows;
   if (dense.cols !== n) {
-    throw new Error(`lu: matrix must be square (got ${dense.rows}×${dense.cols})`);
+    throw notSquareError(`lu: matrix must be square (got ${dense.rows}×${dense.cols})`);
   }
 
   // Working copy in row-major order. We overwrite this in place with the

@@ -11,6 +11,7 @@ import {
   ldexp,
   withPow2Scale,
   type EntryRange,
+  notSquareError,
 } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
@@ -52,14 +53,15 @@ interface Dependencies {
   typed: TypedFunction;
   abs: TypedFunction<number | BigNumber>;
   add: TypedFunction<Scalar | Matrix>;
-  multiply: TypedFunction<Scalar | Matrix>;
-  map: TypedFunction<Matrix>;
+  multiply: TypedFunction<Scalar | Scalar[][] | Matrix>;
+  map: TypedFunction<Scalar[][] | Matrix>;
   sqrt: TypedFunction<Scalar>;
   subtract: TypedFunction<Scalar | Matrix>;
   inv: TypedFunction<Scalar[][] | Matrix>;
   size: TypedFunction<number[]>;
   max: TypedFunction<number | BigNumber>;
-  identity: TypedFunction<Matrix>;
+  identity: TypedFunction<Scalar[][] | Matrix>;
+  matrix: TypedFunction<Matrix>;
 }
 
 const name = 'sqrtm';
@@ -75,12 +77,26 @@ const dependencies = [
   'size',
   'max',
   'identity',
+  'matrix',
 ];
 
 export const createSqrtm = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, abs, add, multiply, map, sqrt, subtract, inv, size, max, identity }: Dependencies) => {
+  ({
+    typed,
+    abs,
+    add,
+    multiply,
+    map,
+    sqrt,
+    subtract,
+    inv,
+    size,
+    max,
+    identity,
+    matrix,
+  }: Dependencies) => {
     const _maxIterations = 1e3;
     const _tolerance = 1e-6;
     // The largest `_residual` of a root. The worst value over 3,000 random matrices that
@@ -93,21 +109,24 @@ export const createSqrtm = /* #__PURE__ */ factory(
      *
      * https://en.wikipedia.org/wiki/Square_root_of_a_matrix#By_Denman-Beavers_iteration
      *
-     * @param A   The square matrix `A`
-     * @return    The principal square root of matrix `A`
+     * Both iterates are nested arrays. The first, `Y`, starts as `A`, and the second, `Z`,
+     * starts as the identity, which `identity(size(A))` gives as a nested array.
+     *
+     * @param A   The square matrix `A`, as a nested array
+     * @return    The principal square root of matrix `A`, as a nested array
      * @private
      */
-    function _denmanBeavers(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
+    function _denmanBeavers(A: Scalar[][]): Scalar[][] {
       let error: number;
       let iterations = 0;
 
-      let Y: Scalar[][] | Matrix = A;
-      let Z: Scalar[][] | Matrix = identity(size(A));
+      let Y: Scalar[][] = A;
+      let Z: Scalar[][] = identity(size(A)) as Scalar[][];
 
       do {
         const Yk = Y;
-        Y = multiply(0.5, add(Yk, inv(Z))) as Scalar[][] | Matrix;
-        Z = multiply(0.5, add(Z, inv(Yk))) as Scalar[][] | Matrix;
+        Y = multiply(0.5, add(Yk, inv(Z))) as Scalar[][];
+        Z = multiply(0.5, add(Z, inv(Yk))) as Scalar[][];
 
         error = max(abs(subtract(Y, Yk))) as number;
 
@@ -165,7 +184,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
      * sqrtm(2^e A) = 2^(e/2) sqrtm(A) (#1122).
      * An ordinary matrix is not scaled.
      */
-    function _sqrtmWindowed(A: Scalar[][] | Matrix, range: EntryRange): Scalar[][] | Matrix {
+    function _sqrtmWindowed(A: Scalar[][], range: EntryRange): Scalar[][] {
       // True after the unscaled run failed once, so it is not made a second time.
       let unscaledFailed = false;
       return withPow2Scale(
@@ -189,14 +208,12 @@ export const createSqrtm = /* #__PURE__ */ factory(
           }
           const unit = -2 * Math.floor(Math.floor(Math.log2(range.amax)) / 2);
           const e = ldexp(range.amin, unit) >= 2 ** -1022 ? unit : windowE;
-          const root = _denmanBeavers(
-            map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][] | Matrix
-          );
+          const root = _denmanBeavers(map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][]);
           // The stop test passes a NaN error, so a scaled run that overflowed returns NaN.
           if (!allFinite(root)) {
             throw new Error('computing square root of matrix: iterative method could not converge');
           }
-          return map(root, (v: unknown) => ldexp(v as number, -e / 2)) as Scalar[][] | Matrix;
+          return map(root, (v: unknown) => ldexp(v as number, -e / 2)) as Scalar[][];
         },
         true
       );
@@ -218,17 +235,15 @@ export const createSqrtm = /* #__PURE__ */ factory(
      * A matrix with a NaN or infinite entry is not checked: it keeps the result of path 1.
      * Entries that are not plain numbers (BigNumber, Complex) take `_denmanBeavers` as before.
      */
-    function _sqrtmScaled(A: Scalar[][] | Matrix): Scalar[][] | Matrix {
-      const data = (isMatrix(A) ? (A as Matrix).valueOf() : A) as Scalar[][];
-      if (!data.every((row) => row.every((v) => typeof v === 'number'))) {
+    function _sqrtmScaled(A: Scalar[][]): Scalar[][] {
+      if (!A.every((row) => row.every((v) => typeof v === 'number'))) {
         return _denmanBeavers(A);
       }
-      const rows = data as unknown as number[][];
+      const rows = A as number[][];
       const range = entryRange(rows);
       if (!range.finite) return _sqrtmWindowed(A, range);
-      const isRoot = (R: Scalar[][] | Matrix): boolean =>
-        _residual(rows, (isMatrix(R) ? (R as Matrix).valueOf() : R) as unknown as number[][]) <=
-        _residualTolerance;
+      const isRoot = (R: Scalar[][]): boolean =>
+        _residual(rows, R as number[][]) <= _residualTolerance;
 
       try {
         const root = _sqrtmWindowed(A, range);
@@ -243,11 +258,10 @@ export const createSqrtm = /* #__PURE__ */ factory(
         if (e !== 0 && ldexp(range.amin, e) >= 2 ** -1022) {
           try {
             const scaled = _denmanBeavers(
-              map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][] | Matrix
+              map(A, (v: unknown) => ldexp(v as number, e)) as Scalar[][]
             );
             if (allFinite(scaled)) {
-              const root = map(scaled, (v: unknown) => ldexp(v as number, -e / 2)) as
-                Scalar[][] | Matrix;
+              const root = map(scaled, (v: unknown) => ldexp(v as number, -e / 2)) as Scalar[][];
               if (isRoot(root)) return root;
             }
           } catch {
@@ -258,11 +272,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
 
       try {
         const R = matrixSqrtm(DenseMatrix.fromArray(rows)).toArray() as number[][];
-        if (_residual(rows, R) <= _residualTolerance) {
-          return isMatrix(A)
-            ? (map(A, (_v: unknown, index: number[]) => R[index[0]][index[1]]) as Matrix)
-            : R;
-        }
+        if (_residual(rows, R) <= _residualTolerance) return R;
       } catch {
         // No real root by the Schur method either.
       }
@@ -305,7 +315,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
               // the root of the 0 x 0 matrix is the 0 x 0 matrix, in the same kind (#1233)
               return isMatrix(A) ? (A as Matrix).clone().resize([0, 0]) : [];
             } else {
-              throw new RangeError(
+              throw notSquareError(
                 'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'
               );
             }
@@ -316,9 +326,14 @@ export const createSqrtm = /* #__PURE__ */ factory(
             const cols = sizeArray[1];
             if (rows === cols) {
               if (rows === 0) return (A as Matrix).clone();
-              return _sqrtmScaled(A as Scalar[][] | Matrix);
+              // Every path runs on the nested entries of A, so both iterates of the
+              // iteration have one container. The argument decides the container of the
+              // result: an Array gives an Array, and a matrix of either storage gives a
+              // dense matrix, as in mathjs (#1278).
+              if (!isMatrix(A)) return _sqrtmScaled(A as Scalar[][]);
+              return matrix(_sqrtmScaled((A as Matrix).valueOf() as Scalar[][]));
             } else {
-              throw new RangeError(
+              throw notSquareError(
                 'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'
               );
             }

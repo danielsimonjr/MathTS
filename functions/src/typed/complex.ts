@@ -43,7 +43,7 @@ function deepMapArray<T>(arr: unknown[], fn: (x: unknown) => T): T[] {
  *   - `x = 0` → 0 (mathjs convention, not -π)
  *   - `x = NaN` → NaN
  *
- * For arrays, the function is applied element-wise.
+ * For arrays and matrices, the function is applied element-wise. A Matrix gives a Matrix.
  *
  * @example
  * ```typescript
@@ -69,6 +69,10 @@ export const arg = mathTyped('arg', {
   Complex: (x: Complex): number => x.arg(),
 
   Array: (x: unknown[]): unknown[] => deepMapArray(x, (item) => arg(item as number)),
+
+  // A Matrix gives a Matrix of the same storage and size, as mathjs does (the rule of `conj`).
+  Matrix: (x: { map(fn: (v: unknown) => unknown): unknown }): unknown =>
+    x.map((item) => arg(item as number)),
 });
 
 // =============================================================================
@@ -115,7 +119,7 @@ export const conj = mathTyped('conj', {
  * For a complex number `a + bi`, the function returns `b`.
  * For real numbers (number, bigint, BigNumber), returns 0.
  *
- * For arrays, the function is applied element-wise.
+ * For arrays and matrices, the function is applied element-wise. A Matrix gives a Matrix.
  *
  * @example
  * ```typescript
@@ -134,6 +138,10 @@ export const im = mathTyped('im', {
   Complex: (x: Complex): number => x.im,
 
   Array: (x: unknown[]): unknown[] => deepMapArray(x, (item) => im(item as number)),
+
+  // A Matrix gives a Matrix of the same storage and size, as mathjs does (the rule of `conj`).
+  Matrix: (x: { map(fn: (v: unknown) => unknown): unknown }): unknown =>
+    x.map((item) => im(item as number)),
 });
 
 // =============================================================================
@@ -145,7 +153,7 @@ export const im = mathTyped('im', {
  * For a complex number `a + bi`, the function returns `a`.
  * For real numbers (number, bigint, BigNumber), returns the value itself.
  *
- * For arrays, the function is applied element-wise.
+ * For arrays and matrices, the function is applied element-wise. A Matrix gives a Matrix.
  *
  * @example
  * ```typescript
@@ -164,6 +172,10 @@ export const re = mathTyped('re', {
   Complex: (x: Complex): number => x.re,
 
   Array: (x: unknown[]): unknown[] => deepMapArray(x, (item) => re(item as number)),
+
+  // A Matrix gives a Matrix of the same storage and size, as mathjs does (the rule of `conj`).
+  Matrix: (x: { map(fn: (v: unknown) => unknown): unknown }): unknown =>
+    x.map((item) => re(item as number)),
 });
 
 // =============================================================================

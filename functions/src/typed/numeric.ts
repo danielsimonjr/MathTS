@@ -22,6 +22,7 @@ import {
   entryRange,
   ldexp,
   pow2ScaleExponent,
+  notSquareError,
 } from '@danielsimonjr/mathts-core/internal';
 import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
@@ -211,7 +212,7 @@ export function linsolve(A: number[][] | SparseMatrix, b: number[]): number[] {
   const dense = densifyForSolver(A)?.toArray() ?? (A as number[][]);
   const n = dense.length;
   if (n === 0) throw new Error('linsolve: empty matrix');
-  if (dense[0].length !== n) throw new Error('linsolve: matrix must be square');
+  if (dense[0].length !== n) throw notSquareError('linsolve: matrix must be square');
   if (b.length !== n) throw new Error('linsolve: dimension mismatch');
   return solvePivoted(dense, b, pivotTolerance(n));
 }

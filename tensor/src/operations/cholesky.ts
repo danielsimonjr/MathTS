@@ -24,6 +24,7 @@ import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { cholesky as matrixCholesky } from '@danielsimonjr/mathts-matrix';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Configures the factor type (lower or upper) and the joining index name for `tensorCholesky`. */
 export interface TensorCholeskyOpts {
@@ -106,7 +107,9 @@ export function tensorCholesky(
   const numCols = colDims.reduce((a, b) => a * b, 1);
 
   if (numRows !== numCols) {
-    throw new Error(`tensorCholesky: reshaped matrix must be square (got ${numRows}×${numCols})`);
+    throw notSquareError(
+      `tensorCholesky: reshaped matrix must be square (got ${numRows}×${numCols})`
+    );
   }
 
   // --- Permute and reshape to 2-D ---

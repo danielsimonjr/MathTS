@@ -4,6 +4,9 @@
  * generic path (#1040).
  */
 
+import { matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { arraySize } from '../utils/array.js';
+
 /**
  * Tells if every entry of a 2-D array is a number.
  *
@@ -33,6 +36,65 @@ export function assertRectangular(m: readonly unknown[]): asserts m is unknown[]
       );
     }
   }
+}
+
+/**
+ * The size of an Array or of a matrix, one entry per axis. An Array gives `arraySize`. A matrix
+ * gives the size that it reports (`matrixSize`), because its nested entries do not show a zero
+ * axis: `toArray()` of a 0 x 3 matrix is `[]`.
+ *
+ * @param collection - An Array or a matrix of any kind.
+ * @returns A new size array.
+ * @throws A `TypeError` when the value is not an Array and reports no valid size.
+ */
+export function collectionSize(collection: unknown): number[] {
+  if (Array.isArray(collection)) return arraySize(collection);
+  const size = matrixSize(collection);
+  if (size === undefined)
+    throw new TypeError('Expected an Array or a matrix that reports its size');
+  return size;
+}
+
+/** The shape and entry access that every sparse matrix kind has. */
+export interface SparseLike {
+  rows: number;
+  cols: number;
+  get(i: number, j: number): number;
+  toArray?: () => number[][];
+}
+
+/**
+ * Reads the order of a square matrix from its size. The size of a boxed matrix comes from
+ * `size()`, and the size of a native or sparse matrix is `[rows, cols]`. The 1-D empty size
+ * `[0]` is the 0 x 0 matrix (the only Array form of an empty matrix is `[]`). A 1-D size `[k]`
+ * with k above 0 reads as k x 0.
+ *
+ * @param name - The name of the function, for the error message.
+ * @param size - The size of the matrix.
+ * @returns The order n of an n x n matrix. The order of the empty matrix is 0.
+ * @throws A `RangeError` (the class that mathjs throws) when the matrix is not 2-D and square.
+ */
+export function squareOrder(name: string, size: readonly number[]): number {
+  if (size.length === 1 && size[0] === 0) return 0;
+  if (size.length === 2 && size[0] === size[1]) return size[0];
+  const shown = size.length === 1 ? `${size[0]}×0` : size.join('×');
+  throw notSquareError(`${name}: matrix must be square (got ${shown})`);
+}
+
+/**
+ * Reads the entries of a sparse matrix as a nested array of `rows` rows of `cols` entries. A
+ * sparse matrix with a `toArray` method gives its own conversion; another one gives its entries
+ * by `get`. The size comes from `rows` and `cols`, so a matrix with a zero axis gives the
+ * nested form of that axis (`[]` for 0 x n, `rows` empty rows for n x 0).
+ *
+ * @param A - A sparse matrix of either kind.
+ * @returns The nested array of the entries.
+ */
+export function sparseToArray(A: SparseLike): number[][] {
+  if (typeof A.toArray === 'function') return A.toArray();
+  return Array.from({ length: A.rows }, (_, i) =>
+    Array.from({ length: A.cols }, (_, j) => A.get(i, j))
+  );
 }
 
 /** The type name of a value, for an error message: the class name of an object. */

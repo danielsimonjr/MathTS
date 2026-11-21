@@ -8,6 +8,7 @@ import { typeOf, isNumber, isBigNumber, isComplex, isFraction } from '../utils/i
 // Type definitions
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Scalar types supported by eigs */
 type Scalar = number | BigNumber | Complex;
@@ -369,7 +370,7 @@ export const createEigs = /* #__PURE__ */ factory(
       const asize = mat.size();
 
       if (asize.length !== 2 || asize[0] !== asize[1]) {
-        throw new RangeError(`Matrix must be square (size: ${format(asize, {})})`);
+        throw notSquareError(`Matrix must be square (size: ${format(asize, {})})`);
       }
 
       const N = asize[0];

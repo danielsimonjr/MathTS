@@ -1,13 +1,11 @@
+import { matrixSize } from '@danielsimonjr/mathts-core/internal';
 import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions
 interface MatrixLike {
-  size?: () => number[];
-  _size?: number[];
-  rows?: number;
-  cols?: number;
+  size?: unknown;
   type?: string;
 }
 
@@ -26,11 +24,8 @@ const dependencies = ['typed'];
 function nativeMatrixDims(x: unknown): number[] | null {
   if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
   const o = x as MatrixLike;
-  if (typeof o.size === 'function') return null;
-  if (typeof o.rows === 'number' && typeof o.cols === 'number' && typeof o.type === 'string') {
-    return [o.rows, o.cols];
-  }
-  return null;
+  if (typeof o.size === 'function' || typeof o.type !== 'string') return null;
+  return matrixSize(x) ?? null;
 }
 
 export const createSize = /* #__PURE__ */ factory(name, dependencies, ({ typed }: Dependencies) => {
@@ -62,16 +57,9 @@ export const createSize = /* #__PURE__ */ factory(name, dependencies, ({ typed }
    * @return {Array} A vector with size of `x`.
    */
   function matrixDims(x: MatrixLike): number[] {
-    if (typeof x.size === 'function') {
-      return x.size();
-    }
-    if (Array.isArray(x._size)) {
-      return [...x._size];
-    }
-    if (typeof x.rows === 'number' && typeof x.cols === 'number') {
-      return [x.rows, x.cols];
-    }
-    throw new TypeError('Cannot compute size: expected a Matrix');
+    const dims = matrixSize(x);
+    if (dims === undefined) throw new TypeError('Cannot compute size: expected a Matrix');
+    return dims;
   }
 
   const impl = typed(name, {

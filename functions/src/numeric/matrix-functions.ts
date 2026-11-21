@@ -52,6 +52,7 @@ import { eig } from '@danielsimonjr/mathts-matrix';
  * docs/Architecture/duplicate-symbols.json) rather than redeclared locally.
  */
 import type { ComplexValue } from '@danielsimonjr/mathts-core/internal';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 export type { ComplexValue };
 
@@ -349,7 +350,8 @@ export function funm(
   const n = A.length;
   if (n === 0) return { re: [], im: [] };
   for (const row of A) {
-    if (row.length !== n) throw new Error(`funm: matrix must be square (got ${n}x${row.length})`);
+    if (row.length !== n)
+      throw notSquareError(`funm: matrix must be square (got ${n}x${row.length})`);
   }
 
   if (isDiagonal(A, n)) {

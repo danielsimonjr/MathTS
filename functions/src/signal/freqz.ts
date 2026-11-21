@@ -1,6 +1,7 @@
 import { factory } from '../utils/factory.js';
 import type { Matrix, Complex, TypedFunction } from '../types.js';
 import { assertAllocSize } from '../utils/limits.js';
+import { collectionSize } from '../typed/number-matrix.js';
 
 const name = 'freqz';
 
@@ -71,18 +72,14 @@ export const createFreqz = /* #__PURE__ */ factory(
       },
       'Matrix, Matrix': function (b: Matrix, a: Matrix): FrequencyResponse {
         const _w = createBins(512);
-        const { w, h } = _freqz(b.valueOf() as number[], a.valueOf() as number[], _w);
+        const { w, h } = _freqz(vectorEntries('b', b), vectorEntries('a', a), _w);
         return {
           w: matrix(w),
           h: matrix(h),
         };
       },
       'Matrix, Matrix, Matrix': function (b: Matrix, a: Matrix, w: Matrix): FrequencyResponse {
-        const { h } = _freqz(
-          b.valueOf() as number[],
-          a.valueOf() as number[],
-          w.valueOf() as number[]
-        );
+        const { h } = _freqz(vectorEntries('b', b), vectorEntries('a', a), w.valueOf() as number[]);
         return {
           h: matrix(h),
           w: matrix(w),
@@ -94,7 +91,7 @@ export const createFreqz = /* #__PURE__ */ factory(
         }
         assertAllocSize('freqz', [w, 8]);
         const _w = createBins(w);
-        const { h } = _freqz(b.valueOf() as number[], a.valueOf() as number[], _w);
+        const { h } = _freqz(vectorEntries('b', b), vectorEntries('a', a), _w);
         return {
           h: matrix(h),
           w: matrix(_w),
@@ -104,6 +101,31 @@ export const createFreqz = /* #__PURE__ */ factory(
     return freqz;
 
     /**
+     * Checks that a coefficient argument has one axis, as `freqz` reads it as a vector.
+     * @param label - The name of the argument, for the error message.
+     * @param x - The argument: an Array or a matrix.
+     * @throws A `RangeError` that shows the size when the argument is not a vector.
+     */
+    function assertVector(label: string, x: unknown): void {
+      const size = collectionSize(x);
+      if (size.length !== 1) {
+        throw new RangeError(`freqz: ${label} must be a vector (size: [${size.join(', ')}])`);
+      }
+    }
+
+    /**
+     * The entries of a coefficient matrix, after the check that it is a vector. The check reads the
+     * size of the matrix, because the entries of a matrix with a zero axis do not show it.
+     * @param label - The name of the argument, for the error message.
+     * @param x - The coefficient matrix.
+     * @returns The entries of the vector.
+     */
+    function vectorEntries(label: string, x: Matrix): number[] {
+      assertVector(label, x);
+      return x.valueOf() as number[];
+    }
+
+    /**
      * Internal frequency response calculation
      * @param b - Numerator coefficients
      * @param a - Denominator coefficients
@@ -111,6 +133,8 @@ export const createFreqz = /* #__PURE__ */ factory(
      * @returns Frequency response with h (complex) and w (frequencies)
      */
     function _freqz(b: number[], a: number[], w: number[]): { h: Complex[]; w: number[] } {
+      assertVector('b', b);
+      assertVector('a', a);
       const num: Complex[] = [];
       const den: Complex[] = [];
 
