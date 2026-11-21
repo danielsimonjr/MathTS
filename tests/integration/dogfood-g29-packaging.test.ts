@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { execFile, execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -12,26 +12,15 @@ const execFileAsync = promisify(execFile);
 const { workspaceDirs } = require(join(REPO, 'tools/test/workspaces.mjs')) as {
   workspaceDirs: (root?: string) => string[];
 };
+const { ciStepProblem } = require(join(REPO, 'tools/test/ci-step.mjs')) as {
+  ciStepProblem: (command: string) => string | null;
+};
+const PACKAGING_GATES = 'node --test tools/test/packaging-gates.test.mjs';
 
 const PUBLIC_DIRS = workspaceDirs(REPO).filter((dir) => {
   const pkg = JSON.parse(readFileSync(join(REPO, dir, 'package.json'), 'utf8'));
   return !pkg.private;
 });
-
-/** Packages whose own module evaluation does not register or mutate globals. */
-const SIDE_EFFECT_FREE = new Set([
-  'parser',
-  'ast',
-  'evaluator',
-  'units',
-  'numbers',
-  'linalg',
-  'arithmetic',
-  'trigonometry',
-  'statistics',
-  'signal',
-  'gpu',
-]);
 
 describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
   // The script takes about 0.2 s alone. In the full parallel test run, the script competes
@@ -41,50 +30,12 @@ describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
     await execFileAsync('node', ['tools/sync-package-packaging.mjs', '--check'], { cwd: REPO });
   }, 60_000);
 
-  it('#789 #790 #696 #741 packed tarballs include LICENSE and manifest fields', () => {
-    for (const dir of PUBLIC_DIRS) {
-      const out = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
-        cwd: join(REPO, dir),
-        encoding: 'utf8',
-        // npm is npm.cmd on Windows; a .cmd file runs only through a shell.
-        shell: process.platform === 'win32',
-      });
-      const [entry] = JSON.parse(out) as { filename: string; files: { path: string }[] }[];
-      const full = JSON.parse(readFileSync(join(REPO, dir, 'package.json'), 'utf8')) as {
-        name: string;
-        homepage?: string;
-        bugs?: { url?: string };
-        sideEffects?: boolean;
-        repository?: { directory?: string };
-        exports?: Record<string, unknown>;
-      };
-      expect(full.homepage, dir).toMatch(/^https:\/\/github\.com\/danielsimonjr\/MathTS/);
-      expect(full.bugs?.url, dir).toBe('https://github.com/danielsimonjr/MathTS/issues');
-      expect(full.repository?.directory, dir).toBe(dir);
-      expect(full.exports?.['./package.json'], dir).toBe('./package.json');
-      const base = dir.split('/').pop() ?? dir;
-      expect(full.sideEffects, dir).toBe(SIDE_EFFECT_FREE.has(base) ? false : true);
-      expect(entry.filename).toMatch(/\.tgz$/);
-      const packed = new Set(entry.files.map((f) => f.path));
-      expect(packed.has('LICENSE'), dir).toBe(true);
-      const jsFiles = [...packed].filter((p) => p.endsWith('.js') && !p.endsWith('.d.ts'));
-      for (const js of jsFiles) {
-        expect(packed.has(`${js}.map`), `${dir} ${js}`).toBe(true);
-      }
-      execFileSync(
-        process.execPath,
-        [
-          '--input-type=module',
-          '-e',
-          `import { createRequire } from 'node:module';
-           const req = createRequire(import.meta.url);
-           const meta = req(${JSON.stringify(`${full.name}/package.json`)});
-           if (typeof meta.version !== 'string') process.exit(1);`,
-        ],
-        { cwd: REPO, stdio: 'pipe' }
-      );
-    }
-  }, 180_000);
+  // npm pack of the 24 public packages does not run in this pool, where a wall-clock limit would
+  // measure the load of the other processes (#1185). The Compile & Lint job runs it in
+  // `tools/test/packaging-gates.test.mjs` as its own step; this test pins that step.
+  it('#789 #790 #696 #741 the Compile & Lint job checks the packed tarballs', () => {
+    expect(ciStepProblem(PACKAGING_GATES)).toBeNull();
+  });
 
   it('#740 every shipped JS file has a map whose sources are relative', () => {
     for (const dir of PUBLIC_DIRS) {
@@ -122,18 +73,6 @@ describe('G29 packaging (#789 #790 #741 #740 #696 #697)', () => {
   // its wall-clock limit would measure the load of the other processes (#1185). The Compile & Lint
   // job runs it as its own step (#697); this test pins that step, so removing the step fails here.
   it('#697 the Compile & Lint job runs the consumer typecheck without @types/node', () => {
-    const lines = readFileSync(join(REPO, '.github', 'workflows', 'ci.yml'), 'utf8').split('\n');
-    const at = lines.findIndex((line) =>
-      /^\s+(?:run:\s+)?node tools\/test\/consumer-typecheck-no-node\.mjs --skip-build\s*$/.test(
-        line
-      )
-    );
-    expect(at, 'ci.yml does not run the no-node consumer type check').toBeGreaterThanOrEqual(0);
-    // A commented-out command, or a step that cannot fail the job or that never runs, is no gate.
-    let first = at;
-    while (first > 0 && !/^ {6}- name:/.test(lines[first] ?? '')) first--;
-    let last = at + 1;
-    while (last < lines.length && !/^ {6}(?:- |#)|^ {2}[a-z]/.test(lines[last] ?? '')) last++;
-    expect(lines.slice(first, last).join('\n')).not.toMatch(/continue-on-error|^\s+if:/m);
+    expect(ciStepProblem('node tools/test/consumer-typecheck-no-node.mjs --skip-build')).toBeNull();
   });
 });

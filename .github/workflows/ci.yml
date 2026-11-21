@@ -281,6 +281,13 @@ jobs:
           node tools/test/consumer-typecheck-no-node.mjs --skip-build
           node --test tools/test/packed-consumer.test.mjs
 
+      # npm pack of every public package, the evaluate bundle sizes and the README stats check.
+      # They start heavy children, so they run here and not in the vitest pool (#1185).
+      - name: Packaging checks (G27, G29)
+        run: |
+          node --test tools/test/ci-step.test.mjs
+          node --test tools/test/packaging-gates.test.mjs
+
   # This job also runs the wall-clock perf gates (tools/test/wall-clock-gates.json) and the
   # self-test of the gates. A wall-clock verdict does not belong in the Test or Coverage jobs:
   # `bun run test` runs about 48 package processes at once, and each of them shares the two
