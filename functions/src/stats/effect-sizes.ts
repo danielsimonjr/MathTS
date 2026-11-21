@@ -53,10 +53,14 @@ export function hedgesG(a: Vec, b: Vec): number {
 export function glassDelta(a: Vec, b: Vec): number {
   const ra = numberVector('glassDelta', a);
   const rb = numberVector('glassDelta', b);
-  const [xa, xb] = unitScaled(largerVariance(ra, rb), [ra, rb]);
-  if (xa.length < 1 || xb.length < 2)
+  if (ra.length < 1 || rb.length < 2)
     throw new RangeError('glassDelta: needs a non-empty a and at least 2 values in b');
-  return (meanOf(xa) - meanOf(xb)) / Math.sqrt(varOf(xb));
+  // Only sd(b) squares the data. The scale comes from b alone: the variance of a is not read, so
+  // a small b among an a of order 1 still gets its scale (#1280).
+  const vb = varOf(rb);
+  const scale = scaleForVariance(vb, rb);
+  const sd = scale === 1 ? Math.sqrt(vb) : scale * Math.sqrt(varOf(divideByScale(rb, scale)));
+  return (meanOf(ra) - meanOf(rb)) / sd;
 }
 
 /** η² = SS_between / SS_total across groups. */

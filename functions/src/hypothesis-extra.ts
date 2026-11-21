@@ -69,16 +69,16 @@ export function fTest(x: Vec, y: Vec): FTestResult {
   const df2 = b.length - 1;
   let va = sampleVar(a);
   let vb = sampleVar(b);
-  // F = va / vb does not change when both samples are divided by one exact power of 2. A variance
-  // outside [2^-400, 2^400] gets that scale: a variance that underflowed to 0 gave a wrong error
-  // (#1280).
-  const scale = scaleForVariance(Math.max(va, vb), a, b);
-  if (scale !== 1) {
-    va = sampleVar(divideByScale(a, scale));
-    vb = sampleVar(divideByScale(b, scale));
-  }
+  // Each variance has its own exact power of 2 as a scale: the smaller sample can underflow while
+  // the larger one is of order 1, and a variance that underflowed to 0 gave a wrong error (#1280).
+  // F = (va' / vb') * (sa / sb)^2, and the two multiplications keep the intermediate in range.
+  const sa = scaleForVariance(va, a);
+  const sb = scaleForVariance(vb, b);
+  if (sa !== 1) va = sampleVar(divideByScale(a, sa));
+  if (sb !== 1) vb = sampleVar(divideByScale(b, sb));
   if (vb === 0) throw new Error('fTest: denominator sample has zero variance');
-  const statistic = va / vb;
+  const ratio = sa / sb;
+  const statistic = (va / vb) * ratio * ratio;
   const lower = fCDF(statistic, df1, df2);
   const upper = fSF(statistic, df1, df2);
   const pValue = Math.min(1, 2 * Math.min(lower, upper));

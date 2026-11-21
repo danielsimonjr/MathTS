@@ -1696,23 +1696,41 @@ export function bartlettTest(groups: f64[][]): VarianceTestResult {
     if (g.length < 2) throw new Error('bartlettTest: every group needs ≥2 observations');
     N += g.length;
   }
-  // The groups are divided by one exact power of 2 when the largest variance is outside
-  // [2^-400, 2^400]: a variance that left the range gave a wrong statistic (#1280).
-  let vars = groups.map((g) => _variance(g, 1)); // sample variances (ddof=1)
-  const scale = scaleForVariance(Math.max(...vars), ...groups);
-  if (scale !== 1) vars = groups.map((g) => _variance(divideByScale(g, scale), 1));
+  // Each group has its own exact power of 2 as a scale when its variance is outside
+  // [2^-400, 2^400]: a group that is much smaller or larger than the others left the range
+  // while the others did not, and gave a wrong statistic (#1280). A group in the window keeps the
+  // scale 1. `vars` are the variances of the scaled groups; the variance of group i is
+  // vars[i] * scales[i]^2.
+  const scales: number[] = [];
+  const vars: number[] = [];
+  let top = 0;
+  for (const g of groups) {
+    const plain = _variance(g, 1); // sample variance (ddof=1)
+    const scale = scaleForVariance(plain, g);
+    scales.push(scale);
+    vars.push(scale === 1 ? plain : _variance(divideByScale(g, scale), 1));
+    if (scale > top) top = scale;
+  }
+  // The pooled variance is read in the frame of the largest scale: a group below it has a weight
+  // of 0 there, as it has in the exact sum.
   let pooledNum = 0;
   let sumInv = 0;
   for (let i = 0; i < k; i++) {
     const ni = groups[i].length;
-    pooledNum += (ni - 1) * vars[i];
+    const r = scales[i] / top;
+    pooledNum += (ni - 1) * vars[i] * r * r;
     sumInv += 1 / (ni - 1);
   }
   const sp2 = pooledNum / (N - k);
-  // (N - k) ln(sp2) - sum (ni - 1) ln(si2) is a sum of (ni - 1) ln(sp2 / si2): each ratio does not
-  // change under a power-of-2 scale, and the two large logarithms no longer cancel.
+  // (N - k) ln(sp2) - sum (ni - 1) ln(si2) is a sum of (ni - 1) ln(sp2 / si2): the two large
+  // logarithms no longer cancel. The scales enter as exact exponents, so no variance has to be
+  // representable. For groups of one scale the exponent is 0 and the term is the plain ratio.
+  const lnTop = Math.log2(top);
   let numerator = 0;
-  for (let i = 0; i < k; i++) numerator += (groups[i].length - 1) * Math.log(sp2 / vars[i]);
+  for (let i = 0; i < k; i++) {
+    const exponent = Math.log2(scales[i]) - lnTop;
+    numerator += (groups[i].length - 1) * (Math.log(sp2 / vars[i]) - 2 * exponent * Math.LN2);
+  }
   const C = 1 + (sumInv - 1 / (N - k)) / (3 * (k - 1));
   const T = numerator / C;
   return { statistic: T, pValue: _chiSquaredPValue(T, k - 1), degreesOfFreedom: k - 1 };
