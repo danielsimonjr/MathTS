@@ -306,12 +306,16 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
   let prev = 1,
     curr = x;
   for (let k = 2; k <= ni; k++) {
-    const next = 2 * x * curr - prev;
+    let next = 2 * x * curr - prev;
     if (!Number.isFinite(next)) {
+      // The product 2 x T_{k-1} is about twice the result, so it can leave the range one step
+      // before T_k does. 2 (x T_{k-1} - prev / 2) is the same value (scaling by 2 is exact) with
+      // no such intermediate. It is computed only here, so every finite result keeps its bits.
+      next = 2 * (x * curr - 0.5 * prev);
       if (Number.isNaN(next)) return NaN;
       // For |x| > 1, |T_k(x)| grows with k and T_k(x) has the sign (-1)^k when x < -1, so the
       // first overflow decides the result. A further step would compute Infinity - Infinity.
-      return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
+      if (!Number.isFinite(next)) return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
     }
     prev = curr;
     curr = next;
@@ -326,15 +330,36 @@ function hermiteHScalar(n: f64, x: f64): f64 {
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 2 * x;
-  // No order limit: the values overflow and give NaN within a few hundred steps for every x.
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  // The literal is MAX_RECURRENCE_ORDER of utils/limits.ts. The values leave the double range
+  // after a few hundred steps, but the sign of H_n(x) oscillates with n (H_1000(1.5) < 0 and
+  // H_1001(1.5) < 0 with H_300(10) > 0), so the recurrence runs to the end on a rescaled copy.
+  if (ni > 2500000000) {
+    throw new RangeError(`hermiteH: n = ${ni} exceeds the supported maximum of 2500000000`);
+  }
+  // Scaling by a power of 2 is exact. `curr` stays at or below 2^600 after each step, so a step
+  // leaves the range only when |x| is above about 2^422 (or infinite); the true value is then the
+  // leading term (2 x)^n, with its sign. `e` counts the scales: H_n(x) = curr * 2^(600 e).
+  const big = Math.pow(2, 600);
+  const small = Math.pow(2, -600);
   let prev = 1,
-    curr = 2 * x;
+    curr = 2 * x,
+    e = 0;
   for (let k = 2; k <= ni; k++) {
     const next = 2 * x * curr - 2 * (k - 1) * prev;
     if (Number.isNaN(next)) return NaN;
+    if (!Number.isFinite(next)) return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
     prev = curr;
     curr = next;
+    if (Math.abs(curr) > big) {
+      prev *= small;
+      curr *= small;
+      e++;
+    }
   }
+  // Scale back in steps: the value is +-Infinity (with the sign of the scaled recurrence) when it
+  // is out of range. There is no shortcut "e >= 2 gives Infinity": H_1001(0) is exactly 0.
+  for (let i = 0; i < e && curr !== 0 && Number.isFinite(curr); i++) curr *= big;
   return curr;
 }
 
@@ -350,14 +375,29 @@ function laguerreLScalar(n: f64, x: f64): f64 {
   if (ni > 1000000000) {
     throw new RangeError(`laguerreL: n = ${ni} exceeds the supported maximum of 1000000000`);
   }
+  // Rescaled recurrence (see hermiteHScalar): the values overflow and their sign oscillates with
+  // n (L_1001(3000) < 0 and L_2000(3000) > 0). The numerator (2k - 1 - x) L_{k-1} is about k times
+  // the result, so it overflowed before the result did.
+  const big = Math.pow(2, 600);
+  const small = Math.pow(2, -600);
   let prev = 1,
-    curr = 1 - x;
+    curr = 1 - x,
+    e = 0;
   for (let k = 2; k <= ni; k++) {
     const next = ((2 * k - 1 - x) * curr - (k - 1) * prev) / k;
     if (Number.isNaN(next)) return NaN;
+    // A step out of range means |x| above about 2^422: the value is the leading term
+    // (-x)^n / n! with its sign.
+    if (!Number.isFinite(next)) return x > 0 && ni % 2 === 1 ? -Infinity : Infinity;
     prev = curr;
     curr = next;
+    if (Math.abs(curr) > big) {
+      prev *= small;
+      curr *= small;
+      e++;
+    }
   }
+  for (let i = 0; i < e && curr !== 0 && Number.isFinite(curr); i++) curr *= big;
   return curr;
 }
 
@@ -375,8 +415,18 @@ function legendrePScalar(n: f64, x: f64): f64 {
   let prev = 1,
     curr = x;
   for (let k = 2; k <= ni; k++) {
-    const next = ((2 * k - 1) * x * curr - (k - 1) * prev) / k;
-    if (Number.isNaN(next)) return NaN;
+    let next = ((2 * k - 1) * x * curr - (k - 1) * prev) / k;
+    if (!Number.isFinite(next)) {
+      // The numerator (2k - 1) x P_{k-1} is about k times the result, so it can leave the range
+      // before P_k does (legendreP(741, 1.5) gave NaN). x P_{k-1} + ((k - 1) / k) (x P_{k-1} - prev)
+      // is the same value with no such intermediate. It is computed only here, so every finite
+      // result keeps its bits.
+      next = x * curr + ((k - 1) / k) * (x * curr - prev);
+      if (Number.isNaN(next)) return NaN;
+      // For |x| > 1, P_k is monotone in k (|P_k(x)| >= |x|^k) with the sign of x^k, so the first
+      // overflow decides. |x| <= 1 never overflows. A further step would compute Infinity - Infinity.
+      if (!Number.isFinite(next)) return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
+    }
     prev = curr;
     curr = next;
   }
@@ -970,6 +1020,7 @@ export const ellipticE = mathTyped('ellipticE', {
 /** The per-call budget of each polynomial family: the order limit of its scalar (#1290). */
 const POLYNOMIAL_CALL_BUDGET = {
   chebyshevT: MAX_CHEBYSHEV_ORDER,
+  hermiteH: MAX_RECURRENCE_ORDER,
   laguerreL: MAX_LAGUERRE_ORDER,
   legendreP: MAX_RECURRENCE_ORDER,
 } as const;
@@ -989,10 +1040,11 @@ function overflowSteps(kind: 'chebyshevT' | 'legendreP', ni: number, x: number):
 }
 
 /**
- * Throw a RangeError when one array call of `chebyshevT`, `legendreP` or `laguerreL` needs more
- * recurrence steps than the order limit of its scalar. The scalar limit bounds one element, so
- * an array of 1000 elements at the largest degree ran for hours. A degree that the scalar
- * rejects keeps the message of the scalar. `laguerreL` counts the full degree for every element.
+ * Throw a RangeError when one array call of `chebyshevT`, `hermiteH`, `legendreP` or `laguerreL`
+ * needs more recurrence steps than the order limit of its scalar. The scalar limit bounds one
+ * element, so an array of 1000 elements at the largest degree ran for hours. A degree that the
+ * scalar rejects keeps the message of the scalar. `laguerreL` and `hermiteH` count the full degree
+ * for every element that is not NaN.
  *
  * @param kind - Polynomial family
  * @param n - Degree
@@ -1010,7 +1062,13 @@ function assertPolynomialArrayWork(
   if (ni < 2 || ni > max || ni * xs.length <= max) return;
   let steps = 0;
   for (let i = 0; i < xs.length; i++) {
-    steps += kind === 'laguerreL' ? (Number.isNaN(xs[i]) ? 0 : ni) : overflowSteps(kind, ni, xs[i]);
+    // laguerreL and hermiteH run the full degree for every element that is not NaN.
+    steps +=
+      kind === 'laguerreL' || kind === 'hermiteH'
+        ? Number.isNaN(xs[i])
+          ? 0
+          : ni
+        : overflowSteps(kind, ni, xs[i]);
   }
   assertArrayWork(kind, n, xs.length, Math.ceil(steps), max);
 }
@@ -1039,8 +1097,10 @@ export const chebyshevT = mathTyped('chebyshevT', {
  */
 export const hermiteH = mathTyped('hermiteH', {
   'number, number': hermiteHScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => hermiteHScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertPolynomialArrayWork('hermiteH', n, x);
+    return f64Unary(x, (v) => hermiteHScalar(n, v));
+  },
 });
 
 /**
