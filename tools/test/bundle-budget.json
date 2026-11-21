@@ -50,7 +50,7 @@
     "parallel/package.json": 2283,
     "workbook/dist/index.js": 49720,
     "workbook/package.json": 2123,
-    "assembly/build/mathts.js": 93147,
+    "assembly/build/mathts.js": 95077,
     "assembly/build/mathts.wasm": 64091,
     "assembly/build/mathts-debug.wasm": 124385,
     "assembly/package.json": 2432,

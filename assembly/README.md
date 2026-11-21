@@ -41,6 +41,26 @@ console.log(sin_f64(Math.PI / 2)); // 1
 `matrix` and `functions` load the same binary as `mathts-as.wasm` via their own
 loaders and SHA-384 verification (`core/src/wasm-loader.ts`).
 
+### Output parameters
+
+The glue copies each typed-array argument into WebAssembly memory before the call. After the
+call, it copies the arguments that the kernel writes back into your array: an output buffer, an
+in-place buffer or a scratch buffer. It never writes an input argument back. A plain Array works
+as an input and as an output.
+
+```typescript node
+import { matrix_multiply } from '@danielsimonjr/mathts-wasm';
+
+const result = new Float64Array(4);
+matrix_multiply(new Float64Array([1, 2, 3, 4]), 2, 2, new Float64Array([5, 6, 7, 8]), 2, result);
+console.log(Array.from(result)); // [19, 22, 43, 50]
+```
+
+`scripts/patch-glue.mjs` holds the class of every parameter (`OUTPUT_PARAMS`: `in` or `out`) and
+runs as a step of `gen:manifest`. The build fails when an export or a parameter is missing from
+that list. The debug build (`build/mathts-debug.js`) throws `mathts glue: <export> wrote its input
+parameter <param>` when a kernel writes a parameter that the list marks `in`.
+
 ### Dense decompositions (AS exports)
 
 From `algebra/decomposition.ts` (used by matrix `WASMBackend` tests, not public
