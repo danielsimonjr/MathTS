@@ -97,7 +97,7 @@ import { arraySize, broadcastTo } from '../utils/array.js';
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
-import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
+import { flooredModSnappedBigNumber } from '../utils/bignumber/floored-mod.js';
 import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
 import { snapBig, snapNumber } from '../arithmetic/snap-to-round.js';
 import { modWithFloor } from '../arithmetic/mod-with-floor.js';
@@ -1936,7 +1936,9 @@ export const mod = mathTyped('mod', {
   'number, number': (a: f64, b: f64): f64 => modWithFloor(a, b, floorNumberSnapped),
   'bigint, bigint': (a: i64, b: i64): i64 => (b === 0n ? a : ((a % b) + b) % b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (b.isZero() ? a : a.mod(b)),
-  'BigNumber, BigNumber': flooredModBigNumber,
+  // The floored remainder of the BigNumber, with the snapped floor of the number kernel.
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
+    flooredModSnappedBigNumber(a, b, floorBigNumberSnapped),
 
   'Array, Array': modKernels.array,
   'DenseMatrix, DenseMatrix': modKernels.matrix,

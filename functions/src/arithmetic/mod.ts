@@ -1,6 +1,7 @@
+import type { BigNumber } from '@danielsimonjr/mathts-core';
 import { factory } from '../utils/factory.js';
 import { createFloor } from './floor.js';
-import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
+import { flooredModSnappedBigNumber } from '../utils/bignumber/floored-mod.js';
 import { modWithFloor } from './mod-with-floor.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
@@ -107,7 +108,8 @@ export const createMod = /* #__PURE__ */ factory(
       {
         'number, number': _modNumber,
 
-        'BigNumber, BigNumber': flooredModBigNumber,
+        'BigNumber, BigNumber': (x: BigNumber, y: BigNumber): BigNumber =>
+          flooredModSnappedBigNumber(x, y, (q) => floor(q) as BigNumber),
 
         'bigint, bigint': function (x: bigint, y: bigint): bigint {
           if (y === 0n) {
