@@ -11,8 +11,8 @@
  *
  * A failing test is a finding. No bound is widened to make a value pass.
  */
-import { describe, it, expect } from 'vitest';
-import { Complex } from '@danielsimonjr/mathts-core';
+import { afterEach, describe, it, expect } from 'vitest';
+import { BigNumber, Complex } from '@danielsimonjr/mathts-core';
 import {
   besselJ,
   chebyshevT,
@@ -21,7 +21,7 @@ import {
   legendreP,
   lgamma,
 } from '../src/typed/special.js';
-import { gamma } from '../src/index.js';
+import { gamma, zeta } from '../src/index.js';
 
 /** Relative error of `got` against `want` (absolute when `want` is 0). */
 const rel = (got: unknown, want: number): number =>
@@ -150,6 +150,137 @@ describe('#1332 and D4: the recurrence polynomials overflow to a signed Infinity
       expect(laguerreL(5, 1e200)).toBe(-Infinity);
       expect(laguerreL(4, 1e200)).toBe(Infinity);
       expect(laguerreL(5, -1e200)).toBe(Infinity);
+    });
+  });
+});
+
+describe('#1327 and D1: zeta of a negative argument by the symmetric functional equation', () => {
+  // main (3b2ffe60): zeta(-170.5) = Infinity and zeta(-200.5) = -Infinity (Gamma(1 - s) overflows
+  // before the product with 2^s pi^(s - 1) sin(pi s / 2) is formed), zeta(complex(-200.5, 1)) =
+  // NaN, and sin(pi s / 2) next to an even integer lost digits.
+  describe('number', () => {
+    it('zeta(-170.5) = 1.7363215609094552e+171, zeta(-200.5) = -2.3200006633528991e+215', () => {
+      expectRel(zeta(-170.5), 1.7363215609094552e171, 1e-13);
+      expectRel(zeta(-200.5), -2.3200006633528991e215, 1e-13);
+    });
+    it('zeta(-259.5) = 3.982766118112322e+307 and zeta(-260.5) overflows to -Infinity', () => {
+      expectRel(zeta(-259.5), 3.982766118112322e307, 1e-13);
+      expect(zeta(-260.5)).toBe(-Infinity);
+    });
+    it('values that main already had keep their accuracy: zeta(-100.5), zeta(-20.5), zeta(-1.5)', () => {
+      expectRel(zeta(-100.5), -1.2790431911215158e78, 1e-13);
+      expectRel(zeta(-20.5), -108.21747505877606, 1e-13);
+      expectRel(zeta(-1.5), -0.025485201889833036, 1e-13);
+    });
+    it('zeta(-2.0000001) = 3.0448453720386309e-9 and zeta(-4.000000001) = -7.9838121079834373e-12 (D1)', () => {
+      // main: 3.044845369470748e-9 (8.4e-10 relative) and -7.983812739514951e-12 (8e-8 relative).
+      expectRel(zeta(-2.0000001), 3.0448453720386309e-9, 1e-13);
+      expectRel(zeta(-4.000000001), -7.9838121079834373e-12, 1e-13);
+    });
+    it('a negative even integer is a trivial zero, also above the range of gamma', () => {
+      expect(zeta(-2)).toBe(0);
+      expect(zeta(-1000)).toBe(0);
+      expect(zeta(-1e300)).toBe(0);
+    });
+    it('an out-of-range value is the infinity with the sign of -B(2n) / (2n), not NaN', () => {
+      expect(zeta(-1001)).toBe(-Infinity);
+      // sign of sin(pi s / 2) from the exact reduction of s / 2 modulo 2
+      const sign = (s: number): number => (s / 2 - 2 * Math.round(s / 4) < 0 ? -1 : 1);
+      expect(zeta(-700.5)).toBe(sign(-700.5) * Infinity);
+      expect(zeta(-1500.5)).toBe(sign(-1500.5) * Infinity);
+      expect(zeta(-4503599627370497)).toBe(-Infinity);
+      expect(zeta(-9007199254740991)).toBe(Infinity);
+    });
+    it('NaN and the infinities keep their values', () => {
+      expect(zeta(NaN)).toBeNaN();
+      expect(zeta(Infinity)).toBe(1);
+      expect(zeta(-Infinity)).toBeNaN();
+    });
+  });
+
+  describe('Complex', () => {
+    const part = (z: unknown, re: number, im: number, tol: number): void => {
+      const c = z as Complex;
+      expectRel(c.re, re, tol);
+      expectRel(c.im, im, tol);
+    };
+    it('zeta(-200.5 + 1i) = 3.8102909584475514e+215 - 6.8967100728523601e+215i', () => {
+      part(zeta(new Complex(-200.5, 1)), 3.8102909584475514e215, -6.8967100728523601e215, 1e-13);
+    });
+    it('zeta(-220.5 + 1i) = 1.0371114652356205e+246 - 2.386918780766325e+246i', () => {
+      part(zeta(new Complex(-220.5, 1)), 1.0371114652356205e246, -2.386918780766325e246, 1e-13);
+    });
+    it('zeta(-2.0000001 + 1e-9i) = 3.0448453720715127e-9 - 3.0448450482042081e-11i (D1)', () => {
+      part(
+        zeta(new Complex(-2.0000001, 1e-9)),
+        3.0448453720715127e-9,
+        -3.0448450482042081e-11,
+        1e-12
+      );
+    });
+    it('zeta(-30.5 + 2i) and zeta(-0.5 + 3i) keep their values', () => {
+      part(zeta(new Complex(-30.5, 2)), -1541128413.7265245, 1704290311.9032229, 1e-12);
+      part(zeta(new Complex(-0.5, 3)), 0.35291387981928725, 0.012124954416036982, 1e-12);
+    });
+  });
+
+  describe('BigNumber', () => {
+    // The relative bound of the plan is 10^(4 - precision): the work precision holds guard digits.
+    const bigRel = (got: unknown, want: string, p: number): void => {
+      const w = BigNumber.parse(want);
+      const g = got as BigNumber;
+      expect(
+        g
+          .minus(w)
+          .abs()
+          .div(w.abs())
+          .lte(`1e-${p - 4}`),
+        `${String(g)} against ${want}`
+      ).toBe(true);
+    };
+    const VALUES: Array<[string, string, string]> = [
+      [
+        '-620000000000000.5',
+        '-1.2113752305837205097e+8407148750326884',
+        '-1.211375230583720509650272710945630045329961364679269536148136268e+8407148750326884',
+      ],
+      [
+        '-630000000000000.5',
+        '-3.1143681162343861121e+8547125705491109',
+        '-3.114368116234386112111889402726837158282955293445211901792803708e+8547125705491109',
+      ],
+      [
+        '-660000000000000.5',
+        '-2.2764983153374937931e+8967465926285145',
+        '-2.276498315337493793078604127022058876468133288906040041889059794e+8967465926285145',
+      ],
+      [
+        '-100000000000000.5',
+        '-4.6196972573299266968e+1276752564973876',
+        '-4.61969725732992669682901774910135025514182316011262515428319438e+1276752564973876',
+      ],
+      [
+        '-12345.25',
+        '-1.9876593257800509947e+35297',
+        '-1.987659325780050994662033298897484820460180885260160034466403337e+35297',
+      ],
+      [
+        '-250.5',
+        '1.3106450149434268013e+293',
+        '1.310645014943426801257106449118695889463794485728052922065547893e+293',
+      ],
+    ];
+    afterEach(() => BigNumber.resetConfig());
+    it.each(VALUES)('precision 20: zeta(%s)', { timeout: 60000 }, (s, want20) => {
+      BigNumber.config({ precision: 20 });
+      bigRel(zeta(BigNumber.parse(s)), want20, 20);
+    });
+    it.each(VALUES)('precision 64: zeta(%s)', { timeout: 60000 }, (s, _want20, want64) => {
+      BigNumber.config({ precision: 64 });
+      bigRel(zeta(BigNumber.parse(s)), want64, 64);
+    });
+    it('zeta(-700000000000000.5) is -Infinity: the exponent 9.5e15 is above the maximum exponent', () => {
+      expect(String(zeta(BigNumber.parse('-700000000000000.5')))).toBe('-Infinity');
     });
   });
 });
