@@ -458,6 +458,37 @@ describe('#1097 bitwise functions of a BigNumber NaN', () => {
   });
 });
 
+describe('#1097 mod of two BigNumbers takes the sign of the divisor', () => {
+  // The typed row called the truncated `BigNumber.mod`, which takes the sign of the dividend.
+  // The factory row adds the divisor when the signs differ, and so does mathjs.
+  const mod = (a: unknown, b: unknown): string => String(fn('mod')(a, b));
+
+  it('#1097 a negative dividend or divisor gives the floored remainder', () => {
+    expect(mod(bn(-1), bn(5))).toBe('4');
+    expect(mod(bn(-7), bn(3))).toBe('2');
+    expect(mod(bn(7), bn(-3))).toBe('-2');
+    expect(mod(bn(-7), bn(-3))).toBe('-1');
+    expect(mod(bn('-7.5'), bn(2))).toBe('0.5');
+    expect(mod(bn(7), bn(3))).toBe('1');
+    expect(mod(bn(-6), bn(3))).toBe('0');
+  });
+
+  it('#1097 a divisor of zero returns the dividend, a number operand is converted', () => {
+    expect(mod(bn(-7), bn(0))).toBe('-7');
+    expect(mod(-1, bn(5))).toBe('4');
+    expect(mod(bn(-1), 5)).toBe('4');
+  });
+
+  it('#1097 the remainder of 30 digits is exact at precision 20 and 64', () => {
+    for (const precision of [20, 64]) {
+      BigNumber.config({ precision });
+      expect(mod(bn('-123456789012345678901234567890123'), bn('777777777777777777777'))).toBe(
+        '320987765308641987531'
+      );
+    }
+  });
+});
+
 describe('#1097 the BigNumber bitwise helpers of the parse path', () => {
   // The helpers served the digit array of decimal.js (`x.d`, `x.e`, `x.s`), which a core BigNumber
   // does not have: a finite operand threw `Cannot read properties of undefined`, and `bitNot`

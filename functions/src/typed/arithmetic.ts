@@ -77,6 +77,7 @@ import { arraySize, broadcastTo } from '../utils/array.js';
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
+import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { sparseProduct } from './sparse-product.js';
@@ -1606,7 +1607,7 @@ export const mod = mathTyped('mod', {
   'number, number': (a: f64, b: f64): f64 => (b === 0 ? a : ((a % b) + b) % b),
   'bigint, bigint': (a: i64, b: i64): i64 => (b === 0n ? a : ((a % b) + b) % b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (b.isZero() ? a : a.mod(b)),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (b.isZero() ? a : a.mod(b)),
+  'BigNumber, BigNumber': flooredModBigNumber,
 
   'Array, Array': modKernels.array,
   'DenseMatrix, DenseMatrix': modKernels.matrix,

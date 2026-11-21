@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { createFloor } from './floor.js';
+import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
 import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
@@ -11,14 +12,6 @@ import type { AlgorithmFunction } from '../type/matrix/types.js';
 import type { ConfigOptions } from '../core/config.js';
 
 // Type definitions for mod
-interface BigNumberType {
-  isZero(): boolean;
-  isNegative(): boolean;
-  add(value: BigNumberType): BigNumberType;
-  mod(value: BigNumberType): BigNumberType;
-  constructor: { precision: number; config(options: { precision: number }): unknown };
-}
-
 interface FractionType {
   equals(value: number): boolean;
   sub(value: FractionType): FractionType;
@@ -113,23 +106,7 @@ export const createMod = /* #__PURE__ */ factory(
       {
         'number, number': _modNumber,
 
-        'BigNumber, BigNumber': function (x: BigNumberType, y: BigNumberType): BigNumberType {
-          if (y.isZero()) return x;
-          // BigNumber mod is exact and takes the sign of x. The floored result adds y when the
-          // signs differ. x - y * floor(x / y) would round the product to the precision (#1118).
-          const remainder = x.mod(y);
-          if (remainder.isZero() || remainder.isNegative() === y.isNegative()) return remainder;
-          // |remainder + y| < |y|, but the sum can have more digits than the precision, so the
-          // add runs with no precision limit.
-          const BigNumber = x.constructor;
-          const precision = BigNumber.precision;
-          BigNumber.config({ precision: Infinity });
-          try {
-            return remainder.add(y);
-          } finally {
-            BigNumber.config({ precision });
-          }
-        },
+        'BigNumber, BigNumber': flooredModBigNumber,
 
         'bigint, bigint': function (x: bigint, y: bigint): bigint {
           if (y === 0n) {

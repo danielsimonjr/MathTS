@@ -151,8 +151,21 @@ describe('#1092 validation cost: only user data is validated', () => {
     Array.from({ length: N }, (_r, i) => Array.from({ length: N }, (_c, j) => offset + i + j));
 
   it('matrix(array) validates every element once', () => {
-    const data = rows(0);
+    // `validate` of the constructor tests a number leaf with `typeof` (a numeric array is the
+    // common case, and a `typeof` test is about 2 times faster), so only a leaf that is not a
+    // number reaches `Array.isArray`. A bigint leaf makes the count see each element.
+    const data = rows(0).map((row) => row.map((v) => BigInt(v)));
     expect(isArrayCalls(() => matrix(data))).toBeGreaterThanOrEqual(N * N);
+  });
+
+  it('matrix(array) of numbers reaches the last element', () => {
+    // A number leaf is not visible to the `Array.isArray` count, so check the reach directly:
+    // an array in the last place of the last row is found.
+    const data = rows(0) as unknown[][];
+    data[N - 1][N - 1] = [1];
+    expect(thrown(() => matrix(data))).toBeInstanceOf(Error);
+    data[N - 1][N - 1] = 1;
+    expect(thrown(() => matrix(data))).toBeUndefined();
   });
 
   it('add and multiply of two bridge matrices do not validate their result', () => {

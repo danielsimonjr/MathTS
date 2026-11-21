@@ -194,6 +194,25 @@ describe('#1097 integer functions through the expression language', () => {
   });
 });
 
+describe('#1097 mod of BigNumbers takes the sign of the divisor on both paths', () => {
+  // Oracle: mathjs 15.2.0. `evaluate` ran the typed row, which gave the sign of the dividend.
+  const ROWS: Array<[string, string]> = [
+    ['mod(bignumber(-1), bignumber(5))', '4'],
+    ['mod(bignumber(-7), bignumber(3))', '2'],
+    ['mod(bignumber(7), bignumber(-3))', '-2'],
+    ['mod(bignumber(-7), bignumber(-3))', '-1'],
+    ['mod(-1, bignumber(5))', '4'],
+    ['mod(bignumber(-1), 5)', '4'],
+    ['mod(bignumber(-7.5), bignumber(2))', '0.5'],
+  ];
+  for (const [e, want] of ROWS) {
+    it(`#1097 ${e} = ${want} on evaluate and on parse`, () => {
+      expect(str(ev(e)), 'evaluate').toBe(want);
+      expect(str(pv(e)), 'parse').toBe(want);
+    });
+  }
+});
+
 describe('#1097 the bitwise operators of BigNumbers on both paths', () => {
   // Oracle: mathjs 15.2.0. The parse path ran helpers written for the digit array of decimal.js,
   // so a finite operand threw `Cannot read properties of undefined`, and `bitNot` kept the sign.
