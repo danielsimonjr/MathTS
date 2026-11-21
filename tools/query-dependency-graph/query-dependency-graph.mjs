@@ -142,7 +142,16 @@ export function findLeaks(pkg, forward, direct) {
 // ── data loading + CLI ──────────────────────────────────────────────────────
 
 function loadData(root) {
-  const graph = JSON.parse(readFileSync(join(root, 'docs/Architecture/dependency-graph.json'), 'utf8'));
+  const graphPath = join(root, 'docs/Architecture/dependency-graph.json');
+  // `bun run docs:deps` writes the graph and no commit holds it, so a fresh checkout has none.
+  if (!existsSync(graphPath)) {
+    console.error(
+      `query-dependency-graph: ${graphPath} not found: run \`bun run docs:deps\` first ` +
+        '(after `bun run build`). That command writes the file, and no commit holds it.'
+    );
+    process.exit(1);
+  }
+  const graph = JSON.parse(readFileSync(graphPath, 'utf8'));
   const surfPath = join(root, 'docs/Architecture/package-export-surfaces.json');
   const surfaces = existsSync(surfPath) ? JSON.parse(readFileSync(surfPath, 'utf8')).surfaces : {};
   const fileEntries = [];

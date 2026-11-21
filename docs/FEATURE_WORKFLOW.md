@@ -62,7 +62,8 @@ answers the placement-probe questions directly over CDG's data (no re-parse):
 `dependents <file>` (who imports this), `symbol-users <symbol>` (cross-package
 usage), `is-public <pkg> <symbol>` (public vs internal), `node-safety [pkg]`,
 `cycles`. `docs:deps` also emits `dependency-reverse.json` (reverse edges) and
-`node-safety.json` (node:-taint + leaks).
+`node-safety.json` (node:-taint + leaks). The repository does not commit these files:
+run `bun run build` and then `bun run docs:deps` in a new checkout.
 
 **Discipline:** regenerate the committed graph **canonically** — never with
 `--all` (that writes the dormant-included variant and pollutes the committed

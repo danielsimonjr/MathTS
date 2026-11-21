@@ -1,0 +1,16 @@
+{
+  "remote": "origin",
+  "base": "main",
+  "union": ["CHANGELOG.md", "TODO.md"],
+  "takeBase": ["tools/test/bundle-budget.json"],
+  "regen": [
+    ["bun", "run", "build"],
+    ["bun", "run", "docs:deps"],
+    ["bun", "run", "docs:functions"]
+  ],
+  "check": [
+    ["node", "tools/test/check-bundle-budget.mjs"],
+    ["bun", "x", "@danielsimonjr/repo-tools@2.2.4", "check", ".", "--docs=docs/Architecture"]
+  ],
+  "message": "chore: merge {base}"
+}
