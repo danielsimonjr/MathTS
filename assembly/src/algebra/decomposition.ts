@@ -12,9 +12,48 @@
  * Return codes:
  *   0  → success
  *   -1 → singular / not-positive-definite (kernel-specific, documented per fn)
+ *
+ * Pivot rule (LU, inverse, determinant). A pivot is zero when the rounding error of its own
+ * computation hides it. The pivot of step k in row p is `a_pk - sum_{j<k} l_pj * u_jk`, and
+ * its rounding error is bounded by a small multiple of `eps * S` with
+ * `S = sum_{j<k} |l_pj| * |u_jk|`. So the kernels read the pivot as zero when it is
+ * `<= PIVOT_REL_TOL * S`. At step 0 the sum is empty: a pivot that is an entry of A is zero
+ * only when it is exactly 0. Every term is in the in-place LU storage (row p of L, column k of
+ * U), and every term scales exactly with a power of 2 of A, of a row or of a column, so the
+ * verdict does not depend on the unit of the matrix. An absolute floor did (#1172): a
+ * rank-deficient matrix times 2^20 kept a rounding residue above it, and a regular matrix with
+ * a pivot of 1e-15 fell under it.
+ *
+ * Limits (they belong to partial-pivoting LU, not to this rule). A regular matrix is called
+ * singular only when a pivot lost 14 or more decimal digits to cancellation, as in
+ * `[[1, 1], [1, 1 + 1e-15]]`. A rank-deficient matrix can pass when its leading block is
+ * ill-conditioned, because the errors of the earlier pivots are amplified: an LU pivot test
+ * does not reveal the rank.
  */
 
-const DECOMP_EPS: f64 = 1e-14;
+/** A pivot is zero when it is at most this multiple of the cancellation sum `S` (see above). */
+const PIVOT_REL_TOL: f64 = 1e-14;
+
+/**
+ * 2^-500. A column whose largest entry is below it has squares that can underflow (they do
+ * below about 2.2e-162), so its norm is computed from the entries divided by that largest
+ * entry. An ordinary column keeps the plain sum of squares, so its bits do not change.
+ */
+const TINY_COLUMN: f64 = 3.0549363634996047e-151;
+
+/**
+ * Whether `pivot` (the magnitude of the pivot candidate of step `k` in row `row` of the in-place
+ * LU storage `work`, row-major n*n) is zero by the rule above. `S` is summed in ascending j,
+ * as in the JS twin `cancellationSum` of `WASMBackend.ts`, so both give the same verdict. A NaN
+ * pivot is not zero (it propagates, as before).
+ */
+function pivotIsZero(work: Float64Array, n: i32, row: i32, k: i32, pivot: f64): bool {
+  let s: f64 = 0.0;
+  for (let j = 0; j < k; j++) {
+    s += Math.abs(work[row * n + j]) * Math.abs(work[j * n + k]);
+  }
+  return pivot <= PIVOT_REL_TOL * s;
+}
 
 /**
  * LU decomposition with partial pivoting (Doolittle form): `P * A = L * U`.
@@ -25,8 +64,8 @@ const DECOMP_EPS: f64 = 1e-14;
  *   - `perm_out` (n):  the row permutation. `perm_out[i] = j` means the
  *                      `i`th row of `P*A` is the `j`th row of `A`.
  *
- * Returns 0 on success, -1 if the matrix is singular (no nonzero pivot
- * found in any sub-column).
+ * Returns 0 on success, -1 if the matrix is singular (a pivot is zero by the pivot rule
+ * of the file header).
  */
 export function matrix_lu_decompose(
   a: Float64Array,
@@ -56,7 +95,7 @@ export function matrix_lu_decompose(
       }
     }
 
-    if (maxVal < DECOMP_EPS) {
+    if (pivotIsZero(work, n, pivotRow, k, maxVal)) {
       return -1; // singular
     }
 
@@ -83,7 +122,7 @@ export function matrix_lu_decompose(
   }
 
   // Final pivot must also be nonzero for the matrix to be non-singular.
-  if (Math.abs(work[(n - 1) * n + (n - 1)]) < DECOMP_EPS) {
+  if (pivotIsZero(work, n, n - 1, n - 1, Math.abs(work[(n - 1) * n + (n - 1)]))) {
     return -1;
   }
 
@@ -157,16 +196,33 @@ export function matrix_qr_decompose(
     v_work !== null && v_work.length >= m ? v_work : new Float64Array(m);
 
   for (let k = 0; k < minDim; k++) {
-    // Column norm below (and including) the diagonal pivot.
+    // Column norm below (and including) the diagonal pivot, and its largest entry.
     let norm: f64 = 0.0;
+    let amax: f64 = 0.0;
     for (let i = k; i < m; i++) {
       const v = r_out[i * n + k];
       norm += v * v;
+      const av = Math.abs(v);
+      if (av > amax) amax = av;
     }
-    norm = Math.sqrt(norm);
 
-    if (norm < DECOMP_EPS) {
-      continue; // already zero — nothing to reflect
+    // Skip a column only when it is exactly zero: there is nothing to reflect. An absolute
+    // floor left a non-zero entry below the diagonal of R, and the squares of an entry under
+    // 2.2e-162 underflow, so `norm == 0` is not an exact-zero test (#1172). A NaN column is not
+    // skipped: its norm is NaN and the result carries the NaN.
+    if (amax == 0.0 && norm == 0.0) {
+      continue;
+    }
+    if (amax < TINY_COLUMN) {
+      // The squares may underflow: take the norm of the entries divided by the largest one.
+      let scaled: f64 = 0.0;
+      for (let i = k; i < m; i++) {
+        const t = r_out[i * n + k] / amax;
+        scaled += t * t;
+      }
+      norm = amax * Math.sqrt(scaled);
+    } else {
+      norm = Math.sqrt(norm);
     }
 
     const akk = r_out[k * n + k];
@@ -303,7 +359,7 @@ export function matrix_inverse(
         pivotRow = i;
       }
     }
-    if (maxVal < DECOMP_EPS) {
+    if (pivotIsZero(work, n, pivotRow, k, maxVal)) {
       for (let i = 0; i < n * n; i++) result[i] = 0.0;
       return -1;
     }
@@ -333,7 +389,7 @@ export function matrix_inverse(
       }
     }
   }
-  if (Math.abs(work[(n - 1) * n + (n - 1)]) < DECOMP_EPS) {
+  if (pivotIsZero(work, n, n - 1, n - 1, Math.abs(work[(n - 1) * n + (n - 1)]))) {
     for (let i = 0; i < n * n; i++) result[i] = 0.0;
     return -1;
   }
@@ -367,10 +423,12 @@ export function matrix_inverse(
 /**
  * Determinant of a square n*n matrix via LU.
  *
- * Returns `det(A)`. Returns 0.0 when the matrix is singular — note this
- * value is also legitimately reachable by a tiny non-singular matrix, so
- * callers wanting a singularity flag should test against a tolerance
- * rather than exact zero.
+ * Returns `det(A)`. Returns 0.0 when a pivot of steps 0 to n-2 is zero by the pivot rule
+ * of the file header. The last pivot is multiplied in without a test, as in LAPACK, so the
+ * determinant of a rank-deficient matrix is a rounding residue (about 1e-17 of the scale),
+ * not 0. A caller that needs a singularity flag uses `matrix_lu_decompose`. The pivots are
+ * multiplied in order, so a matrix with pivots of very different size can overflow in a
+ * partial product before a later pivot brings it back.
  *
  * `work` is a scratch Float64Array of length >= n*n.
  */
@@ -392,7 +450,7 @@ export function matrix_determinant(a: Float64Array, n: i32, work: Float64Array):
         pivotRow = i;
       }
     }
-    if (maxVal < DECOMP_EPS) return 0.0;
+    if (pivotIsZero(work, n, pivotRow, k, maxVal)) return 0.0;
     if (pivotRow != k) {
       for (let j = 0; j < n; j++) {
         const tmp = work[k * n + j];
