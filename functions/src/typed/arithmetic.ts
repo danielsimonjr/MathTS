@@ -1692,6 +1692,8 @@ function snappedNumbersOfCall(kind: 'floor' | 'ceil' | 'fix'): (a: f64) => f64 {
  * floor or the ceiling is replaced by the nearest integer when `a` is within tolerance of it.
  */
 function snapDirectedBigNumber(a: BigNumber, toward: (v: BigNumber) => BigNumber): BigNumber {
+  // An integer is its own floor and ceiling, so nothing can snap: no config read, no rounding.
+  if (a.isInteger()) return toward(a);
   const { relTol, absTol } = liveConfig();
   return snapBig(
     a,
