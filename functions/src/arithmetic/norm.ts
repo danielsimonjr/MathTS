@@ -314,7 +314,7 @@ export const createNorm = /* #__PURE__ */ factory(
           }
           // sqrt is exact for a perfect square and rounds once; pow(n, 0.5) goes through exp/ln.
           const plain = (p === 2 ? sqrt(n) : pow(n, 1 / p)) as number | BigNumberType;
-          return p === 2 ? plain : _scaledPNorm(x, p, n, plain);
+          return p === 2 ? _finiteOr(plain, x) : _scaledPNorm(x, p, n, plain);
         }
         return Number.POSITIVE_INFINITY;
       }
@@ -352,7 +352,20 @@ export const createNorm = /* #__PURE__ */ factory(
         });
         if (plain) return norm2(entries);
       }
-      return abs(sqrt(fro)) as number | BigNumberType;
+      return _finiteOr(abs(sqrt(fro)) as number | BigNumberType, x);
+    }
+
+    /**
+     * `plain` when it is finite. Else the non-finite norm of the entries of `x`: the plain sum
+     * gives NaN for an infinite entry with a NaN entry, and the IEEE rule gives Infinity (#1259).
+     */
+    function _finiteOr(plain: number | BigNumberType, x: MatrixType): number | BigNumberType {
+      const finite =
+        typeof plain === 'number'
+          ? Number.isFinite(plain)
+          : !(plain instanceof CoreBigNumber) || plain.isFinite();
+      if (finite) return plain;
+      return (_nonFiniteNorm(x.toArray() as unknown[]) ?? plain) as number | BigNumberType;
     }
 
     /**
@@ -420,9 +433,10 @@ export const createNorm = /* #__PURE__ */ factory(
     }
 
     /**
-     * The 2-norm of a matrix that has a non-finite entry: NaN when an entry is NaN, else Infinity
-     * when an entry is infinite, as mathjs gives for an infinite entry. A BigNumber when an entry
-     * is a BigNumber, else a number. `undefined` when every entry is finite.
+     * The 2-norm or the Frobenius norm of entries of which one is not finite: Infinity when a part
+     * of an entry is infinite, also with a NaN; else NaN (the IEEE 754 rule of `hypot`, #1259). A
+     * BigNumber when an entry is a BigNumber, else a number. `undefined` when every entry is
+     * finite.
      */
     function _nonFiniteNorm(rows: unknown[]): number | CoreBigNumber | undefined {
       let anyBig = false;
@@ -441,11 +455,11 @@ export const createNorm = /* #__PURE__ */ factory(
         } else {
           continue;
         }
-        if (Number.isNaN(re) || Number.isNaN(im)) anyNaN = true;
-        else if (!Number.isFinite(re) || !Number.isFinite(im)) anyInfinite = true;
+        if (Math.abs(re) === Infinity || Math.abs(im) === Infinity) anyInfinite = true;
+        else if (Number.isNaN(re) || Number.isNaN(im)) anyNaN = true;
       }
       if (!anyNaN && !anyInfinite) return undefined;
-      const result = anyNaN ? NaN : Infinity;
+      const result = anyInfinite ? Infinity : NaN;
       return anyBig ? CoreBigNumber.fromNumber(result) : result;
     }
 

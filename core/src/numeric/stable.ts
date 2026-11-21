@@ -268,13 +268,19 @@ export function norm2(xs: ArrayLike<number>): number {
   assertArrayLike('norm2', xs);
   let scale = 0;
   let ssq = 1;
+  let nan = false;
 
   for (let i = 0; i < xs.length; i++) {
     const x = xs[i];
     if (x === 0) continue;
-    if (Number.isNaN(x)) return NaN;
-
+    // An infinite value gives Infinity, also with a NaN; else a NaN gives NaN (IEEE 754 hypot,
+    // #1259). A NaN is remembered so that a later infinite value still wins.
+    if (Number.isNaN(x)) {
+      nan = true;
+      continue;
+    }
     const ax = Math.abs(x);
+    if (ax === Infinity) return Infinity;
     if (scale < ax) {
       // A new largest element: rescale the accumulated sum of squares down to the new unit.
       const r = scale / ax;
@@ -286,6 +292,7 @@ export function norm2(xs: ArrayLike<number>): number {
     }
   }
 
+  if (nan) return NaN;
   return scale === 0 ? 0 : scale * Math.sqrt(ssq);
 }
 
@@ -469,13 +476,19 @@ export function scaledDistance(a: ArrayLike<number>, b: ArrayLike<number>): numb
   assertArrayLike('scaledDistance', b);
   let scale = 0;
   let ssq = 1;
+  let nan = false;
 
   for (let i = 0; i < a.length; i++) {
     const d = a[i] - b[i];
     if (d === 0) continue;
-    if (Number.isNaN(d)) return NaN;
-
+    // An infinite value gives Infinity, also with a NaN; else a NaN gives NaN (IEEE 754 hypot,
+    // #1259). A NaN is remembered so that a later infinite value still wins.
+    if (Number.isNaN(d)) {
+      nan = true;
+      continue;
+    }
     const ad = Math.abs(d);
+    if (ad === Infinity) return Infinity;
     if (scale < ad) {
       const r = scale / ad;
       ssq = 1 + ssq * r * r;
@@ -486,6 +499,7 @@ export function scaledDistance(a: ArrayLike<number>, b: ArrayLike<number>): numb
     }
   }
 
+  if (nan) return NaN;
   return scale === 0 ? 0 : scale * Math.sqrt(ssq);
 }
 

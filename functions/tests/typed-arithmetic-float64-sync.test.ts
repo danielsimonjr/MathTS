@@ -133,8 +133,9 @@ const UNARY: Array<[string, Fn, number[], number[], ((x: number) => number)?]> =
   ['log2', log2 as Fn, [8, 1024], [3, 10], Math.log2],
   ['log1p', log1p as Fn, [0, -0], [0, -0], Math.log1p],
   ['expm1', expm1 as Fn, [0, -0], [0, -0]],
-  // round(-0.4) is -0 (Math.round keeps the sign); round(2.5) is 3, round(-2.5) is -2.
-  ['round', round as Fn, [-0.4, 2.5, -2.5, 1.4], [-0, 3, -2, 1]],
+  // round(-0.4) is -0 (a value below the 1e-15 absTol floor keeps its sign); a tie goes away
+  // from zero, so round(2.5) is 3 and round(-2.5) is -3 (#996, mathjs 15.2.0).
+  ['round', round as Fn, [-0.4, 2.5, -2.5, 1.4], [-0, 3, -3, 1]],
   ['floor', floor as Fn, [-1.5, 1.5], [-2, 1]],
   ['ceil', ceil as Fn, [-1.5, 1.5, -0.5], [-1, 2, -0]],
   ['fix', fix as Fn, [-1.7, 1.7, -0.2], [-1, 1, -0]],

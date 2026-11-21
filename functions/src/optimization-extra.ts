@@ -4,6 +4,7 @@
  * nonlinear least squares. LM reuses the matrix `inv` for the normal-equations solve
  * rather than re-implementing elimination.
  */
+import { hypotList } from './utils/hypot-list.js';
 import { pairwiseDot } from '@danielsimonjr/mathts-core';
 import { inv as _invRaw } from './factories/index.js';
 import { centralDifferenceGradient, numericJacobian } from './numeric/numeric-jacobian.js';
@@ -145,7 +146,7 @@ export function gradientDescent(
   let iter = 0;
   for (; iter < maxIter; iter++) {
     const g = grad(x);
-    const gnorm = Math.hypot(...g);
+    const gnorm = hypotList(g);
     if (gnorm <= tol) break;
     // backtracking line search
     let t = rate;

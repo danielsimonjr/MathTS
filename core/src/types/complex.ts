@@ -69,7 +69,8 @@ export function isComplex(value: unknown): value is Complex {
  * this is the path `abs`, `log`, `pow`, `sign`, and `sqrt` all share.
  *
  * Outside that window we fall through to `Math.hypot` so huge values do not overflow
- * to `Infinity` and denormals do not flush to `0`.
+ * to `Infinity` and denormals do not flush to `0`. A non-finite part also takes `Math.hypot`:
+ * an infinite part gives Infinity, also with a NaN part, and else a NaN part gives NaN (#1259).
  */
 function hypotFast(re: number, im: number): number {
   if (im === 0) return Math.abs(re);
@@ -79,7 +80,38 @@ function hypotFast(re: number, im: number): number {
   if (a < 1e150 && b < 1e150 && (a > 1e-150 || b > 1e-150)) {
     return Math.sqrt(re * re + im * im);
   }
+  // `Math.hypot` follows IEEE 754: an infinite part gives Infinity, also when the other part is
+  // NaN; else a NaN part gives NaN. This is the rule of `hypot` and `norm` (#1259).
   return Math.hypot(re, im);
+}
+
+/**
+ * `log(sqrt(a² + b²))` as complex.js 2.4.3 computes it, so `Complex.pow` equals mathjs bit for
+ * bit. Below 3000 in both parts it is `0.5 · log(a² + b²)` (no square root); above, the parts are
+ * halved first so that the squares cannot overflow.
+ */
+function logHypot(a: number, b: number): number {
+  const absA = Math.abs(a);
+  const absB = Math.abs(b);
+  if (a === 0) return Math.log(absB);
+  if (b === 0) return Math.log(absA);
+  if (absA < 3000 && absB < 3000) return Math.log(a * a + b * b) * 0.5;
+  const halfA = a * 0.5;
+  const halfB = b * 0.5;
+  const loh = 0.5 * Math.log(halfA * halfA + halfB * halfB) + Math.LN2;
+  // The squares of the halved parts still overflow above about 2.7e154, and complex.js then gives
+  // Infinity, so `(1e300 + 1e300i)^0.5` is NaN + NaN i in mathjs. `Math.hypot` does not overflow
+  // for finite parts. This changes only results that are not finite in complex.js.
+  return loh === Infinity && Number.isFinite(a) && Number.isFinite(b)
+    ? Math.log(Math.hypot(a, b))
+    : loh;
+}
+
+/**
+ * `r · e^(i·theta)` computed as mathjs computes a cube root: `(r + 0i) · exp(0 + theta·i)`.
+ */
+function cubeRootAt(r: number, theta: number): Complex {
+  return new Complex(r, 0).mul(new Complex(0, theta).exp());
 }
 
 /**
@@ -159,31 +191,74 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Parse a complex number from a string
-   * Supports formats: "3+4i", "3-4i", "3", "4i", "-4i", "i", "-i"
+   * Parse a complex number from a string, with the grammar of the mathjs string parser.
+   *
+   * The text is a sum of signed terms. A term is a number (`3`, `.5`, `5.`, `1e3`, `1.5e-2`), a
+   * number followed by `i` (`4i`, `1e3i`), `i`, or `i` followed by a number (`i2`). Several signs
+   * in a row combine (`--1` is 1, `1+-2i` is 1 - 2i), a `_` is ignored, and `I` is the same as `i`.
+   * Three rules keep text that older versions read correctly:
+   * 1. White space is ignored, except between two number characters (`'3 + 4 i'` is 3 + 4i, but
+   *    `'1 2'` is not a number).
+   * 2. The exponent marker is `e` or `E`.
+   * 3. `Infinity` is a number (`'-Infinity'`, `'2+Infinityi'`). `NaN` is not a number.
+   *
+   * A string that is not a complex number throws `SyntaxError('Invalid Param')`, as in mathjs.
+   * @param str - the text to read
+   * @returns the complex number that the text names
    */
   static parse(str: string): Complex {
-    str = str.replace(/\s/g, '');
-
-    // Check for complex form first: "a+bi" or "a-bi"
-    const match = str.match(/^([+-]?[\d.]+)([+-])([\d.]*)i$/);
-    if (match) {
-      const re = parseFloat(match[1]);
-      const sign = match[2] === '-' ? -1 : 1;
-      const imMag = match[3] === '' ? 1 : parseFloat(match[3]);
-      return new Complex(re, sign * imMag);
+    const invalid = (): SyntaxError => new SyntaxError('Invalid Param');
+    // Each run of white space is tested once, on the two characters that touch it. A pattern with
+    // a look-behind and a look-ahead tests the run again from every start position inside it: its
+    // time grows with the square of the run length (23 s for 1e5 spaces). The number pattern is
+    // `\d+(?:\.\d*)?`, not `\d+\.?\d*`: both name the same strings, but two adjacent `\d`
+    // quantifiers split a long digit run in every possible way when the exponent is missing.
+    const tokens = str
+      .replace(/_/g, '')
+      .replace(/\s+/g, (run: string, at: number, whole: string) =>
+        /[\d.eE]/.test(whole[at - 1] ?? '') && /[\d.eE]/.test(whole[at + run.length] ?? '')
+          ? run
+          : ''
+      )
+      .match(/\d+(?:\.\d*)?[eE][+-]?\d+|\d+(?:\.\d*)?|\.\d+|Infinity|[^]/g);
+    if (tokens === null) throw invalid();
+    let re = 0;
+    let im = 0;
+    let plus = 1;
+    let minus = 0;
+    for (let i = 0; i < tokens.length; i++) {
+      const c = tokens[i];
+      if (c === '+') {
+        plus++;
+        continue;
+      }
+      if (c === '-') {
+        minus++;
+        continue;
+      }
+      if (plus + minus === 0) throw invalid(); // two terms with no sign between them
+      const sign = minus % 2 ? '-' : '';
+      const next = tokens[i + 1];
+      if (c === 'i' || c === 'I') {
+        if (next !== undefined && !Number.isNaN(Number(next))) {
+          im += Number(sign + next);
+          i++;
+        } else {
+          im += Number(sign + '1');
+        }
+      } else {
+        if (Number.isNaN(Number(c))) throw invalid();
+        if (next === 'i' || next === 'I') {
+          im += Number(sign + c);
+          i++;
+        } else {
+          re += Number(sign + c);
+        }
+      }
+      plus = minus = 0;
     }
-
-    // Pure imaginary: "i", "-i", "4i", "-4i"
-    if (str.endsWith('i')) {
-      const imStr = str.slice(0, -1);
-      if (imStr === '' || imStr === '+') return new Complex(0, 1);
-      if (imStr === '-') return new Complex(0, -1);
-      return new Complex(0, parseFloat(imStr));
-    }
-
-    // Pure real number
-    return new Complex(parseFloat(str), 0);
+    if (plus + minus > 0) throw invalid(); // a sign with no term after it
+    return new Complex(re, im);
   }
 
   /**
@@ -502,23 +577,84 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Power: z^w = e^(w·ln(z))
+   * Power `z^w`, the algorithm of complex.js 2.4.3 (the library of mathjs), so the result equals
+   * mathjs bit for bit. `w` is a number or a Complex; both take the same body.
+   *
+   * - `z^0` is 1.
+   * - A zero base with a real exponent follows the IEEE 754 pow rules: `0^y` is 0 for `y > 0`
+   *   and +Infinity for `y < 0`. (complex.js reads a zero base as a pure imaginary number there
+   *   and gives -0 + 0i for `0^2` and 0 - Infinity i for `0^(-1)`.)
+   * - A positive real base with a real exponent gives `Math.pow`.
+   * - A pure imaginary base with an integer exponent takes the exact power of `i`.
+   * - Else `exp(c·L − d·θ) · (cos(d·L + c·θ) + i·sin(d·L + c·θ))`, with `L = log|z|` (see
+   *   `logHypot`), `θ = arg z` and `w = c + d·i`. A zero base with `c > 0` gives 0.
+   * - Where complex.js computes Infinity · 0 = NaN, the result keeps the IEEE value. Three
+   *   cases: the squares of `logHypot` overflow for a finite base above about 2.7e154 (mathjs
+   *   gives NaN + NaN i for `(1e300 + 1e300i)^0.5`); `d · L` is 0 · Infinity for a real exponent
+   *   of an infinite base; and an infinite scale times an exact-zero trig part. A result that is
+   *   finite in complex.js does not change.
    */
   pow(n: number | Complex): Complex {
-    if (typeof n === 'number') {
-      // Optimization for real exponents
-      if (this.re === 0 && this.im === 0) {
-        return n === 0 ? new Complex(1, 0) : new Complex(0, 0);
+    const c = typeof n === 'number' ? n : n.re;
+    const d = typeof n === 'number' ? 0 : n.im;
+    const a = this.re;
+    const b = this.im;
+    if (c === 0 && d === 0) return new Complex(1, 0);
+    if (d === 0) {
+      if (a === 0 && b === 0) {
+        if (c > 0) return new Complex(0, 0);
+        if (c < 0) return new Complex(Infinity, 0);
+      } else if (b === 0 && a > 0) {
+        return new Complex(Math.pow(a, c), 0);
+      } else if (a === 0) {
+        // No `default`: a non-integer exponent gives NaN here and takes the general formula.
+        switch (((c % 4) + 4) % 4) {
+          case 0:
+            return new Complex(Math.pow(b, c), 0);
+          case 1:
+            return new Complex(0, Math.pow(b, c));
+          case 2:
+            return new Complex(-Math.pow(b, c), 0);
+          case 3:
+            return new Complex(0, -Math.pow(b, c));
+        }
       }
-      const r = this.abs();
-      const theta = this.arg();
-      return Complex.fromPolar(Math.pow(r, n), theta * n);
     }
-    // General case: z^w = e^(w * ln(z))
-    if (this.re === 0 && this.im === 0) {
-      return new Complex(0, 0);
-    }
-    return this.log().multiply(n).exp();
+    if (a === 0 && b === 0 && c > 0) return new Complex(0, 0);
+    const theta = Math.atan2(b, a);
+    const loh = logHypot(a, b);
+    const scale = Math.exp(c * loh - d * theta);
+    // complex.js computes `d * loh` also for a real exponent. When the modulus overflows
+    // (`loh` is infinite), that is 0 * Infinity = NaN, and `(1e300 + 1e300i)^2` is NaN + NaN i.
+    // The term is 0 for a real exponent, so a modulus that overflows gives an infinite result.
+    // For every other input the term is the complex.js term, so the bits do not change.
+    const dLoh = d === 0 && (loh === Infinity || loh === -Infinity) ? 0 : d * loh;
+    const angle = dLoh + c * theta;
+    // `fromPolar` is `scale · cos` and `scale · sin` (the complex.js product) for a finite scale.
+    // For an infinite scale it keeps an exact-zero trig part, where complex.js gives
+    // Infinity · 0 = NaN.
+    return Complex.fromPolar(scale, angle);
+  }
+
+  /**
+   * The principal cube root, `cbrt(|z|) · e^(i·arg(z)/3)`, as mathjs `cbrt` of a Complex.
+   */
+  cbrt(): Complex {
+    return cubeRootAt(Math.cbrt(this.abs()), this.arg() / 3);
+  }
+
+  /**
+   * The three cube roots, principal first, then the principal root turned by +2π/3 and by
+   * −2π/3, as mathjs `cbrt(z, true)`.
+   */
+  cbrtRoots(): [Complex, Complex, Complex] {
+    const r = Math.cbrt(this.abs());
+    const arg3 = this.arg() / 3;
+    return [
+      cubeRootAt(r, arg3),
+      cubeRootAt(r, arg3 + (Math.PI * 2) / 3),
+      cubeRootAt(r, arg3 - (Math.PI * 2) / 3),
+    ];
   }
 
   // ============================================================

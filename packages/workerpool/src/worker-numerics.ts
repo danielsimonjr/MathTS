@@ -159,7 +159,8 @@ export function _workerPairwiseDot(
 /**
  * Scaled sum of squares of `xs[start..end)` as a `[scale, ssq]` partial, with the
  * BLAS `dnrm2` update used by core's `norm2` (which returns `scale * sqrt(ssq)`).
- * A NaN element yields `[NaN, NaN]`.
+ * An infinite element yields `[Infinity, 1]`, also with a NaN element; else a NaN element
+ * yields `[NaN, NaN]` (the IEEE 754 rule of `hypot`, #1259).
  */
 export function _workerScaledSsq(
   xs: ArrayLike<number>,
@@ -168,13 +169,17 @@ export function _workerScaledSsq(
 ): [number, number] {
   let scale = 0;
   let ssq = 1;
+  let nan = false;
 
   for (let i = start; i < end; i++) {
     const x = xs[i];
     if (x === 0) continue;
-    if (Number.isNaN(x)) return [NaN, NaN];
-
+    if (Number.isNaN(x)) {
+      nan = true;
+      continue;
+    }
     const ax = Math.abs(x);
+    if (ax === Infinity) return [Infinity, 1];
     if (scale < ax) {
       const r = scale / ax;
       ssq = 1 + ssq * r * r;
@@ -185,7 +190,7 @@ export function _workerScaledSsq(
     }
   }
 
-  return [scale, ssq];
+  return nan ? [NaN, NaN] : [scale, ssq];
 }
 
 /**
@@ -200,13 +205,17 @@ export function _workerScaledSsqDiff(
 ): [number, number] {
   let scale = 0;
   let ssq = 1;
+  let nan = false;
 
   for (let i = start; i < end; i++) {
     const d = a[i] - b[i];
     if (d === 0) continue;
-    if (Number.isNaN(d)) return [NaN, NaN];
-
+    if (Number.isNaN(d)) {
+      nan = true;
+      continue;
+    }
     const ad = Math.abs(d);
+    if (ad === Infinity) return [Infinity, 1];
     if (scale < ad) {
       const r = scale / ad;
       ssq = 1 + ssq * r * r;
@@ -217,7 +226,7 @@ export function _workerScaledSsqDiff(
     }
   }
 
-  return [scale, ssq];
+  return nan ? [NaN, NaN] : [scale, ssq];
 }
 
 /**
@@ -229,12 +238,14 @@ export function _workerScaledSsqDiff(
  */
 export function _workerCombineScaledSsq(parts: ReadonlyArray<readonly [number, number]>): number {
   let scale = 0;
+  let nan = false;
   for (const [s] of parts) {
-    if (Number.isNaN(s)) return NaN;
-    if (s > scale) scale = s;
+    if (s === Infinity) return Infinity;
+    if (Number.isNaN(s)) nan = true;
+    else if (s > scale) scale = s;
   }
+  if (nan) return NaN;
   if (scale === 0) return 0;
-  if (scale === Infinity) return Infinity;
 
   let ssq = 0;
   for (const [s, q] of parts) {

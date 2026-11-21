@@ -715,9 +715,23 @@ export class Fraction implements IFraction {
   }
 
   /**
-   * Round to nearest integer
+   * Round to `places` decimal places. A tie goes toward +Infinity (the rule of fraction.js, not
+   * of a number or a BigNumber). The default `places` is 0: round to the nearest integer. A
+   * negative count rounds to tens, hundreds, and so on (an extension: mathjs throws there).
+   * @param places - the number of decimal places, an integer
+   * @returns the rounded Fraction
+   * @throws TypeError when `places` is not an integer
    */
-  round(): Fraction {
+  round(places: number = 0): Fraction {
+    if (!Number.isInteger(places)) {
+      throw new TypeError('Number of decimals in function round must be an integer');
+    }
+    if (places !== 0) {
+      const scale = new Fraction(10n ** BigInt(Math.abs(places)), 1n);
+      return places > 0
+        ? this.multiply(scale).round().divide(scale)
+        : this.divide(scale).round().multiply(scale);
+    }
     const floor = this.floor();
     const diff = this.subtract(floor);
     const half = new Fraction(1n, 2n);

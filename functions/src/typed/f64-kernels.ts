@@ -196,12 +196,32 @@ type ApplyMany = (...args: unknown[]) => unknown;
  * `unaryOnMatrix`.
  */
 export function mapEachLeaf(leaf: (self: ApplyMany, x: unknown, ...rest: unknown[]) => unknown) {
-  return mathTyped.referToSelf((self) => (value: unknown, ...rest: unknown[]) => {
-    const one = (x: unknown): unknown => leaf(self as ApplyMany, x, ...rest);
-    if (!isDenseMatrix(value)) return deepMap(value as unknown[], one);
-    const nested = (value.toArray() as unknown[][]).map((row) => row.map(one));
-    return nested.every((row) => row.every((x) => typeof x === 'number'))
-      ? DenseMatrix.fromArray(nested as number[][])
-      : nested;
-  });
+  return mathTyped.referToSelf(
+    (self) =>
+      (value: unknown, ...rest: unknown[]) =>
+        mapLeaves(value, (x) => leaf(self as ApplyMany, x, ...rest))
+  );
+}
+
+/**
+ * The form of {@link mapEachLeaf} for a scalar first argument and a collection second argument
+ * (`round(2.675, [1, 2])`): the typed function runs on the scalar with each leaf of the
+ * collection. The result has the shape and the class of the collection.
+ */
+export function mapEachLeafOfSecond(
+  leaf: (self: ApplyMany, first: unknown, x: unknown) => unknown
+) {
+  return mathTyped.referToSelf(
+    (self) => (first: unknown, value: unknown) =>
+      mapLeaves(value, (x) => leaf(self as ApplyMany, first, x))
+  );
+}
+
+/** `one` on each leaf of an array or a matrix; see {@link mapEachLeaf} for the result class. */
+function mapLeaves(value: unknown, one: (x: unknown) => unknown): unknown {
+  if (!isDenseMatrix(value)) return deepMap(value as unknown[], one);
+  const nested = (value.toArray() as unknown[][]).map((row) => row.map(one));
+  return nested.every((row) => row.every((x) => typeof x === 'number'))
+    ? DenseMatrix.fromArray(nested as number[][])
+    : nested;
 }

@@ -8,6 +8,9 @@
  * resolve them, including from a nested expression (`map`'s callback is compiled
  * against the same object).
  *
+ * A negative real outside the real domain gives a Complex, as in mathjs: `sqrt(-4)` is `2i`,
+ * `log(-1)` is `πi`, and `(-8)^(1/3)` is `1 + 1.732i`. A NaN argument keeps the number NaN.
+ *
  * @packageDocumentation
  */
 
@@ -122,12 +125,27 @@ function complexOf(x: Operand): Complex {
 }
 
 /**
+ * Real `a ^ b`. A negative base with a non-integer exponent gives the Complex power, as in
+ * mathjs. An integer exponent stays real.
+ * @param a - the base
+ * @param b - the exponent
+ * @returns a number, or a Complex for a negative base with a non-integer exponent
+ */
+function powReal(a: number, b: number): Operand {
+  if (!(a < 0) || Number.isInteger(b)) return Math.pow(a, b);
+  // mathjs keeps the real limit 0 for these two cases; the Complex power gives NaN + NaN i.
+  if ((a * a < 1 && b === Infinity) || (a * a > 1 && b === -Infinity)) return 0;
+  return complexOf(a).pow(b);
+}
+
+/**
  * A binary operator. A Complex operand routes to Complex arithmetic; two real
- * operands keep the plain JS result. Without this branch a Complex coerces to its
+ * operands keep the plain JS result, or a Complex when the real form says so (a negative
+ * base with a non-integer exponent). Without the Complex branch a Complex coerces to its
  * magnitude through `valueOf`, so `1 + i` would return 2.
  */
 function binary(
-  real: (a: number, b: number) => number,
+  real: (a: number, b: number) => Operand,
   complex: (a: Complex, b: Operand) => Complex
 ): (a: Operand, b: Operand) => Operand {
   return (a, b) => (isComplex(a) || isComplex(b) ? complex(complexOf(a), b) : real(a, b));
@@ -135,10 +153,11 @@ function binary(
 
 /**
  * A function of one argument with a real form and a Complex form. A Complex argument takes the
- * Complex form. A real argument keeps the plain JS result.
+ * Complex form. A real argument keeps the plain JS result, or a Complex when the real form says
+ * so (a negative real outside the real domain, as in mathjs).
  */
 function unary(
-  real: (a: number) => number,
+  real: (a: number) => Operand,
   complex: (a: Complex) => Operand
 ): (a: Operand) => Operand {
   return (a) => (isComplex(a) ? complex(a) : real(a));
@@ -175,10 +194,7 @@ export const defaultMathScope: Record<string, unknown> = {
     (a, b) => a / b,
     (a, b) => a.div(complexOf(b))
   ),
-  pow: binary(
-    (a, b) => Math.pow(a, b),
-    (a, b) => a.pow(b)
-  ),
+  pow: binary(powReal, (a, b) => a.pow(b)),
   mod: realOnly('mod', (a, b) => a % b),
   unaryMinus: unary(
     (a) => -a,
@@ -188,12 +204,18 @@ export const defaultMathScope: Record<string, unknown> = {
   sin: unary(Math.sin, (z) => z.sin()),
   cos: unary(Math.cos, (z) => z.cos()),
   tan: unary(Math.tan, (z) => z.tan()),
-  sqrt: unary(Math.sqrt, (z) => z.sqrt()),
-  cbrt: unary(Math.cbrt, (z) => z.pow(1 / 3)),
+  sqrt: unary(
+    (a) => (a < 0 ? complexOf(a).sqrt() : Math.sqrt(a)),
+    (z) => z.sqrt()
+  ),
+  cbrt: unary(Math.cbrt, (z) => z.cbrt()),
   nthRoot: realOnly('nthRoot', nthRoot),
   abs: unary(Math.abs, (z) => z.abs()),
   exp: unary(Math.exp, (z) => z.exp()),
-  log: unary(Math.log, (z) => z.log()),
+  log: unary(
+    (a) => (a < 0 ? complexOf(a).log() : Math.log(a)),
+    (z) => z.log()
+  ),
   pi: Math.PI,
   π: Math.PI,
   e: Math.E,
