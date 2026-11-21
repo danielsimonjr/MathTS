@@ -1077,6 +1077,9 @@
       "UnitSystemEntry": {
         "kind": "type"
       },
+      "WASM_ABORT_TEXT": {
+        "kind": "string"
+      },
       "WasmManifest": {
         "kind": "type"
       },
@@ -1249,6 +1252,9 @@
         "kind": "function"
       },
       "getArrayElement": {
+        "kind": "function"
+      },
+      "guardWasmAborts": {
         "kind": "function"
       },
       "hasOwnProperty": {
@@ -1504,6 +1510,9 @@
         "kind": "function"
       },
       "toPrecision": {
+        "kind": "function"
+      },
+      "translateWasmAbort": {
         "kind": "function"
       },
       "traverse": {
@@ -10308,6 +10317,1022 @@
         "kind": "object"
       },
       "__unpin": {
+        "kind": "function"
+      },
+      "abort_column": {
+        "kind": "function"
+      },
+      "abort_file": {
+        "kind": "function"
+      },
+      "abort_line": {
+        "kind": "function"
+      },
+      "abort_message": {
+        "kind": "function"
+      },
+      "abort_take": {
+        "kind": "function"
+      },
+      "abs_f64": {
+        "kind": "function"
+      },
+      "acos_f64": {
+        "kind": "function"
+      },
+      "acosh_f64": {
+        "kind": "function"
+      },
+      "add_f64": {
+        "kind": "function"
+      },
+      "airy_ai_f64": {
+        "kind": "function"
+      },
+      "airy_bi_f64": {
+        "kind": "function"
+      },
+      "apply_window_f64": {
+        "kind": "function"
+      },
+      "argsort_f64": {
+        "kind": "function"
+      },
+      "array_abs": {
+        "kind": "function"
+      },
+      "array_abs_ptr": {
+        "kind": "function"
+      },
+      "array_add": {
+        "kind": "function"
+      },
+      "array_add_inplace": {
+        "kind": "function"
+      },
+      "array_add_scalar": {
+        "kind": "function"
+      },
+      "array_add_scalar_inplace": {
+        "kind": "function"
+      },
+      "array_argmax": {
+        "kind": "function"
+      },
+      "array_argmin": {
+        "kind": "function"
+      },
+      "array_atan_ptr": {
+        "kind": "function"
+      },
+      "array_atanh_ptr": {
+        "kind": "function"
+      },
+      "array_axpby": {
+        "kind": "function"
+      },
+      "array_clamp_inplace": {
+        "kind": "function"
+      },
+      "array_copy": {
+        "kind": "function"
+      },
+      "array_cos": {
+        "kind": "function"
+      },
+      "array_cos_ptr": {
+        "kind": "function"
+      },
+      "array_cosine_similarity": {
+        "kind": "function"
+      },
+      "array_cot_ptr": {
+        "kind": "function"
+      },
+      "array_csc_ptr": {
+        "kind": "function"
+      },
+      "array_distance": {
+        "kind": "function"
+      },
+      "array_div": {
+        "kind": "function"
+      },
+      "array_dot": {
+        "kind": "function"
+      },
+      "array_erfc_ptr": {
+        "kind": "function"
+      },
+      "array_exp": {
+        "kind": "function"
+      },
+      "array_exp_ptr": {
+        "kind": "function"
+      },
+      "array_expm1_ptr": {
+        "kind": "function"
+      },
+      "array_fill": {
+        "kind": "function"
+      },
+      "array_log": {
+        "kind": "function"
+      },
+      "array_log10_ptr": {
+        "kind": "function"
+      },
+      "array_log1p_ptr": {
+        "kind": "function"
+      },
+      "array_log2_ptr": {
+        "kind": "function"
+      },
+      "array_log_ptr": {
+        "kind": "function"
+      },
+      "array_max": {
+        "kind": "function"
+      },
+      "array_mean": {
+        "kind": "function"
+      },
+      "array_min": {
+        "kind": "function"
+      },
+      "array_mul": {
+        "kind": "function"
+      },
+      "array_neg": {
+        "kind": "function"
+      },
+      "array_norm": {
+        "kind": "function"
+      },
+      "array_norm_l1": {
+        "kind": "function"
+      },
+      "array_norm_linf": {
+        "kind": "function"
+      },
+      "array_product": {
+        "kind": "function"
+      },
+      "array_scale": {
+        "kind": "function"
+      },
+      "array_scale_inplace": {
+        "kind": "function"
+      },
+      "array_sec_ptr": {
+        "kind": "function"
+      },
+      "array_sin": {
+        "kind": "function"
+      },
+      "array_sin_ptr": {
+        "kind": "function"
+      },
+      "array_sinh_ptr": {
+        "kind": "function"
+      },
+      "array_sqrt": {
+        "kind": "function"
+      },
+      "array_square": {
+        "kind": "function"
+      },
+      "array_stddev": {
+        "kind": "function"
+      },
+      "array_sub": {
+        "kind": "function"
+      },
+      "array_sum": {
+        "kind": "function"
+      },
+      "array_tan_ptr": {
+        "kind": "function"
+      },
+      "array_tanh_ptr": {
+        "kind": "function"
+      },
+      "array_variance": {
+        "kind": "function"
+      },
+      "asin_f64": {
+        "kind": "function"
+      },
+      "asinh_f64": {
+        "kind": "function"
+      },
+      "atan2_f64": {
+        "kind": "function"
+      },
+      "atan_f64": {
+        "kind": "function"
+      },
+      "atanh_f64": {
+        "kind": "function"
+      },
+      "bartlett_psd_f64": {
+        "kind": "function"
+      },
+      "bessel_j0_f64": {
+        "kind": "function"
+      },
+      "bessel_j1_f64": {
+        "kind": "function"
+      },
+      "bessel_j_f64": {
+        "kind": "function"
+      },
+      "bessel_jn_f64": {
+        "kind": "function"
+      },
+      "bessel_y0_f64": {
+        "kind": "function"
+      },
+      "bessel_y1_f64": {
+        "kind": "function"
+      },
+      "bessel_y_f64": {
+        "kind": "function"
+      },
+      "bessel_yn_f64": {
+        "kind": "function"
+      },
+      "bitAnd_i32_array": {
+        "kind": "function"
+      },
+      "bitNot_i32_array": {
+        "kind": "function"
+      },
+      "bitOr_i32_array": {
+        "kind": "function"
+      },
+      "bitXor_i32_array": {
+        "kind": "function"
+      },
+      "carlson_rc_f64": {
+        "kind": "function"
+      },
+      "carlson_rd_f64": {
+        "kind": "function"
+      },
+      "carlson_rf_f64": {
+        "kind": "function"
+      },
+      "carlson_rj_f64": {
+        "kind": "function"
+      },
+      "carmichaelLambda": {
+        "kind": "function"
+      },
+      "cbrt_f64": {
+        "kind": "function"
+      },
+      "ceil_f64": {
+        "kind": "function"
+      },
+      "characteristicPolynomial": {
+        "kind": "function"
+      },
+      "cheb_fit_f64": {
+        "kind": "function"
+      },
+      "chebyshevT": {
+        "kind": "function"
+      },
+      "chineseRemainder": {
+        "kind": "function"
+      },
+      "chirp_z_transform_f64": {
+        "kind": "function"
+      },
+      "clamp_f64": {
+        "kind": "function"
+      },
+      "complex": {
+        "kind": "function"
+      },
+      "complexFromPolar": {
+        "kind": "function"
+      },
+      "complex_abs": {
+        "kind": "function"
+      },
+      "complex_abs_squared": {
+        "kind": "function"
+      },
+      "complex_acos": {
+        "kind": "function"
+      },
+      "complex_acosh": {
+        "kind": "function"
+      },
+      "complex_add": {
+        "kind": "function"
+      },
+      "complex_approx_equals": {
+        "kind": "function"
+      },
+      "complex_arg": {
+        "kind": "function"
+      },
+      "complex_array_abs": {
+        "kind": "function"
+      },
+      "complex_array_abs_squared": {
+        "kind": "function"
+      },
+      "complex_array_add": {
+        "kind": "function"
+      },
+      "complex_array_add_inplace": {
+        "kind": "function"
+      },
+      "complex_array_arg": {
+        "kind": "function"
+      },
+      "complex_array_conj": {
+        "kind": "function"
+      },
+      "complex_array_conj_inplace": {
+        "kind": "function"
+      },
+      "complex_array_copy": {
+        "kind": "function"
+      },
+      "complex_array_div": {
+        "kind": "function"
+      },
+      "complex_array_dot": {
+        "kind": "function"
+      },
+      "complex_array_exp": {
+        "kind": "function"
+      },
+      "complex_array_fill": {
+        "kind": "function"
+      },
+      "complex_array_get": {
+        "kind": "function"
+      },
+      "complex_array_get_im": {
+        "kind": "function"
+      },
+      "complex_array_get_re": {
+        "kind": "function"
+      },
+      "complex_array_imag": {
+        "kind": "function"
+      },
+      "complex_array_length": {
+        "kind": "function"
+      },
+      "complex_array_log": {
+        "kind": "function"
+      },
+      "complex_array_mean": {
+        "kind": "function"
+      },
+      "complex_array_mul": {
+        "kind": "function"
+      },
+      "complex_array_neg": {
+        "kind": "function"
+      },
+      "complex_array_norm": {
+        "kind": "function"
+      },
+      "complex_array_ones": {
+        "kind": "function"
+      },
+      "complex_array_real": {
+        "kind": "function"
+      },
+      "complex_array_scale_complex": {
+        "kind": "function"
+      },
+      "complex_array_scale_inplace": {
+        "kind": "function"
+      },
+      "complex_array_scale_real": {
+        "kind": "function"
+      },
+      "complex_array_set": {
+        "kind": "function"
+      },
+      "complex_array_set_parts": {
+        "kind": "function"
+      },
+      "complex_array_sqrt": {
+        "kind": "function"
+      },
+      "complex_array_sub": {
+        "kind": "function"
+      },
+      "complex_array_sum": {
+        "kind": "function"
+      },
+      "complex_array_zeros": {
+        "kind": "function"
+      },
+      "complex_asin": {
+        "kind": "function"
+      },
+      "complex_asinh": {
+        "kind": "function"
+      },
+      "complex_atan": {
+        "kind": "function"
+      },
+      "complex_atanh": {
+        "kind": "function"
+      },
+      "complex_axpby": {
+        "kind": "function"
+      },
+      "complex_conj": {
+        "kind": "function"
+      },
+      "complex_cos": {
+        "kind": "function"
+      },
+      "complex_cosh": {
+        "kind": "function"
+      },
+      "complex_cpow": {
+        "kind": "function"
+      },
+      "complex_cube": {
+        "kind": "function"
+      },
+      "complex_distance": {
+        "kind": "function"
+      },
+      "complex_div": {
+        "kind": "function"
+      },
+      "complex_equals": {
+        "kind": "function"
+      },
+      "complex_exp": {
+        "kind": "function"
+      },
+      "complex_from_imag": {
+        "kind": "function"
+      },
+      "complex_from_polar": {
+        "kind": "function"
+      },
+      "complex_from_real": {
+        "kind": "function"
+      },
+      "complex_is_finite": {
+        "kind": "function"
+      },
+      "complex_is_imaginary": {
+        "kind": "function"
+      },
+      "complex_is_nan": {
+        "kind": "function"
+      },
+      "complex_is_real": {
+        "kind": "function"
+      },
+      "complex_is_zero": {
+        "kind": "function"
+      },
+      "complex_log": {
+        "kind": "function"
+      },
+      "complex_log10": {
+        "kind": "function"
+      },
+      "complex_log2": {
+        "kind": "function"
+      },
+      "complex_mul": {
+        "kind": "function"
+      },
+      "complex_neg": {
+        "kind": "function"
+      },
+      "complex_pow": {
+        "kind": "function"
+      },
+      "complex_reciprocal": {
+        "kind": "function"
+      },
+      "complex_sin": {
+        "kind": "function"
+      },
+      "complex_sinh": {
+        "kind": "function"
+      },
+      "complex_sqrt": {
+        "kind": "function"
+      },
+      "complex_square": {
+        "kind": "function"
+      },
+      "complex_sub": {
+        "kind": "function"
+      },
+      "complex_tan": {
+        "kind": "function"
+      },
+      "complex_tanh": {
+        "kind": "function"
+      },
+      "complex_to_polar": {
+        "kind": "function"
+      },
+      "cosIntegral": {
+        "kind": "function"
+      },
+      "cos_f64": {
+        "kind": "function"
+      },
+      "cosh_f64": {
+        "kind": "function"
+      },
+      "cube_f64": {
+        "kind": "function"
+      },
+      "discriminant": {
+        "kind": "function"
+      },
+      "div_f64": {
+        "kind": "function"
+      },
+      "divided_difference_f64": {
+        "kind": "function"
+      },
+      "divisorSigma": {
+        "kind": "function"
+      },
+      "divisors": {
+        "kind": "function"
+      },
+      "elliptic_e_f64": {
+        "kind": "function"
+      },
+      "elliptic_e_incomplete_f64": {
+        "kind": "function"
+      },
+      "elliptic_f_incomplete_f64": {
+        "kind": "function"
+      },
+      "elliptic_k_f64": {
+        "kind": "function"
+      },
+      "elliptic_pi_incomplete_f64": {
+        "kind": "function"
+      },
+      "erfi": {
+        "kind": "function"
+      },
+      "eulerPhi": {
+        "kind": "function"
+      },
+      "expIntegralEi": {
+        "kind": "function"
+      },
+      "exp_f64": {
+        "kind": "function"
+      },
+      "expfit": {
+        "kind": "function"
+      },
+      "expm1_f64": {
+        "kind": "function"
+      },
+      "fft": {
+        "kind": "function"
+      },
+      "floor_f64": {
+        "kind": "function"
+      },
+      "goertzel_f64": {
+        "kind": "function"
+      },
+      "harmonicNumber": {
+        "kind": "function"
+      },
+      "heap_reset": {
+        "kind": "function"
+      },
+      "hermiteH": {
+        "kind": "function"
+      },
+      "integerDigits": {
+        "kind": "function"
+      },
+      "isFinite_f64": {
+        "kind": "function"
+      },
+      "isNaN_f64": {
+        "kind": "function"
+      },
+      "jacobiSymbol": {
+        "kind": "function"
+      },
+      "laguerreL": {
+        "kind": "function"
+      },
+      "leftShift_i32_array": {
+        "kind": "function"
+      },
+      "legendreP": {
+        "kind": "function"
+      },
+      "legendre_fit_f64": {
+        "kind": "function"
+      },
+      "lgamma_f64": {
+        "kind": "function"
+      },
+      "linprog": {
+        "kind": "function"
+      },
+      "log10_f64": {
+        "kind": "function"
+      },
+      "log1p_f64": {
+        "kind": "function"
+      },
+      "log2_f64": {
+        "kind": "function"
+      },
+      "logIntegral": {
+        "kind": "function"
+      },
+      "log_f64": {
+        "kind": "function"
+      },
+      "logfit": {
+        "kind": "function"
+      },
+      "matrix_add": {
+        "kind": "function"
+      },
+      "matrix_add_inplace": {
+        "kind": "function"
+      },
+      "matrix_add_scalar": {
+        "kind": "function"
+      },
+      "matrix_add_scalar_inplace": {
+        "kind": "function"
+      },
+      "matrix_axpy": {
+        "kind": "function"
+      },
+      "matrix_cholesky": {
+        "kind": "function"
+      },
+      "matrix_copy": {
+        "kind": "function"
+      },
+      "matrix_determinant": {
+        "kind": "function"
+      },
+      "matrix_diag": {
+        "kind": "function"
+      },
+      "matrix_div_elementwise": {
+        "kind": "function"
+      },
+      "matrix_fill": {
+        "kind": "function"
+      },
+      "matrix_gemm": {
+        "kind": "function"
+      },
+      "matrix_gemv": {
+        "kind": "function"
+      },
+      "matrix_get": {
+        "kind": "function"
+      },
+      "matrix_get_col": {
+        "kind": "function"
+      },
+      "matrix_get_diag": {
+        "kind": "function"
+      },
+      "matrix_get_row": {
+        "kind": "function"
+      },
+      "matrix_identity": {
+        "kind": "function"
+      },
+      "matrix_inverse": {
+        "kind": "function"
+      },
+      "matrix_is_diagonal": {
+        "kind": "function"
+      },
+      "matrix_is_identity": {
+        "kind": "function"
+      },
+      "matrix_is_square": {
+        "kind": "function"
+      },
+      "matrix_is_symmetric": {
+        "kind": "function"
+      },
+      "matrix_lu_decompose": {
+        "kind": "function"
+      },
+      "matrix_max": {
+        "kind": "function"
+      },
+      "matrix_mean": {
+        "kind": "function"
+      },
+      "matrix_min": {
+        "kind": "function"
+      },
+      "matrix_mul_elementwise": {
+        "kind": "function"
+      },
+      "matrix_multiply": {
+        "kind": "function"
+      },
+      "matrix_multiply_simd_ptr": {
+        "kind": "function"
+      },
+      "matrix_neg": {
+        "kind": "function"
+      },
+      "matrix_norm_frobenius": {
+        "kind": "function"
+      },
+      "matrix_ones": {
+        "kind": "function"
+      },
+      "matrix_outer": {
+        "kind": "function"
+      },
+      "matrix_qr_decompose": {
+        "kind": "function"
+      },
+      "matrix_scale": {
+        "kind": "function"
+      },
+      "matrix_scale_inplace": {
+        "kind": "function"
+      },
+      "matrix_set": {
+        "kind": "function"
+      },
+      "matrix_sub": {
+        "kind": "function"
+      },
+      "matrix_sum": {
+        "kind": "function"
+      },
+      "matrix_sum_cols": {
+        "kind": "function"
+      },
+      "matrix_sum_rows": {
+        "kind": "function"
+      },
+      "matrix_trace": {
+        "kind": "function"
+      },
+      "matrix_transpose": {
+        "kind": "function"
+      },
+      "matrix_vector_multiply": {
+        "kind": "function"
+      },
+      "matrix_zeros": {
+        "kind": "function"
+      },
+      "max_f64": {
+        "kind": "function"
+      },
+      "medfilt": {
+        "kind": "function"
+      },
+      "memory": {
+        "kind": "object"
+      },
+      "min_f64": {
+        "kind": "function"
+      },
+      "mod_f64": {
+        "kind": "function"
+      },
+      "moebiusMu": {
+        "kind": "function"
+      },
+      "mul_f64": {
+        "kind": "function"
+      },
+      "neg_f64": {
+        "kind": "function"
+      },
+      "nthRoot_f64": {
+        "kind": "function"
+      },
+      "nullspace": {
+        "kind": "function"
+      },
+      "padeApproximant": {
+        "kind": "function"
+      },
+      "partitions": {
+        "kind": "function"
+      },
+      "poly_discriminant_f64": {
+        "kind": "function"
+      },
+      "poly_div_mod_f64": {
+        "kind": "function"
+      },
+      "poly_fit_f64": {
+        "kind": "function"
+      },
+      "poly_mul_f64": {
+        "kind": "function"
+      },
+      "poly_resultant_f64": {
+        "kind": "function"
+      },
+      "polyadd": {
+        "kind": "function"
+      },
+      "polynomialGCD": {
+        "kind": "function"
+      },
+      "polynomialLCM": {
+        "kind": "function"
+      },
+      "polynomialQuotient": {
+        "kind": "function"
+      },
+      "polynomialRemainder": {
+        "kind": "function"
+      },
+      "pow_f64": {
+        "kind": "function"
+      },
+      "powerSpectrum": {
+        "kind": "function"
+      },
+      "powerfit": {
+        "kind": "function"
+      },
+      "primeFactors": {
+        "kind": "function"
+      },
+      "quadprog": {
+        "kind": "function"
+      },
+      "rank_f64": {
+        "kind": "function"
+      },
+      "resample": {
+        "kind": "function"
+      },
+      "residue": {
+        "kind": "function"
+      },
+      "resultant": {
+        "kind": "function"
+      },
+      "rfft": {
+        "kind": "function"
+      },
+      "rightArithShift_i32_array": {
+        "kind": "function"
+      },
+      "rightLogShift_i32_array": {
+        "kind": "function"
+      },
+      "round_f64": {
+        "kind": "function"
+      },
+      "rowReduce": {
+        "kind": "function"
+      },
+      "sign_f64": {
+        "kind": "function"
+      },
+      "sinIntegral": {
+        "kind": "function"
+      },
+      "sin_f64": {
+        "kind": "function"
+      },
+      "sinh_f64": {
+        "kind": "function"
+      },
+      "sort_f64": {
+        "kind": "function"
+      },
+      "sqrt_f64": {
+        "kind": "function"
+      },
+      "square_f64": {
+        "kind": "function"
+      },
+      "sub_f64": {
+        "kind": "function"
+      },
+      "tan_f64": {
+        "kind": "function"
+      },
+      "tanh_f64": {
+        "kind": "function"
+      },
+      "tensorTranspose": {
+        "kind": "function"
+      },
+      "tridiag_solve_f64": {
+        "kind": "function"
+      },
+      "trunc_f64": {
+        "kind": "function"
+      },
+      "vector_matrix_multiply": {
+        "kind": "function"
+      },
+      "welch_psd_f64": {
+        "kind": "function"
+      },
+      "windowFunction": {
+        "kind": "function"
+      }
+    },
+    "./debug.js": {
+      "E": {
+        "kind": "object"
+      },
+      "EPSILON": {
+        "kind": "object"
+      },
+      "LN10": {
+        "kind": "object"
+      },
+      "LN2": {
+        "kind": "object"
+      },
+      "LOG10E": {
+        "kind": "object"
+      },
+      "LOG2E": {
+        "kind": "object"
+      },
+      "PHI": {
+        "kind": "object"
+      },
+      "PI": {
+        "kind": "object"
+      },
+      "SQRT1_2": {
+        "kind": "object"
+      },
+      "SQRT2": {
+        "kind": "object"
+      },
+      "WasmMemory": {
+        "kind": "type"
+      },
+      "__collect": {
+        "kind": "function"
+      },
+      "__new": {
+        "kind": "function"
+      },
+      "__pin": {
+        "kind": "function"
+      },
+      "__rtti_base": {
+        "kind": "object"
+      },
+      "__unpin": {
+        "kind": "function"
+      },
+      "abort_column": {
+        "kind": "function"
+      },
+      "abort_file": {
+        "kind": "function"
+      },
+      "abort_line": {
+        "kind": "function"
+      },
+      "abort_message": {
+        "kind": "function"
+      },
+      "abort_take": {
         "kind": "function"
       },
       "abs_f64": {

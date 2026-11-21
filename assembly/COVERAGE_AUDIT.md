@@ -102,15 +102,13 @@ match numpy; LU/QR/Cholesky reconstruct to ~1e-15.
   the in-body note always documented it. **Resolved (0.1.5):** the misleading
   header comment ("orthogonal Q") was corrected to state the `A = Qᵀ·R`
   convention; behavior is unchanged to avoid breaking the consumer.
-- **ESM bindings can't return decomposition outputs — AS-codegen limitation.**
-  The generated `build/mathts.js` wrappers for `matrix_lu_decompose`/`qr`/
-  `cholesky`/`inverse` lower the output arrays into wasm, call, then
-  `__release` them without lifting the written values back (AssemblyScript has
-  no out-parameter concept). `determinant` (scalar return) is unaffected; the
-  return-based `matrix_svd` is the pattern for ESM-friendly results. These
-  four output-param functions must be driven via the raw AssemblyScript loader
-  (as the matrix package and `tests/diff-decomposition.test.mjs` do). This is
-  a documented usage constraint, not a correctness defect.
+- **ESM bindings write the decomposition outputs back.** The generated
+  `build/mathts.js` wrappers lower each typed-array argument into wasm memory.
+  `scripts/patch-glue.mjs` copies back each parameter that the kernel is
+  contracted to write (`OUTPUT_PARAMS`, class `out`), so the output arrays of
+  `matrix_lu_decompose`/`qr`/`cholesky`/`inverse` hold the result after the
+  call. It never copies an input back. The raw AssemblyScript loader still
+  works, and the matrix package uses it.
 
 ### 3b. Special functions — 140 PASS (was: 73 PASS, 22 WEAK, 15 FAIL)
 
