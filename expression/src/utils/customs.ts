@@ -1,4 +1,5 @@
 import { hasOwnProperty } from './object.js';
+import { isExactStorageArray } from './plain-numeric-buffer.js';
 import { isBigNumber, isComplex, isFraction, isMatrix, isResultSet, isUnit } from './is.js';
 
 /**
@@ -10,12 +11,7 @@ import { isBigNumber, isComplex, isFraction, isMatrix, isResultSet, isUnit } fro
 function isSandboxReceiver(object: unknown): boolean {
   if (object === null || object === undefined) return false;
   if (isPlainObject(object) || Array.isArray(object)) return true;
-  if (
-    object instanceof Float64Array ||
-    object instanceof Float32Array ||
-    object instanceof Int32Array
-  )
-    return true;
+  if (isExactStorageArray(object)) return true;
   if (
     isComplex(object) ||
     isFraction(object) ||

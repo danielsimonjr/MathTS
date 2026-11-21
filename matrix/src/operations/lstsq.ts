@@ -8,6 +8,10 @@
  * `lstsq`. The factor Q is never formed.
  */
 
+import { matrixSize } from '@danielsimonjr/mathts-core/internal';
+import type { DenseMatrix } from '../types/DenseMatrix.js';
+import type { SparseMatrix } from '../types/SparseMatrix.js';
+import { readRightHandSide } from './right-hand-side.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { applyReflector, columnPivotedQr, columnReflector } from './pivoted-qr.js';
 import { SQUARED } from './common.js';
@@ -24,28 +28,47 @@ const LSTSQ_EPS = 2.220446049250313e-16;
  * is tiny next to the others is treated as zero, as in NumPy.
  *
  * @param A - `DenseMatrix`, `SparseMatrix`, nested `number[][]`, square `Float64Array`, or `{ data, rows, cols }`.
- * @param b - Right-hand side: a vector with one entry per row of `A`, or an `m x k` nested array.
+ * @param b - Right-hand side, read by `readRightHandSide`: a vector with one entry per row of `A`
+ *   (a 1-D array or a typed array of numbers), an `m x k` nested array, a `DenseMatrix` or a
+ *   `SparseMatrix` (`m` rows: an `m x k` right side; one row and `m` columns: a vector), or an
+ *   object with a `toArray` method (the MathJS matrix). An entry that is a numeric string, a
+ *   boolean or a bigint is read as its number; `null` and `undefined` are 0.
  * @returns The `n`-vector `x` for a vector `b`, or the `n x k` nested array for a matrix `b`.
  * @throws {RangeError} if `b` has the wrong length or any entry is not finite.
- * @throws {TypeError} if `A` or `b` is not rectangular.
+ * @throws {TypeError} if `A` or `b` is not rectangular, `b` is not a vector or a matrix, an
+ *   entry of `b` has no conversion to number, or an entry is a BigNumber, Fraction or Complex.
  */
-export function lstsq(A: DecompositionMatrixInput, b: readonly number[]): number[];
+export function lstsq(A: DecompositionMatrixInput, b: readonly number[] | Float64Array): number[];
 export function lstsq(A: DecompositionMatrixInput, b: readonly (readonly number[])[]): number[][];
 export function lstsq(
   A: DecompositionMatrixInput,
-  b: readonly number[] | readonly (readonly number[])[]
+  b: DenseMatrix | SparseMatrix
+): number[] | number[][];
+export function lstsq(
+  A: DecompositionMatrixInput,
+  b: readonly number[] | Float64Array | readonly (readonly number[])[] | DenseMatrix | SparseMatrix
 ): number[] | number[][] {
   const rows = decompositionInputToNestedArray(A);
   const m = rows.length;
-  const n = m === 0 ? 0 : rows[0].length;
-  const vectorRhs = b.length === 0 || typeof b[0] === 'number';
-  const bRows: readonly (readonly number[])[] = vectorRhs
-    ? (b as readonly number[]).map((v) => [v])
-    : (b as readonly (readonly number[])[]);
+  // The nested data of a matrix with no rows is `[]`, so the column count of such a matrix
+  // comes from the size that it reports.
+  const sizeA = m === 0 && !Array.isArray(A) ? matrixSize(A) : undefined;
+  const n = m === 0 ? (sizeA?.length === 2 ? sizeA[1] : 0) : rows[0].length;
+  const rhs = readRightHandSide('lstsq', b, m);
+  if (rhs.typedEntry !== undefined) {
+    // lstsq solves in floating point. mathjs has no lstsq, so no typed result exists to match,
+    // and a conversion to number would drop the precision that the caller chose.
+    throw new TypeError(
+      `lstsq: b holds a ${rhs.typedEntry} entry; lstsq takes numbers, or strings, booleans and null that convert to numbers`
+    );
+  }
+  const vectorRhs = rhs.kind === 'vector';
+  const bRows: readonly (readonly number[])[] =
+    rhs.kind === 'vector' ? rhs.values.map((v) => [v]) : rhs.rows;
   if (bRows.length !== m) {
     throw new RangeError(`lstsq: b has length ${bRows.length}, expected ${m}`);
   }
-  const k = m === 0 ? 0 : bRows[0].length;
+  const k = rhs.kind === 'vector' ? 1 : rhs.cols;
 
   // Row-major working copies, scaled so the largest entry is 1 (undone on x).
   const R = new Float64Array(m * n);
@@ -63,12 +86,9 @@ export function lstsq(
   let sB = 0;
   let bMin = Infinity;
   for (let i = 0; i < m; i++) {
-    if (bRows[i].length !== k) {
-      throw new TypeError('lstsq: b must be a vector or a rectangular matrix');
-    }
     for (let j = 0; j < k; j++) {
       const v = bRows[i][j];
-      if (typeof v !== 'number' || !Number.isFinite(v)) {
+      if (!Number.isFinite(v)) {
         throw new RangeError('lstsq: b has a non-finite entry');
       }
       Y[i * k + j] = v;

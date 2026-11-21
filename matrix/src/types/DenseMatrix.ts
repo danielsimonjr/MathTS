@@ -7,12 +7,33 @@
  * @packageDocumentation
  */
 
+import { typeOf } from '@danielsimonjr/mathts-core/internal';
 import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
 import * as arithmetic from './dense/arithmetic.js';
 import * as reduction from './dense/reduction.js';
 import { assertDenseMatrixSize } from './dense/limits.js';
 import { contiguousDenseData } from './dense/storage.js';
 import { DENSE_MATRIX_BRAND, defineMatrixBrand } from './type-marker.js';
+
+/**
+ * Throw the TypeError of the constructor when an entry of row `i`, column `j` of a nested matrix
+ * is not a number. Every reader that copies a nested array into Float64 storage calls it, so no
+ * reader coerces a string, a null or an object to a number (#1003).
+ */
+export function assertNestedEntry(value: unknown, i: number, j: number): asserts value is number {
+  if (typeof value !== 'number') {
+    throw new TypeError(
+      `DenseMatrix nested array must contain numbers; row ${i} column ${j} is ${typeOf(value)}`
+    );
+  }
+}
+
+/** Throw the TypeError of the constructor when entry `j` of a flat array is not a number. */
+function assertFlatEntry(value: unknown, j: number): asserts value is number {
+  if (typeof value !== 'number') {
+    throw new TypeError(`DenseMatrix array must contain numbers; element ${j} is ${typeOf(value)}`);
+  }
+}
 
 /**
  * Numeric matrix literal: reject empty, jagged, and non-numeric cells.
@@ -39,11 +60,7 @@ function readNestedMatrix(nested: readonly unknown[]): {
           `DenseMatrix nested array must be rectangular; element ${j} is an array but element 0 is not`
         );
       }
-      if (typeof value !== 'number') {
-        throw new TypeError(
-          `DenseMatrix array must contain numbers; element ${j} is ${typeof value}`
-        );
-      }
+      assertFlatEntry(value, j);
       row.push(value);
     }
     assertDenseMatrixSize(1, rows);
@@ -68,12 +85,8 @@ function readNestedMatrix(nested: readonly unknown[]): {
     }
     const numeric: number[] = [];
     for (let j = 0; j < cols; j++) {
-      const value = row[j];
-      if (typeof value !== 'number') {
-        throw new TypeError(
-          `DenseMatrix nested array must contain numbers; row ${i} column ${j} is ${typeof value}`
-        );
-      }
+      const value: unknown = row[j];
+      assertNestedEntry(value, i, j);
       numeric.push(value);
     }
     data.push(numeric);
@@ -192,8 +205,11 @@ export class DenseMatrix extends Matrix<number> {
             if (nested[i].length !== nCols) {
               throw new Error(`Row ${i} has ${nested[i].length} elements, expected ${nCols}`);
             }
+            const row = nested[i];
             for (let j = 0; j < nCols; j++) {
-              this.data[i * nCols + j] = nested[i][j];
+              const value: unknown = row[j];
+              assertNestedEntry(value, i, j);
+              this.data[i * nCols + j] = value;
             }
           }
         } else {
@@ -204,7 +220,12 @@ export class DenseMatrix extends Matrix<number> {
               `Data length ${flat.length} does not match dimensions ${nRows}×${nCols}`
             );
           }
-          this.data = new Float64Array(flat);
+          this.data = new Float64Array(flat.length);
+          for (let j = 0; j < flat.length; j++) {
+            const value: unknown = flat[j];
+            assertFlatEntry(value, j);
+            this.data[j] = value;
+          }
         }
       } else {
         throw new TypeError(

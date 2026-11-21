@@ -984,6 +984,9 @@
       "MemoizedFunction": {
         "kind": "type"
       },
+      "NATIVE_MATRIX_BRAND": {
+        "kind": "symbol"
+      },
       "NestedArray": {
         "kind": "type"
       },
@@ -1144,6 +1147,9 @@
         "kind": "function"
       },
       "containsCollections": {
+        "kind": "function"
+      },
+      "convertToNumber": {
         "kind": "function"
       },
       "copysign": {
@@ -1321,6 +1327,9 @@
         "kind": "function"
       },
       "isNumber": {
+        "kind": "function"
+      },
+      "isNumberTypedArray": {
         "kind": "function"
       },
       "isObject": {
@@ -1693,6 +1702,9 @@
       "RepeatedEigenvalue": {
         "kind": "type"
       },
+      "RightHandSide": {
+        "kind": "type"
+      },
       "SVDOptions": {
         "kind": "type"
       },
@@ -1852,6 +1864,9 @@
       "identity": {
         "kind": "function"
       },
+      "implicitNumber": {
+        "kind": "function"
+      },
       "initializeGlobalGPUBackend": {
         "kind": "function"
       },
@@ -1877,6 +1892,9 @@
         "kind": "function"
       },
       "isSparseMatrix": {
+        "kind": "function"
+      },
+      "isTypedScalar": {
         "kind": "function"
       },
       "isWasmAvailable": {
@@ -1934,6 +1952,9 @@
         "kind": "function"
       },
       "multiply": {
+        "kind": "function"
+      },
+      "nestedMatrixShape": {
         "kind": "function"
       },
       "norm": {
@@ -2090,6 +2111,9 @@
         "kind": "function"
       },
       "random": {
+        "kind": "function"
+      },
+      "readRightHandSide": {
         "kind": "function"
       },
       "row": {
