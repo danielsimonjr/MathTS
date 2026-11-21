@@ -20,6 +20,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { squareFunctionInput, type SquareFunctionInput } from './matrix-function-input.js';
 import { eig } from './eig.js';
 import { schurInternal, negligibleSubdiagonal } from './schur.js';
 import {
@@ -508,9 +509,10 @@ export interface SqrtmOptions {
  *   - Non-diagonalisable (defective) matrices: Newton may fail + eig fallback
  *     may also fail. Full Schur-based Björck-Hammarling deferred to Slice 5.9b.
  *
- * @param A    - Square DenseMatrix (n × n).
- * @param opts - Optional flags.
- * @returns sqrtm(A), the principal square root.
+ * @param input - Square matrix (n × n): a `DenseMatrix`, a `SparseMatrix`, a nested `number[][]`, or an
+ *   object with a `toArray` method that returns a nested array (the MathJS matrix).
+ * @param opts  - Optional flags.
+ * @returns sqrtm(input), the principal square root.
  * @throws Error for matrices with negative or complex eigenvalues.
  *
  * @example
@@ -528,7 +530,8 @@ export interface SqrtmOptions {
  * const R = matrixSqrtm(S);
  * // R * R ≈ S  (to machine precision for SPD matrices)
  */
-export function matrixSqrtm(A: DenseMatrix, opts?: SqrtmOptions): DenseMatrix {
+export function matrixSqrtm(input: SquareFunctionInput, opts?: SqrtmOptions): DenseMatrix {
+  const A = squareFunctionInput(input);
   const n = A.rows;
   if (n !== A.cols)
     throw notSquareError(`matrixSqrtm: matrix must be square (got ${A.rows}×${A.cols})`);

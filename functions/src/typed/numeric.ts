@@ -12,8 +12,11 @@
  */
 
 import {
-  densifyForSolver,
+  decompositionInputToNestedArray,
+  isTypedScalar,
+  readRightHandSide,
   singularValues as matrixSingularValues,
+  type DenseMatrix,
   type SparseMatrix,
 } from '@danielsimonjr/mathts-matrix';
 import {
@@ -22,9 +25,11 @@ import {
   entryRange,
   ldexp,
   pow2ScaleExponent,
-  notSquareError,
 } from '@danielsimonjr/mathts-core/internal';
 import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
+import type { Matrix as MathJSMatrix } from '../utils/is.js';
+import { collectionSize, matrixRows, squareOrder, type MatrixArgument } from './number-matrix.js';
+import { factoryScope } from '../factories/scope.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
@@ -84,6 +89,8 @@ export {
 
 type f64 = number;
 type i32 = number;
+/** A typed array with number elements (every kind except the bigint kinds), as `isNumberTypedArray` reads it. */
+type NumberTypedArray = ArrayLike<number> & ArrayBufferView;
 
 // =============================================================================
 // Root Finding
@@ -198,23 +205,88 @@ export function findRoot(f: (x: f64) => f64, a: f64, b: f64, opts?: FindRootOpti
   return b;
 }
 
+/** True when an entry of `rows` is a BigNumber, Fraction or Complex (mathjs keeps its type). */
+function hasTypedEntry(rows: readonly unknown[][]): boolean {
+  for (const row of rows) {
+    if (!Array.isArray(row)) continue;
+    for (const v of row) if (typeof v !== 'number' && isTypedScalar(v)) return true;
+  }
+  return false;
+}
+
+/**
+ * Solve with the typed `lusolve`, which computes in the type of the entries, as mathjs `lusolve`
+ * does. `factoryScope.lusolve` is set when the package entry loads; a static import of the
+ * factories closes an import cycle.
+ */
+function typedSolve(rows: unknown[][], column: readonly unknown[]): unknown[] {
+  const lusolve = (factoryScope as { lusolve?: (a: unknown, b: unknown) => unknown }).lusolve;
+  if (lusolve === undefined) {
+    throw new Error('linsolve: the typed solver is not loaded; import the package entry');
+  }
+  const x = lusolve(
+    rows,
+    column.map((v) => [v])
+  ) as unknown[][];
+  return x.map((row) => row[0]);
+}
+
 /**
  * Solve linear system Ax = b using LU decomposition with partial pivoting.
  *
- * @param A - Coefficient matrix (n x n). A `SparseMatrix` is densified with `toDense()` first.
- * @param b - Right-hand side vector (length n)
- * @returns Solution vector x
+ * Entries follow the implicit rule of mathjs 15.2.0 (`implicitNumber` of the matrix package): a
+ * numeric string, a boolean, `null` and `undefined` convert to numbers. When an entry of `A` or
+ * `b` is a BigNumber, Fraction or Complex, the typed `lusolve` solves the system in that type, as
+ * mathjs `lusolve` does, and the result holds values of that type.
+ *
+ * @param A - Coefficient matrix (n x n), read by `matrixRows`: a nested array, a matrix-package
+ *   `DenseMatrix` or `SparseMatrix` (a `SparseMatrix` is densified first), or a MathJS matrix.
+ * @param b - Right-hand side, read by the matrix-package `readRightHandSide`: a vector (length n;
+ *   a 1-D array or a typed array of numbers), an `n x 1` nested column, a `DenseMatrix` or
+ *   `SparseMatrix` with one column or one row, or a MathJS matrix of size `[n]` or `[n, 1]`.
+ * @returns Solution vector x: numbers, or values of the typed entry type.
+ * @throws TypeError if `A` is not a matrix type, `b` has another shape, or an entry has no
+ *   conversion to number and is no BigNumber, Fraction or Complex.
+ * @throws RangeError if the matrix is not square (its order comes from the size it reports).
+ * @throws Error if the matrix is empty, singular, `b` has the wrong length, or a string entry is
+ *   not a number (`Cannot convert`).
  *
  * @example
  * linsolve([[2, 1], [1, 3]], [5, 10]) // => [1, 3]
  */
-export function linsolve(A: number[][] | SparseMatrix, b: number[]): number[] {
-  const dense = densifyForSolver(A)?.toArray() ?? (A as number[][]);
-  const n = dense.length;
+export function linsolve(
+  A: number[][] | DenseMatrix | SparseMatrix,
+  b: number[] | NumberTypedArray | number[][] | DenseMatrix | SparseMatrix
+): number[];
+export function linsolve(
+  A: MatrixArgument | unknown[][],
+  b: unknown[] | NumberTypedArray | unknown[][] | DenseMatrix | SparseMatrix | MathJSMatrix
+): unknown[];
+export function linsolve(
+  A: MatrixArgument | unknown[][],
+  b: unknown[] | NumberTypedArray | unknown[][] | DenseMatrix | SparseMatrix | MathJSMatrix
+): unknown[] {
+  const rows = matrixRows('linsolve', A);
+  // The nested rows of a matrix with no rows are `[]`, so the order comes from the size that the
+  // matrix reports (B2): a 0 x 3 matrix is not square.
+  const n = squareOrder('linsolve', collectionSize(A));
   if (n === 0) throw new Error('linsolve: empty matrix');
-  if (dense[0].length !== n) throw notSquareError('linsolve: matrix must be square');
-  if (b.length !== n) throw new Error('linsolve: dimension mismatch');
-  return solvePivoted(dense, b, pivotTolerance(n));
+  const rhs = readRightHandSide('linsolve', b, n);
+  let values: readonly unknown[];
+  if (rhs.kind === 'vector') values = rhs.values;
+  else if (rhs.cols === 1) values = rhs.rows.map((row) => row[0]);
+  else {
+    throw new TypeError(
+      `linsolve: b must be a vector of length n, an n x 1 column, or an n x 1 or 1 x n matrix (got ${rhs.rows.length} x ${rhs.cols})`
+    );
+  }
+  if (values.length !== n) throw new Error('linsolve: dimension mismatch');
+  if (rhs.typedEntry !== undefined || hasTypedEntry(rows)) return typedSolve(rows, values);
+  return solvePivoted(
+    decompositionInputToNestedArray(rows as number[][]),
+    values as number[],
+    pivotTolerance(n)
+  );
 }
 
 /**
