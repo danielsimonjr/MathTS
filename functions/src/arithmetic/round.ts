@@ -1,7 +1,5 @@
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
-import { splitNumber } from '../utils/number.js';
-import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
 import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
@@ -74,10 +72,6 @@ export const createRound = /* #__PURE__ */ factory(
     const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
-
-    function toExponent(epsilon: number): number {
-      return Math.abs(splitNumber(epsilon).exponent);
-    }
 
     /**
      * Round a value towards the nearest rounded value.
@@ -163,10 +157,13 @@ export const createRound = /* #__PURE__ */ factory(
       },
 
       BigNumber: function (x: BigNumberType): BigNumberType {
-        // Handle round off errors by first rounding to relTol precision
-        const xEpsilon = new BigNumber(x).toDecimalPlaces(toExponent(config.relTol));
-        const xSelected = bigNearlyEqual(x, xEpsilon, config.relTol, config.absTol) ? xEpsilon : x;
-        return xSelected.toDecimalPlaces(0);
+        // The snap to relTol and the rounding are the shared kernel of the typed round.
+        return roundBigNumberDecimals(
+          x as unknown as BigNumber,
+          0,
+          config.relTol,
+          config.absTol
+        ) as unknown as BigNumberType;
       },
 
       'BigNumber, BigNumber': function (x: BigNumberType, n: BigNumberType): BigNumberType {
