@@ -36,6 +36,7 @@ import { deepMap } from '../utils/collection.js';
 import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 import { product } from '../utils/product.js';
 import { binomialBigInt, rangeProductBigInt } from '../probability/bigint-binomial.js';
+import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
 import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
@@ -177,6 +178,55 @@ function roundedBigNumber(value: bigint): BigNumber {
 }
 
 /**
+ * The size, in bits, where the exact bigint loop and the working-precision loop cost the same.
+ *
+ * Cost model. A loop of `steps` products of numbers of `b` bits ends with `steps * b` bits. Step
+ * `i` of the exact loop works on `i * b` bits, so the exact loop costs `e * steps^2 * b`. A step
+ * of the working-precision loop works on a fixed number of digits, so that loop costs
+ * `w * steps`. The two costs are equal at `steps * b = w / e`. Below that size the exact loop is
+ * the faster one; above it the working-precision loop is.
+ *
+ * Measured on Node 22 for C(10^20, 10^4) and C(10^6, 6000): `w` is 8 microseconds for each step,
+ * and `e` is 0.19 to 0.34 picoseconds for each step squared and bit. Thus `w / e` is 24,000 to
+ * 44,000 bits, and the limit is the power of two in that range. Both loops give the exact value
+ * rounded to the precision, so an error in the limit changes the time only (at most by the
+ * factor of the error), not the result.
+ */
+const EXACT_LOOP_MAX_BITS = 1 << 15;
+
+/** True when an exact bigint loop of `steps` products of numbers up to `top` stays short. */
+function exactLoopIsShort(steps: bigint, top: bigint): boolean {
+  return steps * BigInt(top.toString(2).length) <= BigInt(EXACT_LOOP_MAX_BITS);
+}
+
+/** The working precision of a loop of products of numbers up to `top`: guard digits on top. */
+function loopPrecision(top: bigint): number {
+  return BigNumber.precision + 2 * top.toString().length + 10;
+}
+
+/**
+ * C(total, steps) by the multiplicative loop at the current precision. Each partial result is a
+ * binomial coefficient, so it is not larger than the result.
+ */
+function binomialLoop(total: bigint, steps: bigint): BigNumber {
+  let result = BigNumber.fromNumber(1);
+  for (let i = 1n; i <= steps; i++) {
+    result = result.times(BigNumber.fromBigInt(total - steps + i)).div(BigNumber.fromBigInt(i));
+  }
+  return result;
+}
+
+/** The product lo * (lo + 1) * ... * hi, rounded one time to the precision. */
+function roundedRangeProduct(lo: bigint, hi: bigint): BigNumber {
+  if (exactLoopIsShort(hi - lo + 1n, hi)) return roundedBigNumber(rangeProductBigInt(lo, hi));
+  return atWorkPrecision(BigNumber, loopPrecision(hi), () => {
+    let result = BigNumber.fromNumber(1);
+    for (let i = lo; i <= hi; i++) result = result.times(BigNumber.fromBigInt(i));
+    return result;
+  });
+}
+
+/**
  * Binomial coefficient C(n, k) for non-negative integers n, k with k ≤ n.
  * Returns `Infinity` as soon as the running product overflows.
  * Uses the multiplicative formula to avoid overflow for moderate n.
@@ -240,8 +290,10 @@ function assertNonNegativeIntegers(fnName: string, n: BigNumber, k: BigNumber): 
  * @throws RangeError when the loop would need more than the supported number of steps
  */
 function roundedBinomial(fnName: string, total: bigint, chosen: bigint): BigNumber {
-  assertLoopOrder(fnName, 'k', Number(chosen < total - chosen ? chosen : total - chosen));
-  return roundedBigNumber(binomialBigInt(total, chosen));
+  const steps = chosen < total - chosen ? chosen : total - chosen;
+  assertLoopOrder(fnName, 'k', Number(steps));
+  if (exactLoopIsShort(steps, total)) return roundedBigNumber(binomialBigInt(total, chosen));
+  return atWorkPrecision(BigNumber, loopPrecision(total), () => binomialLoop(total, steps));
 }
 
 /**
@@ -394,6 +446,31 @@ function multinomialBigInt(parts: readonly bigint[]): bigint {
 }
 
 /**
+ * The multinomial of positive integers as a BigNumber rounded one time to the precision: the exact
+ * bigint while that stays short, else the same product of binomials at a working precision.
+ * @throws RangeError when the loops would need more than the supported number of steps
+ */
+function roundedMultinomial(parts: readonly bigint[]): BigNumber {
+  let total = 0n;
+  let steps = 0n;
+  for (const a of parts) {
+    steps += a < total ? a : total;
+    total += a;
+  }
+  assertLoopOrder('multinomial', 'the sum of the entries', Number(steps));
+  if (exactLoopIsShort(steps, total)) return roundedBigNumber(multinomialBigInt(parts));
+  return atWorkPrecision(BigNumber, loopPrecision(total), () => {
+    let sum = 0n;
+    let result = BigNumber.fromNumber(1);
+    for (const a of parts) {
+      result = result.times(binomialLoop(sum + a, a < sum ? a : sum));
+      sum += a;
+    }
+    return result;
+  });
+}
+
+/**
  * Compute the multinomial coefficient n! / (a1! * a2! * … * am!) where
  * n = a1 + a2 + … + am.
  *
@@ -416,9 +493,7 @@ export const multinomial = mathTyped('multinomial', {
     // Validate every entry before any early return, as mathjs does.
     collectMultinomialParts(input, parts);
     if (!parts.some((p) => isBigNumber(p))) return multinomialExact(parts as number[]);
-    return roundedBigNumber(
-      multinomialBigInt(parts.map((p) => (isBigNumber(p) ? p.toBigInt() : BigInt(p))))
-    );
+    return roundedMultinomial(parts.map((p) => (isBigNumber(p) ? p.toBigInt() : BigInt(p))));
   },
 });
 
@@ -468,7 +543,7 @@ function permutationsBigNumber(n: BigNumber, k: BigNumber): BigNumber {
   const total = n.toBigInt();
   const chosen = k.toBigInt();
   assertLoopOrder('permutations', 'k', Number(chosen));
-  return roundedBigNumber(rangeProductBigInt(total - chosen + 1n, total));
+  return roundedRangeProduct(total - chosen + 1n, total);
 }
 
 /**
@@ -490,7 +565,7 @@ export const permutations = mathTyped('permutations', {
     if (!n.isInteger()) throw new Error('Integer BigNumber expected');
     if (n.isNegative()) throw new Error('Value must be non-negative');
     assertLoopOrder('permutations', 'n', n.toNumber());
-    return roundedBigNumber(rangeProductBigInt(1n, n.toBigInt()));
+    return roundedRangeProduct(1n, n.toBigInt());
   },
   'number, number': permutationsOfNumbers,
   'bigint | Fraction, number | bigint | Fraction': (
