@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-20",
-  "totalFiles": 2653,
+  "generated": "2026-11-21",
+  "totalFiles": 2655,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1333,
     "test-only": 0,
     "orphan": 0,
-    "test": 1228,
+    "test": 1230,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1359,
-    "tests": 1228,
+    "tests": 1230,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,12 +23,12 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 33,
-    "@danielsimonjr/mathts-compat": 43,
+    "@danielsimonjr/mathts-compat": 44,
     "@danielsimonjr/mathts-core": 150,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 71,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1257,
+    "@danielsimonjr/mathts-functions": 1258,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -773,6 +773,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 63
+    },
+    {
+      "file": "compat/tests/nthroots-polar-1282.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 38
     },
     {
       "file": "compat/tests/parity-oracle.test.ts",
@@ -6519,7 +6526,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 150
+      "loc": 151
     },
     {
       "file": "functions/src/arithmetic/pow.ts",
@@ -13093,6 +13100,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 47
+    },
+    {
+      "file": "functions/tests/nthroots-polar-1282.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 72
     },
     {
       "file": "functions/tests/number-only-stats-1042.test.ts",
