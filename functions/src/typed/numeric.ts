@@ -32,6 +32,7 @@ import { collectionSize, matrixRows, squareOrder, type MatrixArgument } from './
 import { factoryScope } from '../factories/scope.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
+import { odeRmsNorm } from '../numeric/ode-norm.js';
 import {
   odeAcceptedBudget,
   odeFastestDecayRate,
@@ -1121,14 +1122,10 @@ function _adaptiveRK45System(
 
   // Initial step: Hairer heuristic h₀ ≈ 0.01·‖y0‖/‖f(t0,y0)‖ (same as solveODE's JS path).
   const f0 = f(t, y);
-  const rms = (v: number[]): f64 => {
-    let s = 0;
-    for (let i = 0; i < v.length; i++) s += v[i] * v[i];
-    return Math.sqrt(s / v.length);
-  };
-  const d0 = rms(y);
-  const d1 = rms(f0);
-  // A non-finite start gives a NaN step, and a NaN step never advances: reject it here.
+  const d0 = odeRmsNorm(y);
+  const d1 = odeRmsNorm(f0);
+  // A non-finite start gives a NaN step, and a NaN step never advances: reject it here. A finite
+  // state of 1e154 or more has a finite norm (`odeRmsNorm` scales the squares).
   if (!Number.isFinite(d0) || !Number.isFinite(d1)) {
     throw new RangeError(
       `solveODESystem: the initial state or f(t0, y0) is not finite (t0=${t0}); check y0 and f`

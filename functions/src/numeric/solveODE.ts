@@ -1,4 +1,5 @@
 import { hermiteCubic } from './hermite.js';
+import { odeRmsNorm } from './ode-norm.js';
 import {
   odeAcceptedBudget,
   odeFastestDecayRate,
@@ -132,25 +133,6 @@ export type ForcingFunction = (
 ) => MathNumericType | MathArray;
 
 /**
- * Root-mean-square norm of a plain-number state vector, used for initial-step selection. When the
- * squares overflow (a state near 1e160), the sum runs on the vector divided by its largest
- * magnitude; an Infinity norm made the first step NaN. Every other vector takes the plain sum, so
- * its result keeps the same bits.
- */
-function _rmsNorm(v: number[]): number {
-  let s = 0;
-  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
-  const plain = Math.sqrt(s / v.length);
-  if (Number.isFinite(plain)) return plain;
-  let m = 0;
-  for (let i = 0; i < v.length; i++) m = Math.max(m, Math.abs(v[i]));
-  if (!Number.isFinite(m)) return m;
-  s = 0;
-  for (let i = 0; i < v.length; i++) s += (v[i] / m) * (v[i] / m);
-  return m * Math.sqrt(s / v.length);
-}
-
-/**
  * A BigNumber (or each BigNumber of an array) rounded to the precision of its own class. BigNumber
  * `add` and `multiply` round to that precision (#1118), so an add result is already rounded and this
  * step leaves it unchanged. The step stays as a guard: it costs one comparison per value.
@@ -191,8 +173,8 @@ function _firstStepGuess(
   const f0 = f(t0 as MathNumericType, y0 as MathNumericType | MathArray);
   const f0n = (Array.isArray(f0) ? f0 : [f0]).map(_plainNumber);
   if (!f0n.every(Number.isFinite)) return undefined;
-  const d0 = _rmsNorm(y0n);
-  const d1 = _rmsNorm(f0n);
+  const d0 = odeRmsNorm(y0n);
+  const d1 = odeRmsNorm(f0n);
   const h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
   return Number.isFinite(h0) ? Math.min(h0, span) : undefined;
 }
@@ -611,8 +593,8 @@ function _linearlyImplicitDriver(
     h = dir * Math.abs(options.firstStep as number);
   } else {
     const f0 = _fAccepted(name, f, t, y);
-    const d0 = _rmsNorm(y);
-    const d1 = _rmsNorm(f0);
+    const d0 = odeRmsNorm(y);
+    const d1 = odeRmsNorm(f0);
     h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
   }
 
@@ -1671,7 +1653,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
      * @return {Object} Return an object with t and y values as arrays
      */
 
-    // _rmsNorm, _luSolve, _fArr, _fdJacobian, and the Rosenbrock engine itself now live at module
+    // odeRmsNorm, _luSolve, _fArr, _fdJacobian, and the Rosenbrock engine itself now live at module
     // scope as `rosenbrockSolve` (below) — they are pure numeric helpers with no factory-scope
     // dependency, and `stiffODESolver` (functions/src/typed/numeric.ts) needs to call the same
     // engine directly without depending on this factory instance.
