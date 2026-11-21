@@ -1,4 +1,5 @@
 ---
+'@danielsimonjr/mathts-core': patch
 '@danielsimonjr/mathts-functions': patch
 ---
 
@@ -6,4 +7,6 @@ Integer functions follow mathjs for BigNumber and edge arguments. `nthRoot(bignu
 
 `mod` of two BigNumbers on `evaluate` takes the sign of the divisor, as mathjs and the parse path do: `mod(bignumber(-7), bignumber(3))` is `2` (it was `-1`), and `mod(bignumber(-7.5), bignumber(2))` is `0.5` (it was `-1.5`). Both paths now call one function, `flooredModBigNumber`. A NaN or an infinite operand gives NaN, as mathjs (`mod(bignumber(-1), bignumber(Infinity))` was `Infinity` on both paths, and `mod(bignumber(1), bignumber(Infinity))` was `1`).
 
-The return type of a call with one BigNumber and one number changes: `permutations(bignumber(10), 3)` and `permutations(10, bignumber(3))` return BigNumbers, as mathjs does. Before, they returned numbers. (Refs #1097)
+The return type of a call with one BigNumber and one number changes: `permutations(bignumber(10), 3)` and `permutations(10, bignumber(3))` return BigNumbers, as mathjs does. Before, they returned numbers.
+
+In `@danielsimonjr/mathts-core`, the typed conversion from number to BigNumber comes before every conversion to Complex, as in mathjs, so a BigNumber and a number reach the BigNumber signature on the parse path: `nthRoot`, `round`, `ceil`, `floor` and `fix` of a BigNumber and a number return a BigNumber (they returned a Complex, or `nthRoot` threw the Complex error). `ceil` and `floor` of two BigNumbers no longer throw the internal `DecimalError`. (Refs #1097)

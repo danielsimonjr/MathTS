@@ -15,6 +15,7 @@ import { create, all } from '../src/index.js';
 interface Loose {
   evaluate(expr: string): unknown;
   parse(expr: string): { evaluate(): unknown };
+  multinomial(a: unknown): unknown;
 }
 const math = create(all) as unknown as Loose;
 const ev = (e: string): unknown => math.evaluate(e);
@@ -313,11 +314,11 @@ describe('#1093 multinomial through the expression language', () => {
     );
   });
 
-  it('#1093 a ragged array literal: the parse path refuses the matrix, evaluate keeps the array', () => {
-    // mathjs builds a matrix from the literal and throws a DimensionError. The compat evaluate
-    // keeps a plain nested array, and multinomial counts all of its entries (1 + 2 + 3).
-    expect(() => pv('multinomial([[1, 2], [3]])')).toThrow(/Dimension mismatch/);
-    expect(ev('multinomial([[1, 2], [3]])')).toBe(60);
+  it('#1093 multinomial of a ragged plain Array on the API path equals mathjs (60)', () => {
+    // A plain Array is not validated as a matrix, in mathjs and here: multinomial counts all of
+    // its entries (1 + 2 + 3). The expression-language array literal is a container question of
+    // batch EV, not a multinomial row.
+    expect(math.multinomial([[1, 2], [3]])).toBe(60);
   });
 });
 
@@ -420,8 +421,9 @@ describe('#1093 parse and evaluate run one implementation of the shared function
     expect(pv('combinations(1e20, 2)')).toBe(5e39);
     expect(pv('permutations(1e20, 2)')).toBe(1e40);
     expect(pv('permutations(2^53, 2)')).toBe(8.112963841460667e31);
-    // The exact result above 2^53.
-    expect(toArr(pv('xgcd(2^60, 3)'))).toEqual([1, 1, -384307168202282300]);
+    // A coefficient above 2^53 is not a safe integer: a RangeError in place of a wrong triple
+    // (the factory and mathjs give [3, 0, 1]).
+    expect(() => pv('xgcd(2^60, 3)')).toThrow(RangeError);
     // A Fraction is read as a number (mathjs throws a conversion error; the factory gave a BigNumber).
     expect(pv('combinations(fraction(5), fraction(2))')).toBe(10);
     expect(pv('permutations(fraction(5))')).toBe(120);
