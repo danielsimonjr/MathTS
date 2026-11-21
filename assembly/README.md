@@ -79,6 +79,8 @@ assembly/
 - Hyperbolic: `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`
 - Rounding: `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`
 
+`round_f64` rounds a tie away from zero on the exact double: `round_f64(0.5)` is 1 and `round_f64(-2.5)` is -3. A zero input gives +0, and `round_f64(-0.4)` gives -0. NaN gives NaN, and an infinity gives itself. The kernel has no configuration and applies no tolerance. The `round` of `@danielsimonjr/mathts-functions` applies its `relTol` first: it reads `0.49999999999999994` as the tie 0.5 and gives 1, and `round_f64(0.49999999999999994)` gives 0. The WebAssembly instruction `nearest` rounds a tie to the even integer, and the kernel does not use it.
+
 ### Array Operations
 
 - Reductions: `array_sum`, `array_product`, `array_mean`, `array_variance`, `array_min`, `array_max`
