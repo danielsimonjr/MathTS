@@ -202,7 +202,14 @@ describe('#1132 besselJ and besselY: one work bound per array call', () => {
   });
   it('an element with its own limit error keeps its own message', () => {
     expect(() => besselJ(3e9, fill(4, 5e9))).toThrow(/besselJ: n = 3000000000 exceeds/);
-    expect(() => besselY(3e9, fill(2048, 5))).toThrow(/besselY: n = 3000000000 exceeds/);
+    // x = 5 would give -Infinity at once (Y_3e9(5) is below -1e308, bound before the limit, #1331).
+    expect(() => besselY(3e9, fill(2048, 3e9))).toThrow(/besselY: n = 3000000000 exceeds/);
+    expect(Array.from(besselY(3e9, fill(4, 5)) as Float64Array)).toEqual([
+      -Infinity,
+      -Infinity,
+      -Infinity,
+      -Infinity,
+    ]);
   });
   it('besselJ(2.4e9, 2048 elements at 1000) is 0 for every element (zero bound, no steps)', () => {
     const r = besselJ(2.4e9, fill(2048, 1000)) as Float64Array;

@@ -15,6 +15,7 @@ import { afterEach, describe, it, expect } from 'vitest';
 import { BigNumber, Complex } from '@danielsimonjr/mathts-core';
 import {
   besselJ,
+  besselY,
   chebyshevT,
   hermiteH,
   laguerreL,
@@ -282,5 +283,262 @@ describe('#1327 and D1: zeta of a negative argument by the symmetric functional 
     it('zeta(-700000000000000.5) is -Infinity: the exponent 9.5e15 is above the maximum exponent', () => {
       expect(String(zeta(BigNumber.parse('-700000000000000.5')))).toBe('-Infinity');
     });
+  });
+});
+
+/**
+ * The bound B1 of the large-x engine (x >= 25): 2 * 2^-52 * max(x, an) * max(amplitude, |true|) + 4 ulp.
+ * Measured: the worst of the 31 table and issue values uses 0.083 of the bound (J and Y of order
+ * -99.9999999 at x = 40); the values at x >= 5000 use under 1e-3 of it (relative error 6e-16).
+ */
+const expectB1 = (got: unknown, want: number, x: number, an: number): void => {
+  const g = got as number;
+  const ulp = Math.max(Math.abs(want) * 2 ** -52, 5e-324);
+  const tol =
+    2 * 2 ** -52 * Math.max(x, an) * Math.max(Math.sqrt(2 / (Math.PI * x)), Math.abs(want)) +
+    4 * ulp;
+  expect(Number.isFinite(g), `got ${g}, want ${want}`).toBe(true);
+  expect(Math.abs(g - want), `got ${g}, want ${want}`).toBeLessThanOrEqual(tol);
+};
+
+describe('#1331: real-order J and Y at a large order or a large argument', () => {
+  // main (3b2ffe60) ran CF1 for about x steps and a recurrence of an steps with no bound:
+  // besselJ(4e9 + 0.5, 1000) took 28 s, and besselJ(400.3, 5000) was 3.2e-10 of the amplitude off.
+  describe('the zero and overflow bounds and the order limit run before any loop', () => {
+    it('besselJ(4e9 + 0.5, 1000) is 0 and besselY(4e9 + 0.5, 1e8) is -Infinity', () => {
+      expect(besselJ(4e9 + 0.5, 1000)).toBe(0);
+      expect(besselY(4e9 + 0.5, 1e8)).toBe(-Infinity);
+    });
+    it('an integer order follows the same rule: besselY(4e9, 1e8) is -Infinity', () => {
+      expect(besselY(4e9, 1e8)).toBe(-Infinity);
+      expect(besselJ(4e9, 1000)).toBe(0);
+    });
+    it('besselJ(3e9 + 0.5, 3e9) and besselY(3e9 + 0.5, 3e9) throw a RangeError', () => {
+      expect(() => besselJ(3e9 + 0.5, 3e9)).toThrow(RangeError);
+      expect(() => besselJ(3e9 + 0.5, 3e9)).toThrow(/exceeds the supported maximum/);
+      expect(() => besselY(3e9 + 0.5, 3e9)).toThrow(/exceeds the supported maximum/);
+    });
+    it('a huge order with an x above nu^2 stays O(1): besselJ(3e9 + 0.5, 1e20) does not throw', () => {
+      expect(Number.isFinite(besselJ(3e9 + 0.5, 1e20))).toBe(true);
+    });
+  });
+
+  describe('the Hankel start with stable recurrences (x >= 25), bound B1', () => {
+    // nu | x | J | Y (mpmath 1.3.0 on the exact doubles, rounded to the double)
+    const TABLE: Array<[number, number, number, number]> = [
+      [0.3, 25, 0.028287780084076883, -0.1570392985202982],
+      [24.7, 25, 0.1675811264571081, -0.24032568627968495],
+      [25.3, 25, 0.13837030306336998, -0.2896062006963584],
+      [3.7, 26, 0.1082283714502558, 0.11409872107201208],
+      [60.25, 50, 0.0008910128558409286, -10.671015349752063],
+      [300.7, 25, 2.483587363988605e-287, -4.2770412651425316e283],
+      [1999.75, 2000, 0.03615034729365811, -0.06037281670737458],
+      [5000.5, 4000, 2.7871341210961365e-205, -3.8058400549762204e200],
+      [10000.5, 9000, 8.691184919556407e-139, -8.400021227509216e133],
+      [0.5, 1000000, -0.0002792544117637988, -0.0007474200598579329],
+      [-0.5, 25, 0.15817308404205055, -0.021120283599650444],
+      [-400.3, 5000, -0.0018644908934285784, 0.011147091443899288],
+      [-99.9999999, 40, -457178269806370300000, -1.4552437166727982e27],
+    ];
+    it.each(TABLE)('besselJ(%s, %s) = %s', (nu, x, j) => {
+      expectB1(besselJ(nu, x), j, x, Math.abs(nu));
+    });
+    it.each(TABLE)('besselY(%s, %s), column 4 of the table', (nu, x, _j, y) => {
+      expectB1(besselY(nu, x), y, x, Math.abs(nu));
+    });
+    it('the values of the issue: J and Y of order 400.3 at 5000, 20000 and 1.5e5', () => {
+      expectB1(besselJ(400.3, 5000), 7.9222661657754471e-3, 5000, 400.3);
+      expectB1(besselJ(400.3, 20000), -5.4950720953749295e-3, 20000, 400.3);
+      expectB1(besselJ(400.3, 1.5e5), 1.4431828136850286e-3, 1.5e5, 400.3);
+      expectB1(besselY(400.3, 1.5e5), 1.4701599555883358e-3, 1.5e5, 400.3);
+      expectB1(besselY(400.5, 1.5e5), 9.532123532783423e-4, 1.5e5, 400.5);
+      expectB1(besselJ(1000.5, 9e4), -2.3309866009074991e-3, 9e4, 1000.5);
+    });
+    it('guards that main already had right: besselJ(2.5, 30), besselY(0.75, 100)', () => {
+      expectB1(besselJ(2.5, 30), 0.14120285879928212, 30, 2.5);
+      expectB1(besselY(0.75, 100), -0.048204317525488324, 100, 0.75);
+    });
+    it('the Wronskian identity holds for an order of 100000.3 at x = 100001', () => {
+      // mpmath cannot give this order in 280 s. nu <= x < nu + 1, so J_nu comes from the upward
+      // recurrence and J_(nu+1) from CF1 and the Wronskian.
+      const nu = 100000.3;
+      const x = 100001;
+      const jn = besselJ(nu, x) as number;
+      const jn1 = besselJ(nu + 1, x) as number;
+      const yn = besselY(nu, x) as number;
+      const yn1 = besselY(nu + 1, x) as number;
+      const lhs = jn * yn1 - jn1 * yn + 2 / (Math.PI * x);
+      const tol = 2 * 2 ** -52 * x * (Math.abs(jn * yn1) + Math.abs(jn1 * yn));
+      expect(Math.abs(lhs)).toBeLessThanOrEqual(tol);
+    });
+  });
+
+  describe('the window where Y_an is outside the double range and J_an is not (x = 25)', () => {
+    it('besselJ(322.5, 25) = 8.8966855908733198e-318 (main NaN), besselJ(320.5, 25), besselJ(318.5, 25)', () => {
+      expectB1(besselJ(322.5, 25), 8.8966855908733198e-318, 25, 322.5);
+      expectB1(besselJ(320.5, 25), 5.8858754696535775e-315, 25, 320.5);
+      // a subnormal: 4 units of the last place
+      expect(
+        Math.abs((besselJ(318.5, 25) as number) - 3.8456139531998332e-312)
+      ).toBeLessThanOrEqual(2e-323);
+    });
+    it('besselJ(328.5, 25) is 0 and besselY(322.5, 25) is -Infinity', () => {
+      expect(besselJ(328.5, 25)).toBe(0);
+      expect(besselY(322.5, 25)).toBe(-Infinity);
+    });
+    it('a negative order: besselJ(-322.5, 25) is Infinity, besselY(-322.5, 25) = 8.8966855908733198e-318', () => {
+      expect(besselJ(-322.5, 25)).toBe(Infinity);
+      // cos(322.5 pi) is exactly 0 and Y_(-nu) = sin(nu pi) J_nu
+      expectB1(besselY(-322.5, 25), 8.8966855908733198e-318, 25, 322.5);
+    });
+    it('besselJ(1075.3, 300) is 0, besselJ(-1075.3, 300) is -Infinity, besselY(-1075.3, 300) is Infinity', () => {
+      expect(besselJ(1075.3, 300)).toBe(0);
+      expect(besselJ(-1075.3, 300)).toBe(-Infinity);
+      expect(besselY(-1075.3, 300)).toBe(Infinity);
+    });
+  });
+
+  describe('a negative order with a small factor is finite where Y_an alone is not', () => {
+    it('besselY(-151.5001, 1) = -2.8381551290433205e+305 (main -2.8381551290403436e+305)', () => {
+      expectRel(besselY(-151.5001, 1), -2.8381551290433205e305, 1e-12);
+    });
+    it('besselJ(-150.0000000001, 1e-3) is Infinity and besselY(-150.0000000001, 1e-3) is -Infinity', () => {
+      expect(besselJ(-150.0000000001, 1e-3)).toBe(Infinity);
+      expect(besselY(-150.0000000001, 1e-3)).toBe(-Infinity);
+    });
+  });
+
+  describe('1e-5 <= x < 25 keeps the Temme and Steed values (bound B4, 1e-13 relative)', () => {
+    it.each([
+      ['J', 0.3, 1e-5, 0.028620072142050116],
+      ['Y', 0.3, 1e-5, -37.052241917585756],
+      ['J', 7.25, 1.9999, 0.00010563125704409467],
+      ['Y', 7.25, 2.0001, -432.54354557045493],
+      ['J', 7.25, 24.9999, 0.041634090978524423],
+      ['Y', 7.25, 25.0001, 0.15769609067691412],
+      ['J', -7.25, 25.0001, 0.082089705531464833],
+      ['Y', -7.25, 25.0001, -0.1409262446370445],
+    ] as Array<[string, number, number, number]>)('bessel%s(%s, %s) = %s', (kind, nu, x, want) => {
+      const got = kind === 'J' ? besselJ(nu, x) : besselY(nu, x);
+      expectRel(got, want, 1e-13);
+    });
+  });
+});
+
+describe('#1334 and #1332: J and Y of a tiny argument', () => {
+  // main: besselJ(-0.5, 1e-300) = NaN, besselY(-0.3, 1e-300) = NaN, besselJ(0.5, 5e-324) = 0:
+  // the continued fraction of the Temme engine divides by x, and x / 2 is 0 for the smallest x.
+  describe('besselJ, bound B2', () => {
+    it.each([
+      [-0.5, 1e-300, 7.9788456080286535e149],
+      [-1.7, 1e-100, -7.6023876405919675e169],
+      [-0.9999, 1e-6, 199.72156301161781],
+      [-30.3, 1e-6, 5.2501110334840382e221],
+      [-17.3, 9e-6, -3.9563340874032088e105],
+      [-3.0000000000001, 1e-9, -1598721155463793.7],
+      [0.3, 1e-8, 0.0036030536107702112],
+      [0.5, 5e-324, 1.7735048886036273e-162],
+      [-0.3, 5e-324, 9.3085148507228138e96],
+    ])('besselJ(%s, %s) = %s', (nu, x, want) => {
+      // 1e-14 for |nu| <= 3 and 5e-14 for 3 < |nu| <= 60 (measured worst 1.2e-15 and 7.2e-15)
+      expectRel(besselJ(nu, x), want, Math.abs(nu) <= 3 ? 1e-14 : 5e-14);
+    });
+    it('besselJ(2.5, 1e-300) is 0: the value 5.3e-752 is below the double range', () => {
+      expect(besselJ(2.5, 1e-300)).toBe(0);
+    });
+    it('a value above the double range is the signed Infinity', () => {
+      expect(besselJ(-58.5, 1e-5)).toBe(Infinity);
+      expect(besselJ(-150.5, 1e-3)).toBe(Infinity);
+      expect(besselJ(-1.000000000001, 1e-320)).toBe(-Infinity);
+    });
+    it('the guard that main already had right: besselJ(-2.0000001, 1e-10) = 40000096501782.345', () => {
+      expectRel(besselJ(-2.0000001, 1e-10), 40000096501782.345, 1e-14);
+    });
+  });
+
+  describe('besselY, bound B3', () => {
+    it.each([
+      [-0.3, 1e-300, -6.8909140613203008e89],
+      [1.5, 1e-200, -7.9788456080286538e299],
+      [-2.5, 1e-5, 1.6820883480014255e-14],
+      [1e-10, 1e-6, -8.8690314818165234],
+      [0.3, 5e-324, -1.1505957125059706e97],
+      [0.7, 5e-324, -1.3842517146242157e226],
+      [0.3, 1e-300, -1.1723523233093104e90],
+    ])('besselY(%s, %s) = %s', (nu, x, want) => {
+      // Measured worst 2.9e-14 below x = 1e-100 (the exponent mu ln(x/2) is rounded) and 2e-16 above.
+      expectRel(besselY(nu, x), want, x < 1e-100 ? 1e-13 : 1e-14);
+    });
+    it('besselY(2.0000001, 1e-10) = -1.2732426185660811e+20 and the negative order', () => {
+      expectRel(besselY(2.0000001, 1e-10), -1.2732426185660811e20, 1e-14);
+      expectRel(besselY(-2.0000001, 1e-10), -1.2732426185660182e20, 1e-14);
+    });
+  });
+
+  describe('an integer order of a tiny argument (D5: main returned 0 below |x| = 1e-15)', () => {
+    it.each([
+      [2, 1e-16, 1.2499999999999999e-33],
+      [3, 1e-16, 2.0833333333333332e-50],
+      [5, 1e-20, 2.604166666666666e-104],
+      [10, 1e-28, 2.6911444554673714e-290],
+      [7, 1e-17, 1.5500992063492071e-125],
+      [2, 9e-16, 1.0125000000000001e-31],
+      [4, -3e-16, 2.1093749999999998e-65],
+      [3, -7e-17, -7.1458333333333344e-51],
+      [2, 1e-300, 0],
+      [3, -1e-16, -2.0833333333333332e-50],
+    ])('besselJ(%s, %s) = %s', (n, x, want) => {
+      if (want === 0) expect(besselJ(n, x)).toBe(0);
+      else expectRel(besselJ(n, x), want, 1e-14);
+    });
+    it('a subnormal result is within 2 units of the last place; below half a unit it is 0', () => {
+      // J_10(1e-30) = 2.6911444554673744e-310 and J_11(1e-27) = 1.2232474797578969e-308 are
+      // subnormal: the spacing of the doubles there is 4.9e-324 (relative 1.8e-14 and 4e-16).
+      expect(
+        Math.abs((besselJ(10, 1e-30) as number) - 2.6911444554673744e-310)
+      ).toBeLessThanOrEqual(1e-323);
+      expect(
+        Math.abs((besselJ(11, 1e-27) as number) - 1.2232474797578969e-308)
+      ).toBeLessThanOrEqual(1e-323);
+      // J_20(9e-16) = 4.77e-326 is under half of the smallest subnormal: 0, as is J_21
+      expect(besselJ(20, 9e-16)).toBe(0);
+      expect(besselJ(21, 9e-16)).toBe(0);
+      expect(besselJ(-3, 0)).toBe(-0);
+    });
+    it('besselY(2, 5e-324) is -Infinity (main NaN)', () => {
+      expect(besselY(2, 5e-324)).toBe(-Infinity);
+      expect(besselY(2, 1e-300)).toBe(-Infinity);
+    });
+  });
+});
+
+describe('#1331: the array form is bounded by the same total work (no wall clock)', () => {
+  // assertBesselArrayWork returned at once for a non-integer order, so besselJ(1e9 + 0.5, xs) with
+  // 1000 elements ran 1000 full recurrences. Measured on the dist before the guard: the call with
+  // 8 elements was still running after 20 s and threw no RangeError.
+  it('besselJ(1e9 + 0.5, 8 x 2e9) and besselY(1e9 + 0.5, 8 x 2e9) throw the array-work RangeError', () => {
+    // 8e9 recurrence steps, above the 2.5e9 of one call
+    expect(() => besselJ(1e9 + 0.5, new Float64Array(8).fill(2e9))).toThrow(RangeError);
+    expect(() => besselJ(1e9 + 0.5, new Float64Array(8).fill(2e9))).toThrow(/per call/);
+    expect(() => besselY(1e9 + 0.5, new Float64Array(8).fill(2e9))).toThrow(/per call/);
+  });
+  it('besselJ(4e9 + 0.5, 4 x 1000) returns four zeros at once: each element is under the zero bound', () => {
+    const out = besselJ(4e9 + 0.5, new Float64Array(4).fill(1000)) as Float64Array;
+    expect(Array.from(out)).toEqual([0, 0, 0, 0]);
+  });
+  it('besselJ(400.3, [5000, 20000]) equals the two scalar calls', () => {
+    const out = besselJ(400.3, new Float64Array([5000, 20000])) as Float64Array;
+    expect(out[0]).toBe(besselJ(400.3, 5000));
+    expect(out[1]).toBe(besselJ(400.3, 20000));
+  });
+  it('an order that the scalar rejects keeps the message of the scalar', () => {
+    expect(() => besselJ(3e9 + 0.5, new Float64Array([3e9]))).toThrow(
+      /besselJ: n = 3000000000.5 exceeds the supported maximum of 2500000000/
+    );
+  });
+  it('a moderate real-order array is not refused', () => {
+    const out = besselJ(2.5, new Float64Array(2000).fill(30)) as Float64Array;
+    expect(out.length).toBe(2000);
+    expectRel(out[0], 0.14120285879928212, 1e-13);
   });
 });

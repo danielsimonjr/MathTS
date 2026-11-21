@@ -271,13 +271,24 @@ function _besselJn(n: i32, x: f64): f64 {
   const sign: f64 = n < 0 && ni % 2 != 0 ? -1.0 : 1.0;
   if (ni == 0) return sign * _besselJ0(x);
   if (ni == 1) return sign * _besselJ1(x);
-  if (Math.abs(x) < 1e-15) return sign * 0.0;
   if (isNaN(x)) return NaN;
   const nf: f64 = <f64>ni;
   const ax: f64 = Math.abs(x);
+  if (ax == 0.0) return sign * 0.0;
   // |J_n(x)| <= (|x|/2)^n / n! and ln n! >= n ln n - n, so below ln(2^-1075) = -745.14 the
-  // value rounds to 0. This test comes before the limits, as in the JS scalar.
-  if (ax <= nf && nf * (1.0 + Math.log(ax / 2.0) - Math.log(nf)) < -745.2) return sign * 0.0;
+  // value rounds to 0. This test comes before the limits, as in the JS scalar
+  // (besselJUnderflows, the same expression).
+  if (nf * (1.0 + (Math.log(ax) - Math.LN2) - Math.log(nf)) < -745.2) return sign * 0.0;
+  // A tiny x: J_n(x) = (x/2)^n / n! (1 - x^2 / (4 (n + 1)) + ...), and the second term is below
+  // 1e-31 of the first. The test "|x| < 1e-15 gives 0" returned 0 where J_n(x) is a double
+  // (J_2(1e-16) = 1.25e-33). The zero bound leaves n <= 20; the product uses no pow or exp, so
+  // it gives the same bits as the JS scalar.
+  if (ax < 1e-15) {
+    const h: f64 = ax / 2.0;
+    let t: f64 = h;
+    for (let k: i32 = 2; k <= ni; k++) t *= h / <f64>k;
+    return sign * (x < 0.0 && ni % 2 != 0 ? -t : t);
+  }
   // Upward recurrence is stable only when x > n; otherwise it amplifies
   // round-off (J_n decays in n for n > x). Use Miller's backward recurrence
   // in that regime.

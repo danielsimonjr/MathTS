@@ -80,11 +80,16 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   });
   it.each([
     ['besselJ', () => besselJ(MAX, MAX)],
-    ['besselY', () => besselY(MAX, 2)],
+    // x = MAX: Y_MAX(2) is below -1e308, so the overflow bound returns -Infinity at once, before
+    // the limit (#1331); an x above the order lets the limit decide.
+    ['besselY', () => besselY(MAX, MAX)],
     ['legendreP', () => legendreP(MAX, 0.5)],
   ])('%s(MAX, x) throws a RangeError (hang before the fix)', (_name, call) => {
     expect(call).toThrow(RangeError);
     expect(call).toThrow(RECURRENCE);
+  });
+  it('besselY(MAX, 2) is -Infinity at once: the true value is outside the double range (#1331)', () => {
+    expect(besselY(MAX, 2)).toBe(-Infinity);
   });
   it('chebyshevT has its own limit of 4e9 (hang before the fix)', () => {
     expect(() => chebyshevT(MAX, 0.5)).toThrow(CHEBYSHEV);
