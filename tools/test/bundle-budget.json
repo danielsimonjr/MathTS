@@ -197,7 +197,7 @@
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "bytes": 268464
+      "bytes": 271312
     },
     {
       "label": "compat create(all)",
