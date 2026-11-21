@@ -144,16 +144,7 @@ export class MathJSDenseMatrix {
       // Untrusted nested data: every row must match the size of the first one (mathjs `validate`).
       // A producer that knows the size passes `{ data, size }`, which is not validated or copied.
       // As in mathjs, the matrix holds a copy, so a write to the matrix does not change `data`.
-      // A matrix inside the data is replaced by its nested array first (mathjs `preprocess`).
-      // One pass checks the dimensions and looks for a matrix, so plain numeric data costs no
-      // second pass.
-      let rows = data;
-      let size = inferSize(rows);
-      if (validateFindMatrix(rows, size)) {
-        rows = unwrapNestedMatrices(rows) as number[][];
-        size = inferSize(rows);
-        validate(rows, size);
-      }
+      const { rows, size } = MathJSDenseMatrix._validateRows(data);
       this._size = size;
       this._data = copyAxes(rows, size.length) as number[][];
     } else if (
@@ -648,6 +639,25 @@ export class MathJSDenseMatrix {
   /** Create from native DenseMatrix. */
   static fromNative(dm: DenseMatrix): MathJSDenseMatrix {
     return new MathJSDenseMatrix({ data: dm.toArray(), size: [dm.rows, dm.cols] });
+  }
+
+  /**
+   * The one validation step of the constructor for untrusted nested data: every row has the size
+   * of the first one, and a matrix inside the data is replaced by its nested array (mathjs
+   * `preprocess`). One pass checks the dimensions and looks for a matrix, so plain numeric data
+   * costs no second pass. The `{ data, size }` form never calls it; a test counts its calls to
+   * prove that an operation does not validate the result that it built itself.
+   * @throws DimensionError when the rows do not have the size of the first one
+   */
+  static _validateRows(data: number[][]): { rows: number[][]; size: number[] } {
+    let rows = data;
+    let size = inferSize(rows);
+    if (validateFindMatrix(rows, size)) {
+      rows = unwrapNestedMatrices(rows) as number[][];
+      size = inferSize(rows);
+      validate(rows, size);
+    }
+    return { rows, size };
   }
 
   /**
@@ -1575,7 +1585,6 @@ function isStorageObject(x: object): boolean {
   );
 }
 
-/** A short type name for an error message: null, number, BigNumber, Complex, ... */
 /** True when `value` is a matrix: the flag that the two matrix classes of this file define. */
 function isMatrixValue(value: unknown): value is { toArray(): unknown } {
   return (
@@ -1649,6 +1658,7 @@ function unwrapNestedMatrices(data: unknown): unknown {
   return Array.isArray(data) ? data.map(unwrapNestedMatrices) : data;
 }
 
+/** A short type name for an error message: null, number, BigNumber, Complex, ... */
 function typeName(x: unknown): string {
   if (x === null) return 'null';
   if (typeof x === 'object') return (x as object).constructor?.name ?? 'Object';

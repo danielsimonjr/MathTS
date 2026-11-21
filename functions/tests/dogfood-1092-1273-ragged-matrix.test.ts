@@ -168,6 +168,33 @@ describe('#1092 validation cost: only user data is validated', () => {
     expect(thrown(() => matrix(data))).toBeUndefined();
   });
 
+  /**
+   * Count the calls of the validation step of the constructor during fn. The instrument is the
+   * validation function itself, so a change of its inner loop (for example a `typeof` test that
+   * skips `Array.isArray` for a number) cannot blind it.
+   */
+  function validationCalls(fn: () => unknown): number {
+    const klass = MathJSDenseMatrix as unknown as {
+      _validateRows: (...args: unknown[]) => unknown;
+    };
+    const original = klass._validateRows;
+    let calls = 0;
+    klass._validateRows = function (this: unknown, ...args: unknown[]) {
+      calls++;
+      return original.apply(this, args);
+    };
+    try {
+      fn();
+    } finally {
+      klass._validateRows = original;
+    }
+    return calls;
+  }
+
+  it('matrix(array) calls the validation step once (positive control of the counter)', () => {
+    expect(validationCalls(() => matrix(rows(0)))).toBe(1);
+  });
+
   it('add and multiply of two bridge matrices do not validate their result', () => {
     const a = matrix(rows(0)) as MathJSDenseMatrix;
     const b = matrix(rows(1)) as MathJSDenseMatrix;
@@ -176,8 +203,8 @@ describe('#1092 validation cost: only user data is validated', () => {
     // Warm both paths, so a one-time lazy setup is not counted.
     add(a, b);
     multiply(a, b);
-    expect(isArrayCalls(() => add(a, b))).toBeLessThan(N * N);
-    expect(isArrayCalls(() => multiply(a, b))).toBeLessThan(N * N);
+    expect(validationCalls(() => add(a, b))).toBe(0);
+    expect(validationCalls(() => multiply(a, b))).toBe(0);
   });
 });
 
