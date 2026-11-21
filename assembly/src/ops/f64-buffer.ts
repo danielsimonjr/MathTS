@@ -66,12 +66,3 @@ export function f64Div(a: Float64Array, b: Float64Array, result: Float64Array): 
     unchecked((result[i] = unchecked(a[i]) / unchecked(b[i])));
   }
 }
-
-/** result[i] = fn(re, im) for each interleaved (re, im) pair of `a`. */
-@inline
-export function f64PairMap(a: Float64Array, result: Float64Array, fn: (re: f64, im: f64) => f64): void {
-  const n = a.length / 2;
-  for (let i = 0; i < n; i++) {
-    unchecked((result[i] = fn(unchecked(a[i * 2]), unchecked(a[i * 2 + 1]))));
-  }
-}

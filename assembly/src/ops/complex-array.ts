@@ -7,7 +7,7 @@
  */
 
 import { Complex } from '../types/complex';
-import { f64Add, f64PairMap, f64Sub } from './f64-buffer';
+import { f64Add, f64Sub } from './f64-buffer';
 
 // =============================================================================
 // Array Creation
@@ -209,14 +209,24 @@ export function complex_array_conj(a: Float64Array, result: Float64Array): void 
  * Magnitude (absolute value) of each element: result[i] = |a[i]|
  */
 export function complex_array_abs(a: Float64Array, result: Float64Array): void {
-  f64PairMap(a, result, (re: f64, im: f64): f64 => Math.hypot(re, im));
+  const n = a.length / 2;
+  for (let i = 0; i < n; i++) {
+    const re = unchecked(a[i * 2]);
+    const im = unchecked(a[i * 2 + 1]);
+    unchecked((result[i] = Math.hypot(re, im)));
+  }
 }
 
 /**
  * Phase (argument) of each element: result[i] = arg(a[i])
  */
 export function complex_array_arg(a: Float64Array, result: Float64Array): void {
-  f64PairMap(a, result, (re: f64, im: f64): f64 => Math.atan2(im, re));
+  const n = a.length / 2;
+  for (let i = 0; i < n; i++) {
+    const re = unchecked(a[i * 2]);
+    const im = unchecked(a[i * 2 + 1]);
+    unchecked((result[i] = Math.atan2(im, re)));
+  }
 }
 
 /**
