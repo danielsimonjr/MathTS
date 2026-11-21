@@ -40,12 +40,25 @@ const _LGAMMA_C6: f64 = -0.13857109526572012;
 const _LGAMMA_C7: f64 = 9.9843695780195716e-6;
 const _LGAMMA_C8: f64 = 1.5056327351493116e-7;
 
+/**
+ * sin(pi x) with the argument reduced exactly before it meets pi (the same function as
+ * `sinPiScalar` of functions/src/wasm/special/scalars.ts). `Math.sin(Math.PI * x)` rounds the
+ * product, so next to a nonzero integer it kept only a few digits. `x - 2 round(x / 2)` and
+ * `1 - a` for a in [0.5, 1] are exact. The result is exactly 0 at an integer.
+ */
+function _sinPi(x: f64): f64 {
+  const r: f64 = x - 2.0 * Math.round(x / 2.0);
+  const a: f64 = Math.abs(r);
+  const s: f64 = a > 0.5 ? Math.sin(Math.PI * (1.0 - a)) : Math.sin(Math.PI * a);
+  return s == 0.0 ? 0.0 : r < 0.0 ? -s : s;
+}
+
 function _lgamma(x: f64): f64 {
   // Poles at 0 and negative integers
   if (x <= 0.0 && x == Math.floor(x)) return Infinity;
   if (x < 0.5) {
     // Reflection: lgamma(x) = ln(π/|sin(πx)|) − lgamma(1−x)
-    const sinPiX: f64 = Math.abs(Math.sin(Math.PI * x));
+    const sinPiX: f64 = Math.abs(_sinPi(x));
     if (sinPiX == 0.0) return Infinity;
     return Math.log(Math.PI / sinPiX) - _lgamma(1.0 - x);
   }

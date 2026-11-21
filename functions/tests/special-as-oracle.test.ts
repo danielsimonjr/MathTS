@@ -52,6 +52,7 @@ import {
 } from '../src/index.js';
 import { wasmLoader } from '../src/wasm/WasmLoader.js';
 import {
+  WASM_SPECIAL_THRESHOLD,
   lgammaDispatch,
   besselJ0Dispatch,
   besselJ1Dispatch,
@@ -91,6 +92,16 @@ const AS_ORACLE: readonly {
     expected: 0.28468287047291916,
     js: () => lgamma(2.5) as number,
     wasm: () => lgammaDispatch(new Float64Array([2.5]))[0]!,
+  },
+  {
+    // Batch I2 D1: the reflection used Math.sin(Math.PI * x), which kept 5 digits next to a
+    // nonzero integer (1.5e-10 off here). mpmath 1.3.0: loggamma(mpf(-1.0000001)) = 16.118095608096032.
+    label: 'lgamma(-1.0000001) next to a pole',
+    expected: 16.118095608096032,
+    js: () => lgamma(-1.0000001) as number,
+    // The bridge consults the AS kernel only from WASM_SPECIAL_THRESHOLD elements, so the input
+    // is that long; a shorter array runs the JS fallback and would not test the AS code.
+    wasm: () => lgammaDispatch(new Float64Array(WASM_SPECIAL_THRESHOLD).fill(-1.0000001))[0]!,
   },
   {
     label: 'besselJ0(2.5)',

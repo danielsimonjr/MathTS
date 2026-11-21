@@ -240,11 +240,12 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
     }
   }, 120_000);
 
-  it('hermiteH stops at the first NaN, as the JS scalar does', () => {
-    const r = callKernel('hermiteH', 1_000_000_000, 0.5);
+  it('hermiteH runs the rescaled recurrence and gives +-Infinity, as the JS scalar does (#1332)', () => {
+    // It gave NaN at the first overflow. The sign of H_n oscillates with n, so the kernel runs
+    // the full degree on a copy that is rescaled by 2^600.
+    const r = callKernel('hermiteH', 1_000_000, 0.5);
     expect(r.timedOut).toBe(false);
-    expect(r.value).toBeNaN();
-    expect(r.ms).toBeLessThan(3_000);
+    expect(Math.abs(r.value as number)).toBe(Infinity);
   }, 30_000);
 
   it('a non-finite order gives NaN', () => {
