@@ -169,6 +169,7 @@ function allNumberJobs(values: string[]): Job[] {
  */
 const PLAIN_NOT_SCALAR: Record<string, string> = {
   chebyshevDistance: 'takes two point arrays',
+  distanceND: 'takes two point arrays',
   divergence: 'takes a vector field callback and a point',
   graphDistance: 'takes an adjacency matrix',
   hermiteInterp: 'takes node, value and derivative arrays',
