@@ -1475,8 +1475,6 @@ green.
 
 - **`docs/Architecture/dependency-layers.json` and `docs/Architecture/unused-analysis.json` are no longer tracked.** The external `repo-tools map` wrote them, and the pre-commit hook staged them with the folder. No generator, consumer or gate of this repository uses them, so they went stale. `.gitignore` now names both. `repo-tools map . --out=<tmp>` gives a current copy of each, and that copy of `unused-analysis.json` holds the list of unused exports that repo-tools measures.
 
-## [Unreleased]
-
 ### Fixed
 
 - **Dependabot switched back from the `bun` ecosystem to `npm`.** The Bun migration (#274)
