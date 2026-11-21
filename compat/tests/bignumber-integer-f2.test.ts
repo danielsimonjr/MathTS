@@ -204,6 +204,12 @@ describe('#1097 mod of BigNumbers takes the sign of the divisor on both paths', 
     ['mod(-1, bignumber(5))', '4'],
     ['mod(bignumber(-1), 5)', '4'],
     ['mod(bignumber(-7.5), bignumber(2))', '0.5'],
+    ['mod(bignumber(-1), bignumber(Infinity))', 'NaN'],
+    ['mod(bignumber(1), bignumber(Infinity))', 'NaN'],
+    ['mod(bignumber(-1), bignumber(-Infinity))', 'NaN'],
+    ['mod(bignumber(Infinity), bignumber(5))', 'NaN'],
+    ['mod(bignumber(NaN), bignumber(5))', 'NaN'],
+    ['mod(bignumber(5), bignumber(NaN))', 'NaN'],
   ];
   for (const [e, want] of ROWS) {
     it(`#1097 ${e} = ${want} on evaluate and on parse`, () => {

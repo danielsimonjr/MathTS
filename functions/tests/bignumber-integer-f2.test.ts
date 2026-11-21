@@ -479,6 +479,19 @@ describe('#1097 mod of two BigNumbers takes the sign of the divisor', () => {
     expect(mod(bn(-1), 5)).toBe('4');
   });
 
+  it('#1097 a NaN or infinite operand gives NaN, as mathjs (x - y * floor(x / y))', () => {
+    // BigNumber.mod returns the dividend for an infinite divisor. The floored step then added the
+    // infinite divisor to a negative dividend and gave Infinity.
+    expect(mod(bn(-1), bn(Infinity))).toBe('NaN');
+    expect(mod(bn(1), bn(Infinity))).toBe('NaN');
+    expect(mod(bn(1), bn(-Infinity))).toBe('NaN');
+    expect(mod(bn(-1), bn(-Infinity))).toBe('NaN');
+    expect(mod(bn(Infinity), bn(5))).toBe('NaN');
+    expect(mod(bn(NaN), bn(5))).toBe('NaN');
+    expect(mod(bn(5), bn(NaN))).toBe('NaN');
+    expect(mod(bn(Infinity), bn(0))).toBe('Infinity');
+  });
+
   it('#1097 the remainder of 30 digits is exact at precision 20 and 64', () => {
     for (const precision of [20, 64]) {
       BigNumber.config({ precision });
