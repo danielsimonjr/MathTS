@@ -83,6 +83,12 @@
       "needs": ["core/dist/index.js"]
     },
     {
+      "name": "bignumber-from-bigint-zeros",
+      "script": "functions/tests/helpers/bignumber-from-bigint-zeros-perf-gate.mjs",
+      "limit": 12,
+      "needs": ["core/dist/index.js"]
+    },
+    {
       "name": "simplify-coefficient-cap",
       "script": "functions/tests/helpers/simplify-coefficient-cap-perf-gate.mjs",
       "limit": 3,
