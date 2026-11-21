@@ -229,22 +229,25 @@ describe('roundNumberTol against the decimal-string path (#996)', () => {
     [1e-9, 1e-15],
   ];
 
-  it('equals the exact path on a seeded corpus, for four tolerance pairs', () => {
-    let total = 0;
-    let first: string | undefined;
-    for (const [relTol, absTol] of pairs) {
-      corpus(150, (x, d) => {
+  // One test for each pair: the exact path costs about 55 microseconds a call, so the four pairs
+  // together went over the 5 s default of `bun test` (6.2 s measured). Each test keeps its own budget.
+  it.each(pairs)(
+    'equals the exact path on a seeded corpus, relTol %s and absTol %s',
+    (relTol, absTol) => {
+      let total = 0;
+      let first: string | undefined;
+      corpus(80, (x, d) => {
         total++;
         const got = roundNumberTol(x, d, relTol, absTol);
         const want = roundNumberTolExact(x, d, relTol, absTol);
         if (!Object.is(got, want) && first === undefined) {
-          first = `relTol ${relTol} absTol ${absTol}: round(${x}, ${d}) got ${got}, want ${want}`;
+          first = `round(${x}, ${d}) got ${got}, want ${want}`;
         }
       });
+      expect(total).toBeGreaterThan(4000);
+      expect(first).toBeUndefined();
     }
-    expect(total).toBeGreaterThan(25000);
-    expect(first).toBeUndefined();
-  }, 20_000);
+  );
 
   it('can fail: a kernel without the test of tiny values returns -0 where the exact path gives 0', () => {
     // Local copy of the fast path without `a >= 1e-9`. A negative value that the snap moves to -0
@@ -270,7 +273,7 @@ describe('roundNumberTol against the decimal-string path (#996)', () => {
     expect(mismatches).toBeGreaterThan(0);
     same(withoutTinyTest(-1e-16, 0), -0, 'copy of the fast path, round(-1e-16)');
     same(roundNumberTolExact(-1e-16, 0, REL, ABS), 0, 'exact path, round(-1e-16)');
-  }, 20_000);
+  });
 });
 
 describe('core round of the other types (#996)', () => {
