@@ -113,9 +113,9 @@ describe('#1043 typed nthRoot(BigNumber, n)', () => {
     expect(String(f.nthRoot(new BigNumber(3).pow(100), 100))).toBe('3');
   });
 
-  it('gives a negative real root for an odd root, and NaN for an even one', () => {
+  it('gives a negative real root for an odd root, and throws for an even one (#1097)', () => {
     expect(String(f.nthRoot(new BigNumber(-27), 3))).toBe('-3');
-    expect((f.nthRoot(new BigNumber(-16), 2) as BigNumber).isNaN()).toBe(true);
+    expect(() => f.nthRoot(new BigNumber(-16), 2)).toThrow('Root must be odd when a is negative.');
   });
 
   it('restores the configured precision', () => {

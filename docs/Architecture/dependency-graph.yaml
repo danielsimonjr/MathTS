@@ -2,9 +2,9 @@ metadata:
   name: mathts
   version: 0.1.0
   lastUpdated: '2026-11-21'
-  totalFiles: 1359
+  totalFiles: 1354
   totalModules: 82
-  totalExports: 7454
+  totalExports: 7448
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -9740,9 +9740,9 @@ modules:
           imports:
             - ConfigOptions
           typeOnly: true
-        - file: ../plain/number/index.js
+        - file: ../typed/arithmetic.js
           imports:
-            - xgcdNumber
+            - xgcd
       workspaceDependencies: []
       exports:
         - createXgcd
@@ -15505,12 +15505,12 @@ modules:
         - file: ../matrix/squeeze.js
           imports:
             - createSqueeze
-        - file: ../probability/combinations.js
+        - file: ../typed/probability.js
           imports:
-            - createCombinations
-        - file: ../probability/combinationsWithRep.js
-          imports:
-            - createCombinationsWithRep
+            - combinations
+            - combinationsWithRep
+            - multinomial
+            - permutations
         - file: ../probability/lgamma.js
           imports:
             - createLgamma
@@ -15946,9 +15946,6 @@ modules:
         - file: ../combinatorics/stirlingS2.js
           imports:
             - createStirlingS2
-        - file: ../probability/permutations.js
-          imports:
-            - createPermutations
         - file: ../combinatorics/bellNumbers.js
           imports:
             - createBellNumbers
@@ -16061,9 +16058,6 @@ modules:
         - file: ../probability/kldivergence.js
           imports:
             - createKldivergence
-        - file: ../probability/multinomial.js
-          imports:
-            - createMultinomial
         - file: ../signal/freqz.js
           imports:
             - createFreqz
@@ -19256,6 +19250,9 @@ modules:
         - file: ../utils/limits.js
           imports:
             - assertLoopOrder
+        - file: ../probability/bigint-binomial.js
+          imports:
+            - binomialBigInt
       workspaceDependencies: []
       exports:
         - motzkin
@@ -20007,7 +20004,6 @@ modules:
         - signNumber
         - sqrtNumber
         - squareNumber
-        - xgcdNumber
         - powNumber
         - roundNumber
         - normNumber
@@ -20034,7 +20030,6 @@ modules:
         - signNumber
         - sqrtNumber
         - squareNumber
-        - xgcdNumber
         - powNumber
         - roundNumber
         - normNumber
@@ -20063,22 +20058,6 @@ modules:
         - leftShiftNumber
         - rightArithShiftNumber
         - rightLogShiftNumber
-    functions/src/plain/number/combinations.ts:
-      description: Return the number of ways to choose `k` items from `n` items, without order.
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../../utils/number.js
-          imports:
-            - isInteger
-        - file: ../../utils/product.js
-          imports:
-            - product
-      workspaceDependencies: []
-      exports:
-        - combinationsNumber
-      functions:
-        - combinationsNumber
     functions/src/plain/number/constants.ts:
       description: constants module
       externalDependencies: []
@@ -20096,7 +20075,7 @@ modules:
         - e
         - phi
     functions/src/plain/number/index.ts:
-      description: Package entry point for @danielsimonjr/mathts-functions (re-exports 9 symbols)
+      description: Package entry point for @danielsimonjr/mathts-functions (re-exports 8 symbols)
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -20105,10 +20084,6 @@ modules:
             - '*'
           reExport: true
         - file: ./bitwise.js
-          imports:
-            - '*'
-          reExport: true
-        - file: ./combinations.js
           imports:
             - '*'
           reExport: true
@@ -20141,7 +20116,6 @@ modules:
       reExported:
         - '* from ./arithmetic.js'
         - '* from ./bitwise.js'
-        - '* from ./combinations.js'
         - '* from ./constants.js'
         - '* from ./logical.js'
         - '* from ./relational.js'
@@ -20331,79 +20305,17 @@ modules:
       constants:
         - createBernoulli
     functions/src/probability/bigint-binomial.ts:
-      description: Shared BigNumber binomial product `C(total, choose)` via the short multiplicative
+      description: Exact bigint binomial coefficient and range product. The BigNumber functions of
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/bignumber/work-precision.js
-          imports:
-            - atWorkPrecision
-            - PrecisionClass
+      internalDependencies: []
       workspaceDependencies: []
       exports:
-        - isPositiveInteger
-        - binomialProductBigNumber
-      interfaces:
-        - BigNumberBinomialType
+        - binomialBigInt
+        - rangeProductBigInt
       functions:
-        - isPositiveInteger
-        - binomialProductBigNumber
-    functions/src/probability/combinations.ts:
-      description: Compute the number of ways of picking `k` unordered outcomes from `n`
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/factory.js
-          imports:
-            - factory
-        - file: ../utils/collection.js
-          imports:
-            - deepMap
-        - file: ../plain/number/combinations.js
-          imports:
-            - combinationsNumber
-        - file: ../core/function/typed.js
-          imports:
-            - TypedFunction
-          typeOnly: true
-        - file: ./bigint-binomial.js
-          imports:
-            - binomialProductBigNumber
-            - isPositiveInteger
-            - BigNumberBinomialType
-      workspaceDependencies: []
-      exports:
-        - createCombinations
-      constants:
-        - createCombinations
-    functions/src/probability/combinationsWithRep.ts:
-      description: Compute the number of ways of picking `k` unordered outcomes from `n`
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/factory.js
-          imports:
-            - factory
-        - file: ../utils/number.js
-          imports:
-            - isInteger
-        - file: ../utils/product.js
-          imports:
-            - product
-        - file: ../core/function/typed.js
-          imports:
-            - TypedFunction
-          typeOnly: true
-        - file: ./bigint-binomial.js
-          imports:
-            - binomialProductBigNumber
-            - isPositiveInteger
-            - BigNumberBinomialType
-      workspaceDependencies: []
-      exports:
-        - createCombinationsWithRep
-      constants:
-        - createCombinationsWithRep
+        - binomialBigInt
+        - rangeProductBigInt
     functions/src/probability/factorial.ts:
       description: Compute the factorial of a value
       externalDependencies: []
@@ -20503,57 +20415,6 @@ modules:
         - MultinomialStats
       functions:
         - multinomialExact
-    functions/src/probability/multinomial.ts:
-      description: >-
-        Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n`
-        possibilities
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/collection.js
-          imports:
-            - deepForEach
-        - file: ../utils/factory.js
-          imports:
-            - factory
-        - file: ./multinomial-exact.js
-          imports:
-            - multinomialExact
-        - file: ../core/function/typed.js
-          imports:
-            - TypedFunction
-          typeOnly: true
-      workspaceDependencies: []
-      exports:
-        - createMultinomial
-      constants:
-        - createMultinomial
-    functions/src/probability/permutations.ts:
-      description: Compute the number of ways of obtaining an ordered subset of `k` elements
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../utils/number.js
-          imports:
-            - isInteger
-        - file: ../utils/product.js
-          imports:
-            - product
-        - file: ../utils/factory.js
-          imports:
-            - factory
-        - file: ../utils/collection.js
-          imports:
-            - deepMap
-        - file: ../core/function/typed.js
-          imports:
-            - TypedFunction
-          typeOnly: true
-      workspaceDependencies: []
-      exports:
-        - createPermutations
-      constants:
-        - createPermutations
     functions/src/probability/pickRandom.ts:
       description: Random pick one or more values from a one dimensional array.
       externalDependencies: []
@@ -25141,6 +25002,10 @@ modules:
         - file: ../factories/scope.js
           imports:
             - factoryScope
+        - file: ../arithmetic/fraction-gcd.js
+          imports:
+            - fractionGcd
+            - fractionLcm
         - file: ./euclid.js
           imports:
             - euclidSnap
@@ -27883,6 +27748,13 @@ modules:
           imports:
             - assertAllocSize
             - assertLoopOrder
+        - file: ../utils/product.js
+          imports:
+            - product
+        - file: ../probability/bigint-binomial.js
+          imports:
+            - binomialBigInt
+            - rangeProductBigInt
         - file: ../plain/number/probability.js
           imports:
             - gammaNumber
@@ -27900,6 +27772,12 @@ modules:
           directory: core
           imports:
             - mathTyped
+            - BigNumber
+            - isBigNumber
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - Fraction
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
@@ -29383,6 +29261,9 @@ modules:
         - file: ../utils/factory.js
           imports:
             - factory
+        - file: ../numbertheory/modular.js
+          imports:
+            - modPow
         - file: ../core/function/typed.js
           imports:
             - TypedFunction
@@ -46552,7 +46433,6 @@ dependencyGraph:
       files:
         - functions/src/plain/number/arithmetic.ts
         - functions/src/plain/number/bitwise.ts
-        - functions/src/plain/number/combinations.ts
         - functions/src/plain/number/constants.ts
         - functions/src/plain/number/index.ts
         - functions/src/plain/number/logical.ts
@@ -46564,15 +46444,11 @@ dependencyGraph:
       files:
         - functions/src/probability/bernoulli.ts
         - functions/src/probability/bigint-binomial.ts
-        - functions/src/probability/combinations.ts
-        - functions/src/probability/combinationsWithRep.ts
         - functions/src/probability/factorial.ts
         - functions/src/probability/gamma.ts
         - functions/src/probability/kldivergence.ts
         - functions/src/probability/lgamma.ts
         - functions/src/probability/multinomial-exact.ts
-        - functions/src/probability/multinomial.ts
-        - functions/src/probability/permutations.ts
         - functions/src/probability/pickRandom.ts
         - functions/src/probability/random.ts
         - functions/src/probability/randomInt.ts
@@ -47548,18 +47424,18 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1359
+  totalTypeScriptFiles: 1354
   totalModules: 82
-  totalLinesOfCode: 245744
-  totalExports: 7454
+  totalLinesOfCode: 245285
+  totalExports: 7448
   totalClasses: 64
-  totalInterfaces: 676
-  totalFunctions: 2629
-  totalTypeGuards: 185
+  totalInterfaces: 675
+  totalFunctions: 2627
+  totalTypeGuards: 184
   totalEnums: 0
-  totalConstants: 1702
-  totalReExports: 3195
-  totalTypeOnlyImports: 685
+  totalConstants: 1698
+  totalReExports: 3194
+  totalTypeOnlyImports: 681
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3
   unusedFilesCount: 0

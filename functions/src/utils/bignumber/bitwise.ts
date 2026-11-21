@@ -1,12 +1,10 @@
 /**
  * Structural contract for the BigNumber values manipulated here. Captures the
- * exact instance members and constructor statics used; the configured BigNumber
- * implementation (decimal.js / local Decimal) provides them.
+ * exact instance members and constructor statics used; the BigNumber of
+ * `@danielsimonjr/mathts-core` provides them. The value is a bigint-backed decimal
+ * with no digit array and no sign field, so the helpers read it through `toBigInt`.
  */
 interface BigNumberValue {
-  s: number;
-  d: number[] | null;
-  e: number;
   constructor: BigNumberCtor;
   isFinite(): boolean;
   isInteger(): boolean;
@@ -21,17 +19,19 @@ interface BigNumberValue {
   mod(other: BigNumberValue): BigNumberValue;
   pow(other: BigNumberValue): BigNumberValue;
   floor(): BigNumberValue;
+  neg(): BigNumberValue;
   toNumber(): number;
+  toBigInt(): bigint;
 }
 
 interface BigNumberCtor {
   new (value: number | string): BigNumberValue;
   precision: number;
-  config(options: { precision: number }): void;
+  fromBigInt(value: bigint): BigNumberValue;
 }
 
-/** Bitwise operator applied to the individual bits (0/1) of two operands. */
-type BitFunc = (a: number, b: number) => number;
+/** A bitwise operator on two's-complement integers of any size. */
+type BitOp = (a: bigint, b: bigint) => bigint;
 
 /**
  * Bitwise and for Bignumbers
@@ -97,9 +97,7 @@ export function bitAndBigNumber(x: BigNumberValue, y: BigNumberValue): BigNumber
       return x;
     }
   }
-  return bitwise(x, y, function (a: number, b: number): number {
-    return a & b;
-  });
+  return bitwise(x, y, (a, b) => a & b);
 }
 
 /**
@@ -113,15 +111,9 @@ export function bitNotBigNumber(x: BigNumberValue): BigNumberValue {
     throw new Error('Integer expected in function bitNot');
   }
 
-  const BigNumber = x.constructor;
-  const prevPrec = BigNumber.precision;
-  BigNumber.config({ precision: 1e9 });
-
-  const result = x.plus(new BigNumber(1));
-  result.s = (-result.s || null) as unknown as number;
-
-  BigNumber.config({ precision: prevPrec });
-  return result;
+  // ~x = -x - 1. An infinite operand gives the infinity of the other sign, and NaN stays NaN.
+  if (!x.isFinite()) return x.neg();
+  return x.constructor.fromBigInt(-x.toBigInt() - 1n);
 }
 
 /**
@@ -175,140 +167,19 @@ export function bitOrBigNumber(x: BigNumberValue, y: BigNumberValue): BigNumberV
     return x.isFinite() ? y : x;
   }
 
-  return bitwise(x, y, function (a: number, b: number): number {
-    return a | b;
-  });
+  return bitwise(x, y, (a, b) => a | b);
 }
 
 /**
- * Applies bitwise function to numbers
+ * Applies a bitwise operator to two finite integer BigNumbers. The bigint operators use the
+ * two's-complement form of a negative value, as the mathjs helper does, and the result is exact.
  * @param {BigNumber} x
  * @param {BigNumber} y
- * @param {function (a, b)} func
+ * @param {function (a, b)} op
  * @return {BigNumber}
  */
-export function bitwise(x: BigNumberValue, y: BigNumberValue, func: BitFunc): BigNumberValue {
-  const BigNumber = x.constructor;
-
-  let xBits, yBits;
-  const xSign = +(x.s < 0);
-  const ySign = +(y.s < 0);
-  if (xSign) {
-    xBits = decCoefficientToBinaryString(bitNotBigNumber(x));
-    for (let i = 0; i < xBits.length; ++i) {
-      xBits[i] ^= 1;
-    }
-  } else {
-    xBits = decCoefficientToBinaryString(x);
-  }
-  if (ySign) {
-    yBits = decCoefficientToBinaryString(bitNotBigNumber(y));
-    for (let i = 0; i < yBits.length; ++i) {
-      yBits[i] ^= 1;
-    }
-  } else {
-    yBits = decCoefficientToBinaryString(y);
-  }
-
-  let minBits, maxBits, minSign;
-  if (xBits.length <= yBits.length) {
-    minBits = xBits;
-    maxBits = yBits;
-    minSign = xSign;
-  } else {
-    minBits = yBits;
-    maxBits = xBits;
-    minSign = ySign;
-  }
-
-  let shortLen = minBits.length;
-  let longLen = maxBits.length;
-  const expFuncVal = func(xSign, ySign) ^ 1;
-  let outVal = new BigNumber(expFuncVal ^ 1);
-  let twoPower = new BigNumber(1);
-  const two = new BigNumber(2);
-
-  const prevPrec = BigNumber.precision;
-  BigNumber.config({ precision: 1e9 });
-
-  while (shortLen > 0) {
-    if (func(minBits[--shortLen], maxBits[--longLen]) === expFuncVal) {
-      outVal = outVal.plus(twoPower);
-    }
-    twoPower = twoPower.times(two);
-  }
-  while (longLen > 0) {
-    if (func(minSign, maxBits[--longLen]) === expFuncVal) {
-      outVal = outVal.plus(twoPower);
-    }
-    twoPower = twoPower.times(two);
-  }
-
-  BigNumber.config({ precision: prevPrec });
-
-  if (expFuncVal === 0) {
-    outVal.s = -outVal.s;
-  }
-  return outVal;
-}
-
-/* Extracted from decimal.js, and edited to specialize. */
-function decCoefficientToBinaryString(x: BigNumberValue): number[] {
-  // Convert to string
-  const a = x.d as number[]; // array with digits
-  let r = a[0] + '';
-
-  for (let i = 1; i < a.length; ++i) {
-    let s = a[i] + '';
-    for (let z = 7 - s.length; z--;) {
-      s = '0' + s;
-    }
-
-    r += s;
-  }
-
-  let j = r.length;
-  while (r.charAt(j) === '0') {
-    j--;
-  }
-
-  let xe = x.e;
-  let str = r.slice(0, j + 1 || 1);
-  const strL = str.length;
-  if (xe > 0) {
-    if (++xe > strL) {
-      // Append zeros.
-      xe -= strL;
-      while (xe--) {
-        str += '0';
-      }
-    } else if (xe < strL) {
-      str = str.slice(0, xe) + '.' + str.slice(xe);
-    }
-  }
-
-  // Convert from base 10 (decimal) to base 2
-  const arr = [0];
-  for (let i = 0; i < str.length;) {
-    let arrL = arr.length;
-    while (arrL--) {
-      arr[arrL] *= 10;
-    }
-
-    arr[0] += parseInt(str.charAt(i++)); // convert to int
-    for (let j = 0; j < arr.length; ++j) {
-      if (arr[j] > 1) {
-        if (arr[j + 1] === null || arr[j + 1] === undefined) {
-          arr[j + 1] = 0;
-        }
-
-        arr[j + 1] += arr[j] >> 1;
-        arr[j] &= 1;
-      }
-    }
-  }
-
-  return arr.reverse();
+export function bitwise(x: BigNumberValue, y: BigNumberValue, op: BitOp): BigNumberValue {
+  return x.constructor.fromBigInt(op(x.toBigInt(), y.toBigInt()));
 }
 
 /**
@@ -364,9 +235,7 @@ export function bitXor(x: BigNumberValue, y: BigNumberValue): BigNumberValue {
     }
     return new BigNumber(x.isNegative() === y.isNegative() ? Infinity : -Infinity);
   }
-  return bitwise(x, y, function (a: number, b: number): number {
-    return a ^ b;
-  });
+  return bitwise(x, y, (a, b) => a ^ b);
 }
 
 /**

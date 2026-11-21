@@ -142,8 +142,8 @@ The codebase is organized into the following modules:
 - **functions/ml**: 6 files
 - **functions/numbertheory**: 6 files
 - **functions/numeric**: 34 files
-- **functions/plain**: 10 files
-- **functions/probability**: 17 files
+- **functions/plain**: 9 files
+- **functions/probability**: 13 files
 - **functions/relational**: 14 files
 - **functions/set**: 11 files
 - **functions/signal**: 17 files
@@ -204,7 +204,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
-| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 596            | 0               |
+| `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 591            | 0               |
 | `@danielsimonjr/mathts-expression` (`expression/`)                  | `@danielsimonjr/mathts-core`                                                                                                                                    | 489            | 0               |
 | `@danielsimonjr/mathts-parser` (`parser/`)                          | `@danielsimonjr/mathts-expression`                                                                                                                              | 1              | 1               |
 | `@danielsimonjr/mathts-units` (`units/`)                            | `@danielsimonjr/mathts-core`                                                                                                                                    | 1              | 0               |
@@ -4609,7 +4609,7 @@ graph LR
 | `../utils/factory.js`       | `factory`       | Import             |
 | `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
 | `../core/config.js`         | `ConfigOptions` | Import (type-only) |
-| `../plain/number/index.js`  | `xgcdNumber`    | Import             |
+| `../typed/arithmetic.js`    | `xgcd`          | Import             |
 
 **Exports:**
 
@@ -6360,8 +6360,7 @@ graph LR
 | `../matrix/map.js`                       | `createMap`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import                |
 | `../matrix/size.js`                      | `createSize`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import                |
 | `../matrix/squeeze.js`                   | `createSqueeze`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
-| `../probability/combinations.js`         | `createCombinations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Import                |
-| `../probability/combinationsWithRep.js`  | `createCombinationsWithRep`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Import                |
+| `../typed/probability.js`                | `combinations, combinationsWithRep, multinomial, permutations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Import                |
 | `../probability/lgamma.js`               | `createLgamma`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Import                |
 | `../probability/pickRandom.js`           | `createPickRandom`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import                |
 | `../probability/random.js`               | `createRandom`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Import                |
@@ -6506,7 +6505,6 @@ graph LR
 | `../set/setSize.js`                      | `createSetSize`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Import                |
 | `../matrix/sort.js`                      | `createSort`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Import                |
 | `../combinatorics/stirlingS2.js`         | `createStirlingS2`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Import                |
-| `../probability/permutations.js`         | `createPermutations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Import                |
 | `../combinatorics/bellNumbers.js`        | `createBellNumbers`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Import                |
 | `../type/resultset/ResultSet.js`         | `createResultSet`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Import                |
 | `../arithmetic/utils/nodeOperations.js`  | `createNodeOperations`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Import                |
@@ -6544,7 +6542,6 @@ graph LR
 | `../statistics/variance.js`              | `createVariance, createVarianceDdof`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Import                |
 | `../statistics/quantileSeq.js`           | `createQuantileSeq`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Import                |
 | `../probability/kldivergence.js`         | `createKldivergence`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Import                |
-| `../probability/multinomial.js`          | `createMultinomial`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Import                |
 | `../signal/freqz.js`                     | `createFreqz`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Import                |
 | `../set/setCartesian.js`                 | `createSetCartesian`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Import                |
 | `../set/setDifference.js`                | `createSetDifference`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Import                |
@@ -8232,9 +8229,10 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                 | Imports           | Type   |
-| -------------------- | ----------------- | ------ |
-| `../utils/limits.js` | `assertLoopOrder` | Import |
+| File                                | Imports           | Type   |
+| ----------------------------------- | ----------------- | ------ |
+| `../utils/limits.js`                | `assertLoopOrder` | Import |
+| `../probability/bigint-binomial.js` | `binomialBigInt`  | Import |
 
 **Exports:**
 
@@ -8749,7 +8747,7 @@ graph LR
 
 **Exports:**
 
-- Functions: `absNumber`, `addNumber`, `subtractNumber`, `multiplyNumber`, `divideNumber`, `unaryMinusNumber`, `unaryPlusNumber`, `cbrtNumber`, `cubeNumber`, `expNumber`, `expm1Number`, `gcdNumber`, `lcmNumber`, `logNumber`, `log10Number`, `log2Number`, `log1pNumber`, `modNumber`, `nthRootNumber`, `signNumber`, `sqrtNumber`, `squareNumber`, `xgcdNumber`, `powNumber`, `roundNumber`, `normNumber`
+- Functions: `absNumber`, `addNumber`, `subtractNumber`, `multiplyNumber`, `divideNumber`, `unaryMinusNumber`, `unaryPlusNumber`, `cbrtNumber`, `cubeNumber`, `expNumber`, `expm1Number`, `gcdNumber`, `lcmNumber`, `logNumber`, `log10Number`, `log2Number`, `log1pNumber`, `modNumber`, `nthRootNumber`, `signNumber`, `sqrtNumber`, `squareNumber`, `powNumber`, `roundNumber`, `normNumber`
 
 ---
 
@@ -8767,21 +8765,6 @@ graph LR
 
 ---
 
-### `functions/src/plain/number/combinations.ts` - Return the number of ways to choose `k` items from `n` items, without order.
-
-**Internal Dependencies:**
-
-| File                     | Imports     | Type   |
-| ------------------------ | ----------- | ------ |
-| `../../utils/number.js`  | `isInteger` | Import |
-| `../../utils/product.js` | `product`   | Import |
-
-**Exports:**
-
-- Functions: `combinationsNumber`
-
----
-
 ### `functions/src/plain/number/constants.ts` - constants module
 
 **Exports:**
@@ -8790,7 +8773,7 @@ graph LR
 
 ---
 
-### `functions/src/plain/number/index.ts` - Package entry point for @danielsimonjr/mathts-functions (re-exports 9 symbols)
+### `functions/src/plain/number/index.ts` - Package entry point for @danielsimonjr/mathts-functions (re-exports 8 symbols)
 
 **Internal Dependencies:**
 
@@ -8798,7 +8781,6 @@ graph LR
 | ------------------- | ------- | --------- |
 | `./arithmetic.js`   | `*`     | Re-export |
 | `./bitwise.js`      | `*`     | Re-export |
-| `./combinations.js` | `*`     | Re-export |
 | `./constants.js`    | `*`     | Re-export |
 | `./logical.js`      | `*`     | Re-export |
 | `./relational.js`   | `*`     | Re-export |
@@ -8808,7 +8790,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./arithmetic.js`, `* from ./bitwise.js`, `* from ./combinations.js`, `* from ./constants.js`, `* from ./logical.js`, `* from ./relational.js`, `* from ./probability.js`, `* from ./trigonometry.js`, `* from ./utils.js`
+- Re-exports: `* from ./arithmetic.js`, `* from ./bitwise.js`, `* from ./constants.js`, `* from ./logical.js`, `* from ./relational.js`, `* from ./probability.js`, `* from ./trigonometry.js`, `* from ./utils.js`
 
 ---
 
@@ -8893,54 +8875,11 @@ graph LR
 
 ---
 
-### `functions/src/probability/bigint-binomial.ts` - Shared BigNumber binomial product `C(total, choose)` via the short multiplicative
-
-**Internal Dependencies:**
-
-| File                                   | Imports                           | Type   |
-| -------------------------------------- | --------------------------------- | ------ |
-| `../utils/bignumber/work-precision.js` | `atWorkPrecision, PrecisionClass` | Import |
+### `functions/src/probability/bigint-binomial.ts` - Exact bigint binomial coefficient and range product. The BigNumber functions of
 
 **Exports:**
 
-- Interfaces: `BigNumberBinomialType`
-- Functions: `isPositiveInteger`, `binomialProductBigNumber`
-
----
-
-### `functions/src/probability/combinations.ts` - Compute the number of ways of picking `k` unordered outcomes from `n`
-
-**Internal Dependencies:**
-
-| File                              | Imports                                                              | Type               |
-| --------------------------------- | -------------------------------------------------------------------- | ------------------ |
-| `../utils/factory.js`             | `factory`                                                            | Import             |
-| `../utils/collection.js`          | `deepMap`                                                            | Import             |
-| `../plain/number/combinations.js` | `combinationsNumber`                                                 | Import             |
-| `../core/function/typed.js`       | `TypedFunction`                                                      | Import (type-only) |
-| `./bigint-binomial.js`            | `binomialProductBigNumber, isPositiveInteger, BigNumberBinomialType` | Import             |
-
-**Exports:**
-
-- Constants: `createCombinations`
-
----
-
-### `functions/src/probability/combinationsWithRep.ts` - Compute the number of ways of picking `k` unordered outcomes from `n`
-
-**Internal Dependencies:**
-
-| File                        | Imports                                                              | Type               |
-| --------------------------- | -------------------------------------------------------------------- | ------------------ |
-| `../utils/factory.js`       | `factory`                                                            | Import             |
-| `../utils/number.js`        | `isInteger`                                                          | Import             |
-| `../utils/product.js`       | `product`                                                            | Import             |
-| `../core/function/typed.js` | `TypedFunction`                                                      | Import (type-only) |
-| `./bigint-binomial.js`      | `binomialProductBigNumber, isPositiveInteger, BigNumberBinomialType` | Import             |
-
-**Exports:**
-
-- Constants: `createCombinationsWithRep`
+- Functions: `binomialBigInt`, `rangeProductBigInt`
 
 ---
 
@@ -9015,41 +8954,6 @@ graph LR
 
 - Interfaces: `MultinomialStats`
 - Functions: `multinomialExact`
-
----
-
-### `functions/src/probability/multinomial.ts` - Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n` possibilities
-
-**Internal Dependencies:**
-
-| File                        | Imports            | Type               |
-| --------------------------- | ------------------ | ------------------ |
-| `../utils/collection.js`    | `deepForEach`      | Import             |
-| `../utils/factory.js`       | `factory`          | Import             |
-| `./multinomial-exact.js`    | `multinomialExact` | Import             |
-| `../core/function/typed.js` | `TypedFunction`    | Import (type-only) |
-
-**Exports:**
-
-- Constants: `createMultinomial`
-
----
-
-### `functions/src/probability/permutations.ts` - Compute the number of ways of obtaining an ordered subset of `k` elements
-
-**Internal Dependencies:**
-
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/number.js`        | `isInteger`     | Import             |
-| `../utils/product.js`       | `product`       | Import             |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../utils/collection.js`    | `deepMap`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
-
-**Exports:**
-
-- Constants: `createPermutations`
 
 ---
 
@@ -11887,6 +11791,7 @@ graph LR
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
 | `./number-matrix.js`                   | `assertRectangular, isNumberMatrix, numberVector`                                                                                                                                                                                             | Import             |
 | `../factories/scope.js`                | `factoryScope`                                                                                                                                                                                                                                | Import             |
+| `../arithmetic/fraction-gcd.js`        | `fractionGcd, fractionLcm`                                                                                                                                                                                                                    | Import             |
 | `./euclid.js`                          | `euclidSnap`                                                                                                                                                                                                                                  | Import             |
 | `./f64-kernels.js`                     | `f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection`                                                                                                                                                                                  | Import             |
 | `../utils/real-scale.js`               | `isDegenerate, rescaled`                                                                                                                                                                                                                      | Import             |
@@ -12756,21 +12661,24 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                      | Import      |
-| ---------------------------- | ----------- |
-| `@danielsimonjr/mathts-core` | `mathTyped` |
-| `@danielsimonjr/mathts-core` | `IMatrix`   |
+| Package                      | Import                              |
+| ---------------------------- | ----------------------------------- |
+| `@danielsimonjr/mathts-core` | `mathTyped, BigNumber, isBigNumber` |
+| `@danielsimonjr/mathts-core` | `Fraction`                          |
+| `@danielsimonjr/mathts-core` | `IMatrix`                           |
 
 **Internal Dependencies:**
 
-| File                                  | Imports                            | Type   |
-| ------------------------------------- | ---------------------------------- | ------ |
-| `../utils/collection.js`              | `deepMap`                          | Import |
-| `../utils/limits.js`                  | `assertAllocSize, assertLoopOrder` | Import |
-| `../plain/number/probability.js`      | `gammaNumber`                      | Import |
-| `../factories/matrix-bridge.js`       | `MathJSDenseMatrix`                | Import |
-| `../utils/array.js`                   | `arraySize`                        | Import |
-| `../probability/multinomial-exact.js` | `multinomialExact`                 | Import |
+| File                                  | Imports                              | Type   |
+| ------------------------------------- | ------------------------------------ | ------ |
+| `../utils/collection.js`              | `deepMap`                            | Import |
+| `../utils/limits.js`                  | `assertAllocSize, assertLoopOrder`   | Import |
+| `../utils/product.js`                 | `product`                            | Import |
+| `../probability/bigint-binomial.js`   | `binomialBigInt, rangeProductBigInt` | Import |
+| `../plain/number/probability.js`      | `gammaNumber`                        | Import |
+| `../factories/matrix-bridge.js`       | `MathJSDenseMatrix`                  | Import |
+| `../utils/array.js`                   | `arraySize`                          | Import |
+| `../probability/multinomial-exact.js` | `multinomialExact`                   | Import |
 
 **Exports:**
 
@@ -13430,11 +13338,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                        | Imports         | Type               |
-| --------------------------- | --------------- | ------------------ |
-| `../utils/collection.js`    | `deepMap`       | Import             |
-| `../utils/factory.js`       | `factory`       | Import             |
-| `../core/function/typed.js` | `TypedFunction` | Import (type-only) |
+| File                         | Imports         | Type               |
+| ---------------------------- | --------------- | ------------------ |
+| `../utils/collection.js`     | `deepMap`       | Import             |
+| `../utils/factory.js`        | `factory`       | Import             |
+| `../numbertheory/modular.js` | `modPow`        | Import             |
+| `../core/function/typed.js`  | `TypedFunction` | Import (type-only) |
 
 **Exports:**
 
@@ -21032,29 +20941,29 @@ graph LR
 | File                                                   | Imports From | Exports To |
 | ------------------------------------------------------ | ------------ | ---------- |
 | `expression/src/embeddedDocs/embeddedDocs`             | 346 files    | 1 file     |
-| `functions/src/factories/index`                        | 250 files    | 15 files   |
-| `functions/src/utils/factory`                          | 1 file       | 261 files  |
-| `functions/src/core/function/typed`                    | 3 files      | 206 files  |
+| `functions/src/factories/index`                        | 247 files    | 15 files   |
+| `functions/src/utils/factory`                          | 1 file       | 257 files  |
+| `functions/src/core/function/typed`                    | 3 files      | 202 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
-| `functions/src/plain/number/index`                     | 9 files      | 54 files   |
 | `functions/src/utils/is`                               | 0 files      | 63 files   |
+| `functions/src/plain/number/index`                     | 8 files      | 53 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
 | `functions/src/utils/array`                            | 0 files      | 54 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
 | `functions/src/type/matrix/types`                      | 0 files      | 50 files   |
 | `expression/src/utils/factory`                         | 1 file       | 48 files   |
 | `functions/src/utils/limits`                           | 0 files      | 47 files   |
-| `functions/src/utils/number`                           | 0 files      | 47 files   |
-| `functions/src/utils/collection`                       | 0 files      | 44 files   |
+| `functions/src/utils/number`                           | 0 files      | 44 files   |
+| `functions/src/utils/collection`                       | 0 files      | 41 files   |
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
 | `matrix/src/types/DenseMatrix`                         | 6 files      | 24 files   |
+| `functions/src/typed/arithmetic`                       | 19 files     | 11 files   |
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
-| `functions/src/typed/arithmetic`                       | 18 files     | 10 files   |
 | `functions/src/type/bignumber/BigNumber`               | 0 files      | 27 files   |
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
@@ -21449,442 +21358,441 @@ graph TD
     subgraph Functions/plain
         N235[arithmetic]
         N236[bitwise]
-        N237[combinations]
-        N238[constants]
-        N239[index]
-        N240[logical]
-        N241[probability]
-        N242[relational]
-        N243[trigonometry]
-        N244[utils]
+        N237[constants]
+        N238[index]
+        N239[logical]
+        N240[probability]
+        N241[relational]
+        N242[trigonometry]
+        N243[utils]
     end
 
     subgraph Functions/probability
-        N245[bernoulli]
-        N246[bigint-binomial]
-        N247[combinations]
-        N248[combinationsWithRep]
-        N249[factorial]
-        N250[gamma]
-        N251[kldivergence]
-        N252[lgamma]
-        N253[multinomial-exact]
-        N254[multinomial]
-        N255[...7 more]
+        N244[bernoulli]
+        N245[bigint-binomial]
+        N246[factorial]
+        N247[gamma]
+        N248[kldivergence]
+        N249[lgamma]
+        N250[multinomial-exact]
+        N251[pickRandom]
+        N252[random]
+        N253[randomInt]
+        N254[...3 more]
     end
 
     subgraph Functions/relational
-        N256[compare]
-        N257[compareNatural]
-        N258[compareText]
-        N259[compareUnits]
-        N260[deepEqual]
-        N261[equal]
-        N262[equalScalar]
-        N263[equalText]
-        N264[larger]
-        N265[largerEq]
-        N266[...4 more]
+        N255[compare]
+        N256[compareNatural]
+        N257[compareText]
+        N258[compareUnits]
+        N259[deepEqual]
+        N260[equal]
+        N261[equalScalar]
+        N262[equalText]
+        N263[larger]
+        N264[largerEq]
+        N265[...4 more]
     end
 
     subgraph Functions/set
-        N267[flatten-pair]
-        N268[setCartesian]
-        N269[setDifference]
-        N270[setDistinct]
-        N271[setIntersect]
-        N272[setIsSubset]
-        N273[setMultiplicity]
-        N274[setPowerset]
-        N275[setSize]
-        N276[setSymDifference]
-        N277[...1 more]
+        N266[flatten-pair]
+        N267[setCartesian]
+        N268[setDifference]
+        N269[setDistinct]
+        N270[setIntersect]
+        N271[setIsSubset]
+        N272[setMultiplicity]
+        N273[setPowerset]
+        N274[setSize]
+        N275[setSymDifference]
+        N276[...1 more]
     end
 
     subgraph Functions/signal
-        N278[conv]
-        N279[dtw]
-        N280[fft-core-f64]
-        N281[fft-helpers]
-        N282[fft]
-        N283[fir-smoothing]
-        N284[freqz]
-        N285[iir-design]
-        N286[lomb-scargle]
-        N287[remez-exchange]
-        N288[...7 more]
+        N277[conv]
+        N278[dtw]
+        N279[fft-core-f64]
+        N280[fft-helpers]
+        N281[fft]
+        N282[fir-smoothing]
+        N283[freqz]
+        N284[iir-design]
+        N285[lomb-scargle]
+        N286[remez-exchange]
+        N287[...7 more]
     end
 
     subgraph Functions/special
-        N289[angular-momentum]
-        N290[erf-extra]
-        N291[erf]
-        N292[exp-integrals]
-        N293[hypergeometric]
-        N294[jacobi-elliptic]
-        N295[mathieu]
-        N296[niche]
-        N297[polygamma-orthopoly]
-        N298[spherical-bessel]
-        N299[...4 more]
+        N288[angular-momentum]
+        N289[erf-extra]
+        N290[erf]
+        N291[exp-integrals]
+        N292[hypergeometric]
+        N293[jacobi-elliptic]
+        N294[mathieu]
+        N295[niche]
+        N296[polygamma-orthopoly]
+        N297[spherical-bessel]
+        N298[...4 more]
     end
 
     subgraph Functions/statistics
-        N300[corr]
-        N301[cumsum]
-        N302[extreme]
-        N303[mad]
-        N304[max]
-        N305[mean]
-        N306[median]
-        N307[min]
-        N308[mode]
-        N309[nan-reductions]
-        N310[...9 more]
+        N299[corr]
+        N300[cumsum]
+        N301[extreme]
+        N302[mad]
+        N303[max]
+        N304[mean]
+        N305[median]
+        N306[min]
+        N307[mode]
+        N308[nan-reductions]
+        N309[...9 more]
     end
 
     subgraph Functions/stats
-        N311[distances]
-        N312[distributions-extra]
-        N313[effect-sizes]
-        N314[fit-distribution]
-        N315[gaussian-process]
-        N316[inference-extra]
-        N317[inference-extra2]
-        N318[multivariate-sampling]
-        N319[mvn]
-        N320[nonparametric-extra]
-        N321[...5 more]
+        N310[distances]
+        N311[distributions-extra]
+        N312[effect-sizes]
+        N313[fit-distribution]
+        N314[gaussian-process]
+        N315[inference-extra]
+        N316[inference-extra2]
+        N317[multivariate-sampling]
+        N318[mvn]
+        N319[nonparametric-extra]
+        N320[...5 more]
     end
 
     subgraph Functions/string
-        N322[bin]
-        N323[format]
-        N324[hex]
-        N325[oct]
-        N326[print]
+        N321[bin]
+        N322[format]
+        N323[hex]
+        N324[oct]
+        N325[print]
     end
 
     subgraph Functions/trigonometry
-        N327[acos]
-        N328[acosh]
-        N329[acot]
-        N330[acoth]
-        N331[acsc]
-        N332[acsch]
-        N333[asec]
-        N334[asech]
-        N335[asin]
-        N336[asinh]
-        N337[...16 more]
+        N326[acos]
+        N327[acosh]
+        N328[acot]
+        N329[acoth]
+        N330[acsc]
+        N331[acsch]
+        N332[asec]
+        N333[asech]
+        N334[asin]
+        N335[asinh]
+        N336[...16 more]
     end
 
     subgraph Functions/type
-        N338[BigNumber]
-        N339[Chain]
-        N340[chain]
-        N341[Complex]
-        N342[Decimal]
-        N343[FibonacciHeap]
-        N344[ImmutableDenseMatrix]
-        N345[MatrixIndex]
-        N346[Spa]
-        N347[index]
-        N348[...22 more]
+        N337[BigNumber]
+        N338[Chain]
+        N339[chain]
+        N340[Complex]
+        N341[Decimal]
+        N342[FibonacciHeap]
+        N343[ImmutableDenseMatrix]
+        N344[MatrixIndex]
+        N345[Spa]
+        N346[index]
+        N347[...22 more]
     end
 
     subgraph Functions/typed
-        N349[aggregate-restart]
-        N350[algebra]
-        N351[arithmetic]
-        N352[bitwise]
-        N353[call-rewrite]
-        N354[cas]
-        N355[centrality-restarts]
-        N356[collection-relational]
-        N357[combinatorics]
-        N358[complex-promotion]
-        N359[...49 more]
+        N348[aggregate-restart]
+        N349[algebra]
+        N350[arithmetic]
+        N351[bitwise]
+        N352[call-rewrite]
+        N353[cas]
+        N354[centrality-restarts]
+        N355[collection-relational]
+        N356[combinatorics]
+        N357[complex-promotion]
+        N358[...49 more]
     end
 
     subgraph Functions/unit
-        N360[to]
-        N361[toBest]
+        N359[to]
+        N360[toBest]
     end
 
     subgraph Functions/utils
-        N362[array]
-        N363[bigint]
-        N364[bitwise]
-        N365[nearlyEqual]
-        N366[round-decimals]
-        N367[work-precision]
-        N368[bignumber-hypot]
-        N369[clone]
-        N370[collection]
-        N371[complex]
-        N372[...35 more]
+        N361[array]
+        N362[bigint]
+        N363[bitwise]
+        N364[nearlyEqual]
+        N365[round-decimals]
+        N366[work-precision]
+        N367[bignumber-hypot]
+        N368[clone]
+        N369[collection]
+        N370[complex]
+        N371[...35 more]
     end
 
     subgraph Functions/wasm
-        N373[WasmLoader]
-        N374[wasm-bridge]
-        N375[common]
-        N376[wasm-bridge]
-        N377[integrity]
-        N378[wasm-bridge]
-        N379[policy]
-        N380[wasm-bridge]
-        N381[resolve]
-        N382[wasm-bridge]
-        N383[...3 more]
+        N372[WasmLoader]
+        N373[wasm-bridge]
+        N374[common]
+        N375[wasm-bridge]
+        N376[integrity]
+        N377[wasm-bridge]
+        N378[policy]
+        N379[wasm-bridge]
+        N380[resolve]
+        N381[wasm-bridge]
+        N382[...3 more]
     end
 
     subgraph Expression
-        N384[Help]
-        N385[Parser]
-        N386[default-instance]
-        N387[default-math-scope]
-        N388[index]
-        N389[keywords]
-        N390[limits]
-        N391[operators]
-        N392[parse-defaults]
-        N393[parse]
-        N394[...4 more]
+        N383[Help]
+        N384[Parser]
+        N385[default-instance]
+        N386[default-math-scope]
+        N387[index]
+        N388[keywords]
+        N389[limits]
+        N390[operators]
+        N391[parse-defaults]
+        N392[parse]
+        N393[...4 more]
     end
 
     subgraph Expression/compiler
-        N395[compile]
-        N396[index]
+        N394[compile]
+        N395[index]
     end
 
     subgraph Expression/embeddedDocs
-        N397[Infinity]
-        N398[LN10]
-        N399[LN2]
-        N400[LOG10E]
-        N401[LOG2E]
-        N402[NaN]
-        N403[SQRT1_2]
-        N404[SQRT2]
-        N405[e]
-        N406[false]
-        N407[...388 more]
+        N396[Infinity]
+        N397[LN10]
+        N398[LN2]
+        N399[LOG10E]
+        N400[LOG2E]
+        N401[NaN]
+        N402[SQRT1_2]
+        N403[SQRT2]
+        N404[e]
+        N405[false]
+        N406[...388 more]
     end
 
     subgraph Expression/error
-        N408[DimensionError]
-        N409[IndexError]
+        N407[DimensionError]
+        N408[IndexError]
     end
 
     subgraph Expression/evaluator
-        N410[evaluate]
-        N411[index]
+        N409[evaluate]
+        N410[index]
     end
 
     subgraph Expression/function
-        N412[parser]
+        N411[parser]
     end
 
     subgraph Expression/node
-        N413[AccessorNode]
-        N414[ArrayNode]
-        N415[AssignmentNode]
-        N416[BlockNode]
-        N417[ConditionalNode]
-        N418[ConstantNode]
-        N419[FunctionAssignmentNode]
-        N420[FunctionNode]
-        N421[IndexNode]
-        N422[Node]
-        N423[...11 more]
+        N412[AccessorNode]
+        N413[ArrayNode]
+        N414[AssignmentNode]
+        N415[BlockNode]
+        N416[ConditionalNode]
+        N417[ConstantNode]
+        N418[FunctionAssignmentNode]
+        N419[FunctionNode]
+        N420[IndexNode]
+        N421[Node]
+        N422[...11 more]
     end
 
     subgraph Expression/transform
-        N424[and.transform]
-        N425[bitAnd.transform]
-        N426[bitOr.transform]
-        N427[column.transform]
-        N428[concat.transform]
-        N429[cumsum.transform]
-        N430[diff.transform]
-        N431[filter.transform]
-        N432[forEach.transform]
-        N433[index.transform]
-        N434[...23 more]
+        N423[and.transform]
+        N424[bitAnd.transform]
+        N425[bitOr.transform]
+        N426[column.transform]
+        N427[concat.transform]
+        N428[cumsum.transform]
+        N429[diff.transform]
+        N430[filter.transform]
+        N431[forEach.transform]
+        N432[index.transform]
+        N433[...23 more]
     end
 
     subgraph Expression/utils
-        N435[array]
-        N436[char-classes]
-        N437[collection]
-        N438[current-config]
-        N439[customs]
-        N440[factory]
-        N441[is]
-        N442[latex]
-        N443[map]
-        N444[mathml]
-        N445[...6 more]
+        N434[array]
+        N435[char-classes]
+        N436[collection]
+        N437[current-config]
+        N438[customs]
+        N439[factory]
+        N440[is]
+        N441[latex]
+        N442[map]
+        N443[mathml]
+        N444[...6 more]
     end
 
     subgraph Parser
-        N446[index]
+        N445[index]
     end
 
     subgraph Units
-        N447[index]
+        N446[index]
     end
 
     subgraph Numbers
-        N448[index]
+        N447[index]
     end
 
     subgraph Ast
-        N449[index]
+        N448[index]
     end
 
     subgraph Evaluator
-        N450[index]
+        N449[index]
     end
 
     subgraph Linalg
-        N451[index]
+        N450[index]
     end
 
     subgraph Arithmetic
-        N452[index]
+        N451[index]
     end
 
     subgraph Trigonometry
-        N453[index]
+        N452[index]
     end
 
     subgraph Statistics
-        N454[index]
+        N453[index]
     end
 
     subgraph Signal
-        N455[index]
+        N454[index]
     end
 
     subgraph Parallel
-        N456[ComputePool]
-        N457[ParallelMatrix]
-        N458[WorkerPool]
-        N459[gemm-rows]
-        N460[index]
-        N461[matrix.worker]
-        N462[validate]
+        N455[ComputePool]
+        N456[ParallelMatrix]
+        N457[WorkerPool]
+        N458[gemm-rows]
+        N459[index]
+        N460[matrix.worker]
+        N461[validate]
     end
 
     subgraph Parallel/operations
-        N463[elementwise]
-        N464[index]
-        N465[map]
-        N466[matmul]
-        N467[reduce]
+        N462[elementwise]
+        N463[index]
+        N464[map]
+        N465[matmul]
+        N466[reduce]
     end
 
     subgraph Parallel/ops
-        N468[bitwise]
+        N467[bitwise]
     end
 
     subgraph Parallel/strategies
-        N469[chunk]
-        N470[index]
-        N471[threshold]
+        N468[chunk]
+        N469[index]
+        N470[threshold]
     end
 
     subgraph Workbook
-        N472[cli]
-        N473[contract]
-        N474[doc]
-        N475[edit]
-        N476[executor]
-        N477[formatter]
-        N478[fs-atomic]
-        N479[graph]
-        N480[html]
-        N481[index]
-        N482[...15 more]
+        N471[cli]
+        N472[contract]
+        N473[doc]
+        N474[edit]
+        N475[executor]
+        N476[formatter]
+        N477[fs-atomic]
+        N478[graph]
+        N479[html]
+        N480[index]
+        N481[...15 more]
     end
 
     subgraph Assembly/algebra
-        N483[decomposition]
+        N482[decomposition]
     end
 
     subgraph Assembly
-        N484[elementwise]
-        N485[heap]
-        N486[index]
-        N487[poly]
-        N488[signal]
-        N489[sort]
-        N490[special]
-        N491[tridiag]
+        N483[elementwise]
+        N484[heap]
+        N485[index]
+        N486[poly]
+        N487[signal]
+        N488[sort]
+        N489[special]
+        N490[tridiag]
     end
 
     subgraph Assembly/ops
-        N492[approx]
-        N493[array]
-        N494[bitwise]
-        N495[complex-array]
-        N496[complex-ops]
-        N497[curvefit]
-        N498[f64-buffer]
-        N499[fft]
-        N500[linalg]
-        N501[matrix]
-        N502[...7 more]
+        N491[approx]
+        N492[array]
+        N493[bitwise]
+        N494[complex-array]
+        N495[complex-ops]
+        N496[curvefit]
+        N497[f64-buffer]
+        N498[fft]
+        N499[linalg]
+        N500[matrix]
+        N501[...7 more]
     end
 
     subgraph Assembly/types
-        N503[complex]
+        N502[complex]
     end
 
     subgraph Compat
-        N504[chain]
-        N505[index]
-        N506[instance-api]
-        N507[instance-layout]
-        N508[internal-names.generated]
-        N509[parity-names.generated]
-        N510[shims]
-        N511[unary-fast-path]
+        N503[chain]
+        N504[index]
+        N505[instance-api]
+        N506[instance-layout]
+        N507[internal-names.generated]
+        N508[parity-names.generated]
+        N509[shims]
+        N510[unary-fast-path]
     end
 
     subgraph Gpu
-        N512[BufferPool]
-        N513[GPUContext]
-        N514[ShaderManager]
-        N515[detect]
-        N516[device]
-        N517[flag]
-        N518[index]
-        N519[serialize]
-        N520[webgpu-types]
+        N511[BufferPool]
+        N512[GPUContext]
+        N513[ShaderManager]
+        N514[detect]
+        N515[device]
+        N516[flag]
+        N517[index]
+        N518[serialize]
+        N519[webgpu-types]
     end
 
     subgraph Plot
-        N521[coerce]
-        N522[contour]
-        N523[emit]
-        N524[frame]
-        N525[heatmap]
-        N526[histogram]
-        N527[index]
-        N528[marks2d]
-        N529[overlay]
-        N530[palette]
-        N531[...9 more]
+        N520[coerce]
+        N521[contour]
+        N522[emit]
+        N523[frame]
+        N524[heatmap]
+        N525[histogram]
+        N526[index]
+        N527[marks2d]
+        N528[overlay]
+        N529[palette]
+        N530[...9 more]
     end
 
     subgraph Plot/three
-        N532[points3d]
-        N533[project]
-        N534[surface]
+        N531[points3d]
+        N532[project]
+        N533[surface]
     end
 
     N4 --> N7
@@ -21972,17 +21880,17 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1359   |
+| Total TypeScript Files  | 1354   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 245744 |
-| Total Exports           | 7454   |
-| Total Re-exports        | 3195   |
+| Total Lines of Code     | 245285 |
+| Total Exports           | 7448   |
+| Total Re-exports        | 3194   |
 | Total Classes           | 64     |
-| Total Interfaces        | 676    |
-| Total Functions         | 2629   |
-| Total Type Guards       | 185    |
+| Total Interfaces        | 675    |
+| Total Functions         | 2627   |
+| Total Type Guards       | 184    |
 | Total Enums             | 0      |
-| Type-only Imports       | 685    |
+| Type-only Imports       | 681    |
 | Runtime Circular Deps   | 2      |
 | Type-only Circular Deps | 3      |
 

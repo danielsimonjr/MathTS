@@ -1,14 +1,14 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-21", "f": 1359, "e": 7454, "re": 3195 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-21", "f": 1354, "e": 7448, "re": 3194 },
   "s": {
-    "loc": 245744,
+    "loc": 245285,
     "cls": 64,
-    "int": 676,
-    "fn": 2629,
-    "tg": 185,
+    "int": 675,
+    "fn": 2627,
+    "tg": 184,
     "en": 0,
-    "co": 1702,
-    "toi": 685
+    "co": 1698,
+    "toi": 681
   },
   "c": { "rt": 2, "to": 3, "rtp": ["Tensor→slice→Tensor", "algebra→polynomial-canonical→algebra"] },
   "mod": {
@@ -888,7 +888,7 @@
       ]
     },
     "functions/plain": {
-      "f": 10,
+      "f": 9,
       "exp": [
         "absNumber",
         "addNumber",
@@ -913,20 +913,16 @@
       ]
     },
     "functions/probability": {
-      "f": 17,
+      "f": 13,
       "exp": [
         "createBernoulli",
-        "isPositiveInteger",
-        "binomialProductBigNumber",
-        "createCombinations",
-        "createCombinationsWithRep",
+        "binomialBigInt",
+        "rangeProductBigInt",
         "createFactorial",
         "createGamma",
         "createKldivergence",
         "createLgamma",
         "multinomialExact",
-        "createMultinomial",
-        "createPermutations",
         "createPickRandom",
         "createRandom",
         "createRandomNumber",
@@ -936,7 +932,7 @@
         "randomMatrix",
         "createRng"
       ],
-      "int": ["BigNumberBinomialType", "MultinomialStats"]
+      "int": ["MultinomialStats"]
     },
     "functions/relational": {
       "f": 14,
@@ -1959,12 +1955,12 @@
   },
   "hp": [
     { "p": "embeddedDocs/embeddedDocs.ts", "i": 346, "o": 1 },
-    { "p": "factories/index.ts", "i": 252, "o": 15 },
-    { "p": "utils/factory.ts", "i": 1, "o": 261 },
+    { "p": "factories/index.ts", "i": 249, "o": 15 },
+    { "p": "utils/factory.ts", "i": 1, "o": 257 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
-    { "p": "function/typed.ts", "i": 3, "o": 206 },
-    { "p": "number/index.ts", "i": 9, "o": 54 },
+    { "p": "function/typed.ts", "i": 3, "o": 202 },
     { "p": "utils/is.ts", "i": 0, "o": 63 },
+    { "p": "number/index.ts", "i": 8, "o": 53 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "utils/array.ts", "i": 0, "o": 54 },
@@ -1972,6 +1968,6 @@
     { "p": "matrix/types.ts", "i": 0, "o": 50 },
     { "p": "utils/factory.ts", "i": 1, "o": 48 },
     { "p": "utils/limits.ts", "i": 0, "o": 47 },
-    { "p": "utils/number.ts", "i": 0, "o": 47 }
+    { "p": "utils/number.ts", "i": 0, "o": 44 }
   ]
 }

@@ -663,14 +663,10 @@
       "functions/src/matrix/zeros.ts",
       "functions/src/numeric/solveODE.ts",
       "functions/src/probability/bernoulli.ts",
-      "functions/src/probability/combinations.ts",
-      "functions/src/probability/combinationsWithRep.ts",
       "functions/src/probability/factorial.ts",
       "functions/src/probability/gamma.ts",
       "functions/src/probability/kldivergence.ts",
       "functions/src/probability/lgamma.ts",
-      "functions/src/probability/multinomial.ts",
-      "functions/src/probability/permutations.ts",
       "functions/src/probability/pickRandom.ts",
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts",
@@ -923,14 +919,10 @@
       "functions/src/matrix/transpose.ts",
       "functions/src/matrix/utils/zerosAndOnes.ts",
       "functions/src/probability/bernoulli.ts",
-      "functions/src/probability/combinations.ts",
-      "functions/src/probability/combinationsWithRep.ts",
       "functions/src/probability/factorial.ts",
       "functions/src/probability/gamma.ts",
       "functions/src/probability/kldivergence.ts",
       "functions/src/probability/lgamma.ts",
-      "functions/src/probability/multinomial.ts",
-      "functions/src/probability/permutations.ts",
       "functions/src/probability/pickRandom.ts",
       "functions/src/probability/random.ts",
       "functions/src/probability/randomInt.ts",
@@ -1124,14 +1116,11 @@
       "functions/src/matrix/utils/zerosAndOnes.ts",
       "functions/src/plain/number/arithmetic.ts",
       "functions/src/plain/number/bitwise.ts",
-      "functions/src/plain/number/combinations.ts",
       "functions/src/plain/number/probability.ts",
       "functions/src/plain/number/trigonometry.ts",
       "functions/src/plain/number/utils.ts",
       "functions/src/probability/bernoulli.ts",
-      "functions/src/probability/combinationsWithRep.ts",
       "functions/src/probability/lgamma.ts",
-      "functions/src/probability/permutations.ts",
       "functions/src/relational/compare.ts",
       "functions/src/relational/equalScalar.ts",
       "functions/src/relational/larger.ts",
@@ -1424,10 +1413,7 @@
       "functions/src/complex/re.ts",
       "functions/src/logical/not.ts",
       "functions/src/matrix/concat.ts",
-      "functions/src/probability/combinations.ts",
       "functions/src/probability/factorial.ts",
-      "functions/src/probability/multinomial.ts",
-      "functions/src/probability/permutations.ts",
       "functions/src/special/erf.ts",
       "functions/src/statistics/cumsum.ts",
       "functions/src/statistics/extreme.ts",
@@ -1471,7 +1457,6 @@
       "functions/src/arithmetic/subtractScalar.ts",
       "functions/src/arithmetic/unaryMinus.ts",
       "functions/src/arithmetic/unaryPlus.ts",
-      "functions/src/arithmetic/xgcd.ts",
       "functions/src/bitwise/bitAnd.ts",
       "functions/src/bitwise/bitNot.ts",
       "functions/src/bitwise/bitOr.ts",
@@ -1723,7 +1708,8 @@
     ],
     "functions/src/arithmetic/fraction-gcd.ts": [
       "functions/src/arithmetic/gcd.ts",
-      "functions/src/arithmetic/lcm.ts"
+      "functions/src/arithmetic/lcm.ts",
+      "functions/src/typed/arithmetic.ts"
     ],
     "functions/src/arithmetic/mod.ts": [
       "functions/src/arithmetic/gcd.ts",
@@ -1792,7 +1778,6 @@
       "functions/src/arithmetic/lcm.ts",
       "functions/src/combinatorics/bellNumbers.ts",
       "functions/src/combinatorics/catalan.ts",
-      "functions/src/probability/bigint-binomial.ts",
       "functions/src/probability/gamma.ts",
       "functions/src/special/zeta.ts",
       "functions/src/typed/arithmetic.ts"
@@ -1870,6 +1855,19 @@
     "functions/src/utils/bignumber/round-decimals.ts": [
       "functions/src/arithmetic/round.ts",
       "functions/src/typed/arithmetic.ts"
+    ],
+    "functions/src/typed/arithmetic.ts": [
+      "functions/src/arithmetic/xgcd.ts",
+      "functions/src/descriptive-stats.ts",
+      "functions/src/factories/index.ts",
+      "functions/src/hypothesis-extra.ts",
+      "functions/src/linalg-extra.ts",
+      "functions/src/numeric-extra.ts",
+      "functions/src/scalar-eval.ts",
+      "functions/src/stats/fit-distribution.ts",
+      "functions/src/timeseries-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
     ],
     "functions/src/utils/bignumber/bitwise.ts": [
       "functions/src/bitwise/bitAnd.ts",
@@ -1967,18 +1965,6 @@
       "functions/src/typed/arithmetic.ts",
       "functions/src/typed/complex-promotion.ts",
       "functions/src/typed/matrix-ops.ts"
-    ],
-    "functions/src/typed/arithmetic.ts": [
-      "functions/src/descriptive-stats.ts",
-      "functions/src/factories/index.ts",
-      "functions/src/hypothesis-extra.ts",
-      "functions/src/linalg-extra.ts",
-      "functions/src/numeric-extra.ts",
-      "functions/src/scalar-eval.ts",
-      "functions/src/stats/fit-distribution.ts",
-      "functions/src/timeseries-extra.ts",
-      "functions/src/typed/expression-eval-barrel.ts",
-      "functions/src/typed/index.ts"
     ],
     "functions/src/distribution-functions.ts": [
       "functions/src/descriptive-stats.ts",
@@ -2313,7 +2299,8 @@
     "functions/src/numbertheory/modular.ts": [
       "functions/src/index.ts",
       "functions/src/numbertheory/arithmetic-functions.ts",
-      "functions/src/numbertheory/extra.ts"
+      "functions/src/numbertheory/extra.ts",
+      "functions/src/utils/isPrime.ts"
     ],
     "functions/src/numbertheory/arithmetic-functions.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/sequences.ts": ["functions/src/index.ts"],
@@ -2490,8 +2477,12 @@
     "functions/src/matrix/map.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/size.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/squeeze.ts": ["functions/src/factories/index.ts"],
-    "functions/src/probability/combinations.ts": ["functions/src/factories/index.ts"],
-    "functions/src/probability/combinationsWithRep.ts": ["functions/src/factories/index.ts"],
+    "functions/src/typed/probability.ts": [
+      "functions/src/factories/index.ts",
+      "functions/src/special/zeta-extra.ts",
+      "functions/src/typed/expression-eval-barrel.ts",
+      "functions/src/typed/index.ts"
+    ],
     "functions/src/probability/lgamma.ts": ["functions/src/factories/index.ts"],
     "functions/src/probability/pickRandom.ts": ["functions/src/factories/index.ts"],
     "functions/src/probability/random.ts": ["functions/src/factories/index.ts"],
@@ -2628,7 +2619,6 @@
     "functions/src/set/setSize.ts": ["functions/src/factories/index.ts"],
     "functions/src/matrix/sort.ts": ["functions/src/factories/index.ts"],
     "functions/src/combinatorics/stirlingS2.ts": ["functions/src/factories/index.ts"],
-    "functions/src/probability/permutations.ts": ["functions/src/factories/index.ts"],
     "functions/src/combinatorics/bellNumbers.ts": ["functions/src/factories/index.ts"],
     "functions/src/type/resultset/ResultSet.ts": ["functions/src/factories/index.ts"],
     "functions/src/arithmetic/utils/nodeOperations.ts": ["functions/src/factories/index.ts"],
@@ -2663,7 +2653,6 @@
     "functions/src/statistics/variance.ts": ["functions/src/factories/index.ts"],
     "functions/src/statistics/quantileSeq.ts": ["functions/src/factories/index.ts"],
     "functions/src/probability/kldivergence.ts": ["functions/src/factories/index.ts"],
-    "functions/src/probability/multinomial.ts": ["functions/src/factories/index.ts"],
     "functions/src/set/setCartesian.ts": ["functions/src/factories/index.ts"],
     "functions/src/set/setDifference.ts": ["functions/src/factories/index.ts"],
     "functions/src/set/setDistinct.ts": ["functions/src/factories/index.ts"],
@@ -2780,6 +2769,10 @@
       "functions/src/typed/expression-eval-barrel.ts",
       "functions/src/typed/index.ts"
     ],
+    "functions/src/probability/bigint-binomial.ts": [
+      "functions/src/numbertheory/sequences.ts",
+      "functions/src/typed/probability.ts"
+    ],
     "functions/src/numeric/tridiagonal-eigen.ts": [
       "functions/src/numeric/gauss-nodes-extra.ts",
       "functions/src/special/mathieu.ts"
@@ -2801,21 +2794,11 @@
       "functions/src/numeric/solveODE.ts",
       "functions/src/typed/numeric.ts"
     ],
-    "functions/src/utils/product.ts": [
-      "functions/src/plain/number/combinations.ts",
-      "functions/src/plain/number/probability.ts",
-      "functions/src/probability/combinationsWithRep.ts",
-      "functions/src/probability/permutations.ts"
-    ],
     "functions/src/plain/number/arithmetic.ts": [
       "functions/src/plain/number/index.ts",
       "functions/src/typed/cas.ts"
     ],
     "functions/src/plain/number/bitwise.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/plain/number/combinations.ts": [
-      "functions/src/plain/number/index.ts",
-      "functions/src/probability/combinations.ts"
-    ],
     "functions/src/plain/number/constants.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/logical.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/relational.ts": ["functions/src/plain/number/index.ts"],
@@ -2826,12 +2809,8 @@
     ],
     "functions/src/plain/number/trigonometry.ts": ["functions/src/plain/number/index.ts"],
     "functions/src/plain/number/utils.ts": ["functions/src/plain/number/index.ts"],
-    "functions/src/probability/bigint-binomial.ts": [
-      "functions/src/probability/combinations.ts",
-      "functions/src/probability/combinationsWithRep.ts"
-    ],
-    "functions/src/probability/multinomial-exact.ts": [
-      "functions/src/probability/multinomial.ts",
+    "functions/src/utils/product.ts": [
+      "functions/src/plain/number/probability.ts",
       "functions/src/typed/probability.ts"
     ],
     "functions/src/probability/util/randomMatrix.ts": [
@@ -2877,11 +2856,6 @@
     "functions/src/signal/wavelet-filters.ts": [
       "functions/src/signal/wavelets.ts",
       "functions/src/typed/signal.ts"
-    ],
-    "functions/src/typed/probability.ts": [
-      "functions/src/special/zeta-extra.ts",
-      "functions/src/typed/expression-eval-barrel.ts",
-      "functions/src/typed/index.ts"
     ],
     "functions/src/utils/switch.ts": ["functions/src/statistics/cumsum.ts"],
     "functions/src/statistics/utils/improveErrorMessage.ts": [
@@ -3092,6 +3066,7 @@
     "functions/src/numeric/solveDAE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/solveDDE.ts": ["functions/src/typed/numeric.ts"],
     "functions/src/numeric/gauss-legendre4.ts": ["functions/src/typed/numeric.ts"],
+    "functions/src/probability/multinomial-exact.ts": ["functions/src/typed/probability.ts"],
     "functions/src/wasm/signal/wasm-bridge.ts": ["functions/src/typed/signal.ts"],
     "functions/src/typed/trig-angle-unit.ts": ["functions/src/typed/trigonometry.ts"],
     "functions/src/wasm/resolve.ts": ["functions/src/wasm/WasmLoader.ts"],
