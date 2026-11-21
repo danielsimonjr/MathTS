@@ -36,7 +36,7 @@ import { deepMap } from '../utils/collection.js';
 import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 import { product } from '../utils/product.js';
 import { binomialBigInt, rangeProductBigInt } from '../probability/bigint-binomial.js';
-import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
+import { binomialLoop, roundedLoop } from '../probability/rounded-loop.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
 import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
@@ -169,71 +169,17 @@ function isNonNegativeIntegerBigNumber(n: BigNumber): boolean {
   return n.isInteger() && !n.isNegative();
 }
 
-/**
- * A bigint result as a BigNumber rounded one time to the precision. The BigNumber product of the
- * same factors rounds at every step, and the digits of that result depend on the order of the steps.
- */
-function roundedBigNumber(value: bigint): BigNumber {
-  return BigNumber.fromBigInt(value).toSignificantDigits(BigNumber.precision);
-}
-
-/**
- * The exact bigint loop or the working-precision loop: the cost model that selects one.
- *
- * A loop of `steps` products of numbers of `b` bits ends with `steps * b` bits. Step `i` of the
- * exact loop works on `i * b` bits, so the exact loop costs `e * steps^2 * b`. A step of the
- * working-precision loop works on the `W` bits of the working precision and has a fixed cost for
- * the BigNumber objects, so that loop costs `steps * (w + c * e * W)`. The exact loop is the
- * faster one while `steps * b <= w / e + c * W`.
- *
- * Measured on Node 22 with operands of 20, 200 and 2000 digits (`W` of 385, 1580 and 13532 bits):
- * the two loops cost the same at about 67,000 bits, 150,000 bits and more than 660,000 bits. That
- * gives `w / e` of about 2^15 bits and `c` of about 64. An operand of many digits makes each
- * working-precision step slow (`W` grows with the digits of the operand), so a short loop on a
- * large operand stays exact: for `combinations(bignumber('1e2000'), 2)` the working-precision
- * loop was 1200 times slower than the exact loop.
- *
- * An error in the two constants changes the time only, not the result: the exact loop gives the
- * exact value rounded one time, and the working-precision loop gives the same digits unless the
- * exact value is nearer to a rounding boundary than the guard digits can show.
- */
-const EXACT_LOOP_FIXED_BITS = 1 << 15;
-const WORK_STEP_COST_RATIO = 64;
-/** A decimal digit holds log2(10) bits. */
-const BITS_PER_DIGIT = Math.log2(10);
-
-/** True when the exact bigint loop of `steps` products of numbers up to `top` is the faster loop. */
-function exactLoopIsShort(steps: bigint, top: bigint): boolean {
-  const workBits = Math.ceil(loopPrecision(top) * BITS_PER_DIGIT);
-  const limit = EXACT_LOOP_FIXED_BITS + WORK_STEP_COST_RATIO * workBits;
-  return steps * BigInt(top.toString(2).length) <= BigInt(limit);
-}
-
-/** The working precision of a loop of products of numbers up to `top`: guard digits on top. */
-function loopPrecision(top: bigint): number {
-  return BigNumber.precision + 2 * top.toString().length + 10;
-}
-
-/**
- * C(total, steps) by the multiplicative loop at the current precision. Each partial result is a
- * binomial coefficient, so it is not larger than the result.
- */
-function binomialLoop(total: bigint, steps: bigint): BigNumber {
-  let result = BigNumber.fromNumber(1);
-  for (let i = 1n; i <= steps; i++) {
-    result = result.times(BigNumber.fromBigInt(total - steps + i)).div(BigNumber.fromBigInt(i));
-  }
-  return result;
-}
-
 /** The product lo * (lo + 1) * ... * hi, rounded one time to the precision. */
 function roundedRangeProduct(lo: bigint, hi: bigint): BigNumber {
-  if (exactLoopIsShort(hi - lo + 1n, hi)) return roundedBigNumber(rangeProductBigInt(lo, hi));
-  return atWorkPrecision(BigNumber, loopPrecision(hi), () => {
-    let result = BigNumber.fromNumber(1);
-    for (let i = lo; i <= hi; i++) result = result.times(BigNumber.fromBigInt(i));
-    return result;
-  });
+  return roundedLoop(
+    { steps: hi - lo + 1n, top: hi, divides: false, operations: Number(hi - lo + 1n) },
+    () => {
+      let result = BigNumber.fromNumber(1);
+      for (let i = lo; i <= hi; i++) result = result.times(BigNumber.fromBigInt(i));
+      return result;
+    },
+    () => rangeProductBigInt(lo, hi)
+  );
 }
 
 /**
@@ -302,8 +248,11 @@ function assertNonNegativeIntegers(fnName: string, n: BigNumber, k: BigNumber): 
 function roundedBinomial(fnName: string, total: bigint, chosen: bigint): BigNumber {
   const steps = chosen < total - chosen ? chosen : total - chosen;
   assertLoopOrder(fnName, 'k', Number(steps));
-  if (exactLoopIsShort(steps, total)) return roundedBigNumber(binomialBigInt(total, chosen));
-  return atWorkPrecision(BigNumber, loopPrecision(total), () => binomialLoop(total, steps));
+  return roundedLoop(
+    { steps, top: total, divides: true, operations: 2 * Number(steps) },
+    () => binomialLoop(total, steps),
+    () => binomialBigInt(total, chosen)
+  );
 }
 
 /**
@@ -468,16 +417,20 @@ function roundedMultinomial(parts: readonly bigint[]): BigNumber {
     total += a;
   }
   assertLoopOrder('multinomial', 'the sum of the entries', Number(steps));
-  if (exactLoopIsShort(steps, total)) return roundedBigNumber(multinomialBigInt(parts));
-  return atWorkPrecision(BigNumber, loopPrecision(total), () => {
-    let sum = 0n;
-    let result = BigNumber.fromNumber(1);
-    for (const a of parts) {
-      result = result.times(binomialLoop(sum + a, a < sum ? a : sum));
-      sum += a;
-    }
-    return result;
-  });
+  return roundedLoop(
+    // Each part runs a binomial loop, and one product joins it to the result.
+    { steps, top: total, divides: true, operations: 2 * Number(steps) + parts.length },
+    () => {
+      let sum = 0n;
+      let result = BigNumber.fromNumber(1);
+      for (const a of parts) {
+        result = result.times(binomialLoop(sum + a, a < sum ? a : sum));
+        sum += a;
+      }
+      return result;
+    },
+    () => multinomialBigInt(parts)
+  );
 }
 
 /**

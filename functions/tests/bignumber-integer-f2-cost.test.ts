@@ -1,11 +1,14 @@
 /**
  * The BigNumber combinations, permutations and multinomial are exact while the exact bigint loop
- * stays short. A loop of k products of numbers of b bits ends with k * b bits, and each step costs
- * time in that size, so an exact loop costs O(k^2): C(1e6, 6e4) took 20 s, C(1e6, 1e5) minutes.
- * The loop limit of the file (10 million steps) bounds the steps, not the size. Where the cost
- * model of `typed/probability.ts` says that the exact loop is the slower one, the loops run at a
- * working precision, which costs O(k). The values stay equal to the exact value rounded one time.
- * A short loop on an operand of many digits stays exact: there each working-precision step is slow.
+ * is the cheaper one. A loop of k products of numbers of b bits ends with k * b bits, and each step
+ * costs time in that size, so an exact loop costs O(k^2): C(1e6, 6e4) took 20 s, C(1e6, 1e5)
+ * minutes. The loop limit of the file (10 million steps) bounds the steps, not the size. Where the
+ * cost model of `probability/rounded-loop.ts` (limb operations of each loop) says that the exact
+ * loop is the dearer one, the loops run at a working precision, which costs O(k), and the rounding
+ * proof of that loop keeps the value equal to the exact value rounded one time. The working
+ * precision depends on the count of steps only, not on the digits of the operand, so a short loop
+ * on an operand of many digits also takes the working loop (measured: 0.04 ms against 0.15 ms
+ * for two steps on a 2000-digit operand).
  *
  * The test reads which path ran from the calls of `BigNumber.config` (the working precision is set
  * and restored there), not from a clock.
@@ -45,13 +48,24 @@ const exactBinomial = (n: bigint, k: bigint) => {
 };
 
 describe('exact bigint loops are bounded in size', () => {
-  it('a loop of two steps on a 6000-digit operand stays exact (no working precision)', () => {
-    const n = 10n ** 6000n + 7n;
+  it('a loop of two steps on a 2000-digit operand runs at a working precision and is exact rounded', () => {
+    const n = 10n ** 2000n + 7n;
     const { result, raised } = maxConfiguredPrecision(() =>
       (combinations as Fn)(bn(n.toString()), bn(2))
     );
-    expect(raised).toBe(0);
+    // The working precision does not grow with the digits of the operand.
+    expect(raised).toBeGreaterThan(64);
+    expect(raised).toBeLessThan(100);
     expect(String(result)).toBe(rounded(exactBinomial(n, 2n)));
+  });
+
+  it('a loop of 32 steps on a 20-digit operand stays exact (no working precision)', () => {
+    const n = 10n ** 20n + 7n;
+    const { result, raised } = maxConfiguredPrecision(() =>
+      (combinations as Fn)(bn(n.toString()), bn(32))
+    );
+    expect(raised).toBe(0);
+    expect(String(result)).toBe(rounded(exactBinomial(n, 32n)));
   });
 
   it('a short loop is exact and sets no working precision', () => {
