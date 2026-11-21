@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, neumaierCumsum, norm2 } from '@danielsimonjr/mathts-core';
+import { mathTyped, neumaierCumsum, norm2, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 import { medianInPlace, minFrom, quickSelectInPlace } from '../utils/median-numbers.js';
@@ -478,9 +478,15 @@ export const parallelStatNorm = mathTyped('parallelStatNorm', {
   // With p-norm parameter
   'Float64Array, number': (data: Float64Array, p: f64): f64 => {
     if (p === 2) {
-      // Euclidean norm: the scaled 2-norm of core keeps every digit when the squares are
-      // subnormal or overflow (#1280)
-      return norm2(data);
+      // Euclidean norm. One plain pass keeps the speed and the bits of the plain path; the scaled
+      // 2-norm of core (about 2 to 4.6 times slower) runs only when the sum of squares left the
+      // range in which every digit is kept: subnormal squares, an underflow to 0 or an overflow
+      // (#1280). A NaN sum is not in that range, so it takes the scaled norm too.
+      let sumSq: f64 = 0;
+      for (let i: i32 = 0; i < data.length; i++) {
+        sumSq += data[i] * data[i];
+      }
+      return sumSq >= SQUARES_SAFE_MIN && sumSq < Infinity ? Math.sqrt(sumSq) : norm2(data);
     } else if (p === 1) {
       // Manhattan norm
       let sum: f64 = 0;
