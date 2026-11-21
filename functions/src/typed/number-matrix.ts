@@ -4,8 +4,20 @@
  * generic path (#1040).
  */
 
-import { matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import {
+  isNumberTypedArray,
+  matrixSize,
+  notSquareError,
+} from '@danielsimonjr/mathts-core/internal';
+import {
+  decompositionInputToNestedArray,
+  densifyForSolver,
+  isDenseMatrix as isNativeDenseMatrix,
+  type DenseMatrix,
+  type SparseMatrix,
+} from '@danielsimonjr/mathts-matrix';
 import { arraySize } from '../utils/array.js';
+import { isMatrix, type Matrix as MathJSMatrix } from '../utils/is.js';
 
 /**
  * Tells if every entry of a 2-D array is a number.
@@ -160,10 +172,10 @@ export function numberVector(name: string, x: ArrayLike<unknown>): number[] {
   if (!isVectorInput(x)) {
     throw new TypeError(`${name}: expects an array of numbers, got a ${typeNameOf(x)}`);
   }
-  if (x instanceof BigInt64Array || x instanceof BigUint64Array) {
+  if (isNumberTypedArray(x)) return Array.from(x);
+  if (ArrayBuffer.isView(x)) {
     throw new TypeError(`${name}: expects number data, got a ${typeNameOf(x)}`);
   }
-  if (ArrayBuffer.isView(x)) return Array.from(x as ArrayLike<number>);
   // One pass reads each element once, checks it and copies it. The caller then reads the copy.
   const src: ArrayLike<unknown> = Array.isArray(x) ? x : Array.from(x);
   const out = new Array<number>(src.length);
@@ -175,4 +187,39 @@ export function numberVector(name: string, x: ArrayLike<unknown>): number[] {
     out[i] = v;
   }
   return out;
+}
+
+/** A matrix argument of a function that works on `number[][]`: a nested array or a matrix object. */
+export type MatrixArgument = number[][] | DenseMatrix | SparseMatrix | MathJSMatrix;
+
+/**
+ * Rows of a matrix argument, with the entries as the argument holds them. A nested array is
+ * returned as it is. A matrix-package `DenseMatrix` or `SparseMatrix` is read by the
+ * matrix-package reader `decompositionInputToNestedArray` (a `SparseMatrix` keeps the size limit
+ * of `densifyForSolver`), so its rows hold numbers. A MathJS matrix is read through `toArray`. The
+ * caller applies the entry rule: `decompositionInputToNestedArray` for number rows, or a typed
+ * path for BigNumber, Fraction and Complex entries (see `linsolve`).
+ *
+ * @param name - The name of the function, for the error message.
+ * @param A - The argument.
+ * @returns The rows of `A`.
+ * @throws A `TypeError` when `A` is no nested array and no matrix, or a MathJS matrix is 1-D.
+ */
+export function matrixRows(name: string, A: unknown): unknown[][] {
+  if (Array.isArray(A)) return A as unknown[][];
+  // `densifyForSolver` tests a sparse matrix by its structure, so a second copy of the package
+  // passes too, and it keeps the size limit.
+  const native = isNativeDenseMatrix(A) ? A : densifyForSolver(A);
+  if (native !== undefined) return decompositionInputToNestedArray(native);
+  if (isMatrix(A)) {
+    // The size decides the kind: a MathJS matrix of size [n] with n above 0 is a vector, which is
+    // no matrix argument. The size [0] (`matrix([])`) is the 0 x 0 matrix.
+    const size = collectionSize(A);
+    if (size.length === 2 || (size.length === 1 && size[0] === 0)) {
+      return (A as unknown as { toArray(): unknown[][] }).toArray();
+    }
+  }
+  throw new TypeError(
+    `${name}: A must be a number[][], DenseMatrix, SparseMatrix or MathJS matrix (got ${typeNameOf(A)})`
+  );
 }

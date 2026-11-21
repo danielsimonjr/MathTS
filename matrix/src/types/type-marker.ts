@@ -13,11 +13,15 @@
  * - The brand is read-only and not enumerable. It adds no own key to an instance.
  *
  * Each type test reads its own brand constant at its own site, so each lookup site sees one symbol.
- * This module has no imports, so the class modules can share it without a cycle.
+ * This module imports only core, so the class modules can share it without a cycle.
  */
 
-/** Brand of the abstract `Matrix` base. `DenseMatrix` and `SparseMatrix` inherit it. */
-export const MATRIX_BRAND: unique symbol = Symbol.for('mathts.matrix.Matrix');
+/**
+ * Brand of the abstract `Matrix` base. `DenseMatrix` and `SparseMatrix` inherit it. Its one
+ * definition is in core (`NATIVE_MATRIX_BRAND`), because the result guard of the expression
+ * package reads it too.
+ */
+export { NATIVE_MATRIX_BRAND as MATRIX_BRAND } from '@danielsimonjr/mathts-core/internal';
 /** Brand of `DenseMatrix`. */
 export const DENSE_MATRIX_BRAND: unique symbol = Symbol.for('mathts.matrix.DenseMatrix');
 /** Brand of `SparseMatrix`. */
