@@ -37,6 +37,8 @@ export { DEFAULT_CONFIG } from './config.js';
 export { MathjsError } from './error/MathjsError.js';
 export { DimensionError } from './error/DimensionError.js';
 export { IndexError, createIndexError } from './error/IndexError.js';
+// The one bigint greatest common divisor of the monorepo (non-negative for any signs).
+export { gcdBigInt } from './types/bigint-gcd.js';
 
 // mathjs-style factory helpers (name-sorted DAG loader), consolidated from the
 // duplicate copies formerly in expression/src/utils/factory.ts and

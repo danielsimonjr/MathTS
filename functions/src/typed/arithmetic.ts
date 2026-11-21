@@ -34,6 +34,8 @@ import {
   extrema,
   isComplex,
 } from '@danielsimonjr/mathts-core';
+import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
+import { fractionGcd, fractionLcm } from '../arithmetic/fraction-gcd.js';
 import { euclidSnap } from './euclid.js';
 import { f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection } from './f64-kernels.js';
 import {
@@ -88,6 +90,7 @@ import { arraySize, broadcastTo } from '../utils/array.js';
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
+import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { assertInnerDimensions, sparseProduct } from './sparse-product.js';
@@ -1500,6 +1503,10 @@ function bigNthRoot(a: BigNumber, n: f64): BigNumber {
   if (a.isNegative() && Number.isInteger(n) && Math.abs(n) % 2 === 1) {
     return bigNthRoot(a.neg(), n).neg();
   }
+  // A negative base has no real root for an even or a fractional root, as in the number path.
+  if (a.isNegative()) {
+    throw new Error('Root must be odd when a is negative.');
+  }
   // The error of 1/n is multiplied by ln(a), so the exponent gets extra digits for its order.
   const precision = BigNumber.precision;
   const lnOrder =
@@ -1742,7 +1749,7 @@ export const mod = mathTyped('mod', {
   'number, number': (a: f64, b: f64): f64 => (b === 0 ? a : ((a % b) + b) % b),
   'bigint, bigint': (a: i64, b: i64): i64 => (b === 0n ? a : ((a % b) + b) % b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (b.isZero() ? a : a.mod(b)),
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => (b.isZero() ? a : a.mod(b)),
+  'BigNumber, BigNumber': flooredModBigNumber,
 
   'Array, Array': modKernels.array,
   'DenseMatrix, DenseMatrix': modKernels.matrix,
@@ -1760,12 +1767,31 @@ export const mod = mathTyped('mod', {
 });
 modForNumberPath.fn = mod;
 
-/** These are the call signatures of `gcd`. Each signature returns the type of its two arguments. */
+/**
+ * These are the call signatures of `gcd`. Each signature returns the type of its arguments: two
+ * or more values of one type.
+ */
 interface GcdOverloads {
-  (a: number, b: number): number;
-  (a: bigint, b: bigint): bigint;
-  (a: BigNumber, b: BigNumber): BigNumber;
+  (a: number, b: number, ...rest: number[]): number;
+  (a: bigint, b: bigint, ...rest: bigint[]): bigint;
+  (a: BigNumber, b: BigNumber, ...rest: BigNumber[]): BigNumber;
+  (a: Fraction, b: Fraction, ...rest: Fraction[]): Fraction;
 }
+
+/** The scalar types of `gcd` and `lcm` that take more than two values. */
+const GCD_SCALARS = 'number | bigint | BigNumber | Fraction';
+
+/**
+ * The signature of `gcd` and `lcm` for three or more values: the function folds over the values
+ * from left to right. The typed function passes the values after the second one as an array.
+ */
+const variadicGcdSignature = () =>
+  mathTyped.referToSelf((self) => (a: unknown, b: unknown, rest: unknown[]) => {
+    const pair = self as (x: unknown, y: unknown) => unknown;
+    let result = pair(a, b);
+    for (const value of rest) result = pair(result, value);
+    return result;
+  });
 
 /** `gcd` with its precise call signatures. `gcd` is still a `TypedFunction`. */
 export type GcdFunction = GcdOverloads & TypedFunction;
@@ -1780,16 +1806,11 @@ export const gcd: GcdFunction = mathTyped('gcd', {
     }
     return euclidSnap(a, b, Math.floor);
   },
-  'bigint, bigint': (a: i64, b: i64): i64 => {
-    a = a < 0n ? -a : a;
-    b = b < 0n ? -b : b;
-    while (b !== 0n) {
-      const t = b;
-      b = a % b;
-      a = t;
-    }
-    return a;
-  },
+  'bigint, bigint': (a: i64, b: i64): i64 => gcdBigInt(a, b),
+  'Fraction, Fraction': fractionGcd,
+  'Fraction, number': (a: Fraction, b: f64): Fraction => fractionGcd(a, Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction => fractionGcd(Fraction.fromNumber(a), b),
+  [`${GCD_SCALARS}, ${GCD_SCALARS}, ...${GCD_SCALARS}`]: variadicGcdSignature(),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
     // NaN, Infinity and a fraction have no integer gcd. The loop below never ends on them.
     if (!a.isInteger() || !b.isInteger()) {
@@ -1831,6 +1852,10 @@ export const lcm = mathTyped('lcm', {
     const absB = b < 0n ? -b : b;
     return (absA * absB) / g;
   },
+  'Fraction, Fraction': fractionLcm,
+  'Fraction, number': (a: Fraction, b: f64): Fraction => fractionLcm(a, Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction => fractionLcm(Fraction.fromNumber(a), b),
+  [`${GCD_SCALARS}, ${GCD_SCALARS}, ...${GCD_SCALARS}`]: variadicGcdSignature(),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
     if (!a.isInteger() || !b.isInteger()) {
       throw new Error('Parameters in function lcm must be integer numbers');
@@ -1843,65 +1868,90 @@ export const lcm = mathTyped('lcm', {
   },
 });
 
+const XGCD_INTEGER_MESSAGE = 'Parameters in function xgcd must be integer numbers';
+
+/** The quotient of two bigints rounded toward minus infinity, as `Math.floor(a / b)` does. */
+function floorDivBigInt(a: bigint, b: bigint): bigint {
+  const q = a / b;
+  return a % b !== 0n && a < 0n !== b < 0n ? q - 1n : q;
+}
+
+/**
+ * Extended Euclid on bigints: `[g, x, y]` with `a * x + b * y = g` and `g >= 0`. It is the loop
+ * of mathjs for numbers, with floored division, so the signs of x and y match mathjs and
+ * the identity holds for a negative operand (the mathjs BigNumber loop breaks it for
+ * `xgcd(12, -8)`). Bigint has no `-0`, and it stays exact above 2^53. `xgcd(0, 0)` is `[0, 0, 0]`.
+ */
+function xgcdBigInt(a: bigint, b: bigint): [bigint, bigint, bigint] {
+  let x = 0n;
+  let lastX = 1n;
+  let y = 1n;
+  let lastY = 0n;
+  while (b !== 0n) {
+    const q = floorDivBigInt(a, b);
+    const r = a - q * b;
+    [x, lastX] = [lastX - q * x, x];
+    [y, lastY] = [lastY - q * y, y];
+    a = b;
+    b = r;
+  }
+  return a < 0n ? [-a, -lastX, -lastY] : [a, a === 0n ? 0n : lastX, lastY];
+}
+
+/**
+ * `xgcd` of two BigNumbers. The three results are exact integers at every precision (a Bezout
+ * coefficient has about as many digits as an operand, and a rounded one breaks `a*x + b*y = g`).
+ * As in mathjs, the middle result of `xgcd(0, 0)` is the number 0.
+ * @throws Error when an operand is NaN, Infinity or not an integer
+ */
+function xgcdBigNumber(a: BigNumber, b: BigNumber): [BigNumber, BigNumber | number, BigNumber] {
+  if (!a.isInteger() || !b.isInteger()) throw new Error(XGCD_INTEGER_MESSAGE);
+  const [g, x, y] = xgcdBigInt(a.toBigInt(), b.toBigInt());
+  return [BigNumber.fromBigInt(g), g === 0n ? 0 : BigNumber.fromBigInt(x), BigNumber.fromBigInt(y)];
+}
+
+/** The largest safe integer as a bigint. */
+const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
+
+/**
+ * `xgcd` of two numbers. The loop runs on bigints, so it is exact. A Bezout coefficient above
+ * 2^53 does not convert to a number without rounding, and a rounded coefficient breaks
+ * `a*x + b*y = g` (`xgcd(2^60, 3)`: y = -384307168202282325 becomes -384307168202282300).
+ * The gcd always converts exactly: it is a power of two times a divisor of the odd parts of
+ * the operands, which have at most 53 bits.
+ * @throws Error when an operand is NaN, Infinity or not an integer
+ * @throws RangeError when a coefficient is not a safe integer
+ */
+function xgcdNumber(a: f64, b: f64): [f64, f64, f64] {
+  if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error(XGCD_INTEGER_MESSAGE);
+  const [g, x, y] = xgcdBigInt(BigInt(a), BigInt(b));
+  for (const c of [x, y]) {
+    if (c > MAX_SAFE_BIGINT || c < -MAX_SAFE_BIGINT) {
+      throw new RangeError(
+        'A coefficient of xgcd is not a safe integer: use bigint or BigNumber operands for the exact result'
+      );
+    }
+  }
+  return [Number(g), Number(x), Number(y)];
+}
+
 /**
  * Extended greatest common divisor
- * Returns [gcd, x, y] where gcd = a*x + b*y (Bezout coefficients)
+ * Returns [gcd, x, y] where gcd = a*x + b*y (Bezout coefficients). The operands must be integers.
+ * The results of two BigNumbers (or a BigNumber and a number) are BigNumbers. For two numbers a
+ * coefficient above 2^53 throws a RangeError; bigint and BigNumber operands give it exactly.
  */
 export const xgcd = mathTyped('xgcd', {
-  'number, number': (a: f64, b: f64): [f64, f64, f64] => {
-    if (!Number.isFinite(a) || !Number.isFinite(b)) return [NaN, NaN, NaN];
-    a = Math.floor(a);
-    b = Math.floor(b);
-    let x = 0,
-      lastX = 1;
-    let y = 1,
-      lastY = 0;
-    while (b !== 0) {
-      const q = Math.floor(a / b);
-      [a, b] = [b, a % b];
-      [x, lastX] = [lastX - q * x, x];
-      [y, lastY] = [lastY - q * y, y];
-    }
-    return a < 0 ? [-a, -lastX, -lastY] : [a, lastX, lastY];
-  },
-  'bigint, bigint': (a: i64, b: i64): [i64, i64, i64] => {
-    let x = 0n,
-      lastX = 1n;
-    let y = 1n,
-      lastY = 0n;
-    while (b !== 0n) {
-      const q = a / b;
-      [a, b] = [b, a % b];
-      [x, lastX] = [lastX - q * x, x];
-      [y, lastY] = [lastY - q * y, y];
-    }
-    return a < 0n ? [-a, -lastX, -lastY] : [a, lastX, lastY];
-  },
-  'Fraction, Fraction': (a: Fraction, b: Fraction): [Fraction, Fraction, Fraction] => {
-    if (!a.isInteger() || !b.isInteger()) {
-      throw new Error('Parameters in function xgcd must be integer numbers');
-    }
-    const zero = new Fraction(0n, 1n);
-    const one = new Fraction(1n, 1n);
-    let x = zero,
-      lastX = one;
-    let y = one,
-      lastY = zero;
-    while (!b.isZero()) {
-      const q = a.divide(b).floor();
-      const r = a.mod(b);
-      const nextX = lastX.subtract(q.multiply(x)) as Fraction;
-      const nextY = lastY.subtract(q.multiply(y)) as Fraction;
-      lastX = x;
-      x = nextX;
-      lastY = y;
-      y = nextY;
-      a = b;
-      b = r;
-    }
-    return a.lessThan(zero)
-      ? [a.negate(), lastX.negate(), lastY.negate()]
-      : [a, !a.isZero() ? lastX : zero, lastY];
+  'number, number': xgcdNumber,
+  'bigint, bigint': (a: i64, b: i64): [i64, i64, i64] => xgcdBigInt(a, b),
+  'BigNumber, BigNumber': xgcdBigNumber,
+  'BigNumber, number': (a: BigNumber, b: f64) => xgcdBigNumber(a, BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: f64, b: BigNumber) => xgcdBigNumber(BigNumber.fromNumber(a), b),
+  // As in mathjs, the middle result of `xgcd(0, 0)` is the number 0.
+  'Fraction, Fraction': (a: Fraction, b: Fraction): [Fraction, Fraction | number, Fraction] => {
+    if (!a.isInteger() || !b.isInteger()) throw new Error(XGCD_INTEGER_MESSAGE);
+    const [g, x, y] = xgcdBigInt(a.numerator, b.numerator);
+    return [new Fraction(g, 1n), g === 0n ? 0 : new Fraction(x, 1n), new Fraction(y, 1n)];
   },
 });
 

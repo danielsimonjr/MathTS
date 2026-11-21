@@ -29,10 +29,14 @@
  * @packageDocumentation
  */
 
-import { mathTyped } from '@danielsimonjr/mathts-core';
+import { mathTyped, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
+import type { Fraction } from '@danielsimonjr/mathts-core';
 import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
 import { deepMap } from '../utils/collection.js';
 import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
+import { product } from '../utils/product.js';
+import { binomialBigInt, rangeProductBigInt } from '../probability/bigint-binomial.js';
+import { binomialLoop, roundedLoop } from '../probability/rounded-loop.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
 import { denseOfSize } from '../factories/matrix-bridge.js';
@@ -150,17 +154,31 @@ function bernoulliNumber(n: number): number {
 // =============================================================================
 
 /**
- * Exact integer factorial for n ≤ 170.
- * Returns Infinity for n > 170.
+ * A bigint or a Fraction as a number. `combinations` and `permutations` read such an argument as a
+ * number and give a number, as they did before they had BigNumber signatures. Without the explicit
+ * signatures that use this function, the engine would convert the argument to a BigNumber.
  */
-function factorialExact(n: number): number {
-  if (n < 0 || !Number.isInteger(n)) {
-    throw new RangeError('Factorial argument must be a non-negative integer');
-  }
-  if (n > 170) return Infinity;
-  let r = 1;
-  for (let i = 2; i <= n; i++) r *= i;
-  return r;
+function scalarToNumber(value: number | bigint | Fraction): number {
+  if (typeof value === 'number') return value;
+  return typeof value === 'bigint' ? Number(value) : value.toNumber();
+}
+
+/** True when `n` is a non-negative integer BigNumber (false for NaN, Infinity and a fraction). */
+function isNonNegativeIntegerBigNumber(n: BigNumber): boolean {
+  return n.isInteger() && !n.isNegative();
+}
+
+/** The product lo * (lo + 1) * ... * hi, rounded one time to the precision. */
+function roundedRangeProduct(lo: bigint, hi: bigint): BigNumber {
+  return roundedLoop(
+    { steps: hi - lo + 1n, top: hi, divides: false, operations: Number(hi - lo + 1n) },
+    () => {
+      let result = BigNumber.fromNumber(1);
+      for (let i = lo; i <= hi; i++) result = result.times(BigNumber.fromBigInt(i));
+      return result;
+    },
+    () => rangeProductBigInt(lo, hi)
+  );
 }
 
 /**
@@ -176,7 +194,7 @@ function combinationsExact(n: number, k: number): number {
     throw new TypeError('Positive integer value expected in function combinations');
   }
   if (k > n) {
-    throw new TypeError('k must be less than or equal to n in function combinations');
+    throw new TypeError('k must be less than or equal to n');
   }
   if (k === 0 || k === n) return 1;
   // Use the smaller of k, n-k to minimise multiplications
@@ -214,9 +232,47 @@ export const bernoulli = mathTyped('bernoulli', {
   number: (n: number): number => bernoulliNumber(n),
 });
 
+/** Throws the mathjs `TypeError` when an argument is not a non-negative integer BigNumber. */
+function assertNonNegativeIntegers(fnName: string, n: BigNumber, k: BigNumber): void {
+  if (!isNonNegativeIntegerBigNumber(n) || !isNonNegativeIntegerBigNumber(k)) {
+    throw new TypeError(`Positive integer value expected in function ${fnName}`);
+  }
+}
+
+/**
+ * The exact binomial coefficient C(total, chosen), rounded one time to the precision. The loop of
+ * the shorter side is bounded first.
+ * @throws RangeError when the loop would need more than the supported number of steps
+ */
+function roundedBinomial(fnName: string, total: bigint, chosen: bigint): BigNumber {
+  const steps = chosen < total - chosen ? chosen : total - chosen;
+  assertLoopOrder(fnName, 'k', Number(steps));
+  return roundedLoop(
+    { steps, top: total, divides: true, operations: 2 * Number(steps) },
+    () => binomialLoop(total, steps),
+    () => binomialBigInt(total, chosen)
+  );
+}
+
+/**
+ * `combinations` of two BigNumbers: the exact binomial coefficient, rounded one time to the precision.
+ * @throws TypeError when an argument is not a non-negative integer, or when `k > n`
+ * @throws RangeError when the loop would need more than the supported number of steps
+ */
+function combinationsBigNumber(n: BigNumber, k: BigNumber): BigNumber {
+  assertNonNegativeIntegers('combinations', n, k);
+  if (k.greaterThan(n)) {
+    throw new TypeError('k must be less than n in function combinations');
+  }
+  return roundedBinomial('combinations', n.toBigInt(), k.toBigInt());
+}
+
 /**
  * Compute the binomial coefficient C(n, k) — the number of ways of choosing
  * k unordered elements from n elements without replacement.
+ *
+ * Two BigNumbers (or a BigNumber and a number) give the exact value as a BigNumber, rounded one
+ * time to the precision. An Array or a Matrix of `n` (or of `k`) gives the collection of the results.
  *
  * @example
  * combinations(5, 2)  // 10
@@ -225,42 +281,167 @@ export const bernoulli = mathTyped('bernoulli', {
  */
 export const combinations = mathTyped('combinations', {
   'number, number': (n: number, k: number): number => combinationsExact(n, k),
+  'bigint | Fraction, number | bigint | Fraction': (
+    n: bigint | Fraction,
+    k: number | bigint | Fraction
+  ): number => combinationsExact(scalarToNumber(n), scalarToNumber(k)),
+  'number, bigint | Fraction': (n: number, k: bigint | Fraction): number =>
+    combinationsExact(n, scalarToNumber(k)),
+  'BigNumber, BigNumber': combinationsBigNumber,
+  'BigNumber, number': (n: BigNumber, k: number): BigNumber =>
+    combinationsBigNumber(n, BigNumber.fromNumber(k)),
+  'number, BigNumber': (n: number, k: BigNumber): BigNumber =>
+    combinationsBigNumber(BigNumber.fromNumber(n), k),
   // Collections map elementwise over whichever argument is the collection
   // (as `permutations` does); two collections are not zipped.
-  'Array | Matrix, number': (n: unknown[] | Matrix, k: number): unknown[] | Matrix =>
-    deepMap(n as unknown[], (nVal) => combinationsExact(nVal as number, k)) as unknown[] | Matrix,
-  'number, Array | Matrix': (n: number, k: unknown[] | Matrix): unknown[] | Matrix =>
-    deepMap(k as unknown[], (kVal) => combinationsExact(n, kVal as number)) as unknown[] | Matrix,
+  'Array | Matrix, number | BigNumber': mathTyped.referToSelf(
+    (self) =>
+      (n: unknown[] | Matrix, k: number | BigNumber): unknown[] | Matrix =>
+        deepMap(n as unknown[], (nVal) =>
+          (self as (a: unknown, b: unknown) => unknown)(nVal, k)
+        ) as unknown[] | Matrix
+  ),
+  'number | BigNumber, Array | Matrix': mathTyped.referToSelf(
+    (self) =>
+      (n: number | BigNumber, k: unknown[] | Matrix): unknown[] | Matrix =>
+        deepMap(k as unknown[], (kVal) =>
+          (self as (a: unknown, b: unknown) => unknown)(n, kVal)
+        ) as unknown[] | Matrix
+  ),
 });
+
+/** `combinationsWithRep` of two numbers: C(n + k - 1, k) with the mathjs checks and texts. */
+function combinationsWithRepOfNumbers(n: number, k: number): number {
+  if (!Number.isInteger(n) || n < 0 || !Number.isInteger(k) || k < 0) {
+    throw new TypeError('Positive integer value expected in function combinationsWithRep');
+  }
+  if (n < 1) throw new TypeError('k must be less than or equal to n + k - 1');
+  return combinationsExact(n + k - 1, k);
+}
+
+/**
+ * `combinationsWithRep` of two BigNumbers: the exact multiset coefficient C(n + k - 1, k), rounded
+ * one time to the precision. The checks and the texts are the mathjs ones.
+ */
+function combinationsWithRepBigNumber(n: BigNumber, k: BigNumber): BigNumber {
+  assertNonNegativeIntegers('combinationsWithRep', n, k);
+  if (n.isZero()) {
+    throw new TypeError(
+      'k must be less than or equal to n + k - 1 in function combinationsWithRep'
+    );
+  }
+  const chosen = k.toBigInt();
+  return roundedBinomial('combinationsWithRep', n.toBigInt() + chosen - 1n, chosen);
+}
 
 /**
  * Compute the number of ways of choosing k unordered elements from n elements
  * WITH replacement: C(n + k - 1, k).
+ *
+ * Two BigNumbers (or a BigNumber and a number) give the exact value as a BigNumber, rounded one
+ * time to the precision.
  *
  * @example
  * combinationsWithRep(7, 5)  // 462
  * combinationsWithRep(5, 2)  // 15
  */
 export const combinationsWithRep = mathTyped('combinationsWithRep', {
-  'number, number': (n: number, k: number): number => {
-    if (!Number.isInteger(n) || n < 1) {
-      throw new TypeError(
-        'Positive integer value (≥ 1) expected for n in function combinationsWithRep'
-      );
-    }
-    if (!Number.isInteger(k) || k < 0) {
-      throw new TypeError('Non-negative integer expected for k in function combinationsWithRep');
-    }
-    return combinationsExact(n + k - 1, k);
-  },
+  'number, number': combinationsWithRepOfNumbers,
+  // A bigint or a Fraction is read as a number, as in `combinations`.
+  'bigint | Fraction, number | bigint | Fraction': (
+    n: bigint | Fraction,
+    k: number | bigint | Fraction
+  ): number => combinationsWithRepOfNumbers(scalarToNumber(n), scalarToNumber(k)),
+  'number, bigint | Fraction': (n: number, k: bigint | Fraction): number =>
+    combinationsWithRepOfNumbers(n, scalarToNumber(k)),
+  'BigNumber, BigNumber': combinationsWithRepBigNumber,
+  'BigNumber, number': (n: BigNumber, k: number): BigNumber =>
+    combinationsWithRepBigNumber(n, BigNumber.fromNumber(k)),
+  'number, BigNumber': (n: number, k: BigNumber): BigNumber =>
+    combinationsWithRepBigNumber(BigNumber.fromNumber(n), k),
 });
+
+/**
+ * Read the entries of a multinomial argument, in order, into `parts`. A nested Array or Matrix is
+ * read recursively. A boolean is 0 or 1, as in mathjs. A hole of an Array is read as `undefined`.
+ * @throws TypeError for an entry that is not an integer of 1 or more
+ */
+function collectMultinomialParts(value: unknown, parts: (number | BigNumber)[]): void {
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) collectMultinomialParts(value[i], parts);
+    return;
+  }
+  if (value !== null && typeof value === 'object' && (value as { isMatrix?: unknown }).isMatrix) {
+    collectMultinomialParts((value as { toArray(): unknown }).toArray(), parts);
+    return;
+  }
+  const entry = typeof value === 'boolean' ? (value ? 1 : 0) : value;
+  const valid = isBigNumber(entry)
+    ? entry.isInteger() && entry.greaterThanOrEqual(1)
+    : typeof entry === 'number' && Number.isInteger(entry) && entry >= 1;
+  if (!valid) {
+    throw new TypeError('Positive integer value expected in function multinomial');
+  }
+  parts.push(entry as number | BigNumber);
+}
+
+/**
+ * The multinomial of positive integers as an exact bigint: a product of binomials
+ * C(total + a, a), as `multinomialExact` computes, with no cap on the size of the result.
+ * @throws RangeError when the loops would need more than the supported number of steps
+ */
+function multinomialBigInt(parts: readonly bigint[]): bigint {
+  let total = 0n;
+  let steps = 0;
+  let result = 1n;
+  for (const a of parts) {
+    steps += Number(a < total ? a : total);
+    assertLoopOrder('multinomial', 'the sum of the entries', steps);
+    result *= binomialBigInt(total + a, a);
+    total += a;
+  }
+  return result;
+}
+
+/**
+ * The multinomial of positive integers as a BigNumber rounded one time to the precision: the exact
+ * bigint while that stays short, else the same product of binomials at a working precision.
+ * @throws RangeError when the loops would need more than the supported number of steps
+ */
+function roundedMultinomial(parts: readonly bigint[]): BigNumber {
+  let total = 0n;
+  let steps = 0n;
+  for (const a of parts) {
+    steps += a < total ? a : total;
+    total += a;
+  }
+  assertLoopOrder('multinomial', 'the sum of the entries', Number(steps));
+  return roundedLoop(
+    // Each part runs a binomial loop, and one product joins it to the result.
+    { steps, top: total, divides: true, operations: 2 * Number(steps) + parts.length },
+    () => {
+      let sum = 0n;
+      let result = BigNumber.fromNumber(1);
+      for (const a of parts) {
+        result = result.times(binomialLoop(sum + a, a < sum ? a : sum));
+        sum += a;
+      }
+      return result;
+    },
+    () => multinomialBigInt(parts)
+  );
+}
 
 /**
  * Compute the multinomial coefficient n! / (a1! * a2! * … * am!) where
  * n = a1 + a2 + … + am.
  *
- * @param a - Array of positive integers
- * @returns Multinomial coefficient as a number; Infinity when it overflows
+ * An entry is a number, a boolean or a BigNumber. With a BigNumber entry the result is a BigNumber:
+ * the exact value, rounded one time to the precision. With numbers only the result is a number,
+ * and it is Infinity when it overflows.
+ *
+ * @param a - Array (or Matrix) of positive integers
+ * @returns Multinomial coefficient as a number or a BigNumber
  *
  * @example
  * multinomial([2, 1, 1])  // 12  (= 4! / (2! * 1! * 1!))
@@ -269,55 +450,116 @@ export const combinationsWithRep = mathTyped('combinationsWithRep', {
  */
 export const multinomial = mathTyped('multinomial', {
   // A nested array or a matrix counts all of its entries, as in mathjs.
-  'Array | Matrix': (input: unknown[] | Matrix): number => {
-    const a = (Array.isArray(input) ? input : (input.toArray() as unknown[])).flat(
-      Infinity
-    ) as number[];
+  'Array | Matrix': (input: unknown[] | Matrix): number | BigNumber => {
+    const parts: (number | BigNumber)[] = [];
     // Validate every entry before any early return, as mathjs does.
-    for (const ai of a) {
-      if (!Number.isInteger(ai) || ai < 1) {
-        throw new TypeError('Positive integer value expected in function multinomial');
-      }
-    }
-    return multinomialExact(a);
+    collectMultinomialParts(input, parts);
+    if (!parts.some((p) => isBigNumber(p))) return multinomialExact(parts as number[]);
+    return roundedMultinomial(parts.map((p) => (isBigNumber(p) ? p.toBigInt() : BigInt(p))));
   },
 });
+
+/**
+ * `permutations` of one number: n! of a non-integer n is gamma(n + 1), as in mathjs. An integer n
+ * above 170 is Infinity.
+ */
+function permutationsOfNumber(n: number): number {
+  if (n < 0) throw new RangeError('Value must be non-negative');
+  if (!Number.isInteger(n)) return gammaNumber(n + 1);
+  return n > 170 ? Infinity : product(1, n);
+}
+
+/** `permutations` of two numbers: the product (n - k + 1) * … * n. */
+function permutationsOfNumbers(n: number, k: number): number {
+  if (!Number.isInteger(n) || n < 0) {
+    throw new TypeError('Positive integer value expected in function permutations');
+  }
+  if (!Number.isInteger(k) || k < 0) {
+    throw new TypeError('Positive integer value expected in function permutations');
+  }
+  if (k > n) {
+    throw new TypeError('second argument k must be less than or equal to first argument n');
+  }
+  // k above 170 gives at least 171!, which is above Number.MAX_VALUE (and n - j would reach 0
+  // for k = n).
+  if (k > 170) return Infinity;
+  // The product, split at the midpoint as mathjs does.
+  if (n <= Number.MAX_SAFE_INTEGER) return product(n - k + 1, n);
+  // Above 2^53 the midpoint of a range is not exact, so the factors run in order. Each factor
+  // is n - j and has one rounding. A count of k factors, not a bound on i, so the loop ends.
+  let r = 1;
+  for (let j = k - 1; j >= 0; j--) r *= n - j;
+  return r;
+}
+
+/**
+ * `permutations` of two BigNumbers: the exact product (n - k + 1) * … * n, rounded one time to the precision.
+ * @throws TypeError when an argument is not a non-negative integer, or when `k > n`
+ * @throws RangeError when the loop would need more than the supported number of steps
+ */
+function permutationsBigNumber(n: BigNumber, k: BigNumber): BigNumber {
+  assertNonNegativeIntegers('permutations', n, k);
+  if (k.greaterThan(n)) {
+    throw new TypeError('second argument k must be less than or equal to first argument n');
+  }
+  const total = n.toBigInt();
+  const chosen = k.toBigInt();
+  assertLoopOrder('permutations', 'k', Number(chosen));
+  return roundedRangeProduct(total - chosen + 1n, total);
+}
 
 /**
  * Compute the number of ordered subsets of k elements from n elements:
  * P(n, k) = n! / (n-k)!
  *
  * When called with a single argument, returns n! (all permutations of n items).
+ * Two BigNumbers (or a BigNumber and a number) give the exact value as a BigNumber, rounded one
+ * time to the precision. An Array or a Matrix of `n` (or of `k`) gives the collection of the results.
  *
  * @example
  * permutations(5)     // 120  (= 5!)
  * permutations(5, 3)  // 60   (= 5*4*3)
  */
 export const permutations = mathTyped('permutations', {
-  // n! of a non-integer n is gamma(n + 1), as in mathjs.
-  number: (n: number): number => {
-    if (n < 0) throw new RangeError('Value must be non-negative');
-    return Number.isInteger(n) ? factorialExact(n) : gammaNumber(n + 1);
+  number: permutationsOfNumber,
+  'bigint | Fraction': (n: bigint | Fraction): number => permutationsOfNumber(scalarToNumber(n)),
+  BigNumber: (n: BigNumber): BigNumber => {
+    if (!n.isInteger()) throw new Error('Integer BigNumber expected');
+    if (n.isNegative()) throw new Error('Value must be non-negative');
+    assertLoopOrder('permutations', 'n', n.toNumber());
+    return roundedRangeProduct(1n, n.toBigInt());
   },
-  'number, number': (n: number, k: number): number => {
-    if (!Number.isInteger(n) || n < 0) {
-      throw new TypeError('Non-negative integer expected in function permutations');
-    }
-    if (!Number.isInteger(k) || k < 0) {
-      throw new TypeError('Non-negative integer expected in function permutations');
-    }
-    if (k > n) {
-      throw new TypeError('k must be less than or equal to n in function permutations');
-    }
-    // product (n-k+1) * … * n, in ascending order. Each factor is n - j, so it has one
-    // rounding above 2^53, where (n - k + 1) + j rounds twice. A count of k factors, not a
-    // bound on i, so the loop ends: above 2^53, i + 1 === i. k above 170 gives at least 171!,
-    // which is above Number.MAX_VALUE (and n - j would reach 0 for k = n).
-    if (k > 170) return Infinity;
-    let r = 1;
-    for (let j = k - 1; j >= 0; j--) r *= n - j;
-    return r;
-  },
+  'number, number': permutationsOfNumbers,
+  'bigint | Fraction, number | bigint | Fraction': (
+    n: bigint | Fraction,
+    k: number | bigint | Fraction
+  ): number => permutationsOfNumbers(scalarToNumber(n), scalarToNumber(k)),
+  'number, bigint | Fraction': (n: number, k: bigint | Fraction): number =>
+    permutationsOfNumbers(n, scalarToNumber(k)),
+  'BigNumber, BigNumber': permutationsBigNumber,
+  'BigNumber, number': (n: BigNumber, k: number): BigNumber =>
+    permutationsBigNumber(n, BigNumber.fromNumber(k)),
+  'number, BigNumber': (n: number, k: BigNumber): BigNumber =>
+    permutationsBigNumber(BigNumber.fromNumber(n), k),
+  'Array | Matrix': mathTyped.referToSelf(
+    (self) =>
+      (n: unknown[] | Matrix): unknown[] | Matrix =>
+        deepMap(n as unknown[], (v) => (self as (a: unknown) => unknown)(v)) as unknown[] | Matrix
+  ),
+  'Array | Matrix, number | BigNumber': mathTyped.referToSelf(
+    (self) =>
+      (n: unknown[] | Matrix, k: number | BigNumber): unknown[] | Matrix =>
+        deepMap(n as unknown[], (nVal) =>
+          (self as (a: unknown, b: unknown) => unknown)(nVal, k)
+        ) as unknown[] | Matrix
+  ),
+  'number | BigNumber, Array | Matrix': mathTyped.referToSelf(
+    (self) =>
+      (n: number | BigNumber, k: unknown[] | Matrix): unknown[] | Matrix =>
+        deepMap(k as unknown[], (kVal) =>
+          (self as (a: unknown, b: unknown) => unknown)(n, kVal)
+        ) as unknown[] | Matrix
+  ),
 });
 
 // =============================================================================

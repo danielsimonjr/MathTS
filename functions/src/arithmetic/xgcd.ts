@@ -1,74 +1,28 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
-import { xgcdNumber } from '../plain/number/index.js';
-
-// Type definitions for xgcd
-interface BigNumberType {
-  isInteger(): boolean;
-  isZero(): boolean;
-  lessThan(other: BigNumberType): boolean;
-  negate(): BigNumberType;
-  divide(other: BigNumberType): BigNumberType;
-  mod(other: BigNumberType): BigNumberType;
-  floor(): BigNumberType;
-  subtract(other: BigNumberType): BigNumberType;
-  times(other: BigNumberType): BigNumberType;
-  toFixed(digits: number): string;
-}
-
-interface BigNumberConstructor {
-  precision: number;
-  config(options: { precision: number }): unknown;
-  fromNumber(value: number): BigNumberType;
-}
-
-interface FractionType {
-  isInteger(): boolean;
-  isZero(): boolean;
-  lessThan(other: FractionType): boolean;
-  negate(): FractionType;
-  divide(other: FractionType | number): FractionType;
-  mod(other: FractionType): FractionType;
-  floor(): FractionType;
-  subtract(other: FractionType | number): FractionType;
-  multiply(other: FractionType | number): FractionType;
-}
-
-interface FractionConstructor {
-  new (numerator: number | bigint, denominator?: number | bigint): FractionType;
-}
+import { xgcd as typedXgcd } from '../typed/arithmetic.js';
 
 interface XgcdDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
   matrix: (arr: unknown[]) => unknown;
-  BigNumber: BigNumberConstructor;
-  Fraction?: FractionConstructor;
-}
-
-interface XgcdRing<T> {
-  from(v: 0 | 1): T;
-  isInt(v: T): boolean;
-  floorDiv(a: T, b: T): T;
-  minus(a: T, b: T): T;
-  times(a: T, b: T): T;
-  lt(a: T, b: T): boolean;
-  neg(a: T): T;
 }
 
 const name = 'xgcd';
-const dependencies = ['typed', 'config', 'matrix', 'BigNumber', '?Fraction'];
-
-const XGCD_INTEGER_MSG = 'Parameters in function xgcd must be integer numbers';
+const dependencies = ['typed', 'config', 'matrix'];
 
 export const createXgcd = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, matrix, BigNumber, Fraction }: XgcdDependencies): TypedFunction => {
+  ({ typed, config, matrix }: XgcdDependencies): TypedFunction => {
     /**
      * Calculate the extended greatest common divisor for two values.
      * See https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm.
+     *
+     * The values come from the typed `xgcd`, the one implementation of the package: its Bezout
+     * coefficients are exact integers for a number, a bigint, a BigNumber or a Fraction. This
+     * function wraps the result in a matrix, as mathjs does, unless `config.matrix` is `'Array'`.
      *
      * Syntax:
      *
@@ -84,113 +38,20 @@ export const createXgcd = /* #__PURE__ */ factory(
      *
      *    gcd, lcm
      *
-     * @param {number | BigNumber} a  An integer number
-     * @param {number | BigNumber} b  An integer number
-     * @return {Array}              Returns an array containing 3 integers `[div, m, n]`
-     *                              where `div = gcd(a, b)` and `a*m + b*n = div`
+     * @param {number | BigNumber | Fraction} a  An integer number
+     * @param {number | BigNumber | Fraction} b  An integer number
+     * @return {Array | Matrix}   Returns an array containing 3 integers `[div, m, n]`
+     *                            where `div = gcd(a, b)` and `a*m + b*n = div`
      */
-    const bigNumberRing: XgcdRing<BigNumberType> = {
-      from: (v) => BigNumber.fromNumber(v),
-      isInt: (v) => v.isInteger(),
-      floorDiv: (a, b) => a.divide(b).floor(),
-      minus: (a, b) => a.subtract(b),
-      times: (a, b) => a.times(b),
-      lt: (a, b) => a.lessThan(b),
-      neg: (a) => a.negate(),
-    };
-
-    const typedSignatures: Record<string, unknown> = {
-      'number, number': function (a: number, b: number): unknown {
-        const res = xgcdNumber(a, b);
-
-        return config.matrix === 'Array' ? res : matrix(res);
-      },
-      'BigNumber, BigNumber': _xgcdBigNumber,
-    };
-
-    if (Fraction) {
-      typedSignatures['Fraction, Fraction'] = _xgcdFraction;
-    }
-
-    return typed(name, typedSignatures) as TypedFunction;
-
-    function _xgcdRing<T extends { isZero(): boolean; mod(b: T): T }>(
-      ring: XgcdRing<T>,
-      a: T,
-      b: T
-    ): unknown {
-      // source: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-      let t: T;
-      let q: T;
-      let r: T;
-
-      const zero = ring.from(0);
-      const one = ring.from(1);
-      let x: T = zero;
-      let lastx: T = one;
-      let y: T = one;
-      let lasty: T = zero;
-
-      if (!ring.isInt(a) || !ring.isInt(b)) {
-        throw new Error(XGCD_INTEGER_MSG);
-      }
-
-      while (!b.isZero()) {
-        q = ring.floorDiv(a, b);
-        r = a.mod(b);
-
-        t = x;
-        x = ring.minus(lastx, ring.times(q, x));
-        lastx = t;
-
-        t = y;
-        y = ring.minus(lasty, ring.times(q, y));
-        lasty = t;
-
-        a = b;
-        b = r;
-      }
-
-      let res: (T | number)[];
-      if (ring.lt(a, zero)) {
-        res = [ring.neg(a), ring.neg(lastx), ring.neg(lasty)];
-      } else {
-        res = [a, !a.isZero() ? lastx : 0, lasty];
-      }
+    const wrap = (a: unknown, b: unknown): unknown => {
+      const res = (typedXgcd as (x: unknown, y: unknown) => unknown[])(a, b);
       return config.matrix === 'Array' ? res : matrix(res);
-    }
+    };
 
-    function _xgcdBigNumber(a: BigNumberType, b: BigNumberType): unknown {
-      // BigNumber add and multiply round to the precision (#1118). Every quotient and Bezout
-      // coefficient is at most |a| or |b|, so with twice their digits the steps stay exact.
-      const precision = BigNumber.precision;
-      if (a.isInteger() && b.isInteger()) {
-        const digits = a.toFixed(0).length + b.toFixed(0).length;
-        BigNumber.config({ precision: Math.max(precision, 2 * digits + 10) });
-      }
-      try {
-        return _xgcdRing(bigNumberRing, a, b);
-      } finally {
-        BigNumber.config({ precision });
-      }
-    }
-
-    function _xgcdFraction(a: FractionType, b: FractionType): unknown {
-      if (!Fraction) {
-        throw new Error('Fraction is not available');
-      }
-
-      const fractionRing: XgcdRing<FractionType> = {
-        from: (v) => new Fraction(v),
-        isInt: (v) => v.isInteger(),
-        floorDiv: (a, b) => a.divide(b).floor(),
-        minus: (a, b) => a.subtract(b),
-        times: (a, b) => a.multiply(b),
-        lt: (a, b) => a.lessThan(b),
-        neg: (a) => a.negate(),
-      };
-
-      return _xgcdRing(fractionRing, a, b);
-    }
+    return typed(name, {
+      'number, number': wrap,
+      'BigNumber, BigNumber': wrap,
+      'Fraction, Fraction': wrap,
+    }) as TypedFunction;
   }
 );

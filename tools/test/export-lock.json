@@ -1230,6 +1230,9 @@
       "formatGeneric": {
         "kind": "function"
       },
+      "gcdBigInt": {
+        "kind": "function"
+      },
       "generalize": {
         "kind": "function"
       },

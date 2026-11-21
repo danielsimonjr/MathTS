@@ -264,53 +264,6 @@ export function squareNumber(x: number): number {
 squareNumber.signature = n1;
 
 /**
- * Calculate xgcd for two numbers
- * @param a - First number
- * @param b - Second number
- * @returns Result array [gcd, x, y]
- * @private
- */
-export function xgcdNumber(a: number, b: number): number[] {
-  // source: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-  let t: number; // used to swap two variables
-  let q: number; // quotient
-  let r: number; // remainder
-  let x = 0;
-  let lastx = 1;
-  let y = 1;
-  let lasty = 0;
-
-  if (!isInteger(a) || !isInteger(b)) {
-    throw new Error('Parameters in function xgcd must be integer numbers');
-  }
-
-  while (b) {
-    q = Math.floor(a / b);
-    r = a - q * b;
-
-    t = x;
-    x = lastx - q * x;
-    lastx = t;
-
-    t = y;
-    y = lasty - q * y;
-    lasty = t;
-
-    a = b;
-    b = r;
-  }
-
-  let res: number[];
-  if (a < 0) {
-    res = [-a, -lastx, -lasty];
-  } else {
-    res = [a, a ? lastx : 0, lasty];
-  }
-  return res;
-}
-xgcdNumber.signature = n2;
-
-/**
  * Calculates the power of x to y, x^y, for two numbers.
  * @param x - Base
  * @param y - Exponent
