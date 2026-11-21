@@ -16,19 +16,13 @@
 import { SparseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { MathJSDenseMatrix, MathJSSparseMatrix, denseOfSize } from '../factories/matrix-bridge.js';
 import { csrToCsc, cscToPublic } from '../factories/sparse-adapter.js';
+import { collectionSize } from './number-matrix.js';
 
 /** A binary operation on two scalars of any type. */
 export type SparseScalarOp = (a: unknown, b: unknown) => unknown;
 
 /** The result of a sparse x sparse product. */
 export type SparseProduct = MathJSSparseMatrix | SparseMatrix | MathJSDenseMatrix;
-
-/** The size of a sparse operand of either class: the CSC `_size`, or `rows` and `cols`. */
-function sparseSize(m: unknown): [number, number] {
-  if (m instanceof MathJSSparseMatrix) return [m._size[0], m._size[1]];
-  const p = m as { rows: number; cols: number };
-  return [p.rows, p.cols];
-}
 
 /**
  * Throw the dimension error of a matrix product.
@@ -222,7 +216,7 @@ export function sparseProduct(
   add: SparseScalarOp,
   mul: SparseScalarOp
 ): SparseProduct {
-  assertInnerDimensions(sparseSize(a), sparseSize(b));
+  assertInnerDimensions(collectionSize(a), collectionSize(b));
   const publicA = isSparseMatrix(a);
   const publicB = isSparseMatrix(b);
   if (publicA && publicB) return (a as SparseMatrix).multiply(b as SparseMatrix);
@@ -237,5 +231,5 @@ export function sparseProduct(
   );
   const out = cscToPublic(product);
   if (out instanceof SparseMatrix) return out;
-  return denseOfSize(product.toArray() as number[][], product.size());
+  return denseOfSize(product.toArray() as number[][], collectionSize(product));
 }

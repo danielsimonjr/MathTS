@@ -58,6 +58,7 @@ import {
   entryRange,
   ldexp,
   withPow2Scale,
+  notSquareError,
 } from '@danielsimonjr/mathts-core/internal';
 import { scaleDense } from '../operations/common.js';
 import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
@@ -592,7 +593,7 @@ export class WASMBackend implements MatrixBackend {
   }> {
     const n = a.rows;
     if (n !== a.cols) {
-      throw new Error('LU decomposition requires a square matrix');
+      throw notSquareError('LU decomposition requires a square matrix');
     }
     return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
       if (e === 0) return this.luUnscaled(a);
@@ -689,7 +690,7 @@ export class WASMBackend implements MatrixBackend {
   } {
     const n = a.rows;
     if (n !== a.cols) {
-      throw new Error('LU decomposition requires a square matrix');
+      throw notSquareError('LU decomposition requires a square matrix');
     }
 
     const data = new Float64Array(a.toFloat64Array());
@@ -849,7 +850,7 @@ export class WASMBackend implements MatrixBackend {
   async inverse(a: DenseMatrix): Promise<{ inverse: DenseMatrix; singular: boolean }> {
     const n = a.rows;
     if (n !== a.cols) {
-      throw new Error('Matrix inverse requires a square matrix');
+      throw notSquareError('Matrix inverse requires a square matrix');
     }
     return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
       if (e === 0) return this.inverseUnscaled(a);
@@ -926,7 +927,7 @@ export class WASMBackend implements MatrixBackend {
   async determinantWasm(a: DenseMatrix): Promise<number> {
     const n = a.rows;
     if (n !== a.cols) {
-      throw new Error('Determinant requires a square matrix');
+      throw notSquareError('Determinant requires a square matrix');
     }
     const mod = this.wasmModule;
     if (!mod || typeof mod.matrix_determinant !== 'function') {
@@ -976,7 +977,7 @@ export class WASMBackend implements MatrixBackend {
   }> {
     const n = a.rows;
     if (n !== a.cols) {
-      throw new Error('Cholesky decomposition requires a square matrix');
+      throw notSquareError('Cholesky decomposition requires a square matrix');
     }
     const mod = this.wasmModule;
     if (!mod || typeof mod.matrix_cholesky !== 'function') {
@@ -1004,7 +1005,7 @@ export class WASMBackend implements MatrixBackend {
   } {
     const n = a.rows;
     if (n !== a.cols) {
-      throw new Error('Cholesky decomposition requires a square matrix');
+      throw notSquareError('Cholesky decomposition requires a square matrix');
     }
 
     const aData = a.toFloat64Array();

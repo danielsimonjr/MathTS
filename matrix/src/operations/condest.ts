@@ -16,6 +16,7 @@ import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { decompositionInputToDenseMatrix } from './as-packed.js';
 import { lu } from './lu.js';
 import { ldexp, entryRange, withPow2Scale, SQUARED } from './common.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Solve `A x = b` given `A`'s LU factors (`P · A = L · U`). */
 function luSolve(
@@ -136,7 +137,7 @@ export function condest(input: DenseMatrix | SparseMatrix, p: number = 1): numbe
   const A = decompositionInputToDenseMatrix(input);
   const n = A.rows;
   if (A.cols !== n) {
-    throw new Error(`condest: matrix must be square (got ${A.rows}×${A.cols})`);
+    throw notSquareError(`condest: matrix must be square (got ${A.rows}×${A.cols})`);
   }
   if (n === 0) return 0;
 

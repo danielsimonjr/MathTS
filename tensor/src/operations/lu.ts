@@ -22,6 +22,7 @@ import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { lu as matrixLU } from '@danielsimonjr/mathts-matrix';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Contains the L and U factors, the row permutation, and its parity from `tensorLU`. */
 export interface TensorLUResult {
@@ -91,7 +92,7 @@ export function tensorLU(
   const numCols = colDims.reduce((a, b) => a * b, 1);
 
   if (numRows !== numCols) {
-    throw new Error(
+    throw notSquareError(
       `tensorLU: reshaped matrix must be square (got ${numRows}×${numCols}); ` +
         'LU decomposition requires equal row and column dimensions'
     );

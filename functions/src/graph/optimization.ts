@@ -1,3 +1,4 @@
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 /**
  * Graph Optimization — Max-Flow/Min-Cut, A* Search, Hungarian Assignment
  *
@@ -210,7 +211,7 @@ export function astar(
 ): AStarResult {
   const n = adj.length;
   if (!Array.isArray(adj) || !Number.isInteger(n) || n < 0) {
-    throw new Error('astar: adjacency must be a square number[][]');
+    throw notSquareError('astar: adjacency must be a square number[][]');
   }
   if (
     !Number.isInteger(start) ||
@@ -307,7 +308,7 @@ export function hungarian(cost: number[][]): HungarianResult {
   }
   for (const row of cost) {
     if (row.length !== n) {
-      throw new Error('hungarian: cost matrix must be square');
+      throw notSquareError('hungarian: cost matrix must be square');
     }
   }
 

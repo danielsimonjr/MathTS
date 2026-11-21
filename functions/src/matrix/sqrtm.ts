@@ -11,6 +11,7 @@ import {
   ldexp,
   withPow2Scale,
   type EntryRange,
+  notSquareError,
 } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
@@ -314,7 +315,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
               // the root of the 0 x 0 matrix is the 0 x 0 matrix, in the same kind (#1233)
               return isMatrix(A) ? (A as Matrix).clone().resize([0, 0]) : [];
             } else {
-              throw new RangeError(
+              throw notSquareError(
                 'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'
               );
             }
@@ -332,7 +333,7 @@ export const createSqrtm = /* #__PURE__ */ factory(
               if (!isMatrix(A)) return _sqrtmScaled(A as Scalar[][]);
               return matrix(_sqrtmScaled((A as Matrix).valueOf() as Scalar[][]));
             } else {
-              throw new RangeError(
+              throw notSquareError(
                 'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'
               );
             }

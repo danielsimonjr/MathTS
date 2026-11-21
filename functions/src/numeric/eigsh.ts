@@ -18,6 +18,7 @@
  */
 
 import { norm2 } from '@danielsimonjr/mathts-core';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** A symmetric linear operator: either a dense matrix or a matvec callback `x -> A x`. */
 export type EigshOperatorInput = number[][] | ((x: number[]) => number[]);
@@ -60,8 +61,9 @@ function toMatvecAndSize(
   if (isDenseMatrix(a)) {
     const rows = a;
     const n = rows.length;
-    if (n === 0 || rows.some((row) => row.length !== n)) {
-      throw new Error('eigsh: dense matrix input must be square and non-empty');
+    if (n === 0) throw new Error('eigsh: dense matrix input must be square and non-empty');
+    if (rows.some((row) => row.length !== n)) {
+      throw notSquareError('eigsh: dense matrix input must be square and non-empty');
     }
     return {
       n,

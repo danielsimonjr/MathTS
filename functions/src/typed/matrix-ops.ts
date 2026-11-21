@@ -38,8 +38,16 @@ import {
 } from '@danielsimonjr/mathts-matrix';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { factoryScope } from '../factories/scope.js';
-import { isNumberMatrix, squareOrder, sparseToArray, type SparseLike } from './number-matrix.js';
+import {
+  collectionSize,
+  isNumberMatrix,
+  squareOrder,
+  sparseToArray,
+  type SparseLike,
+} from './number-matrix.js';
+import { arraySize } from '../utils/array.js';
 import { denseOfSize, sparseOfSize } from '../factories/matrix-bridge.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -84,7 +92,7 @@ function assertSquare(A: number[][], name: string): i32 {
   const m = A.length;
   if (m === 0) throw new Error(`${name}: empty matrix`);
   const n = A[0].length;
-  if (m !== n) throw new Error(`${name}: matrix must be square (got ${m}x${n})`);
+  if (m !== n) throw notSquareError(`${name}: matrix must be square (got ${m}x${n})`);
   return n;
 }
 
@@ -1068,39 +1076,57 @@ export const pinv = mathTyped('pinv', {
   number: (x: number): number => (x === 0 ? 0 : 1 / x),
   // A native DenseMatrix goes to the SVD path. A boxed matrix (from `matrix()`) of numbers goes
   // to the same path and keeps its class; one with another entry type takes the generic path.
-  DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => {
-    if (isDenseMatrix(A)) return matrixPinv(A);
-    const [rows, cols] = boxedShape(A);
-    return denseOfSize(pinvData(boxedEntries(A), rows, cols), [cols, rows]);
-  },
+  DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) =>
+    isDenseMatrix(A) ? matrixPinv(A) : pinvBoxed(A),
   // A sparse matrix gives a sparse matrix of its own kind (mathjs), as `expm` does (#1264).
   SparseMatrix: pinvSparse,
-  'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) => {
-    if (isDenseMatrix(A)) return matrixPinv(A, opts);
-    const [rows, cols] = boxedShape(A);
-    return denseOfSize(pinvData(boxedEntries(A), rows, cols, opts), [cols, rows]);
-  },
-  // Array in → Array out (mathjs convention). Previously `pinv([[...]])` threw
-  // "expected DenseMatrix, actual Array" — the common call form was unsupported.
-  Array: (A: unknown[][]) =>
-    isNumberMatrix(A) ? matrixPinv(DenseMatrix.fromArray(A)).toArray() : genericPinv(A),
-  'Array, Object': (A: unknown[][], opts: PinvOptions) => {
-    if (isNumberMatrix(A)) return matrixPinv(DenseMatrix.fromArray(A), opts).toArray();
-    throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
-  },
+  'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) =>
+    isDenseMatrix(A) ? matrixPinv(A, opts) : pinvBoxed(A, opts),
+  // Array in → Array out (mathjs convention). The size of the Array decides the shape of the
+  // result, as for a matrix: `[]` gives `[]`, and a vector gives a vector.
+  Array: (A: unknown[]) => pinvOfSize(A, arraySize(A)).data,
+  'Array, Object': (A: unknown[], opts: PinvOptions) => pinvOfSize(A, arraySize(A), opts).data,
 });
 
 /**
- * The size `[rows, cols]` of a boxed matrix for the pseudo-inverse. A 1-D matrix is one row, as
- * in {@link boxedEntries}. The size comes from the matrix, because the nested entries of a
- * matrix with a zero axis do not show it.
+ * The pseudo-inverse of a boxed dense matrix (from `matrix()`), in the boxed class. The size
+ * comes from `collectionSize`, because the nested entries of a matrix with a zero axis do not
+ * show it.
  *
  * @param A - The boxed matrix.
- * @returns The rows and the columns of the matrix.
+ * @param opts - Options for a matrix of numbers.
+ * @returns A boxed matrix of the size that {@link pinvOfSize} gives.
  */
-function boxedShape(A: unknown): [number, number] {
-  const size = (A as { size(): number[] }).size();
-  return size.length === 1 ? [1, size[0]] : [size[0], size[1]];
+function pinvBoxed(A: unknown, opts?: PinvOptions): unknown {
+  const { data, size } = pinvOfSize(
+    (A as { toArray(): unknown[] }).toArray(),
+    collectionSize(A),
+    opts
+  );
+  return denseOfSize(data, size);
+}
+
+/**
+ * The nested pseudo-inverse of a matrix and its size. A 2-D argument of size m x n gives n x m.
+ * A 1-D argument of length n is one row, and its result is the vector of length n (mathjs:
+ * `pinv(matrix([3, 4]))` has size `[2]`). The size of the argument decides, never the entries.
+ *
+ * @param entries - The nested entries of the argument.
+ * @param size - The size of the argument.
+ * @param opts - Options for a matrix of numbers.
+ * @returns The nested entries and the size of the pseudo-inverse.
+ */
+function pinvOfSize(
+  entries: unknown[],
+  size: readonly number[],
+  opts?: PinvOptions
+): { data: unknown[]; size: number[] } {
+  if (size.length === 1) {
+    const n = size[0];
+    return { data: pinvData([entries], 1, n, opts).map((row) => row[0]), size: [n] };
+  }
+  const [rows, cols] = size;
+  return { data: pinvData(entries as unknown[][], rows, cols, opts), size: [cols, rows] };
 }
 
 /**
@@ -1134,7 +1160,7 @@ function pinvData(nested: unknown[][], rows: number, cols: number, opts?: PinvOp
  * @returns The sparse pseudo-inverse, n x m for an m x n argument.
  */
 function pinvSparse(A: SparseLike) {
-  const { rows, cols } = A;
+  const [rows, cols] = collectionSize(A);
   const data = pinvData(sparseToArray(A), rows, cols);
   if (isSparseMatrix(A)) {
     return SparseMatrix.fromDense(
@@ -1142,12 +1168,6 @@ function pinvSparse(A: SparseLike) {
     );
   }
   return sparseOfSize(data, [cols, rows]);
-}
-
-/** The entries of a boxed dense matrix as a nested array. A 1-D matrix is one row. */
-function boxedEntries(A: unknown): unknown[][] {
-  const entries = (A as { toArray(): unknown[] }).toArray();
-  return (entries.length > 0 && !Array.isArray(entries[0]) ? [entries] : entries) as unknown[][];
 }
 
 /**
@@ -1255,7 +1275,7 @@ export const matrixExpm = mathTyped('matrixExpm', {
 /**
  * The exponential of a dense matrix argument, in the class of the argument. A native
  * `DenseMatrix` takes the matrix package. A boxed matrix (the dispatch type `DenseMatrix` also
- * matches the boxed class) gives a boxed matrix, with its size read from `size()`, because a 0 x n
+ * matches the boxed class) gives a boxed matrix, with its size read by `collectionSize`, because a 0 x n
  * matrix converts to `[]` and loses its shape.
  *
  * @param A - A native or boxed dense matrix.
@@ -1264,7 +1284,7 @@ export const matrixExpm = mathTyped('matrixExpm', {
  */
 function expmDense(A: Parameters<typeof matrixExpmPrimitive>[0]) {
   if (isDenseMatrix(A)) return matrixExpmPrimitive(A);
-  const n = squareOrder('matrixExpm', (A as unknown as { size(): number[] }).size());
+  const n = squareOrder('matrixExpm', collectionSize(A));
   if (n === 0) return denseOfSize([], [0, 0]);
   const data = matrixExpmPrimitive(A).toArray();
   return denseOfSize(data, [n, n]);
@@ -1279,7 +1299,7 @@ function expmDense(A: Parameters<typeof matrixExpmPrimitive>[0]) {
  * @throws A `RangeError` when `A` is not square.
  */
 function expmSparse(A: SparseLike) {
-  const n = squareOrder('matrixExpm', [A.rows, A.cols]);
+  const n = squareOrder('matrixExpm', collectionSize(A));
   const data = n === 0 ? [] : expmArray(sparseToArray(A));
   if (isSparseMatrix(A)) {
     return SparseMatrix.fromDense(n === 0 ? DenseMatrix.zeros(0, 0) : DenseMatrix.fromArray(data));
@@ -1288,13 +1308,9 @@ function expmSparse(A: SparseLike) {
 }
 
 function expmArray(A: number[][]): number[][] {
-  // [] is the 0 x 0 matrix; its exponential is [] (#1233)
-  if (A.length === 0) return [];
-  if (A.every((row) => row.length === 0)) {
-    throw new Error(`matrixExpm: matrix must be square (got ${A.length}×0)`);
-  }
-  const D = DenseMatrix.fromArray(A);
-  return matrixExpmPrimitive(D).toArray();
+  // [] is the 0 x 0 matrix; its exponential is [] (#1233). The square rule is `squareOrder`.
+  if (squareOrder('matrixExpm', arraySize(A)) === 0) return [];
+  return matrixExpmPrimitive(DenseMatrix.fromArray(A)).toArray();
 }
 
 // =============================================================================

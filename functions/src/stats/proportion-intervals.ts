@@ -6,6 +6,7 @@
  * - `cohensKappa`: Cohen's kappa for a square agreement matrix.
  */
 import { normalQuantile } from '../distribution-functions.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Computes the Wilson score interval for a binomial proportion.
@@ -102,7 +103,7 @@ export function cohensKappa(matrix: readonly (readonly number[])[]): number {
   for (let i = 0; i < size; i++) {
     const row = matrix[i];
     if (row === undefined || row.length !== size) {
-      throw new RangeError('matrix must be square');
+      throw notSquareError('matrix must be square');
     }
     for (let j = 0; j < size; j++) {
       const value = row[j] as number;

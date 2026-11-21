@@ -1,3 +1,4 @@
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 /**
  * Structured and indefinite direct linear solvers.
  *
@@ -79,7 +80,7 @@ export function solveBanded(l: number, u: number, A: number[][], b: number[]): n
     throw new Error(`solveBanded: A is ${n}x? but b has length ${b.length}`);
   }
   for (const row of A) {
-    if (row.length !== n) throw new Error('solveBanded: A must be a square dense matrix');
+    if (row.length !== n) throw notSquareError('solveBanded: A must be a square dense matrix');
   }
 
   const W = A.map((row) => row.slice());
@@ -242,7 +243,7 @@ export interface LDLResult {
 export function ldl(A: number[][]): LDLResult {
   const n = A.length;
   for (const row of A) {
-    if (row.length !== n) throw new Error('ldl: A must be a square matrix');
+    if (row.length !== n) throw notSquareError('ldl: A must be a square matrix');
   }
 
   const W = A.map((row) => row.slice());

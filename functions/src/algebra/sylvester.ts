@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions for sylvester
 interface MatrixType {
@@ -141,12 +142,12 @@ export const createSylvester = /* #__PURE__ */ factory(
       const sa = _dims(A);
       const sb = _dims(B);
       if (sa.length !== 2 || sa[0] !== sa[1]) {
-        throw new RangeError(
+        throw notSquareError(
           'Dimension mismatch: A must be a square matrix (size: [' + sa.join(', ') + '])'
         );
       }
       if (sb.length !== 2 || sb[0] !== sb[1]) {
-        throw new RangeError(
+        throw notSquareError(
           'Dimension mismatch: B must be a square matrix (size: [' + sb.join(', ') + '])'
         );
       }

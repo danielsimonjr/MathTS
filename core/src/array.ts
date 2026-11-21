@@ -63,6 +63,36 @@ export function arraySize<T>(x: NestedArray<T>): number[] {
   return s;
 }
 
+function isDimension(x: unknown): x is number {
+  return typeof x === 'number' && Number.isInteger(x) && x >= 0;
+}
+
+/**
+ * Size that a matrix object reports for itself. The nested array of a matrix does not carry
+ * the size of an empty matrix: `toArray()` of a 0 x 3 matrix is `[]`, and `arraySize([])` is
+ * `[0]`. A caller that needs the true size reads it from the matrix with this function.
+ *
+ * The function reads, in this order: the `size()` method (the MathJS contract; it returns the size
+ * array), the `size` property of a matrix of this repository (`{ rows, cols }`), and the numeric
+ * `rows` and `cols` properties. A `rows` or `cols` that is not a number (a method) is not read.
+ *
+ * @param m - Any value.
+ * @returns A new size array, or `undefined` when `m` reports no valid size.
+ */
+export function matrixSize(m: unknown): number[] | undefined {
+  if (typeof m !== 'object' || m === null) return undefined;
+  const { size, rows, cols } = m as { size?: unknown; rows?: unknown; cols?: unknown };
+  if (typeof size === 'function') {
+    const reported: unknown = size.call(m);
+    return Array.isArray(reported) && reported.every(isDimension) ? reported.slice() : undefined;
+  }
+  if (typeof size === 'object' && size !== null) {
+    const dims = size as { rows?: unknown; cols?: unknown };
+    return isDimension(dims.rows) && isDimension(dims.cols) ? [dims.rows, dims.cols] : undefined;
+  }
+  return isDimension(rows) && isDimension(cols) ? [rows, cols] : undefined;
+}
+
 /**
  * Recursively validate whether each element in a multi dimensional array
  * has a size corresponding to the provided size array.

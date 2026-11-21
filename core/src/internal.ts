@@ -137,6 +137,7 @@ export { createUnitClass, unitDependencies, Unit as CoreUnit } from './types/uni
 export type { NestedArray, IdentifiedValue } from './array.js';
 export {
   arraySize,
+  matrixSize,
   validate,
   validateIndexSourceSize,
   validateIndex,
@@ -236,3 +237,4 @@ export {
   withPow2Scale,
 } from './pow2-scale.js';
 export type { EntryRange } from './pow2-scale.js';
+export { notSquareError } from './square-error.js';

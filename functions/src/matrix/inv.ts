@@ -3,7 +3,13 @@ import { arraySize } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import { isExactZero } from '../utils/isExactZero.js';
 import { format } from '../utils/string.js';
-import { SQUARED, entryRange, ldexp, withPow2Scale } from '@danielsimonjr/mathts-core/internal';
+import {
+  SQUARED,
+  entryRange,
+  ldexp,
+  withPow2Scale,
+  notSquareError,
+} from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 import type BigNumber from 'bignumber.js';
@@ -136,7 +142,7 @@ export const createInv = /* #__PURE__ */ factory(
               // the inverse of the empty matrix is the 0 x 0 matrix, as lup gives (#1229)
               return isMatrix(x) ? (x as Matrix).clone().resize([0, 0]) : [];
             }
-            throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
+            throw notSquareError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
 
           case 2: {
             // two dimensional array
@@ -156,7 +162,7 @@ export const createInv = /* #__PURE__ */ factory(
                 return _invScaled(x as Scalar[][], rows, cols) as unknown as Scalar[];
               }
             } else {
-              throw new RangeError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
+              throw notSquareError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
             }
           }
 

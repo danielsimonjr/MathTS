@@ -12,6 +12,7 @@
  */
 import { Tensor, Index, tensorSvd, tensorEig } from '@danielsimonjr/mathts-tensor';
 import { assertSameShape, ownedCopy } from './shape.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 type BackwardFn = (outputGrad: Float64Array) => void;
 
@@ -2067,7 +2068,9 @@ export class TapedTensor {
       );
     }
     if (this.shape.length !== 2 || this.shape[0] !== this.shape[1]) {
-      throw new Error(`TapedTensor.eig: expected rank-2 square input, got shape [${this.shape}].`);
+      throw notSquareError(
+        `TapedTensor.eig: expected rank-2 square input, got shape [${this.shape}].`
+      );
     }
     const n = this.shape[0];
 

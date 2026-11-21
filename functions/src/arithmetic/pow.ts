@@ -6,6 +6,7 @@ import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
 import type { BigNumber } from '@danielsimonjr/mathts-core';
 import { powBigNumberWith } from '../typed/complex-promotion.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions for pow
 interface BigNumberType {
@@ -244,7 +245,7 @@ export const createPow = /* #__PURE__ */ factory(
         throw new Error('For A^b, A must be 2 dimensional (A has ' + s.length + ' dimensions)');
       }
       if (s[0] !== s[1]) {
-        throw new Error('For A^b, A must be square (size is ' + s[0] + 'x' + s[1] + ')');
+        throw notSquareError('For A^b, A must be square (size is ' + s[0] + 'x' + s[1] + ')');
       }
       if (y < 0) {
         try {
@@ -294,7 +295,7 @@ export const createPow = /* #__PURE__ */ factory(
           throw new TypeError('For A^b, b must be an integer (value is ' + y + ')');
         }
         if (!empty1d && s[1] !== 0) {
-          throw new Error('For A^b, A must be square (size is ' + s[0] + 'x' + s[1] + ')');
+          throw notSquareError('For A^b, A must be square (size is ' + s[0] + 'x' + s[1] + ')');
         }
         return x.clone().resize([0, 0]);
       }

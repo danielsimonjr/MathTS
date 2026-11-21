@@ -2,6 +2,7 @@ import { clone } from '../utils/object.js';
 import { format } from '../utils/string.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions for trace
 interface DenseMatrix {
@@ -90,7 +91,7 @@ export const createTrace = /* #__PURE__ */ factory(
             // return data[0]
             return clone((data as unknown[])[0]);
           }
-          throw new RangeError('Matrix must be square (size: ' + format(size, {}) + ')');
+          throw notSquareError('Matrix must be square (size: ' + format(size, {}) + ')');
         case 2: {
           // two dimensional
           const rows = size[0];
@@ -105,7 +106,7 @@ export const createTrace = /* #__PURE__ */ factory(
             // return trace
             return sum;
           } else {
-            throw new RangeError('Matrix must be square (size: ' + format(size, {}) + ')');
+            throw notSquareError('Matrix must be square (size: ' + format(size, {}) + ')');
           }
         }
         default:
@@ -155,7 +156,7 @@ export const createTrace = /* #__PURE__ */ factory(
         // return trace
         return sum;
       }
-      throw new RangeError('Matrix must be square (size: ' + format(size, {}) + ')');
+      throw notSquareError('Matrix must be square (size: ' + format(size, {}) + ')');
     }
   }
 );

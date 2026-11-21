@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 import * as mj from 'mathjs';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { readFileSync, readdirSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   add,
@@ -183,8 +184,8 @@ describe('S5 pinv: pinvData, boxedShape', () => {
     const r = (pinv as unknown as Bin)(zeros(0, 3), { rcond: 1e-6 });
     expect(size(r)).toEqual([3, 0]);
   });
-  it('a 1-D matrix is one row, as before', () => {
-    expect(size(pinv(matrix([3, 4]) as never))).toEqual([2, 1]);
+  it('a 1-D matrix gives a 1-D result of the same length (mathjs [2]; it was [2, 1])', () => {
+    expect(size(pinv(matrix([3, 4]) as never))).toEqual([2]);
   });
 });
 
@@ -195,7 +196,7 @@ describe('S6 consumers of the size: a lost second axis was read as a 0 x 0 matri
     expect(() => (det as (a: unknown) => unknown)(lost())).toThrow(RangeError);
     expect(() => (inv as (a: unknown) => unknown)(lost())).toThrow(RangeError);
     expect(() => (expm as (a: unknown) => unknown)(lost())).toThrow(/square/);
-    expect(() => (pow as Bin)(lost(), 2)).toThrow();
+    expect(() => (pow as Bin)(lost(), 2)).toThrow(RangeError);
   });
 });
 
@@ -208,17 +209,30 @@ describe('S7 random takes the requested size', () => {
 });
 
 describe('S8 the class guard: one constructor, no size read from the result data', () => {
-  const dir = fileURLToPath(new URL('../src/typed/', import.meta.url));
-  const files = readdirSync(dir).filter((name) => name.endsWith('.ts'));
-  it('no file under functions/src/typed calls `new MathJSDenseMatrix(`', () => {
-    const hits = files.filter((name) =>
-      readFileSync(dir + name, 'utf8').includes('new MathJSDenseMatrix(')
+  const root = fileURLToPath(new URL('../../', import.meta.url));
+  const walk = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? walk(join(dir, e.name)) : e.name.endsWith('.ts') ? [join(dir, e.name)] : []
     );
+  const files = ['functions/src', 'compat/src'].flatMap((d) => walk(join(root, d)));
+  const rel = (file: string) => relative(root, file).split(sep).join('/');
+  // Allowed: matrix-bridge.ts defines the boxed class and the one constructor (`denseOfSize`);
+  // scope.ts holds `createDenseMatrix`, the constructor that the mathjs factories call with their
+  // own `{ data, size }` storage object.
+  const allowed = new Set([
+    'functions/src/factories/matrix-bridge.ts',
+    'functions/src/factories/scope.ts',
+  ]);
+  it('no file under functions/src or compat/src but the two allowed calls `new MathJSDenseMatrix(`', () => {
+    const hits = files
+      .filter((file) => readFileSync(file, 'utf8').includes('new MathJSDenseMatrix('))
+      .map(rel)
+      .filter((name) => !allowed.has(name));
     expect(hits).toEqual([]);
   });
-  it('no file under functions/src/typed passes arraySize(...) as the size of a result', () => {
+  it('no file under functions/src or compat/src passes arraySize(...) as the size of a result', () => {
     const call = new RegExp(String.raw`(denseOfSize|sparseOfSize)\([^;]*?arraySize\(`, 's');
-    const hits = files.filter((name) => call.test(readFileSync(dir + name, 'utf8')));
+    const hits = files.filter((file) => call.test(readFileSync(file, 'utf8'))).map(rel);
     expect(hits).toEqual([]);
   });
 });

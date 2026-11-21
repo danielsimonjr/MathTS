@@ -746,6 +746,7 @@ export class MathJSSparseMatrix {
   constructor(
     data?:
       | unknown[][]
+      | MathJSDenseMatrix
       | {
           values?: unknown[] | null;
           index?: number[];
@@ -788,7 +789,7 @@ export class MathJSSparseMatrix {
       this._index = [];
       this._ptr = [];
       this._size = [];
-      this._fromDenseArray(data._data);
+      this._fromSizedDense(data._data, data._size);
       this._datatype = data._datatype;
       return;
     }
@@ -814,7 +815,7 @@ export class MathJSSparseMatrix {
       this._index = [];
       this._ptr = [];
       this._size = [];
-      this._fromDenseArray(data.data);
+      this._fromSizedDense(data.data, data.size);
       this._datatype = data.datatype ?? data._datatype;
       return;
     }
@@ -837,6 +838,23 @@ export class MathJSSparseMatrix {
     this._ptr = ptr ?? [0];
     this._size = size ?? [0, 0];
     this._datatype = data.datatype ?? data._datatype;
+  }
+
+  /**
+   * Convert nested dense data of a known size to CSC format. The nested data of a matrix with a
+   * zero axis is `[]` for every 0 x n matrix, so the size decides that case, not the data (#1337).
+   * Every other size takes the data (`_fromDenseArray`).
+   */
+  private _fromSizedDense(nested: unknown[][], size: unknown): void {
+    if (Array.isArray(size) && size.length === 2 && size[0] * size[1] === 0) {
+      const [rows, cols] = size as [number, number];
+      this._values = [];
+      this._index = [];
+      this._ptr = new Array<number>(cols + 1).fill(0);
+      this._size = [rows, cols];
+      return;
+    }
+    this._fromDenseArray(nested);
   }
 
   /**
@@ -1476,15 +1494,7 @@ export function denseOfSize(data: unknown[], size: readonly number[]): MathJSDen
  * @returns A sparse matrix of that size.
  */
 export function sparseOfSize(data: unknown[][], size: readonly number[]): MathJSSparseMatrix {
-  if (size.length === 2 && size[0] * size[1] === 0) {
-    return new MathJSSparseMatrix({
-      values: [],
-      index: [],
-      ptr: new Array<number>(size[1] + 1).fill(0),
-      size: [...size],
-    });
-  }
-  return new MathJSSparseMatrix(data);
+  return new MathJSSparseMatrix({ data, size: [...size] });
 }
 
 // ---------------------------------------------------------------------------
@@ -1562,7 +1572,7 @@ export function createMatrixBridge() {
         : data.clone();
     }
     if (data instanceof MathJSDenseMatrix)
-      return sparse ? new MathJSSparseMatrix(data._data) : data.clone();
+      return sparse ? new MathJSSparseMatrix(data) : data.clone();
     // A storage object from a caller: the constructor trusts { data, size } (internal producers
     // pass it), so check here that the data has the size, as mathjs does.
     if (!sparse) {

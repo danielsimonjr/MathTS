@@ -74,3 +74,55 @@ describe('compat add, subtract and multiply keep the size of an empty matrix', (
     expect(m.add([], [])).toEqual([]);
   });
 });
+
+// matrix(x, format) converted a native matrix through its nested data: a public CSR 0 x 3 matrix
+// threw the #1278 TypeError on the way to dense, and a native 0 x 3 dense matrix became a 0 x 0
+// sparse matrix. The conversion now takes the size of the source.
+describe('compat matrix(x, format) keeps the size of a native matrix with a zero axis', () => {
+  it.each([
+    [0, 3],
+    [3, 0],
+    [0, 0],
+  ])('%i x %i: CSR to dense and dense to sparse', (r, c) => {
+    expect(sizeOf(m.matrix(csr(r, c), 'dense'))).toEqual([r, c]);
+    expect(sizeOf(m.matrix(dense(r, c), 'sparse'))).toEqual([r, c]);
+  });
+});
+
+// The divide shim was the typed function itself, which gives the boxed class for every matrix
+// operand; inv, sqrtm and the matrix path of add and multiply give the native class.
+describe('compat divide of two native dense matrices is a native DenseMatrix', () => {
+  it('0 x 0 and 2 x 2 operands, as inv and sqrtm', () => {
+    for (const fn of ['divide', 'add', 'multiply', 'subtract']) {
+      expect(m[fn](dense(0, 0), dense(0, 0)) instanceof DenseMatrix).toBe(true);
+    }
+    expect(m.inv(dense(0, 0)) instanceof DenseMatrix).toBe(true);
+    expect(m.sqrtm(dense(0, 0)) instanceof DenseMatrix).toBe(true);
+    const A = DenseMatrix.fromArray([
+      [2, 1],
+      [1, 3],
+    ]);
+    const q = m.divide(A, A) as DenseMatrix;
+    expect(q instanceof DenseMatrix).toBe(true);
+    const got = q.toArray() as number[][];
+    expect(got[0][0]).toBeCloseTo(1, 12);
+    expect(got[0][1]).toBeCloseTo(0, 12);
+    expect(got[1][1]).toBeCloseTo(1, 12);
+  });
+  it('a divisor that is not square throws a RangeError', () => {
+    expect(() => m.divide(dense(2, 3), dense(2, 3))).toThrow(RangeError);
+  });
+  it('a scalar divisor keeps the typed function', () => {
+    expect(m.divide(6, 3)).toBe(2);
+  });
+});
+
+describe('compat square rule and freqz', () => {
+  it('det of a native 0 x 3 matrix throws a RangeError (it was a plain Error)', () => {
+    expect(() => m.det(dense(0, 3))).toThrow(RangeError);
+    expect(() => m.det(dense(0, 3))).toThrow('Determinant requires a square matrix');
+  });
+  it('freqz of matrices that are not vectors throws a RangeError (mathjs throws too)', () => {
+    expect(() => m.freqz(m.zeros(0, 3), m.zeros(3, 0))).toThrow(RangeError);
+  });
+});

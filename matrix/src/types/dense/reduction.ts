@@ -1,6 +1,7 @@
 import type { Matrix } from '../Matrix.js';
 import { norm2 } from '@danielsimonjr/mathts-core';
 import { contiguousDenseData } from './storage.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * `sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that
@@ -133,7 +134,7 @@ export function norm(a: Matrix<number>): number {
  */
 export function trace(a: Matrix<number>): number {
   if (!a.isSquare) {
-    throw new Error('Trace is only defined for square matrices');
+    throw notSquareError('Trace is only defined for square matrices');
   }
   let traceSum = 0;
   for (let i = 0; i < a.rows; i++) {

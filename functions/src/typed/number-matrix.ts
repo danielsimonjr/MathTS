@@ -4,6 +4,9 @@
  * generic path (#1040).
  */
 
+import { matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { arraySize } from '../utils/array.js';
+
 /**
  * Tells if every entry of a 2-D array is a number.
  *
@@ -35,6 +38,23 @@ export function assertRectangular(m: readonly unknown[]): asserts m is unknown[]
   }
 }
 
+/**
+ * The size of an Array or of a matrix, one entry per axis. An Array gives `arraySize`. A matrix
+ * gives the size that it reports (`matrixSize`), because its nested entries do not show a zero
+ * axis: `toArray()` of a 0 x 3 matrix is `[]`.
+ *
+ * @param collection - An Array or a matrix of any kind.
+ * @returns A new size array.
+ * @throws A `TypeError` when the value is not an Array and reports no valid size.
+ */
+export function collectionSize(collection: unknown): number[] {
+  if (Array.isArray(collection)) return arraySize(collection);
+  const size = matrixSize(collection);
+  if (size === undefined)
+    throw new TypeError('Expected an Array or a matrix that reports its size');
+  return size;
+}
+
 /** The shape and entry access that every sparse matrix kind has. */
 export interface SparseLike {
   rows: number;
@@ -58,7 +78,7 @@ export function squareOrder(name: string, size: readonly number[]): number {
   if (size.length === 1 && size[0] === 0) return 0;
   if (size.length === 2 && size[0] === size[1]) return size[0];
   const shown = size.length === 1 ? `${size[0]}×0` : size.join('×');
-  throw new RangeError(`${name}: matrix must be square (got ${shown})`);
+  throw notSquareError(`${name}: matrix must be square (got ${shown})`);
 }
 
 /**

@@ -16,6 +16,7 @@
 
 import {
   assertRectangular,
+  collectionSize,
   isNumberMatrix,
   numberVector,
   sparseToArray,
@@ -126,6 +127,7 @@ import {
   powReal,
   nthRootReal,
 } from './complex-promotion.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -717,14 +719,6 @@ const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp, true);
 const divideKernels = elementwiseKernels(divideForNumberPath, divOp, true);
 const modKernels = elementwiseKernels(modForNumberPath, modOp, 'left');
 
-/** The size of an Array or a matrix: one entry per axis. */
-function collectionSize(collection: unknown): number[] {
-  if (Array.isArray(collection)) return arraySize(collection);
-  const m = collection as { size?: () => number[]; rows: number; cols: number };
-  // The public matrix classes expose `rows` and `cols`; the factory (CSC and dense) classes expose `size()`.
-  return typeof m.size === 'function' ? m.size() : [m.rows, m.cols];
-}
-
 /**
  * `divide(scalar, collection)` is a matrix division, `scalar * inv(collection)` (mathjs
  * parity, #960). A non-square collection throws mathjs's RangeError text. A singular square
@@ -738,7 +732,7 @@ function divideScalarByCollection(scalar: unknown, collection: unknown): unknown
     throw new RangeError(`Matrix must be two dimensional (size: [${size.join(', ')}])`);
   }
   if (!oneEntryVector && (size.length !== 2 || size[0] !== size[1])) {
-    throw new RangeError(`Matrix must be square (size: [${size.join(', ')}])`);
+    throw notSquareError(`Matrix must be square (size: [${size.join(', ')}])`);
   }
   const inverse = divideInverse()(collection);
   return (multiply as unknown as ScalarOp)(scalar, inverse);
@@ -1307,7 +1301,7 @@ function assertMatrixExponent(b: f64): void {
 function matrixPowNumber(m: number[][], b: f64): number[][] {
   const n = m.length;
   if (m.some((row) => row.length !== n)) {
-    throw new RangeError(`pow: matrix must be square (got ${n}×${m[0]?.length ?? 0})`);
+    throw notSquareError(`pow: matrix must be square (got ${n}×${m[0]?.length ?? 0})`);
   }
   assertMatrixExponent(b);
   if (n === 0) return [];
@@ -1324,15 +1318,15 @@ function matrixPowNumber(m: number[][], b: f64): number[][] {
 
 /**
  * The power of a boxed dense matrix (from `matrix()`), in the boxed class. The shape comes from
- * `size()`, because a 0 x n matrix converts to `[]` and loses its shape.
+ * `collectionSize`, because a 0 x n matrix converts to `[]` and loses its shape.
  *
  * @param a - The boxed matrix.
  * @param b - The exponent, a non-negative integer.
  * @returns A boxed `n` x `n` matrix.
  * @throws A `TypeError` for a 1-D matrix, a `RangeError` for a matrix that is not square, and an `Error` for a bad exponent.
  */
-function powBoxedDense(a: { size(): number[]; toArray(): unknown }, b: f64): MathJSDenseMatrix {
-  const size = a.size();
+function powBoxedDense(a: { toArray(): unknown }, b: f64): MathJSDenseMatrix {
+  const size = collectionSize(a);
   if (size.length === 1 && size[0] > 0) throw new TypeError(POW_NOT_2D);
   const n = squareOrder('pow', size);
   const data = matrixPowNumber(n === 0 ? [] : (a.toArray() as number[][]), b);
@@ -1374,7 +1368,7 @@ export const pow = mathTyped('pow', {
   // is read here, before the Matrix to Array conversion, because a 0 x n matrix converts to [].
   'DenseMatrix, number': (a: DenseMatrix, b: f64) => {
     if (!isDenseMatrix(a)) return powBoxedDense(a as never, b);
-    const n = squareOrder('pow', [a.rows, a.cols]);
+    const n = squareOrder('pow', collectionSize(a));
     if (n === 0) {
       assertMatrixExponent(b);
       return DenseMatrix.zeros(0, 0);
@@ -1383,7 +1377,7 @@ export const pow = mathTyped('pow', {
   },
   // A non-empty sparse matrix gives a dense matrix, as mathjs does. The 0 x 0 matrix keeps its kind.
   'SparseMatrix, number': (a: SparseLike, b: f64) => {
-    const n = squareOrder('pow', [a.rows, a.cols]);
+    const n = squareOrder('pow', collectionSize(a));
     if (n === 0) {
       assertMatrixExponent(b);
       return isSparseMatrix(a)
