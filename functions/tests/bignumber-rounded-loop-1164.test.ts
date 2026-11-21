@@ -133,6 +133,22 @@ describe('#1164 the working-precision loop is correctly rounded', () => {
     });
   }
 
+  for (const rounding of ['up', 'ceil'] as const) {
+    it(`bellNumbers(143) at precision 3, one guard digit, rounding ${rounding}: the check rejects a misrounded triangle`, () => {
+      // The working triangle at this precision rounds to 4.36e208; the exact B(143) rounds to
+      // 4.35e208. Only the interval check gives the exact value rounded.
+      BigNumber.config({ precision: 3, rounding });
+      const parts = bellLoop(143);
+      const want = rounded(parts.exact());
+      const p = 3 + String(8 * parts.shape.operations).length + 1;
+      BigNumber.config({ precision: p });
+      const unchecked = parts.work();
+      BigNumber.config({ precision: 3 });
+      expect(unchecked.toSignificantDigits(3).toString(), 'the row needs the check').not.toBe(want);
+      expect(viaWorkLoop(parts, 1)).toBe(want);
+    });
+  }
+
   it('catalan and bellNumbers of BigNumbers equal the exact value rounded at precision 20', () => {
     BigNumber.config({ precision: 20 });
     type BnFn = (x: BigNumber) => BigNumber;
