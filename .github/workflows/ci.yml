@@ -57,9 +57,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # `typecheck` reads `dist/` of the package it checks and of the packages its tests
-      # compile. A missing Turbo edge lets that package's `build` clean `dist/` mid-run.
-      # The check reads the resolved task graph, so it needs no build.
+      # `typecheck`, `test` and `test:coverage` read `dist/` of the package they check and of the
+      # packages that its tests import or compile. A missing Turbo edge lets the `build` of such a
+      # package clean `dist/` mid-run. The check reads the resolved task graph, so it needs no build.
       - name: Typecheck task graph
         run: |
           node --test tools/test/check-typecheck-graph.test.mjs
