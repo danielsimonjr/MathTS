@@ -76,7 +76,12 @@ import {
   isSparseMatrix,
   singularValues,
 } from '@danielsimonjr/mathts-matrix';
-import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
+import {
+  MathJSDenseMatrix,
+  MathJSSparseMatrix,
+  denseOfSize,
+  sparseOfSize,
+} from '../factories/matrix-bridge.js';
 import { arraySize, broadcastTo } from '../utils/array.js';
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
@@ -84,7 +89,7 @@ import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
-import { sparseProduct } from './sparse-product.js';
+import { assertInnerDimensions, sparseProduct } from './sparse-product.js';
 import { collectionRelationalRows, unitsEqual } from './collection-relational.js';
 import { exactReductions } from './exact-reductions.js';
 import {
@@ -241,8 +246,19 @@ function sameLeadingShape(a: unknown[], b: unknown[]): boolean {
  * @throws RangeError when an axis pair cannot broadcast, with the text of the same-length check.
  */
 function broadcastPair(a: unknown[], b: unknown[]): [unknown[], unknown[]] {
-  const sizeA = arraySize(a);
-  const sizeB = arraySize(b);
+  const common = broadcastSize(arraySize(a), arraySize(b));
+  return [broadcastTo(a, common) as unknown[], broadcastTo(b, common) as unknown[]];
+}
+
+/**
+ * The common size of two sizes under the broadcast rule of {@link broadcastPair}.
+ *
+ * @param sizeA - Size of the left operand.
+ * @param sizeB - Size of the right operand.
+ * @returns The common size.
+ * @throws RangeError when an axis pair cannot broadcast.
+ */
+function broadcastSize(sizeA: readonly number[], sizeB: readonly number[]): number[] {
   const rank = Math.max(sizeA.length, sizeB.length);
   const common = new Array<number>(rank);
   for (let k = 1; k <= rank; k++) {
@@ -253,7 +269,34 @@ function broadcastPair(a: unknown[], b: unknown[]): [unknown[], unknown[]] {
     }
     common[rank - k] = Math.max(da, db);
   }
-  return [broadcastTo(a, common) as unknown[], broadcastTo(b, common) as unknown[]];
+  return common;
+}
+
+/**
+ * The size of the element-wise result of two operands, one of them a matrix at least. The size
+ * comes from the operands, never from the nested result: `[]` is the nested form of a 0 x n result
+ * as well as of a 0 x 0 result. A matrix gives its own size, an Array gives its axes and a scalar
+ * gives none. The size `[0]` is the empty Array `[]` or its boxed form `matrix([])`. `[]` is the
+ * only Array form of every matrix with no rows, so this operand has no second axis to show: it
+ * takes the size of the other operand. Two operands with no size of their own give `[0]`.
+ *
+ * @param a - Left operand.
+ * @param b - Right operand.
+ * @returns The broadcast size of the two operands.
+ * @throws RangeError when the sizes cannot broadcast.
+ */
+function elementwiseSize(a: unknown, b: unknown): number[] {
+  const sizeA = operandSize(a);
+  const sizeB = operandSize(b);
+  if (sizeA === undefined || sizeB === undefined) return sizeA ?? sizeB ?? [0];
+  return broadcastSize(sizeA, sizeB);
+}
+
+/** The size of an operand; `undefined` for a scalar and for the empty size `[0]`. */
+function operandSize(x: unknown): number[] | undefined {
+  if (!isCollection(x)) return undefined;
+  const size = collectionSize(x);
+  return size.length === 1 && size[0] === 0 ? undefined : size;
 }
 
 /**
@@ -343,6 +386,7 @@ function elementwiseMatrixNumber(
   scalarKeepsSparse: boolean | 'left' = false
 ): MathJSDenseMatrix | MathJSSparseMatrix | SparseMatrix {
   const data = elementwiseNumber(tf, fallback, toNested(a), toNested(b)) as unknown[][];
+  const size = elementwiseSize(a, b);
   const sparseA = isSparseStorage(a);
   const sparseB = isSparseStorage(b);
   const sparseOut =
@@ -350,24 +394,29 @@ function elementwiseMatrixNumber(
     (scalarKeepsSparse === 'left' && sparseA) ||
     (scalarKeepsSparse === true &&
       ((sparseA && !isCollection(b)) || (sparseB && !isCollection(a))));
-  if (!sparseOut) return trustedDense(data as number[][]);
-  if (isSparseMatrix(a) || isSparseMatrix(b)) return publicSparseOrDense(data);
-  return new MathJSSparseMatrix(data);
+  if (!sparseOut) return denseOfSize(data, size);
+  if (isSparseMatrix(a) || isSparseMatrix(b)) return publicSparseOrDense(data, size);
+  return sparseOfSize(data, size);
 }
 
 /**
- * A bridge matrix of nested data that an operation built itself. The size comes from the first
- * element of each axis, and the data is not validated (the `{ data, size }` form).
+ * The public `SparseMatrix` of nested numbers; a nested array with another entry type as a dense
+ * matrix. A result with an empty axis holds no entry, so it is built from its size alone.
+ *
+ * @param data - The nested entries of the result.
+ * @param size - The size of the result.
+ * @returns The public sparse matrix, or a dense matrix for an entry that is not a number.
  */
-function trustedDense(data: number[][]): MathJSDenseMatrix {
-  return new MathJSDenseMatrix({ data, size: arraySize(data) });
-}
-
-/** The public `SparseMatrix` of nested numbers; a nested array with another entry type as a dense matrix. */
-function publicSparseOrDense(data: unknown[][]): SparseMatrix | MathJSDenseMatrix {
+function publicSparseOrDense(
+  data: unknown[][],
+  size: readonly number[]
+): SparseMatrix | MathJSDenseMatrix {
+  if (size.length === 2 && size[0] * size[1] === 0) {
+    return SparseMatrix.fromDense(DenseMatrix.zeros(size[0], size[1]));
+  }
   for (const row of data) {
     for (const v of row) {
-      if (typeof v !== 'number') return trustedDense(data as number[][]);
+      if (typeof v !== 'number') return denseOfSize(data, size);
     }
   }
   return SparseMatrix.fromDense(DenseMatrix.fromArray(data as number[][]));
@@ -387,57 +436,77 @@ function isSparseStorage(m: unknown): boolean {
 
 /** The product of two matrix operands of any storage, as nested numbers. */
 function matrixProduct(a: unknown, b: unknown): unknown[][] {
+  const sizeA = collectionSize(a);
+  const sizeB = collectionSize(b);
   const na = toNested(a) as unknown[][];
   const nb = toNested(b) as unknown[][];
   // The numeric backend holds numbers only. A Complex, Fraction or BigNumber entry takes the
   // generic product, which uses the scalar add and multiply (#1040).
   // A product with an empty axis (`[2, 1] x [1, 0]` is `[[], []]`) takes the generic product:
-  // `DenseMatrix` holds no empty axis.
-  if (!isNumberMatrix(na) || !isNumberMatrix(nb) || hasEmptyAxis(na) || hasEmptyAxis(nb)) {
+  // `DenseMatrix` holds no empty axis. The sizes show the empty axis, because the nested form
+  // of a 0 x n matrix is `[]`.
+  if (
+    !isNumberMatrix(na) ||
+    !isNumberMatrix(nb) ||
+    sizeA[0] * sizeA[1] === 0 ||
+    sizeB[0] * sizeB[1] === 0
+  ) {
     assertRectangular(na);
     assertRectangular(nb);
-    return genericMatrixProduct(na, nb);
+    return genericMatrixProduct(na, nb, sizeA, sizeB);
   }
   const A = DenseMatrix.fromArray(na as number[][]);
   const B = DenseMatrix.fromArray(nb as number[][]);
   return backendManager.multiply(A, B).toArray();
 }
 
-/** True when a 2-D array has no rows or no columns. */
-function hasEmptyAxis(m: unknown[][]): boolean {
-  return m.length === 0 || m[0].length === 0;
+/**
+ * The size of the product of two matrix operands with two axes each: the rows of the left
+ * operand and the columns of the right operand. The size comes from the operands, never from the
+ * nested product.
+ *
+ * @param a - Left operand, a matrix of any storage.
+ * @param b - Right operand, a matrix of any storage.
+ * @returns The size `[rows, cols]` of the product.
+ */
+function productSize(a: unknown, b: unknown): number[] {
+  return [collectionSize(a)[0], collectionSize(b)[1]];
 }
 
-/** The product of two 2-D arrays with any scalar entries, by the scalar add and multiply. */
-function genericMatrixProduct(a: unknown[][], b: unknown[][]): unknown[][] {
-  const rows = a.length;
-  const inner = rows > 0 ? a[0].length : 0;
-  const cols = b.length > 0 ? b[0].length : 0;
-  if (b.length !== inner) {
-    throw new Error(`Cannot multiply ${rows}×${inner} matrix with ${b.length}×${cols} matrix`);
-  }
+/**
+ * The product of two 2-D arrays with any scalar entries, by the scalar add and multiply. The
+ * sizes of the operands give the rows, the inner length and the columns: the nested form of a
+ * matrix with a zero first axis is `[]`, which shows neither the inner length nor the columns.
+ * With an inner length of 0 every entry is the empty sum, 0.
+ *
+ * @param a - Left operand, nested.
+ * @param b - Right operand, nested.
+ * @param sizeA - Size of the left operand.
+ * @param sizeB - Size of the right operand.
+ * @returns The nested product, `sizeA[0]` rows of `sizeB[1]` entries.
+ * @throws Error when the inner lengths differ.
+ */
+function genericMatrixProduct(
+  a: unknown[][],
+  b: unknown[][],
+  sizeA: readonly number[],
+  sizeB: readonly number[]
+): unknown[][] {
+  assertInnerDimensions(sizeA, sizeB);
+  const rows = sizeA[0];
+  const inner = sizeA[1];
+  const cols = sizeB[1];
   const out: unknown[][] = [];
   for (let i = 0; i < rows; i++) {
     const row: unknown[] = [];
     for (let j = 0; j < cols; j++) {
-      let acc: unknown = mulOp(a[i][0], b[0][j]);
+      let acc: unknown = inner === 0 ? 0 : mulOp(a[i][0], b[0][j]);
       for (let k = 1; k < inner; k++) acc = addOp(acc, mulOp(a[i][k], b[k][j]));
       row.push(acc);
     }
     out.push(row);
   }
   return out;
-}
-
-/** The number of axes of an Array, read along its first elements: `[]` has 1, `[[1]]` has 2. */
-function arrayRank(a: unknown): number {
-  let rank = 0;
-  let x: unknown = a;
-  while (Array.isArray(x)) {
-    rank++;
-    x = x[0];
-  }
-  return rank;
 }
 
 /**
@@ -470,13 +539,20 @@ function dotProduct(
  *
  * @param a - Left operand.
  * @param b - Right operand.
- * @param rankA - Number of axes of `a`.
- * @param rankB - Number of axes of `b`.
+ * @param sizeA - Size of `a`. A matrix gives its own size, because its nested form shows no empty axis.
+ * @param sizeB - Size of `b`.
  * @returns A scalar, or the Array of the product.
  * @throws RangeError when the lengths do not match; Error for an empty vector pair or a 3-D operand;
  *   TypeError for a matrix with no columns times an empty vector.
  */
-function vectorProduct(a: unknown[], b: unknown[], rankA: number, rankB: number): unknown {
+function vectorProduct(
+  a: unknown[],
+  b: unknown[],
+  sizeA: readonly number[],
+  sizeB: readonly number[]
+): unknown {
+  const rankA = sizeA.length;
+  const rankB = sizeB.length;
   if (rankA !== 1 && rankA !== 2) {
     throw new Error(
       `Can only multiply a 1 or 2 dimensional matrix (Matrix A has ${rankA} dimensions)`
@@ -488,39 +564,39 @@ function vectorProduct(a: unknown[], b: unknown[], rankA: number, rankB: number)
     );
   }
   if (rankA === 1 && rankB === 1) {
-    if (a.length !== b.length) {
+    if (sizeA[0] !== sizeB[0]) {
       throw new RangeError(
         'Dimension mismatch in multiplication. Vectors must have the same length'
       );
     }
-    if (a.length === 0) throw new Error('Cannot multiply two empty vectors');
-    return dotProduct(a, b, a.length, true);
+    if (sizeA[0] === 0) throw new Error('Cannot multiply two empty vectors');
+    return dotProduct(a, b, sizeA[0], true);
   }
   if (rankA === 1) {
-    if (a.length !== b.length) {
+    if (sizeA[0] !== sizeB[0]) {
       throw new RangeError(
-        `Dimension mismatch in multiplication. Vector length (${a.length}) must match Matrix rows (${b.length})`
+        `Dimension mismatch in multiplication. Vector length (${sizeA[0]}) must match Matrix rows (${sizeB[0]})`
       );
     }
-    const cols = (b[0] as unknown[]).length;
+    const cols = sizeB[1];
     const out = new Array<unknown>(cols);
-    const column = new Array<unknown>(b.length);
+    const column = new Array<unknown>(sizeB[0]);
     for (let j = 0; j < cols; j++) {
-      for (let k = 0; k < b.length; k++) column[k] = (b[k] as unknown[])[j];
-      out[j] = a.length === 0 ? 0 : dotProduct(a, column, a.length);
+      for (let k = 0; k < sizeB[0]; k++) column[k] = (b[k] as unknown[])[j];
+      out[j] = sizeA[0] === 0 ? 0 : dotProduct(a, column, sizeA[0]);
     }
     return out;
   }
-  const inner = (a[0] as unknown[]).length;
-  if (inner !== b.length) {
+  const inner = sizeA[1];
+  if (inner !== sizeB[0]) {
     throw new RangeError(
-      `Dimension mismatch in multiplication. Matrix columns (${inner}) must match Vector length (${b.length})`
+      `Dimension mismatch in multiplication. Matrix columns (${inner}) must match Vector length (${sizeB[0]})`
     );
   }
   // An `[r, 0]` matrix times an empty vector has no entry to multiply; mathjs throws a TypeError.
   if (inner === 0) throw new TypeError('Cannot multiply a matrix with an empty vector');
-  const out = new Array<unknown>(a.length);
-  for (let i = 0; i < a.length; i++) out[i] = dotProduct(a[i] as unknown[], b, inner);
+  const out = new Array<unknown>(sizeA[0]);
+  for (let i = 0; i < sizeA[0]; i++) out[i] = dotProduct(a[i] as unknown[], b, inner);
   return out;
 }
 
@@ -531,13 +607,18 @@ function vectorProduct(a: unknown[], b: unknown[], rankA: number, rankB: number)
 function matrixVectorProduct(a: unknown, b: unknown): unknown {
   const na = toNested(a) as unknown[];
   const nb = toNested(b) as unknown[];
-  return vectorProduct(na, nb, arrayRank(na), arrayRank(nb));
+  return vectorProduct(na, nb, collectionSize(a), collectionSize(b));
 }
 
 /** A vector product as a dense matrix of size `[n]`; a scalar stays a scalar. */
 function denseVectorProduct(a: unknown, b: unknown): unknown {
   const out = matrixVectorProduct(a, b);
-  return Array.isArray(out) ? trustedDense(out as number[][]) : out;
+  return Array.isArray(out) ? denseOfSize(out, [out.length]) : out;
+}
+
+/** The product of two matrix operands with two axes each, as a dense matrix of the product size. */
+function denseMatrixProduct(a: unknown, b: unknown): MathJSDenseMatrix {
+  return denseOfSize(matrixProduct(a, b), productSize(a, b));
 }
 
 /** True when a matrix operand has other than two axes (a factory matrix of size `[n]`). */
@@ -636,13 +717,9 @@ const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp, true);
 const divideKernels = elementwiseKernels(divideForNumberPath, divOp, true);
 const modKernels = elementwiseKernels(modForNumberPath, modOp, 'left');
 
-/** The size of an Array or a matrix, in mathjs's shape: `[n]` for a vector, `[r, c]` otherwise. */
+/** The size of an Array or a matrix: one entry per axis. */
 function collectionSize(collection: unknown): number[] {
-  if (Array.isArray(collection)) {
-    return Array.isArray(collection[0])
-      ? [collection.length, (collection[0] as unknown[]).length]
-      : [collection.length];
-  }
+  if (Array.isArray(collection)) return arraySize(collection);
   const m = collection as { size?: () => number[]; rows: number; cols: number };
   // The public matrix classes expose `rows` and `cols`; the factory (CSC and dense) classes expose `size()`.
   return typeof m.size === 'function' ? m.size() : [m.rows, m.cols];
@@ -657,6 +734,9 @@ function divideScalarByCollection(scalar: unknown, collection: unknown): unknown
   const size = collectionSize(collection);
   // A vector of length 1 is a 1 x 1 matrix for this rule, as in mathjs: `divide(4, [-2])` is `[-2]`.
   const oneEntryVector = size.length === 1 && size[0] === 1;
+  if (size.length > 2) {
+    throw new RangeError(`Matrix must be two dimensional (size: [${size.join(', ')}])`);
+  }
   if (!oneEntryVector && (size.length !== 2 || size[0] !== size[1])) {
     throw new RangeError(`Matrix must be square (size: [${size.join(', ')}])`);
   }
@@ -916,6 +996,12 @@ subtractForNumberPath.fn = subtract;
 // Multiplication
 // =============================================================================
 
+/** The product of two operands, one of them a matrix, as a boxed dense matrix (a vector gives a vector). */
+function denseProduct(a: unknown, b: unknown): unknown {
+  if (isNotTwoDimensional(a) || isNotTwoDimensional(b)) return denseVectorProduct(a, b);
+  return denseMatrixProduct(a, b);
+}
+
 /**
  * Polymorphic multiplication function. The Float64Array signature is synchronous.
  * Invalid operands throw `TypeError: multiply: unexpected type …` (same rules as `add`).
@@ -962,9 +1048,9 @@ export const multiply = withBinaryScalarGuards(
     // A 1-D operand takes the vector product of mathjs (#1007): vector x vector is the scalar
     // product, matrix x vector and vector x matrix are vectors.
     'Array, Array': (a: unknown[], b: unknown[]): unknown => {
-      const rankA = arrayRank(a);
-      const rankB = arrayRank(b);
-      if (rankA !== 2 || rankB !== 2) return vectorProduct(a, b, rankA, rankB);
+      const sizeA = arraySize(a);
+      const sizeB = arraySize(b);
+      if (sizeA.length !== 2 || sizeB.length !== 2) return vectorProduct(a, b, sizeA, sizeB);
       return matrixProduct(a, b);
     },
 
@@ -972,10 +1058,7 @@ export const multiply = withBinaryScalarGuards(
     // NOT a bare array. The `Array, Array` path above returns an array, and
     // reaching it via the Matrix~>Array conversion would strip the matrix type
     // (breaking callers like `sylvester` that call `.toArray()` on the product).
-    'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
-      if (isNotTwoDimensional(a) || isNotTwoDimensional(b)) return denseVectorProduct(a, b);
-      return trustedDense(matrixProduct(a, b) as number[][]);
-    },
+    'DenseMatrix, DenseMatrix': denseProduct,
 
     // Matrix product with a sparse operand. mathjs returns a sparse matrix for two sparse
     // operands and a dense matrix for a sparse and a dense operand. The sparse product reads
@@ -985,16 +1068,15 @@ export const multiply = withBinaryScalarGuards(
       sparseProduct(a, b, addOp, mulOp),
     // A sparse matrix times a 1-D dense matrix is a sparse column of size [r, 1] (mathjs).
     'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
-      if (!isNotTwoDimensional(b)) return trustedDense(matrixProduct(a, b) as number[][]);
+      if (!isNotTwoDimensional(b)) return denseMatrixProduct(a, b);
       const column = (matrixVectorProduct(a, b) as unknown[]).map((x) => [x]);
-      return isSparseMatrix(a) ? publicSparseOrDense(column) : new MathJSSparseMatrix(column);
+      const size = [column.length, 1];
+      return isSparseMatrix(a) ? publicSparseOrDense(column, size) : sparseOfSize(column, size);
     },
     // A 1-D dense matrix times a sparse matrix is a dense vector of size [c]. mathjs throws
     // here; the product is defined, so MathTS returns it.
     'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      isNotTwoDimensional(a)
-        ? denseVectorProduct(a, b)
-        : trustedDense(matrixProduct(a, b) as number[][]),
+      isNotTwoDimensional(a) ? denseVectorProduct(a, b) : denseMatrixProduct(a, b),
 
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
@@ -1252,9 +1334,9 @@ function matrixPowNumber(m: number[][], b: f64): number[][] {
 function powBoxedDense(a: { size(): number[]; toArray(): unknown }, b: f64): MathJSDenseMatrix {
   const size = a.size();
   if (size.length === 1 && size[0] > 0) throw new TypeError(POW_NOT_2D);
-  const n = squareOrder('pow', size, RangeError);
+  const n = squareOrder('pow', size);
   const data = matrixPowNumber(n === 0 ? [] : (a.toArray() as number[][]), b);
-  return new MathJSDenseMatrix({ data, size: [n, n] });
+  return denseOfSize(data, [n, n]);
 }
 
 /**
@@ -1292,7 +1374,7 @@ export const pow = mathTyped('pow', {
   // is read here, before the Matrix to Array conversion, because a 0 x n matrix converts to [].
   'DenseMatrix, number': (a: DenseMatrix, b: f64) => {
     if (!isDenseMatrix(a)) return powBoxedDense(a as never, b);
-    const n = squareOrder('pow', [a.rows, a.cols], RangeError);
+    const n = squareOrder('pow', [a.rows, a.cols]);
     if (n === 0) {
       assertMatrixExponent(b);
       return DenseMatrix.zeros(0, 0);
@@ -1301,14 +1383,14 @@ export const pow = mathTyped('pow', {
   },
   // A non-empty sparse matrix gives a dense matrix, as mathjs does. The 0 x 0 matrix keeps its kind.
   'SparseMatrix, number': (a: SparseLike, b: f64) => {
-    const n = squareOrder('pow', [a.rows, a.cols], RangeError);
+    const n = squareOrder('pow', [a.rows, a.cols]);
     if (n === 0) {
       assertMatrixExponent(b);
       return isSparseMatrix(a)
         ? SparseMatrix.fromDense(DenseMatrix.zeros(0, 0))
-        : new MathJSSparseMatrix([]);
+        : sparseOfSize([], [0, 0]);
     }
-    return new MathJSDenseMatrix({ data: matrixPowNumber(sparseToArray(a, n), b), size: [n, n] });
+    return denseOfSize(matrixPowNumber(sparseToArray(a), b), [n, n]);
   },
   'Array, number': (a: unknown[], b: f64): number[][] => {
     // [] is the 0 x 0 matrix, the only Array form of an empty matrix

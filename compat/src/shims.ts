@@ -182,13 +182,26 @@ function isCompatBridgeMatrix(x: unknown): boolean {
   return false;
 }
 
+/**
+ * A native `DenseMatrix` of the nested data `arr`. `DenseMatrix.fromArray` holds no empty axis,
+ * and the nested data of a matrix with a zero axis does not show its size (`[]` is 0 x 3 as well
+ * as 0 x 0). So the size of the operand `m` decides the empty case.
+ */
+function denseOfNested(arr: unknown[], m: unknown): DenseMatrix {
+  const size = axesOf(m);
+  if (size !== null && size.length === 2 && size[0] * size[1] === 0) {
+    return DenseMatrix.zeros(size[0], size[1]);
+  }
+  return DenseMatrix.fromArray(arr as number[][]);
+}
+
 /** Normalize compat/matrix inputs to a native `DenseMatrix` for linear algebra shims. */
 function compatToDenseMatrix(m: unknown): DenseMatrix {
   if (isDenseMatrix(m)) {
     return m;
   }
   if (isSparseMatrix(m)) {
-    return DenseMatrix.fromArray(m.toArray() as number[][]);
+    return denseOfNested(m.toArray(), m);
   }
   if (Array.isArray(m)) {
     return DenseMatrix.fromArray(m as number[][]);
@@ -196,7 +209,7 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
   if (typeof m === 'object' && m !== null && 'toArray' in m) {
     const arr = (m as { toArray(): unknown }).toArray();
     if (Array.isArray(arr)) {
-      return DenseMatrix.fromArray(arr as number[][]);
+      return denseOfNested(arr, m);
     }
   }
   throw new TypeError('Expected DenseMatrix or 2D array');
@@ -260,12 +273,16 @@ const isMatrixLike = (x: unknown): x is MatrixLike =>
 
 const toDenseMatrix = (x: MatrixLike): DenseMatrix => compatToDenseMatrix(x);
 
-const unwrap = (r: unknown): unknown =>
-  isCompatBridgeMatrix(r) && !isDenseMatrix(r)
-    ? (r as { toArray(): unknown }).toArray()
-    : isDenseMatrix(r)
-      ? r.toArray()
-      : r;
+/**
+ * An arithmetic result as the nested Array of its entries. A matrix with a zero axis stays a
+ * matrix: its nested Array `[]` does not show the size, and reads as 0 x 0.
+ */
+const unwrap = (r: unknown): unknown => {
+  if (!isCompatBridgeMatrix(r)) return r;
+  const size = axesOf(r);
+  if (size !== null && size.length === 2 && size[0] * size[1] === 0) return r;
+  return (r as { toArray(): unknown }).toArray();
+};
 
 /** The axis lengths of an Array or a matrix operand, read along the first elements; null for a scalar. */
 const axesOf = (x: unknown): number[] | null => {

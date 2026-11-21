@@ -51,32 +51,30 @@ export interface SparseLike {
  *
  * @param name - The name of the function, for the error message.
  * @param size - The size of the matrix.
- * @param ErrorType - The class of the error for a matrix that is not square. The default is `Error`.
  * @returns The order n of an n x n matrix. The order of the empty matrix is 0.
- * @throws An `ErrorType` when the matrix is not 2-D and square.
+ * @throws A `RangeError` (the class that mathjs throws) when the matrix is not 2-D and square.
  */
-export function squareOrder(
-  name: string,
-  size: readonly number[],
-  ErrorType: new (message: string) => Error = Error
-): number {
+export function squareOrder(name: string, size: readonly number[]): number {
   if (size.length === 1 && size[0] === 0) return 0;
   if (size.length === 2 && size[0] === size[1]) return size[0];
   const shown = size.length === 1 ? `${size[0]}×0` : size.join('×');
-  throw new ErrorType(`${name}: matrix must be square (got ${shown})`);
+  throw new RangeError(`${name}: matrix must be square (got ${shown})`);
 }
 
 /**
- * Reads the entries of a square sparse matrix as a nested array. A sparse matrix with a
- * `toArray` method gives its own conversion; another one gives its entries by `get`.
+ * Reads the entries of a sparse matrix as a nested array of `rows` rows of `cols` entries. A
+ * sparse matrix with a `toArray` method gives its own conversion; another one gives its entries
+ * by `get`. The size comes from `rows` and `cols`, so a matrix with a zero axis gives the
+ * nested form of that axis (`[]` for 0 x n, `rows` empty rows for n x 0).
  *
  * @param A - A sparse matrix of either kind.
- * @param n - The order of `A`, from `squareOrder`.
- * @returns The `n` x `n` nested array of the entries.
+ * @returns The nested array of the entries.
  */
-export function sparseToArray(A: SparseLike, n: number): number[][] {
+export function sparseToArray(A: SparseLike): number[][] {
   if (typeof A.toArray === 'function') return A.toArray();
-  return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => A.get(i, j)));
+  return Array.from({ length: A.rows }, (_, i) =>
+    Array.from({ length: A.cols }, (_, j) => A.get(i, j))
+  );
 }
 
 /** The type name of a value, for an error message: the class name of an object. */

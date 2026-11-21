@@ -415,4 +415,30 @@ describe('#1278 sqrtm of a non-empty Matrix returns a Matrix', () => {
       9
     );
   });
+
+  it('T15b every path of sqrtm gives one container for a matrix: a dense matrix', () => {
+    // The zero matrix has no inverse, so it takes the Schur path. An entry near 1e300 takes the
+    // scaled path. The container must not depend on the path that found the root.
+    const zero = [
+      [0, 0],
+      [0, 0],
+    ];
+    const huge = [
+      [4e300, 0],
+      [0, 9e300],
+    ];
+    for (const make of [matrix, sparse] as const) {
+      const z = sqrtm(make(zero)) as BridgeMatrix;
+      expect(z.storage()).toBe('dense');
+      expect(z.toArray()).toEqual(zero);
+      const h = sqrtm(make(huge)) as BridgeMatrix;
+      expect(h.storage()).toBe('dense');
+      const rows = h.toArray() as number[][];
+      expect(rows[0][0] / 2e150).toBeCloseTo(1, 12);
+      expect(rows[1][1] / 3e150).toBeCloseTo(1, 12);
+      expect(rows[0][1]).toBe(0);
+    }
+    expect(Array.isArray(sqrtm(zero))).toBe(true);
+    expect(Array.isArray(sqrtm(huge))).toBe(true);
+  });
 });

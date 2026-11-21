@@ -39,8 +39,7 @@ import {
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { factoryScope } from '../factories/scope.js';
 import { isNumberMatrix, squareOrder, sparseToArray, type SparseLike } from './number-matrix.js';
-import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
-import { arraySize } from '../utils/array.js';
+import { denseOfSize, sparseOfSize } from '../factories/matrix-bridge.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -1071,22 +1070,15 @@ export const pinv = mathTyped('pinv', {
   // to the same path and keeps its class; one with another entry type takes the generic path.
   DenseMatrix: (A: Parameters<typeof matrixPinv>[0]) => {
     if (isDenseMatrix(A)) return matrixPinv(A);
-    const nested = boxedEntries(A);
-    const data = (
-      isNumberMatrix(nested)
-        ? matrixPinv(DenseMatrix.fromArray(nested)).toArray()
-        : genericPinv(nested)
-    ) as number[][];
-    return new MathJSDenseMatrix({ data, size: arraySize(data) });
+    const [rows, cols] = boxedShape(A);
+    return denseOfSize(pinvData(boxedEntries(A), rows, cols), [cols, rows]);
   },
+  // A sparse matrix gives a sparse matrix of its own kind (mathjs), as `expm` does (#1264).
+  SparseMatrix: pinvSparse,
   'DenseMatrix, Object': (A: Parameters<typeof matrixPinv>[0], opts: PinvOptions) => {
     if (isDenseMatrix(A)) return matrixPinv(A, opts);
-    const nested = boxedEntries(A);
-    if (!isNumberMatrix(nested)) {
-      throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
-    }
-    const data = matrixPinv(DenseMatrix.fromArray(nested), opts).toArray() as number[][];
-    return new MathJSDenseMatrix({ data, size: arraySize(data) });
+    const [rows, cols] = boxedShape(A);
+    return denseOfSize(pinvData(boxedEntries(A), rows, cols, opts), [cols, rows]);
   },
   // Array in → Array out (mathjs convention). Previously `pinv([[...]])` threw
   // "expected DenseMatrix, actual Array" — the common call form was unsupported.
@@ -1097,6 +1089,60 @@ export const pinv = mathTyped('pinv', {
     throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
   },
 });
+
+/**
+ * The size `[rows, cols]` of a boxed matrix for the pseudo-inverse. A 1-D matrix is one row, as
+ * in {@link boxedEntries}. The size comes from the matrix, because the nested entries of a
+ * matrix with a zero axis do not show it.
+ *
+ * @param A - The boxed matrix.
+ * @returns The rows and the columns of the matrix.
+ */
+function boxedShape(A: unknown): [number, number] {
+  const size = (A as { size(): number[] }).size();
+  return size.length === 1 ? [1, size[0]] : [size[0], size[1]];
+}
+
+/**
+ * The nested pseudo-inverse of a matrix. The size of the matrix decides the empty case: a matrix
+ * with a zero axis holds no entry, `DenseMatrix.fromArray` holds no empty axis, and the result
+ * is `cols` rows of no entry (so `[]` for a 3 x 0 matrix).
+ *
+ * @param nested - The nested entries of the matrix.
+ * @param rows - Rows of the matrix.
+ * @param cols - Columns of the matrix.
+ * @param opts - Options for a matrix of numbers.
+ * @returns The nested pseudo-inverse, `cols` x `rows`.
+ * @throws TypeError when options come with an entry that is not a number.
+ */
+function pinvData(nested: unknown[][], rows: number, cols: number, opts?: PinvOptions): number[][] {
+  if (rows * cols === 0) return Array.from({ length: cols }, () => []);
+  if (isNumberMatrix(nested)) {
+    return matrixPinv(DenseMatrix.fromArray(nested), opts).toArray() as number[][];
+  }
+  if (opts !== undefined) {
+    throw new TypeError('pinv: the rcond option applies only to a matrix of numbers');
+  }
+  return genericPinv(nested) as number[][];
+}
+
+/**
+ * The pseudo-inverse of a sparse matrix, as a sparse matrix of the same kind: the public CSR
+ * `SparseMatrix` gives a `SparseMatrix`, and a boxed CSC matrix gives a boxed CSC matrix.
+ *
+ * @param A - A sparse matrix of either kind.
+ * @returns The sparse pseudo-inverse, n x m for an m x n argument.
+ */
+function pinvSparse(A: SparseLike) {
+  const { rows, cols } = A;
+  const data = pinvData(sparseToArray(A), rows, cols);
+  if (isSparseMatrix(A)) {
+    return SparseMatrix.fromDense(
+      rows * cols === 0 ? DenseMatrix.zeros(cols, rows) : DenseMatrix.fromArray(data)
+    );
+  }
+  return sparseOfSize(data, [cols, rows]);
+}
 
 /** The entries of a boxed dense matrix as a nested array. A 1-D matrix is one row. */
 function boxedEntries(A: unknown): unknown[][] {
@@ -1214,14 +1260,14 @@ export const matrixExpm = mathTyped('matrixExpm', {
  *
  * @param A - A native or boxed dense matrix.
  * @returns A matrix of the same class as `A`.
- * @throws An `Error` when `A` is not a square 2-D matrix.
+ * @throws A `RangeError` when `A` is not a square 2-D matrix.
  */
 function expmDense(A: Parameters<typeof matrixExpmPrimitive>[0]) {
   if (isDenseMatrix(A)) return matrixExpmPrimitive(A);
   const n = squareOrder('matrixExpm', (A as unknown as { size(): number[] }).size());
-  if (n === 0) return new MathJSDenseMatrix({ data: [], size: [0, 0] });
+  if (n === 0) return denseOfSize([], [0, 0]);
   const data = matrixExpmPrimitive(A).toArray();
-  return new MathJSDenseMatrix({ data, size: [n, n] });
+  return denseOfSize(data, [n, n]);
 }
 
 /**
@@ -1230,15 +1276,15 @@ function expmDense(A: Parameters<typeof matrixExpmPrimitive>[0]) {
  *
  * @param A - A sparse matrix of either kind.
  * @returns A sparse matrix of the same kind as `A`.
- * @throws An `Error` when `A` is not square.
+ * @throws A `RangeError` when `A` is not square.
  */
 function expmSparse(A: SparseLike) {
   const n = squareOrder('matrixExpm', [A.rows, A.cols]);
-  const data = n === 0 ? [] : expmArray(sparseToArray(A, n));
+  const data = n === 0 ? [] : expmArray(sparseToArray(A));
   if (isSparseMatrix(A)) {
     return SparseMatrix.fromDense(n === 0 ? DenseMatrix.zeros(0, 0) : DenseMatrix.fromArray(data));
   }
-  return new MathJSSparseMatrix(data);
+  return sparseOfSize(data, [n, n]);
 }
 
 function expmArray(A: number[][]): number[][] {

@@ -35,8 +35,7 @@ import { deepMap } from '../utils/collection.js';
 import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
-import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
-import { arraySize } from '../utils/array.js';
+import { denseOfSize } from '../factories/matrix-bridge.js';
 import { multinomialExact } from '../probability/multinomial-exact.js';
 
 // =============================================================================
@@ -378,9 +377,8 @@ function sized(fn: string, draw: (self: Draw, ...args: number[]) => unknown) {
         ? draw(self as Draw, ...args)
         : Array.from({ length: dims[d] }, () => fill(d + 1));
     const out = fill(0);
-    return Array.isArray(size)
-      ? out
-      : new MathJSDenseMatrix({ data: out as number[][], size: arraySize(out as number[][]) });
+    // The size is the requested size: the nested form `[]` of a 0 x 3 result does not show it.
+    return Array.isArray(size) ? out : denseOfSize(out as number[][], dims);
   });
 }
 

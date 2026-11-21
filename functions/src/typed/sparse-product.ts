@@ -14,9 +14,8 @@
  */
 
 import { SparseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
-import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
+import { MathJSDenseMatrix, MathJSSparseMatrix, denseOfSize } from '../factories/matrix-bridge.js';
 import { csrToCsc, cscToPublic } from '../factories/sparse-adapter.js';
-import { arraySize } from '../utils/array.js';
 
 /** A binary operation on two scalars of any type. */
 export type SparseScalarOp = (a: unknown, b: unknown) => unknown;
@@ -238,6 +237,5 @@ export function sparseProduct(
   );
   const out = cscToPublic(product);
   if (out instanceof SparseMatrix) return out;
-  const data = product.toArray() as number[][];
-  return new MathJSDenseMatrix({ data, size: arraySize(data) });
+  return denseOfSize(product.toArray() as number[][], product.size());
 }

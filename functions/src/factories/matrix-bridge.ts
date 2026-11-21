@@ -1447,6 +1447,47 @@ Object.defineProperty(MathJSSparseMatrix.prototype, 'type', {
 });
 
 // ---------------------------------------------------------------------------
+// Matrices of a stated size
+// ---------------------------------------------------------------------------
+
+/**
+ * A dense matrix of the nested data of a result, with the size of that result.
+ *
+ * Nested data does not show the size of an empty matrix: `[]` is the Array form of a 0 x 0 matrix
+ * and of every 0 x n matrix, and `arraySize([])` is `[0]`. A function that builds a matrix from the
+ * data of its result therefore states the size from the sizes of its operands (the rule of its
+ * operation: the broadcast size, the product size, the transposed size). It never reads the size
+ * from the result data. This is the one constructor for that case.
+ *
+ * @param data - The nested entries of the result. The data is not validated.
+ * @param size - The size of the result.
+ * @returns A dense matrix of that size.
+ */
+export function denseOfSize(data: unknown[], size: readonly number[]): MathJSDenseMatrix {
+  return new MathJSDenseMatrix({ data: data as number[][], size: [...size] });
+}
+
+/**
+ * A sparse matrix (CSC) of the nested data of a result, with the size of that result. A result
+ * with an empty axis holds no entry, so it is built from its size alone.
+ *
+ * @param data - The nested entries of the result.
+ * @param size - The size of the result.
+ * @returns A sparse matrix of that size.
+ */
+export function sparseOfSize(data: unknown[][], size: readonly number[]): MathJSSparseMatrix {
+  if (size.length === 2 && size[0] * size[1] === 0) {
+    return new MathJSSparseMatrix({
+      values: [],
+      index: [],
+      ptr: new Array<number>(size[1] + 1).fill(0),
+      size: [...size],
+    });
+  }
+  return new MathJSSparseMatrix(data);
+}
+
+// ---------------------------------------------------------------------------
 // matrix() factory function — creates matrices from data
 // ---------------------------------------------------------------------------
 
