@@ -1,6 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { createFloor } from './floor.js';
 import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
+import { modWithFloor } from './mod-with-floor.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
 import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
@@ -135,20 +136,16 @@ export const createMod = /* #__PURE__ */ factory(
     );
 
     /**
-     * Calculate the modulus of two numbers
+     * Calculate the modulus of two numbers. The kernel is the one of the typed `mod`
+     * (`modWithFloor`): exact for two integers, else `x - y * floor(x / y)` with the floor of this
+     * factory, which snaps to the nearest integer within the configured tolerance.
      * @param {number} x
      * @param {number} y
      * @returns {number} res
      * @private
      */
     function _modNumber(x: number, y: number): number {
-      // We don't use JavaScript's % operator here as this doesn't work
-      // correctly for x < 0 and x === 0
-      // see https://en.wikipedia.org/wiki/Modulo_operation
-
-      // We use mathjs floor to handle errors associated with
-      // precision float approximation
-      return y === 0 ? x : x - y * (floor(x / y) as number);
+      return modWithFloor(x, y, (v) => floor(v) as number);
     }
   }
 );

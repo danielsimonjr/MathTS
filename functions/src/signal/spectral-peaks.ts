@@ -10,7 +10,6 @@
  *
  * @packageDocumentation
  */
-import { fft, type ComplexNumber } from './fft.js';
 import { fftExactFloat64 } from './fft-core-f64.js';
 import { windowFunction } from '../typed/signal.js';
 import { toSamples } from '../utils/samples.js';
@@ -202,13 +201,19 @@ export interface CsdOptions {
   fs?: number;
 }
 
-/** Windowed, non-overlapping-checked segment FFTs of `sig` for Welch averaging. */
+/** The spectrum of one segment: `nperseg` bins in two flat buffers. */
+type SegmentSpectrum = { real: Float64Array; imag: Float64Array };
+
+/**
+ * Windowed segment spectra of `sig` for Welch averaging. Each segment takes an exact `nperseg`-point
+ * DFT (`nfft = nperseg`, the default of `scipy.signal.csd`), not a zero-padded power of two.
+ */
 function segmentSpectra(
   sig: readonly number[],
   nperseg: number,
   noverlap: number,
   winType: string
-): { segments: ComplexNumber[][]; winSum2: number } {
+): { segments: SegmentSpectrum[]; winSum2: number } {
   const step = nperseg - noverlap;
   if (step <= 0) throw new Error('csd/coherence: noverlap must be less than nperseg');
   const win = windowFunction(nperseg, winType);
@@ -220,11 +225,13 @@ function segmentSpectra(
     );
   }
 
-  const segments: ComplexNumber[][] = [];
+  const segments: SegmentSpectrum[] = [];
+  // The transform reads the two buffers and does not change them, so each segment reuses them.
+  const segRe = new Float64Array(nperseg);
+  const segIm = new Float64Array(nperseg);
   for (let start = 0; start + nperseg <= sig.length; start += step) {
-    const seg = new Array<number>(nperseg);
-    for (let i = 0; i < nperseg; i++) seg[i] = sig[start + i] * win[i];
-    segments.push(fft(seg).spectrum);
+    for (let i = 0; i < nperseg; i++) segRe[i] = sig[start + i] * win[i];
+    segments.push(fftExactFloat64(segRe, segIm, false));
   }
   if (segments.length === 0) {
     throw new Error(`csd/coherence: signal length ${sig.length} shorter than nperseg ${nperseg}`);
@@ -232,12 +239,15 @@ function segmentSpectra(
   return { segments, winSum2 };
 }
 
-/** Welch-averaged cross power spectrum `X·conj(Y)` (re/im), plus its frequency bins. */
+/**
+ * Welch-averaged cross power spectrum `X·conj(Y)` (re/im), plus its frequency bins and `nfft`. The
+ * spectrum is not yet one-sided: {@link csd} doubles the bins that a one-sided density doubles.
+ */
 function crossPower(
   x: readonly number[],
   y: readonly number[],
   opts?: CsdOptions
-): { frequencies: number[]; re: number[]; im: number[] } {
+): { frequencies: number[]; re: number[]; im: number[]; nfft: number } {
   const nperseg = opts?.nperseg ?? Math.min(256, x.length, y.length);
   const noverlap = opts?.noverlap ?? Math.floor(nperseg / 2);
   const winType = opts?.window ?? 'hann';
@@ -246,17 +256,19 @@ function crossPower(
   const { segments: Xs, winSum2 } = segmentSpectra(x, nperseg, noverlap, winType);
   const { segments: Ys } = segmentSpectra(y, nperseg, noverlap, winType);
   const nSeg = Math.min(Xs.length, Ys.length);
-  const nfft = Xs[0].length;
+  const nfft = Xs[0].real.length;
   const half = Math.floor(nfft / 2) + 1;
 
   const re = new Array<number>(half).fill(0);
   const im = new Array<number>(half).fill(0);
   for (let s = 0; s < nSeg; s++) {
     for (let k = 0; k < half; k++) {
-      const X = Xs[s][k];
-      const Y = Ys[s][k];
-      re[k] += X.re * Y.re + X.im * Y.im;
-      im[k] += X.im * Y.re - X.re * Y.im;
+      const xRe = Xs[s].real[k];
+      const xIm = Xs[s].imag[k];
+      const yRe = Ys[s].real[k];
+      const yIm = Ys[s].imag[k];
+      re[k] += xRe * yRe + xIm * yIm;
+      im[k] += xIm * yRe - xRe * yIm;
     }
   }
 
@@ -267,7 +279,7 @@ function crossPower(
   }
 
   const frequencies = Array.from({ length: half }, (_, k) => (k * fs) / nfft);
-  return { frequencies, re, im };
+  return { frequencies, re, im, nfft };
 }
 
 /**
@@ -277,16 +289,24 @@ function crossPower(
  * @param x - First signal
  * @param y - Second signal
  * @param opts - `{ nperseg?, noverlap?, window?, fs? }`
- * @returns `{ frequencies, power }` — `power` is the magnitude of the averaged
- *   cross spectrum at each frequency bin
+ * @returns `{ frequencies, power }` — `power` is the magnitude of the averaged one-sided
+ *   cross spectral density at each frequency bin. Each segment takes an exact `nperseg`-point DFT.
+ *   The bins between DC and the Nyquist frequency are doubled (the Nyquist bin is not doubled
+ *   for an even `nperseg`), as `scipy.signal.csd` does for a one-sided density.
  */
 export function csd(
   x: readonly number[],
   y: readonly number[],
   opts?: CsdOptions
 ): { frequencies: number[]; power: number[] } {
-  const { frequencies, re, im } = crossPower(x, y, opts);
-  const power = re.map((r, k) => Math.hypot(r, im[k]));
+  const { frequencies, re, im, nfft } = crossPower(x, y, opts);
+  // One-sided density: the bins 1 to the last bin before Nyquist take the energy of their
+  // mirror bins. For an even nfft the last bin is Nyquist and stays; for an odd nfft it doubles.
+  const doubledEnd = nfft % 2 === 0 ? re.length - 1 : re.length;
+  const power = re.map((r, k) => {
+    const side = k >= 1 && k < doubledEnd ? 2 : 1;
+    return side * Math.hypot(r, im[k]);
+  });
   return { frequencies, power };
 }
 

@@ -77,8 +77,18 @@ const MERGE_UNARIES: Array<{ name: string; fn: UnaryF64; scalar: (x: number) => 
     fn: (a) => round(a) as Promise<Float64Array>,
     scalar: (x) => (Math.abs(x) <= 1e-15 ? 0 : x < 0 ? -Math.round(-x) : Math.round(x)),
   },
-  { name: 'floor', fn: (a) => floor(a) as Promise<Float64Array>, scalar: Math.floor },
-  { name: 'ceil', fn: (a) => ceil(a) as Promise<Float64Array>, scalar: Math.ceil },
+  // #968: a value within absTol (1e-15) of an integer snaps to it, as in mathjs, so
+  // floor(-1e-300) and ceil(1e-300) are 0. Zero itself keeps its sign.
+  {
+    name: 'floor',
+    fn: (a) => floor(a) as Promise<Float64Array>,
+    scalar: (x) => (x !== 0 && Math.abs(x) <= 1e-15 ? 0 : Math.floor(x)),
+  },
+  {
+    name: 'ceil',
+    fn: (a) => ceil(a) as Promise<Float64Array>,
+    scalar: (x) => (x !== 0 && Math.abs(x) <= 1e-15 ? 0 : Math.ceil(x)),
+  },
   { name: 'fix', fn: (a) => fix(a) as Promise<Float64Array>, scalar: Math.trunc },
   { name: 'cosh', fn: (a) => cosh(a) as Promise<Float64Array>, scalar: Math.cosh },
   { name: 'log10', fn: (a) => log10(a) as unknown as Promise<Float64Array>, scalar: Math.log10 },

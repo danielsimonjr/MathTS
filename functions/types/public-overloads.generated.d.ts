@@ -48,6 +48,12 @@ export interface AddCallable {
   (a: number, b: DenseMatrix): DenseMatrix;
   (a: SparseMatrix, b: number): SparseMatrix;
   (a: number, b: SparseMatrix): SparseMatrix;
+  (a: DenseMatrix, b: number[]): DenseMatrix;
+  (a: number[], b: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix, b: number[]): DenseMatrix;
+  (a: number[], b: SparseMatrix): DenseMatrix;
+  (a: DenseMatrix, b: SparseMatrix): DenseMatrix;
+  (a: SparseMatrix, b: DenseMatrix): DenseMatrix;
   (a: unknown, b: unknown, ...rest: unknown[]): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;

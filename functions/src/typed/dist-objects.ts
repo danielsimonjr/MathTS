@@ -32,6 +32,7 @@ import {
   gammaincScalar,
 } from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
+import { assertAllocSize } from '../utils/limits.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 
 // =============================================================================
@@ -231,6 +232,13 @@ async function _sampleNDispatch(
   opts: SampleNOptions | undefined,
   jsFallback: (n: number, rng: () => number) => Float64Array
 ): Promise<Float64Array> {
+  // The count is checked before any allocation or worker dispatch. The function is async, so a
+  // bad count is a rejected Promise. A negative or fractional count made `new Float64Array`
+  // throw an engine error, and a huge one allocated until the process ran out of memory.
+  if (!Number.isSafeInteger(n) || n < 0) {
+    throw new RangeError(`sampleN: count must be a non-negative integer (got ${n})`);
+  }
+  assertAllocSize('sampleN', [n]);
   const seed = opts?.seed !== undefined ? opts.seed >>> 0 : (Math.random() * 0xffffffff) >>> 0;
 
   if (

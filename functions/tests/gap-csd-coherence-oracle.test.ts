@@ -12,8 +12,8 @@ import { csd, coherence, welchPSD } from '../src/index.js';
  * decomposed re/im parts, so "csd(x,x) is real" and "csd(x,y) = conj(csd(y,x))"
  * are adapted to what's actually observable through the public surface:
  *  - `csd(x,x).power` is compared to `welchPSD` (a second, independently coded
- *    Welch-PSD implementation in this package) via the well-known one-sided
- *    PSD doubling convention (interior bins get x2, DC/Nyquist bins don't).
+ *    Welch-PSD implementation in this package). Both give a one-sided density
+ *    (interior bins doubled, DC and Nyquist bins not), so they agree bin by bin.
  *  - conjugate symmetry (`Pxy = conj(Pyx)`) implies equal magnitude, so
  *    `csd(x,y).power` must equal `csd(y,x).power`.
  *  - the real part of `Pxy` is independently recoverable from three
@@ -58,7 +58,7 @@ describe('csd/coherence — implementation-independent invariants', () => {
     expect(coh[20]).toBeCloseTo(1, 6);
   });
 
-  it('csd(x,x) matches welchPSD up to the one-sided doubling convention', () => {
+  it('csd(x,x) equals welchPSD: both are one-sided densities', () => {
     const x = makeSignal(0);
     const { power } = csd(x, x, OPTS);
     const { psd } = welchPSD(x, {
@@ -68,12 +68,8 @@ describe('csd/coherence — implementation-independent invariants', () => {
     });
     expect(psd.length).toBe(power.length);
 
-    const last = power.length - 1;
     for (let k = 0; k < power.length; k++) {
-      // DC (k=0) and Nyquist (k=last) bins are not doubled by the one-sided
-      // PSD convention; every interior bin is.
-      const expectedFactor = k === 0 || k === last ? 1 : 2;
-      expect(psd[k]).toBeCloseTo(expectedFactor * power[k], 9);
+      expect(psd[k]).toBeCloseTo(power[k], 9);
     }
     // Trivially true given `power = hypot(re, im)`, but locks the public
     // contract: csd's magnitude output is always real-valued and non-negative.
