@@ -336,6 +336,18 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
     convert: (s: unknown) => Complex.parse(s as string),
   },
   // -------------------------------------------------------------------------
+  // number to BigNumber comes before every conversion to Complex, as in mathjs
+  // (core/function/typed.js). typed-function prefers the conversion that comes first, so a
+  // call with a BigNumber and a number reaches the 'BigNumber, BigNumber' signature. With
+  // number to Complex first, the same call reached 'Complex, number' (a Complex result, or the
+  // Complex error of nthRoot).
+  // -------------------------------------------------------------------------
+  {
+    from: 'number',
+    to: 'BigNumber',
+    convert: (n: unknown) => BigNumber.fromNumber(n as number),
+  },
+  // -------------------------------------------------------------------------
   // To Complex conversions
   // -------------------------------------------------------------------------
   {
@@ -371,11 +383,6 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
   // -------------------------------------------------------------------------
   // To BigNumber conversions
   // -------------------------------------------------------------------------
-  {
-    from: 'number',
-    to: 'BigNumber',
-    convert: (n: unknown) => BigNumber.fromNumber(n as number),
-  },
   {
     from: 'bigint',
     to: 'BigNumber',

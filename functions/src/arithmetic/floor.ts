@@ -1,4 +1,4 @@
-import { Decimal } from 'decimal.js';
+import { BigNumber } from '@danielsimonjr/mathts-core';
 import { factory } from '../utils/factory.js';
 import { deepMap } from '../utils/collection.js';
 import { isInteger } from '../utils/number.js';
@@ -53,7 +53,7 @@ interface FloorDependencies extends FloorNumberDependencies {
 const name = 'floor';
 const dependencies = ['typed', 'config', 'round', 'matrix', 'equalScalar', 'zeros', 'DenseMatrix'];
 
-const bigTen = new Decimal(10);
+const bigTen = BigNumber.fromNumber(10);
 
 export const createFloorNumber = /* #__PURE__ */ factory(
   name,
@@ -167,10 +167,8 @@ export const createFloor = /* #__PURE__ */ factory(
       BigNumber: _bigFloor,
 
       'BigNumber, BigNumber': function (x: BigNumberType, n: BigNumberType): BigNumberType {
-        const shift = bigTen.pow(n as unknown as Decimal);
-        return _bigFloor(x.mul(shift as unknown as BigNumberType)).div(
-          shift as unknown as BigNumberType
-        );
+        const shift = bigTen.pow(n as unknown as BigNumber) as unknown as BigNumberType;
+        return _bigFloor(x.mul(shift)).div(shift);
       },
 
       bigint: (b: bigint): bigint => b,
