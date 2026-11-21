@@ -691,6 +691,43 @@ describe('#968 item 8c: sampleN checks its count', () => {
     });
   }
 
+  // Every distribution constructor of the module, with valid parameters. Each `sampleN` goes
+  // through `_sampleNDispatch`, so each one has the check; this table pins that for all of them.
+  const everyDistribution: [string, () => unknown][] = [
+    ['normalDist', () => mt.normalDist(0, 1)],
+    ['betaDist', () => mt.betaDist(2, 3)],
+    ['binomialDist', () => mt.binomialDist(10, 0.5)],
+    ['chiSquaredDist', () => mt.chiSquaredDist(3)],
+    ['exponentialDist', () => mt.exponentialDist(1)],
+    ['fDist', () => mt.fDist(3, 4)],
+    ['gammaDist', () => mt.gammaDist(2, 1)],
+    ['logNormalDist', () => mt.logNormalDist(0, 1)],
+    ['poissonDist', () => mt.poissonDist(3)],
+    ['tDist', () => mt.tDist(5)],
+    ['uniformDist', () => mt.uniformDist(0, 1)],
+    ['weibullDist', () => mt.weibullDist(2, 1)],
+    ['hypergeometricDist', () => mt.hypergeometricDist(50, 5, 10)],
+    ['negativeBinomialDist', () => mt.negativeBinomialDist(3, 0.5)],
+    ['paretoDist', () => mt.paretoDist(2, 1)],
+    ['rayleighDist', () => mt.rayleighDist(1)],
+    ['triangularDist', () => mt.triangularDist(0, 1, 2)],
+    ['discreteUniformDist', () => mt.discreteUniformDist(1, 6)],
+    ['gumbelDist', () => mt.gumbelDist(0, 1)],
+    ['invGaussDist', () => mt.invGaussDist(1, 2)],
+  ];
+
+  it.each(everyDistribution)(
+    '14: %s rejects a bad count and a count above the limit',
+    async (_name, make) => {
+      const dist = make as () => { sampleN: (n: number) => Promise<Float64Array> };
+      for (const n of [-1, 2.5, NaN]) {
+        await expect(dist().sampleN(n), `sampleN(${n})`).rejects.toThrow(/non-negative integer/);
+      }
+      await expect(dist().sampleN(2 ** 40), 'sampleN(2**40)').rejects.toThrow(/result too large/);
+      expect((await dist().sampleN(0)).length).toBe(0);
+    }
+  );
+
   it('14: a seeded batch keeps its values', async () => {
     const values = await normal().sampleN(3, { seed: 1 });
     expect(Array.from(values, bits)).toEqual([
