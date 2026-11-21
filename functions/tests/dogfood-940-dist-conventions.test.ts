@@ -15,7 +15,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { bignumber } from '@danielsimonjr/mathts-core';
-import { evaluate } from '../src/index.js';
+import { evaluate, fraction } from '../src/index.js';
 import {
   betaDist,
   binomialDist,
@@ -283,6 +283,13 @@ describe('#1384 a parameter with a numeric reading is stored as that number', ()
       mean: 4,
     });
     expect(() => call(gammaDist, { shape: 'x', scale: 2 })).toThrow(/shape must be a number/);
+  });
+  it('gammaDist: a BigNumber or Fraction rate is a rate, not an options object (#1360)', () => {
+    // A BigNumber is an object, so it took the options branch: 'unknown option "type"' (J3) and
+    // 'expected a positive rate or { scale }' (main). evaluate in a BigNumber scope passes one.
+    expect(call(gammaDist, bignumber(2), bignumber(2))).toMatchObject({ mean: 1 });
+    expect(call(gammaDist, 2, fraction(1, 2))).toMatchObject({ mean: 4 });
+    expect(gammaDist(2, 2).pdf(1)).toBe(0.5413411329464507);
   });
   it('multivariateNormal: string entries of mean and cov are stored as numbers (strings before)', () => {
     const want = multivariateNormal(

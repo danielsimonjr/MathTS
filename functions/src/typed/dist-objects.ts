@@ -32,6 +32,7 @@ import {
   gammaincScalar,
 } from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
+import { isBigNumber, isFraction } from '../utils/is.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 
 // =============================================================================
@@ -814,7 +815,14 @@ export function gammaDist(
     shape = shapeOrOptions as f64;
     shape = _numberArg('gammaDist', 'shape', shape);
     _gammaPositiveFinite('shape', shape);
-    if (typeof rateOrOptions === 'object' && rateOrOptions !== null) {
+    // A BigNumber or a Fraction is an object too, but it is a rate, not an options object
+    // (#1360): `evaluate('gammaDist(2, 2)')` in a BigNumber scope passes one.
+    if (
+      typeof rateOrOptions === 'object' &&
+      rateOrOptions !== null &&
+      !isBigNumber(rateOrOptions) &&
+      !isFraction(rateOrOptions)
+    ) {
       if ('rate' in rateOrOptions) {
         throw new Error('gammaDist: pass rate or scale, not both');
       }
