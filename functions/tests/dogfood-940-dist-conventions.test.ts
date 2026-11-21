@@ -239,3 +239,18 @@ describe('#940 parameter conventions: the arguments of each factory give the doc
     expect(d.pdf([1, 2])).toBeCloseTo(1 / (2 * Math.PI * Math.sqrt(1.75)), 12);
   });
 });
+
+describe('#940 an array in a number parameter throws (Number([2]) is 2)', () => {
+  it.each([
+    ['normalDist([2], 1)', () => normalDist([2] as never, 1)],
+    ['normalDist(0, [1])', () => normalDist(0, [1] as never)],
+    ['poissonDist([3])', () => poissonDist([3] as never)],
+    ['poissonDist(new Float64Array([3]))', () => poissonDist(new Float64Array([3]) as never)],
+  ])('%s', (_label, call) => {
+    expect(call).toThrow(TypeError);
+  });
+  it('GUARD: a number still passes', () => {
+    expect(normalDist(2, 1).mean).toBe(2);
+    expect(poissonDist(3).mean).toBe(3);
+  });
+});

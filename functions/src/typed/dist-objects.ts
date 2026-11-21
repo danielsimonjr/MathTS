@@ -169,7 +169,8 @@ function _typeName(v: unknown): string {
 
 /**
  * Throws a `TypeError` when a number parameter has no numeric reading: an options object, `'x'`.
- * `undefined` passes (the factory has its default, or its present result). A number (also NaN),
+ * An array or a typed array throws as well (`[2]` reads as 2). `undefined` passes (the factory
+ * has its default, or its present result). A number (also NaN),
  * `null`, a numeric string, a BigNumber and a Fraction pass to the existing validation: the
  * factories are in the expression scope, where a parameter can be a BigNumber.
  *
@@ -179,7 +180,8 @@ function _typeName(v: unknown): string {
  */
 function _numberArg(name: string, param: string, v: unknown): void {
   if (v === undefined || typeof v === 'number') return;
-  if (!Number.isNaN(Number(v))) return;
+  // `Number([2])` is 2, so an array (and a typed array) would read as its only entry.
+  if (!Array.isArray(v) && !ArrayBuffer.isView(v) && !Number.isNaN(Number(v))) return;
   throw new TypeError(`${name}: ${param} must be a number, got ${_typeName(v)}`);
 }
 
