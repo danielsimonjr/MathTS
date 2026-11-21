@@ -5,6 +5,7 @@
  */
 
 import { assertLoopOrder } from '../utils/limits.js';
+import { binomialBigInt } from '../probability/bigint-binomial.js';
 
 /**
  * Largest index whose value is a finite double. The next index rounds to Infinity
@@ -32,13 +33,7 @@ function assertNonNegInt(n: number, name: string): void {
 
 /** Exact binomial coefficient C(n, k) as a bigint (0 outside 0 <= k <= n). */
 function binomialBig(n: number, k: number): bigint {
-  if (k < 0 || k > n) return 0n;
-  const kk = Math.min(k, n - k);
-  let c = 1n;
-  for (let i = 1; i <= kk; i++) {
-    c = (c * BigInt(n - kk + i)) / BigInt(i);
-  }
-  return c;
+  return binomialBigInt(BigInt(n), BigInt(k));
 }
 
 /** Motzkin number M(n): number of Motzkin paths of length n. Infinity for n > 654. */

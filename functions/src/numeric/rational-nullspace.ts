@@ -13,6 +13,7 @@
  */
 
 import { Fraction, isFraction } from '@danielsimonjr/mathts-core';
+import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
 
 /** Options for {@link rationalNullspace}. */
 export interface RationalNullspaceOptions {
@@ -36,20 +37,9 @@ export interface RationalNullspaceResult {
   readonly rank: number;
 }
 
-function gcd(a: bigint, b: bigint): bigint {
-  let x = a < 0n ? -a : a;
-  let y = b < 0n ? -b : b;
-  while (y !== 0n) {
-    const t = y;
-    y = x % y;
-    x = t;
-  }
-  return x;
-}
-
 function lcm(a: bigint, b: bigint): bigint {
   if (a === 0n || b === 0n) return 0n;
-  return (a / gcd(a, b)) * b;
+  return (a / gcdBigInt(a, b)) * b;
 }
 
 function entryToFraction(value: number | bigint | Fraction, row: number, col: number): Fraction {
@@ -72,7 +62,7 @@ function integerize(vec: Fraction[]): Fraction[] {
   const ints = vec.map((f) => (f.numerator * scale) / f.denominator);
   let content = 0n;
   for (const x of ints) {
-    if (x !== 0n) content = gcd(content, x);
+    if (x !== 0n) content = gcdBigInt(content, x);
   }
   if (content === 0n) content = 1n;
   const reduced = ints.map((x) => x / content);

@@ -177,6 +177,51 @@ function integerRoot(value: bigint, n: 2 | 3): bigint {
 /** At or above this coefficient, `normalize` tests the low bit before it divides by ten. */
 const BIT_TEST_LIMIT = 10n ** 40n;
 
+/** True when a positive coefficient ends in a decimal zero. */
+function endsInZero(coefficient: bigint): boolean {
+  // An odd coefficient has no trailing zero. For a long coefficient the bit test is much
+  // cheaper than a division. For a short one the division is cheaper than the bit test.
+  return (coefficient < BIT_TEST_LIMIT || (coefficient & 1n) === 0n) && coefficient % 10n === 0n;
+}
+
+/**
+ * A positive coefficient without its trailing decimal zeros, and the count of zeros removed.
+ *
+ * Removing one zero in each step divides the whole coefficient each time, so `Z` zeros of an
+ * `n`-digit coefficient cost `Z` divisions of `n` digits: `fromBigInt(10n ** 100000n)` took 25 s.
+ * Here a long coefficient is divided by the powers `10^(2^j)`, largest first. Squaring finds the
+ * largest `J` with `10^(2^J)` a divisor, so fewer than `2^(J+1)` zeros remain; at step `j` fewer
+ * than `2^(j+1)` remain, so the step divides when at least `2^j` remain. That is about
+ * `3 * log2(Z)` divisions. A short coefficient has at most 40 zeros and keeps the simple loop.
+ */
+function stripTrailingZeros(coefficient: bigint): [bigint, number] {
+  let coef = coefficient;
+  let zeros = 0;
+  if (coef < BIT_TEST_LIMIT) {
+    while (coef % 10n === 0n) {
+      coef /= 10n;
+      zeros++;
+    }
+    return [coef, zeros];
+  }
+  const powers = [10n];
+  for (;;) {
+    const last = powers[powers.length - 1] as bigint;
+    const next = last * last;
+    if (next > coef || coef % next !== 0n) break;
+    powers.push(next);
+  }
+  for (let j = powers.length - 1; j >= 0; j--) {
+    const power = powers[j] as bigint;
+    const quotient = coef / power;
+    if (quotient * power === coef) {
+      coef = quotient;
+      zeros += 2 ** j;
+    }
+  }
+  return [coef, zeros];
+}
+
 /** True when `10^precision` comes from the cache, so a comparison with it is cheap. */
 function cachedPrecision(precision: number): boolean {
   return Number.isInteger(precision) && precision > 0 && precision < POW10_CACHE_SIZE - 3;
@@ -582,14 +627,10 @@ export class BigNumber implements MathTSValue {
       return BigNumber.#allocate(0, 0n, 0);
     }
     const sign: 1 | -1 = n < 0n ? -1 : 1;
-    let coef = n < 0n ? -n : n;
-    let exp = 0;
-    // Strip factors of 10 in place — no toString / BigInt(string) round-trip.
-    while (coef % 10n === 0n) {
-      coef /= 10n;
-      exp++;
-    }
-    return BigNumber.#allocate(sign, coef, exp);
+    const coef = n < 0n ? -n : n;
+    if (!endsInZero(coef)) return BigNumber.#allocate(sign, coef, 0);
+    const [stripped, zeros] = stripTrailingZeros(coef);
+    return BigNumber.#allocate(sign, stripped, zeros);
   }
 
   /**
@@ -2530,17 +2571,9 @@ export class BigNumber implements MathTSValue {
       return BigNumber.#allocate(0, 0n, 0);
     }
 
-    // Remove trailing zeros
-    let coef = coefficient;
-    let exp = exponent;
-    // An odd coefficient has no trailing zero. For a long coefficient the bit test is much
-    // cheaper than a division. For a short one the division is cheaper than the bit test.
-    while ((coef < BIT_TEST_LIMIT || (coef & 1n) === 0n) && coef % 10n === 0n) {
-      coef = coef / 10n;
-      exp++;
-    }
-
-    return BigNumber.#allocate(sign, coef, exp);
+    if (!endsInZero(coefficient)) return BigNumber.#allocate(sign, coefficient, exponent);
+    const [coef, zeros] = stripTrailingZeros(coefficient);
+    return BigNumber.#allocate(sign, coef, exponent + zeros);
   }
 }
 

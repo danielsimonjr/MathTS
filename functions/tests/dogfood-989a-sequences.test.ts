@@ -215,7 +215,9 @@ describe('number theory with a huge argument (#989)', () => {
   });
 
   it('combinations and the functions built on it stop at a huge argument [slow]', () => {
-    expect(() => composition(1e308, 3)).toThrow(RangeError);
+    // The typed combinations loops min(k, n - k) times, so a huge n ends at once and the
+    // value (about 5e615) is Infinity. The number path of the former factory refused it (#1093).
+    expect(composition(1e308, 3)).toBe(Infinity);
     expect(catalan(1e9)).toBe(Infinity);
     expect(catalan(2e7)).toBe(Infinity);
     expect(composition(3e7, 1.5e7)).toBe(Infinity);

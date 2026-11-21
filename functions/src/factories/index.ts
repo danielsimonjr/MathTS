@@ -62,8 +62,14 @@ import { createSize } from '../matrix/size.js';
 import { createSqueeze } from '../matrix/squeeze.js';
 
 // probability
-import { createCombinations } from '../probability/combinations.js';
-import { createCombinationsWithRep } from '../probability/combinationsWithRep.js';
+// One implementation of combinations, combinationsWithRep, permutations and multinomial: the
+// typed functions. The parse path and the API give the same values and the same errors.
+import {
+  combinations as typedCombinations,
+  combinationsWithRep as typedCombinationsWithRep,
+  multinomial as typedMultinomial,
+  permutations as typedPermutations,
+} from '../typed/probability.js';
 import { createLgamma } from '../probability/lgamma.js';
 import { createPickRandom } from '../probability/pickRandom.js';
 import { createRandom } from '../probability/random.js';
@@ -183,11 +189,6 @@ export const map = createMap(factoryScope as Parameters<typeof createMap>[0]);
 export const size = createSize(factoryScope as Parameters<typeof createSize>[0]);
 export const squeeze = createSqueeze(factoryScope as Parameters<typeof createSqueeze>[0]);
 
-// probability (activated factories — superseded by typed/probability; kept internal for factoryScope wiring)
-const combinations = createCombinations(factoryScope as Parameters<typeof createCombinations>[0]);
-const combinationsWithRep = createCombinationsWithRep(
-  factoryScope as Parameters<typeof createCombinationsWithRep>[0]
-);
 // lgamma superseded by typed/special.ts (WASM-backed); kept internal for factoryScope wiring
 const lgamma = createLgamma(factoryScope as Parameters<typeof createLgamma>[0]);
 const pickRandom = createPickRandom(factoryScope as Parameters<typeof createPickRandom>[0]);
@@ -278,8 +279,8 @@ factoryScope.atan = factory_atan;
 factoryScope.atanh = factory_atanh;
 factoryScope.bitNot = bitNot;
 factoryScope.clone = clone;
-factoryScope.combinations = combinations;
-factoryScope.combinationsWithRep = combinationsWithRep;
+factoryScope.combinations = typedCombinations;
+factoryScope.combinationsWithRep = typedCombinationsWithRep;
 factoryScope.conj = conj;
 factoryScope.cos = factory_cos;
 factoryScope.cosh = factory_cosh;
@@ -918,16 +919,11 @@ factoryScope.sort = sort;
 // ---------------------------------------------------------------------------
 
 import { createStirlingS2 } from '../combinatorics/stirlingS2.js';
-import { createPermutations } from '../probability/permutations.js';
 
 export const stirlingS2 = createStirlingS2(factoryScope as Parameters<typeof createStirlingS2>[0]);
 factoryScope.stirlingS2 = stirlingS2;
 
-// probability (activated factory — superseded by typed/probability; kept internal for factoryScope wiring)
-const permutations_factory = createPermutations(
-  factoryScope as Parameters<typeof createPermutations>[0]
-);
-factoryScope.permutations = permutations_factory;
+factoryScope.permutations = typedPermutations;
 
 // ---------------------------------------------------------------------------
 // Tier 9: bellNumbers (unlocked by stirlingS2)
@@ -1248,7 +1244,6 @@ import { createMedian } from '../statistics/median.js';
 import { createVariance, createVarianceDdof } from '../statistics/variance.js';
 import { createQuantileSeq } from '../statistics/quantileSeq.js';
 import { createKldivergence } from '../probability/kldivergence.js';
-import { createMultinomial } from '../probability/multinomial.js';
 import { createFreqz } from '../signal/freqz.js';
 import { createSetCartesian } from '../set/setCartesian.js';
 import { createSetDifference } from '../set/setDifference.js';
@@ -1323,11 +1318,7 @@ export const kldivergence = createKldivergence(
 );
 factoryScope.kldivergence = kldivergence;
 
-// probability (activated factory — superseded by typed/probability; kept internal for factoryScope wiring)
-const multinomial_factory = createMultinomial(
-  factoryScope as Parameters<typeof createMultinomial>[0]
-);
-factoryScope.multinomial = multinomial_factory;
+factoryScope.multinomial = typedMultinomial;
 
 export const freqz = createFreqz(factoryScope as Parameters<typeof createFreqz>[0]);
 factoryScope.freqz = freqz;
