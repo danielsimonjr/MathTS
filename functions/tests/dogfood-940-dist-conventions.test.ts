@@ -276,4 +276,46 @@ describe('#1384 a parameter with a numeric reading is stored as that number', ()
   it('gammaDist: a string shape and rate (a TypeError before: not finite)', () => {
     expect(call(gammaDist, '3', '4')).toMatchObject({ mean: 0.75 });
   });
+  it('gammaDist options: a string or BigNumber shape and scale (a TypeError before)', () => {
+    expect(call(gammaDist, { shape: '2', scale: '2' })).toMatchObject({ mean: 4 });
+    expect(call(gammaDist, 2, { scale: '2' })).toMatchObject({ mean: 4 });
+    expect(call(gammaDist, { shape: bignumber(2), scale: bignumber(2) })).toMatchObject({
+      mean: 4,
+    });
+    expect(() => call(gammaDist, { shape: 'x', scale: 2 })).toThrow(/shape must be a number/);
+  });
+  it('multivariateNormal: string entries of mean and cov are stored as numbers (strings before)', () => {
+    const want = multivariateNormal(
+      [1, 2],
+      [
+        [2, 0.5],
+        [0.5, 1],
+      ]
+    );
+    const got = call(
+      multivariateNormal,
+      ['1', '2'],
+      [
+        ['2', '0.5'],
+        ['0.5', '1'],
+      ]
+    ) as typeof want;
+    expect(got.mean).toEqual([1, 2]);
+    expect(typeof got.mean[0]).toBe('number');
+    expect(got.cov).toEqual([
+      [2, 0.5],
+      [0.5, 1],
+    ]);
+    expect(got.pdf([1.5, 1])).toBe(want.pdf([1.5, 1]));
+    expect(() =>
+      call(
+        multivariateNormal,
+        ['x', 2],
+        [
+          [1, 0],
+          [0, 1],
+        ]
+      )
+    ).toThrow(/mean\[0\] must be a number/);
+  });
 });

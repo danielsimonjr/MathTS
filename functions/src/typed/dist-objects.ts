@@ -805,8 +805,8 @@ export function gammaDist(
       throw new Error('gammaDist: pass rate or scale, not both');
     }
     _onlyKeys('gammaDist', shapeOrOptions, ['shape', 'scale']);
-    shape = shapeOrOptions.shape;
-    const scale = shapeOrOptions.scale;
+    shape = _numberArg('gammaDist', 'shape', shapeOrOptions.shape);
+    const scale = _numberArg('gammaDist', 'scale', shapeOrOptions.scale);
     _gammaPositiveFinite('shape', shape);
     _gammaPositiveFinite('scale', scale);
     rate = 1 / scale;
@@ -822,7 +822,7 @@ export function gammaDist(
       if (!('scale' in rateOrOptions)) {
         throw new Error('gammaDist: expected a positive rate or { scale }');
       }
-      const scale = rateOrOptions.scale;
+      const scale = _numberArg('gammaDist', 'scale', rateOrOptions.scale);
       _gammaPositiveFinite('scale', scale);
       rate = 1 / scale;
     } else {
@@ -1597,6 +1597,12 @@ export function multivariateNormal(mean: number[], cov: number[][]): Multivariat
   if (cov.length !== k || cov.some((row) => row.length !== k)) {
     throw new Error('multivariateNormal: cov must be a k×k matrix matching mean');
   }
+  // Each entry is stored as the number that it reads as (#1384): a numeric string was stored as
+  // it was, and `+` on it joins strings.
+  mean = Array.from(mean, (v, i) => _numberArg('multivariateNormal', `mean[${i}]`, v));
+  cov = cov.map((row, i) =>
+    Array.from(row, (v, j) => _numberArg('multivariateNormal', `cov[${i}][${j}]`, v))
+  );
   const L = _cholesky(cov);
   let logDet = 0;
   for (let i = 0; i < k; i++) logDet += 2 * Math.log(L[i][i]);
