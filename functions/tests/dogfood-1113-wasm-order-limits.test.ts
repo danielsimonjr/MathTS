@@ -213,8 +213,7 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
     const r = jn(1_250_000_000, 1_249_999_999);
     expect(r.timedOut).toBe(false);
     expect(r.ok).toBe(false);
-    // The binary has no `abort` import, so an abort traps as a RuntimeError (`unreachable`).
-    expect(r.message).toMatch(/unreachable/i);
+    expect(r.message).toMatch(/sweep/);
     expect(r.ms).toBeLessThan(5_000);
   }, 30_000);
 
@@ -237,7 +236,7 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
       const r = callKernel(fn, n, 0.5);
       expect(r.timedOut, `${fn}(${n}) must not loop`).toBe(false);
       expect(r.ok, `${fn}(${n})`).toBe(false);
-      expect(r.message, `${fn}(${n})`).toMatch(/unreachable/i);
+      expect(r.message, `${fn}(${n})`).toMatch(/exceeds the supported maximum/);
     }
   }, 120_000);
 

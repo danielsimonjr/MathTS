@@ -68,9 +68,26 @@ returns its exports (pointer ABI, without the glue). Node 22.12 needs the flag
 Bun has no loader for a WebAssembly module: `import()` of a binary subpath returns the file path
 as `default`.
 
-A binary has no `abort` import, so an AssemblyScript abort (a failed assertion, or the
-`RangeError` that a kernel throws above its order limit) traps as `WebAssembly.RuntimeError`.
-The message is `unreachable` in V8. The abort message of the source is not available.
+A binary has no `abort` import. An AssemblyScript abort (a failed assertion, or the
+`RangeError` that a kernel throws above its order limit) stores its message, file, line and
+column in globals and traps as `WebAssembly.RuntimeError` (message `unreachable` in V8). The glue
+catches the trap and throws `Error('<message> in <file>:<line>:<column>')`, for example
+`Index out of range in ~lib/typedarray.ts:1457:64`.
+
+A host that calls a binary directly reads the record with these exports:
+
+- `abort_take()` returns 1 when an abort is pending, and clears the flag. A trap that is not an
+  abort (a memory access out of bounds) leaves the flag clear. Call it first, in the `catch` of
+  every call into the binary (a runtime helper such as `__new` can abort too). An abort that the
+  host does not read stays pending.
+- `abort_message()` and `abort_file()` return pointers to AssemblyScript strings (UTF-16 text,
+  the byte length is at pointer - 4).
+- `abort_line()` and `abort_column()` return numbers.
+
+`guardWasmAborts` of `@danielsimonjr/mathts-core/internal` does this for the loaders of `matrix`
+and `functions`. Each loader throws the `Error` text that it threw when the binary had the
+import (`WASM abort`, and `AS WASM abort` for `WASMBackend`). The `cause` of that `Error` is an
+`Error` with the text `<message> in <file>:<line>:<column>`.
 
 ### Output parameters
 

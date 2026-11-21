@@ -31,8 +31,15 @@
  * parameter that the glue does not have, a class other than `in` or `out`, and an anchor of the
  * glue that is not found (a change of the `asc` glue shape).
  *
+ * The same step adds the abort translation. The binary has no `env.abort` import (#1019), so an
+ * AssemblyScript abort traps as a `WebAssembly.RuntimeError`, and the binary keeps the message,
+ * the file, the line and the column in globals (`assembly/src/abort.ts`). Each export of the glue
+ * catches that trap, reads the record and throws `Error('<message> in <file>:<line>:<column>')`,
+ * the text that the `env.abort` of the generated glue threw before.
+ *
  * The packages `matrix` and `functions` do not use this glue: they load `mathts.wasm` and pass
- * pointers.
+ * pointers. Their loaders translate the trap with `translateWasmAbort` of
+ * `@danielsimonjr/mathts-core/internal`.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -242,6 +249,52 @@ const HELPER_TAIL = `    new constructor(memory.buffer, buffer, length).set(valu
   }
 `;
 
+// The return of `instantiate`: the patch returns the exports through `__abortAware`.
+const ABORT_TAIL = `  return adaptedExports;
+`;
+
+/**
+ * The abort translation. `__liftString` is the helper of `asc` (the generated glue drops it when
+ * the binary has no `abort` import). A trap that is not an abort is not translated: the flag of
+ * `abort_take` is clear for it. The runtime helpers (`__new`, ...) are wrapped too: an abort of
+ * `__new` that no wrapper reads would stay pending and give its record to a later trap.
+ */
+function abortGlue() {
+  return `  function __liftString(pointer) {
+    if (!pointer) return null;
+    const end = pointer + new Uint32Array(memory.buffer)[pointer - 4 >>> 2] >>> 1,
+      memoryU16 = new Uint16Array(memory.buffer);
+    let start = pointer >>> 1, string = "";
+    while (end - start > 1024) string += String.fromCharCode(...memoryU16.subarray(start, start += 1024));
+    return string + String.fromCharCode(...memoryU16.subarray(start, end));
+  }
+  function __abortError(error) {
+    if (!(error instanceof WebAssembly.RuntimeError) || !exports.abort_take()) return error;
+    const message = __liftString(exports.abort_message() >>> 0);
+    const fileName = __liftString(exports.abort_file() >>> 0);
+    return Error(\`\${message} in \${fileName}:\${exports.abort_line() >>> 0}:\${exports.abort_column() >>> 0}\`, { cause: error });
+  }
+  function __abortAware(adapted) {
+    const guarded = {};
+    for (const key of new Set([...Object.keys(exports), ...Object.keys(adapted)])) {
+      const value = adapted[key];
+      guarded[key] =
+        typeof value === "function" && !key.startsWith("abort_")
+          ? (...args) => {
+              try {
+                return value(...args);
+              } catch (error) {
+                throw __abortError(error);
+              }
+            }
+          : value;
+    }
+    return guarded;
+  }
+  return __abortAware(adaptedExports);
+`;
+}
+
 function helperHead() {
   return `  ${MARKER}
   const __out = [];
@@ -364,7 +417,7 @@ export function patchGlue(text, table, { debug = false, file = 'glue' } = {}) {
   for (const exportName of Object.keys(table)) {
     if (!seen.has(exportName)) problems.push(`patch-glue: ${exportName} is not in the glue`);
   }
-  for (const anchor of [HELPER_HEAD, HELPER_TAIL]) {
+  for (const anchor of [HELPER_HEAD, HELPER_TAIL, ABORT_TAIL]) {
     if (!patched.includes(anchor)) {
       const line = JSON.stringify(anchor.split('\n')[0].trim());
       problems.push(`patch-glue: anchor ${line} not found in ${file}`);
@@ -374,7 +427,8 @@ export function patchGlue(text, table, { debug = false, file = 'glue' } = {}) {
 
   patched = patched
     .replace(HELPER_HEAD, () => helperHead())
-    .replace(HELPER_TAIL, () => helperTail(debug));
+    .replace(HELPER_TAIL, () => helperTail(debug))
+    .replace(ABORT_TAIL, () => abortGlue());
   return patched;
 }
 

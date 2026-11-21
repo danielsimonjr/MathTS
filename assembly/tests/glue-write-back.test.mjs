@@ -304,6 +304,7 @@ const STUB = `
       return __dataview.getUint32(pointer, true);
     }
   }
+  return adaptedExports;
 `;
 const STUB_TABLE = {
   kern: { a: 'in', b: 'out' },
@@ -337,8 +338,7 @@ function run(text, kernels) {
     __unpin() {},
     ...kernels({ memory, view }),
   };
-  const body = `${text}\n  return adaptedExports;`;
-  return new Function('exports', 'memory', body)(exports, memory);
+  return new Function('exports', 'memory', text)(exports, memory);
 }
 const scaleKernel = (write) => (env) => ({
   kern(a, b, k) {
@@ -372,6 +372,14 @@ test('patchGlue: a class other than in or out fails the build', () => {
 
 test('patchGlue: a glue without the lowering helper fails the build', () => {
   const text = STUB.replace('function __lowerTypedArray(', 'function __lowerOther(');
+  assert.throws(
+    () => patchGlue(text, STUB_TABLE, { debug: false, file: 'stub.js' }),
+    /patch-glue: anchor .* not found in stub\.js/
+  );
+});
+
+test('patchGlue: a glue without the return of the exports fails the build', () => {
+  const text = STUB.replace('  return adaptedExports;\n', '');
   assert.throws(
     () => patchGlue(text, STUB_TABLE, { debug: false, file: 'stub.js' }),
     /patch-glue: anchor .* not found in stub\.js/

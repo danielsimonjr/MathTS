@@ -219,6 +219,9 @@ export {
   verifyWasmIntegrity,
   resolvePackagedWasm,
   defaultWasmLocation,
+  WASM_ABORT_TEXT,
+  translateWasmAbort,
+  guardWasmAborts,
   WasmModuleLoader,
 } from './wasm-loader.js';
 

@@ -14,6 +14,9 @@
 // Stub-runtime heap reset, called by the functions bridges after each managed call.
 export { heap_reset } from './heap';
 
+// Record of the last abort (the handler is `use: abort=src/abort/trapAbort` in asconfig.json).
+export { abort_take, abort_message, abort_file, abort_line, abort_column } from './abort';
+
 // =============================================================================
 // Core Types
 // =============================================================================

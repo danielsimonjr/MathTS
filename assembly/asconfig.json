@@ -20,7 +20,7 @@
     "bindings": "esm",
     "exportRuntime": true,
     "runtime": "stub",
-    "use": ["abort="],
+    "use": ["abort=src/abort/trapAbort"],
     "enable": ["simd", "bulk-memory", "reference-types"]
   }
 }

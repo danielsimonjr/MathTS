@@ -59,9 +59,13 @@ import {
   ldexp,
   withPow2Scale,
   notSquareError,
+  guardWasmAborts,
 } from '@danielsimonjr/mathts-core/internal';
 import { scaleDense } from '../operations/common.js';
 import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
+
+/** The message of the `Error` that an abort of the binary gives through this backend. */
+const AS_ABORT_TEXT = 'AS WASM abort';
 
 /**
  * A pivot is zero when it is at most this multiple of its cancellation sum (see
@@ -441,17 +445,10 @@ export class WASMBackend implements MatrixBackend {
    * tests and multiple backend instances can coexist in the same process.
    */
   private async loadAsModule(path: string): Promise<AsModule> {
-    const imports: WebAssembly.Imports = {
-      env: {
-        abort: (msg: number, file: number, line: number, column: number) => {
-          console.error('AS WASM abort', { msg, file, line, column });
-          throw new Error('AS WASM abort');
-        },
-        seed: () => Date.now(),
-      },
-      Math: Math as unknown as WebAssembly.ModuleImports,
-      Date: Date as unknown as WebAssembly.ModuleImports,
-    };
+    // The binary has no import (#1019): an abort traps, and `guardWasmAborts` turns the trap into
+    // the `Error` that the `env.abort` of this loader threw (`AS_ABORT_TEXT`). Its `cause` holds
+    // the message and the position of the abort.
+    const imports: WebAssembly.Imports = {};
 
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
     const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
@@ -482,7 +479,7 @@ export class WASMBackend implements MatrixBackend {
         instance = await WebAssembly.instantiate(module, imports);
       }
     }
-    return instance.exports as unknown as AsModule;
+    return guardWasmAborts(instance.exports, AS_ABORT_TEXT) as unknown as AsModule;
   }
 
   /**

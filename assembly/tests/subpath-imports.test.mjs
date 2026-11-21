@@ -6,8 +6,9 @@
  * - `./wasm` and `./debug` are the binaries. They have no import, so Node loads them as
  *   WebAssembly ES modules. Bun has no such loader: it returns the file path as `default`.
  * - A binary that has no import needs no host function for `abort`. An AssemblyScript abort
- *   (a failed assert, an index out of range) traps as a `WebAssembly.RuntimeError`
- *   (message `unreachable` in V8, `Unreachable code should not be executed` in JavaScriptCore).
+ *   (a failed assert, an index out of range) stores its message, file, line and column in globals
+ *   (`abort_*` exports) and traps as a `WebAssembly.RuntimeError`. The glue turns the trap into an
+ *   `Error('<message> in <file>:<line>:<column>')`.
  *
  * Plain asserts, no framework: the test runs with `node` and with `bun`.
  */
@@ -107,15 +108,51 @@ for (const { subpath, file } of BINARIES) {
   });
 }
 
-await test('an abort traps as WebAssembly.RuntimeError and leaves the glue usable', async () => {
-  const release = await import(PACKAGE);
-  // chebyshevT throws a RangeError above the order that an i32 holds; the throw is an abort.
-  assert.throws(
-    () => release.chebyshevT(3e9, 0.5),
-    (error) => error instanceof WebAssembly.RuntimeError && /unreachable/i.test(error.message)
-  );
-  assert.equal(release.add_f64(2, 3), 5);
-  assert.equal(release.chebyshevT(3, 0.5), -1);
+await test('the glue turns an abort into an Error with its message and position', async () => {
+  for (const subpath of [PACKAGE, `${PACKAGE}/debug.js`]) {
+    const glue = await import(subpath);
+    // chebyshevT throws a RangeError above the order that an i32 holds; the throw is an abort.
+    // The text of origin/main (`env.abort` of the asc glue): `<message> in <file>:<line>:<column>`.
+    assert.throws(
+      () => glue.chebyshevT(3e9, 0.5),
+      (error) =>
+        error instanceof Error &&
+        error.name === 'Error' &&
+        /^chebyshevT: order exceeds the supported maximum in src\/ops\/special\.ts:\d+:\d+$/.test(
+          error.message
+        ) &&
+        error.cause instanceof WebAssembly.RuntimeError
+    );
+    assert.equal(glue.add_f64(2, 3), 5);
+    assert.equal(glue.chebyshevT(3, 0.5), -1);
+    // An abort of a runtime helper has the same form (`__new` above the size limit of the runtime).
+    assert.throws(
+      () => glue.__new(0x7fffffff, 1),
+      (error) =>
+        error.name === 'Error' &&
+        /^Allocation too large in ~lib\/rt\/stub\.ts:\d+:\d+$/.test(error.message)
+    );
+  }
+});
+
+await test('the raw binary traps as WebAssembly.RuntimeError and keeps the abort record', async () => {
+  const bytes = readFileSync(join(here, '../build/mathts.wasm'));
+  const { instance } = await WebAssembly.instantiate(bytes, {});
+  const x = instance.exports;
+  assert.equal(x.abort_take(), 0, 'no abort is pending before the first');
+  assert.throws(() => x.chebyshevT(3e9, 0.5), WebAssembly.RuntimeError);
+  assert.equal(x.abort_take(), 1, 'the abort is pending');
+  assert.equal(x.abort_take(), 0, 'abort_take clears the flag');
+  const text = (pointer) => {
+    const length = new Uint32Array(x.memory.buffer)[(pointer - 4) >>> 2] >>> 1;
+    return String.fromCharCode(...new Uint16Array(x.memory.buffer, pointer, length));
+  };
+  assert.match(text(x.abort_message()), /exceeds the supported maximum/);
+  assert.match(text(x.abort_file()), /\.ts$/);
+  assert.ok(x.abort_line() > 0 && x.abort_column() > 0);
+  // A trap that is not an abort leaves the flag clear: a host does not reuse the old record.
+  assert.throws(() => x.array_sum(0x7ffffff0), WebAssembly.RuntimeError); // memory access out of bounds
+  assert.equal(x.abort_take(), 0);
 });
 
 console.log(`\nsubpath-imports: ${passed} passed, ${failed} failed`);

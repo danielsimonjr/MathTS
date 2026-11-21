@@ -1074,6 +1074,9 @@
       "UnitSystemEntry": {
         "kind": "type"
       },
+      "WASM_ABORT_TEXT": {
+        "kind": "string"
+      },
       "WasmManifest": {
         "kind": "type"
       },
@@ -1243,6 +1246,9 @@
         "kind": "function"
       },
       "getArrayElement": {
+        "kind": "function"
+      },
+      "guardWasmAborts": {
         "kind": "function"
       },
       "hasOwnProperty": {
@@ -1495,6 +1501,9 @@
         "kind": "function"
       },
       "toPrecision": {
+        "kind": "function"
+      },
+      "translateWasmAbort": {
         "kind": "function"
       },
       "traverse": {
@@ -10286,6 +10295,21 @@
       "__unpin": {
         "kind": "function"
       },
+      "abort_column": {
+        "kind": "function"
+      },
+      "abort_file": {
+        "kind": "function"
+      },
+      "abort_line": {
+        "kind": "function"
+      },
+      "abort_message": {
+        "kind": "function"
+      },
+      "abort_take": {
+        "kind": "function"
+      },
       "abs_f64": {
         "kind": "function"
       },
@@ -11270,6 +11294,21 @@
         "kind": "object"
       },
       "__unpin": {
+        "kind": "function"
+      },
+      "abort_column": {
+        "kind": "function"
+      },
+      "abort_file": {
+        "kind": "function"
+      },
+      "abort_line": {
+        "kind": "function"
+      },
+      "abort_message": {
+        "kind": "function"
+      },
+      "abort_take": {
         "kind": "function"
       },
       "abs_f64": {
