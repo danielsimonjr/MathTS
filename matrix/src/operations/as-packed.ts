@@ -5,7 +5,7 @@
  * in `@danielsimonjr/mathts-functions`.
  */
 
-import { DenseMatrix, isDenseMatrix } from '../types/DenseMatrix.js';
+import { DenseMatrix, assertNestedEntry, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { densifyForSolver } from './densify.js';
 import { denseReader } from '../types/dense/storage.js';
@@ -96,6 +96,26 @@ function nestedFromPacked(data: Float64Array, rows: number, cols: number): numbe
   return nested;
 }
 
+/**
+ * Row and column count of a nested matrix. Throws the decomposition input error for a 1-D array,
+ * and a TypeError for a row that is not an array or that has another length than row 0. Reads no entry: a caller with entries of another type (the
+ * typed path of `lusolve`) uses it for the shape only.
+ */
+export function nestedMatrixShape(input: readonly unknown[]): { rows: number; cols: number } {
+  const rows = input.length;
+  const first = input[0];
+  // A 1-D array is no nested matrix: it gets the input error of every decomposition reader.
+  if (rows > 0 && !Array.isArray(first)) invalidDecompositionInput(input);
+  const cols = Array.isArray(first) ? first.length : 0;
+  for (let i = 0; i < rows; i++) {
+    const row = input[i];
+    if (!Array.isArray(row) || row.length !== cols) {
+      throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
+    }
+  }
+  return { rows, cols };
+}
+
 function resolveDimensions(input: DecompositionMatrixInput): {
   rows: number;
   cols: number;
@@ -109,12 +129,10 @@ function resolveDimensions(input: DecompositionMatrixInput): {
     return { rows: dense.rows, cols: dense.cols, nested: dense.toArray() };
   }
   if (isNestedNumberMatrix(input)) {
-    const rows = input.length;
-    const cols = input[0]?.length ?? 0;
+    const { rows, cols } = nestedMatrixShape(input);
     for (let i = 0; i < rows; i++) {
-      if (!Array.isArray(input[i]) || input[i].length !== cols) {
-        throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
-      }
+      const row: readonly unknown[] = input[i];
+      for (let j = 0; j < cols; j++) assertNestedEntry(row[j], i, j);
     }
     return { rows, cols, nested: input };
   }

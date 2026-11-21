@@ -134,8 +134,8 @@ describe('issues #977 and #1003: linsolve refuses a b or A of the wrong shape', 
     expect(() => linsolve(A, mathjsB([5, 11, 1]))).toThrow(/dimension mismatch/);
   });
 
-  it('a column b with a non-number entry throws a TypeError', () => {
-    expect(() => linsolve(A, [[5], ['x']] as never)).toThrow(TypeError);
+  it('a column b with a non-numeric string throws Cannot convert, as mathjs lusolve does (L3)', () => {
+    expect(() => linsolve(A, [[5], ['x']] as never)).toThrow(/Cannot convert "x" to a number/);
   });
 
   it('a 1-D MathJS A throws a TypeError that names A', () => {

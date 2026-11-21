@@ -62,6 +62,14 @@ export function isTypedWasmAvailable(): boolean {
 
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
 import { isDual } from '../types/dual.js';
+import {
+  bigNumberToNumber,
+  bigintToNumber,
+  booleanToNumber,
+  fractionToNumber,
+  isNumberTypedArray,
+  stringToNumber,
+} from './number-input.js';
 import { Fraction, isFraction as _isFraction } from '../types/fraction.js';
 import { BigNumber, isBigNumber as _isBigNumber } from '../types/bignumber.js';
 
@@ -171,17 +179,9 @@ export const isFloat64Array = (x: unknown): x is Float64Array => x instanceof Fl
 
 export const isFloat32Array = (x: unknown): x is Float32Array => x instanceof Float32Array;
 
-/**
- * True for a typed array with number elements other than Float64Array: Float32Array, Int32Array,
- * Int16Array, Uint8ClampedArray and the other kinds. BigInt64Array and BigUint64Array hold
- * bigint elements, so this test excludes them.
- */
+/** A typed array of numbers other than Float64Array (Float64Array has its own type). */
 const isNumericTypedArray = (x: unknown): x is ArrayLike<number> =>
-  ArrayBuffer.isView(x) &&
-  !(x instanceof DataView) &&
-  !(x instanceof Float64Array) &&
-  !(x instanceof BigInt64Array) &&
-  !(x instanceof BigUint64Array);
+  isNumberTypedArray(x) && !(x instanceof Float64Array);
 
 export const isInt32Array = (x: unknown): x is Int32Array => x instanceof Int32Array;
 
@@ -307,13 +307,7 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
   {
     from: 'string',
     to: 'number',
-    convert: (s: unknown) => {
-      // Number() reads the whole string (hex, exponent, surrounding space); parseFloat would
-      // read '3abc' as 3.
-      const n = Number(s as string);
-      if (isNaN(n)) throw new Error(`Cannot convert "${s}" to a number`);
-      return n;
-    },
+    convert: stringToNumber,
   },
   {
     from: 'string',
@@ -394,22 +388,22 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
   {
     from: 'boolean',
     to: 'number',
-    convert: (b: unknown) => (b ? 1 : 0),
+    convert: booleanToNumber,
   },
   {
     from: 'bigint',
     to: 'number',
-    convert: (n: unknown) => Number(n as bigint),
+    convert: bigintToNumber,
   },
   {
     from: 'Fraction',
     to: 'number',
-    convert: (f: unknown) => (f as Fraction).toNumber(),
+    convert: fractionToNumber,
   },
   {
     from: 'BigNumber',
     to: 'number',
-    convert: (bn: unknown) => (bn as BigNumber).valueOf(),
+    convert: bigNumberToNumber,
   },
 
   // -------------------------------------------------------------------------

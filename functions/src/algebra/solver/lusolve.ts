@@ -2,6 +2,7 @@ import {
   decompositionInputToNestedArray,
   isPackedMatrixDescriptor,
   lu,
+  nestedMatrixShape,
   luSolve,
   densifyForSolver,
 } from '@danielsimonjr/mathts-matrix';
@@ -218,7 +219,7 @@ export const createLusolve = /* #__PURE__ */ factory(
     /** Throw the packed-path errors for a 1-D, a jagged or a non-square nested A. */
     function assertSquareNested(rows: unknown[][]): void {
       // The packed path's own shape check. It reads the row lengths only, not the entries.
-      const cols = decompositionInputToNestedArray(rows as number[][])[0]?.length ?? 0;
+      const { cols } = nestedMatrixShape(rows);
       if (rows.length !== cols) {
         throw new Error(`lu: matrix must be square (got ${rows.length}×${cols})`);
       }

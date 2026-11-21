@@ -511,7 +511,7 @@ export interface SqrtmOptions {
  * @param input - Square matrix (n × n): a `DenseMatrix`, a `SparseMatrix`, a nested `number[][]`, or an
  *   object with a `toArray` method that returns a nested array (the MathJS matrix).
  * @param opts  - Optional flags.
- * @returns sqrtm(A), the principal square root.
+ * @returns sqrtm(input), the principal square root.
  * @throws Error for matrices with negative or complex eigenvalues.
  *
  * @example

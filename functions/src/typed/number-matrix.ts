@@ -4,6 +4,16 @@
  * generic path (#1040).
  */
 
+import { isNumberTypedArray } from '@danielsimonjr/mathts-core/internal';
+import {
+  decompositionInputToNestedArray,
+  densifyForSolver,
+  isDenseMatrix as isNativeDenseMatrix,
+  type DenseMatrix,
+  type SparseMatrix,
+} from '@danielsimonjr/mathts-matrix';
+import { isMatrix, type Matrix as MathJSMatrix } from '../utils/is.js';
+
 /**
  * Tells if every entry of a 2-D array is a number.
  *
@@ -98,10 +108,10 @@ export function numberVector(name: string, x: ArrayLike<unknown>): number[] {
   if (!isVectorInput(x)) {
     throw new TypeError(`${name}: expects an array of numbers, got a ${typeNameOf(x)}`);
   }
-  if (x instanceof BigInt64Array || x instanceof BigUint64Array) {
+  if (isNumberTypedArray(x)) return Array.from(x);
+  if (ArrayBuffer.isView(x)) {
     throw new TypeError(`${name}: expects number data, got a ${typeNameOf(x)}`);
   }
-  if (ArrayBuffer.isView(x)) return Array.from(x as ArrayLike<number>);
   // One pass reads each element once, checks it and copies it. The caller then reads the copy.
   const src: ArrayLike<unknown> = Array.isArray(x) ? x : Array.from(x);
   const out = new Array<number>(src.length);
@@ -113,4 +123,38 @@ export function numberVector(name: string, x: ArrayLike<unknown>): number[] {
     out[i] = v;
   }
   return out;
+}
+
+/** A matrix argument of a function that works on `number[][]`: a nested array or a matrix object. */
+export type MatrixArgument = number[][] | DenseMatrix | SparseMatrix | MathJSMatrix;
+
+/**
+ * Rows of a matrix argument. A nested array is returned as it is. A matrix-package `DenseMatrix`
+ * or `SparseMatrix` is read by the matrix-package reader `decompositionInputToNestedArray` (a
+ * `SparseMatrix` keeps the size limit of `densifyForSolver`). A MathJS matrix is read through
+ * `toArray`, and the nested result goes through the same reader, which checks the shape and
+ * that every entry is a number.
+ *
+ * @param name - The name of the function, for the error message.
+ * @param A - The argument.
+ * @returns The rows of `A`.
+ * @throws A `TypeError` when `A` is no nested array and no matrix, or a matrix has a jagged row or
+ *   an entry that is not a number (the message names the row, the column and the entry type).
+ */
+export function matrixRows(name: string, A: unknown): number[][] {
+  if (Array.isArray(A)) return A as number[][];
+  // `densifyForSolver` tests a sparse matrix by its structure, so a second copy of the package
+  // passes too, and it keeps the size limit.
+  const native = isNativeDenseMatrix(A) ? A : densifyForSolver(A);
+  if (native !== undefined) return decompositionInputToNestedArray(native);
+  if (isMatrix(A)) {
+    const rows: unknown = (A as unknown as { toArray(): unknown }).toArray();
+    // A MathJS matrix of size [n] gives a 1-D array, which is no matrix argument.
+    if (Array.isArray(rows) && (rows.length === 0 || Array.isArray(rows[0]))) {
+      return decompositionInputToNestedArray(rows as number[][]);
+    }
+  }
+  throw new TypeError(
+    `${name}: A must be a number[][], DenseMatrix, SparseMatrix or MathJS matrix (got ${typeNameOf(A)})`
+  );
 }

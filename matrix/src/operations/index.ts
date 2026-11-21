@@ -84,6 +84,8 @@ export {
   decompositionInputToDenseMatrix,
   decompositionInputToNestedArray,
   isPackedMatrixDescriptor,
+  nestedMatrixShape,
   type DecompositionMatrixInput,
   type PackedMatrixDescriptor,
 } from './as-packed.js';
+export { readRightHandSide, type RightHandSide } from './right-hand-side.js';

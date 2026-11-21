@@ -126,9 +126,9 @@ export interface ExpmOptions {
  *
  * @param input - Square matrix (n × n): a `DenseMatrix`, a `SparseMatrix`, a nested `number[][]`, or an
  *   object with a `toArray` method that returns a nested array (the MathJS matrix).
- * @returns expm(A) as a DenseMatrix (n × n).
- * @throws Error if A is not square.
- * @throws {TypeError} if A is not an accepted input.
+ * @returns expm(input) as a DenseMatrix (n × n).
+ * @throws Error if `input` is not square.
+ * @throws {TypeError} if `input` is not an accepted input.
  *
  * @example
  * // expm(0) = I

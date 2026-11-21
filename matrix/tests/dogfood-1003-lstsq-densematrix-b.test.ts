@@ -49,7 +49,7 @@ describe('issue #1003: lstsq accepts a DenseMatrix b', () => {
 
   it('a 3 x 1 b for a 2-row A throws a RangeError that names the shape', () => {
     expect(() => lstsq(A, new DenseMatrix([[5], [11], [1]]))).toThrow(RangeError);
-    expect(() => lstsq(A, new DenseMatrix([[5], [11], [1]]))).toThrow(/expected 2 rows/);
+    expect(() => lstsq(A, new DenseMatrix([[5], [11], [1]]))).toThrow(/b has length 3, expected 2/);
   });
 
   it('pin: a number[] b still works', () => {

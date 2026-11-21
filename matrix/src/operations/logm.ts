@@ -558,7 +558,7 @@ export interface LogmOptions {
  * @param input - Square matrix with no eigenvalue on the closed negative real axis: a `DenseMatrix`, a
  *   `SparseMatrix`, a nested `number[][]`, or an object with a `toArray` method that returns a
  *   nested array (the MathJS matrix).
- * @returns logm(A) as a DenseMatrix.
+ * @returns logm(input) as a DenseMatrix.
  * @throws Error for matrices with non-positive real eigenvalues. When a small eigenvalue is
  *   at the rounding noise of the Schur form, the error has the name
  *   `MatrixLogmNumericallySingularError` and its message gives the remedy.

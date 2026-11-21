@@ -984,6 +984,9 @@
       "MemoizedFunction": {
         "kind": "type"
       },
+      "NATIVE_MATRIX_BRAND": {
+        "kind": "symbol"
+      },
       "NestedArray": {
         "kind": "type"
       },
@@ -1141,6 +1144,9 @@
         "kind": "function"
       },
       "containsCollections": {
+        "kind": "function"
+      },
+      "convertToNumber": {
         "kind": "function"
       },
       "copysign": {
@@ -1309,6 +1315,9 @@
         "kind": "function"
       },
       "isNumber": {
+        "kind": "function"
+      },
+      "isNumberTypedArray": {
         "kind": "function"
       },
       "isObject": {
@@ -1660,6 +1669,9 @@
       "RepeatedEigenvalue": {
         "kind": "type"
       },
+      "RightHandSide": {
+        "kind": "type"
+      },
       "SVDOptions": {
         "kind": "type"
       },
@@ -1903,6 +1915,9 @@
       "multiply": {
         "kind": "function"
       },
+      "nestedMatrixShape": {
+        "kind": "function"
+      },
       "norm": {
         "kind": "function"
       },
@@ -2057,6 +2072,9 @@
         "kind": "function"
       },
       "random": {
+        "kind": "function"
+      },
+      "readRightHandSide": {
         "kind": "function"
       },
       "row": {

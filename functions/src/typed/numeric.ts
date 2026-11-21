@@ -12,8 +12,7 @@
  */
 
 import {
-  densifyForSolver,
-  isDenseMatrix as isNativeDenseMatrix,
+  readRightHandSide,
   singularValues as matrixSingularValues,
   type DenseMatrix,
   type SparseMatrix,
@@ -26,7 +25,8 @@ import {
   pow2ScaleExponent,
 } from '@danielsimonjr/mathts-core/internal';
 import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
-import { isMatrix, type Matrix as MathJSMatrix } from '../utils/is.js';
+import type { Matrix as MathJSMatrix } from '../utils/is.js';
+import { matrixRows, type MatrixArgument } from './number-matrix.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
@@ -200,101 +200,43 @@ export function findRoot(f: (x: f64) => f64, a: f64, b: f64, opts?: FindRootOpti
   return b;
 }
 
-const LINSOLVE_A_MESSAGE = 'linsolve: A must be a square number[][], DenseMatrix or SparseMatrix';
-
-/** True when `rows` is a nested array of numbers. */
-function isNumberRows(rows: unknown): rows is number[][] {
-  return (
-    Array.isArray(rows) &&
-    rows.every((row) => Array.isArray(row) && row.every((v) => typeof v === 'number'))
-  );
-}
-
-/**
- * Rows of the coefficient matrix when `A` is not a nested array: a matrix-package `SparseMatrix`
- * (densified, with the size limit of `densifyForSolver`), a matrix-package `DenseMatrix`, or a
- * MathJS matrix, dense or sparse (read through `toArray`, which must give a nested number array).
- */
-function solverMatrixRows(A: unknown): number[][] {
-  const sparse = densifyForSolver(A);
-  if (sparse !== undefined) return sparse.toArray();
-  if (isNativeDenseMatrix(A)) return A.toArray();
-  if (isMatrix(A)) {
-    const rows: unknown = (A as unknown as { toArray(): unknown }).toArray();
-    if (isNumberRows(rows)) return rows;
-  }
-  throw new TypeError(LINSOLVE_A_MESSAGE);
-}
-
-/**
- * Right-hand side of `linsolve` when `b` is not a 1-D array and not a `Float64Array`: an `n x 1`
- * nested column, a `DenseMatrix` with one column or one row (a 1-D `DenseMatrix` is a row), or a
- * MathJS matrix of size `[n]` or `[n, 1]`. The length is not checked here. Every entry must be a
- * number. Any other shape or type throws a `TypeError` that names the shape.
- */
-function solverRhsVector(b: unknown): number[] {
-  const refuse = (shape: string): never => {
-    throw new TypeError(
-      `linsolve: b must be a vector of length n, an n x 1 column, or an n x 1 or 1 x n matrix (got ${shape})`
-    );
-  };
-  let entries: unknown[];
-  if (Array.isArray(b)) {
-    if (!b.every((row) => Array.isArray(row) && row.length === 1)) {
-      const first: unknown = b[0];
-      refuse(`nested ${b.length} x ${Array.isArray(first) ? first.length : 1}`);
-    }
-    entries = (b as unknown[][]).map((row) => row[0]);
-  } else if (isNativeDenseMatrix(b)) {
-    if (b.cols === 1) entries = b.toArray().map((row) => row[0]);
-    else if (b.rows === 1) entries = b.toArray()[0];
-    else return refuse(`${b.rows} x ${b.cols}`);
-  } else if (isMatrix(b)) {
-    const mj = b as unknown as { size(): number[]; toArray(): unknown };
-    const size = mj.size();
-    const nested = mj.toArray();
-    if (size.length === 1 && Array.isArray(nested)) entries = nested;
-    else if (size.length === 2 && size[1] === 1 && Array.isArray(nested)) {
-      entries = (nested as unknown[][]).map((row) => row[0]);
-    } else return refuse(`size [${size.join(', ')}]`);
-  } else {
-    return refuse(b === null ? 'null' : typeof b);
-  }
-  for (const v of entries) {
-    if (typeof v !== 'number') throw new TypeError('linsolve: b must hold numbers only');
-  }
-  return entries as number[];
-}
-
 /**
  * Solve linear system Ax = b using LU decomposition with partial pivoting.
  *
- * @param A - Coefficient matrix (n x n): a nested array, a matrix-package `DenseMatrix` or
- *   `SparseMatrix` (a `SparseMatrix` is densified with `toDense()` first), or a MathJS matrix.
- * @param b - Right-hand side: a vector (length n), an `n x 1` nested column, a matrix-package
- *   `DenseMatrix` with one column or one row (a 1-D `DenseMatrix` is a row), or a MathJS matrix of
- *   size `[n]` or `[n, 1]`.
+ * @param A - Coefficient matrix (n x n), read by `matrixRows`: a nested array, a matrix-package
+ *   `DenseMatrix` or `SparseMatrix` (a `SparseMatrix` is densified first), or a MathJS matrix.
+ * @param b - Right-hand side, read by the matrix-package `readRightHandSide`: a vector (length n;
+ *   a 1-D array or a typed array of numbers), an `n x 1` nested column, a `DenseMatrix` or
+ *   `SparseMatrix` with one column or one row, or a MathJS matrix of size `[n]` or `[n, 1]`. An
+ *   entry that is a numeric string, a boolean, a bigint, a Fraction or a BigNumber is read as its
+ *   number, as mathjs `lusolve` does.
  * @returns Solution vector x
- * @throws TypeError if `A` is not a square matrix type, or `b` has another shape or holds a non-number.
+ * @throws TypeError if `A` is not a matrix type, `b` has another shape, or an entry of `b` has no
+ *   conversion to number.
  * @throws Error if the matrix is empty, not square, singular, or `b` has the wrong length.
  *
  * @example
  * linsolve([[2, 1], [1, 3]], [5, 10]) // => [1, 3]
  */
 export function linsolve(
-  A: number[][] | SparseMatrix | DenseMatrix | MathJSMatrix,
-  b: number[] | Float64Array | number[][] | DenseMatrix | MathJSMatrix
+  A: MatrixArgument,
+  b: number[] | Float64Array | number[][] | DenseMatrix | SparseMatrix | MathJSMatrix
 ): number[] {
-  const dense = Array.isArray(A) ? A : solverMatrixRows(A);
+  const dense = matrixRows('linsolve', A);
   const n = dense.length;
   if (n === 0) throw new Error('linsolve: empty matrix');
   if (dense[0].length !== n) throw new Error('linsolve: matrix must be square');
-  const rhs =
-    (Array.isArray(b) && !Array.isArray(b[0])) || b instanceof Float64Array
-      ? (b as number[])
-      : solverRhsVector(b);
-  if (rhs.length !== n) throw new Error('linsolve: dimension mismatch');
-  return solvePivoted(dense, rhs, pivotTolerance(n));
+  const rhs = readRightHandSide('linsolve', b, n);
+  let values: number[];
+  if (rhs.kind === 'vector') values = rhs.values;
+  else if (rhs.rows.every((row) => row.length === 1)) values = rhs.rows.map((row) => row[0]);
+  else {
+    throw new TypeError(
+      `linsolve: b must be a vector of length n, an n x 1 column, or an n x 1 or 1 x n matrix (got ${rhs.rows.length} x ${rhs.rows[0].length})`
+    );
+  }
+  if (values.length !== n) throw new Error('linsolve: dimension mismatch');
+  return solvePivoted(dense, values, pivotTolerance(n));
 }
 
 /**
