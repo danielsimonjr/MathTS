@@ -45,3 +45,11 @@ export function defineTypeMarkers(
   Object.defineProperty(proto, brand, { value: true });
   if (mathjsMarker !== undefined) Object.defineProperty(proto, mathjsMarker, { value: true });
 }
+
+/**
+ * Brand of the abstract `Matrix` of the matrix package. The matrix package sets it on
+ * `Matrix.prototype` (`matrix/src/types/type-marker.ts` re-exports it as `MATRIX_BRAND`), and the
+ * result guard of the expression package reads it (`expression/src/utils/safe-result.ts`). The
+ * expression package does not depend on the matrix package, so the one definition lives here.
+ */
+export const NATIVE_MATRIX_BRAND: unique symbol = Symbol.for('mathts.matrix.Matrix');

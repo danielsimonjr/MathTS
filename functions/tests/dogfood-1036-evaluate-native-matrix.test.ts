@@ -85,11 +85,14 @@ describe('issue #1036: safe evaluate returns a matrix of the matrix package', ()
     expect(evaluate('inv(A)', { A: sparse })).toBeInstanceOf(SparseMatrix);
   });
 
-  it('pinv of a SparseMatrix is a nested array, pinv of a DenseMatrix is a DenseMatrix', () => {
-    const dense = evaluate('pinv(A)', { A: makeDense() });
-    const sparse = evaluate('pinv(A)', { A: SparseMatrix.fromDense(makeDense()) });
-    expect(dense).toBeInstanceOf(DenseMatrix);
-    expect(Array.isArray(sparse)).toBe(true);
+  it('pinv of a DenseMatrix and of a SparseMatrix give the inverse values', () => {
+    // Values only: the container type of the pinv result is not a contract of #1036.
+    const inverse = [
+      [-2, 1],
+      [1.5, -0.5],
+    ];
+    expectClose(nested(evaluate('pinv(A)', { A: makeDense() })), inverse);
+    expectClose(nested(evaluate('pinv(A)', { A: SparseMatrix.fromDense(makeDense()) })), inverse);
   });
 });
 
@@ -108,5 +111,17 @@ describe('issue #1036: the guard still refuses host objects', () => {
     const x = new Float64Array([1, 2]);
     expect(() => evaluate('x', { x })).toThrow(/host object/);
     expect(() => evaluate('{a: x}', { x })).toThrow(/host object/);
+  });
+});
+
+// Code review F7: the guard and the matrix package read one brand definition (core
+// `NATIVE_MATRIX_BRAND`). A rename in one place cannot make the guard refuse a native matrix again.
+describe('issue #1036: the guard reads the brand that the matrix classes carry', () => {
+  it('DenseMatrix and SparseMatrix prototypes carry core NATIVE_MATRIX_BRAND', async () => {
+    const { NATIVE_MATRIX_BRAND } = await import('@danielsimonjr/mathts-core/internal');
+    const brandOf = (p: object): unknown => (p as Record<symbol, unknown>)[NATIVE_MATRIX_BRAND];
+    expect(brandOf(DenseMatrix.prototype)).toBe(true);
+    expect(brandOf(SparseMatrix.prototype)).toBe(true);
+    expect(NATIVE_MATRIX_BRAND).toBe(Symbol.for('mathts.matrix.Matrix'));
   });
 });
