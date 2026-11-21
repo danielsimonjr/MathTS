@@ -118,7 +118,7 @@ The codebase is organized into the following modules:
 - **core/types**: 22 files
 - **matrix/backends**: 21 files
 - **matrix**: 4 files
-- **matrix/operations**: 23 files
+- **matrix/operations**: 24 files
 - **matrix/types**: 10 files
 - **tensor**: 5 files
 - **tensor/operations**: 18 files
@@ -201,7 +201,7 @@ The codebase is organized into the following modules:
 | `@danielsimonjr/mathts-typed-function` (`packages/typed-function/`) | (none)                                                                                                                                                          | 1              | 1               |
 | `@danielsimonjr/mathts-workerpool` (`packages/workerpool/`)         | (none)                                                                                                                                                          | 12             | 1               |
 | `@danielsimonjr/mathts-core` (`core/`)                              | (none)                                                                                                                                                          | 56             | 1               |
-| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 58             | 0               |
+| `@danielsimonjr/mathts-matrix` (`matrix/`)                          | `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-parallel`                                                                     | 59             | 0               |
 | `@danielsimonjr/mathts-tensor` (`tensor/`)                          | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`                                                                                                    | 23             | 0               |
 | `@danielsimonjr/mathts-autograd` (`autograd/`)                      | `@danielsimonjr/mathts-tensor`, `@danielsimonjr/mathts-core`                                                                                                    | 7              | 0               |
 | `@danielsimonjr/mathts-functions` (`functions/`)                    | `@danielsimonjr/mathts-core`, `@danielsimonjr/mathts-matrix`, `@danielsimonjr/mathts-expression`, `@danielsimonjr/mathts-gpu`, `@danielsimonjr/mathts-parallel` | 596            | 0               |
@@ -2003,10 +2003,11 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                             | Type   |
-| ------------------------- | ------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                       | Import |
-| `./common.js`             | `eye, matMul, matAdd, matSub, matScale, norm1, gaussJordanContinue` | Import |
+| File                         | Imports                                                             | Type   |
+| ---------------------------- | ------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js`    | `DenseMatrix`                                                       | Import |
+| `./matrix-function-input.js` | `squareFunctionInput, SquareFunctionInput`                          | Import |
+| `./common.js`                | `eye, matMul, matAdd, matSub, matScale, norm1, gaussJordanContinue` | Import |
 
 **Exports:**
 
@@ -2059,13 +2060,14 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                                                            | Type   |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                                      | Import |
-| `./eig.js`                | `eig`                                                                                                                                                              | Import |
-| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                                                             | Import |
-| `./common.js`             | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
-| `./sqrtm.js`              | `matrixSqrtNewtonInternal, sqrtmQuasiTriangular`                                                                                                                   | Import |
+| File                         | Imports                                                                                                                                                            | Type   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| `../types/DenseMatrix.js`    | `DenseMatrix`                                                                                                                                                      | Import |
+| `./matrix-function-input.js` | `squareFunctionInput, SquareFunctionInput`                                                                                                                         | Import |
+| `./eig.js`                   | `eig`                                                                                                                                                              | Import |
+| `./schur.js`                 | `schurInternal, negligibleSubdiagonal`                                                                                                                             | Import |
+| `./common.js`                | `eye, matMul, transpose, matScale, normInf, norm1, matInv, gaussJordanContinue, ldexpMatrix, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, FOURTH` | Import |
+| `./sqrtm.js`                 | `matrixSqrtNewtonInternal, sqrtmQuasiTriangular`                                                                                                                   | Import |
 
 **Exports:**
 
@@ -2078,15 +2080,16 @@ graph LR
 
 **Internal Dependencies:**
 
-| File              | Imports                                                     | Type   |
-| ----------------- | ----------------------------------------------------------- | ------ |
-| `./as-packed.js`  | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
-| `./pivoted-qr.js` | `applyReflector, columnPivotedQr, columnReflector`          | Import |
-| `./common.js`     | `SQUARED`                                                   | Import |
+| File                      | Imports                                                     | Type   |
+| ------------------------- | ----------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `isDenseMatrix, DenseMatrix`                                | Import |
+| `./as-packed.js`          | `decompositionInputToNestedArray, DecompositionMatrixInput` | Import |
+| `./pivoted-qr.js`         | `applyReflector, columnPivotedQr, columnReflector`          | Import |
+| `./common.js`             | `SQUARED`                                                   | Import |
 
 **Exports:**
 
-- Functions: `lstsq`, `lstsq`, `lstsq`
+- Functions: `lstsq`, `lstsq`, `lstsq`, `lstsq`
 
 ---
 
@@ -2103,6 +2106,23 @@ graph LR
 
 - Interfaces: `LUResult`
 - Functions: `lu`, `luSolve`
+
+---
+
+### `matrix/src/operations/matrix-function-input.ts` - Input of the matrix functions `matrixExpm`, `matrixLogm` and `matrixSqrtm`.
+
+**Internal Dependencies:**
+
+| File                      | Imports                                                     | Type   |
+| ------------------------- | ----------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js` | `DenseMatrix, isDenseMatrix`                                | Import |
+| `../types/Matrix.js`      | `isNativeMatrix`                                            | Import |
+| `./as-packed.js`          | `decompositionInputToDenseMatrix, DecompositionMatrixInput` | Import |
+
+**Exports:**
+
+- Types: `SquareFunctionInput`
+- Functions: `squareFunctionInput`
 
 ---
 
@@ -2203,12 +2223,13 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                      | Imports                                                                                                                                         | Type   |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `../types/DenseMatrix.js` | `DenseMatrix`                                                                                                                                   | Import |
-| `./eig.js`                | `eig`                                                                                                                                           | Import |
-| `./schur.js`              | `schurInternal, negligibleSubdiagonal`                                                                                                          | Import |
-| `./common.js`             | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, normInf, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
+| File                         | Imports                                                                                                                                         | Type   |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `../types/DenseMatrix.js`    | `DenseMatrix`                                                                                                                                   | Import |
+| `./matrix-function-input.js` | `squareFunctionInput, SquareFunctionInput`                                                                                                      | Import |
+| `./eig.js`                   | `eig`                                                                                                                                           | Import |
+| `./schur.js`                 | `schurInternal, negligibleSubdiagonal`                                                                                                          | Import |
+| `./common.js`                | `eye, matMul, transpose, matInv, gaussJordanSolve, ldexpMatrix, normInf, relativeDifference, entryRange, withPow2Scale, ABS_CUTOFF_LO, SQUARED` | Import |
 
 **Exports:**
 
@@ -12661,16 +12682,17 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                                                         |
-| ------------------------------ | -------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix` | `densifyForSolver, singularValues, SparseMatrix`               |
-| `@danielsimonjr/mathts-core`   | `ABS_CUTOFF_LO, SQUARED, entryRange, ldexp, pow2ScaleExponent` |
+| Package                        | Import                                                                       |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `densifyForSolver, isDenseMatrix, singularValues, DenseMatrix, SparseMatrix` |
+| `@danielsimonjr/mathts-core`   | `ABS_CUTOFF_LO, SQUARED, entryRange, ldexp, pow2ScaleExponent`               |
 
 **Internal Dependencies:**
 
 | File                                   | Imports                                                                                                                            | Type      |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | `../algebra/solver/pivot-tolerance.js` | `pivotTolerance`                                                                                                                   | Import    |
+| `../utils/is.js`                       | `isMatrix, Matrix`                                                                                                                 | Import    |
 | `../numeric/numeric-jacobian.js`       | `numericJacobian`                                                                                                                  | Import    |
 | `../numeric/solveODE.js`               | `rosenbrockSolve`                                                                                                                  | Import    |
 | `../numeric/ode-step-limit.js`         | `odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError`                                                                              | Import    |
@@ -21012,8 +21034,8 @@ graph LR
 | `functions/src/utils/factory`                          | 1 file       | 261 files  |
 | `functions/src/core/function/typed`                    | 3 files      | 206 files  |
 | `functions/src/index`                                  | 138 files    | 0 files    |
+| `functions/src/utils/is`                               | 0 files      | 64 files   |
 | `functions/src/plain/number/index`                     | 9 files      | 54 files   |
-| `functions/src/utils/is`                               | 0 files      | 63 files   |
 | `functions/src/core/config`                            | 0 files      | 56 files   |
 | `functions/src/utils/array`                            | 0 files      | 54 files   |
 | `expression/src/embeddedDocs/physicalConstants/index`  | 51 files     | 1 file     |
@@ -21025,8 +21047,8 @@ graph LR
 | `functions/src/types`                                  | 5 files      | 30 files   |
 | `expression/src/index`                                 | 34 files     | 0 files    |
 | `functions/src/type/matrix/utils/matrixAlgorithmSuite` | 6 files      | 27 files   |
+| `matrix/src/types/DenseMatrix`                         | 6 files      | 26 files   |
 | `expression/src/utils/is`                              | 0 files      | 32 files   |
-| `matrix/src/types/DenseMatrix`                         | 6 files      | 24 files   |
 | `functions/src/typed/index`                            | 29 files     | 1 file     |
 | `expression/src/node/Node`                             | 7 files      | 23 files   |
 | `functions/src/utils/object`                           | 0 files      | 29 files   |
@@ -21038,9 +21060,9 @@ graph LR
 | `functions/src/typed/number-matrix`                    | 0 files      | 24 files   |
 | `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
+| `functions/src/typed/numeric`                          | 12 files     | 10 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `functions/src/typed/cas`                              | 20 files     | 1 file     |
-| `functions/src/typed/numeric`                          | 11 files     | 10 files   |
 | `matrix/src/operations/index`                          | 19 files     | 1 file     |
 | `tensor/src/index`                                     | 20 files     | 0 files    |
 | `functions/src/type/matrix/utils/matAlgo03xDSf`        | 3 files      | 16 files   |
@@ -21187,7 +21209,7 @@ graph TD
         N68[eig]
         N69[expm]
         N70[givens]
-        N71[...13 more]
+        N71[...14 more]
     end
 
     subgraph Matrix/types
@@ -21948,14 +21970,14 @@ graph TD
 
 | Category                | Count  |
 | ----------------------- | ------ |
-| Total TypeScript Files  | 1359   |
+| Total TypeScript Files  | 1360   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 245798 |
-| Total Exports           | 7453   |
+| Total Lines of Code     | 246014 |
+| Total Exports           | 7454   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |
 | Total Interfaces        | 676    |
-| Total Functions         | 2630   |
+| Total Functions         | 2632   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

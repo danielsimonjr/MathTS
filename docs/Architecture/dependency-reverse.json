@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-20",
+  "generated": "2026-11-21",
   "dependents": {
     "packages/workerpool/src/pool-types.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/compile-function-source.ts": [
@@ -204,7 +204,9 @@
       "matrix/src/operations/densify.ts",
       "matrix/src/operations/expm.ts",
       "matrix/src/operations/logm.ts",
+      "matrix/src/operations/lstsq.ts",
       "matrix/src/operations/lu.ts",
+      "matrix/src/operations/matrix-function-input.ts",
       "matrix/src/operations/pinv.ts",
       "matrix/src/operations/qr-family.ts",
       "matrix/src/operations/qr-pivoted.ts",
@@ -328,6 +330,7 @@
       "matrix/src/operations/index.ts",
       "matrix/src/operations/lstsq.ts",
       "matrix/src/operations/lu.ts",
+      "matrix/src/operations/matrix-function-input.ts",
       "matrix/src/operations/qr-family.ts",
       "matrix/src/operations/qr-pivoted.ts",
       "matrix/src/operations/qr.ts",
@@ -350,6 +353,11 @@
       "matrix/src/operations/sqrtm.ts"
     ],
     "matrix/src/operations/eig-multiplicity.ts": ["matrix/src/operations/eig.ts"],
+    "matrix/src/operations/matrix-function-input.ts": [
+      "matrix/src/operations/expm.ts",
+      "matrix/src/operations/logm.ts",
+      "matrix/src/operations/sqrtm.ts"
+    ],
     "matrix/src/operations/svd.ts": [
       "matrix/src/operations/index.ts",
       "matrix/src/operations/pinv.ts",
@@ -378,17 +386,18 @@
     "matrix/src/operations/qr-pivoted.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/qr-family.ts": ["matrix/src/operations/index.ts"],
     "matrix/src/operations/condest.ts": ["matrix/src/operations/index.ts"],
-    "matrix/src/operations/givens.ts": [
-      "matrix/src/operations/schur.ts",
-      "matrix/src/operations/svd.ts"
-    ],
     "matrix/src/types/Matrix.ts": [
+      "matrix/src/operations/matrix-function-input.ts",
       "matrix/src/types/DenseMatrix.ts",
       "matrix/src/types/SparseMatrix.ts",
       "matrix/src/types/dense/arithmetic.ts",
       "matrix/src/types/dense/reduction.ts",
       "matrix/src/types/dense/storage.ts",
       "matrix/src/types/index.ts"
+    ],
+    "matrix/src/operations/givens.ts": [
+      "matrix/src/operations/schur.ts",
+      "matrix/src/operations/svd.ts"
     ],
     "matrix/src/types/dense/arithmetic.ts": ["matrix/src/types/DenseMatrix.ts"],
     "matrix/src/types/dense/limits.ts": [
@@ -1079,6 +1088,7 @@
       "functions/src/type/matrix/ImmutableDenseMatrix.ts",
       "functions/src/type/matrix/MatrixIndex.ts",
       "functions/src/type/matrix/function/index.ts",
+      "functions/src/typed/numeric.ts",
       "functions/src/utils/numeric.ts",
       "functions/src/utils/optimizeCallback.ts",
       "functions/src/utils/print.ts",

@@ -16,6 +16,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { squareFunctionInput, type SquareFunctionInput } from './matrix-function-input.js';
 import { eye, matMul, matAdd, matSub, matScale, norm1, gaussJordanContinue } from './common.js';
 
 // ---------------------------------------------------------------------------
@@ -118,14 +119,16 @@ export interface ExpmOptions {
 }
 
 /**
- * Compute the matrix exponential of a square DenseMatrix.
+ * Compute the matrix exponential of a square matrix.
  *
  * Uses the Padé-13 scaling-and-squaring algorithm (Higham 2005).
  * Accurate to near machine precision for general real matrices.
  *
- * @param A - Square DenseMatrix (n × n).
+ * @param input - Square matrix (n × n): a `DenseMatrix`, a `SparseMatrix`, a nested `number[][]`, or an
+ *   object with a `toArray` method that returns a nested array (the MathJS matrix).
  * @returns expm(A) as a DenseMatrix (n × n).
  * @throws Error if A is not square.
+ * @throws {TypeError} if A is not an accepted input.
  *
  * @example
  * // expm(0) = I
@@ -136,7 +139,8 @@ export interface ExpmOptions {
  * const tI = DenseMatrix.fromArray([[2,0],[0,2]]);
  * matrixExpm(tI) // => [[e^2, 0], [0, e^2]]
  */
-export function matrixExpm(A: DenseMatrix): DenseMatrix {
+export function matrixExpm(input: SquareFunctionInput): DenseMatrix {
+  const A = squareFunctionInput(input);
   const n = A.rows;
   if (n !== A.cols) throw new Error(`matrixExpm: matrix must be square (got ${A.rows}×${A.cols})`);
   if (n === 0) return DenseMatrix.zeros(0, 0);

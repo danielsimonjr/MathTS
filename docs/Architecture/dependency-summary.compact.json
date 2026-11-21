@@ -1,10 +1,10 @@
 {
-  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-20", "f": 1359, "e": 7453, "re": 3194 },
+  "m": { "n": "mathts", "v": "0.1.0", "d": "2026-11-21", "f": 1360, "e": 7454, "re": 3194 },
   "s": {
-    "loc": 245798,
+    "loc": 246014,
     "cls": 64,
     "int": 676,
-    "fn": 2630,
+    "fn": 2632,
     "tg": 185,
     "en": 0,
     "co": 1701,
@@ -321,7 +321,7 @@
       "int": ["BackendConfig", "AdaptiveTuningConfig", "ProfilingConfig", "MatrixConfig"]
     },
     "matrix/operations": {
-      "f": 23,
+      "f": 24,
       "exp": [
         "isPackedMatrixDescriptor",
         "decompositionInputToNestedArray",
@@ -1963,8 +1963,8 @@
     { "p": "utils/factory.ts", "i": 1, "o": 261 },
     { "p": "src/index.ts", "i": 211, "o": 0 },
     { "p": "function/typed.ts", "i": 3, "o": 206 },
+    { "p": "utils/is.ts", "i": 0, "o": 64 },
     { "p": "number/index.ts", "i": 9, "o": 54 },
-    { "p": "utils/is.ts", "i": 0, "o": 63 },
     { "p": "core/config.ts", "i": 0, "o": 56 },
     { "p": "typed/index.ts", "i": 53, "o": 1 },
     { "p": "utils/array.ts", "i": 0, "o": 54 },

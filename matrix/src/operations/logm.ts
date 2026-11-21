@@ -19,6 +19,7 @@
  */
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
+import { squareFunctionInput, type SquareFunctionInput } from './matrix-function-input.js';
 import { eig } from './eig.js';
 import { schurInternal, negligibleSubdiagonal } from './schur.js';
 import {
@@ -554,7 +555,9 @@ export interface LogmOptions {
  *   - The Newton fallback (taken when the Schur path cannot start) throws for complex
  *     eigenvalues.
  *
- * @param A - Square DenseMatrix with no eigenvalue on the closed negative real axis.
+ * @param input - Square matrix with no eigenvalue on the closed negative real axis: a `DenseMatrix`, a
+ *   `SparseMatrix`, a nested `number[][]`, or an object with a `toArray` method that returns a
+ *   nested array (the MathJS matrix).
  * @returns logm(A) as a DenseMatrix.
  * @throws Error for matrices with non-positive real eigenvalues. When a small eigenvalue is
  *   at the rounding noise of the Schur form, the error has the name
@@ -570,7 +573,8 @@ export interface LogmOptions {
  * const logA = matrixLogm(A);
  * // expm(logA) ≈ A  (to machine precision for diagonalisable A)
  */
-export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
+export function matrixLogm(input: SquareFunctionInput, opts?: LogmOptions): DenseMatrix {
+  const A = squareFunctionInput(input);
   const n = A.rows;
   if (n !== A.cols) throw new Error(`matrixLogm: matrix must be square (got ${A.rows}×${A.cols})`);
   if (n === 0) return DenseMatrix.zeros(0, 0);

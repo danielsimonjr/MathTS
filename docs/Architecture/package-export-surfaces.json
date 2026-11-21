@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-20",
+  "generated": "2026-11-21",
   "surfaces": {
     "arithmetic": [
       "abs",
@@ -4800,6 +4800,7 @@
       "sqrtOfSumSquares",
       "square",
       "SQUARED",
+      "squareFunctionInput",
       "subset",
       "subtract",
       "sum",

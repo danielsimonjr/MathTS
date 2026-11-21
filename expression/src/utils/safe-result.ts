@@ -56,9 +56,33 @@ function isHostIdentity(value: object): boolean {
   }
 }
 
+/**
+ * Brand of a matrix of the matrix package: the global-registry symbol that `Matrix.prototype`
+ * carries (`matrix/src/types/type-marker.ts`). `DenseMatrix` and `SparseMatrix` inherit it. The
+ * expression package does not depend on the matrix package, so it reads the brand by its registry
+ * name. Safe evaluate cannot make or read a symbol, so only host code can put the brand on a value.
+ */
+const NATIVE_MATRIX_BRAND = Symbol.for('mathts.matrix.Matrix');
+
+function isNativeMatrix(value: object): boolean {
+  return (value as Record<symbol, unknown>)[NATIVE_MATRIX_BRAND] === true;
+}
+
+/**
+ * The storage of a matrix of the matrix package: `Float64Array` or `Float32Array` entries, and
+ * `Int32Array` indices. These arrays hold numbers only. A typed array of any other kind is not
+ * storage of a matrix and stays refused.
+ */
+function isMatrixStorageArray(value: unknown): boolean {
+  return (
+    value instanceof Float64Array || value instanceof Float32Array || value instanceof Int32Array
+  );
+}
+
 function isMathBrand(value: object): boolean {
   if (
     isComplex(value) ||
+    isNativeMatrix(value) ||
     isFraction(value) ||
     isBigNumber(value) ||
     isMatrix(value) ||
@@ -142,8 +166,12 @@ export function sanitizeEvaluateResult(
     return out;
   }
 
+  // The typed arrays of a matrix of the matrix package are its own storage. They pass here only.
+  // A typed array on its own, or in an object that has no matrix brand, is still refused.
+  const nativeMatrix = isNativeMatrix(obj);
   for (const key of Object.keys(obj)) {
     const child = (obj as Record<string, unknown>)[key];
+    if (nativeMatrix && isMatrixStorageArray(child)) continue;
     if (child !== null && (typeof child === 'object' || typeof child === 'function')) {
       sanitizeEvaluateResult(child, seen, trusted);
     }

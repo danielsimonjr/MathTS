@@ -8,6 +8,7 @@
  * `lstsq`. The factor Q is never formed.
  */
 
+import { isDenseMatrix, type DenseMatrix } from '../types/DenseMatrix.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { applyReflector, columnPivotedQr, columnReflector } from './pivoted-qr.js';
 import { SQUARED } from './common.js';
@@ -24,24 +25,29 @@ const LSTSQ_EPS = 2.220446049250313e-16;
  * is tiny next to the others is treated as zero, as in NumPy.
  *
  * @param A - `DenseMatrix`, `SparseMatrix`, nested `number[][]`, square `Float64Array`, or `{ data, rows, cols }`.
- * @param b - Right-hand side: a vector with one entry per row of `A`, or an `m x k` nested array.
+ * @param b - Right-hand side: a vector with one entry per row of `A`, an `m x k` nested array, or a
+ *   `DenseMatrix`. A `DenseMatrix` with `m` rows is an `m x k` right side. A `DenseMatrix` with one
+ *   row and `m` columns (a 1-D `DenseMatrix`) stands for a vector. An object with a `toArray` method
+ *   (the MathJS matrix) is read through `toArray`.
  * @returns The `n`-vector `x` for a vector `b`, or the `n x k` nested array for a matrix `b`.
  * @throws {RangeError} if `b` has the wrong length or any entry is not finite.
- * @throws {TypeError} if `A` or `b` is not rectangular.
+ * @throws {TypeError} if `A` or `b` is not rectangular, or `b` is not a vector or a matrix.
  */
 export function lstsq(A: DecompositionMatrixInput, b: readonly number[]): number[];
 export function lstsq(A: DecompositionMatrixInput, b: readonly (readonly number[])[]): number[][];
+export function lstsq(A: DecompositionMatrixInput, b: DenseMatrix): number[] | number[][];
 export function lstsq(
   A: DecompositionMatrixInput,
-  b: readonly number[] | readonly (readonly number[])[]
+  b: readonly number[] | readonly (readonly number[])[] | DenseMatrix
 ): number[] | number[][] {
   const rows = decompositionInputToNestedArray(A);
   const m = rows.length;
   const n = m === 0 ? 0 : rows[0].length;
-  const vectorRhs = b.length === 0 || typeof b[0] === 'number';
+  const rhs = rightHandSide(b, m);
+  const vectorRhs = rhs.length === 0 || typeof rhs[0] === 'number';
   const bRows: readonly (readonly number[])[] = vectorRhs
-    ? (b as readonly number[]).map((v) => [v])
-    : (b as readonly (readonly number[])[]);
+    ? (rhs as readonly number[]).map((v) => [v])
+    : (rhs as readonly (readonly number[])[]);
   if (bRows.length !== m) {
     throw new RangeError(`lstsq: b has length ${bRows.length}, expected ${m}`);
   }
@@ -128,6 +134,31 @@ export function lstsq(
     for (let j = 0; j < n; j++) out[perm[j]][col] = unscale(z[j]);
   }
   return finish();
+}
+
+const B_KIND_MESSAGE = 'lstsq: b must be a vector, a nested array or a DenseMatrix';
+
+/**
+ * Read the right-hand side as a vector or a nested array. A `DenseMatrix` with `m` rows is an
+ * `m x k` right side. A `DenseMatrix` with one row and `m` columns is a vector. An object with a
+ * `toArray` method (the MathJS matrix; this package cannot import it) is read through `toArray`.
+ */
+function rightHandSide(
+  b: readonly number[] | readonly (readonly number[])[] | DenseMatrix,
+  m: number
+): readonly number[] | readonly (readonly number[])[] {
+  if (Array.isArray(b)) return b;
+  if (isDenseMatrix(b)) {
+    if (b.rows === m) return b.toArray();
+    if (b.rows === 1 && b.cols === m) return b.toArray()[0];
+    throw new RangeError(`lstsq: b has ${b.rows}x${b.cols}, expected ${m} rows`);
+  }
+  const duck = b as { toArray?: unknown } | null;
+  if (typeof duck === 'object' && duck !== null && typeof duck.toArray === 'function') {
+    const nested: unknown = (duck as { toArray(): unknown }).toArray();
+    if (Array.isArray(nested)) return nested as readonly number[] | readonly (readonly number[])[];
+  }
+  throw new TypeError(B_KIND_MESSAGE);
 }
 
 /**

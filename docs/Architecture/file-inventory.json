@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-20",
-  "totalFiles": 2653,
+  "generated": "2026-11-21",
+  "totalFiles": 2661,
   "byDisposition": {
     "reachable": 26,
-    "build-entry": 1333,
+    "build-entry": 1334,
     "test-only": 0,
     "orphan": 0,
-    "test": 1228,
+    "test": 1235,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
-    "src": 1359,
-    "tests": 1228,
+    "src": 1360,
+    "tests": 1235,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -27,11 +27,11 @@
     "@danielsimonjr/mathts-core": 150,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 71,
-    "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1257,
+    "@danielsimonjr/mathts-expression": 576,
+    "@danielsimonjr/mathts-functions": 1260,
     "@danielsimonjr/mathts-gpu": 22,
-    "@danielsimonjr/mathts-linalg": 6,
-    "@danielsimonjr/mathts-matrix": 160,
+    "@danielsimonjr/mathts-linalg": 7,
+    "@danielsimonjr/mathts-matrix": 163,
     "@danielsimonjr/mathts-numbers": 4,
     "@danielsimonjr/mathts-typed-function": 4,
     "@danielsimonjr/mathts-workerpool": 30,
@@ -5364,7 +5364,7 @@
       "package": "@danielsimonjr/mathts-expression",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 153
+      "loc": 181
     },
     {
       "file": "expression/src/utils/scope.ts",
@@ -5477,6 +5477,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 147
+    },
+    {
+      "file": "expression/tests/dogfood-1036-native-brand.test.ts",
+      "package": "@danielsimonjr/mathts-expression",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 93
     },
     {
       "file": "expression/tests/dogfood-g20-parser-evaluator.test.ts",
@@ -9606,7 +9613,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 2627
+      "loc": 2708
     },
     {
       "file": "functions/src/typed/parallel-map.ts",
@@ -10890,6 +10897,13 @@
       "loc": 204
     },
     {
+      "file": "functions/tests/dogfood-1036-evaluate-native-matrix.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 113
+    },
+    {
       "file": "functions/tests/dogfood-1087-exptotrig.test.ts",
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
@@ -11420,6 +11434,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 47
+    },
+    {
+      "file": "functions/tests/dogfood-976-1003-pins.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 80
+    },
+    {
+      "file": "functions/tests/dogfood-977-1003-linsolve-matrix-args.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 156
     },
     {
       "file": "functions/tests/dogfood-978-eigs-complex-vectors.test.ts",
@@ -14943,6 +14971,13 @@
       "loc": 80
     },
     {
+      "file": "linalg/tests/dogfood-1003-matrixexpm-array.test.ts",
+      "package": "@danielsimonjr/mathts-linalg",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 23
+    },
+    {
       "file": "linalg/tests/issue-915-densematrix-export.test.ts",
       "package": "@danielsimonjr/mathts-linalg",
       "area": "tests",
@@ -15199,7 +15234,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 171
+      "loc": 175
     },
     {
       "file": "matrix/src/operations/givens.ts",
@@ -15220,14 +15255,14 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 675
+      "loc": 679
     },
     {
       "file": "matrix/src/operations/lstsq.ts",
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 180
+      "loc": 211
     },
     {
       "file": "matrix/src/operations/lu.ts",
@@ -15235,6 +15270,13 @@
       "area": "src",
       "disposition": "build-entry",
       "loc": 158
+    },
+    {
+      "file": "matrix/src/operations/matrix-function-input.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "src",
+      "disposition": "build-entry",
+      "loc": 65
     },
     {
       "file": "matrix/src/operations/pinv.ts",
@@ -15283,7 +15325,7 @@
       "package": "@danielsimonjr/mathts-matrix",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 625
+      "loc": 628
     },
     {
       "file": "matrix/src/operations/svd-wasm.ts",
@@ -15571,6 +15613,20 @@
       "area": "tests",
       "disposition": "test",
       "loc": 678
+    },
+    {
+      "file": "matrix/tests/dogfood-1003-lstsq-densematrix-b.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 71
+    },
+    {
+      "file": "matrix/tests/dogfood-1003-matrix-fn-array-input.test.ts",
+      "package": "@danielsimonjr/mathts-matrix",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 112
     },
     {
       "file": "matrix/tests/dogfood-1013-one-d-input.test.ts",

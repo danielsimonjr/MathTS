@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-20",
-    "totalFiles": 1359,
+    "lastUpdated": "2026-11-21",
+    "totalFiles": 1360,
     "totalModules": 82,
-    "totalExports": 7453
+    "totalExports": 7454
   },
   "entryPoints": [
     {
@@ -5728,6 +5728,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./matrix-function-input.js",
+            "imports": ["squareFunctionInput", "SquareFunctionInput"]
+          },
+          {
             "file": "./common.js",
             "imports": [
               "eye",
@@ -6018,6 +6022,10 @@
             "imports": ["DenseMatrix"]
           },
           {
+            "file": "./matrix-function-input.js",
+            "imports": ["squareFunctionInput", "SquareFunctionInput"]
+          },
+          {
             "file": "./eig.js",
             "imports": ["eig"]
           },
@@ -6060,6 +6068,10 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["isDenseMatrix", "DenseMatrix"]
+          },
+          {
             "file": "./as-packed.js",
             "imports": ["decompositionInputToNestedArray", "DecompositionMatrixInput"]
           },
@@ -6074,7 +6086,7 @@
         ],
         "workspaceDependencies": [],
         "exports": ["lstsq"],
-        "functions": ["lstsq", "lstsq", "lstsq"]
+        "functions": ["lstsq", "lstsq", "lstsq", "lstsq"]
       },
       "matrix/src/operations/lu.ts": {
         "description": "LU Decomposition (DenseMatrix primitive)",
@@ -6094,6 +6106,28 @@
         "exports": ["lu", "luSolve"],
         "interfaces": ["LUResult"],
         "functions": ["lu", "luSolve"]
+      },
+      "matrix/src/operations/matrix-function-input.ts": {
+        "description": "Input of the matrix functions `matrixExpm`, `matrixLogm` and `matrixSqrtm`.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/DenseMatrix.js",
+            "imports": ["DenseMatrix", "isDenseMatrix"]
+          },
+          {
+            "file": "../types/Matrix.js",
+            "imports": ["isNativeMatrix"]
+          },
+          {
+            "file": "./as-packed.js",
+            "imports": ["decompositionInputToDenseMatrix", "DecompositionMatrixInput"]
+          }
+        ],
+        "workspaceDependencies": [],
+        "exports": ["squareFunctionInput"],
+        "functions": ["squareFunctionInput"]
       },
       "matrix/src/operations/pinv.ts": {
         "description": "Moore-Penrose Pseudoinverse (DenseMatrix primitive)",
@@ -6254,6 +6288,10 @@
           {
             "file": "../types/DenseMatrix.js",
             "imports": ["DenseMatrix"]
+          },
+          {
+            "file": "./matrix-function-input.js",
+            "imports": ["squareFunctionInput", "SquareFunctionInput"]
           },
           {
             "file": "./eig.js",
@@ -29408,6 +29446,10 @@
             "imports": ["pivotTolerance"]
           },
           {
+            "file": "../utils/is.js",
+            "imports": ["isMatrix", "Matrix"]
+          },
+          {
             "file": "../numeric/numeric-jacobian.js",
             "imports": ["numericJacobian"]
           },
@@ -29480,7 +29522,13 @@
           {
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
-            "imports": ["densifyForSolver", "singularValues", "SparseMatrix"]
+            "imports": [
+              "densifyForSolver",
+              "isDenseMatrix",
+              "singularValues",
+              "DenseMatrix",
+              "SparseMatrix"
+            ]
           },
           {
             "package": "@danielsimonjr/mathts-core",
@@ -48799,6 +48847,7 @@
           "matrix/src/operations/logm.ts",
           "matrix/src/operations/lstsq.ts",
           "matrix/src/operations/lu.ts",
+          "matrix/src/operations/matrix-function-input.ts",
           "matrix/src/operations/pinv.ts",
           "matrix/src/operations/pivoted-qr.ts",
           "matrix/src/operations/qr-family.ts",
@@ -50363,13 +50412,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 1359,
+    "totalTypeScriptFiles": 1360,
     "totalModules": 82,
-    "totalLinesOfCode": 245798,
-    "totalExports": 7453,
+    "totalLinesOfCode": 246014,
+    "totalExports": 7454,
     "totalClasses": 64,
     "totalInterfaces": 676,
-    "totalFunctions": 2630,
+    "totalFunctions": 2632,
     "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1701,

@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-20'
-  totalFiles: 1359
+  lastUpdated: '2026-11-21'
+  totalFiles: 1360
   totalModules: 82
-  totalExports: 7453
+  totalExports: 7454
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -5504,6 +5504,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./matrix-function-input.js
+          imports:
+            - squareFunctionInput
+            - SquareFunctionInput
         - file: ./common.js
           imports:
             - eye
@@ -5790,6 +5794,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./matrix-function-input.js
+          imports:
+            - squareFunctionInput
+            - SquareFunctionInput
         - file: ./eig.js
           imports:
             - eig
@@ -5833,6 +5841,10 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - isDenseMatrix
+            - DenseMatrix
         - file: ./as-packed.js
           imports:
             - decompositionInputToNestedArray
@@ -5849,6 +5861,7 @@ modules:
       exports:
         - lstsq
       functions:
+        - lstsq
         - lstsq
         - lstsq
         - lstsq
@@ -5873,6 +5886,27 @@ modules:
       functions:
         - lu
         - luSolve
+    matrix/src/operations/matrix-function-input.ts:
+      description: Input of the matrix functions `matrixExpm`, `matrixLogm` and `matrixSqrtm`.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/DenseMatrix.js
+          imports:
+            - DenseMatrix
+            - isDenseMatrix
+        - file: ../types/Matrix.js
+          imports:
+            - isNativeMatrix
+        - file: ./as-packed.js
+          imports:
+            - decompositionInputToDenseMatrix
+            - DecompositionMatrixInput
+      workspaceDependencies: []
+      exports:
+        - squareFunctionInput
+      functions:
+        - squareFunctionInput
     matrix/src/operations/pinv.ts:
       description: Moore-Penrose Pseudoinverse (DenseMatrix primitive)
       externalDependencies: []
@@ -6043,6 +6077,10 @@ modules:
         - file: ../types/DenseMatrix.js
           imports:
             - DenseMatrix
+        - file: ./matrix-function-input.js
+          imports:
+            - squareFunctionInput
+            - SquareFunctionInput
         - file: ./eig.js
           imports:
             - eig
@@ -27557,6 +27595,10 @@ modules:
         - file: ../algebra/solver/pivot-tolerance.js
           imports:
             - pivotTolerance
+        - file: ../utils/is.js
+          imports:
+            - isMatrix
+            - Matrix
         - file: ../numeric/numeric-jacobian.js
           imports:
             - numericJacobian
@@ -27623,7 +27665,9 @@ modules:
           directory: matrix
           imports:
             - densifyForSolver
+            - isDenseMatrix
             - singularValues
+            - DenseMatrix
             - SparseMatrix
         - package: '@danielsimonjr/mathts-core'
           directory: core
@@ -46116,6 +46160,7 @@ dependencyGraph:
         - matrix/src/operations/logm.ts
         - matrix/src/operations/lstsq.ts
         - matrix/src/operations/lu.ts
+        - matrix/src/operations/matrix-function-input.ts
         - matrix/src/operations/pinv.ts
         - matrix/src/operations/pivoted-qr.ts
         - matrix/src/operations/qr-family.ts
@@ -47508,13 +47553,13 @@ dependencyGraph:
         - plot/src/three/project.ts
         - plot/src/three/surface.ts
 statistics:
-  totalTypeScriptFiles: 1359
+  totalTypeScriptFiles: 1360
   totalModules: 82
-  totalLinesOfCode: 245798
-  totalExports: 7453
+  totalLinesOfCode: 246014
+  totalExports: 7454
   totalClasses: 64
   totalInterfaces: 676
-  totalFunctions: 2630
+  totalFunctions: 2632
   totalTypeGuards: 185
   totalEnums: 0
   totalConstants: 1701
