@@ -1,17 +1,16 @@
-import { execFile, execFileSync } from 'node:child_process';
-import { promisify } from 'node:util';
+import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { describe, it, expect } from 'vitest';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const FIXTURE_DIR = join(dirname(fileURLToPath(import.meta.url)), 'type-consumer-g17');
-const require = createRequire(import.meta.url);
-const execFileAsync = promisify(execFile);
-const tsc = join(dirname(require.resolve('typescript/package.json')), 'bin/tsc');
 
-/** Issue repro fixtures; keep in sync with dogfood G17 plan. */
+/**
+ * Issue repro fixtures; keep in sync with dogfood G17 plan. The tsc run on the fixture folder
+ * (skipLibCheck false, NodeNext and Node16) is `node tools/test/check-g17-types.mjs`, a step of
+ * the Compile & Lint job; it does not run in this pool (#1185).
+ */
 describe('dogfood G17 public TypeScript types', () => {
   it('gen-public-overloads matches committed generated declarations', () => {
     const out = execFileSync('node', ['scripts/gen-public-overloads.mjs', '--check'], {
@@ -35,28 +34,4 @@ describe('dogfood G17 public TypeScript types', () => {
       }
     }
   });
-
-  // Each tsc run takes about 1.5 s alone, but more than 30 s while `bun run test` runs about
-  // 48 package processes on the same cores. The two runs go in parallel, with a 120 s limit.
-  it('issue repro fixtures typecheck with skipLibCheck false (NodeNext and Node16)', async () => {
-    const runTsc = (config: string) =>
-      execFileAsync(process.execPath, [tsc, '-p', join(FIXTURE_DIR, config), '--pretty', 'false'], {
-        encoding: 'utf8',
-      }).then(
-        ({ stdout }) => stdout,
-        (e: { code?: number | null; signal?: string | null; stdout?: string; stderr?: string }) => {
-          // Report what tsc printed and how it ended; the default message holds only the command.
-          throw new Error(
-            `tsc ${config} failed: code=${e.code} signal=${e.signal}
-` +
-              `stdout:
-${e.stdout ?? ''}
-stderr:
-${e.stderr ?? ''}`
-          );
-        }
-      );
-    const outputs = await Promise.all(['tsconfig.json', 'tsconfig.node16.json'].map(runTsc));
-    expect(outputs).toEqual(['', '']);
-  }, 120_000);
 });

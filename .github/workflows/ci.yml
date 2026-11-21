@@ -258,6 +258,13 @@ jobs:
           node --test tools/test/check-export-lock.test.mjs
           node tools/test/check-export-lock.mjs
 
+      # The G17 fixtures compile against the built .d.ts of ten packages with skipLibCheck: false,
+      # under NodeNext and Node16. The step runs alone, not inside the vitest pool (#1185).
+      - name: G17 type fixtures (skipLibCheck false, NodeNext and Node16)
+        run: |
+          node --test tools/test/check-g17-types.test.mjs
+          node tools/test/check-g17-types.mjs
+
       # Pack every published package, install the tarballs into a fresh consumer project and
       # type-check every public entry point with skipLibCheck: false. The repo's own typecheck
       # reads source, so it cannot see errors in the emitted .d.ts (core 0.15.0 shipped six
