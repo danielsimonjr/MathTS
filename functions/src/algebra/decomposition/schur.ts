@@ -1,6 +1,7 @@
 import { factory } from '../../utils/factory.js';
 import { matrixSchur, DenseMatrix as NativeDenseMatrix } from '@danielsimonjr/mathts-matrix';
 import type { TypedFunction } from '../../core/function/typed.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Check if a 2D array contains only plain numbers
@@ -113,7 +114,7 @@ export const createSchur = /* #__PURE__ */ factory(
       }
       const n = data.length;
       if (n === 0 || (data[0]?.length ?? 0) !== n) {
-        throw new Error('schur: matrix must be square (real Schur decomposition)');
+        throw notSquareError('schur: matrix must be square (real Schur decomposition)');
       }
 
       const { Q, T } = matrixSchur(NativeDenseMatrix.fromArray(data as number[][]));

@@ -100,14 +100,11 @@ describe('#1233 expm of a 0 x 0 matrix', () => {
   it('an Array [] gives []', () => {
     expect(expm([])).toEqual([]);
   });
-  it('sparse([]) gives [], as a non-empty sparse matrix gives an Array', () => {
-    expect(expm(sparse([]))).toEqual([]);
+  it('sparse([]) gives a 0 x 0 sparse matrix (#1264)', () => {
+    expectEmpty(expm(sparse([])), 'sparse');
   });
-  it('a DenseMatrix 0 x 0 gives a 0 x 0 matrix', () => {
-    for (const a of [matrix([]), dense00()]) {
-      const r = expm(a) as { rows: number; cols: number };
-      expect([r.rows, r.cols]).toEqual([0, 0]);
-    }
+  it('a DenseMatrix 0 x 0 gives a 0 x 0 dense matrix', () => {
+    for (const a of [matrix([]), dense00()]) expectEmpty(expm(a), 'dense');
   });
   it('a non-square empty input throws the square error', () => {
     expect(() => expm([[]])).toThrow(squareRe);
@@ -223,15 +220,15 @@ describe('#1233 a 0 x n or n x 0 Matrix is not square', () => {
     }
     expect(() => expm(sparse([[1, 2, 3]]))).toThrow(squareRe);
   });
-  it('expm of a non-empty sparse matrix is unchanged', () => {
-    expect(
-      expm(
-        sparse([
-          [0, 0],
-          [0, 0],
-        ])
-      )
-    ).toEqual([
+  it('expm of a non-empty sparse matrix is a sparse matrix (#1264)', () => {
+    const r = expm(
+      sparse([
+        [0, 0],
+        [0, 0],
+      ])
+    ) as Mat & { toArray(): number[][] };
+    expectEmpty(r, 'sparse', [2, 2]);
+    expect(r.toArray()).toEqual([
       [1, 0],
       [0, 1],
     ]);

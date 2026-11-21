@@ -16,6 +16,7 @@ import { Matrix, MatrixEntry, SliceSpec } from './Matrix.js';
 import { DenseMatrix, registerSparseMatrixFactory } from './DenseMatrix.js';
 import { sqrtOfSumSquares } from './dense/reduction.js';
 import { SPARSE_MATRIX_BRAND, defineMatrixBrand } from './type-marker.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Sparse matrix using Compressed Sparse Row (CSR) format
@@ -819,7 +820,7 @@ export class SparseMatrix extends Matrix<number> {
    */
   trace(): number {
     if (!this.isSquare) {
-      throw new Error('Trace is only defined for square matrices');
+      throw notSquareError('Trace is only defined for square matrices');
     }
 
     let sum = 0;

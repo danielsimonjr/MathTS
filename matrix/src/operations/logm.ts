@@ -38,6 +38,7 @@ import {
   FOURTH,
 } from './common.js';
 import { matrixSqrtNewtonInternal, sqrtmQuasiTriangular } from './sqrtm.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -572,7 +573,8 @@ export interface LogmOptions {
  */
 export function matrixLogm(A: DenseMatrix, opts?: LogmOptions): DenseMatrix {
   const n = A.rows;
-  if (n !== A.cols) throw new Error(`matrixLogm: matrix must be square (got ${A.rows}×${A.cols})`);
+  if (n !== A.cols)
+    throw notSquareError(`matrixLogm: matrix must be square (got ${A.rows}×${A.cols})`);
   if (n === 0) return DenseMatrix.zeros(0, 0);
 
   const tol = opts?.nearIdentityTol ?? 0.25;

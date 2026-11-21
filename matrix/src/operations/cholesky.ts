@@ -11,6 +11,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { decompositionInputToDenseMatrix, type DecompositionMatrixInput } from './as-packed.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Result of `cholesky`: the lower-triangular factor of the decomposition.
@@ -33,7 +34,7 @@ export function cholesky(A: DecompositionMatrixInput): CholeskyResult {
   const dense = decompositionInputToDenseMatrix(A);
   const n = dense.rows;
   if (dense.cols !== n) {
-    throw new Error(`cholesky: matrix must be square (got ${dense.rows}×${dense.cols})`);
+    throw notSquareError(`cholesky: matrix must be square (got ${dense.rows}×${dense.cols})`);
   }
 
   const src = dense.toFloat64Array();

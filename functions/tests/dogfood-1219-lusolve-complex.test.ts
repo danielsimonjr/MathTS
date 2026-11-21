@@ -338,6 +338,7 @@ describe('lusolve Array A: shape checks do not depend on the entry type (#1219)'
     it(`${kind} A: a b of the wrong length throws the dimension error`, () => {
       expectThrow(() => lusolve(sq, [1, 2, 3]), RangeError, MISMATCH);
     });
+    // The square rule throws the RangeError of notSquareError (#1264, one class at every site).
     it(`${kind} A: a non-square A throws the lu square error`, () => {
       expectThrow(
         () =>
@@ -348,7 +349,7 @@ describe('lusolve Array A: shape checks do not depend on the entry type (#1219)'
             ],
             [1, 2]
           ),
-        Error,
+        RangeError,
         'lu: matrix must be square (got 2×3)'
       );
     });

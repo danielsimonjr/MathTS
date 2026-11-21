@@ -23,6 +23,7 @@ import {
   validatePackedUpperTriangularPivots,
   validateUpperTriangularPivots,
 } from './validate-u-pivots.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 interface MatrixConstructor {
   (data: unknown[] | unknown[][], storage?: 'dense' | 'sparse'): DenseMatrix | SparseMatrix;
@@ -159,7 +160,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         // An empty system has the empty solution. A non-square empty input still throws.
         const cols = nested.length === 0 ? 0 : nested[0].length;
         if (nested.length !== cols) {
-          throw new Error(`lu: matrix must be square (got ${nested.length}×${cols})`);
+          throw notSquareError(`lu: matrix must be square (got ${nested.length}×${cols})`);
         }
         // The shared validation checks b as it does for a matrix A.
         return solveEmpty(new DenseMatrix({ data: [], size: [0, 0] }), b).valueOf() as number[][];
@@ -220,7 +221,7 @@ export const createLusolve = /* #__PURE__ */ factory(
       // The packed path's own shape check. It reads the row lengths only, not the entries.
       const cols = decompositionInputToNestedArray(rows as number[][])[0]?.length ?? 0;
       if (rows.length !== cols) {
-        throw new Error(`lu: matrix must be square (got ${rows.length}×${cols})`);
+        throw notSquareError(`lu: matrix must be square (got ${rows.length}×${cols})`);
       }
     }
 

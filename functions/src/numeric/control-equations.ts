@@ -49,6 +49,7 @@ import { matMul as matmul } from '@danielsimonjr/mathts-matrix';
  */
 
 import { linsolve } from '../typed/numeric.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // ---------------------------------------------------------------------------
 // Local dense-matrix helpers (kept self-contained; this module only needs
@@ -61,7 +62,7 @@ function assertSquare(A: number[][], name: string): number {
   if (n === 0) throw new Error(`${name}: empty matrix`);
   for (const row of A) {
     if (row.length !== n)
-      throw new Error(`${name}: matrix must be square (got ${n}x${row.length})`);
+      throw notSquareError(`${name}: matrix must be square (got ${n}x${row.length})`);
   }
   return n;
 }

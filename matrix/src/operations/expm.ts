@@ -17,6 +17,7 @@
 
 import { DenseMatrix } from '../types/DenseMatrix.js';
 import { eye, matMul, matAdd, matSub, matScale, norm1, gaussJordanContinue } from './common.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // ---------------------------------------------------------------------------
 // Padé-13 coefficients (Higham 2005, Table 1 / Algorithm 10.20)
@@ -138,7 +139,8 @@ export interface ExpmOptions {
  */
 export function matrixExpm(A: DenseMatrix): DenseMatrix {
   const n = A.rows;
-  if (n !== A.cols) throw new Error(`matrixExpm: matrix must be square (got ${A.rows}×${A.cols})`);
+  if (n !== A.cols)
+    throw notSquareError(`matrixExpm: matrix must be square (got ${A.rows}×${A.cols})`);
   if (n === 0) return DenseMatrix.zeros(0, 0);
 
   const Aarr = A.toArray();

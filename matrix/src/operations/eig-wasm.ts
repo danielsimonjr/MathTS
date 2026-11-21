@@ -15,6 +15,7 @@
 
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
 import { eig, eigvals, powerIteration, type EigResult, type EigOptions } from './eig.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Eigendecomposition. Delegates to the JS {@link eig} (WASM path retired — see file header).
@@ -30,7 +31,7 @@ export async function eigWasm(
   }
   for (let i = 0; i < n; i++) {
     if (nested[i].length !== n) {
-      throw new Error('Matrix must be square');
+      throw notSquareError('Matrix must be square');
     }
   }
   return eig(matrix, options);

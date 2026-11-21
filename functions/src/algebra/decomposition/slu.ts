@@ -3,6 +3,7 @@ import { factory } from '../../utils/factory.js';
 import { createCsSqr } from '../sparse/csSqr.js';
 import { createCsLu } from '../sparse/csLu.js';
 import type { TypedFunction } from '../../core/function/typed.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 interface SparseMatrix {
@@ -191,7 +192,7 @@ export const createSlu = /* #__PURE__ */ factory(
         // The CSparse LU is square-only. A rectangular input gets a RangeError, not an
         // internal TypeError. lup factorizes a rectangular matrix.
         if (rows !== cols) {
-          throw new RangeError(
+          throw notSquareError(
             'Matrix must be square (size: [' +
               rows +
               ', ' +
