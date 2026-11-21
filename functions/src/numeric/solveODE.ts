@@ -1747,6 +1747,12 @@ export const createSolveODE = /* #__PURE__ */ factory(
         const ongoing = _createOngoing(isForwards);
         const trimStep = _createTrimStep(isForwards);
         const tfNum = tf as number;
+        // The time of a budget error as a plain number: a BigNumber time is converted, not
+        // replaced by the final time (the message said `last t = target` for a BigNumber run).
+        const tPlain = (v: unknown): number => {
+          const x = _plainNumber(v);
+          return Number.isFinite(x) ? x : tfNum;
+        };
         let lastStepMag = 0;
         // iterate until the final time or the accepted-step cap
         while (ongoing(t[n], tf)) {
@@ -1756,9 +1762,9 @@ export const createSolveODE = /* #__PURE__ */ factory(
               maxIter,
               acceptedSteps: n,
               attempts,
-              tStart: isNumber(t0) ? (t0 as number) : tfNum,
-              tCurrent: isNumber(t[n]) ? (t[n] as number) : tfNum,
-              tFinal: isNumber(tf) ? tfNum : tfNum,
+              tStart: tPlain(t0),
+              tCurrent: tPlain(t[n]),
+              tFinal: tPlain(tf),
               lastStepMag,
               fastestDecayRate: _rkDecayRate(f, t[n], y[n]),
             });
@@ -1849,15 +1855,14 @@ export const createSolveODE = /* #__PURE__ */ factory(
           }
           attempts++;
           if (attempts >= attemptCap && ongoing(t[n], tf)) {
-            const tCur = isNumber(t[n]) ? (t[n] as number) : tfNum;
             throw odeMaxStepsError({
               method: rkMethod,
               maxIter,
               acceptedSteps: n,
               attempts,
-              tStart: isNumber(t0) ? (t0 as number) : tfNum,
-              tCurrent: tCur,
-              tFinal: tfNum,
+              tStart: tPlain(t0),
+              tCurrent: tPlain(t[n]),
+              tFinal: tPlain(tf),
               lastStepMag,
               fastestDecayRate: _rkDecayRate(f, t[n], y[n]),
             });
