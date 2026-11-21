@@ -1431,6 +1431,18 @@
       "roundDigits": {
         "kind": "function"
       },
+      "roundHalfAway": {
+        "kind": "function"
+      },
+      "roundNumberTol": {
+        "kind": "function"
+      },
+      "roundNumberTolExact": {
+        "kind": "function"
+      },
+      "roundNumberWide": {
+        "kind": "function"
+      },
       "safeNumberType": {
         "kind": "function"
       },

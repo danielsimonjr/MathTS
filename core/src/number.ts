@@ -738,6 +738,112 @@ export function nearlyEqual(
   return Math.abs(a - b) <= Math.max(relTol * Math.max(Math.abs(a), Math.abs(b)), absTol);
 }
 
+const ROUND_DECIMALS_RANGE =
+  'Number of decimals in function round must be an integer from 0 to 15 inclusive';
+const ROUND_POW10 = [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9];
+
+/**
+ * Round to the nearest integer, a tie away from zero. `roundHalfAway(-0.4)` is -0.
+ * @param v - the number to round
+ * @returns the integer that is nearest to `v`
+ */
+export function roundHalfAway(v: number): number {
+  return v < 0 ? -Math.round(-v) : Math.round(v);
+}
+
+/**
+ * Round `x` to `decimals` places on the decimal string of `x`. This is the slow, exact form of
+ * {@link roundNumberTol}; the differential test compares the two.
+ *
+ * The steps are those of the mathjs `round`. When `decimals` is below the exponent of `relTol`
+ * (at most 15), `x` first takes its rounding at that exponent if the two are nearly equal. Then
+ * the shortest decimal string of the result rounds half away from zero.
+ * @param x - the number to round
+ * @param decimals - the number of places after the point, an integer from 0 to 15
+ * @param relTol - the relative tolerance of the snap
+ * @param absTol - the absolute tolerance of the snap
+ * @returns the rounded number
+ */
+export function roundNumberTolExact(
+  x: number,
+  decimals: number,
+  relTol: number,
+  absTol: number
+): number {
+  const e = Math.min(Math.abs(splitNumber(relTol).exponent), 15);
+  if (decimals >= e) return parseFloat(toFixed(x, decimals));
+  const xe = parseFloat(toFixed(x, e));
+  const xs = nearlyEqual(x, xe, relTol, absTol) ? xe : x;
+  return parseFloat(toFixed(xs, decimals));
+}
+
+/**
+ * Round `x` to `decimals` places, as the mathjs `round` does (#996). A tie goes away from zero.
+ * A value that is within `relTol` below a tie rounds up, so `round(0.49999999999999994)` is 1.
+ * A negative value that rounds to zero keeps its sign (-0), except for -0 and for a value with
+ * `|x| <= absTol`, which give +0.
+ *
+ * Most calls take a fast path with one multiplication. The path is valid only when the guard
+ * holds: `relTol` is at most 1e-10 (so the snap moves `x` by less than the guard), `decimals`
+ * is below 10 (for more, the guard is at least 1), and `|x|` is at least 1e-9 (below it the snap
+ * can give -0 for a negative value, and the string path decides the sign). The guard is the
+ * distance of `x * 10^decimals` from a tie. Inside the guard the string path decides.
+ * @param x - the number to round
+ * @param decimals - the number of places after the point, an integer from 0 to 15
+ * @param relTol - the relative tolerance of the snap, greater than 0
+ * @param absTol - the absolute tolerance of the snap, at least 0
+ * @returns the rounded number
+ * @throws Error when `decimals` is not an integer from 0 to 15
+ */
+export function roundNumberTol(
+  x: number,
+  decimals: number,
+  relTol: number,
+  absTol: number
+): number {
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 15) {
+    throw new Error(ROUND_DECIMALS_RANGE);
+  }
+  if (!Number.isFinite(x)) return x;
+  if (x === 0) return 0; // also for -0, as in mathjs
+  if (decimals < 10 && relTol > 0 && relTol <= 1e-10 && absTol >= 0) {
+    const a = Math.abs(x);
+    if (a >= 1e-9) {
+      const p = ROUND_POW10[decimals];
+      const t = a * p;
+      const guard = decimals === 0 ? 1e-9 : 1e-10 * p + t * 2 ** -50;
+      if (Math.abs(t - Math.floor(t) - 0.5) > guard) {
+        if (t >= 2 ** 52) return x; // decimals is 0 here: x is an integer
+        const r = Math.round(t) / p;
+        return x < 0 ? -r : r;
+      }
+    }
+  }
+  return roundNumberTolExact(x, decimals, relTol, absTol);
+}
+
+/**
+ * `roundNumberTol` for an integer `decimals` from 0 to 15. Any other `decimals` scales by
+ * 10^decimals and rounds half away from zero (an extension of MathTS: mathjs throws there).
+ * @param x - the number to round
+ * @param decimals - the number of places after the point; a negative count rounds to tens, hundreds, and so on
+ * @param relTol - the relative tolerance of the snap
+ * @param absTol - the absolute tolerance of the snap
+ * @returns the rounded number
+ */
+export function roundNumberWide(
+  x: number,
+  decimals: number,
+  relTol: number,
+  absTol: number
+): number {
+  if (Number.isInteger(decimals) && decimals >= 0 && decimals <= 15) {
+    return roundNumberTol(x, decimals, relTol, absTol);
+  }
+  const f = 10 ** decimals;
+  return roundHalfAway(x * f) / f;
+}
+
 /**
  * Calculate the hyperbolic arccos of a number
  * @param x The number

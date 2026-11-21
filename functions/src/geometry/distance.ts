@@ -1,3 +1,4 @@
+import { hypotList } from '../utils/hypot-list.js';
 import { bigHypot, pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
 import { isBigNumber } from '../utils/is.js';
@@ -450,7 +451,7 @@ export const createDistance = /* #__PURE__ */ factory(
       if (vals.some((v) => v instanceof CoreBigNumber)) {
         return bigHypot(vals as (number | CoreBigNumber)[]) as unknown as MathNumericType;
       }
-      return Math.hypot(...(vals as number[]));
+      return hypotList(vals as number[]);
     }
 
     function _distancePointLine3D(

@@ -71,7 +71,12 @@ const EDGE_SCALARS = [
 const MERGE_UNARIES: Array<{ name: string; fn: UnaryF64; scalar: (x: number) => number }> = [
   { name: 'sign', fn: (a) => sign(a) as Promise<Float64Array>, scalar: Math.sign },
   { name: 'cbrt', fn: (a) => cbrt(a) as Promise<Float64Array>, scalar: Math.cbrt },
-  { name: 'round', fn: (a) => round(a) as Promise<Float64Array>, scalar: Math.round },
+  // #996: a tie rounds away from zero and a value below absTol (1e-15) rounds to 0, as in mathjs.
+  {
+    name: 'round',
+    fn: (a) => round(a) as Promise<Float64Array>,
+    scalar: (x) => (Math.abs(x) <= 1e-15 ? 0 : x < 0 ? -Math.round(-x) : Math.round(x)),
+  },
   { name: 'floor', fn: (a) => floor(a) as Promise<Float64Array>, scalar: Math.floor },
   { name: 'ceil', fn: (a) => ceil(a) as Promise<Float64Array>, scalar: Math.ceil },
   { name: 'fix', fn: (a) => fix(a) as Promise<Float64Array>, scalar: Math.trunc },

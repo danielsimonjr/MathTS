@@ -37,7 +37,13 @@ import {
 import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
 import { fractionGcd, fractionLcm } from '../arithmetic/fraction-gcd.js';
 import { euclidSnap } from './euclid.js';
-import { f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection } from './f64-kernels.js';
+import {
+  f64Unary,
+  f64UnaryDispatched,
+  mapEachLeaf,
+  mapEachLeafOfSecond,
+  unaryCollection,
+} from './f64-kernels.js';
 import {
   pairwiseSum,
   pairwiseSumChecked,
@@ -69,6 +75,7 @@ import {
   fix as coreFix,
   equal as coreEqual,
 } from '@danielsimonjr/mathts-core';
+import { roundNumberTol, roundNumberWide } from '@danielsimonjr/mathts-core/internal';
 // The Unit is now the single merged class; use its instance type in type position.
 import type { UnitInstance as Unit, TypedFunction } from '@danielsimonjr/mathts-core';
 import {
@@ -1441,22 +1448,13 @@ export const cube = mathTyped('cube', {
 });
 
 /**
- * The three complex cube roots of `z`, principal first: |z|^(1/3)·e^(i·arg/3)
- * rotated by 0, +2π/3, −2π/3. Matches mathjs `cbrt(x, true)` ordering.
- */
-function cbrtAllRoots(z: Complex): Complex[] {
-  const arg3 = z.arg() / 3;
-  const r = Math.cbrt(z.abs());
-  const rotate = (theta: number): Complex => new Complex(r, 0).mul(new Complex(0, theta).exp());
-  return [rotate(arg3), rotate(arg3 + (Math.PI * 2) / 3), rotate(arg3 - (Math.PI * 2) / 3)];
-}
-
-/**
  * Cube root
  */
 export const cbrt = mathTyped('cbrt', {
   number: (a: f64): f64 => Math.cbrt(a),
-  Complex: (a: Complex): Complex => a.pow(1 / 3),
+  // The principal cube root of core `Complex.cbrt`, the mathjs formula (`pow(1 / 3)` rounds
+  // differently).
+  Complex: (a: Complex): Complex => a.cbrt(),
   BigNumber: (a: BigNumber): BigNumber => a.cbrt(),
   Dual: (a: Dual): Dual => a.powConst(1 / 3),
 
@@ -1466,11 +1464,10 @@ export const cbrt = mathTyped('cbrt', {
   // path exactly like mathjs `cbrt(8, true)` → [2, -1±i√3].
   'number, boolean': (a: f64, allRoots: boolean): Complex | Complex[] => {
     const z = new Complex(a, 0);
-    return allRoots ? cbrtAllRoots(z) : cbrtAllRoots(z)[0];
+    return allRoots ? z.cbrtRoots() : z.cbrt();
   },
-  'Complex, boolean': (a: Complex, allRoots: boolean): Complex | Complex[] => {
-    return allRoots ? cbrtAllRoots(a) : cbrtAllRoots(a)[0];
-  },
+  'Complex, boolean': (a: Complex, allRoots: boolean): Complex | Complex[] =>
+    allRoots ? a.cbrtRoots() : a.cbrt(),
 
   // Float64Array cbrt (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.cbrt(x)),
@@ -1570,6 +1567,20 @@ function roundBigNumberLive(a: BigNumber, decimals: number): BigNumber {
   return roundBigNumberDecimals(a, decimals, relTol, absTol);
 }
 
+/**
+ * A number rounded to `decimals` places with the live `relTol` and `absTol`. A count from 0 to 15
+ * takes the mathjs kernel; any other count scales by 10^decimals (an extension, #996).
+ */
+function roundNumberLive(a: f64, decimals: f64): f64 {
+  const { relTol, absTol } = liveConfig();
+  return roundNumberWide(a, decimals, relTol, absTol);
+}
+
+/** Throws the mathjs TypeError for a decimal count that is not an integer. */
+function assertIntegerDecimals(decimals: f64): void {
+  if (!Number.isInteger(decimals)) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+}
+
 export const log = mathTyped('log', {
   number: (a: f64): f64 | Complex => logReal(a),
   Complex: (a: Complex): Complex => a.log(),
@@ -1660,29 +1671,61 @@ export const expm1 = mathTyped('expm1', {
 // =============================================================================
 
 /**
- * Round to nearest integer
+ * Round to a decimal count (default 0), with the tie rule of mathjs 15.2.0 for each type (#996):
+ * a number and a BigNumber round a tie away from zero, after a snap to the live `relTol`
+ * (`round(-2.5)` is -3, `round(1.005, 2)` is 1.01); a Fraction rounds it toward +Infinity
+ * (fraction.js); a Complex rounds each part toward +Infinity (complex.js).
  */
 export const round = mathTyped('round', {
-  number: (a: f64): f64 => Math.round(a),
-  // Rich-type policy cases DELEGATE to core's scalar `round`, which uses `halfCeil`
-  // for BigNumber so round(bignumber(-2.5)) = -2 (type-consistent with number/Fraction),
-  // not the -3 the old inline `a.round()` (half-away-from-zero) produced.
+  number: (a: f64): f64 => roundNumberLive(a, 0),
   Fraction: (a: Fraction): Fraction => coreRound(a) as Fraction,
-  BigNumber: (a: BigNumber): BigNumber => coreRound(a) as BigNumber,
+  BigNumber: (a: BigNumber): BigNumber => roundBigNumberLive(a, 0),
   Complex: (a: Complex): Complex => coreRound(a) as Complex,
-  'number, number': (a: f64, decimals: f64): f64 => {
-    const factor = Math.pow(10, decimals);
-    return Math.round(a * factor) / factor;
-  },
+  'number, number': (a: f64, decimals: f64): f64 => roundNumberLive(a, decimals),
   'BigNumber, number': (a: BigNumber, decimals: f64): BigNumber => roundBigNumberLive(a, decimals),
   'BigNumber, BigNumber': (a: BigNumber, decimals: BigNumber): BigNumber => {
     if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
     return roundBigNumberLive(a, decimals.toNumber());
   },
+  // Without this row the Complex and Fraction rows below take `round(2.55, bignumber(1))`,
+  // because the number converts to Complex before it converts to BigNumber.
+  'number, BigNumber': (a: f64, decimals: BigNumber): BigNumber => {
+    if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+    return roundBigNumberLive(BigNumber.fromNumber(a), decimals.toNumber());
+  },
+  'Fraction, number': (a: Fraction, decimals: f64): Fraction => a.round(decimals),
+  'Fraction, BigNumber': (a: Fraction, decimals: BigNumber): Fraction => {
+    if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+    return a.round(decimals.toNumber());
+  },
+  'Complex, number': (a: Complex, decimals: f64): Complex => {
+    assertIntegerDecimals(decimals);
+    return a.round(decimals);
+  },
+  'Complex, BigNumber': (a: Complex, decimals: BigNumber): Complex => {
+    if (!decimals.isInteger()) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
+    return a.round(decimals.toNumber());
+  },
 
-  // Float64Array round, synchronous (nearest integer, matching the 'number' overload)
-  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.round(x)),
-  'Array | Matrix': unaryCollection({ real: Math.round }),
+  // Float64Array round, synchronous. Each element takes the 'number' overload (so -0 gives 0);
+  // the config is read once per call.
+  Float64Array: (a: Float64Array): Float64Array => {
+    const { relTol, absTol } = liveConfig();
+    return f64Unary(a, (x) => roundNumberTol(x, 0, relTol, absTol));
+  },
+  // An Array or a Matrix copies a zero element as it is: mathjs maps them with
+  // `deepMap(x, self, true)`, whose callback is `x === 0 ? x : self(x)`. So `round([-0])` is
+  // `[-0]`, and the scalar `round(-0)` is 0. `Math.round` gave -0 here before #996.
+  'Array | Matrix': unaryCollection({
+    real: (x: f64): f64 => (x === 0 ? x : roundNumberLive(x, 0)),
+  }),
+  // A decimal count with a collection maps the scalar rows over the leaves, as mathjs does
+  // (`matAlgo14xDs` and `matAlgo11xS0s` call the scalar function). A zero leaf goes through the
+  // scalar row here, so `round([-0], 2)` is `[0]`, as in mathjs.
+  'Array | Matrix, number | BigNumber': mapEachLeaf((self, x, n) => self(x, n)),
+  'number | BigNumber | Fraction | Complex, Array | Matrix': mapEachLeafOfSecond((self, x, n) =>
+    self(x, n)
+  ),
 });
 
 /**
@@ -1963,10 +2006,24 @@ function is2DArray(arr: unknown[]): boolean {
   return Array.isArray(arr[0]);
 }
 
+/**
+ * The largest (`max` true) or the smallest absolute value of `arr`, as `Math.max` / `Math.min`
+ * of the absolute values (a NaN gives NaN; an empty list gives -Infinity / Infinity). A loop, not
+ * a spread: a spread of a long list overflows the call stack.
+ */
+function extremeAbs(arr: readonly f64[], max: boolean): f64 {
+  let m = max ? -Infinity : Infinity;
+  for (const x of arr) {
+    const a = Math.abs(x);
+    if (a !== a) return NaN;
+    if (max ? a > m : a < m) m = a;
+  }
+  return m;
+}
+
 /** Vector p-norm (`p` defaults to 2). */
 function vectorNorm(arr: f64[], p: f64 = 2): f64 {
-  if (p === Infinity) return Math.max(...arr.map((x) => Math.abs(x)));
-  if (p === -Infinity) return Math.min(...arr.map((x) => Math.abs(x)));
+  if (p === Infinity || p === -Infinity) return extremeAbs(arr, p > 0);
   if (p === 0) return arr.filter((x) => x !== 0).length;
 
   // 2-norm via LAPACK's dnrm2 scaling, NOT `sqrt(sum(x*x))`.
@@ -2016,10 +2073,10 @@ function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
     let s = 0;
     for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) s += data[i][j] * data[i][j];
     // The sum of squares overflows above about 1e154 and loses its digits below about
-    // 1e-150 (#1104). Then the scaled norm of the finite entries is returned.
+    // 1e-150 (#1104), and it is NaN for an infinite entry with a NaN entry. Then the scaled norm
+    // is returned; `norm2` also applies the IEEE rule to a non-finite entry (#1259).
     if (s >= 2 ** -800 && s < Infinity) return Math.sqrt(s);
-    const entries = data.flat();
-    return entries.every(Number.isFinite) ? norm2(entries) : Math.sqrt(s);
+    return norm2(data.flat());
   }
   if (p === 1) {
     let max = 0;
@@ -2040,16 +2097,17 @@ function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
     return max;
   }
   if (p === 2) {
-    // A NaN entry gives NaN, and an infinite entry gives Infinity, as in mathjs. The singular
-    // value iteration cannot read a non-finite entry (#1285).
-    let infinite = false;
+    // An infinite entry gives Infinity, also with a NaN entry; else a NaN entry gives NaN (the
+    // IEEE rule of `hypot`, #1259). The singular value iteration cannot read a non-finite entry
+    // (#1285).
+    let nan = false;
     for (const row of data) {
       for (const x of row) {
-        if (Number.isNaN(x)) return NaN;
-        if (!Number.isFinite(x)) infinite = true;
+        if (x === Infinity || x === -Infinity) return Infinity;
+        if (Number.isNaN(x)) nan = true;
       }
     }
-    if (infinite) return Infinity;
+    if (nan) return NaN;
     // spectral norm = largest singular value
     const sv = singularValues(data);
     return sv.length > 0 ? Math.max(...sv) : 0;

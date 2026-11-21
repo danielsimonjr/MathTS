@@ -104,13 +104,18 @@ export const createHypot = /* #__PURE__ */ factory(
       ) {
         return bigHypot(args as (number | CoreBigNumber)[]) as unknown as NumericValue;
       }
+      // An infinite argument gives Infinity, also with a NaN (the IEEE 754 rule, #1259). The
+      // scaled loop below cannot decide it: it divides Infinity by Infinity.
+      let infinite = false;
+      for (const a of args) {
+        if (isComplex(a)) throw new TypeError('Unexpected type of argument to hypot');
+        if (a === Infinity || a === -Infinity) infinite = true;
+      }
+      if (infinite) return Infinity;
       let result: NumericValue = 0;
       let largest: NumericValue = 0;
 
       for (let i = 0; i < args.length; i++) {
-        if (isComplex(args[i])) {
-          throw new TypeError('Unexpected type of argument to hypot');
-        }
         const value: NumericValue = abs(args[i]);
         if (smaller(largest, value)) {
           result = multiplyScalar(

@@ -16,6 +16,7 @@
  * singular matrix — is handled correctly (a singular matrix has det 0), verified
  * against numpy.
  */
+import { hypotList } from '../utils/hypot-list.js';
 import { DenseMatrix, lu, eig, balanceForEig } from '@danielsimonjr/mathts-matrix';
 import { Complex } from '@danielsimonjr/mathts-core';
 import { defineRemovedVectorsGetter } from './eigs.js';
@@ -191,7 +192,7 @@ function realVector(
   const im = ne.values[i].im;
   if (im >= 0 || !isReal(ne.values[i])) return ne.vectors[i];
   const v = ne.vectorsIm[i];
-  const norm = Math.hypot(...v) || 1;
+  const norm = hypotList(v) || 1;
   return v.map((x) => x / norm);
 }
 

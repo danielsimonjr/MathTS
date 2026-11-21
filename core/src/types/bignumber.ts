@@ -2338,7 +2338,8 @@ export class BigNumber implements MathTSValue {
 
   /**
    * The square root of the sum of the squares of the values, `sqrt(sum(x^2))`. An empty list gives 0.
-   * A NaN value gives NaN. Else an infinite value gives Infinity.
+   * An infinite value gives Infinity, also with a NaN. Else a NaN value gives NaN (the IEEE 754
+   * rule of `hypot`, #1259).
    *
    * A square can be out of range when the result is in range. Each value is divided by 10^shift
    * first, with `shift` the largest decimal order, so the largest square has an exponent near 0.
@@ -2348,8 +2349,8 @@ export class BigNumber implements MathTSValue {
    * applies the configured bounds to it (#1204, #1255).
    */
   static hypotN(values: readonly BigNumber[]): BigNumber {
-    if (values.some((x) => x._isNaN)) return BigNumber.#allocate(0, 0n, 0, true);
     if (values.some((x) => x._isInfinite)) return BigNumber.#allocate(1, 0n, 0, false, true);
+    if (values.some((x) => x._isNaN)) return BigNumber.#allocate(0, 0n, 0, true);
     let shift = 0;
     let found = false;
     for (const x of values) {

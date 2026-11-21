@@ -24,6 +24,7 @@ import {
   staysRealUnitInterval,
 } from './complex-promotion.js';
 import { bigHypot as scaledBigHypot } from '../utils/bignumber-hypot.js';
+import { hypotList } from '../utils/hypot-list.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
 import type { PublicCos, PublicSin, PublicTan } from './public-type-exports.js';
 import { trigFromAngleUnit } from './trig-angle-unit.js';
@@ -311,19 +312,24 @@ export const toDegrees = mathTyped('toDegrees', {
  */
 export const hypot = mathTyped('hypot', {
   number: (a: number) => Math.abs(a),
-  'number, number': (a: number, b: number) => Math.hypot(a, b),
-  'number, number, ...number': (a: number, b: number, rest: number[]) => Math.hypot(a, b, ...rest),
-  // BigNumber arguments keep a BigNumber result at the configured precision (#1043). A number
-  // mixed with a BigNumber converts to a BigNumber.
-  '...BigNumber': (xs: BigNumber[]) => (xs.length === 1 ? xs[0].abs() : bigHypot(xs)),
-  'BigNumber, number': (a: BigNumber, b: number) => bigHypot([a, b]),
-  'number, BigNumber': (a: number, b: BigNumber) => bigHypot([a, b]),
+  BigNumber: (a: BigNumber) => a.abs(),
+  // One row per arity takes every mix of numbers and BigNumbers, so a BigNumber in any position
+  // keeps a BigNumber result at the configured precision (#1043, #1259). Separate rows per type
+  // let dispatch convert a BigNumber to a number for three or more arguments.
+  'number | BigNumber, number | BigNumber': (a: number | BigNumber, b: number | BigNumber) =>
+    typeof a === 'number' && typeof b === 'number' ? Math.hypot(a, b) : bigHypot([a, b]),
+  'number | BigNumber, number | BigNumber, ...number | BigNumber': (
+    a: number | BigNumber,
+    b: number | BigNumber,
+    rest: (number | BigNumber)[]
+  ) => {
+    const xs = [a, b, ...rest];
+    return xs.every((x) => typeof x === 'number') ? hypotList(xs as number[]) : bigHypot(xs);
+  },
   // An array or a matrix counts all of its entries, as in mathjs.
   'Array | Matrix': (input: unknown[] | { toArray(): unknown }) => {
     const arr = (Array.isArray(input) ? input : (input.toArray() as unknown[])).flat(Infinity);
-    return arr.every((x) => typeof x === 'number')
-      ? Math.hypot(...(arr as number[]))
-      : bigHypot(arr);
+    return arr.every((x) => typeof x === 'number') ? hypotList(arr as number[]) : bigHypot(arr);
   },
 });
 

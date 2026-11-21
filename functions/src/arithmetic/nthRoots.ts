@@ -12,7 +12,8 @@ interface ComplexType {
 }
 
 interface ComplexConstructor {
-  new (value: number | { r: number; phi: number }, imaginary?: number): ComplexType;
+  new (re: number, im?: number): ComplexType;
+  fromPolar(r: number, phi: number): ComplexType;
 }
 
 interface NthRootsDependencies {
@@ -97,7 +98,7 @@ export const createNthRoots = /* #__PURE__ */ factory(
           roots.push(_calculateExactResult[halfPiFactor % 4](r));
           continue;
         }
-        roots.push(new Complex({ r, phi: (arg + 2 * Math.PI * k) / root }));
+        roots.push(Complex.fromPolar(r, (arg + 2 * Math.PI * k) / root));
       }
       return roots;
     }

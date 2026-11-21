@@ -213,7 +213,7 @@ export function complex_array_abs(a: Float64Array, result: Float64Array): void {
   for (let i = 0; i < n; i++) {
     const re = unchecked(a[i * 2]);
     const im = unchecked(a[i * 2 + 1]);
-    unchecked((result[i] = sqrt(re * re + im * im)));
+    unchecked((result[i] = Math.hypot(re, im)));
   }
 }
 
