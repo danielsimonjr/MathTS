@@ -59,10 +59,10 @@ check('legendreP(2, 0.5) = -0.125', near(exports.legendreP(2, 0.5), -0.125));
 const rel = (got, want) => Math.abs((got - want) / want);
 check('legendreP(1000, 1.5) = +Infinity', exports.legendreP(1000, 1.5) === Infinity);
 check('legendreP(1001, -1.5) = -Infinity', exports.legendreP(1001, -1.5) === -Infinity);
-check('legendreP(741, 1.5) is finite (false overflow of the numerator)', rel(exports.legendreP(741, 1.5), 1.1759686377667739e308) < 1e-12);
+check('legendreP(741, 1.5) is finite (false overflow of the numerator)', rel(exports.legendreP(741, 1.5), 1.175968637766774e+308) < 1e-12);
 check('legendreP(5, Infinity) = +Infinity, legendreP(5, NaN) is NaN', exports.legendreP(5, Infinity) === Infinity && Number.isNaN(exports.legendreP(5, NaN)));
 check('chebyshevT(1000, 1.5) = +Infinity', exports.chebyshevT(1000, 1.5) === Infinity);
-check('chebyshevT(5028, 1.01) is finite (false overflow of the product)', rel(exports.chebyshevT(5028, 1.01), 1.7967817555890111e308) < 1e-12);
+check('chebyshevT(5028, 1.01) is finite (false overflow of the product)', rel(exports.chebyshevT(5028, 1.01), 1.796781755589011e+308) < 1e-12);
 check('hermiteH(1000, 1.5) = -Infinity, hermiteH(1001, 1.5) = -Infinity', exports.hermiteH(1000, 1.5) === -Infinity && exports.hermiteH(1001, 1.5) === -Infinity);
 check('hermiteH(300, 10) = +Infinity, hermiteH(301, -10) = +Infinity', exports.hermiteH(300, 10) === Infinity && exports.hermiteH(301, -10) === Infinity);
 check('hermiteH(150, 10) is unchanged', rel(exports.hermiteH(150, 10), -1.3205101243688398e175) < 1e-12);
@@ -71,15 +71,15 @@ check('hermiteH(5, -1e200) = -Infinity, hermiteH(4, -1e200) = +Infinity', export
 check('hermiteH(3, NaN) is NaN', Number.isNaN(exports.hermiteH(3, NaN)));
 check('laguerreL(1000, -1000) = +Infinity, laguerreL(2000, 3000) = +Infinity', exports.laguerreL(1000, -1000) === Infinity && exports.laguerreL(2000, 3000) === Infinity);
 check('laguerreL(1001, 3000) = -Infinity', exports.laguerreL(1001, 3000) === -Infinity);
-check('laguerreL(801, 1419) is finite (false overflow of the numerator)', rel(exports.laguerreL(801, 1419), -7.5516370208470904e305) < 1e-12);
-check('laguerreL(300, 1000) is unchanged', rel(exports.laguerreL(300, 1000), -5.2681767098751553e215) < 1e-12);
+check('laguerreL(801, 1419) is finite (false overflow of the numerator)', rel(exports.laguerreL(801, 1419), -7.551637020847091e+305) < 1e-12);
+check('laguerreL(300, 1000) is unchanged', rel(exports.laguerreL(300, 1000), -5.268176709875155e+215) < 1e-12);
 check('laguerreL(5, 1e200) = -Infinity, laguerreL(4, 1e200) = +Infinity', exports.laguerreL(5, 1e200) === -Infinity && exports.laguerreL(4, 1e200) === Infinity);
 
 // D1: sin(pi x) next to a nonzero integer. lgamma_f64 reduces x exactly (mpmath: -1.0000001).
 {
   const ptr = makeArray([-1.0000001, -1.5, 0.25]);
   const out = readArr(exports.lgamma_f64(ptr));
-  check('lgamma_f64(-1.0000001) = 16.118095608096032 (was 1.5e-10 off)', Math.abs(out[0] - 16.118095608096032) < 1e-13);
+  check('lgamma_f64(-1.0000001) = 16.11809560809603 (was 1.5e-10 off)', Math.abs(out[0] - 16.11809560809603) < 1e-13);
   check('lgamma_f64(-1.5) = log(4 sqrt(pi) / 3)', Math.abs(out[1] - Math.log((4 * Math.sqrt(Math.PI)) / 3)) < 1e-13);
   check('lgamma_f64(0.25) is unchanged', Math.abs(out[2] - 1.2880225246980774) < 1e-13);
 }
