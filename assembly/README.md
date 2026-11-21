@@ -41,6 +41,37 @@ console.log(sin_f64(Math.PI / 2)); // 1
 `matrix` and `functions` load the same binary as `mathts-as.wasm` via their own
 loaders and SHA-384 verification (`core/src/wasm-loader.ts`).
 
+### Entry points
+
+| Specifier                             | Kind   | Content                                                              |
+| ------------------------------------- | ------ | -------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-wasm`          | module | The glue of the release build (`build/mathts.js`).                   |
+| `@danielsimonjr/mathts-wasm/debug.js` | module | The glue of the debug build. It checks the input parameters (below). |
+| `@danielsimonjr/mathts-wasm/wasm`     | file   | The release binary `mathts.wasm`. It has no import.                  |
+| `@danielsimonjr/mathts-wasm/debug`    | file   | The debug binary `mathts-debug.wasm`. It has no import.              |
+
+The two binaries need no host function, so any runtime can instantiate them with an empty import
+object. Read the bytes of the file that the subpath names:
+
+```typescript node
+import { readFile } from 'node:fs/promises';
+
+const bytes = await readFile(new URL(import.meta.resolve('@danielsimonjr/mathts-wasm/wasm')));
+const { instance } = await WebAssembly.instantiate(bytes, {});
+const add = instance.exports.add_f64 as (a: number, b: number) => number;
+console.log(add(2, 3)); // 5
+```
+
+Node also loads a binary as a WebAssembly ES module: `await import('@danielsimonjr/mathts-wasm/wasm')`
+returns its exports (pointer ABI, without the glue). Node 22.12 needs the flag
+`--experimental-wasm-modules`; newer versions (measured on 22.23, 24.22 and 26.13) need none.
+Bun has no loader for a WebAssembly module: `import()` of a binary subpath returns the file path
+as `default`.
+
+A binary has no `abort` import, so an AssemblyScript abort (a failed assertion, or the
+`RangeError` that a kernel throws above its order limit) traps as `WebAssembly.RuntimeError`.
+The message is `unreachable` in V8. The abort message of the source is not available.
+
 ### Output parameters
 
 The glue copies each typed-array argument into WebAssembly memory before the call. After the
@@ -58,7 +89,7 @@ console.log(Array.from(result)); // [19, 22, 43, 50]
 
 `scripts/patch-glue.mjs` holds the class of every parameter (`OUTPUT_PARAMS`: `in` or `out`) and
 runs as a step of `gen:manifest`. The build fails when an export or a parameter is missing from
-that list. The debug build (`build/mathts-debug.js`) throws `mathts glue: <export> wrote its input
+that list. The debug glue (`@danielsimonjr/mathts-wasm/debug.js`) throws `mathts glue: <export> wrote its input
 parameter <param>` when a kernel writes a parameter that the list marks `in`.
 
 ### Dense decompositions (AS exports)
