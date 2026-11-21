@@ -386,6 +386,20 @@ test('patchGlue: a glue without the return of the exports fails the build', () =
   );
 });
 
+test('patchGlue: a lowering call outside a classified export fails the build', () => {
+  // A call that the patch cannot match (here: a declaration instead of an assignment) would copy
+  // in and never back without a sign. The count of calls must equal the count of classified sites.
+  const odd = STUB.replace(
+    '    total(a) {',
+    '    stray(a) {\n      const z = __lowerTypedArray(Float64Array, 5, 3, a);\n      return exports.stray(z);\n    },\n    total(a) {'
+  );
+  assert.notEqual(odd, STUB);
+  assert.throws(
+    () => patchGlue(odd, STUB_TABLE, { debug: false, file: 'stub.js' }),
+    /patch-glue: 6 lowering calls in stub\.js, 5 of them in a classified export/
+  );
+});
+
 test('patchGlue: a second run returns the text unchanged', () => {
   for (const debugBuild of [false, true]) {
     const once = patchGlue(STUB, STUB_TABLE, { debug: debugBuild });

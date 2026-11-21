@@ -359,6 +359,18 @@ function wrapCall(body, name, debug) {
   return null;
 }
 
+/** The number of matches of a global regular expression. */
+function countOf(text, pattern) {
+  return [...text.matchAll(pattern)].length;
+}
+
+/** The number of lowering calls that lie in a method that `METHOD` matches and `LOWER_SITE` reads. */
+function classifiedSiteCount(text) {
+  let count = 0;
+  for (const method of text.matchAll(METHOD)) count += countOf(method[3], LOWER_SITE);
+  return count;
+}
+
 /**
  * Patch the text of an `asc` ESM glue. Pure: text in, text out.
  * @param {string} text glue text
@@ -374,6 +386,18 @@ export function patchGlue(text, table, { debug = false, file = 'glue' } = {}) {
         problems.push(`patch-glue: ${exportName}.${param} has class '${kind}' (use 'in' or 'out')`);
       }
     }
+  }
+
+  // Every call of the lowering helper must lie in a method that this patch classifies. A call that
+  // `METHOD` or `LOWER_SITE` does not match (a new asc layout, a nested array of typed arrays)
+  // would keep the old copy-in-only behaviour without a sign.
+  const calls =
+    countOf(text, /__lowerTypedArray\(/g) - countOf(text, /function __lowerTypedArray\(/g);
+  const classified = classifiedSiteCount(text);
+  if (calls !== classified) {
+    problems.push(
+      `patch-glue: ${calls} lowering calls in ${file}, ${classified} of them in a classified export`
+    );
   }
 
   const seen = new Set();
