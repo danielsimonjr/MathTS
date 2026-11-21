@@ -2452,6 +2452,9 @@
       "BoxLcpResult": {
         "kind": "type"
       },
+      "BridgeMatrix": {
+        "kind": "type"
+      },
       "CAS_BATCH_THRESHOLD": {
         "kind": "number"
       },
@@ -2948,6 +2951,9 @@
         "kind": "type"
       },
       "Matrix": {
+        "kind": "type"
+      },
+      "MatrixValue": {
         "kind": "type"
       },
       "MaxFlowResult": {

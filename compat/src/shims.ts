@@ -234,7 +234,7 @@ export function matrix(
   format?: 'dense' | 'sparse' | string
 ): CompatMatrixValue {
   if (arguments.length === 0) {
-    return _factoryMatrix() as CompatMatrixValue;
+    return _factoryMatrix() as unknown as CompatMatrixValue;
   }
   if (isDenseMatrix(data) || isSparseMatrix(data)) {
     // A native matrix of the format that is asked for, or of no format, is returned as it is.
@@ -244,7 +244,10 @@ export function matrix(
     // The nested data of a matrix with a zero axis does not show its size, so the size of the
     // source goes with the data (#1337).
     if (format === 'sparse' && isDenseMatrix(data)) {
-      return _factorySparse({ data: data.toArray(), size: matrixSize(data) }) as CompatMatrixValue;
+      return _factorySparse({
+        data: data.toArray(),
+        size: matrixSize(data),
+      }) as unknown as CompatMatrixValue;
     }
     if (format !== 'sparse' && isSparseMatrix(data)) {
       return denseOfNested(data.toArray(), data);
@@ -252,7 +255,7 @@ export function matrix(
     return data;
   }
   // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
-  return _factoryMatrix(data as number[][], format) as CompatMatrixValue;
+  return _factoryMatrix(data as number[][], format) as unknown as CompatMatrixValue;
 }
 
 /**
@@ -260,9 +263,9 @@ export function matrix(
  */
 export function sparse(data?: number[][]): CompatMatrixValue {
   if (data === undefined) {
-    return _factorySparse() as CompatMatrixValue;
+    return _factorySparse() as unknown as CompatMatrixValue;
   }
-  return _factorySparse(data) as CompatMatrixValue;
+  return _factorySparse(data) as unknown as CompatMatrixValue;
 }
 
 // =============================================================================

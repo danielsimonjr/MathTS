@@ -8,6 +8,8 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import { median, mode, mad, matrix, bignumber, parallelFFT } from '../src/index.js';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import type { BridgeMatrix } from '../src/index.js';
+import type { MathJSDenseMatrix, MathJSSparseMatrix } from '../src/factories/matrix-bridge.js';
 
 const XS: number[] = [4, 1, 3, 2, 5];
 const GRID: number[][] = [
@@ -93,7 +95,7 @@ describe('the Matrix arm returns numbers because the public Matrix stores number
   });
 
   it('a DenseMatrix refuses a BigNumber, and a SparseMatrix stores it as a double', () => {
-    const big = bignumber(5) as number;
+    const big = bignumber(5) as unknown as number;
     expect(() => new DenseMatrix([[big]])).toThrow(/must contain numbers/);
     const sparse = new SparseMatrix(1, 1, [big], [0], [0, 1]);
     expect(typeof median(sparse)).toBe('number');
@@ -101,14 +103,36 @@ describe('the Matrix arm returns numbers because the public Matrix stores number
     expect(typeof (mode(sparse) as number[])[0]).toBe('number');
   });
 
-  it('a compat matrix of BigNumber returns a BigNumber, and its type is unknown', () => {
-    // `matrix()` and `bignumber()` return `unknown` (#1359), so no overload names this input.
-    // A value typed `unknown` is no argument of `median` (as for `mean`, #964): the one cast
-    // names the kind, and the elements stay `unknown`.
-    const compat = matrix([bignumber(1), bignumber(5), bignumber(3)]) as readonly unknown[];
+  it('a matrix of BigNumber is an argument of median, and the result type is unknown', () => {
+    // `matrix()` returns the bridge matrix, which holds any element: no overload names its
+    // elements, so the result is `unknown` and one cast names the kind.
+    const compat = matrix([bignumber(1), bignumber(5), bignumber(3)]);
     const result = median(compat);
     expectTypeOf(result).toEqualTypeOf<unknown>();
     expect((result as { toNumber(): number }).toNumber()).toBe(3);
+  });
+});
+
+describe('matrix() and sparse() return the bridge matrix', () => {
+  it('both run-time classes have every member of BridgeMatrix', () => {
+    // `BridgeMatrix` is the public name of the two classes that are not exported. A member that
+    // one class lacks, or types in another way, fails here at compile time.
+    expectTypeOf<MathJSDenseMatrix>().toMatchTypeOf<BridgeMatrix>();
+    expectTypeOf<MathJSSparseMatrix>().toMatchTypeOf<BridgeMatrix>();
+    expectTypeOf(matrix([1, 2])).toEqualTypeOf<BridgeMatrix>();
+  });
+
+  it('the bridge matrix is not the DenseMatrix of the matrix package', () => {
+    const m = matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    expect(m instanceof DenseMatrix).toBe(false);
+    expect(m.isMatrix).toBe(true);
+    expect(m.size()).toEqual([2, 2]);
+    expect([m.rows, m.cols, m.storage()]).toEqual([2, 2, 'dense']);
+    expect(m.get([1, 0])).toBe(3);
+    expect(m.clone().toArray()).toEqual(m.toArray());
   });
 });
 

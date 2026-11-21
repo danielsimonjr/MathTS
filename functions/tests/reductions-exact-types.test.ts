@@ -307,7 +307,7 @@ const B1 = B[1];
 
 // `matrix` returns `unknown` by design; the typed statistics overloads take a Matrix. This is the one
 // cast of the file.
-const dense = (data: unknown[]): DenseMatrix => matrix(data) as DenseMatrix;
+const dense = (data: unknown[]): DenseMatrix => matrix(data) as unknown as DenseMatrix;
 
 describe('mean, variance and std keep exact types', () => {
   it('mean of Complex, BigNumber and Fraction values', () => {
@@ -396,7 +396,7 @@ describe('mean, variance and std keep exact types', () => {
     const m = sparse([
       [f(1), f(2)],
       [f(3), f(4)],
-    ]) as DenseMatrix;
+    ]) as unknown as DenseMatrix;
     for (const [fn, want] of [
       [mean, [2, 3]],
       [variance, [2, 2]],

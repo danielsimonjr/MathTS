@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type BigNumber from 'bignumber.js';
 import { eigs, bignumber, complex } from '../src/index.js';
 
-const bn = (x: number | string) => bignumber(x) as BigNumber;
+const bn = (x: number | string) => bignumber(x) as unknown as BigNumber;
 
 type Ri = { re: number; im: number };
 const toRi = (x: unknown): Ri => {

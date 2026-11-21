@@ -31,6 +31,8 @@ const run = (A: unknown[][]): EigResult => eigs(A as never) as unknown as EigRes
 
 const asBig = (A: number[][]) => A.map((r) => r.map((x) => bignumber(x)));
 const asComplex = (A: number[][]) => A.map((r) => r.map((x) => complex(x, 0)));
+/** A converter of number rows: `bignumber` gives BigNumber, `complex` still gives unknown (#1359). */
+type Conv = (A: number[][]) => unknown[][];
 
 /** The largest relative distance from a wanted value to the nearest computed value. */
 function worstRelError(got: unknown[], want: Ri[], scale: (w: Ri) => number): number {
@@ -127,18 +129,18 @@ const SEEDED = (() => {
 })();
 
 describe('eigs of seeded random matrices (#1238)', () => {
-  const cases: Array<[string, number[][], typeof asBig]> = [
-    ...[0, 1, 2].map((k): [string, number[][], typeof asBig] => [
+  const cases: Array<[string, number[][], Conv]> = [
+    ...[0, 1, 2].map((k): [string, number[][], Conv] => [
       `BigNumber 4x4 #${k}`,
       SEEDED.m4[k],
       asBig,
     ]),
-    ...[1, 5, 8, 20].map((k): [string, number[][], typeof asBig] => [
+    ...[1, 5, 8, 20].map((k): [string, number[][], Conv] => [
       `BigNumber 6x6 #${k}`,
       SEEDED.m6[k],
       asBig,
     ]),
-    ...[5, 8, 15, 21].map((k): [string, number[][], typeof asBig] => [
+    ...[5, 8, 15, 21].map((k): [string, number[][], Conv] => [
       `Complex 6x6 #${k}`,
       SEEDED.m6[k],
       asComplex,

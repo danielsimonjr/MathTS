@@ -5,7 +5,7 @@ import { eigs as eigsRaw, bignumber, complex, matrix } from '../src/index.js';
 type EigResult = { values: unknown; eigenvectors?: { value: unknown; vector: unknown }[] };
 const eigs = eigsRaw as unknown as (m: unknown, o?: object) => EigResult;
 
-const bn = (x: number | string) => bignumber(x) as BigNumber;
+const bn = (x: number | string) => bignumber(x) as unknown as BigNumber;
 const num = (x: unknown): number =>
   typeof x === 'number' ? x : (x as { toNumber: () => number }).toNumber();
 
