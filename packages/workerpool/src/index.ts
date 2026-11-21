@@ -18,6 +18,7 @@ import {
   type PoolStats,
 } from './pool-types.js';
 import { compileFunctionSource } from './compile-function-source.js';
+import { toArrayData, toFloat64Data, toInt32Data } from './data-guards.js';
 import { chunkPairTyped, chunkTyped } from './chunk-typed.js';
 import { fftFrameInPlace } from './fft-core.js';
 import { assertMatmulBuffers, matmulSequential } from './matmul-sequential.js';
@@ -848,6 +849,7 @@ export class MathWorkerPool {
    * Parallel sum of array elements
    */
   async sum(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
+    data = toFloat64Data('sum', data);
     return this.reduceScalar(data, options, {
       // Pairwise, as in the chunk kernel and in ComputePool's sequential path: the result
       // must not depend on whether the call crossed the parallel threshold.
@@ -861,6 +863,7 @@ export class MathWorkerPool {
    * Parallel product of array elements
    */
   async prod(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
+    data = toFloat64Data('prod', data);
     return this.reduceScalar(data, options, {
       sequential: () => {
         let total = 1;
@@ -882,6 +885,8 @@ export class MathWorkerPool {
     b: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<number>> {
+    a = toFloat64Data('dot', a);
+    b = toFloat64Data('dot', b);
     if (a.length !== b.length) throw lengthMismatch('dot', a.length, b.length);
 
     const start = performance.now();
@@ -928,6 +933,8 @@ export class MathWorkerPool {
     op: 'add' | 'subtract' | 'multiply' | 'divide',
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    a = toFloat64Data('elementwise', a);
+    b = toFloat64Data('elementwise', b);
     if (a.length !== b.length) throw lengthMismatch(op, a.length, b.length);
 
     const start = performance.now();
@@ -991,6 +998,7 @@ export class MathWorkerPool {
     scalar: number,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    data = toFloat64Data('scale', data);
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -1051,6 +1059,8 @@ export class MathWorkerPool {
     op: 'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift',
     options?: TaskOptions
   ): Promise<ParallelResult<Int32Array>> {
+    a = toInt32Data(op, a);
+    b = toInt32Data(op, b);
     if (a.length !== b.length) throw lengthMismatch(op, a.length, b.length);
 
     const start = performance.now();
@@ -1122,6 +1132,7 @@ export class MathWorkerPool {
     op: 'bitAnd' | 'bitOr' | 'bitXor' | 'leftShift' | 'rightArithShift' | 'rightLogShift',
     options?: TaskOptions
   ): Promise<ParallelResult<Int32Array>> {
+    a = toInt32Data(op, a);
     const start = performance.now();
 
     if (!this.shouldParallelize(a.length, options)) {
@@ -1181,6 +1192,7 @@ export class MathWorkerPool {
    * Unary bitwise NOT (`~a[i]`) over an `Int32Array`.
    */
   async bitwiseNot(a: Int32Array, options?: TaskOptions): Promise<ParallelResult<Int32Array>> {
+    a = toInt32Data('bitwiseNot', a);
     const start = performance.now();
 
     if (!this.shouldParallelize(a.length, options)) {
@@ -1240,6 +1252,8 @@ export class MathWorkerPool {
     bCols: number,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    a = toFloat64Data('matmul', a);
+    b = toFloat64Data('matmul', b);
     assertMatmulBuffers(a.length, aRows, aCols, b.length, bCols);
     const resultSize = aRows * bCols;
     const start = performance.now();
@@ -1308,6 +1322,7 @@ export class MathWorkerPool {
     cols: number,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    data = toFloat64Data('transpose', data);
     if (data.length !== rows * cols) {
       throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
     }
@@ -1391,6 +1406,7 @@ export class MathWorkerPool {
     data: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<{ min: number; max: number; minIdx: number; maxIdx: number }>> {
+    data = toFloat64Data('minMax', data);
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -1439,6 +1455,7 @@ export class MathWorkerPool {
     data: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
+    data = toFloat64Data('variance', data);
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -1501,6 +1518,7 @@ export class MathWorkerPool {
    * Compute norm (Euclidean length) in parallel
    */
   async norm(data: Float64Array, options?: TaskOptions): Promise<ParallelResult<number>> {
+    data = toFloat64Data('norm', data);
     // Chunks return scaled `[scale, ssq]` partials (BLAS dnrm2), combined scale-aware, so a
     // vector of 1e200s gives a finite norm instead of Infinity.
     return this.reduceScalar<[number, number]>(data, options, {
@@ -1518,6 +1536,8 @@ export class MathWorkerPool {
     b: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<number>> {
+    a = toFloat64Data('distance', a);
+    b = toFloat64Data('distance', b);
     if (a.length !== b.length) throw lengthMismatch('distance', a.length, b.length);
 
     const start = performance.now();
@@ -1562,6 +1582,7 @@ export class MathWorkerPool {
     fn: UnaryFn,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    data = toFloat64Data('unary', data);
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -1610,6 +1631,7 @@ export class MathWorkerPool {
     fnSource: string,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    data = toFloat64Data('applyKernel', data);
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -1663,6 +1685,8 @@ export class MathWorkerPool {
     fnSource: string,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    a = toFloat64Data('applyKernel2', a);
+    b = toFloat64Data('applyKernel2', b);
     if (a.length !== b.length) throw lengthMismatch('applyKernel2', a.length, b.length);
 
     const start = performance.now();
@@ -1734,6 +1758,8 @@ export class MathWorkerPool {
     inverse = false,
     options?: TaskOptions
   ): Promise<ParallelResult<{ real: Float64Array; imag: Float64Array }>> {
+    real = toFloat64Data('fftBatch', real);
+    imag = toFloat64Data('fftBatch', imag);
     const start = performance.now();
     const total = frameCount * frameLength;
 
@@ -1821,6 +1847,7 @@ export class MathWorkerPool {
     dim: number,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    points = toFloat64Data('distanceMatrix', points);
     const start = performance.now();
     const resultSize = n * n;
 
@@ -1889,6 +1916,7 @@ export class MathWorkerPool {
     max?: number,
     options?: TaskOptions
   ): Promise<ParallelResult<number[]>> {
+    data = toFloat64Data('histogram', data);
     if (!Number.isInteger(bins) || bins <= 0) {
       throw new RangeError(`histogram: bins must be a positive integer (got ${bins})`);
     }
@@ -1971,6 +1999,8 @@ export class MathWorkerPool {
     vector: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    matrix = toFloat64Data('matvec', matrix);
+    vector = toFloat64Data('matvec', vector);
     if (cols !== vector.length) {
       throw new Error(`Matrix columns (${cols}) must match vector length (${vector.length})`);
     }
@@ -2045,6 +2075,8 @@ export class MathWorkerPool {
     b: Float64Array,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    a = toFloat64Data('outer', a);
+    b = toFloat64Data('outer', b);
     const resultSize = a.length * b.length;
     const start = performance.now();
 
@@ -2111,6 +2143,7 @@ export class MathWorkerPool {
     predicate: (item: T) => boolean,
     options?: TaskOptions
   ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
+    data = toArrayData<T>('find', data);
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
@@ -2169,6 +2202,7 @@ export class MathWorkerPool {
     compare?: (a: T, b: T) => number,
     options?: TaskOptions
   ): Promise<ParallelResult<T[]>> {
+    data = toArrayData<T>('sort', data);
     return this.runParallel(data.length, options, {
       sequential: () => [...data].sort(compare),
       chunks: () => this.chunkArray(data, this.workerChunkSize(data.length, options)),
@@ -2273,6 +2307,7 @@ export class MathWorkerPool {
     fn: (item: T) => R,
     options?: TaskOptions
   ): Promise<ParallelResult<R[]>> {
+    data = toArrayData<T>('map', data);
     return this.runArrayChunks(data, options, 'mapChunk', fn.toString(), () => data.map(fn));
   }
 
@@ -2285,6 +2320,7 @@ export class MathWorkerPool {
     initial: R,
     options?: TaskOptions
   ): Promise<ParallelResult<R>> {
+    data = toArrayData<T>('reduce', data);
     const fnString = fn.toString();
     return this.runParallel(data.length, options, {
       sequential: () => data.reduce(fn, initial),
@@ -2302,6 +2338,7 @@ export class MathWorkerPool {
     predicate: (item: T) => boolean,
     options?: TaskOptions
   ): Promise<ParallelResult<T[]>> {
+    data = toArrayData<T>('filter', data);
     return this.runArrayChunks(data, options, 'filterChunk', predicate.toString(), () =>
       data.filter(predicate)
     );
@@ -2463,6 +2500,7 @@ export type { Pool, PoolOptions, ExecOptions, PoolStats };
 export type { TransferDescriptor, TransferableLike } from './pool-types.js';
 
 export { chunkTyped, chunkPairTyped } from './chunk-typed.js';
+export { toFloat64Data, toInt32Data, toArrayData, assertArrayData } from './data-guards.js';
 export { forEachMultiIndex } from './multi-index.js';
 export { tensordotRange } from './tensordot-range.js';
 export { matmulSequential } from './matmul-sequential.js';

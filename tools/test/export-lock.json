@@ -182,6 +182,9 @@
       "WorkerpoolCapabilities": {
         "kind": "type"
       },
+      "assertArrayData": {
+        "kind": "function"
+      },
       "canUseSharedMemory": {
         "kind": "function"
       },
@@ -237,6 +240,15 @@
         "kind": "function"
       },
       "terminatePool": {
+        "kind": "function"
+      },
+      "toArrayData": {
+        "kind": "function"
+      },
+      "toFloat64Data": {
+        "kind": "function"
+      },
+      "toInt32Data": {
         "kind": "function"
       },
       "transferArrayBuffer": {

@@ -20,6 +20,9 @@ import {
   MathWorkerPool,
   Transfer,
   tensordotRange,
+  toArrayData,
+  toFloat64Data,
+  toInt32Data,
   type WorkerPoolConfig,
   type ParallelResult as WorkerParallelResult,
   type TaskOptions,
@@ -643,6 +646,8 @@ export class ComputePool {
     }
   ): Promise<ParallelResult<number>> {
     this.assertActive();
+    a = toFloat64Data(options.op, a);
+    b = toFloat64Data(options.op, b);
     assertSameLength(options.op, a.length, b.length);
     if (!this.shouldParallelize(a.length, options.op, options.force)) {
       return this.seqResult(options.sequential(a, b));
@@ -664,6 +669,8 @@ export class ComputePool {
     }
   ): Promise<ParallelResult<Int32Array>> {
     this.assertActive();
+    a = toInt32Data(options.op, a);
+    b = toInt32Data(options.op, b);
     assertSameLength(options.op, a.length, b.length);
     if (this.shouldParallelize(a.length, options.op)) {
       return toParallelResult(await this.workerPool.bitwiseBinary(a, b, options.op));
@@ -691,6 +698,8 @@ export class ComputePool {
     }
   ): Promise<ParallelResult<Int32Array>> {
     this.assertActive();
+    a = toInt32Data(options.op, a);
+    if (typeof b !== 'number') b = toInt32Data(options.op, b);
     if (typeof b !== 'number') assertSameLength(options.op, a.length, b.length);
     if (this.shouldParallelize(a.length, options.op)) {
       const result =
@@ -730,6 +739,7 @@ export class ComputePool {
    */
   async sum(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
     this.assertActive();
+    data = toFloat64Data('sum', data);
     if (!this.shouldParallelize(data.length, 'sum', force)) {
       // PAIRWISE, not `s += data[i]`. Naive accumulation grows error as O(n)*eps; pairwise as
       // O(log n)*eps. On 1e6 elements that is 1.3e-11 vs 2.9e-16 — we were ~46,000x less accurate
@@ -747,6 +757,7 @@ export class ComputePool {
    */
   async prod(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
     this.assertActive();
+    data = toFloat64Data('prod', data);
     if (!this.shouldParallelize(data.length, 'prod', force)) {
       let p = 1;
       for (let i = 0; i < data.length; i++) p *= data[i];
@@ -824,6 +835,8 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    a = toFloat64Data('elementwise', a);
+    b = toFloat64Data('elementwise', b);
     const result = await this.workerPool.elementwise(
       a,
       b,
@@ -842,6 +855,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    data = toFloat64Data('scale', data);
     const result = await this.workerPool.scale(
       data,
       scalar,
@@ -891,6 +905,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    data = toFloat64Data('transpose', data);
     if (data.length !== rows * cols) {
       throw new Error(`transpose: data length ${data.length} !== rows*cols (${rows * cols})`);
     }
@@ -920,6 +935,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<R[]>> {
     this.assertActive();
+    data = toArrayData<T>('map', data);
     await this.ensureInitializedForParallel(data.length, undefined, force);
     const result = await this.workerPool.map(
       data,
@@ -939,6 +955,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<R>> {
     this.assertActive();
+    data = toArrayData<T>('reduce', data);
     await this.ensureInitializedForParallel(data.length, undefined, force);
     const result = await this.workerPool.reduce(
       data,
@@ -958,6 +975,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<T[]>> {
     this.assertActive();
+    data = toArrayData<T>('filter', data);
     await this.ensureInitializedForParallel(data.length, undefined, force);
     const result = await this.workerPool.filter(
       data,
@@ -979,6 +997,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<{ min: number; max: number; minIdx: number; maxIdx: number }>> {
     this.assertActive();
+    data = toFloat64Data('minMax', data);
     // 'minMax' backs both `min` and `max` (they slice this result); gate on the
     // stricter of the two so it honors either op's threshold.
     if (
@@ -1001,6 +1020,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<{ mean: number; variance: number; std: number }>> {
     this.assertActive();
+    data = toFloat64Data('variance', data);
     if (!this.shouldParallelize(data.length, 'variance', force)) {
       // Corrected two-pass (pairwise mean + (Σd)²/n correction). A naive mean and an uncorrected
       // Σ(x-mean)² lost ~7 digits on large-mean data — variance was ~1e-7 relErr vs NumPy's ~1e-13.
@@ -1022,6 +1042,7 @@ export class ComputePool {
    */
   async norm(data: Float64Array, force?: DispatchOptions): Promise<ParallelResult<number>> {
     this.assertActive();
+    data = toFloat64Data('norm', data);
     if (!this.shouldParallelize(data.length, 'norm', force)) {
       // LAPACK dnrm2 scaling, not `sqrt(sum(x*x))`: squaring before adding overflows to Infinity
       // around 1e200 and FLUSHES TO ZERO around 1e-200 (a silently wrong answer, worse than the
@@ -1063,6 +1084,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<number[]>> {
     this.assertActive();
+    data = toFloat64Data('histogram', data);
     if (!Number.isInteger(bins) || bins <= 0) {
       throw new RangeError(`histogram: bins must be a positive integer (got ${bins})`);
     }
@@ -1116,6 +1138,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    data = toFloat64Data('unary', data);
     const result = await this.workerPool.unary(
       data,
       fn,
@@ -1135,6 +1158,7 @@ export class ComputePool {
    */
   async applyKernel(data: Float64Array, fnSource: string): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    data = toFloat64Data('applyKernel', data);
     const result = await this.workerPool.applyKernel(data, fnSource);
     return toParallelResult(result);
   }
@@ -1153,6 +1177,8 @@ export class ComputePool {
     fnSource: string
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    a = toFloat64Data('applyKernel2', a);
+    b = toFloat64Data('applyKernel2', b);
     const result = await this.workerPool.applyKernel2(a, b, fnSource);
     return toParallelResult(result);
   }
@@ -1285,6 +1311,8 @@ export class ComputePool {
     inverse = false
   ): Promise<ParallelResult<{ real: Float64Array; imag: Float64Array }>> {
     this.assertActive();
+    real = toFloat64Data('fftBatch', real);
+    imag = toFloat64Data('fftBatch', imag);
     const result = await this.workerPool.fftBatch(real, imag, frameCount, frameLength, inverse);
     return toParallelResult(result);
   }
@@ -1303,6 +1331,7 @@ export class ComputePool {
     dim: number
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    points = toFloat64Data('distanceMatrix', points);
     const result = await this.workerPool.distanceMatrix(points, n, dim);
     return toParallelResult(result);
   }
@@ -1388,6 +1417,8 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    matrix = toFloat64Data('matvec', matrix);
+    vector = toFloat64Data('matvec', vector);
     if (matrix.length !== rows * cols) {
       throw new Error(`matvec: matrix length ${matrix.length} !== rows*cols (${rows * cols})`);
     }
@@ -1423,6 +1454,8 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    a = toFloat64Data('outer', a);
+    b = toFloat64Data('outer', b);
     if (!this.shouldParallelize(a.length * b.length, 'outer', force)) {
       const out = new Float64Array(a.length * b.length);
       for (let i = 0; i < a.length; i++) {
@@ -1452,6 +1485,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<{ found: boolean; value?: T; index?: number }>> {
     this.assertActive();
+    data = toArrayData<T>('find', data);
     await this.ensureInitializedForParallel(data.length, undefined, force);
     const result = await this.workerPool.find(
       data,
@@ -1470,6 +1504,7 @@ export class ComputePool {
     force?: DispatchOptions
   ): Promise<ParallelResult<T[]>> {
     this.assertActive();
+    data = toArrayData<T>('sort', data);
     await this.ensureInitializedForParallel(data.length, undefined, force);
     const result = await this.workerPool.sort(
       data,
@@ -1538,6 +1573,8 @@ export class ComputePool {
    */
   async pow(a: Float64Array, b: Float64Array): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    a = toFloat64Data('pow', a);
+    b = toFloat64Data('pow', b);
     assertSameLength('pow', a.length, b.length);
     if (this.shouldParallelize(a.length, 'pow')) {
       return this.applyKernel2(a, b, '(a, b) => Math.pow(a, b)');
@@ -1566,6 +1603,7 @@ export class ComputePool {
    */
   async sign(data: Float64Array): Promise<ParallelResult<Float64Array>> {
     this.assertActive();
+    data = toFloat64Data('sign', data);
     if (this.shouldParallelize(data.length, 'sign')) {
       return this.applyKernel(data, '(x) => Math.sign(x)');
     }
@@ -1610,6 +1648,8 @@ export class ComputePool {
     axesB: readonly number[]
   ): Promise<ParallelResult<{ data: Float64Array; shape: number[] }>> {
     this.assertActive();
+    a = toFloat64Data('tensordot', a);
+    b = toFloat64Data('tensordot', b);
     if (axesA.length !== axesB.length) {
       throw new Error(
         `tensordot: axesA.length (${axesA.length}) !== axesB.length (${axesB.length})`
@@ -1800,6 +1840,7 @@ export class ComputePool {
    */
   async bitNot(a: Int32Array): Promise<ParallelResult<Int32Array>> {
     this.assertActive();
+    a = toInt32Data('bitNot', a);
     if (this.shouldParallelize(a.length, 'bitNot')) {
       return toParallelResult(await this.workerPool.bitwiseNot(a));
     }
