@@ -101,7 +101,7 @@ function inv(A: number[][]): number[][] {
   const n = A.length;
   const Inv = zeros(n, n);
   for (let j = 0; j < n; j++) {
-    const e = new Array(n).fill(0);
+    const e = new Array<number>(n).fill(0);
     e[j] = 1;
     const col = linsolve(A, e);
     for (let i = 0; i < n; i++) Inv[i][j] = col[i];

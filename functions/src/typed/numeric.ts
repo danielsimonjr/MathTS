@@ -12,6 +12,8 @@
  */
 
 import {
+  decompositionInputToNestedArray,
+  isTypedScalar,
   readRightHandSide,
   singularValues as matrixSingularValues,
   type DenseMatrix,
@@ -27,6 +29,7 @@ import {
 import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
 import type { Matrix as MathJSMatrix } from '../utils/is.js';
 import { matrixRows, type MatrixArgument } from './number-matrix.js';
+import { factoryScope } from '../factories/scope.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
 import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
@@ -86,6 +89,8 @@ export {
 
 type f64 = number;
 type i32 = number;
+/** A typed array with number elements (every kind except the bigint kinds), as `isNumberTypedArray` reads it. */
+type NumberTypedArray = ArrayLike<number> & ArrayBufferView;
 
 // =============================================================================
 // Root Finding
@@ -200,34 +205,74 @@ export function findRoot(f: (x: f64) => f64, a: f64, b: f64, opts?: FindRootOpti
   return b;
 }
 
+/** True when an entry of `rows` is a BigNumber, Fraction or Complex (mathjs keeps its type). */
+function hasTypedEntry(rows: readonly unknown[][]): boolean {
+  for (const row of rows) {
+    if (!Array.isArray(row)) continue;
+    for (const v of row) if (typeof v !== 'number' && isTypedScalar(v)) return true;
+  }
+  return false;
+}
+
+/**
+ * Solve with the typed `lusolve`, which computes in the type of the entries, as mathjs `lusolve`
+ * does. `factoryScope.lusolve` is set when the package entry loads; a static import of the
+ * factories closes an import cycle.
+ */
+function typedSolve(rows: unknown[][], column: readonly unknown[]): unknown[] {
+  const lusolve = (factoryScope as { lusolve?: (a: unknown, b: unknown) => unknown }).lusolve;
+  if (lusolve === undefined) {
+    throw new Error('linsolve: the typed solver is not loaded; import the package entry');
+  }
+  const x = lusolve(
+    rows,
+    column.map((v) => [v])
+  ) as unknown[][];
+  return x.map((row) => row[0]);
+}
+
 /**
  * Solve linear system Ax = b using LU decomposition with partial pivoting.
+ *
+ * Entries follow the implicit rule of mathjs 15.2.0 (`implicitNumber` of the matrix package): a
+ * numeric string, a boolean, `null` and `undefined` convert to numbers. When an entry of `A` or
+ * `b` is a BigNumber, Fraction or Complex, the typed `lusolve` solves the system in that type, as
+ * mathjs `lusolve` does, and the result holds values of that type.
  *
  * @param A - Coefficient matrix (n x n), read by `matrixRows`: a nested array, a matrix-package
  *   `DenseMatrix` or `SparseMatrix` (a `SparseMatrix` is densified first), or a MathJS matrix.
  * @param b - Right-hand side, read by the matrix-package `readRightHandSide`: a vector (length n;
  *   a 1-D array or a typed array of numbers), an `n x 1` nested column, a `DenseMatrix` or
- *   `SparseMatrix` with one column or one row, or a MathJS matrix of size `[n]` or `[n, 1]`. An
- *   entry that is a numeric string, a boolean, a bigint, a Fraction or a BigNumber is read as its
- *   number, as mathjs `lusolve` does.
- * @returns Solution vector x
- * @throws TypeError if `A` is not a matrix type, `b` has another shape, or an entry of `b` has no
- *   conversion to number.
- * @throws Error if the matrix is empty, not square, singular, or `b` has the wrong length.
+ *   `SparseMatrix` with one column or one row, or a MathJS matrix of size `[n]` or `[n, 1]`.
+ * @returns Solution vector x: numbers, or values of the typed entry type.
+ * @throws TypeError if `A` is not a matrix type, `b` has another shape, or an entry has no
+ *   conversion to number and is no BigNumber, Fraction or Complex.
+ * @throws Error if the matrix is empty, not square, singular, `b` has the wrong length, or a
+ *   string entry is not a number (`Cannot convert`).
  *
  * @example
  * linsolve([[2, 1], [1, 3]], [5, 10]) // => [1, 3]
  */
 export function linsolve(
-  A: MatrixArgument,
-  b: number[] | Float64Array | number[][] | DenseMatrix | SparseMatrix | MathJSMatrix
-): number[] {
-  const dense = matrixRows('linsolve', A);
-  const n = dense.length;
+  A: number[][] | DenseMatrix | SparseMatrix,
+  b: number[] | NumberTypedArray | number[][] | DenseMatrix | SparseMatrix
+): number[];
+export function linsolve(
+  A: MatrixArgument | unknown[][],
+  b: unknown[] | NumberTypedArray | unknown[][] | DenseMatrix | SparseMatrix | MathJSMatrix
+): unknown[];
+export function linsolve(
+  A: MatrixArgument | unknown[][],
+  b: unknown[] | NumberTypedArray | unknown[][] | DenseMatrix | SparseMatrix | MathJSMatrix
+): unknown[] {
+  const rows = matrixRows('linsolve', A);
+  const n = rows.length;
   if (n === 0) throw new Error('linsolve: empty matrix');
-  if (dense[0].length !== n) throw new Error('linsolve: matrix must be square');
+  if ((rows[0] as unknown[] | undefined)?.length !== n) {
+    throw new Error('linsolve: matrix must be square');
+  }
   const rhs = readRightHandSide('linsolve', b, n);
-  let values: number[];
+  let values: readonly unknown[];
   if (rhs.kind === 'vector') values = rhs.values;
   else if (rhs.rows.every((row) => row.length === 1)) values = rhs.rows.map((row) => row[0]);
   else {
@@ -236,7 +281,12 @@ export function linsolve(
     );
   }
   if (values.length !== n) throw new Error('linsolve: dimension mismatch');
-  return solvePivoted(dense, values, pivotTolerance(n));
+  if (rhs.typedEntry !== undefined || hasTypedEntry(rows)) return typedSolve(rows, values);
+  return solvePivoted(
+    decompositionInputToNestedArray(rows as number[][]),
+    values as number[],
+    pivotTolerance(n)
+  );
 }
 
 /**

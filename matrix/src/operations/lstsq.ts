@@ -51,6 +51,13 @@ export function lstsq(
   const m = rows.length;
   const n = m === 0 ? 0 : rows[0].length;
   const rhs = readRightHandSide('lstsq', b, m);
+  if (rhs.typedEntry !== undefined) {
+    // lstsq solves in floating point. mathjs has no lstsq, so no typed result exists to match,
+    // and a conversion to number would drop the precision that the caller chose.
+    throw new TypeError(
+      `lstsq: b holds a ${rhs.typedEntry} entry; lstsq takes numbers, or strings, booleans and null that convert to numbers`
+    );
+  }
   const vectorRhs = rhs.kind === 'vector';
   const bRows: readonly (readonly number[])[] =
     rhs.kind === 'vector' ? rhs.values.map((v) => [v]) : rhs.rows;

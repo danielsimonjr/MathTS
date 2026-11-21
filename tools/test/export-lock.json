@@ -1831,6 +1831,9 @@
       "identity": {
         "kind": "function"
       },
+      "implicitNumber": {
+        "kind": "function"
+      },
       "initializeGlobalGPUBackend": {
         "kind": "function"
       },
@@ -1856,6 +1859,9 @@
         "kind": "function"
       },
       "isSparseMatrix": {
+        "kind": "function"
+      },
+      "isTypedScalar": {
         "kind": "function"
       },
       "isWasmAvailable": {

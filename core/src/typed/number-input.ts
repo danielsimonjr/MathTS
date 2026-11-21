@@ -2,11 +2,9 @@
  * Rules for reading a value as number data: which typed arrays hold numbers, and how a scalar
  * converts to a number. The typed-function conversions (`MATHTS_CONVERSIONS` in
  * `mathts-typed.ts`) and the readers of numeric functions (`convertToNumber`) use the same rules.
- * This module imports only the brand symbols, so `@danielsimonjr/mathts-core/internal` carries it
- * without the numeric classes.
+ * This module has no imports, so `@danielsimonjr/mathts-core/internal` carries it without the
+ * numeric classes.
  */
-
-import { BIGNUMBER_BRAND, FRACTION_BRAND } from '../types/type-marker.js';
 
 /**
  * True for a typed array with number elements: Float64Array, Float32Array, Int32Array, Int16Array,
@@ -49,17 +47,15 @@ export const fractionToNumber = (f: unknown): number => (f as { toNumber(): numb
 /** Convert a core BigNumber to the nearest number. */
 export const bigNumberToNumber = (bn: unknown): number => (bn as { valueOf(): number }).valueOf();
 
-function hasBrand(x: unknown, brand: symbol): boolean {
-  return typeof x === 'object' && x !== null && (x as Record<symbol, unknown>)[brand] === true;
-}
-
 /**
- * Read a scalar as a number with the to-number conversions of the typed-function setup: a number
- * as it is; a string, boolean, bigint, Fraction or BigNumber through its conversion.
+ * Read a scalar as a number with the implicit to-number rule of mathjs: a number as it is; a
+ * string, a boolean or a bigint through its conversion. A BigNumber, a Fraction and a Complex are
+ * not converted: mathjs keeps their type and computes with it, so a caller that holds one takes
+ * its typed path (or refuses the value).
  *
  * @param x - Any value.
- * @returns The number, or `undefined` when no conversion to number exists (Complex, an array, an
- *   object, `null`, `undefined`).
+ * @returns The number, or `undefined` when the implicit rule has no conversion to number
+ *   (BigNumber, Fraction, Complex, an array, an object, `null`, `undefined`).
  * @throws An `Error` for a string that is not a number (see `stringToNumber`).
  */
 export function convertToNumber(x: unknown): number | undefined {
@@ -73,8 +69,6 @@ export function convertToNumber(x: unknown): number | undefined {
     case 'bigint':
       return bigintToNumber(x);
     default:
-      if (hasBrand(x, FRACTION_BRAND)) return fractionToNumber(x);
-      if (hasBrand(x, BIGNUMBER_BRAND)) return bigNumberToNumber(x);
       return undefined;
   }
 }

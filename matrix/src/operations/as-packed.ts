@@ -8,6 +8,7 @@
 import { DenseMatrix, assertNestedEntry, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { densifyForSolver } from './densify.js';
+import { implicitNumber } from './entry-rule.js';
 import { denseReader } from '../types/dense/storage.js';
 
 /** Row-major packed matrix given explicitly when length alone is ambiguous. */
@@ -116,6 +117,32 @@ export function nestedMatrixShape(input: readonly unknown[]): { rows: number; co
   return { rows, cols };
 }
 
+/**
+ * The entries of a rectangular nested matrix as numbers, by the entry rule of mathjs
+ * (`implicitNumber`: a numeric string, a boolean, `null` and `undefined` convert). An input of
+ * numbers is returned as it is; the copy starts at the first entry that is not a number.
+ * An entry with no conversion (a BigNumber, Fraction or Complex in this floating-point package,
+ * an array, an object) throws the entry TypeError of the DenseMatrix constructor.
+ */
+function numberEntries(input: readonly unknown[][], rows: number, cols: number): number[][] {
+  let out: number[][] | undefined;
+  for (let i = 0; i < rows; i++) {
+    const row = input[i];
+    for (let j = 0; j < cols; j++) {
+      const value = row[j];
+      if (typeof value === 'number') {
+        if (out !== undefined) out[i][j] = value;
+        continue;
+      }
+      const n = implicitNumber(value);
+      if (n === undefined) assertNestedEntry(value, i, j);
+      out ??= input.map((r) => r.slice()) as number[][];
+      out[i][j] = n as number;
+    }
+  }
+  return out ?? (input as number[][]);
+}
+
 function resolveDimensions(input: DecompositionMatrixInput): {
   rows: number;
   cols: number;
@@ -130,11 +157,7 @@ function resolveDimensions(input: DecompositionMatrixInput): {
   }
   if (isNestedNumberMatrix(input)) {
     const { rows, cols } = nestedMatrixShape(input);
-    for (let i = 0; i < rows; i++) {
-      const row: readonly unknown[] = input[i];
-      for (let j = 0; j < cols; j++) assertNestedEntry(row[j], i, j);
-    }
-    return { rows, cols, nested: input };
+    return { rows, cols, nested: numberEntries(input, rows, cols) };
   }
   if (input instanceof Float64Array) {
     const size = squareSize(input.length);

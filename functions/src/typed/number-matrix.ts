@@ -129,20 +129,20 @@ export function numberVector(name: string, x: ArrayLike<unknown>): number[] {
 export type MatrixArgument = number[][] | DenseMatrix | SparseMatrix | MathJSMatrix;
 
 /**
- * Rows of a matrix argument. A nested array is returned as it is. A matrix-package `DenseMatrix`
- * or `SparseMatrix` is read by the matrix-package reader `decompositionInputToNestedArray` (a
- * `SparseMatrix` keeps the size limit of `densifyForSolver`). A MathJS matrix is read through
- * `toArray`, and the nested result goes through the same reader, which checks the shape and
- * that every entry is a number.
+ * Rows of a matrix argument, with the entries as the argument holds them. A nested array is
+ * returned as it is. A matrix-package `DenseMatrix` or `SparseMatrix` is read by the
+ * matrix-package reader `decompositionInputToNestedArray` (a `SparseMatrix` keeps the size limit
+ * of `densifyForSolver`), so its rows hold numbers. A MathJS matrix is read through `toArray`. The
+ * caller applies the entry rule: `decompositionInputToNestedArray` for number rows, or a typed
+ * path for BigNumber, Fraction and Complex entries (see `linsolve`).
  *
  * @param name - The name of the function, for the error message.
  * @param A - The argument.
  * @returns The rows of `A`.
- * @throws A `TypeError` when `A` is no nested array and no matrix, or a matrix has a jagged row or
- *   an entry that is not a number (the message names the row, the column and the entry type).
+ * @throws A `TypeError` when `A` is no nested array and no matrix, or a MathJS matrix is 1-D.
  */
-export function matrixRows(name: string, A: unknown): number[][] {
-  if (Array.isArray(A)) return A as number[][];
+export function matrixRows(name: string, A: unknown): unknown[][] {
+  if (Array.isArray(A)) return A as unknown[][];
   // `densifyForSolver` tests a sparse matrix by its structure, so a second copy of the package
   // passes too, and it keeps the size limit.
   const native = isNativeDenseMatrix(A) ? A : densifyForSolver(A);
@@ -151,7 +151,7 @@ export function matrixRows(name: string, A: unknown): number[][] {
     const rows: unknown = (A as unknown as { toArray(): unknown }).toArray();
     // A MathJS matrix of size [n] gives a 1-D array, which is no matrix argument.
     if (Array.isArray(rows) && (rows.length === 0 || Array.isArray(rows[0]))) {
-      return decompositionInputToNestedArray(rows as number[][]);
+      return rows as unknown[][];
     }
   }
   throw new TypeError(
