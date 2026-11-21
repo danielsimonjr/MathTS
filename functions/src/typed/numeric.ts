@@ -275,10 +275,10 @@ export function linsolve(
   const rhs = readRightHandSide('linsolve', b, n);
   let values: readonly unknown[];
   if (rhs.kind === 'vector') values = rhs.values;
-  else if (rhs.rows.every((row) => row.length === 1)) values = rhs.rows.map((row) => row[0]);
+  else if (rhs.cols === 1) values = rhs.rows.map((row) => row[0]);
   else {
     throw new TypeError(
-      `linsolve: b must be a vector of length n, an n x 1 column, or an n x 1 or 1 x n matrix (got ${rhs.rows.length} x ${rhs.rows[0].length})`
+      `linsolve: b must be a vector of length n, an n x 1 column, or an n x 1 or 1 x n matrix (got ${rhs.rows.length} x ${rhs.cols})`
     );
   }
   if (values.length !== n) throw new Error('linsolve: dimension mismatch');

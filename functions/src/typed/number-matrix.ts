@@ -212,10 +212,11 @@ export function matrixRows(name: string, A: unknown): unknown[][] {
   const native = isNativeDenseMatrix(A) ? A : densifyForSolver(A);
   if (native !== undefined) return decompositionInputToNestedArray(native);
   if (isMatrix(A)) {
-    const rows: unknown = (A as unknown as { toArray(): unknown }).toArray();
-    // A MathJS matrix of size [n] gives a 1-D array, which is no matrix argument.
-    if (Array.isArray(rows) && (rows.length === 0 || Array.isArray(rows[0]))) {
-      return rows as unknown[][];
+    // The size decides the kind: a MathJS matrix of size [n] with n above 0 is a vector, which is
+    // no matrix argument. The size [0] (`matrix([])`) is the 0 x 0 matrix.
+    const size = collectionSize(A);
+    if (size.length === 2 || (size.length === 1 && size[0] === 0)) {
+      return (A as unknown as { toArray(): unknown[][] }).toArray();
     }
   }
   throw new TypeError(

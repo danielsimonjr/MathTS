@@ -8,6 +8,7 @@
  * `lstsq`. The factor Q is never formed.
  */
 
+import { matrixSize } from '@danielsimonjr/mathts-core/internal';
 import type { DenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { readRightHandSide } from './right-hand-side.js';
@@ -49,7 +50,10 @@ export function lstsq(
 ): number[] | number[][] {
   const rows = decompositionInputToNestedArray(A);
   const m = rows.length;
-  const n = m === 0 ? 0 : rows[0].length;
+  // The nested data of a matrix with no rows is `[]`, so the column count of such a matrix
+  // comes from the size that it reports.
+  const sizeA = m === 0 && !Array.isArray(A) ? matrixSize(A) : undefined;
+  const n = m === 0 ? (sizeA?.length === 2 ? sizeA[1] : 0) : rows[0].length;
   const rhs = readRightHandSide('lstsq', b, m);
   if (rhs.typedEntry !== undefined) {
     // lstsq solves in floating point. mathjs has no lstsq, so no typed result exists to match,
@@ -64,7 +68,7 @@ export function lstsq(
   if (bRows.length !== m) {
     throw new RangeError(`lstsq: b has length ${bRows.length}, expected ${m}`);
   }
-  const k = m === 0 ? 0 : bRows[0].length;
+  const k = rhs.kind === 'vector' ? 1 : rhs.cols;
 
   // Row-major working copies, scaled so the largest entry is 1 (undone on x).
   const R = new Float64Array(m * n);

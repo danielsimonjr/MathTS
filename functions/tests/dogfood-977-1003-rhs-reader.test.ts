@@ -129,3 +129,10 @@ describe('issue #977/#1003: one entry rule for linsolve and lstsq (the mathjs im
     expect(() => lstsq(A, bad([bignumber(5), bignumber(11)]))).toThrow(TypeError);
   });
 });
+
+describe('the column count of b comes from the size that b reports', () => {
+  it('linsolve names the 0 x 3 shape of a b with no rows', () => {
+    const b03 = { toArray: () => [] as number[][], size: () => [0, 3] };
+    expect(() => linsolve(A, b03 as never)).toThrow(/got 0 x 3/);
+  });
+});

@@ -3,7 +3,12 @@
  * "what is a vector, what is a matrix, which entry is a number" has one place here.
  */
 
-import { isNumberTypedArray, typeOf } from '@danielsimonjr/mathts-core/internal';
+import {
+  isEmpty2DSize,
+  isNumberTypedArray,
+  matrixSize,
+  typeOf,
+} from '@danielsimonjr/mathts-core/internal';
 import { isDenseMatrix } from '../types/DenseMatrix.js';
 import { densifyForSolver } from './densify.js';
 import { implicitNumber, isTypedScalar } from './entry-rule.js';
@@ -15,9 +20,19 @@ import { implicitNumber, isTypedScalar } from './entry-rule.js';
  */
 export type RightHandSide =
   | { readonly kind: 'vector'; readonly typedEntry: undefined; readonly values: number[] }
-  | { readonly kind: 'matrix'; readonly typedEntry: undefined; readonly rows: number[][] }
+  | {
+      readonly kind: 'matrix';
+      readonly typedEntry: undefined;
+      readonly rows: number[][];
+      readonly cols: number;
+    }
   | { readonly kind: 'vector'; readonly typedEntry: string; readonly values: unknown[] }
-  | { readonly kind: 'matrix'; readonly typedEntry: string; readonly rows: unknown[][] };
+  | {
+      readonly kind: 'matrix';
+      readonly typedEntry: string;
+      readonly rows: unknown[][];
+      readonly cols: number;
+    };
 
 /** Reads the entries of `b` and remembers the type of the first typed entry. */
 class EntryReader {
@@ -64,7 +79,7 @@ function readNested(name: string, b: readonly unknown[]): RightHandSide {
     for (let j = 0; j < k; j++) out[j] = reader.read(row[j], `[${i}][${j}]`);
     rows[i] = out;
   }
-  return { kind: 'matrix', typedEntry: reader.typedEntry, rows } as RightHandSide;
+  return { kind: 'matrix', typedEntry: reader.typedEntry, rows, cols: k } as RightHandSide;
 }
 
 /**
@@ -92,13 +107,19 @@ export function readRightHandSide(name: string, b: unknown, m: number): RightHan
     return { kind: 'vector', typedEntry: undefined, values: Array.from(b) };
   if (Array.isArray(b)) return readNested(name, b);
   const dense = densifyForSolver(b) ?? b;
+  // The nested data of a matrix with no rows is `[]`, which loses the column count, so the
+  // column count comes from the size that the matrix reports.
+  const size = matrixSize(dense);
+  if (size !== undefined && isEmpty2DSize(size) && size[0] === 0) {
+    return { kind: 'matrix', typedEntry: undefined, rows: [], cols: size[1] };
+  }
   if (isDenseMatrix(dense)) {
     // A 1-D DenseMatrix is a 1 x n row, so a single row that does not match the row count of `A`
     // is a vector. The caller checks the length.
     if (dense.rows === 1 && dense.rows !== m) {
       return { kind: 'vector', typedEntry: undefined, values: dense.toArray()[0] };
     }
-    return { kind: 'matrix', typedEntry: undefined, rows: dense.toArray() };
+    return { kind: 'matrix', typedEntry: undefined, rows: dense.toArray(), cols: dense.cols };
   }
   const duck = b as { toArray?: unknown } | null;
   if (typeof duck === 'object' && duck !== null && typeof duck.toArray === 'function') {
