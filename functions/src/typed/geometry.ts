@@ -9,6 +9,7 @@
  * @packageDocumentation
  */
 
+import { scaledDistance } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
@@ -307,14 +308,24 @@ export function projectVector(v: number[], onto: number[]): number[] {
  * Euclidean distance between two 2D points.
  */
 export function distance2D(a: number[], b: number[]): f64 {
-  return Math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2);
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const s = dx ** 2 + dy ** 2;
+  // A sum that overflowed or is NaN takes `Math.hypot`: no overflow, and an infinite difference
+  // gives Infinity, also with a NaN (the IEEE rule of `hypot`, #1259).
+  return s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy);
 }
 
 /**
  * Euclidean distance between two 3D points.
  */
 export function distance3D(a: number[], b: number[]): f64 {
-  return Math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2);
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const dz = b[2] - a[2];
+  const s = dx ** 2 + dy ** 2 + dz ** 2;
+  // See `distance2D`.
+  return s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy, dz);
 }
 
 /**
@@ -326,7 +337,8 @@ export function distanceND(a: number[], b: number[]): f64 {
   for (let i: i32 = 0; i < n; i++) {
     sum += (b[i] - a[i]) ** 2;
   }
-  return Math.sqrt(sum);
+  // See `distance2D`. `scaledDistance` does not overflow and applies the IEEE rule (#1259).
+  return sum < Infinity ? Math.sqrt(sum) : scaledDistance(a.slice(0, n), b.slice(0, n));
 }
 
 /**

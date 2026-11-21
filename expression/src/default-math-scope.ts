@@ -135,7 +135,7 @@ function powReal(a: number, b: number): Operand {
   if (!(a < 0) || Number.isInteger(b)) return Math.pow(a, b);
   // mathjs keeps the real limit 0 for these two cases; the Complex power gives NaN + NaN i.
   if ((a * a < 1 && b === Infinity) || (a * a > 1 && b === -Infinity)) return 0;
-  return complexOf(a).pow(complexOf(b));
+  return complexOf(a).pow(b);
 }
 
 /**
@@ -208,7 +208,7 @@ export const defaultMathScope: Record<string, unknown> = {
     (a) => (a < 0 ? complexOf(a).sqrt() : Math.sqrt(a)),
     (z) => z.sqrt()
   ),
-  cbrt: unary(Math.cbrt, (z) => z.pow(1 / 3)),
+  cbrt: unary(Math.cbrt, (z) => z.cbrt()),
   nthRoot: realOnly('nthRoot', nthRoot),
   abs: unary(Math.abs, (z) => z.abs()),
   exp: unary(Math.exp, (z) => z.exp()),

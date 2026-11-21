@@ -93,7 +93,9 @@ describe.each(['norm', 'factory_norm'])(
       ).toBeNaN();
     });
 
-    it('NaN beats Infinity', () => {
+    // The IEEE 754 rule of `hypot` covers every Euclidean magnitude (#1259): an infinite entry
+    // gives Infinity, also with a NaN entry.
+    it('Infinity beats NaN (#1259)', () => {
       expect(
         norm(
           [
@@ -102,7 +104,7 @@ describe.each(['norm', 'factory_norm'])(
           ],
           2
         )
-      ).toBeNaN();
+      ).toBe(Infinity);
     });
 
     it('a finite matrix is unchanged', () => {

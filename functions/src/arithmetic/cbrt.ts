@@ -6,10 +6,8 @@ import type { MathJsConfig } from '../core/config.js';
 
 // Type definitions for cbrt
 interface ComplexType {
-  arg(): number;
-  abs(): number;
-  mul(other: ComplexType): ComplexType;
-  exp(): ComplexType;
+  cbrt(): ComplexType;
+  cbrtRoots(): ComplexType[];
 }
 
 interface ComplexConstructor {
@@ -156,24 +154,12 @@ export const createCbrt = /* #__PURE__ */ factory(
       allRoots?: boolean
     ): ComplexType | ComplexType[] | unknown {
       // https://www.wikiwand.com/en/Cube_root#/Complex_numbers
-
-      const arg3 = x.arg() / 3;
-      const abs = x.abs();
-
-      // principal root:
-      const principal = new Complex(cbrtNumber(abs), 0).mul(new Complex(0, arg3).exp());
-
+      // Core `Complex.cbrt` and `Complex.cbrtRoots` hold the one formula (the mathjs formula).
       if (allRoots) {
-        const all = [
-          principal,
-          new Complex(cbrtNumber(abs), 0).mul(new Complex(0, arg3 + (Math.PI * 2) / 3).exp()),
-          new Complex(cbrtNumber(abs), 0).mul(new Complex(0, arg3 - (Math.PI * 2) / 3).exp()),
-        ];
-
+        const all = x.cbrtRoots();
         return config.matrix === 'Array' ? all : matrix(all);
-      } else {
-        return principal;
       }
+      return x.cbrt();
     }
 
     /**

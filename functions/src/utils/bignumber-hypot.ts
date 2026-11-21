@@ -6,7 +6,7 @@ import { BigNumber } from '@danielsimonjr/mathts-core';
  * `BigNumber.hypotN` shifts the exponents before it squares, so no square goes out of range and
  * no value is rounded before it is squared.
  *
- * A NaN value gives NaN. Else an infinite value gives Infinity.
+ * An infinite value gives Infinity, also with a NaN. Else a NaN value gives NaN (#1259).
  */
 export function bigHypot(values: readonly (number | BigNumber)[]): BigNumber {
   return BigNumber.hypotN(values.map((v) => (typeof v === 'number' ? BigNumber.fromNumber(v) : v)));
