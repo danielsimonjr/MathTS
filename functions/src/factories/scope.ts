@@ -387,6 +387,85 @@ function bignumberFn(...args: unknown[]): unknown {
   return args.length === 0 ? BigNumber.fromNumber(0) : toBigNumber(args[0]);
 }
 
+/** The members of the typed-function factory that `fraction` and `number` use. */
+export interface TypedBuilder {
+  (name: string, signatures: Record<string, unknown>): (...args: unknown[]) => unknown;
+  referToSelf(
+    builder: (self: (...args: unknown[]) => unknown) => (...args: unknown[]) => unknown
+  ): unknown;
+}
+
+/** The scalar types that `fraction` reads without a conversion. */
+const FRACTION_SCALAR = 'number | bigint | string | boolean';
+
+/**
+ * The fallback of `fraction`: a Fraction of a second copy of core passes through unchanged
+ * (#1033), a BigNumber of another library converts from its decimal text, and a Fraction of
+ * another library converts from its sign, numerator and denominator. Any other value has no
+ * signature, so the call throws the TypeError that mathjs throws.
+ */
+function fractionOfOtherValue(x: unknown): unknown {
+  if (isFraction(x)) return x;
+  const o = (x ?? {}) as {
+    isBigNumber?: boolean;
+    isFraction?: boolean;
+    s?: unknown;
+    n?: unknown;
+    d?: unknown;
+  };
+  if (o.isBigNumber === true) return new Fraction(x as never);
+  if (o.isFraction === true) {
+    const { s: sign, n, d } = o;
+    if (typeof n === 'bigint' && typeof d === 'bigint') {
+      return new Fraction(typeof sign === 'bigint' && sign < 0n ? -n : n, d);
+    }
+    if (typeof n === 'number' && typeof d === 'number') {
+      return new Fraction(typeof sign === 'number' && sign < 0 ? -n : n, d);
+    }
+  }
+  throw new TypeError(
+    'Unexpected type of argument in function fraction (expected: number or string or Fraction or ' +
+      `BigNumber or Unit or Object or Array or Matrix or null or bigint or boolean, actual: ${complexArgType(x)}, index: 0)`
+  );
+}
+
+/**
+ * fraction() as a typed-function, as in mathjs. Each accepted type has its own signature, so no
+ * conversion runs and a bigint keeps every digit. The callback adapters of `map`, `forEach`,
+ * `filter`, the Matrix methods and `evaluate` read the signatures, so `map(x, fraction)` passes
+ * the value alone. With a plain function whose second parameter is optional, the adapters passed
+ * the index as the denominator (#1160).
+ *
+ * A number, bigint, string or boolean converts alone or with a denominator of those types. null
+ * gives 0, a Fraction is returned, a Unit keeps its unit and converts its value, an object
+ * `{ n, d }` builds from numerator and denominator, and an Array or a Matrix converts each entry.
+ * A Complex, a Date, undefined and a call with a third argument throw a TypeError.
+ */
+const fractionFn = (mathTyped as unknown as TypedBuilder)('fraction', {
+  [FRACTION_SCALAR]: (x: number | bigint | string | boolean) => new Fraction(x as never, 1),
+  [`${FRACTION_SCALAR}, ${FRACTION_SCALAR}`]: (
+    n: number | bigint | string | boolean,
+    d: number | bigint | string | boolean
+  ) => new Fraction(n as never, d as never),
+  [`${FRACTION_SCALAR}, undefined`]: (n: number | bigint | string | boolean) =>
+    new Fraction(n as never, 1),
+  BigNumber: (x: unknown) => new Fraction(x as never, 1),
+  Fraction: (x: unknown) => x,
+  null: () => new Fraction(0, 1),
+  Unit: (mathTyped as unknown as TypedBuilder).referToSelf((self) => (x: unknown) => {
+    const clone = (x as { clone(): { value: unknown } }).clone();
+    clone.value = self((x as { value: unknown }).value);
+    return clone;
+  }),
+  Object: (o: { n: number | bigint | string; d: number | bigint | string }) =>
+    new Fraction(o.n as never, o.d as never),
+  'Array | Matrix': (mathTyped as unknown as TypedBuilder).referToSelf((self) => (x: unknown) => {
+    if (Array.isArray(x)) return x.map((v) => self(v));
+    return (x as { map(callback: (v: unknown) => unknown): unknown }).map((v) => self(v));
+  }),
+  any: fractionOfOtherValue,
+});
+
 /** The type name that a `complex` error message reports for an argument. */
 function complexArgType(x: unknown): string {
   if (x === null || x === undefined) return String(x);
@@ -495,7 +574,7 @@ export const factoryScope: Record<string, unknown> = {
   // Helper factory functions (lowercase) — factories call `complex(re, im)` etc.
   complex: complexFn,
   bignumber: bignumberFn,
-  fraction: (n: number, d?: number) => new Fraction(n, d ?? 1),
+  fraction: fractionFn,
   number: Number,
 
   // Matrix helper factories

@@ -100,6 +100,8 @@ const THROWS_ON_NAN: Record<string, string[]> = {
   factory_xgcd: ['Error'],
   fallingFactorial: ['Error'],
   fibonacci: ['Error'],
+  // #1160: `fraction` is a typed-function. A Fraction holds no NaN, so a NaN numerator or denominator throws.
+  fraction: ['Error'],
   harmonicNumber: ['Error'],
   hex: ['Error'],
   identity: ['Error'],
