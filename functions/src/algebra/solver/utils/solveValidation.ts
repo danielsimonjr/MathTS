@@ -2,6 +2,7 @@ import { densifyForSolver } from '@danielsimonjr/mathts-matrix';
 import { isArray, isMatrix, isDenseMatrix, isSparseMatrix } from '../../../utils/is.js';
 import { arraySize } from '../../../utils/array.js';
 import { format } from '../../../utils/string.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // Type definitions
 interface DenseMatrixType {
@@ -31,7 +32,7 @@ interface SparseMatrixType {
  * @returns The error, with a hint to use lstsq for a rectangular system.
  */
 export function nonSquareSolveError(size: number[]): RangeError {
-  return new RangeError(
+  return notSquareError(
     'Matrix must be square (size: ' +
       format(size, {}) +
       '); for a rectangular least-squares system use lstsq'

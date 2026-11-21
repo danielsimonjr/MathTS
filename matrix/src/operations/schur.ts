@@ -28,6 +28,7 @@ import {
   applyHouseholderRight,
 } from './common.js';
 import { applyGivensRight, givensRotation } from './givens.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -417,7 +418,7 @@ export function matrixSchur(A: DecompositionMatrixInput, opts?: SchurOptions): S
   const source = decompositionSource(A);
   const n = source.rows;
   if (n !== source.cols) {
-    throw new Error(`matrixSchur: matrix must be square (got ${source.rows}×${source.cols})`);
+    throw notSquareError(`matrixSchur: matrix must be square (got ${source.rows}×${source.cols})`);
   }
   if (n === 0) {
     return {

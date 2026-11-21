@@ -1281,6 +1281,9 @@
       "isDenseMatrix": {
         "kind": "function"
       },
+      "isEmpty2DSize": {
+        "kind": "function"
+      },
       "isEmptyIndex": {
         "kind": "function"
       },
@@ -1377,6 +1380,9 @@
       "mapObject": {
         "kind": "function"
       },
+      "matrixSize": {
+        "kind": "function"
+      },
       "memoize": {
         "kind": "function"
       },
@@ -1384,6 +1390,9 @@
         "kind": "function"
       },
       "normalizeFormatOptions": {
+        "kind": "function"
+      },
+      "notSquareError": {
         "kind": "function"
       },
       "pick": {
