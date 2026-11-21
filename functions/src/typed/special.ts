@@ -34,7 +34,6 @@ import {
   sinPiScalar,
   cosPiScalar,
   erfcSelfContained,
-  factorial,
   upperGammaQ,
   incompleteBetaFraction,
   besselHankel,
@@ -65,6 +64,10 @@ import {
   gammaincpScalar,
   betaincScalar,
   besselIScalar,
+  besselIPlan,
+  besselIPositive,
+  besselKReal,
+  besselKScalar,
   besselJ0Scalar,
   besselJ1Scalar,
   besselY0Scalar,
@@ -85,6 +88,7 @@ import {
   besselY1Dispatch,
   besselYDispatch,
   assertBesselArrayWork,
+  assertBesselIArrayWork,
   airyAiDispatch,
   airyBiDispatch,
   ellipticKDispatch,
@@ -179,105 +183,9 @@ function digammaScalar(x: f64): f64 {
 // self-contained (inlined literals) so kernelSource can serialize them.
 // ---------------------------------------------------------------------------
 
-// Modified Bessel K_0 and K_1 by the uniformly-accurate Numerical Recipes
-// `bessik` method, specialized to the fractional order mu = 0 (integer order).
-// Two regimes, both machine-precision — no series/asymptotic crossover to
-// floor the error near x≈8..11:
-//   x <  2 : Temme's power series (DLMF 10.31 / NR §6.7), with the mu=0 limits
-//            gam1 = -gamma (Euler), gam2 = gampl = gammi = 1.
-//   x >= 2 : Steed's continued fraction CF2 (NR eq. 6.7.34) + normalization by
-//            the exp(-x)*sqrt(pi/2x) prefactor; K1 from the Wronskian relation.
-// Returns [K0(x), K1(x)]; caller handles x<=0 and the order recurrence for n>=2.
-function besselK01(x: f64): f64[] {
-  const EPS = 1e-16;
-  const xi = 1.0 / x;
-  const xi2 = 2.0 * xi;
-  let rkmu: f64;
-  let rk1: f64;
-  if (x < 2.0) {
-    // Temme series (mu = 0): gam1 = -gamma, gam2 = 1, gampl = gammi = 1.
-    const x2 = 0.5 * x;
-    const d = -Math.log(x2);
-    let ff = -0.5772156649015328606 + d; // f0 = gam1 - gam2*ln(x/2) = -(ln(x/2)+gamma)
-    let sum = ff;
-    let p = 0.5; // p0 = 0.5*e/gampl, e=1
-    let q = 0.5; // q0 = 0.5/(e*gammi)
-    let c = 1.0;
-    const dd = x2 * x2;
-    let sum1 = p;
-    for (let i = 1; i <= 10000; i++) {
-      ff = (i * ff + p + q) / (i * i); // xmu2 = 0
-      c *= dd / i;
-      p /= i;
-      q /= i;
-      const del = c * ff;
-      sum += del;
-      sum1 += c * (p - i * ff);
-      if (Math.abs(del) < Math.abs(sum) * EPS) break;
-    }
-    rkmu = sum;
-    rk1 = sum1 * xi2;
-  } else {
-    // Steed's CF2 (mu = 0). a1 = 0.25 - xmu2 = 0.25.
-    const a1 = 0.25;
-    let b = 2.0 * (1.0 + x);
-    let d = 1.0 / b;
-    let h = d;
-    let delh = d;
-    let q1 = 0.0;
-    let q2 = 1.0;
-    let q = a1;
-    let cc = a1;
-    let a = -a1;
-    let s = 1.0 + q * delh;
-    for (let i = 2; i <= 10000; i++) {
-      a -= 2 * (i - 1);
-      cc = (-a * cc) / i;
-      const qnew = (q1 - b * q2) / a;
-      q1 = q2;
-      q2 = qnew;
-      q += cc * qnew;
-      b += 2.0;
-      d = 1.0 / (b + a * d);
-      delh = (b * d - 1.0) * delh;
-      h += delh;
-      const dels = q * delh;
-      s += dels;
-      if (Math.abs(dels / s) < EPS) break;
-    }
-    h = a1 * h;
-    rkmu = (Math.sqrt(Math.PI / (2.0 * x)) * Math.exp(-x)) / s;
-    rk1 = rkmu * (x + 0.5 - h) * xi; // xmu = 0
-  }
-  return [rkmu, rk1];
-}
-
-/** Modified Bessel function of the second kind, K_n(x). */
-function besselKScalar(n: f64, x: f64): f64 {
-  // A non-finite order has no defined value, and the recurrence below would never end.
-  if (!Number.isFinite(n)) return NaN;
-  const ni = Math.round(Math.abs(n));
-  if (x <= 0) return NaN;
-  const k01 = besselK01(x);
-  const k0 = k01[0];
-  const k1 = k01[1];
-  if (ni === 0) return k0;
-  if (ni === 1) return k1;
-  // Upward recurrence in order is stable for K (K_n grows with n). The loop has no order
-  // limit: it returns within a few thousand steps at the first Infinity or NaN, or at two
-  // zeros in a row (an underflowed K_0 and K_1 keep every later value at 0).
-  let kPrev = k0;
-  let kCurr = k1;
-  for (let k = 1; k < ni; k++) {
-    const kNext = ((2 * k) / x) * kCurr + kPrev;
-    kPrev = kCurr;
-    kCurr = kNext;
-    // Every term is positive, so an overflow to Infinity stays Infinity, and a NaN stays NaN.
-    if (!(kCurr < Infinity)) return kCurr;
-    if (kCurr === 0 && kPrev === 0) return 0;
-  }
-  return kCurr;
-}
+// Modified Bessel K_nu for a real order: `besselKScalar` and `besselKReal` in
+// ../wasm/special/scalars.ts, next to the negative-order I that needs them. A kernel serializes a
+// function with its source, so a scalar must call its helpers in its own module.
 
 // Complete elliptic integrals K(m) and E(m) — ellipticKScalar /
 // ellipticECompleteScalar — live in ../wasm/special/scalars.ts (shared with the
@@ -933,22 +841,29 @@ export const besselY = mathTyped('besselY', {
 });
 
 /**
- * Modified Bessel function of the first kind, I_n(x).
+ * Modified Bessel function of the first kind, I_nu(x), for a real order.
  *
- * @param n - Order (integer)
+ * A negative x gives (-1)^n I_n(|x|) for an integer order and NaN for any other order. The
+ * work of one call is about nu + 2 m steps (m is the index of the largest term of the series);
+ * a call above 2500000000 steps throws a RangeError, and the array form counts the total of its
+ * elements (`besselIPlan`).
+ *
+ * @param n - Order (real)
  * @param x - Input value, or Float64Array of values
- * @returns I_n(x)
+ * @returns I_nu(x)
  */
 export const besselI = mathTyped('besselI', {
   'number, number': besselIScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => besselIScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselIArrayWork(n, x);
+    return f64Unary(x, (v) => besselIScalar(n, v));
+  },
 });
 
 /**
- * Modified Bessel function of the second kind, K_n(x).
+ * Modified Bessel function of the second kind, K_nu(x), for a real order (K_(-nu) = K_nu).
  *
- * @param n - Order (integer)
+ * @param n - Order (real)
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns K_n(x)
  */
@@ -1613,7 +1528,16 @@ registerWorkerKernels({
     1,
     (n: number) =>
       kernelSource(
-        [factorial, sinPiScalar, _lgamma, besselIScalar],
+        [
+          sinPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselGammaAux,
+          besselKReal,
+          besselIPlan,
+          besselIPositive,
+          besselIScalar,
+        ],
         `(x) => besselIScalar(${numberLiteral(n)}, x)`
       ),
   ],
@@ -1621,7 +1545,10 @@ registerWorkerKernels({
     1,
     1,
     (n: number) =>
-      kernelSource([besselK01, besselKScalar], `(x) => besselKScalar(${numberLiteral(n)}, x)`),
+      kernelSource(
+        [besselGammaAux, besselKReal, besselKScalar],
+        `(x) => besselKScalar(${numberLiteral(n)}, x)`
+      ),
   ],
   ellipticK: [0, 0, () => kernelSource([ellipticKScalar], '(m) => ellipticKScalar(m)')],
   ellipticE: [

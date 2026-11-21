@@ -273,4 +273,25 @@ describe('kernels that reach the reflection of _lgamma match the scalar bit for 
     expect(evalKernel(workerKernel('besselI', 2))(3)).toBe(besselI(2, 3));
     expect(evalKernel(workerKernel('besselK', 2))(3)).toBe(besselK(2, 3));
   });
+
+  // Each input reaches the new helpers of the real-order engine: the Hankel start (x >= 25), the
+  // recurrence with the 2^-600 scale, the K core with its scale, and the I series with its exponent.
+  it('besselJ of order 400.3 at x = 5000 and of order 322.5 at x = 25', () => {
+    expect(evalKernel(workerKernel('besselJ', 400.3))(5000)).toBe(besselJ(400.3, 5000));
+    expect(evalKernel(workerKernel('besselJ', 322.5))(25)).toBe(besselJ(322.5, 25));
+  });
+
+  it('besselY of order 400.3 at x = 1.5e5 and of order -0.3 at x = 1e-300', () => {
+    expect(evalKernel(workerKernel('besselY', 400.3))(1.5e5)).toBe(besselY(400.3, 1.5e5));
+    expect(evalKernel(workerKernel('besselY', -0.3))(1e-300)).toBe(besselY(-0.3, 1e-300));
+  });
+
+  it('besselI of order -2.5 at x = 3 and of order 200 at x = 700', () => {
+    expect(evalKernel(workerKernel('besselI', -2.5))(3)).toBe(besselI(-2.5, 3));
+    expect(evalKernel(workerKernel('besselI', 200))(700)).toBe(besselI(200, 700));
+  });
+
+  it('besselK of order 1.49 at x = 3', () => {
+    expect(evalKernel(workerKernel('besselK', 1.49))(3)).toBe(besselK(1.49, 3));
+  });
 });

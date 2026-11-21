@@ -735,7 +735,9 @@ export function besselJYLarge(
  */
 export function besselJRealOrder(nu: f64, x: f64): f64 {
   if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
-  if (x === 0) return nu > 0 ? 0 : nu < 0 ? Infinity : 1;
+  // As x -> 0+ the leading term is (x/2)^(-an) / Gamma(1 - an) for a negative order: Infinity with
+  // the sign of Gamma(1 - an) (besselJ(-1.5, 0) is -Infinity).
+  if (x === 0) return nu > 0 ? 0 : nu < 0 ? (rgammaScalar(1 + nu) > 0 ? Infinity : -Infinity) : 1;
   const an = Math.abs(nu);
   if (nu > 0 && besselJUnderflows(an, x)) return 0;
   // For a negative order -sin(nu pi) Y_an dominates when it is above the double range: the sign of
@@ -1287,17 +1289,237 @@ export function betaincScalar(a: f64, b: f64, x: f64): f64 {
   return incompleteBetaFraction(a, b, x);
 }
 
-/** Modified Bessel function of the first kind, I_n(x). */
-export function besselIScalar(n: f64, x: f64): f64 {
-  const ni = Math.round(Math.abs(n));
-  if (Math.abs(x) < 1e-15) return ni === 0 ? 1 : 0;
+/**
+ * kScale * K_an(x) for an order an >= 0 and x > 0 (modified Bessel function of the second kind,
+ * K_(-nu) = K_nu). K_mu and K_(mu+1) at the reduced order mu = an - round(an), |mu| <= 1/2, come
+ * from Temme's series (x < 2) or Steed's continued fraction CF2 (x >= 2), as in Numerical Recipes
+ * `bessik`, and the upward recurrence, which is stable for K, runs to an. Accurate to about 2e-15
+ * (the exponent mu ln(x/2) is rounded, so 2e-14 below x = 1e-100).
+ *
+ * `kScale` multiplies K_mu and K_(mu+1) before the recurrence (which is linear): a caller that
+ * needs `c * K_an` with a small `c` passes `c`, and the product can be a double where K_an alone
+ * is not (I_(-nu) = I_nu + (2 / pi) sin(nu pi) K_nu). K is positive, so every term has the sign of
+ * kScale: a result outside the double range is +-Infinity, and the loop ends at the first one
+ * (it returns within a few thousand steps), or at two zeros in a row (K_mu and K_(mu+1) have
+ * underflowed, which happens above x = 745). A loop that does not converge gives NaN.
+ */
+export function besselKReal(an: f64, x: f64, kScale: f64 = 1): f64 {
+  const EPS = 1e-16;
+  const MAXIT = 100000;
+  const nl = Math.floor(an + 0.5);
+  const xmu = an - nl;
+  const xmu2 = xmu * xmu;
+  let rkmu: f64;
+  let rk1: f64;
+  if (x < 2) {
+    // Temme's series. ln(x/2) is Math.log(x) - Math.LN2 and every division is by x, so it works
+    // down to x = 5e-324.
+    const x2 = 0.5 * x;
+    const pimu = Math.PI * xmu;
+    const fact = Math.abs(pimu) < EPS ? 1 : pimu / Math.sin(pimu);
+    const d = -(Math.log(x) - Math.LN2);
+    let e = xmu * d;
+    const fact2 = Math.abs(e) < EPS ? 1 : Math.sinh(e) / e;
+    const g = besselGammaAux(xmu);
+    let ff = fact * (g[0] * Math.cosh(e) + g[1] * fact2 * d);
+    let sum = ff;
+    e = Math.exp(e);
+    let p = (0.5 * e) / g[2];
+    let q = 0.5 / (e * g[3]);
+    let c: f64 = 1;
+    const dd = x2 * x2;
+    let sum1 = p;
+    let converged = false;
+    for (let i = 1; i <= MAXIT; i++) {
+      ff = (i * ff + p + q) / (i * i - xmu2);
+      c *= dd / i;
+      p /= i - xmu;
+      q /= i + xmu;
+      const del = c * ff;
+      sum += del;
+      sum1 += c * (p - i * ff);
+      if (Math.abs(del) < Math.abs(sum) * EPS) {
+        converged = true;
+        break;
+      }
+    }
+    if (!converged) return NaN;
+    rkmu = sum * kScale;
+    rk1 = (sum1 * 2 * kScale) / x;
+  } else {
+    // Steed's CF2 and the normalization by exp(-x) sqrt(pi / (2 x)).
+    const a1 = 0.25 - xmu2;
+    let b = 2 * (1 + x);
+    let d = 1 / b;
+    let h = d;
+    let delh = d;
+    let q1: f64 = 0;
+    let q2: f64 = 1;
+    let q = a1;
+    let c = a1;
+    let a = -a1;
+    let s = 1 + q * delh;
+    let converged = false;
+    for (let i = 2; i <= MAXIT; i++) {
+      a -= 2 * (i - 1);
+      c = (-a * c) / i;
+      const qnew = (q1 - b * q2) / a;
+      q1 = q2;
+      q2 = qnew;
+      q += c * qnew;
+      b += 2;
+      d = 1 / (b + a * d);
+      delh = (b * d - 1) * delh;
+      h += delh;
+      const dels = q * delh;
+      s += dels;
+      if (Math.abs(dels / s) < EPS) {
+        converged = true;
+        break;
+      }
+    }
+    if (!converged) return NaN;
+    h = a1 * h;
+    const k0 = (Math.sqrt(Math.PI / (2 * x)) * Math.exp(-x)) / s;
+    rkmu = k0 * kScale;
+    rk1 = (rkmu * (xmu + x + 0.5 - h)) / x;
+  }
+  if (nl === 0) return rkmu;
+  for (let i = 1; i < nl; i++) {
+    const rktemp = (2 * (xmu + i) * rk1) / x + rkmu;
+    rkmu = rk1;
+    rk1 = rktemp;
+    if (!Number.isFinite(rk1)) return rk1;
+    if (rk1 === 0 && rkmu === 0) return 0;
+  }
+  return rk1;
+}
 
-  let sum: f64 = 0;
-  const halfX = Math.abs(x) / 2;
-  for (let m = 0; m < 100; m++) {
-    const term = Math.pow(halfX, ni + 2 * m) / (factorial(m) * Math.exp(_lgamma(ni + m + 1)));
+/**
+ * Modified Bessel function of the second kind, K_nu(x), for a real order (K_(-nu) = K_nu). Main
+ * rounded a real order to an integer. A NaN or infinite order or a NaN x has no defined value,
+ * x <= 0 is outside the domain, and K_nu(Infinity) is 0.
+ */
+export function besselKScalar(n: f64, x: f64): f64 {
+  if (!Number.isFinite(n) || x !== x || x <= 0) return NaN;
+  if (x === Infinity) return 0;
+  return besselKReal(Math.abs(n), x, 1);
+}
+
+/**
+ * The plan of the power series of I_nu(x) for nu >= 0 and 0 < x < Infinity:
+ * [m, steps, verdict]. I_nu(x) = sum T(m) with T(m) = (x/2)^(nu + 2m) / (m! Gamma(nu + m + 1)),
+ * all terms positive and the largest one at m = (sqrt(nu^2 + x^2) - nu) / 2 (rounded). The sum
+ * is at least that term and at most (2 m + 50) times it, so ln T above 709.79 means Infinity
+ * (verdict 1) and ln T + ln(2 m + 50) below -745.2 means 0 (verdict -1). Otherwise verdict 0 and
+ * `steps` = nu + 2 m is the work of the product and of the series. No loop runs here.
+ */
+export function besselIPlan(nu: f64, x: f64): [f64, f64, f64] {
+  const t = nu / x;
+  const m = Math.round(x / (2 * (Math.sqrt(1 + t * t) + t)));
+  const lt = (nu + 2 * m) * (Math.log(x) - Math.LN2) - _lgamma(m + 1) - _lgamma(nu + m + 1);
+  if (lt > 709.79) return [m, 0, 1];
+  if (lt + Math.log(2 * m + 50) < -745.2) return [m, 0, -1];
+  return [m, nu + 2 * m, 0];
+}
+
+/**
+ * Modified Bessel function of the first kind I_nu(x) for a real order nu >= 0 and 0 < x < Infinity,
+ * from the power series in log scale. The first term (x/2)^nu / Gamma(nu + 1) is built by a
+ * running product with one power-of-2 exponent for the whole sum (2^600 per step), so an order
+ * of 200 at x = 700 does not underflow in the first term; the sum is rescaled the same way when
+ * it passes 2^600, and the result is sum * 2^(600 e). The gates of `besselIPlan` run first; a
+ * RangeError when the work nu + 2 m is above 2500000000. A series that does not converge in
+ * 2 m + 100 + 10 sqrt(m + 1) terms gives NaN, never its partial sum.
+ */
+export function besselIPositive(nu: f64, x: f64): f64 {
+  const plan = besselIPlan(nu, x);
+  if (plan[2] > 0) return Infinity;
+  if (plan[2] < 0) return 0;
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  if (plan[1] > 2500000000) {
+    throw new RangeError(
+      `besselI: n = ${nu} at x = ${x} needs about ${plan[1]} steps, above the supported maximum of 2500000000`
+    );
+  }
+  const mstar = plan[0];
+  const up = Math.pow(2, 600);
+  const down = Math.pow(2, -600);
+  const h = x / 2;
+  const n = Math.floor(nu);
+  const f = nu - n;
+  let t: f64 = 1;
+  if (f !== 0) t = (Math.pow(x, f) * Math.pow(2, -f)) / Math.exp(_lgamma(f + 1));
+  let e = 0;
+  for (let j = 1; j <= n; j++) {
+    t *= h / (f + j);
+    if (t < down) {
+      t *= up;
+      e--;
+    } else if (t > up) {
+      t *= down;
+      e++;
+    }
+  }
+  const q = h * h;
+  let sum = t;
+  let term = t;
+  const cap = 2 * mstar + 100 + Math.ceil(10 * Math.sqrt(mstar + 1));
+  let converged = false;
+  for (let m = 0; m < cap; m++) {
+    term *= q / ((m + 1) * (m + 1 + nu));
     sum += term;
-    if (Math.abs(term) < Math.abs(sum) * 1e-15) break;
+    if (sum > up) {
+      sum *= down;
+      term *= down;
+      e++;
+    }
+    if (m >= mstar && term <= 1e-17 * sum) {
+      converged = true;
+      break;
+    }
+  }
+  if (!converged) return NaN;
+  while (e > 0 && sum !== Infinity) {
+    sum *= up;
+    e--;
+  }
+  while (e < 0 && sum !== 0) {
+    sum *= down;
+    e++;
   }
   return sum;
+}
+
+/**
+ * Modified Bessel function of the first kind, I_nu(x), for a real order nu. An integer order has
+ * I_(-n) = I_n and I_n(-x) = (-1)^n I_n(x); a non-integer order with x < 0 is complex, so NaN.
+ * A non-integer order below 0 is I_nu = I_an + (2 / pi) sin(an pi) K_an (DLMF 10.27.2, with
+ * sinPiScalar for the exact reduction): the K term goes into `besselKReal` as its scale, so the
+ * sum is right next to an integer order, where K_an alone is outside the double range
+ * (besselI(-150.000000001, 0.9) = 3.97e303). Positive order: `besselIPositive`.
+ */
+export function besselIScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the series would never end.
+  if (!Number.isFinite(n) || x !== x) return NaN;
+  const an = Math.abs(n);
+  const integer = n === Math.round(n);
+  if (x < 0) {
+    if (!integer) return NaN;
+    const v = besselIScalar(an, -x);
+    return an % 2 === 1 ? -v : v;
+  }
+  if (x === 0) {
+    if (integer) return an === 0 ? 1 : 0;
+    // As x -> 0+ the leading term is (x/2)^(-an) / Gamma(1 - an), with the sign of Gamma.
+    if (n > 0) return 0;
+    return rgammaScalar(1 - an) > 0 ? Infinity : -Infinity;
+  }
+  if (x === Infinity) return Infinity;
+  if (integer || n > 0) return besselIPositive(an, x);
+  // The scale 2 sin(an pi) / pi times K_an is a recurrence of about an steps.
+  if (an > 2500000000) {
+    throw new RangeError(`besselI: n = ${an} exceeds the supported maximum of 2500000000`);
+  }
+  return besselIPositive(an, x) + besselKReal(an, x, (2 / Math.PI) * sinPiScalar(an));
 }

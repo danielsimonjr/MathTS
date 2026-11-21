@@ -48,6 +48,7 @@ import {
   sinPiScalar,
   besselJUnderflows,
   besselYLogBound,
+  besselIPlan,
   besselJ0Scalar,
   besselJ1Scalar,
   besselJScalar,
@@ -299,6 +300,36 @@ export function assertBesselArrayWork(
     steps += besselElementSteps(kind, ni, xs[i]);
   }
   assertArrayWork(kind, n, xs.length, Math.ceil(steps), MAX_RECURRENCE_ORDER);
+}
+
+/**
+ * Throw a RangeError when one array call of `besselI` needs more than `MAX_RECURRENCE_ORDER`
+ * steps in total, as `assertBesselArrayWork` does for J and Y. One element runs the product and
+ * the series (`besselIPlan`: nu + 2 m steps, 0 when a gate returns at once) and, for a negative
+ * real order, the recurrence of K (at most an steps, and it ends within 2000 steps past 2 x).
+ * An order above the limit and a NaN or infinite order are the scalar's.
+ */
+export function assertBesselIArrayWork(n: number, xs: Float64Array): void {
+  const an = Math.abs(n);
+  if (!Number.isFinite(n) || an > SCALAR_ORDER_LIMIT) return;
+  // m <= x / 2, so one element runs at most an + |x| steps: most calls pass here.
+  let xmax = 0;
+  for (let i = 0; i < xs.length; i++) {
+    const ax = Math.abs(xs[i]);
+    if (ax > xmax && ax < Infinity) xmax = ax;
+  }
+  if ((an + xmax) * xs.length <= MAX_RECURRENCE_ORDER) return;
+  const integer = Number.isInteger(n);
+  let steps = 0;
+  for (let i = 0; i < xs.length; i++) {
+    const x = xs[i];
+    const ax = Math.abs(x);
+    if (!(ax > 0) || ax === Infinity || (x < 0 && !integer)) continue;
+    const plan = besselIPlan(an, ax);
+    steps += plan[1];
+    if (n < 0 && !integer) steps += Math.min(an, 2 * Math.ceil(ax) + 2000);
+  }
+  assertArrayWork('besselI', n, xs.length, Math.ceil(steps), MAX_RECURRENCE_ORDER);
 }
 
 /** Order-`n` (`n ≥ 2`) variant of an AS managed `<name>(order, xs)` kernel. */

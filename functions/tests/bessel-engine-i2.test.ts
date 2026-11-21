@@ -14,7 +14,9 @@
 import { afterEach, describe, it, expect } from 'vitest';
 import { BigNumber, Complex } from '@danielsimonjr/mathts-core';
 import {
+  besselI,
   besselJ,
+  besselK,
   besselY,
   chebyshevT,
   hermiteH,
@@ -540,5 +542,147 @@ describe('#1331: the array form is bounded by the same total work (no wall clock
     const out = besselJ(2.5, new Float64Array(2000).fill(30)) as Float64Array;
     expect(out.length).toBe(2000);
     expectRel(out[0], 0.14120285879928212, 1e-13);
+  });
+});
+
+describe('D2 and D3: besselI and besselK of a real order (main rounded the order)', () => {
+  // main: besselI(1, -1) = 0.5652 (true -0.5652), besselI(-0.5, 1) = 0.5652 (true 1.2312),
+  // besselI(0.5, 1) = 0.5652 (true 0.9377), besselI(2, 800) = NaN, besselI(0.5, 1e-300) = 0, and
+  // besselK(1.49, 3) = 0.0402 (true 0.04783) because `Math.round(Math.abs(n))` replaced the order.
+  describe('besselI', () => {
+    it.each([
+      [1, -1, -0.56515910399248503],
+      [3, -2, -0.21273995923985266],
+      [-2, 3, 2.2452124409299512],
+      [-1, 3, 3.9533702174026094],
+      [0, 0.5, 1.0634833707413235],
+      [1, 0.5, 0.25789430539089632],
+      [2, 50, 2.8164306402451941e20],
+      [2, 700, 1.5252262036997769e302],
+      [200, 700, 7.0802044275411892e289],
+      [-0.5, 1, 1.2312002145929674],
+      [0.5, 1, 0.93767488824548765],
+      [0.3, 1e-8, 0.0036030536107702113],
+      [1000.5, 900, 1.3945311004547579e166],
+      [170.5, 30, 1.3008463806581897e-107],
+      [-150.000000001, 0.9, 3.9657950421771418e303],
+      [-2.5, 3, 1.5688541070744028],
+      [-0.3, 0.2, 1.5591400070119671],
+      [-150.5, 2, 1.4737746528722863e261],
+      [-3.7, 60, 5.2537089359530428e24],
+      [-1e-9, 2, 2.2795853024499611],
+      [2.7, 40, 13582084091273960],
+    ])('besselI(%s, %s) = %s', (nu, x, want) => {
+      // Bound B3: 1e-14. Measured worst 3.4e-15 (besselI(1000.5, 900)).
+      expectRel(besselI(nu, x), want, 1e-14);
+    });
+    it('besselI(0.5, 1e-300) = 7.9788456080286537e-151 (main 0)', () => {
+      expectRel(besselI(0.5, 1e-300), 7.9788456080286537e-151, 1e-13);
+    });
+    it('a negative x: an integer order has the sign (-1)^n, a real order is NaN', () => {
+      expect(besselI(0.5, -1)).toBeNaN();
+      expect(besselI(-0.5, -1)).toBeNaN();
+      expect(besselI(2, -3)).toBe(besselI(2, 3));
+      expect(besselI(-3, -2)).toBe(-(besselI(3, 2) as number));
+    });
+    it('the result outside the double range: Infinity (main NaN) and 0', () => {
+      expect(besselI(2, 800)).toBe(Infinity);
+      expect(besselI(0, 1e5)).toBe(Infinity);
+      expect(besselI(300.25, 1)).toBe(0); // true 3.2e-706
+      expect(besselI(4.5, 5e-324)).toBe(0); // true 1.1e-1458
+    });
+    it('x = 0: 1 for order 0, 0 for a positive order, a signed Infinity for a negative real order', () => {
+      expect(besselI(0, 0)).toBe(1);
+      expect(besselI(2, 0)).toBe(0);
+      expect(besselI(-2, 0)).toBe(0);
+      expect(besselI(0.5, 0)).toBe(0);
+      expect(besselI(-0.5, 0)).toBe(Infinity);
+      // Gamma(-0.5) < 0, so I_(-1.5)(x) -> -Infinity as x -> 0+
+      expect(besselI(-1.5, 0)).toBe(-Infinity);
+    });
+    it('a NaN or infinite order is NaN, x = Infinity is Infinity, a NaN x is NaN', () => {
+      expect(besselI(NaN, 1)).toBeNaN();
+      expect(besselI(Infinity, 1)).toBeNaN();
+      expect(besselI(0.5, NaN)).toBeNaN();
+      expect(besselI(0.5, Infinity)).toBe(Infinity);
+      expect(besselI(2, -Infinity)).toBe(Infinity);
+      expect(besselI(1, -Infinity)).toBe(-Infinity);
+    });
+    it('the work limit: a RangeError when the product and the series need above 2500000000 steps', () => {
+      // nu = 2200000000.5 at x = 1458035535: ln T(m*) = -0.34 (no gate fires), m* = 219646508
+      expect(() => besselI(2200000000.5, 1458035535)).toThrow(RangeError);
+      expect(() => besselI(2200000000.5, 1458035535)).toThrow(
+        /besselI: .* above the supported maximum of 2500000000/
+      );
+      // an order of 3e9 at x = 1000 is 0 at once (the zero gate comes first)
+      expect(besselI(3e9 + 0.5, 1000)).toBe(0);
+    });
+  });
+
+  describe('besselK', () => {
+    it.each([
+      [0.5, 1, 0.46106850444789456],
+      [-0.5, 1, 0.46106850444789456],
+      [2.5, 2, 0.3897977588961997],
+      [0.3, 0.1, 2.8050564750215722],
+      [2.7, 40, 9.1831009509620418e-19],
+      [-2.7, 40, 9.1831009509620418e-19],
+      [150.5, 2, 2.3149998112552111e261],
+      [1.49, 3, 0.04783045360771901],
+      [1.51, 3, 0.04824102776989774],
+      [2.5, 1.999, 0.39046557949525685],
+      [2.5, 2.001, 0.38913127073156315],
+      [1e-7, 1.5, 0.2138055626475263],
+      [0.25, 700, 4.6699847598133661e-306],
+      [3.3, 700, 4.7062160878657106e-306],
+    ])('besselK(%s, %s) = %s', (nu, x, want) => {
+      // Bound B3: 1e-14. Measured worst 1.8e-15.
+      expectRel(besselK(nu, x), want, 1e-14);
+    });
+    it('besselK(0.5, 1e-300) = 1.2533141373155002e+150 (the exponent mu ln(x/2) is rounded)', () => {
+      expectRel(besselK(0.5, 1e-300), 1.2533141373155002e150, 1e-13);
+    });
+    it('besselK(2, 3) = 0.061510458471742038 within 4e-15 (an integer order, as main)', () => {
+      expectRel(besselK(2, 3), 0.061510458471742038, 4e-15);
+    });
+    it('the result above the double range is Infinity; an invalid input is NaN', () => {
+      expect(besselK(150.000000001, 0.9)).toBe(Infinity);
+      expect(besselK(0.5, 0)).toBeNaN();
+      expect(besselK(0.5, -1)).toBeNaN();
+      expect(besselK(NaN, 1)).toBeNaN();
+      expect(besselK(Infinity, 1)).toBeNaN();
+      expect(besselK(0.5, NaN)).toBeNaN();
+      expect(besselK(0.5, Infinity)).toBe(0);
+    });
+  });
+
+  describe('the array form of besselI is bounded by the total work', () => {
+    it('besselI(1e9, 4 x 662743431) throws: one element needs 1.2e9 steps, four need 4.8e9', () => {
+      // ln T(m*) = -0.37 at m* = 99839323, so no gate fires; the scalar is never called
+      expect(() => besselI(1e9, new Float64Array(4).fill(662743431))).toThrow(RangeError);
+      expect(() => besselI(1e9, new Float64Array(4).fill(662743431))).toThrow(/per call/);
+    });
+    it('besselI(1e9, 4 x 1000) returns four zeros at once (the zero gate)', () => {
+      const out = besselI(1e9, new Float64Array(4).fill(1000)) as Float64Array;
+      expect(Array.from(out)).toEqual([0, 0, 0, 0]);
+    });
+    it('besselI(2.5, [1, 30]) and besselI(-2.5, [1, 30]) equal the scalars', () => {
+      const a = besselI(2.5, new Float64Array([1, 30])) as Float64Array;
+      expect(a[0]).toBe(besselI(2.5, 1));
+      expect(a[1]).toBe(besselI(2.5, 30));
+      const b = besselI(-2.5, new Float64Array([1, 30])) as Float64Array;
+      expect(b[0]).toBe(besselI(-2.5, 1));
+      expect(b[1]).toBe(besselI(-2.5, 30));
+    });
+  });
+});
+
+describe('#1331: J of a negative real order at x = 0 is a signed Infinity', () => {
+  // J_(-nu)(x) ~ (x/2)^(-nu) / Gamma(1 - nu) as x -> 0+, with the sign of Gamma(1 - nu).
+  it('besselJ(-0.5, 0) = Infinity and besselJ(-1.5, 0) = -Infinity (main Infinity)', () => {
+    expect(besselJ(-0.5, 0)).toBe(Infinity);
+    expect(besselJ(-1.5, 0)).toBe(-Infinity);
+    expect(besselJ(-2.5, 0)).toBe(Infinity);
+    expect(besselJ(0.5, 0)).toBe(0);
   });
 });
