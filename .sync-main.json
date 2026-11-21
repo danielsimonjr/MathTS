@@ -2,19 +2,7 @@
   "remote": "origin",
   "base": "main",
   "union": ["CHANGELOG.md", "TODO.md"],
-  "takeBase": [
-    "docs/api/compat.md",
-    "docs/api/core.md",
-    "docs/api/expression.md",
-    "docs/api/functions.md",
-    "docs/api/matrix.md",
-    "docs/api/parallel.md",
-    "docs/api/plot.md",
-    "docs/api/workbook.md",
-    "docs/reference/functions.html",
-    "docs/reference/functions.md",
-    "tools/test/bundle-budget.json"
-  ],
+  "takeBase": ["tools/test/bundle-budget.json"],
   "regen": [
     ["bun", "run", "build"],
     ["bun", "run", "docs:deps"],
