@@ -254,3 +254,26 @@ describe('#940 an array in a number parameter throws (Number([2]) is 2)', () => 
     expect(poissonDist(3).mean).toBe(3);
   });
 });
+
+describe('#1384 a parameter with a numeric reading is stored as that number', () => {
+  type D = { mean: number; variance: number; pdf(x: number): number };
+  const SCALAR = FACTORIES.filter(([name]) => name !== 'multivariateNormal');
+  it.each(SCALAR)('%s: string arguments give the distribution of the numbers', (_n, f, args) => {
+    const want = call(f, ...args) as D;
+    const got = call(f, ...args.map(String)) as D;
+    expect(typeof got.mean).toBe('number');
+    expect(got.mean).toBe(want.mean);
+    expect(got.variance).toBe(want.variance);
+  });
+  it('the issue input: normalDist("2", 1).mean is the number 2 (the string "2" before)', () => {
+    expect(call(normalDist, '2', 1)).toMatchObject({ mean: 2, variance: 1 });
+  });
+  it('a BigNumber parameter is stored as a number', () => {
+    const d = normalDist(bignumber(1.5) as unknown as number, 2);
+    expect(typeof d.mean).toBe('number');
+    expect(d.mean).toBe(1.5);
+  });
+  it('gammaDist: a string shape and rate (a TypeError before: not finite)', () => {
+    expect(call(gammaDist, '3', '4')).toMatchObject({ mean: 0.75 });
+  });
+});

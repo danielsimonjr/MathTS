@@ -168,20 +168,26 @@ function _typeName(v: unknown): string {
 }
 
 /**
- * Throws a `TypeError` when a number parameter has no numeric reading: an options object, `'x'`.
- * An array or a typed array throws as well (`[2]` reads as 2). `undefined` passes (the factory
- * has its default, or its present result). A number (also NaN),
- * `null`, a numeric string, a BigNumber and a Fraction pass to the existing validation: the
- * factories are in the expression scope, where a parameter can be a BigNumber.
+ * Returns the number that a number parameter reads as, and throws a `TypeError` when the
+ * parameter has no numeric reading: an options object, `'x'`. An array or a typed array throws
+ * as well (`[2]` reads as 2). `undefined` is returned as it is (the factory has its default, or
+ * its present result). A number (also NaN) is returned as it is. `null`, a numeric string, a
+ * BigNumber and a Fraction are returned as `Number(v)`: the factories are in the expression
+ * scope, where a parameter can be a BigNumber, and the factory stores the parameter, so a
+ * value that is not converted shows in the result (`normalDist('2', 1).mean` was `'2'`, #1384).
  *
  * @param name - The factory name for the message.
  * @param param - The parameter name for the message.
  * @param v - The value of the parameter binding (after its default).
+ * @returns The number that the factory uses in place of `v`.
  */
-function _numberArg(name: string, param: string, v: unknown): void {
-  if (v === undefined || typeof v === 'number') return;
+function _numberArg(name: string, param: string, v: unknown): f64 {
+  if (v === undefined || typeof v === 'number') return v as f64;
   // `Number([2])` is 2, so an array (and a typed array) would read as its only entry.
-  if (!Array.isArray(v) && !ArrayBuffer.isView(v) && !Number.isNaN(Number(v))) return;
+  if (!Array.isArray(v) && !ArrayBuffer.isView(v)) {
+    const n = Number(v);
+    if (!Number.isNaN(n)) return n;
+  }
   throw new TypeError(`${name}: ${param} must be a number, got ${_typeName(v)}`);
 }
 
@@ -337,8 +343,8 @@ async function _sampleNDispatch(
  */
 export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
   _noIgnoredOptions('normalDist', arguments, 2);
-  _numberArg('normalDist', 'mu', mu);
-  _numberArg('normalDist', 'sigma', sigma);
+  mu = _numberArg('normalDist', 'mu', mu);
+  sigma = _numberArg('normalDist', 'sigma', sigma);
   if (sigma <= 0) throw new Error('normalDist: sigma must be positive');
   return _withSampleCount({
     pdf: (x: f64) => Math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * SQRT_2PI),
@@ -392,8 +398,8 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
  */
 export function betaDist(alpha: f64, beta_: f64): Distribution {
   _noIgnoredOptions('betaDist', arguments, 2);
-  _numberArg('betaDist', 'alpha', alpha);
-  _numberArg('betaDist', 'beta_', beta_);
+  alpha = _numberArg('betaDist', 'alpha', alpha);
+  beta_ = _numberArg('betaDist', 'beta_', beta_);
   if (alpha <= 0 || beta_ <= 0) throw new Error('betaDist: alpha and beta must be positive');
   const B = (_gamma(alpha) * _gamma(beta_)) / _gamma(alpha + beta_);
   return _withSampleCount({
@@ -484,8 +490,8 @@ function _gammaRandomRng(alpha: f64, rng: () => number): f64 {
  */
 export function binomialDist(n: number, p: f64): Distribution {
   _noIgnoredOptions('binomialDist', arguments, 2);
-  _numberArg('binomialDist', 'n', n);
-  _numberArg('binomialDist', 'p', p);
+  n = _numberArg('binomialDist', 'n', n);
+  p = _numberArg('binomialDist', 'p', p);
   if (!Number.isInteger(n) || n < 0)
     throw new Error('binomialDist: n must be a non-negative integer');
   if (p < 0 || p > 1) throw new Error('binomialDist: p must be in [0, 1]');
@@ -560,7 +566,7 @@ export function binomialDist(n: number, p: f64): Distribution {
  */
 export function chiSquaredDist(k: number): Distribution {
   _noIgnoredOptions('chiSquaredDist', arguments, 1);
-  _numberArg('chiSquaredDist', 'k', k);
+  k = _numberArg('chiSquaredDist', 'k', k);
   if (k <= 0) throw new Error('chiSquaredDist: k must be positive');
   const halfK = k / 2;
   return _withSampleCount({
@@ -632,7 +638,7 @@ export function chiSquaredDist(k: number): Distribution {
  */
 export function exponentialDist(lambda: f64 = 1): Distribution {
   _noIgnoredOptions('exponentialDist', arguments, 1);
-  _numberArg('exponentialDist', 'lambda', lambda);
+  lambda = _numberArg('exponentialDist', 'lambda', lambda);
   if (lambda <= 0) throw new Error('exponentialDist: lambda must be positive');
   return _withSampleCount({
     pdf: (x: f64) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)),
@@ -677,8 +683,8 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
  */
 export function fDist(d1: f64, d2: f64): Distribution {
   _noIgnoredOptions('fDist', arguments, 2);
-  _numberArg('fDist', 'd1', d1);
-  _numberArg('fDist', 'd2', d2);
+  d1 = _numberArg('fDist', 'd1', d1);
+  d2 = _numberArg('fDist', 'd2', d2);
   if (d1 <= 0 || d2 <= 0) throw new Error('fDist: d1 and d2 must be positive');
   return _withSampleCount({
     pdf: (x: f64) => {
@@ -806,7 +812,7 @@ export function gammaDist(
     rate = 1 / scale;
   } else {
     shape = shapeOrOptions as f64;
-    _numberArg('gammaDist', 'shape', shape);
+    shape = _numberArg('gammaDist', 'shape', shape);
     _gammaPositiveFinite('shape', shape);
     if (typeof rateOrOptions === 'object' && rateOrOptions !== null) {
       if ('rate' in rateOrOptions) {
@@ -821,7 +827,7 @@ export function gammaDist(
       rate = 1 / scale;
     } else {
       rate = rateOrOptions as f64;
-      _numberArg('gammaDist', 'rate', rate);
+      rate = _numberArg('gammaDist', 'rate', rate);
       _gammaPositiveFinite('rate', rate);
     }
   }
@@ -891,8 +897,8 @@ export function gammaDist(
  */
 export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
   _noIgnoredOptions('logNormalDist', arguments, 2);
-  _numberArg('logNormalDist', 'mu', mu);
-  _numberArg('logNormalDist', 'sigma', sigma);
+  mu = _numberArg('logNormalDist', 'mu', mu);
+  sigma = _numberArg('logNormalDist', 'sigma', sigma);
   if (sigma <= 0) throw new Error('logNormalDist: sigma must be positive');
   return _withSampleCount({
     pdf: (x: f64) => {
@@ -942,7 +948,7 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
  */
 export function poissonDist(lambda: f64): Distribution {
   _noIgnoredOptions('poissonDist', arguments, 1);
-  _numberArg('poissonDist', 'lambda', lambda);
+  lambda = _numberArg('poissonDist', 'lambda', lambda);
   if (lambda <= 0) throw new Error('poissonDist: lambda must be positive');
   return _withSampleCount({
     pdf: (k: f64) => {
@@ -1015,7 +1021,7 @@ export function poissonDist(lambda: f64): Distribution {
  */
 export function tDist(nu: f64): Distribution {
   _noIgnoredOptions('tDist', arguments, 1);
-  _numberArg('tDist', 'nu', nu);
+  nu = _numberArg('tDist', 'nu', nu);
   if (nu <= 0) throw new Error('tDist: nu must be positive');
   const coeff = Math.exp(_lgamma((nu + 1) / 2) - _lgamma(nu / 2)) / Math.sqrt(nu * Math.PI);
   return _withSampleCount({
@@ -1085,8 +1091,8 @@ export function tDist(nu: f64): Distribution {
  */
 export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
   _noIgnoredOptions('uniformDist', arguments, 2);
-  _numberArg('uniformDist', 'a', a);
-  _numberArg('uniformDist', 'b', b);
+  a = _numberArg('uniformDist', 'a', a);
+  b = _numberArg('uniformDist', 'b', b);
   if (b <= a) throw new Error('uniformDist: b must be greater than a');
   const range = b - a;
   return _withSampleCount({
@@ -1135,8 +1141,8 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
  */
 export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
   _noIgnoredOptions('weibullDist', arguments, 2);
-  _numberArg('weibullDist', 'k', k);
-  _numberArg('weibullDist', 'lambda', lambda);
+  k = _numberArg('weibullDist', 'k', k);
+  lambda = _numberArg('weibullDist', 'lambda', lambda);
   if (k <= 0 || lambda <= 0) throw new Error('weibullDist: k and lambda must be positive');
   return _withSampleCount({
     pdf: (x: f64) => {
@@ -1202,9 +1208,9 @@ export function hypergeometricDist(
   draws: number
 ): Distribution {
   _noIgnoredOptions('hypergeometricDist', arguments, 3);
-  _numberArg('hypergeometricDist', 'population', population);
-  _numberArg('hypergeometricDist', 'successes', successes);
-  _numberArg('hypergeometricDist', 'draws', draws);
+  population = _numberArg('hypergeometricDist', 'population', population);
+  successes = _numberArg('hypergeometricDist', 'successes', successes);
+  draws = _numberArg('hypergeometricDist', 'draws', draws);
   if (![population, successes, draws].every((v) => Number.isInteger(v) && v >= 0)) {
     throw new Error(
       'hypergeometricDist: population, successes, draws must be non-negative integers'
@@ -1267,8 +1273,8 @@ export function hypergeometricDist(
  */
 export function negativeBinomialDist(r: number, p: f64): Distribution {
   _noIgnoredOptions('negativeBinomialDist', arguments, 2);
-  _numberArg('negativeBinomialDist', 'r', r);
-  _numberArg('negativeBinomialDist', 'p', p);
+  r = _numberArg('negativeBinomialDist', 'r', r);
+  p = _numberArg('negativeBinomialDist', 'p', p);
   if (!Number.isInteger(r) || r < 1)
     throw new Error('negativeBinomialDist: r must be a positive integer');
   if (p <= 0 || p > 1) throw new Error('negativeBinomialDist: p must be in (0, 1]');
@@ -1329,8 +1335,8 @@ function _contSample(quantile: (p: f64) => f64, rng: () => number): f64 {
  */
 export function paretoDist(b: number, xm: number): Distribution {
   _noIgnoredOptions('paretoDist', arguments, 2);
-  _numberArg('paretoDist', 'b', b);
-  _numberArg('paretoDist', 'xm', xm);
+  b = _numberArg('paretoDist', 'b', b);
+  xm = _numberArg('paretoDist', 'xm', xm);
   if (b <= 0 || xm <= 0) throw new Error('paretoDist: shape b and scale xm must be positive');
   const quantile = (p: f64): f64 => (p <= 0 ? xm : p >= 1 ? Infinity : xm / Math.pow(1 - p, 1 / b));
   return _withSampleCount({
@@ -1355,7 +1361,7 @@ export function paretoDist(b: number, xm: number): Distribution {
  */
 export function rayleighDist(sigma: number): Distribution {
   _noIgnoredOptions('rayleighDist', arguments, 1);
-  _numberArg('rayleighDist', 'sigma', sigma);
+  sigma = _numberArg('rayleighDist', 'sigma', sigma);
   if (sigma <= 0) throw new Error('rayleighDist: sigma must be positive');
   const s2 = sigma * sigma;
   const quantile = (p: f64): f64 =>
@@ -1383,9 +1389,9 @@ export function rayleighDist(sigma: number): Distribution {
  */
 export function triangularDist(a: number, c: number, b: number): Distribution {
   _noIgnoredOptions('triangularDist', arguments, 3);
-  _numberArg('triangularDist', 'a', a);
-  _numberArg('triangularDist', 'c', c);
-  _numberArg('triangularDist', 'b', b);
+  a = _numberArg('triangularDist', 'a', a);
+  c = _numberArg('triangularDist', 'c', c);
+  b = _numberArg('triangularDist', 'b', b);
   if (!(a <= c && c <= b && a < b))
     throw new Error('triangularDist: require a <= mode <= b, a < b');
   const quantile = (p: f64): f64 => {
@@ -1431,8 +1437,8 @@ export function triangularDist(a: number, c: number, b: number): Distribution {
  */
 export function discreteUniformDist(lo: number, hi: number): Distribution {
   _noIgnoredOptions('discreteUniformDist', arguments, 2);
-  _numberArg('discreteUniformDist', 'lo', lo);
-  _numberArg('discreteUniformDist', 'hi', hi);
+  lo = _numberArg('discreteUniformDist', 'lo', lo);
+  hi = _numberArg('discreteUniformDist', 'hi', hi);
   if (!Number.isInteger(lo) || !Number.isInteger(hi) || hi < lo) {
     throw new Error('discreteUniformDist: require integer lo <= hi');
   }
@@ -1470,8 +1476,8 @@ export function discreteUniformDist(lo: number, hi: number): Distribution {
  */
 export function gumbelDist(mu: number, beta: number): Distribution {
   _noIgnoredOptions('gumbelDist', arguments, 2);
-  _numberArg('gumbelDist', 'mu', mu);
-  _numberArg('gumbelDist', 'beta', beta);
+  mu = _numberArg('gumbelDist', 'mu', mu);
+  beta = _numberArg('gumbelDist', 'beta', beta);
   if (beta <= 0) throw new Error('gumbelDist: scale beta must be positive');
   const quantile = (p: f64): f64 =>
     p <= 0 ? -Infinity : p >= 1 ? Infinity : mu - beta * Math.log(-Math.log(p));
@@ -1502,8 +1508,8 @@ export function gumbelDist(mu: number, beta: number): Distribution {
  */
 export function invGaussDist(mu: number, lambda: number): Distribution {
   _noIgnoredOptions('invGaussDist', arguments, 2);
-  _numberArg('invGaussDist', 'mu', mu);
-  _numberArg('invGaussDist', 'lambda', lambda);
+  mu = _numberArg('invGaussDist', 'mu', mu);
+  lambda = _numberArg('invGaussDist', 'lambda', lambda);
   if (mu <= 0 || lambda <= 0) throw new Error('invGaussDist: mu and lambda must be positive');
   const quantile = (p: f64): f64 => {
     if (p !== p) return NaN;
