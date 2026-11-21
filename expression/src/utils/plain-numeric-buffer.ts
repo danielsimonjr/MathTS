@@ -41,7 +41,8 @@ export function isExactStorageArray(value: unknown): boolean {
 
 /**
  * True for a plain numeric buffer: an exact storage array (see `isExactStorageArray`) with no own
- * enumerable property other than its indices. Such an array holds numbers only, so the result walk
+ * property other than its indices (`Reflect.ownKeys`: a non-enumerable or symbol-keyed property
+ * counts too). Such an array holds numbers only, so the result walk
  * has nothing to visit in it. The result guard uses this rule.
  *
  * The key count costs one pass over the indices, as the walk of a nested array does.
@@ -49,6 +50,6 @@ export function isExactStorageArray(value: unknown): boolean {
 export function isPlainNumericBuffer(value: unknown): boolean {
   return (
     isExactStorageArray(value) &&
-    Object.keys(value as object).length === (value as ArrayLike<number>).length
+    Reflect.ownKeys(value as object).length === (value as ArrayLike<number>).length
   );
 }

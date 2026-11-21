@@ -247,8 +247,9 @@ function typedSolve(rows: unknown[][], column: readonly unknown[]): unknown[] {
  * @returns Solution vector x: numbers, or values of the typed entry type.
  * @throws TypeError if `A` is not a matrix type, `b` has another shape, or an entry has no
  *   conversion to number and is no BigNumber, Fraction or Complex.
- * @throws Error if the matrix is empty, not square, singular, `b` has the wrong length, or a
- *   string entry is not a number (`Cannot convert`).
+ * @throws RangeError if the matrix is not square (its order comes from the size it reports).
+ * @throws Error if the matrix is empty, singular, `b` has the wrong length, or a string entry is
+ *   not a number (`Cannot convert`).
  *
  * @example
  * linsolve([[2, 1], [1, 3]], [5, 10]) // => [1, 3]

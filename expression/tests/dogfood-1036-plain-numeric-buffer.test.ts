@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 // Issue #1036 (guard rule for typed arrays). Safe evaluate returns a typed array only as the
 // storage of a branded matrix, and only when the array is a plain numeric buffer: a real
 // `Float64Array`, `Float32Array` or `Int32Array`, with the exact prototype of its kind, and with
-// no own enumerable property other than its indices. Every other typed array is refused at every
+// no own property (enumerable or not, string or symbol key) other than its indices. Every other typed array is refused at every
 // position.
 import { sanitizeEvaluateResult } from '../src/utils/safe-result.js';
 
@@ -105,5 +105,22 @@ describe('issue #1036: the receiver allowlist takes a typed array only with its 
     // The receiver test is O(1) (it reads no own keys), so an own property does not change it;
     // `isSafeProperty` and `isSafeMethod` govern own members, as for a plain object.
     expect(isSandboxReceiver(Object.assign(new Float64Array(1), { note: 1 }))).toBe(true);
+  });
+});
+
+describe('issue #1036 (final review): a hidden own property also refuses the buffer', () => {
+  it('refuses a storage array with a non-enumerable or a symbol-keyed own property', () => {
+    const hidden = new Float64Array(2);
+    Object.defineProperty(hidden, 'leak', { value: process, enumerable: false });
+    expect(() => sanitizeEvaluateResult(new Branded({ data: hidden }))).toThrow(REFUSED);
+    const symbolic = new Float64Array(2);
+    Object.defineProperty(symbolic, Symbol('leak'), { value: process, enumerable: true });
+    expect(() => sanitizeEvaluateResult(new Branded({ data: symbolic }))).toThrow(REFUSED);
+  });
+
+  it('still accepts a plain buffer of each storage kind', () => {
+    for (const data of [new Float64Array(3), new Float32Array(3), new Int32Array(3)]) {
+      expect(() => sanitizeEvaluateResult(new Branded({ data }))).not.toThrow();
+    }
   });
 });
