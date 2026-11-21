@@ -1562,12 +1562,18 @@ export const round = mathTyped('round', {
     return a.round(decimals.toNumber());
   },
 
-  // Float64Array round, synchronous (the 'number' overload; the config is read once per call)
+  // Float64Array round, synchronous. Each element takes the 'number' overload (so -0 gives 0);
+  // the config is read once per call.
   Float64Array: (a: Float64Array): Float64Array => {
     const { relTol, absTol } = liveConfig();
     return f64Unary(a, (x) => roundNumberTol(x, 0, relTol, absTol));
   },
-  'Array | Matrix': unaryCollection({ real: (x: f64): f64 => roundNumberLive(x, 0) }),
+  // An Array or a Matrix copies a zero element as it is: mathjs maps them with
+  // `deepMap(x, self, true)`, whose callback is `x === 0 ? x : self(x)`. So `round([-0])` is
+  // `[-0]`, and the scalar `round(-0)` is 0. `Math.round` gave -0 here before #996.
+  'Array | Matrix': unaryCollection({
+    real: (x: f64): f64 => (x === 0 ? x : roundNumberLive(x, 0)),
+  }),
 });
 
 /**
