@@ -41,6 +41,74 @@ console.log(sin_f64(Math.PI / 2)); // 1
 `matrix` and `functions` load the same binary as `mathts-as.wasm` via their own
 loaders and SHA-384 verification (`core/src/wasm-loader.ts`).
 
+### Entry points
+
+| Specifier                             | Kind   | Content                                                              |
+| ------------------------------------- | ------ | -------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-wasm`          | module | The glue of the release build (`build/mathts.js`).                   |
+| `@danielsimonjr/mathts-wasm/debug.js` | module | The glue of the debug build. It checks the input parameters (below). |
+| `@danielsimonjr/mathts-wasm/wasm`     | file   | The release binary `mathts.wasm`. It has no import.                  |
+| `@danielsimonjr/mathts-wasm/debug`    | file   | The debug binary `mathts-debug.wasm`. It has no import.              |
+
+The two binaries need no host function, so any runtime can instantiate them with an empty import
+object. Read the bytes of the file that the subpath names:
+
+```typescript node
+import { readFile } from 'node:fs/promises';
+
+const bytes = await readFile(new URL(import.meta.resolve('@danielsimonjr/mathts-wasm/wasm')));
+const { instance } = await WebAssembly.instantiate(bytes, {});
+const add = instance.exports.add_f64 as (a: number, b: number) => number;
+console.log(add(2, 3)); // 5
+```
+
+Node also loads a binary as a WebAssembly ES module: `await import('@danielsimonjr/mathts-wasm/wasm')`
+returns its exports (pointer ABI, without the glue). Node 22.12 needs the flag
+`--experimental-wasm-modules`; newer versions (measured on 22.23, 24.22 and 26.13) need none.
+Bun has no loader for a WebAssembly module: `import()` of a binary subpath returns the file path
+as `default`.
+
+A binary has no `abort` import. An AssemblyScript abort (a failed assertion, or the
+`RangeError` that a kernel throws above its order limit) stores its message, file, line and
+column in globals and traps as `WebAssembly.RuntimeError` (message `unreachable` in V8). The glue
+catches the trap and throws `Error('<message> in <file>:<line>:<column>')`, for example
+`Index out of range in ~lib/typedarray.ts:1457:64`.
+
+A host that calls a binary directly reads the record with these exports:
+
+- `abort_take()` returns 1 when an abort is pending, and clears the flag. A trap that is not an
+  abort (a memory access out of bounds) leaves the flag clear. Call it first, in the `catch` of
+  every call into the binary (a runtime helper such as `__new` can abort too). An abort that the
+  host does not read stays pending.
+- `abort_message()` and `abort_file()` return pointers to AssemblyScript strings (UTF-16 text,
+  the byte length is at pointer - 4).
+- `abort_line()` and `abort_column()` return numbers.
+
+`guardWasmAborts` of `@danielsimonjr/mathts-core/internal` does this for the loaders of `matrix`
+and `functions`. Each loader throws the `Error` text that it threw when the binary had the
+import (`WASM abort`, and `AS WASM abort` for `WASMBackend`). The `cause` of that `Error` is an
+`Error` with the text `<message> in <file>:<line>:<column>`.
+
+### Output parameters
+
+The glue copies each typed-array argument into WebAssembly memory before the call. After the
+call, it copies the arguments that the kernel writes back into your array: an output buffer, an
+in-place buffer or a scratch buffer. It never writes an input argument back. A plain Array works
+as an input and as an output.
+
+```typescript node
+import { matrix_multiply } from '@danielsimonjr/mathts-wasm';
+
+const result = new Float64Array(4);
+matrix_multiply(new Float64Array([1, 2, 3, 4]), 2, 2, new Float64Array([5, 6, 7, 8]), 2, result);
+console.log(Array.from(result)); // [19, 22, 43, 50]
+```
+
+`scripts/patch-glue.mjs` holds the class of every parameter (`OUTPUT_PARAMS`: `in` or `out`) and
+runs as a step of `gen:manifest`. The build fails when an export or a parameter is missing from
+that list. The debug glue (`@danielsimonjr/mathts-wasm/debug.js`) throws `mathts glue: <export> wrote its input
+parameter <param>` when a kernel writes a parameter that the list marks `in`.
+
 ### Dense decompositions (AS exports)
 
 From `algebra/decomposition.ts` (used by matrix `WASMBackend` tests, not public
@@ -78,6 +146,8 @@ assembly/
 - Trig: `sin_f64`, `cos_f64`, `tan_f64`, `asin_f64`, `acos_f64`, `atan_f64`
 - Hyperbolic: `sinh_f64`, `cosh_f64`, `tanh_f64`, `asinh_f64`, `acosh_f64`, `atanh_f64`
 - Rounding: `abs_f64`, `floor_f64`, `ceil_f64`, `round_f64`, `trunc_f64`
+
+`round_f64` rounds a tie away from zero on the exact double: `round_f64(0.5)` is 1 and `round_f64(-2.5)` is -3. A zero input gives +0, and `round_f64(-0.4)` gives -0. NaN gives NaN, and an infinity gives itself. The kernel has no configuration and applies no tolerance. The `round` of `@danielsimonjr/mathts-functions` applies its `relTol` first: it reads `0.49999999999999994` as the tie 0.5 and gives 1, and `round_f64(0.49999999999999994)` gives 0. The WebAssembly instruction `nearest` rounds a tie to the even integer, and the kernel does not use it.
 
 ### Array Operations
 

@@ -59,9 +59,67 @@ import {
   ldexp,
   withPow2Scale,
   notSquareError,
+  guardWasmAborts,
 } from '@danielsimonjr/mathts-core/internal';
 import { scaleDense } from '../operations/common.js';
 import { detectWasmFeatures, type WasmFeatures } from './wasm/detect.js';
+
+/** The message of the `Error` that an abort of the binary gives through this backend. */
+const AS_ABORT_TEXT = 'AS WASM abort';
+
+/**
+ * A pivot is zero when it is at most this multiple of its cancellation sum (see
+ * {@link cancellationSum}). The AssemblyScript kernels use the same constant
+ * (`PIVOT_REL_TOL` in `assembly/src/algebra/decomposition.ts`).
+ */
+const PIVOT_REL_TOL = 1e-14;
+
+/**
+ * 2^-500. A Householder column whose largest entry is below it has squares that can underflow
+ * (they do below about 2.2e-162), so its norm is taken from the entries divided by that
+ * largest entry. An ordinary column keeps the plain sum of squares, so its bits do not change.
+ * Same value as `TINY_COLUMN` in `assembly/src/algebra/decomposition.ts`.
+ */
+const TINY_COLUMN = 2 ** -500;
+
+/**
+ * 2^500. A column whose largest finite entry is above it has squares that can overflow (they do
+ * above about 1.34e154), so its norm is taken the same way. Same value as `HUGE_COLUMN` in
+ * `assembly/src/algebra/decomposition.ts`.
+ */
+const HUGE_COLUMN = 2 ** 500;
+
+/**
+ * The cancellation sum `S = sum_{j<k} |L[row][j]| * |U[j][k]|` of the pivot candidate of step `k`
+ * in row `row`. `data` is the in-place LU storage (row-major, n x n): row `row` holds the
+ * multipliers in columns before `k`, and column `k` of the rows before `k` holds U. The
+ * candidate `a_pk - sum_{j<k} l_pj * u_jk` has a rounding error of about `eps * S`, so it is zero
+ * when it is at most `PIVOT_REL_TOL * S`. At step 0 the sum is empty and only an exact 0 is
+ * zero. Every term scales exactly with a power of 2 of the matrix, so the verdict does not
+ * depend on the unit (#1172). The sum runs in ascending j, as in the AssemblyScript kernels.
+ */
+function cancellationSum(data: Float64Array, n: number, row: number, k: number): number {
+  let s = 0.0;
+  for (let j = 0; j < k; j++) s += Math.abs(data[row * n + j]) * Math.abs(data[j * n + k]);
+  return s;
+}
+
+/**
+ * Whether the pivot candidate of magnitude `pivot` (step `k`, row `row` of `data`) is zero by the
+ * rule of {@link cancellationSum}. An infinite pivot is not zero: no rounding error hides it, and
+ * its cancellation sum is Infinity, so the plain test `Infinity <= 1e-14 * Infinity` would call it
+ * zero. A NaN pivot is not zero (it propagates). Twin of `pivotIsZero` in the AssemblyScript
+ * kernels.
+ */
+function pivotIsZero(
+  data: Float64Array,
+  n: number,
+  row: number,
+  k: number,
+  pivot: number
+): boolean {
+  return pivot !== Infinity && pivot <= PIVOT_REL_TOL * cancellationSum(data, n, row, k);
+}
 
 /**
  * Subset of the AssemblyScript module surface this backend uses.
@@ -411,17 +469,10 @@ export class WASMBackend implements MatrixBackend {
    * tests and multiple backend instances can coexist in the same process.
    */
   private async loadAsModule(path: string): Promise<AsModule> {
-    const imports: WebAssembly.Imports = {
-      env: {
-        abort: (msg: number, file: number, line: number, column: number) => {
-          console.error('AS WASM abort', { msg, file, line, column });
-          throw new Error('AS WASM abort');
-        },
-        seed: () => Date.now(),
-      },
-      Math: Math as unknown as WebAssembly.ModuleImports,
-      Date: Date as unknown as WebAssembly.ModuleImports,
-    };
+    // The binary has no import (#1019): an abort traps, and `guardWasmAborts` turns the trap into
+    // the `Error` that the `env.abort` of this loader threw (`AS_ABORT_TEXT`). Its `cause` holds
+    // the message and the position of the abort.
+    const imports: WebAssembly.Imports = {};
 
     const isNode = typeof process !== 'undefined' && process.versions?.node !== undefined;
     const { loadWasmManifest, verifyWasmIntegrity } = await import('./wasm/integrity.js');
@@ -452,7 +503,7 @@ export class WASMBackend implements MatrixBackend {
         instance = await WebAssembly.instantiate(module, imports);
       }
     }
-    return instance.exports as unknown as AsModule;
+    return guardWasmAborts(instance.exports, AS_ABORT_TEXT) as unknown as AsModule;
   }
 
   /**
@@ -582,9 +633,14 @@ export class WASMBackend implements MatrixBackend {
   // =========================================================================
 
   /**
-   * LU decomposition. The kernels floor a pivot at an absolute 1e-14, so a matrix whose
-   * largest entry is outside [2^-3, 2^400] runs scaled by an exact power of 2: L and the
-   * permutation are scale-free, and U is scaled back (#1123).
+   * LU decomposition. A pivot is singular when it is at most `1e-14` times the cancellation sum
+   * of its own computation (see {@link cancellationSum}); the verdict does not depend on the
+   * unit of the matrix (#1172). A regular matrix is called singular only when a pivot lost 14
+   * or more decimal digits to cancellation, as in `[[1, 1], [1, 1 + 1e-15]]`. A rank-deficient
+   * matrix with an ill-conditioned leading block can pass: an LU pivot test does not reveal the
+   * rank. A matrix whose largest entry is outside [2^-3, 2^400] runs scaled by an exact power of
+   * 2, which keeps subnormal and huge entries accurate: L and the permutation are scale-free,
+   * and U is scaled back (#1123).
    */
   async luDecomposition(a: DenseMatrix): Promise<{
     lu: DenseMatrix;
@@ -660,7 +716,7 @@ export class WASMBackend implements MatrixBackend {
   }
 
   /**
-   * LU decomposition on the JS path. Each of the n pivots has the floor 1e-14, as in the
+   * LU decomposition on the JS path. Each of the n pivots has the cancellation rule, as in the
    * AssemblyScript kernels `matrix_lu_decompose` and `matrix_inverse`.
    */
   private luDecompositionJS(a: DenseMatrix): {
@@ -672,8 +728,12 @@ export class WASMBackend implements MatrixBackend {
     const n = a.rows;
     // The elimination tests the pivots 0 to n-2. A last pivot of 0 gave `singular: false`
     // and an inverse of NaN entries.
-    if (!r.singular && n > 0 && Math.abs(r.lu.get(n - 1, n - 1)) < 1e-14) {
-      return { lu: r.lu, perm: r.perm, singular: true };
+    if (!r.singular && n > 0) {
+      const data = r.lu.toFloat64Array();
+      const last = n - 1;
+      if (pivotIsZero(data, n, last, last, Math.abs(data[last * n + last]))) {
+        return { lu: r.lu, perm: r.perm, singular: true };
+      }
     }
     return r;
   }
@@ -681,7 +741,8 @@ export class WASMBackend implements MatrixBackend {
   /**
    * Gaussian elimination with partial pivoting. It tests the pivots 0 to n-2 only, as the
    * AssemblyScript kernel `matrix_determinant` does; `determinantJS` multiplies the last
-   * pivot in, so a last pivot of 0 gives the determinant 0.
+   * pivot in without a test, so the determinant of a rank-deficient matrix is a rounding
+   * residue, as in LAPACK. The test of a pivot is the cancellation rule of {@link cancellationSum}.
    */
   private luEliminateJS(a: DenseMatrix): {
     lu: DenseMatrix;
@@ -710,7 +771,7 @@ export class WASMBackend implements MatrixBackend {
         }
       }
 
-      if (maxVal < 1e-14) {
+      if (pivotIsZero(data, n, pivotRow, k, maxVal)) {
         return { lu: new DenseMatrix(n, n, data), perm, singular: true };
       }
 
@@ -739,9 +800,12 @@ export class WASMBackend implements MatrixBackend {
   }
 
   /**
-   * QR decomposition. The Householder steps skip a column whose norm is below an absolute
-   * 1e-14 and square the entries, so a matrix whose largest entry is outside [2^-3, 2^400]
-   * runs scaled by an exact power of 2. Q is scale-free; R is scaled back (#1123).
+   * QR decomposition. A Householder step skips a column only when its sub-column is exactly
+   * zero; a column whose largest entry is below 2^-500 takes its norm from the entries divided
+   * by that entry, because the squares underflow (#1172). The Householder steps square the
+   * entries, so a matrix whose largest entry is outside [2^-3, 2^400] runs scaled by an exact
+   * power of 2. Q is scale-free; R is scaled back (#1123). The `q` result holds Q transposed:
+   * `A = qᵀ r`.
    */
   async qrDecomposition(a: DenseMatrix): Promise<{ q: DenseMatrix; r: DenseMatrix }> {
     return withPow2Scale(entryRange(a.toFloat64Array()), UNIT_LO, SQUARED, (e) => {
@@ -806,13 +870,28 @@ export class WASMBackend implements MatrixBackend {
 
     for (let k = 0; k < minDim; k++) {
       let norm = 0.0;
+      let amax = 0.0;
       for (let i = k; i < m; i++) {
         const val = r[i * n + k];
         norm += val * val;
+        const av = Math.abs(val);
+        if (av > amax) amax = av;
       }
-      norm = Math.sqrt(norm);
 
-      if (norm < 1e-14) continue;
+      // Skip a column only when it is exactly zero. An absolute floor left a non-zero entry
+      // below the diagonal of R, and the squares of an entry under 2.2e-162 underflow, so
+      // `norm === 0` is not an exact-zero test (#1172). A NaN column is not skipped.
+      if (amax === 0.0 && norm === 0.0) continue;
+      if (amax < TINY_COLUMN || (amax > HUGE_COLUMN && amax !== Infinity)) {
+        let scaled = 0.0;
+        for (let i = k; i < m; i++) {
+          const t = r[i * n + k] / amax;
+          scaled += t * t;
+        }
+        norm = amax * Math.sqrt(scaled);
+      } else {
+        norm = Math.sqrt(norm);
+      }
 
       const sign = r[k * n + k] >= 0.0 ? 1.0 : -1.0;
       const u1 = r[k * n + k] + sign * norm;
@@ -838,6 +917,10 @@ export class WASMBackend implements MatrixBackend {
         const factor = tau * vDotCol;
         for (let i = 0; i < m - k; i++) q[(k + i) * m + j] -= factor * v[i];
       }
+
+      // The reflection leaves a rounding residue below the diagonal of column k: R is upper
+      // trapezoidal, so set it to exact zero, as the AssemblyScript kernel does.
+      for (let i = k + 1; i < m; i++) r[i * n + k] = 0.0;
     }
 
     return {
