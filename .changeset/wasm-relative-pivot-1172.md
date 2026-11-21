@@ -1,4 +1,5 @@
 ---
+'@danielsimonjr/mathts-functions': patch
 '@danielsimonjr/mathts-matrix': patch
 '@danielsimonjr/mathts-wasm': patch
 ---
