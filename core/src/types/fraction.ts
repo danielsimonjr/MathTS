@@ -720,7 +720,7 @@ export class Fraction implements IFraction {
    * negative count rounds to tens, hundreds, and so on (an extension: mathjs throws there).
    * @param places - the number of decimal places, an integer
    * @returns the rounded Fraction
-   * @throws {TypeError} when `places` is not an integer
+   * @throws TypeError when `places` is not an integer
    */
   round(places: number = 0): Fraction {
     if (!Number.isInteger(places)) {

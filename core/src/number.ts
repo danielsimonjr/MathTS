@@ -793,7 +793,7 @@ export function roundNumberTolExact(
  * @param relTol - the relative tolerance of the snap, greater than 0
  * @param absTol - the absolute tolerance of the snap, at least 0
  * @returns the rounded number
- * @throws {Error} when `decimals` is not an integer from 0 to 15
+ * @throws Error when `decimals` is not an integer from 0 to 15
  */
 export function roundNumberTol(
   x: number,
