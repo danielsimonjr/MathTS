@@ -1,7 +1,7 @@
 import { factory } from '../utils/factory.js';
 import { isBigNumber, isCollection } from '../utils/is.js';
 import { deepForEach } from '../utils/collection.js';
-import { isDegenerate, rescaled } from '../utils/real-scale.js';
+import { rootOfSquaresLostDigits, rescaled } from '../utils/real-scale.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for std
@@ -95,12 +95,15 @@ export const createStd = /* #__PURE__ */ factory(
       },
     });
 
-    /** A result that is NaN, infinite or 0 can come from a square that left the range (#1257). */
+    /**
+     * A result that is NaN, infinite or 0 can come from a square that left the range (#1257). A
+     * result below 2^-400 can come from squares that were subnormal and lost digits (#1280).
+     */
     function _degenerate(result: unknown): boolean {
-      if (!isCollection(result)) return isDegenerate(result);
+      if (!isCollection(result)) return rootOfSquaresLostDigits(result);
       let found = false;
       deepForEach(result as never, (x: unknown) => {
-        if (isDegenerate(x)) found = true;
+        if (rootOfSquaresLostDigits(x)) found = true;
       });
       return found;
     }
@@ -119,7 +122,7 @@ export const createStd = /* #__PURE__ */ factory(
      * plain result stays when no scale applies (a value that is not finite, a Complex value).
      */
     function _scaledSlice(slice: unknown, normalization: string, plain: unknown): unknown {
-      if (!isDegenerate(plain)) return plain;
+      if (!rootOfSquaresLostDigits(plain)) return plain;
       const fixed = rescaled(_leaves(slice), (scaled) =>
         sqrt((variance as (...a: unknown[]) => unknown)(scaled, normalization))
       );

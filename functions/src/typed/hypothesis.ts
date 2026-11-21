@@ -29,7 +29,11 @@
  * @packageDocumentation
  */
 
-import { mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
+import {
+  mulberry32 as _makeMulberry32,
+  divideByScale,
+  scaleForVariance,
+} from '@danielsimonjr/mathts-core';
 import { normalDist } from './dist-objects.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
@@ -46,6 +50,7 @@ import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 import { multipleTest } from '../stats/inference-extra.js';
 import { assertAllocSize, assertLoopOrder, MAX_LOOP_ORDER } from '../utils/limits.js';
 import { hasNaN } from './number-matrix.js';
+import { scaledDeviationSums } from '../utils/deviation-sums.js';
 
 /** Largest `n` that `binomialTest` accepts (`binomialTest(5e10 + 1e5, 1e11)` takes 7.1 s). */
 const MAX_BINOMIAL_TEST_N = 100_000_000_000;
@@ -402,10 +407,22 @@ export function studentTTest(sample1: f64[], sample2?: f64[] | number | null): T
   // Welch's two-sample t-test
   const n1 = sample1.length;
   const n2 = sample2.length;
-  const m1 = _mean(sample1);
-  const m2 = _mean(sample2);
-  const v1 = _variance(sample1);
-  const v2 = _variance(sample2);
+  let a = sample1;
+  let b = sample2 as f64[];
+  let v1 = _variance(a);
+  let v2 = _variance(b);
+  // The statistic squares the variances. For a variance outside [2^-400, 2^400] both samples are
+  // divided by one exact power of 2 (the statistic and the degrees of freedom do not change).
+  // The scale is exact, so data of order 1 keeps its plain path (#1280).
+  const scale = scaleForVariance(Math.max(v1, v2), a, b);
+  if (scale !== 1) {
+    a = divideByScale(a, scale);
+    b = divideByScale(b, scale);
+    v1 = _variance(a);
+    v2 = _variance(b);
+  }
+  const m1 = _mean(a);
+  const m2 = _mean(b);
   const se = Math.sqrt(v1 / n1 + v2 / n2);
   const t = (m1 - m2) / se;
 
@@ -420,9 +437,20 @@ export function studentTTest(sample1: f64[], sample2?: f64[] | number | null): T
 /** One-sample Student's t against hypothesized mean `mu` (SciPy `ttest_1samp`, two-sided). */
 function _oneSampleTTest(sample: f64[], mu: f64): TTestResult {
   const n = sample.length;
-  const m = _mean(sample);
-  const s = Math.sqrt(_variance(sample));
-  const t = (m - mu) / (s / Math.sqrt(n));
+  let data = sample;
+  let popmean = mu;
+  let v = _variance(data);
+  // The statistic does not change when the sample and `mu` are divided by one exact power of 2.
+  // A variance outside [2^-400, 2^400] gets that scale (#1280).
+  const scale = scaleForVariance(v, data);
+  if (scale !== 1) {
+    data = divideByScale(data, scale);
+    popmean = mu / scale;
+    v = _variance(data);
+  }
+  const m = _mean(data);
+  const s = Math.sqrt(v);
+  const t = (m - popmean) / (s / Math.sqrt(n));
   const df = n - 1;
   return { statistic: t, pValue: _tPValue(t, df), degreesOfFreedom: df };
 }
@@ -1668,18 +1696,23 @@ export function bartlettTest(groups: f64[][]): VarianceTestResult {
     if (g.length < 2) throw new Error('bartlettTest: every group needs ≥2 observations');
     N += g.length;
   }
+  // The groups are divided by one exact power of 2 when the largest variance is outside
+  // [2^-400, 2^400]: a variance that left the range gave a wrong statistic (#1280).
+  let vars = groups.map((g) => _variance(g, 1)); // sample variances (ddof=1)
+  const scale = scaleForVariance(Math.max(...vars), ...groups);
+  if (scale !== 1) vars = groups.map((g) => _variance(divideByScale(g, scale), 1));
   let pooledNum = 0;
-  let sumLnVar = 0;
   let sumInv = 0;
-  for (const g of groups) {
-    const ni = g.length;
-    const si2 = _variance(g, 1); // sample variance (ddof=1)
-    pooledNum += (ni - 1) * si2;
-    sumLnVar += (ni - 1) * Math.log(si2);
+  for (let i = 0; i < k; i++) {
+    const ni = groups[i].length;
+    pooledNum += (ni - 1) * vars[i];
     sumInv += 1 / (ni - 1);
   }
   const sp2 = pooledNum / (N - k);
-  const numerator = (N - k) * Math.log(sp2) - sumLnVar;
+  // (N - k) ln(sp2) - sum (ni - 1) ln(si2) is a sum of (ni - 1) ln(sp2 / si2): each ratio does not
+  // change under a power-of-2 scale, and the two large logarithms no longer cancel.
+  let numerator = 0;
+  for (let i = 0; i < k; i++) numerator += (groups[i].length - 1) * Math.log(sp2 / vars[i]);
   const C = 1 + (sumInv - 1 / (N - k)) / (3 * (k - 1));
   const T = numerator / C;
   return { statistic: T, pValue: _chiSquaredPValue(T, k - 1), degreesOfFreedom: k - 1 };
@@ -1702,9 +1735,17 @@ export function studentTTestPaired(sample1: f64[], sample2: f64[]): TTestResult 
   if (n < 2 || sample2.length !== n) {
     throw new Error('studentTTestPaired: samples must be the same length ≥ 2');
   }
-  const d = sample1.map((x, i) => x - sample2[i]);
+  let d = sample1.map((x, i) => x - sample2[i]);
+  let v = _variance(d, 1);
+  // The statistic does not change when the differences are divided by an exact power of 2. A
+  // variance outside [2^-400, 2^400] gets that scale (#1280).
+  const scale = scaleForVariance(v, d);
+  if (scale !== 1) {
+    d = divideByScale(d, scale);
+    v = _variance(d, 1);
+  }
   const dBar = _mean(d);
-  const sd = Math.sqrt(_variance(d, 1));
+  const sd = Math.sqrt(v);
   const df = n - 1;
   const t = dBar / (sd / Math.sqrt(n));
   return { statistic: t, pValue: _tPValue(t, df), degreesOfFreedom: df };
@@ -1809,16 +1850,9 @@ export function binomialTest(
 /** Biased (population) skewness and Pearson kurtosis of a sample. */
 function _skewKurt(a: f64[]): { skew: f64; kurtPearson: f64 } {
   const n = a.length;
-  const m = _mean(a);
-  let m2 = 0;
-  let m3 = 0;
-  let m4 = 0;
-  for (const v of a) {
-    const d = v - m;
-    m2 += d * d;
-    m3 += d * d * d;
-    m4 += d * d * d * d;
-  }
+  // The standardized moments do not change when the data is divided by an exact power of 2: see
+  // `scaledDeviationSums` (#1280).
+  const { m2, m3, m4 } = scaledDeviationSums(a, (x) => _mean(x));
   const mu2 = m2 / n;
   return { skew: m3 / n / Math.pow(mu2, 1.5), kurtPearson: m4 / n / (mu2 * mu2) };
 }

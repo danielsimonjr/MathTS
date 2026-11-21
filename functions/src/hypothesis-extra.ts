@@ -6,6 +6,7 @@
  * re-deriving statistics or tail probabilities. Results follow the existing
  * `{ statistic, pValue, … }` shape used in `typed/hypothesis.ts`.
  */
+import { divideByScale, scaleForVariance } from '@danielsimonjr/mathts-core';
 import { variance as _variance, mean as _mean } from './typed/arithmetic.js';
 import { skewness, kurtosis, rankdata } from './descriptive-stats.js';
 import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
@@ -66,9 +67,18 @@ export function fTest(x: Vec, y: Vec): FTestResult {
     throw new Error('fTest: each sample needs at least 2 observations');
   const df1 = a.length - 1;
   const df2 = b.length - 1;
-  const vb = sampleVar(b);
+  let va = sampleVar(a);
+  let vb = sampleVar(b);
+  // F = va / vb does not change when both samples are divided by one exact power of 2. A variance
+  // outside [2^-400, 2^400] gets that scale: a variance that underflowed to 0 gave a wrong error
+  // (#1280).
+  const scale = scaleForVariance(Math.max(va, vb), a, b);
+  if (scale !== 1) {
+    va = sampleVar(divideByScale(a, scale));
+    vb = sampleVar(divideByScale(b, scale));
+  }
   if (vb === 0) throw new Error('fTest: denominator sample has zero variance');
-  const statistic = sampleVar(a) / vb;
+  const statistic = va / vb;
   const lower = fCDF(statistic, df1, df2);
   const upper = fSF(statistic, df1, df2);
   const pValue = Math.min(1, 2 * Math.min(lower, upper));

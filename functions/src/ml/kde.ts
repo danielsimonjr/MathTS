@@ -12,6 +12,8 @@
  * against variance (too noisy) using the sample spread.
  */
 
+import { stdFromSquaredDeviations } from '@danielsimonjr/mathts-core';
+
 export interface GaussianKDEOptions {
   /** Bandwidth (smoothing parameter). Defaults to Silverman's rule of thumb. */
   bandwidth?: number;
@@ -40,7 +42,8 @@ function sampleStd(samples: number[], mean: number): number {
     const d = s - mean;
     sumSq += d * d;
   }
-  return Math.sqrt(sumSq / (n - 1));
+  // The std keeps every digit when the squares are subnormal or overflow (#1280).
+  return stdFromSquaredDeviations(samples, sumSq, n - 1);
 }
 
 /** Linear-interpolated percentile (0-100) over a pre-sorted array. */

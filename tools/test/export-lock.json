@@ -469,6 +469,9 @@
       "REFUSED_UNIT_SPELLINGS": {
         "kind": "object"
       },
+      "ROOT_SAFE_MIN": {
+        "kind": "number"
+      },
       "Range": {
         "kind": "function"
       },
@@ -503,6 +506,9 @@
         "kind": "number"
       },
       "SQRT2": {
+        "kind": "number"
+      },
+      "SQUARES_SAFE_MIN": {
         "kind": "number"
       },
       "Scalar": {
@@ -629,6 +635,9 @@
         "kind": "function"
       },
       "dim": {
+        "kind": "function"
+      },
+      "divideByScale": {
         "kind": "function"
       },
       "divideExactScales": {
@@ -802,6 +811,12 @@
       "powerExactScale": {
         "kind": "function"
       },
+      "powerOfTwoBelow": {
+        "kind": "function"
+      },
+      "powerOfTwoScaleOf": {
+        "kind": "function"
+      },
       "ratioExactScale": {
         "kind": "function"
       },
@@ -823,10 +838,16 @@
       "rowMajorStrides": {
         "kind": "function"
       },
+      "scaleForVariance": {
+        "kind": "function"
+      },
       "scaledDistance": {
         "kind": "function"
       },
       "setDeterministic": {
+        "kind": "function"
+      },
+      "stdFromSquaredDeviations": {
         "kind": "function"
       },
       "subtractScalar": {

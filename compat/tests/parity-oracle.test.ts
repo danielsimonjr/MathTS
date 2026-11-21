@@ -2,12 +2,12 @@
  * compat parity guard — numpy oracle + functions cross-check.
  *
  * `compat/src/shims.ts` REIMPLEMENTS several homonyms independently of their
- * `functions`/`core` twins so it can pin mathjs semantics (e.g. std/variance
- * default to 'unbiased', matrix-aware add/subtract/multiply). Those independent
- * bodies are allowlisted in tools/create-dependency-graph/duplicate-allowlist.json
- * as intentional — but "allowlist alone is negligent": a divergent compat impl
- * is EXACTLY how a past 10^6× variance bug hid. This test is the guard the
- * allowlist entries reference:
+ * `functions`/`core` twins so it can pin mathjs semantics (e.g. the 2x2/3x3/LU
+ * det, the Math.* trig wrappers, the Complex-method conj/re/im/arg). Those
+ * independent bodies are allowlisted in
+ * tools/create-dependency-graph/duplicate-allowlist.json as intentional — but
+ * "allowlist alone is negligent": a divergent compat impl is EXACTLY how a past
+ * 10^6× variance bug hid. This test is the guard the allowlist entries reference:
  *
  *   1. anchor compat's impl to the numpy oracle (expected values generated via
  *      `python -c "import numpy ..."`), and
@@ -16,7 +16,8 @@
  * If a future edit makes compat diverge from numpy OR from functions, this goes
  * RED. (As of writing, all three agree to full double precision — the compat
  * bodies are independent implementations that happen to converge, which is what
- * the guard protects.)
+ * the guard protects.) compat `std` and `variance` are the functions
+ * implementations, so they are anchored to the numpy oracle only.
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -33,8 +34,6 @@ import {
   arg as cArg,
 } from '../src/index.js';
 import {
-  variance as fVariance,
-  std as fStd,
   det as fDet,
   acos as fAcos,
   asin as fAsin,
@@ -101,15 +100,13 @@ const DET_CORPUS: Array<{ m: number[][]; det: number }> = [
   },
 ];
 
-describe('compat parity — variance/std vs numpy oracle + functions', () => {
+describe('compat parity — variance/std vs numpy oracle', () => {
   for (const { data, varUnbiased, stdUnbiased } of VAR_CORPUS) {
-    it(`variance([${data}]) matches numpy (unbiased) and functions`, () => {
+    it(`variance([${data}]) matches numpy (unbiased)`, () => {
       expect(cVariance(data)).toBeCloseTo(varUnbiased, 10); // numpy oracle
-      expect(cVariance(data)).toBeCloseTo(fVariance(data) as number, 12); // functions cross-check
     });
-    it(`std([${data}]) matches numpy (unbiased) and functions`, () => {
+    it(`std([${data}]) matches numpy (unbiased)`, () => {
       expect(cStd(data)).toBeCloseTo(stdUnbiased, 10);
-      expect(cStd(data)).toBeCloseTo(fStd(data) as number, 12);
     });
   }
 

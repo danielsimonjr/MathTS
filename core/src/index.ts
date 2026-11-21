@@ -267,6 +267,13 @@ export {
   neumaierCumsum,
   sumSquaredDeviations,
   sumSquaredDeviationsChecked,
+  SQUARES_SAFE_MIN,
+  ROOT_SAFE_MIN,
+  powerOfTwoBelow,
+  powerOfTwoScaleOf,
+  scaleForVariance,
+  divideByScale,
+  stdFromSquaredDeviations,
   extrema,
 } from './numeric/stable.js';
 export type { Extrema } from './numeric/stable.js';

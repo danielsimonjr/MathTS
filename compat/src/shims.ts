@@ -34,7 +34,9 @@ import type {
   PublicMean,
   PublicSin,
   PublicSqrt,
+  PublicStd,
   PublicTan,
+  PublicVariance,
 } from '@danielsimonjr/mathts-functions';
 
 import {
@@ -57,6 +59,8 @@ import {
   atan2 as _atan2,
   sum as _sum,
   mean as _mean,
+  std as _std,
+  variance as _variance,
   min as _min,
   max as _max,
   gcd as _gcd,
@@ -478,57 +482,18 @@ export const atan2: TypedFunction = _atan2;
 export const sum: TypedFunction = _sum;
 export const mean = _mean as PublicMean;
 
-// std/variance must match mathjs defaults — 'unbiased' (sample, ÷(N-1)). The
-// functions-package versions now also default to unbiased and accept a
-// normalization argument (GC1), but compat keeps a self-contained override so it
-// can flatten DenseMatrix / nested-array inputs that the typed Array/Float64Array
-// signatures don't cover.
-type Normalization = 'unbiased' | 'uncorrected' | 'biased';
-
-function toNumericArray(data: unknown): number[] {
-  if (isCompatBridgeMatrix(data)) {
-    const flat = (data as { toArray(): unknown }).toArray();
-    return (Array.isArray(flat) ? flat : [flat]).flat(Infinity) as number[];
-  }
-  if (Array.isArray(data)) return (data as unknown[]).flat(Infinity) as number[];
-  return [data as number];
-}
+/**
+ * The variance of the values in the data. This is the functions implementation: it defaults to
+ * the unbiased divisor (N - 1), as mathjs does, and it takes the dimension, the variadic form
+ * and BigNumber data. Subnormal squares and squares that overflow keep every digit (#1280).
+ */
+export const variance = _variance as PublicVariance;
 
 /**
- * Return the variance of all values in `data`.
- *
- * This function flattens a DenseMatrix or a nested array to one list.
- * It uses any other input as a list of one value.
- * An empty list gives `NaN`.
- * The divisor is N - 1 for `'unbiased'` (N for one value), N for `'uncorrected'` and N + 1 for `'biased'`.
- *
- * @param data - A number, a DenseMatrix or a nested array of numbers.
- * @param normalization - The divisor rule. The default is `'unbiased'`, as in mathjs.
- * @returns The variance.
+ * The standard deviation of the values in the data. This is the functions implementation, with
+ * the same arguments as {@link variance}.
  */
-export function variance(data: unknown, normalization: Normalization = 'unbiased'): number {
-  const arr = toNumericArray(data);
-  const n = arr.length;
-  if (n === 0) return NaN;
-  const mu = arr.reduce((s, x) => s + x, 0) / n;
-  const ss = arr.reduce((s, x) => s + (x - mu) * (x - mu), 0);
-  const denom =
-    normalization === 'uncorrected' ? n : normalization === 'biased' ? n + 1 : n > 1 ? n - 1 : n;
-  return ss / denom;
-}
-
-/**
- * Return the standard deviation of all values in `data`.
- *
- * The result is the square root of `variance(data, normalization)`.
- *
- * @param data - A number, a DenseMatrix or a nested array of numbers.
- * @param normalization - The divisor rule. The default is `'unbiased'`, as in mathjs.
- * @returns The standard deviation.
- */
-export function std(data: unknown, normalization: Normalization = 'unbiased'): number {
-  return Math.sqrt(variance(data, normalization));
-}
+export const std = _std as PublicStd;
 export const min: TypedFunction = _min;
 export const max: TypedFunction = _max;
 

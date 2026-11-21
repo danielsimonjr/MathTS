@@ -1,9 +1,14 @@
 /**
- * mathjs parity: std/variance must default to 'unbiased' (sample, ÷(N-1)),
- * not the functions-package population default (÷N), and must accept a
+ * mathjs parity: std/variance default to 'unbiased' (sample, ÷(N-1)) and accept a
  * normalization argument. Regression for the compat stats-default gap.
+ *
+ * Since #1280, compat `std` and `variance` are the functions-package implementations (one
+ * implementation, not a copy): they honour the dimension argument, the variadic form and
+ * BigNumber data, and they rescale data whose squared deviations leave the range. Each result
+ * that changed is pinned here against mathjs 15.2.0.
  */
 import { describe, it, expect } from 'vitest';
+import * as mathjs from 'mathjs';
 import { create, all } from '../src/index.js';
 
 const math = create(all);
@@ -35,5 +40,67 @@ describe('compat std/variance — mathjs defaults', () => {
     expect(math.sum([1, 2, 3])).toBe(6);
     expect(math.min([3, 1, 2])).toBe(1);
     expect(math.max([3, 1, 2])).toBe(3);
+  });
+});
+
+describe('#1280 compat std and variance are the functions implementations', () => {
+  const EPS4 = 4 * Number.EPSILON;
+  const rel = (a: number, b: number): number => (a === b ? 0 : Math.abs(a - b) / Math.abs(b));
+  // The public overloads of std and variance do not name a compat matrix or a BigNumber matrix, but
+  // the functions implementation accepts both, as mathjs does. The calls below go through these two
+  // loosely typed handles; the public types are not weakened.
+  const stdOf = math.std as unknown as (...a: unknown[]) => unknown;
+  const varianceOf = math.variance as unknown as (...a: unknown[]) => unknown;
+  // The same for `matrix` (typed for number data; the runtime builds a matrix of BigNumber or
+  // Fraction entries), `mean` and `median`, and for the mathjs calls with a numeric string.
+  const matrixOf = math.matrix as unknown as (data: unknown[]) => unknown;
+  const meanOf = math.mean as unknown as (...a: unknown[]) => unknown;
+  const medianOf = math.median as unknown as (...a: unknown[]) => unknown;
+  const mathjsStd = mathjs.std as unknown as (...a: unknown[]) => unknown;
+  const mathjsMatrix = mathjs.matrix as unknown as (data: unknown[]) => unknown;
+  const mathjsVariance = mathjs.variance as unknown as (...a: unknown[]) => unknown;
+  // mathjs 15.2.0 has the #1280 error for these two lists, so they pin the closed form.
+  it('std of data with subnormal squared deviations (0 for 1e-170 before)', () => {
+    expect(rel(math.std([1e-160, 3e-160]) as number, Math.SQRT2 * 1e-160)).toBeLessThan(EPS4);
+    expect(rel(math.std([1e-170, 3e-170]) as number, Math.SQRT2 * 1e-170)).toBeLessThan(EPS4);
+  });
+  it('honours the dimension argument (1.707825127659933 before)', () => {
+    const m = [
+      [1, 2],
+      [3, 5],
+    ];
+    const ref = mathjs.std(mathjs.matrix(m), 1) as unknown as { toArray(): number[] };
+    expect(stdOf(math.matrix(m), 1)).toEqual(ref.toArray());
+    expect(varianceOf(math.matrix(m), 0)).toEqual([2, 4.5]);
+  });
+  it('the variadic form std(1, 2, 4) (0 before)', () => {
+    expect(rel(stdOf(1, 2, 4) as number, mathjs.std(1, 2, 4))).toBeLessThan(EPS4);
+  });
+  it('a BigNumber matrix gives a BigNumber (a number before)', () => {
+    const v = varianceOf(matrixOf([math.bignumber(1), math.bignumber(2)]));
+    expect(math.isBigNumber(v)).toBe(true);
+    expect(String(v)).toBe('0.5');
+    const ref = mathjsVariance(mathjsMatrix([mathjs.bignumber(1), mathjs.bignumber(2)]));
+    expect(String(ref)).toBe('0.5');
+  });
+  it('numeric strings (6.519202405202649 before)', () => {
+    expect(stdOf(['1', '3'])).toBe(mathjsStd(['1', '3']));
+  });
+  it('an unknown normalization throws (a number before)', () => {
+    expect(() => stdOf([1, 2, 4], 'bogus')).toThrow();
+    expect(() => mathjs.std([1, 2, 4], 'bogus' as never)).toThrow();
+  });
+  it('mean of a BigNumber matrix is a BigNumber (the #964 item 4 regression)', () => {
+    const v = meanOf(matrixOf([math.bignumber(1), math.bignumber(2)]));
+    expect(math.isBigNumber(v)).toBe(true);
+    expect(String(v)).toBe('1.5');
+  });
+  it('median of a Fraction matrix is a Fraction (the #964 item 3 regression)', () => {
+    const v = medianOf(matrixOf([math.fraction(1, 2), math.fraction(5, 2), math.fraction(3, 2)]));
+    expect(math.isFraction(v)).toBe(true);
+    expect(String(v)).toBe('1.5');
+  });
+  it('unchanged: variance([5]) is 0', () => {
+    expect(math.variance([5])).toBe(0);
   });
 });

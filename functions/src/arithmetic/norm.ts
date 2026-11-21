@@ -1,9 +1,9 @@
 import { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
 import { bigHypot, pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { factory } from '../utils/factory.js';
-import { norm2 } from '@danielsimonjr/mathts-core';
+import { norm2, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '../core/function/typed.js';
-import { realScale, isDegenerate } from '../utils/real-scale.js';
+import { realScale, rootOfSquaresLostDigits } from '../utils/real-scale.js';
 
 // Type definitions for norm
 interface ComplexType {
@@ -343,7 +343,7 @@ export const createNorm = /* #__PURE__ */ factory(
       // A sum of squares of plain numbers overflows above about 1e154 and loses its
       // digits below about 1e-150 (#1104). Then the scaled norm of the entries is
       // returned. A NaN, infinite, complex or BigNumber entry keeps the plain sum.
-      if (typeof fro === 'number' && !(fro >= 2 ** -800 && fro < Infinity)) {
+      if (typeof fro === 'number' && !(fro >= SQUARES_SAFE_MIN && fro < Infinity)) {
         const entries: number[] = [];
         let plain = true;
         x.forEach(function (value: number | BigNumberType | ComplexType) {
@@ -413,7 +413,7 @@ export const createNorm = /* #__PURE__ */ factory(
       let plainError: unknown;
       try {
         plain = _matrixNormTwoOf(x);
-        if (!isDegenerate(plain)) return plain;
+        if (!rootOfSquaresLostDigits(plain)) return plain;
       } catch (err) {
         if (!(err instanceof RangeError)) throw err;
         plainError = err;

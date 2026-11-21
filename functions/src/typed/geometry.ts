@@ -9,7 +9,7 @@
  * @packageDocumentation
  */
 
-import { scaledDistance } from '@danielsimonjr/mathts-core';
+import { scaledDistance, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
@@ -311,9 +311,10 @@ export function distance2D(a: number[], b: number[]): f64 {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
   const s = dx ** 2 + dy ** 2;
-  // A sum that overflowed or is NaN takes `Math.hypot`: no overflow, and an infinite difference
-  // gives Infinity, also with a NaN (the IEEE rule of `hypot`, #1259).
-  return s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy);
+  // A sum below SQUARES_SAFE_MIN holds subnormal squares (or underflowed to 0), and a sum that
+  // overflowed or is NaN has no digits: both take `Math.hypot`, which scales (#1280). An infinite
+  // difference gives Infinity, also with a NaN (the IEEE rule of `hypot`, #1259).
+  return s >= SQUARES_SAFE_MIN && s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy);
 }
 
 /**
@@ -325,7 +326,7 @@ export function distance3D(a: number[], b: number[]): f64 {
   const dz = b[2] - a[2];
   const s = dx ** 2 + dy ** 2 + dz ** 2;
   // See `distance2D`.
-  return s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy, dz);
+  return s >= SQUARES_SAFE_MIN && s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy, dz);
 }
 
 /**
@@ -337,8 +338,11 @@ export function distanceND(a: number[], b: number[]): f64 {
   for (let i: i32 = 0; i < n; i++) {
     sum += (b[i] - a[i]) ** 2;
   }
-  // See `distance2D`. `scaledDistance` does not overflow and applies the IEEE rule (#1259).
-  return sum < Infinity ? Math.sqrt(sum) : scaledDistance(a.slice(0, n), b.slice(0, n));
+  // See `distance2D`. `scaledDistance` does not lose digits, does not overflow and applies the
+  // IEEE rule (#1259, #1280).
+  return sum >= SQUARES_SAFE_MIN && sum < Infinity
+    ? Math.sqrt(sum)
+    : scaledDistance(a.slice(0, n), b.slice(0, n));
 }
 
 /**

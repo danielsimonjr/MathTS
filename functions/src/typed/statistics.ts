@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import { mathTyped, neumaierCumsum } from '@danielsimonjr/mathts-core';
+import { mathTyped, neumaierCumsum, norm2 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 import { medianInPlace, minFrom, quickSelectInPlace } from '../utils/median-numbers.js';
@@ -200,8 +200,22 @@ export const parallelStatStd = mathTyped('parallelStatStd', {
     data: Float64Array,
     normalization: NormalizationType
   ): Promise<f64> => {
-    const variance = await parallelStatVariance(data, normalization);
-    return Math.sqrt(variance as number);
+    // The std comes from the pool's population std, not from a root of the variance: the squares
+    // of data of order 1e-160 are subnormal, so a root of the variance lost digits (#1280). The
+    // factor sqrt(n / (n - k)) is a degree-1 scale, so it cannot underflow.
+    const n = data.length;
+    if (n === 0) return NaN;
+    const populationStd = (await computePool.variance(data)).result.std;
+    switch (normalization) {
+      case 'uncorrected':
+        return populationStd;
+      case 'biased':
+        return populationStd * Math.sqrt(n / (n + 1));
+      case 'unbiased':
+      default:
+        if (n === 1) return 0;
+        return populationStd * Math.sqrt(n / (n - 1));
+    }
   },
 
   // Number array
@@ -464,12 +478,9 @@ export const parallelStatNorm = mathTyped('parallelStatNorm', {
   // With p-norm parameter
   'Float64Array, number': (data: Float64Array, p: f64): f64 => {
     if (p === 2) {
-      // Euclidean norm
-      let sum: f64 = 0;
-      for (let i: i32 = 0; i < data.length; i++) {
-        sum += data[i] * data[i];
-      }
-      return Math.sqrt(sum);
+      // Euclidean norm: the scaled 2-norm of core keeps every digit when the squares are
+      // subnormal or overflow (#1280)
+      return norm2(data);
     } else if (p === 1) {
       // Manhattan norm
       let sum: f64 = 0;
