@@ -21,7 +21,9 @@ bun run docs:deps
 bun tools/create-dependency-graph/create-dependency-graph.ts --root=.
 ```
 
-**Output:**
+**Output:** (the repository does not commit these files; `.gitignore` names each of them.
+`docs:deps` needs `functions/dist/wasm/mathts-as.wasm`, so run `bun run build` first:
+`bun run build:wasm` alone is not enough)
 
 - `docs/Architecture/DEPENDENCY_GRAPH.md` - Markdown documentation
 - `docs/Architecture/dependency-graph.json` - JSON data structure

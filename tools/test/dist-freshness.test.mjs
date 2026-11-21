@@ -18,7 +18,10 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { after, describe, test } from 'node:test';
-import { runtimeExportNames } from '../generate-functions-reference.mjs';
+import {
+  missingSurfaceFileMessage,
+  runtimeExportNames,
+} from '../generate-functions-reference.mjs';
 import { IMPORT_EXPORT_KEYS, packageDotEntry } from '../package-dot-entry.mjs';
 
 const REPO = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -239,5 +242,27 @@ describe('runtimeExportNames', () => {
       ].join('\n'),
     );
     assert.deepEqual([...names].sort(), ['config', 'kept', 'lw']);
+  });
+});
+
+describe('generate-functions-reference surfaces file', () => {
+  // package-export-surfaces.json is written by `bun run docs:deps`, and no commit holds it.
+  const absent = join(root, 'no-surfaces', 'package-export-surfaces.json');
+
+  test('--check fails on a missing surfaces file and names the command that writes it', () => {
+    const message = missingSurfaceFileMessage(absent, true);
+    assert.equal(typeof message, 'string');
+    assert.match(message, /bun run docs:deps/);
+    assert.match(message, /package-export-surfaces\.json/);
+  });
+
+  test('a rewrite skips the reconciliation when the surfaces file is missing', () => {
+    // The Site workflow runs the generator after a build and without docs:deps.
+    assert.equal(missingSurfaceFileMessage(absent, false), null);
+  });
+
+  test('--check passes the file test when the surfaces file exists', () => {
+    const dir = fixture('with-surfaces', { 'package-export-surfaces.json': '{"surfaces":{}}' });
+    assert.equal(missingSurfaceFileMessage(join(dir, 'package-export-surfaces.json'), true), null);
   });
 });
