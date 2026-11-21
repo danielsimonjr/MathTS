@@ -159,31 +159,65 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Parse a complex number from a string
-   * Supports formats: "3+4i", "3-4i", "3", "4i", "-4i", "i", "-i"
+   * Parse a complex number from a string, with the grammar of the mathjs string parser.
+   *
+   * The text is a sum of signed terms. A term is a number (`3`, `.5`, `5.`, `1e3`, `1.5e-2`), a
+   * number followed by `i` (`4i`, `1e3i`), `i`, or `i` followed by a number (`i2`). Several signs
+   * in a row combine (`--1` is 1, `1+-2i` is 1 - 2i), a `_` is ignored, and `I` is the same as `i`.
+   * Three rules keep text that older versions read correctly:
+   * 1. White space is ignored, except between two number characters (`'3 + 4 i'` is 3 + 4i, but
+   *    `'1 2'` is not a number).
+   * 2. The exponent marker is `e` or `E`.
+   * 3. `Infinity` is a number (`'-Infinity'`, `'2+Infinityi'`). `NaN` is not a number.
+   *
+   * A string that is not a complex number throws `SyntaxError('Invalid Param')`, as in mathjs.
+   * @param str - the text to read
+   * @returns the complex number that the text names
    */
   static parse(str: string): Complex {
-    str = str.replace(/\s/g, '');
-
-    // Check for complex form first: "a+bi" or "a-bi"
-    const match = str.match(/^([+-]?[\d.]+)([+-])([\d.]*)i$/);
-    if (match) {
-      const re = parseFloat(match[1]);
-      const sign = match[2] === '-' ? -1 : 1;
-      const imMag = match[3] === '' ? 1 : parseFloat(match[3]);
-      return new Complex(re, sign * imMag);
+    const invalid = (): SyntaxError => new SyntaxError('Invalid Param');
+    const tokens = str
+      .replace(/_/g, '')
+      .replace(/(?<![\d.eE\s])\s+|\s+(?![\d.eE\s])/g, '')
+      .match(/\d+\.?\d*[eE][+-]?\d+|\d+\.?\d*|\.\d+|Infinity|[^]/g);
+    if (tokens === null) throw invalid();
+    let re = 0;
+    let im = 0;
+    let plus = 1;
+    let minus = 0;
+    for (let i = 0; i < tokens.length; i++) {
+      const c = tokens[i];
+      if (c === '+') {
+        plus++;
+        continue;
+      }
+      if (c === '-') {
+        minus++;
+        continue;
+      }
+      if (plus + minus === 0) throw invalid(); // two terms with no sign between them
+      const sign = minus % 2 ? '-' : '';
+      const next = tokens[i + 1];
+      if (c === 'i' || c === 'I') {
+        if (next !== undefined && !Number.isNaN(Number(next))) {
+          im += Number(sign + next);
+          i++;
+        } else {
+          im += Number(sign + '1');
+        }
+      } else {
+        if (Number.isNaN(Number(c))) throw invalid();
+        if (next === 'i' || next === 'I') {
+          im += Number(sign + c);
+          i++;
+        } else {
+          re += Number(sign + c);
+        }
+      }
+      plus = minus = 0;
     }
-
-    // Pure imaginary: "i", "-i", "4i", "-4i"
-    if (str.endsWith('i')) {
-      const imStr = str.slice(0, -1);
-      if (imStr === '' || imStr === '+') return new Complex(0, 1);
-      if (imStr === '-') return new Complex(0, -1);
-      return new Complex(0, parseFloat(imStr));
-    }
-
-    // Pure real number
-    return new Complex(parseFloat(str), 0);
+    if (plus + minus > 0) throw invalid(); // a sign with no term after it
+    return new Complex(re, im);
   }
 
   /**
