@@ -10,11 +10,14 @@
  * and sqrt/log-style `number | Complex` scalar returns widen the array).
  *
  * Manifest entry keys: `name`, `source`, `mathTypedPattern` (where the signature block starts),
- * `fallback` (overload lines appended last, for the `'...'` rest signature) and `sigTypes`
- * (a typed-function type name to a public type, for this export only). A `sigTypes` name that
- * matches no signature part of the export is an error. It sets parameter types of the keys that
- * the generator reads as written. The element-wise `Array | Matrix` key follows the container
- * rule and ignores it.
+ * `fallback` (overload lines appended last, for the `'...'` rest signature), `sigTypes`
+ * (a typed-function type name to a public type, for this export only) and `leadingOverloads`
+ * (a signature key to overload lines that come first among the overloads of that key, for
+ * example the `number[][]` forms of `det` that stay ahead of the generic `Array | Matrix` line).
+ * A `sigTypes` name that matches no signature part of the export is an error, and so is a
+ * `leadingOverloads` key that matches no signature key. `sigTypes` sets parameter types of the
+ * keys that the generator reads as written. The element-wise `Array | Matrix` key follows the
+ * container rule and ignores it.
  *
  * `--check` fails when the generated file, or the public option aliases, drift.
  * `--root=<dir>` reads the manifest and the sources from another package folder.
@@ -312,12 +315,7 @@ function overloadsForKey(key, body, exportName, aliases, nextKey, overrides) {
     ret = 'unknown';
   }
 
-  const lines = [overload(paramsOf(splitKey(key), overrides), ret)];
-  if (exportName === 'det' && key === 'Array | Matrix') {
-    lines.unshift(overload('A: readonly number[][]', 'number'));
-    lines.unshift(overload('A: number[][]', 'number'));
-  }
-  return lines;
+  return [overload(paramsOf(splitKey(key), overrides), ret)];
 }
 
 function capitalize(s) {
@@ -373,9 +371,11 @@ function buildFile(manifest) {
     "import type { Complex, Fraction, BigNumber, Dual, UnitInstance } from '@danielsimonjr/mathts-core';",
     "import type { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';",
     "import type { StatReduceOptions } from './stat-reduce-options.js';",
+    "import type { BridgeMatrix, MatrixValue } from './bridge-matrix.js';",
     "import type { PhysicsEvaluateOptions } from './physics-evaluate-options.js';",
     '',
     'export type Matrix = DenseMatrix | SparseMatrix;',
+    'export type { BridgeMatrix, MatrixValue };',
     'export type ElementwiseLeaf = number | bigint | Complex | Fraction | BigNumber | UnitInstance | Dual;',
     '/** A flat or nested array of exact values of one type, for the element-typed reduction overloads. */',
     'export type ExactData<T> = readonly T[] | readonly (readonly T[])[];',
@@ -406,20 +406,28 @@ function buildFile(manifest) {
         );
       }
     }
+    const leadingOverloads = entry.leadingOverloads ?? {};
+    for (const [leadKey, leadLines] of Object.entries(leadingOverloads)) {
+      if (!keys.includes(leadKey)) {
+        throw new Error(
+          `${entry.name}: leadingOverloads "${leadKey}" matches no signature key (keys: ${keys.join('; ')})`
+        );
+      }
+      if (!Array.isArray(leadLines) || leadLines.some((line) => typeof line !== 'string')) {
+        throw new Error(`${entry.name}: leadingOverloads "${leadKey}" must be an array of strings`);
+      }
+    }
     const iface = `${capitalize(entry.name)}Callable`;
     lines.push(`export interface ${iface} {`);
     const seen = new Set();
     const specific = [];
     const fallback = [];
     keys.forEach((key, index) => {
-      for (const line of overloadsForKey(
-        key,
-        body,
-        entry.name,
-        aliases,
-        keys[index + 1],
-        sigTypes
-      )) {
+      const leading = (leadingOverloads[key] ?? []).map((line) => `  ${line}`);
+      for (const line of [
+        ...leading,
+        ...overloadsForKey(key, body, entry.name, aliases, keys[index + 1], sigTypes),
+      ]) {
         if (seen.has(line)) continue;
         seen.add(line);
         if (/\(\s*a: unknown\b/.test(line) || line.includes('...rest:')) fallback.push(line);

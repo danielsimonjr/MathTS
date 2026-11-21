@@ -4,6 +4,7 @@
  * Bridges signal ↔ statistics (the statistical ACF, distinct from the signal-domain
  * `autoCorrelation`).
  */
+import { divideByScale, powerOfTwoScaleOf, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { mean as _mean } from './typed/arithmetic.js';
 import { numberVector } from './typed/number-matrix.js';
 
@@ -75,6 +76,12 @@ export function detrend(x: Vec, type: 'linear' | 'constant' = 'linear'): number[
   return a.map((v, i) => v - (slope * t[i] + intercept));
 }
 
+/** The deviations of `a` from its mean. */
+function deviations(a: number[]): number[] {
+  const m = mean(a);
+  return a.map((v) => v - m);
+}
+
 /**
  * Autocorrelation function up to `nlags` (inclusive), biased estimator
  * (÷n, like `statsmodels.tsa.stattools.acf`). `acf[0] = 1`.
@@ -84,10 +91,20 @@ export function acf(x: Vec, nlags: number): number[] {
   const n = a.length;
   if (nlags < 0 || nlags >= n)
     throw new Error(`acf: nlags ${nlags} out of range for series length ${n}`);
-  const m = mean(a);
-  const dev = a.map((v) => v - m);
+  let dev = deviations(a);
   let c0 = 0;
   for (let i = 0; i < n; i++) c0 += dev[i] * dev[i];
+  // Each ratio does not change when the series is divided by an exact power of 2. A sum of
+  // squares below SQUARES_SAFE_MIN holds subnormal squares (or underflowed to 0), and one above
+  // the range overflowed: the series is divided and the sums are formed again (#1280).
+  if (!(c0 >= SQUARES_SAFE_MIN && c0 < Infinity)) {
+    const scale = powerOfTwoScaleOf(a);
+    if (scale !== 1) {
+      dev = deviations(divideByScale(a, scale));
+      c0 = 0;
+      for (let i = 0; i < n; i++) c0 += dev[i] * dev[i];
+    }
+  }
   if (c0 === 0) throw new Error('acf: series has zero variance');
   const out = new Array<number>(nlags + 1);
   for (let k = 0; k <= nlags; k++) {

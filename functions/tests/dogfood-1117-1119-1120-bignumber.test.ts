@@ -266,10 +266,9 @@ describe('#1119 review: bignumber() extra arguments and radix strings', () => {
     expect(fromMap.every(isBig)).toBe(true);
     expect(strs(fromMap)).toEqual(['1', '2']);
     expect(strs(map(matrix([1, 2]) as never, bignumber as never))).toEqual(['1', '2']);
-    expect(strs((matrix([1, 2]) as { map(f: unknown): unknown }).map(bignumber))).toEqual([
-      '1',
-      '2',
-    ]);
+    expect(
+      strs((matrix([1, 2]) as unknown as { map(f: unknown): unknown }).map(bignumber))
+    ).toEqual(['1', '2']);
     const sp = sparse([
       [1, 0],
       [0, 2],

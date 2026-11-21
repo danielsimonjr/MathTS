@@ -15,11 +15,13 @@
  *     as an observation, each column as a variable (the data-matrix convention).
  *   - `zscore` uses population std (`ddof=0`); `sem` uses sample std (`ddof=1`).
  */
+import { divideByScale, scaleForVariance, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
+import { deviationSums, scaledDeviationSums } from './utils/deviation-sums.js';
 import { quantileSeq as _quantileSeqRaw } from './factories/index.js';
 import { studentTCDF as _studentTCDF } from './distribution-functions.js';
 import { betaincScalar } from './wasm/special/scalars.js';
-import { fitLine, linregressFromFit } from './regression-extra.js';
+import { fitLineScaled, linregressFromFit, unscaleLinregress } from './regression-extra.js';
 import { normalCDF as _normalCDF } from './typed/distributions.js';
 import { kendallPExact, kendallShouldUseExact } from './kendall-exact.js';
 import { hasNaN, numberVector } from './typed/number-matrix.js';
@@ -52,6 +54,23 @@ const mean = (x: number[]): number => _mean(x) as number;
 const stdPop = (x: number[]): number => _std(x, 'uncorrected') as number;
 const stdSample = (x: number[]): number => _std(x) as number; // default is unbiased (n-1)
 const sum = (x: number[]): number => _sum(x) as number;
+
+/**
+ * `a` with its population variance `m2`, or a copy of `a` divided by an exact power of 2 and the
+ * variance of that copy, when `m2` is outside `[2^-400, 2^400]` (#1280). The third and fourth
+ * powers of the deviations leave the range much earlier than the squares do (`kurtosis` was
+ * NaN for data of order 2^-270 and of order 2^300), and a variance of 0 can come from squares
+ * that underflowed. The skewness and the kurtosis do not change when the data is multiplied by a
+ * positive constant, so the scale is not applied to the result. Data inside the window keeps its
+ * plain path, bit for bit. Constant data stays constant (variance 0), and a NaN or an infinite
+ * value has no scale.
+ */
+function momentInput(a: number[], m2: number): { data: number[]; m2: number } {
+  const scale = scaleForVariance(m2, a);
+  if (scale === 1) return { data: a, m2 };
+  const data = divideByScale(a, scale);
+  return { data, m2: centralMoment(data, 2) };
+}
 
 /** k-th central moment `E[(x − mean)^k]` (population, ÷n) — the shared core. */
 function centralMoment(x: number[], k: number): number {
@@ -168,9 +187,10 @@ export function moment(x: Vec, k: number, central = true): number {
  * (SciPy `bias=true`); pass `{ bias: false }` for the sample-corrected G₁.
  */
 export function skewness(x: Vec, opts: { bias?: boolean } = {}): number {
-  const a = numberVector('skewness', x);
-  const n = a.length;
-  const m2 = centralMoment(a, 2); // NaN for empty (graceful) — the m2===0 guard skips it
+  const raw = numberVector('skewness', x);
+  const n = raw.length;
+  // NaN for empty (graceful) — the m2===0 guard skips it
+  const { data: a, m2 } = momentInput(raw, centralMoment(raw, 2));
   if (m2 === 0) throw new Error('skewness: variance is zero (constant input); skewness undefined');
   const m3 = centralMoment(a, 3);
   const g1 = m3 / Math.pow(m2, 1.5);
@@ -188,9 +208,10 @@ export function skewness(x: Vec, opts: { bias?: boolean } = {}): number {
  * default; `{ bias: false }` applies the sample correction.
  */
 export function kurtosis(x: Vec, opts: { fisher?: boolean; bias?: boolean } = {}): number {
-  const a = numberVector('kurtosis', x);
-  const n = a.length;
-  const m2 = centralMoment(a, 2); // NaN for empty (graceful) — the m2===0 guard skips it
+  const raw = numberVector('kurtosis', x);
+  const n = raw.length;
+  // NaN for empty (graceful) — the m2===0 guard skips it
+  const { data: a, m2 } = momentInput(raw, centralMoment(raw, 2));
   if (m2 === 0) throw new Error('kurtosis: variance is zero (constant input); kurtosis undefined');
   const m4 = centralMoment(a, 4);
   let g2 = m4 / (m2 * m2); // Pearson's kurtosis
@@ -426,7 +447,8 @@ export function linregress(x: Vec, y: Vec): LinRegressResult {
   const n = x.length;
   if (n !== y.length) throw new Error('linregress: x and y must have equal length');
   if (n < 3) throw new Error('linregress: need at least 3 points for inference');
-  const fit = fitLine(numberVector('linregress', x), numberVector('linregress', y));
+  const scaled = fitLineScaled(numberVector('linregress', x), numberVector('linregress', y));
+  const fit = scaled.fit;
   if (fit.sxx === 0) {
     const nan = Number.NaN;
     return {
@@ -438,17 +460,19 @@ export function linregress(x: Vec, y: Vec): LinRegressResult {
       interceptStdErr: nan,
     };
   }
-  const base = linregressFromFit(fit, n);
   const df = n - 2;
   const s2 = fit.rss / df;
   const interceptStdErr = Math.sqrt(s2 * (1 / n + (fit.mx * fit.mx) / fit.sxx));
+  // The fit may be of data divided by exact powers of 2 (#1280): the result is in the units of
+  // the data again.
+  const base = unscaleLinregress(linregressFromFit(fit, n), scaled);
   return {
     slope: base.slope,
     intercept: base.intercept,
     rValue: base.rValue,
     pValue: base.pValue,
     stdErr: base.stdErr,
-    interceptStdErr,
+    interceptStdErr: interceptStdErr * scaled.sy,
   };
 }
 
@@ -705,33 +729,35 @@ export function describe(x: Vec, opts?: { skipNaN?: boolean; skipna?: boolean })
   }
   const n = a.length;
   const m = mean(a);
-  let m2 = 0;
-  let m3 = 0;
-  let m4 = 0;
   let lo = a[0];
   let hi = a[0];
   for (const v of a) {
-    const d = v - m;
-    m2 += d * d;
-    m3 += d * d * d;
-    m4 += d * d * d * d;
     if (v < lo) lo = v;
     if (v > hi) hi = v;
   }
-  const mu2 = m2 / n;
-  const variance = m2 / (n - 1);
+  const plain = deviationSums(a, m);
+  const variance = plain.m2 / (n - 1);
+  // The std of the sample, and the skewness and the kurtosis, keep every digit when the squares
+  // are subnormal or the powers leave the range (#1280): see `momentInput`. A sample of one value
+  // keeps the NaN variance, so its std stays NaN.
+  const std =
+    n > 1 && !(plain.m2 >= SQUARES_SAFE_MIN && plain.m2 < Infinity)
+      ? stdSample(a)
+      : Math.sqrt(variance);
+  const moments = scaledDeviationSums(a, mean, plain);
+  const mu2 = moments.m2 / n;
   return {
     nobs: n,
     min: lo,
     max: hi,
     mean: m,
     variance,
-    std: Math.sqrt(variance),
+    std,
     q25: _quantileSeq(a, 0.25) as number,
     q50: _quantileSeq(a, 0.5) as number,
     q75: _quantileSeq(a, 0.75) as number,
-    skewness: m3 / n / Math.pow(mu2, 1.5),
-    kurtosis: m4 / n / (mu2 * mu2) - 3,
+    skewness: moments.m3 / n / Math.pow(mu2, 1.5),
+    kurtosis: moments.m4 / n / (mu2 * mu2) - 3,
   };
 }
 

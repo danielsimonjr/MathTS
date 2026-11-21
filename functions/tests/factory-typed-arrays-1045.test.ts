@@ -55,8 +55,12 @@ describe('#1045 factory functions accept typed arrays', () => {
     const t = new Float64Array([3, 1, 2]);
     expect(factory_median(t)).toBe(factory_median([3, 1, 2]));
     expect(factory_median(t, 0)).toEqual(factory_median([3, 1, 2], 0));
-    expect(factory_mad(t, 1)).toEqual(factory_mad([3, 1, 2], 1));
-    expect(factory_mode(new Float64Array([1, 1, 2]), 1)).toEqual(factory_mode([1, 1, 2], 1));
+    // `mad` and `mode` take no dimension: as in mathjs, the extra argument is one more value (#964).
+    // The public types refuse these two calls, so they go through loosely typed handles.
+    const madOf = factory_mad as unknown as (...a: unknown[]) => unknown;
+    const modeOf = factory_mode as unknown as (...a: unknown[]) => unknown;
+    expect(madOf(t, 1)).toEqual(madOf([3, 1, 2], 1));
+    expect(modeOf(new Float64Array([1, 1, 2]), 1)).toEqual(modeOf([1, 1, 2], 1));
   });
 
   it('the wrapper keeps a typed array only for a typed-array signature', () => {

@@ -23,7 +23,7 @@ describe('#1239 transpose of a sparse matrix with stale tail entries', () => {
     const m = sparse([
       [1, 0],
       [2, 3],
-    ]) as S;
+    ]) as unknown as S;
     // stale entries: row 1 out of reach of the column pointers
     m._index.push(1, 1);
     m._values!.push(9, 9);
@@ -45,7 +45,7 @@ describe('#1239 transpose of a sparse matrix with stale tail entries', () => {
     const m = sparse([
       [1, 0],
       [2, 3],
-    ]) as S;
+    ]) as unknown as S;
     m._values = undefined;
     m._index.push(1);
     const r = t(m);
@@ -55,7 +55,7 @@ describe('#1239 transpose of a sparse matrix with stale tail entries', () => {
   });
 
   it('ignores a stale entry of a matrix with no rows', () => {
-    const base = sparse([[1]]) as S;
+    const base = sparse([[1]]) as unknown as S;
     const m = base.createSparseMatrix({ values: [7], index: [0], ptr: [0, 0, 0, 0], size: [0, 3] });
     const r = t(m);
     expect(r._size).toEqual([3, 0]);
@@ -67,7 +67,7 @@ describe('#1239 transpose of a sparse matrix with stale tail entries', () => {
     const m = sparse([
       [1, 0, 4],
       [0, 0, 5],
-    ]) as S;
+    ]) as unknown as S;
     const r = t(m);
     expect(r._size).toEqual([3, 2]);
     expect(r._ptr).toEqual([0, 2, 3]);
@@ -81,7 +81,7 @@ describe('#1239 transpose of a sparse matrix with stale tail entries', () => {
   });
 
   it('a matrix with no columns still throws the RangeError', () => {
-    const base = sparse([[1]]) as S;
+    const base = sparse([[1]]) as unknown as S;
     const m = base.createSparseMatrix({ values: [], index: [], ptr: [0], size: [3, 0] });
     expect(() => t(m)).toThrow(RangeError);
   });

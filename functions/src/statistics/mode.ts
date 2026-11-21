@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
+import { isMatrix, typeOf } from '../utils/is.js';
 import { flattenForStatistics, type FloatTyped } from './numeric-data.js';
 
 // Type definitions for mode
@@ -36,6 +37,10 @@ export const createMode = /* #__PURE__ */ factory(
      *     math.mode(1, 4, 6, 1, 6)                             // returns [1, 6]
      *     math.mode('a','a','b','c')                           // returns ["a"]
      *     math.mode(1, 1.5, 'abc')                             // returns [1, 1.5, "abc"]
+     *
+     * `mode` takes no dimension argument: as in mathjs, an extra argument is one more value of
+     * the list, so `mode([1, 2], 0)` is `[1, 2, 0]`. A Matrix is no value of the list: `mode(1,
+     * matrix)` throws a TypeError. Pass the Matrix alone, or its `toArray()`.
      *
      * See also:
      *
@@ -79,6 +84,18 @@ export const createMode = /* #__PURE__ */ factory(
       let max = 0;
       for (let i = 0; i < flat.length; i++) {
         const value = flat[i];
+
+        // A Matrix value would reach the NaN test below, and `isNaN(matrix)` is a Matrix, which
+        // is truthy: the false message "array containing NaN values" (#964).
+        if (isMatrix(value)) {
+          // `.type` is the mathjs type name ('DenseMatrix'); the class name is 'MathJSDenseMatrix'.
+          const kind = (value as { type?: unknown }).type;
+          throw new TypeError(
+            'Cannot calculate mode, unexpected type of argument (type: ' +
+              (typeof kind === 'string' ? kind : typeOf(value)) +
+              ')'
+          );
+        }
 
         if (isNumeric(value) && mathIsNaN(value)) {
           throw new Error('Cannot calculate mode of an array containing NaN values');
