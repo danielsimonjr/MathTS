@@ -7,6 +7,10 @@ otherwise greps for, plus emits two derived artifacts.
 
 Zero dependencies (plain Node ESM). CDG generates; this tool queries.
 
+The repository does not commit CDG's output. In a new checkout run `bun run build` and then
+`bun run docs:deps` first. Without `docs/Architecture/dependency-graph.json` every command
+stops with `run \`bun run docs:deps\` first` and exit code 1.
+
 ## Usage
 
 ```bash

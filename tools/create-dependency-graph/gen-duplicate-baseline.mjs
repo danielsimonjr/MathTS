@@ -3,12 +3,21 @@
 // of any npm script) whenever the baseline needs to be re-seeded after a
 // deliberate, reviewed change to the accepted TRUE_DUPLICATE set. See
 // tools/create-dependency-graph/check-duplicates.mjs for the consumer.
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 const ROOT_DIR = process.cwd();
 const dupPath = join(ROOT_DIR, 'docs', 'Architecture', 'duplicate-symbols.json');
 const outPath = join(ROOT_DIR, 'docs', 'Architecture', 'duplicate-baseline.json');
+
+// `bun run docs:deps` writes the report and no commit holds it, so a new checkout has none.
+if (!existsSync(dupPath)) {
+  console.error(
+    `gen-duplicate-baseline: ${dupPath} not found: run \`bun run docs:deps\` first ` +
+      '(after `bun run build`). That command writes the file, and no commit holds it.'
+  );
+  process.exit(1);
+}
 
 const report = JSON.parse(readFileSync(dupPath, 'utf-8'));
 

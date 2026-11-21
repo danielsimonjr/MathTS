@@ -118,10 +118,14 @@ function readReports(dir) {
   return out;
 }
 
+// Each generator run is a Bun subprocess, bounded here. The test runs the generator twice, so its own limit is
+// two such bounds: the 5 s default of `bun test` measures the load of the machine, not the generator.
+const GENERATOR_TIMEOUT_MS = 120_000;
+
 /** Run the generator on `root`; `reversed` loads the preload that reverses every directory listing. */
 function generate(root, reversed) {
   const args = [...(reversed ? ['--preload', reversePreload] : []), generator, `--root=${root}`];
-  const r = spawnSync(bunBinary, args, { encoding: 'utf8', timeout: 120_000 });
+  const r = spawnSync(bunBinary, args, { encoding: 'utf8', timeout: GENERATOR_TIMEOUT_MS });
   assert.equal(
     r.status,
     0,
@@ -130,41 +134,45 @@ function generate(root, reversed) {
   return r;
 }
 
-test('the reports do not depend on the order in which the file system lists a directory', () => {
-  const root = mkdtempSync(join(tmpdir(), 'cdg-order-'));
-  try {
-    writeFixture(root);
-    const reports = join(root, 'docs', 'Architecture');
+test(
+  'the reports do not depend on the order in which the file system lists a directory',
+  { timeout: 2 * GENERATOR_TIMEOUT_MS },
+  () => {
+    const root = mkdtempSync(join(tmpdir(), 'cdg-order-'));
+    try {
+      writeFixture(root);
+      const reports = join(root, 'docs', 'Architecture');
 
-    generate(root, false);
-    const inNameOrder = readReports(reports);
+      generate(root, false);
+      const inNameOrder = readReports(reports);
 
-    const reversedRun = generate(root, true);
-    const inReverseOrder = readReports(reports);
+      const reversedRun = generate(root, true);
+      const inReverseOrder = readReports(reports);
 
-    // Controls. Without them an empty result, or a preload that never loaded, would make the two runs equal.
-    assert.match(
-      reversedRun.stderr,
-      /patched readdirSync calls: [1-9]/,
-      'the preload must change at least one listing'
-    );
-    const graph = inNameOrder.get('DEPENDENCY_GRAPH.md');
-    assert.ok(graph, 'DEPENDENCY_GRAPH.md must exist');
-    assert.ok(
-      (graph.match(/^## .+ Dependencies$/gm) ?? []).length >= 6,
-      'the fixture must produce several module sections'
-    );
+      // Controls. Without them an empty result, or a preload that never loaded, would make the two runs equal.
+      assert.match(
+        reversedRun.stderr,
+        /patched readdirSync calls: [1-9]/,
+        'the preload must change at least one listing'
+      );
+      const graph = inNameOrder.get('DEPENDENCY_GRAPH.md');
+      assert.ok(graph, 'DEPENDENCY_GRAPH.md must exist');
+      assert.ok(
+        (graph.match(/^## .+ Dependencies$/gm) ?? []).length >= 6,
+        'the fixture must produce several module sections'
+      );
 
-    const differing = [...inNameOrder.keys(), ...inReverseOrder.keys()].filter(
-      (name, i, all) =>
-        all.indexOf(name) === i && inNameOrder.get(name) !== inReverseOrder.get(name)
-    );
-    assert.deepEqual(
-      differing,
-      [],
-      `these reports changed when the directory listings were reversed: ${differing.join(', ')}`
-    );
-  } finally {
-    rmSync(root, { recursive: true, force: true });
+      const differing = [...inNameOrder.keys(), ...inReverseOrder.keys()].filter(
+        (name, i, all) =>
+          all.indexOf(name) === i && inNameOrder.get(name) !== inReverseOrder.get(name)
+      );
+      assert.deepEqual(
+        differing,
+        [],
+        `these reports changed when the directory listings were reversed: ${differing.join(', ')}`
+      );
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   }
-});
+);
