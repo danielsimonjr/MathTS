@@ -153,10 +153,11 @@ export class Complex {
 
   /**
    * Absolute value (magnitude)
-   * |z| = sqrt(re² + im²)
+   * |z| = hypot(re, im). It does not overflow or underflow, and an infinite part gives
+   * Infinity, also with a NaN part (IEEE 754, #1259).
    */
   abs(): f64 {
-    return sqrt(this.re * this.re + this.im * this.im);
+    return Math.hypot(this.re, this.im);
   }
 
   /**

@@ -24,6 +24,7 @@ import {
   staysRealUnitInterval,
 } from './complex-promotion.js';
 import { bigHypot as scaledBigHypot } from '../utils/bignumber-hypot.js';
+import { hypotList } from '../utils/hypot-list.js';
 import { f64Unary, f64UnaryDispatched, unaryCollection } from './f64-kernels.js';
 import type { PublicCos, PublicSin, PublicTan } from './public-type-exports.js';
 import { trigFromAngleUnit } from './trig-angle-unit.js';
@@ -311,55 +312,26 @@ export const toDegrees = mathTyped('toDegrees', {
  */
 export const hypot = mathTyped('hypot', {
   number: (a: number) => Math.abs(a),
-  'number, number': (a: number, b: number) => Math.hypot(a, b),
-  'number, number, ...number': (a: number, b: number, rest: number[]) =>
-    hypotNumbers([a, b, ...rest]),
-  // BigNumber arguments keep a BigNumber result at the configured precision (#1043). A number
-  // mixed with a BigNumber converts to a BigNumber.
-  '...BigNumber': (xs: BigNumber[]) => (xs.length === 1 ? xs[0].abs() : bigHypot(xs)),
-  'BigNumber, number': (a: BigNumber, b: number) => bigHypot([a, b]),
-  'number, BigNumber': (a: number, b: BigNumber) => bigHypot([a, b]),
+  BigNumber: (a: BigNumber) => a.abs(),
+  // One row per arity takes every mix of numbers and BigNumbers, so a BigNumber in any position
+  // keeps a BigNumber result at the configured precision (#1043, #1259). Separate rows per type
+  // let dispatch convert a BigNumber to a number for three or more arguments.
+  'number | BigNumber, number | BigNumber': (a: number | BigNumber, b: number | BigNumber) =>
+    typeof a === 'number' && typeof b === 'number' ? Math.hypot(a, b) : bigHypot([a, b]),
+  'number | BigNumber, number | BigNumber, ...number | BigNumber': (
+    a: number | BigNumber,
+    b: number | BigNumber,
+    rest: (number | BigNumber)[]
+  ) => {
+    const xs = [a, b, ...rest];
+    return xs.every((x) => typeof x === 'number') ? hypotList(xs as number[]) : bigHypot(xs);
+  },
   // An array or a matrix counts all of its entries, as in mathjs.
   'Array | Matrix': (input: unknown[] | { toArray(): unknown }) => {
     const arr = (Array.isArray(input) ? input : (input.toArray() as unknown[])).flat(Infinity);
-    return arr.every((x) => typeof x === 'number') ? hypotNumbers(arr as number[]) : bigHypot(arr);
+    return arr.every((x) => typeof x === 'number') ? hypotList(arr as number[]) : bigHypot(arr);
   },
 });
-
-/** The longest list that `hypotNumbers` spreads into one `Math.hypot` call. */
-const HYPOT_SPREAD_MAX = 32768;
-
-/**
- * `sqrt(Σ x²)` of numbers with the rule of `Math.hypot` (IEEE 754): an infinite argument gives
- * Infinity, also with a NaN; else a NaN gives NaN (#1259). A list longer than `HYPOT_SPREAD_MAX`
- * does not go through a spread, because a spread of a long list overflows the call stack. It
- * takes the algorithm of V8's `Math.hypot`: the largest magnitude scales each value, and the
- * squares are added with Kahan compensation.
- * @param xs - the numbers
- */
-function hypotNumbers(xs: readonly number[]): number {
-  if (xs.length <= HYPOT_SPREAD_MAX) return Math.hypot(...xs);
-  let max = 0;
-  let nan = false;
-  for (const x of xs) {
-    const a = Math.abs(x);
-    if (a === Infinity) return Infinity;
-    if (a !== a) nan = true;
-    else if (a > max) max = a;
-  }
-  if (nan) return NaN;
-  if (max === 0) return 0;
-  let sum = 0;
-  let compensation = 0;
-  for (const x of xs) {
-    const r = x / max;
-    const term = r * r - compensation;
-    const next = sum + term;
-    compensation = next - sum - term;
-    sum = next;
-  }
-  return Math.sqrt(sum) * max;
-}
 
 /** `sqrt(Σ x²)` over BigNumber (or number) values, at the configured precision (scaled, #1255). */
 function bigHypot(xs: readonly unknown[]): BigNumber {
