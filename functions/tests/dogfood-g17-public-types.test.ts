@@ -8,8 +8,8 @@ const FIXTURE_DIR = join(dirname(fileURLToPath(import.meta.url)), 'type-consumer
 
 /**
  * Issue repro fixtures; keep in sync with dogfood G17 plan. The tsc run on the fixture folder
- * (skipLibCheck false, NodeNext and Node16) is `node tools/test/check-g17-types.mjs`, a step of
- * the Compile & Lint job; it does not run in this pool (#1185).
+ * (skipLibCheck false, NodeNext and Node16) is the last part of the `typecheck` script of
+ * `functions`; it does not run in this pool (#1185).
  */
 describe('dogfood G17 public TypeScript types', () => {
   it('gen-public-overloads matches committed generated declarations', () => {
