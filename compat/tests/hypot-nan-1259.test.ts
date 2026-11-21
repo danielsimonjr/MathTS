@@ -20,3 +20,14 @@ describe('compat hypot with a NaN argument (#1259)', () => {
     expect(m.hypot(3, 4)).toBe(5);
   });
 });
+
+describe('compat abs of a Complex with a NaN part (same mechanism, #1259)', () => {
+  const c = m as unknown as {
+    abs: (...a: unknown[]) => unknown;
+    complex: (...a: unknown[]) => unknown;
+  };
+
+  it('abs(complex(Infinity, NaN)) is NaN', () => {
+    expect(c.abs(c.complex(Infinity, NaN))).toBeNaN();
+  });
+});

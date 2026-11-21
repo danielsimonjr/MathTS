@@ -92,3 +92,23 @@ describe('factory hypot with a NaN argument (pins, already correct)', () => {
     expect(factoryHypot(-Infinity, NaN, 1)).toBeNaN();
   });
 });
+
+describe('the modulus of a Complex with a NaN part is NaN (same mechanism, #1259)', () => {
+  const complex = math.complex as unknown as Fn;
+  const abs = math.abs as unknown as Fn;
+  const norm = math.norm as unknown as Fn;
+
+  it.each([
+    [Infinity, NaN],
+    [-Infinity, NaN],
+    [NaN, Infinity],
+    [NaN, -Infinity],
+  ])('abs and norm of complex(%s, %s) are NaN', (re, im) => {
+    expect(abs(complex(re, im))).toBeNaN();
+    expect(norm(complex(re, im))).toBeNaN();
+  });
+
+  it('abs(complex(3, 4)) is 5 (control)', () => {
+    expect(abs(complex(3, 4))).toBe(5);
+  });
+});

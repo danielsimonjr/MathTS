@@ -79,6 +79,10 @@ function hypotFast(re: number, im: number): number {
   if (a < 1e150 && b < 1e150 && (a > 1e-150 || b > 1e-150)) {
     return Math.sqrt(re * re + im * im);
   }
+  // `Math.hypot` gives Infinity for an infinite part even when the other part is NaN (IEEE 754).
+  // A NaN part makes the modulus NaN, as in mathjs and in `hypot` (#1259). A NaN fails both range
+  // tests above, so this test costs nothing on the fast path.
+  if (re !== re || im !== im) return NaN;
   return Math.hypot(re, im);
 }
 
