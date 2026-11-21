@@ -849,7 +849,7 @@ topologicalSort(dag); // [0, 1, 2, 3] or [0, 2, 1, 3]
 
 ## Distribution Objects
 
-Distribution object constructors return objects with `pdf`, `cdf`, `ppf` (quantile), and `sample` methods — a higher-level API than the standalone distribution functions.
+Distribution object constructors return objects with `pdf`, `cdf`, `quantile` (the inverse CDF), `sample` and `sampleN` methods — a higher-level API than the standalone distribution functions.
 
 ```typescript
 import { normalDist, tDist, gammaDist, binomialDist } from '@danielsimonjr/mathts-functions';
@@ -858,8 +858,9 @@ import { normalDist, tDist, gammaDist, binomialDist } from '@danielsimonjr/matht
 const normal = normalDist(0, 1); // standard normal
 normal.pdf(0); // ~0.3989
 normal.cdf(1.96); // ~0.975  (95th percentile)
-normal.ppf(0.975); // ~1.96   (inverse CDF)
-normal.sample(100); // Float64Array of 100 samples
+normal.quantile(0.975); // ~1.96   (inverse CDF)
+normal.sample(100); // Float64Array of 100 unseeded samples
+await normal.sampleN(100, { seed: 1 }); // Float64Array of 100 samples that repeat for the same seed
 
 // t-distribution for small samples
 const t10 = tDist(10);
@@ -874,6 +875,38 @@ gamma.cdf(2); // ~0.594
 const binom = binomialDist(20, 0.5);
 binom.pdf(10); // P(X=10) for n=20, p=0.5 ≈ 0.176
 ```
+
+### Parameter conventions
+
+Each constructor lists its parameters in this order. The last column gives the SciPy call that makes the same distribution. Two conventions differ from SciPy: `exponentialDist` and `gammaDist` take a **rate**, and SciPy takes a **scale** (`scale = 1/rate`).
+
+| Constructor                                                                    | SciPy equivalent                                  |
+| ------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `normalDist(mu, sigma)`                                                        | `norm(loc=mu, scale=sigma)`                       |
+| `betaDist(a, b)`                                                               | `beta(a, b)`                                      |
+| `binomialDist(n, p)`                                                           | `binom(n, p)`                                     |
+| `chiSquaredDist(k)`                                                            | `chi2(k)`                                         |
+| `exponentialDist(lambda)` (RATE)                                               | `expon(scale=1/lambda)`                           |
+| `fDist(d1, d2)`                                                                | `f(d1, d2)`                                       |
+| `gammaDist(k, rate)`, `gammaDist(k, { scale })`, `gammaDist({ shape, scale })` | `gamma(k, scale=1/rate)`, `gamma(k, scale=scale)` |
+| `logNormalDist(mu, sigma)`                                                     | `lognorm(s=sigma, scale=exp(mu))`                 |
+| `poissonDist(lambda)`                                                          | `poisson(lambda)`                                 |
+| `tDist(nu)`                                                                    | `t(nu)`                                           |
+| `uniformDist(a, b)`                                                            | `uniform(loc=a, scale=b-a)`                       |
+| `weibullDist(k, lambda)`                                                       | `weibull_min(k, scale=lambda)`                    |
+| `hypergeometricDist(population, successes, draws)`                             | `hypergeom(M=population, n=successes, N=draws)`   |
+| `negativeBinomialDist(r, p)`                                                   | `nbinom(r, p)`                                    |
+| `paretoDist(b, xm)`                                                            | `pareto(b, scale=xm)`                             |
+| `rayleighDist(sigma)`                                                          | `rayleigh(scale=sigma)`                           |
+| `triangularDist(a, c, b)`                                                      | `triang((c-a)/(b-a), loc=a, scale=b-a)`           |
+| `discreteUniformDist(lo, hi)`                                                  | `randint(lo, hi+1)`                               |
+| `gumbelDist(mu, beta)`                                                         | `gumbel_r(loc=mu, scale=beta)`                    |
+| `invGaussDist(mu, lambda)`                                                     | `invgauss(mu/lambda, scale=lambda)`               |
+| `multivariateNormal(mean, cov)`                                                | `multivariate_normal(mean, cov)`                  |
+
+A constructor throws a `TypeError` for an argument that it would ignore: an options object after its last parameter (`gammaDist(2, 2, { scale: 2 })`, `exponentialDist(2, { scale: 2 })`), an unknown key of an options object (`gammaDist(2, { scale: 2, loc: 1 })`, `sampleN(n, { sead: 1 })`), or an object in a number position. An argument that is `undefined`, a number or an array after the parameters does not throw, so `[1, 2, 3].map(poissonDist)` works.
+
+The free functions do not use one convention for the gamma distribution: `gammaPDF(x, k, theta)` reads `theta` as a scale, and `gammaCDF(x, k, rate)` and `gammaQuantile(p, k, rate)` read the third argument as a rate (#1286).
 
 ## Hypothesis Tests
 
