@@ -155,7 +155,9 @@ function erfiScalar(x: f64): f64 {
 function digammaScalar(x: f64): f64 {
   if (x <= 0 && x === Math.floor(x)) return NaN;
   if (x < 0) {
-    return digammaScalar(-x + 1) + Math.PI / Math.tan(Math.PI * -x);
+    // psi(x) = psi(1 - x) - pi cot(pi x). The exact reduction keeps the digits next to a negative
+    // integer, where Math.PI * -x rounded (digamma(-10.0000000001) was 3.7e-6 off).
+    return digammaScalar(-x + 1) + (Math.PI * cosPiScalar(-x)) / sinPiScalar(-x);
   }
 
   let result = 0;
@@ -1436,7 +1438,11 @@ registerWorkerKernels({
         `(x) => betaincScalar(${numberLiteral(a)}, ${numberLiteral(b)}, x)`
       ),
   ],
-  digamma: [0, 0, () => kernelSource([digammaScalar], '(x) => digammaScalar(x)')],
+  digamma: [
+    0,
+    0,
+    () => kernelSource([sinPiScalar, cosPiScalar, digammaScalar], '(x) => digammaScalar(x)'),
+  ],
   besselJ0: [
     0,
     0,
