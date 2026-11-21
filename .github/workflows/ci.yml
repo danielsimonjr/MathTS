@@ -43,9 +43,9 @@ jobs:
 
       # Bun is the monorepo package manager and, with bunfig [run].bun = true, the
       # runtime of every `bun run` script (vitest, asc, tsc, tsdown, turbo included).
-      # Every step of this job runs through Bun, except the last two, which run the release
-      # script tests on Node 22 (see below). The Test matrix installs Node to run the suite
-      # and a dist smoke test on real Node (see `test`).
+      # Every step of this job runs through Bun, except the last steps, which run the release
+      # script tests and the packaging checks on Node 22 (see below). The Test matrix installs
+      # Node to run the vitest suite and a dist smoke test on real Node (see `test`).
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -245,6 +245,42 @@ jobs:
       - name: Release script tests
         run: node --test tools/test/ensure-package-releases.test.mjs
 
+      # The packaging checks below need one Node 22 (its bundled npm 10) and the development
+      # dist. They ran on the Test (22.x) leg, after both full test suites, and pushed that leg
+      # to its 20-minute limit (#1356). The facts they prove do not depend on the test suites.
+      # `Build (production)` above rewrote dist/ with minified output, so this step puts the
+      # development build back (Turbo replays it from the local cache of the Build step).
+      - name: Build (development dist for the packaging checks)
+        run: bun run build
+
+      - name: Public export-name lock
+        run: |
+          node --test tools/test/check-export-lock.test.mjs
+          node tools/test/check-export-lock.mjs
+
+      # Pack every published package, install the tarballs into a fresh consumer project and
+      # type-check every public entry point with skipLibCheck: false. The repo's own typecheck
+      # reads source, so it cannot see errors in the emitted .d.ts (core 0.15.0 shipped six
+      # TS2416 in dist/map.d.ts). Plain `node`: a `bun run` script would run it on Bun.
+      # This step uses the npm 10 that Node 22 bundles, so it also proves that npm 10 users can
+      # install the packed packages (no git dependencies; see check-published-deps.mjs).
+      - name: Consumer type check of packed packages
+        run: node tools/test/consumer-typecheck.mjs --skip-build
+
+      # The same check under moduleResolution NodeNext, which is what a Node 16+ consumer on
+      # "type": "module" gets. NodeNext rejects an extensionless relative specifier in a .d.ts
+      # (TS2834) and resolves bare dependencies by their CJS/ESM format, so it catches emit
+      # faults that Bundler resolution accepts. Before the tsconfig.dts.base.json nodenext emit
+      # it reported 60 errors (53 TS2834 + 7 TS2709); it must stay at 0.
+      - name: Consumer type check of packed packages (NodeNext)
+        run: node tools/test/consumer-typecheck.mjs --skip-build --module-resolution=NodeNext
+
+      - name: Packaging metadata and no-node consumer typecheck (G29)
+        run: |
+          node tools/sync-package-packaging.mjs --check
+          node tools/test/consumer-typecheck-no-node.mjs --skip-build
+          node --test tools/test/packed-consumer.test.mjs
+
   # This job also runs the wall-clock perf gates (tools/test/wall-clock-gates.json) and the
   # self-test of the gates. A wall-clock verdict does not belong in the Test or Coverage jobs:
   # `bun run test` runs about 48 package processes at once, and each of them shares the two
@@ -347,10 +383,11 @@ jobs:
 
     strategy:
       # Independent legs so one Node version failing doesn't cancel the others.
-      # `bun run test` runs every package script on BUN ([run] bun = true), so it
-      # proves nothing about Node. Each leg therefore ALSO runs the full suite under
-      # vitest on the matrix Node, plus a smoke test of the built dist, by calling
-      # `node` directly (a `bun run` script would put them back on Bun).
+      # Each leg runs the full suite under vitest on the matrix Node, plus a smoke test of
+      # the built dist, by calling `node` directly (a `bun run` script would put them back
+      # on Bun). The Bun-runtime suite (`bun run test`) runs every package script on Bun
+      # ([run] bun = true), so the matrix Node does not change it: it runs once, in the
+      # Coverage job. The packaging checks run once, in the Compile & Lint job (#1356).
       fail-fast: false
       matrix:
         # Every package declares engines.node ">=22.12": Node 20 reached EOL 2026-04 and
@@ -391,30 +428,6 @@ jobs:
       - name: Build
         run: bun run build
 
-      # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
-      - name: Test (Bun runtime)
-        shell: bash
-        run: bun run test 2>&1 | tee test-output.log
-
-      # Runs after the Bun gate so `collectLockTree` does not import every built package
-      # entry in the same job immediately before turbo fans out ~48 package test processes.
-      # On 22.x that pairing OOM-killed `@danielsimonjr/mathts-expression#test` (exit 137)
-      # while individual suites still reported 0 fail.
-      - name: Public export-name lock
-        if: matrix.node-version == '22.x'
-        run: |
-          node --test tools/test/check-export-lock.test.mjs
-          node tools/test/check-export-lock.mjs
-
-      # Skipped tests pass silently: nine WASM-tier suites once skipped themselves on
-      # every machine for months. Each suite's skip count is pinned in
-      # tools/test/skip-baseline.json and any change, up or down, fails here. The parser's
-      # own tests run first: Turbo formats its output differently here than in a terminal.
-      - name: Skip budget
-        run: |
-          node --test tools/test/check-skip-budget.test.mjs
-          node tools/test/check-skip-budget.mjs test-output.log
-
       # Every package's tests under vitest on the matrix Node, plus the root suites
       # and the assembly Node test scripts. Prints a `[runtime-probe]` line.
       - name: Test on Node ${{ matrix.node-version }} (vitest)
@@ -424,32 +437,6 @@ jobs:
       # one representative function from the built dist.
       - name: Smoke test dist on Node ${{ matrix.node-version }}
         run: node tools/test/smoke-dist-node.mjs
-
-      # Pack every published package, install the tarballs into a fresh consumer project and
-      # type-check every public entry point with skipLibCheck: false. The repo's own typecheck
-      # reads source, so it cannot see errors in the emitted .d.ts (core 0.15.0 shipped six
-      # TS2416 in dist/map.d.ts). Plain `node`: a `bun run` script would run it on Bun.
-      # This step uses the npm 10 that Node 22 bundles, so it also proves that npm 10 users can
-      # install the packed packages (no git dependencies; see check-published-deps.mjs).
-      - name: Consumer type check of packed packages
-        if: matrix.node-version == '22.x'
-        run: node tools/test/consumer-typecheck.mjs --skip-build
-
-      # The same check under moduleResolution NodeNext, which is what a Node 16+ consumer on
-      # "type": "module" gets. NodeNext rejects an extensionless relative specifier in a .d.ts
-      # (TS2834) and resolves bare dependencies by their CJS/ESM format, so it catches emit
-      # faults that Bundler resolution accepts. Before the tsconfig.dts.base.json nodenext emit
-      # it reported 60 errors (53 TS2834 + 7 TS2709); it must stay at 0.
-      - name: Consumer type check of packed packages (NodeNext)
-        if: matrix.node-version == '22.x'
-        run: node tools/test/consumer-typecheck.mjs --skip-build --module-resolution=NodeNext
-
-      - name: Packaging metadata and no-node consumer typecheck (G29)
-        if: matrix.node-version == '22.x'
-        run: |
-          node tools/sync-package-packaging.mjs --check
-          node tools/test/consumer-typecheck-no-node.mjs --skip-build
-          node --test tools/test/packed-consumer.test.mjs
 
   coverage:
     name: Coverage
@@ -480,6 +467,29 @@ jobs:
       # used to paper over a race between that copy and `asc`.)
       - name: Build
         run: bun run build
+
+      # The Bun-runtime suite. Every package script runs on Bun ([run] bun = true), so the
+      # result does not depend on a Node version and the suite runs here once, not on each
+      # Test leg (#1356). Node 22 is set up so that a tool that starts real Node sees the
+      # runtime that the former Test (22.x) run of this step saw.
+      - name: Setup Node.js 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.x
+
+      # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
+      - name: Test (Bun runtime)
+        shell: bash
+        run: bun run test 2>&1 | tee test-output.log
+
+      # Skipped tests pass silently: nine WASM-tier suites once skipped themselves on
+      # every machine for months. Each suite's skip count is pinned in
+      # tools/test/skip-baseline.json and any change, up or down, fails here. The parser's
+      # own tests run first: Turbo formats its output differently here than in a terminal.
+      - name: Skip budget
+        run: |
+          node --test tools/test/check-skip-budget.test.mjs
+          node tools/test/check-skip-budget.mjs test-output.log
 
       - name: Test with coverage
         # ubuntu-latest (26.04) aborts this job with SIGABRT / "Out of memory"
