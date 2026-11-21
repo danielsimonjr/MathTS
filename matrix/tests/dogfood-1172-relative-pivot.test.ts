@@ -286,6 +286,26 @@ describe.each(PATHS)('#1172 $name', ({ backend }) => {
     expect(singular).toBe(0);
   });
 
+  it('6b. an infinite pivot is not zero: LU and inverse agree with the determinant', async () => {
+    // The pivot -Infinity has the cancellation sum Infinity, and `Infinity <= 1e-14 * Infinity`
+    // is true. An infinite pivot is not hidden by a rounding error, so it is not zero (origin/main
+    // called these matrices regular too).
+    for (const A of [
+      [
+        [1, 2],
+        [3, Infinity],
+      ],
+      [
+        [1, Infinity],
+        [1, 1],
+      ],
+    ]) {
+      expect((await backend.luDecomposition(dm(A))).singular).toBe(false);
+      expect((await backend.inverse(dm(A))).singular).toBe(false);
+      expect(Math.abs(await backend.determinantWasm(dm(A)))).toBe(Infinity);
+    }
+  });
+
   describe('7. QR of a column with a tiny or dependent sub-column', () => {
     const cases: Array<[string, number[][]]> = [
       [

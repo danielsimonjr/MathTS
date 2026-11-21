@@ -105,6 +105,23 @@ function cancellationSum(data: Float64Array, n: number, row: number, k: number):
 }
 
 /**
+ * Whether the pivot candidate of magnitude `pivot` (step `k`, row `row` of `data`) is zero by the
+ * rule of {@link cancellationSum}. An infinite pivot is not zero: no rounding error hides it, and
+ * its cancellation sum is Infinity, so the plain test `Infinity <= 1e-14 * Infinity` would call it
+ * zero. A NaN pivot is not zero (it propagates). Twin of `pivotIsZero` in the AssemblyScript
+ * kernels.
+ */
+function pivotIsZero(
+  data: Float64Array,
+  n: number,
+  row: number,
+  k: number,
+  pivot: number
+): boolean {
+  return pivot !== Infinity && pivot <= PIVOT_REL_TOL * cancellationSum(data, n, row, k);
+}
+
+/**
  * Subset of the AssemblyScript module surface this backend uses.
  *
  * The AS module exports ~250 functions total; we only declare the ones the
@@ -714,7 +731,7 @@ export class WASMBackend implements MatrixBackend {
     if (!r.singular && n > 0) {
       const data = r.lu.toFloat64Array();
       const last = n - 1;
-      if (Math.abs(data[last * n + last]) <= PIVOT_REL_TOL * cancellationSum(data, n, last, last)) {
+      if (pivotIsZero(data, n, last, last, Math.abs(data[last * n + last]))) {
         return { lu: r.lu, perm: r.perm, singular: true };
       }
     }
@@ -754,7 +771,7 @@ export class WASMBackend implements MatrixBackend {
         }
       }
 
-      if (maxVal <= PIVOT_REL_TOL * cancellationSum(data, n, pivotRow, k)) {
+      if (pivotIsZero(data, n, pivotRow, k, maxVal)) {
         return { lu: new DenseMatrix(n, n, data), perm, singular: true };
       }
 

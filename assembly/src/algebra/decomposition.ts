@@ -54,14 +54,15 @@ const HUGE_COLUMN: f64 = 3.273390607896142e150;
  * Whether `pivot` (the magnitude of the pivot candidate of step `k` in row `row` of the in-place
  * LU storage `work`, row-major n*n) is zero by the rule above. `S` is summed in ascending j,
  * as in the JS twin `cancellationSum` of `WASMBackend.ts`, so both give the same verdict. A NaN
- * pivot is not zero (it propagates, as before).
+ * pivot is not zero (it propagates, as before). An infinite pivot is not zero: no rounding
+ * error hides it, and its sum `S` is Infinity, so the plain test would call it zero.
  */
 function pivotIsZero(work: Float64Array, n: i32, row: i32, k: i32, pivot: f64): bool {
   let s: f64 = 0.0;
   for (let j = 0; j < k; j++) {
     s += Math.abs(work[row * n + j]) * Math.abs(work[j * n + k]);
   }
-  return pivot <= PIVOT_REL_TOL * s;
+  return pivot < Infinity && pivot <= PIVOT_REL_TOL * s;
 }
 
 /**
