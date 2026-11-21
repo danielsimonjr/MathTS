@@ -39,6 +39,10 @@ export const createMad = /* #__PURE__ */ factory(
      *     math.mad([1, 2, 3])              // returns 1
      *     math.mad([[1, 2, 3], [4, 5, 6]]) // returns 1.5
      *
+     * `mad` takes no dimension argument: as in mathjs, an extra argument is one more value of the
+     * list, so `mad([1, 2, 3], 0)` reads 0 as a fourth value. A Matrix with another argument
+     * throws a TypeError.
+     *
      * See also:
      *
      *     median, mean, std, abs

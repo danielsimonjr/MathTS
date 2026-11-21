@@ -14,6 +14,7 @@
 
 import { stdFromSquaredDeviations } from '@danielsimonjr/mathts-core';
 
+/** Options of `gaussianKDE`. */
 export interface GaussianKDEOptions {
   /** Bandwidth (smoothing parameter). Defaults to Silverman's rule of thumb. */
   bandwidth?: number;

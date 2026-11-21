@@ -286,38 +286,42 @@ export interface DetCallable {
 export type PublicDet = DetCallable;
 
 export interface MedianCallable {
-  (a: number[] | number[][] | Matrix): number;
+  (a: readonly number[] | readonly (readonly number[])[] | Matrix): number;
   (a: NumberTypedArray | Float32Array): number;
-  (a: number[] | number[][] | Matrix, b: StatReduceOptions): number;
+  (a: readonly number[] | readonly (readonly number[])[] | Matrix, b: StatReduceOptions): number;
   (a: NumberTypedArray | Float32Array, b: StatReduceOptions): number;
-  (a: number[] | number[][] | Matrix, b: number | BigNumber): number | number[];
-  (a: number[] | number[][] | Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
+  (a: readonly number[] | readonly (readonly number[])[] | Matrix, b: number | BigNumber): number | number[];
+  (a: readonly number[] | readonly (readonly number[])[] | Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
   <T extends Fraction | BigNumber>(a: ExactData<T>): T;
   (a: ExactData<bigint>): Fraction;
-  (...rest: number[]): number;
-  (...rest: unknown[]): unknown;
+  (first: number, ...rest: number[]): number;
+  <T extends Fraction | BigNumber>(first: T, ...rest: T[]): T;
+  (a: readonly unknown[] | NumberTypedArray | Matrix, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
 }
 export type PublicMedian = MedianCallable;
 
 export interface ModeCallable {
-  (a: number[] | number[][] | Matrix): number[] | number;
+  (a: readonly number[] | readonly (readonly number[])[] | Matrix): number[] | number;
   (a: NumberTypedArray | Float32Array): number[] | number;
   <T extends Fraction | BigNumber | Complex | bigint>(a: ExactData<T>): T[];
-  (...rest: number[]): number[];
-  (...rest: unknown[]): unknown;
+  (first: number, ...rest: number[]): number[];
+  <T extends Fraction | BigNumber | Complex | bigint>(first: T, ...rest: T[]): T[];
+  (a: readonly unknown[] | Matrix): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
 }
 export type PublicMode = ModeCallable;
 
 export interface MadCallable {
-  (a: number[] | number[][] | Matrix): number;
+  (a: readonly number[] | readonly (readonly number[])[] | Matrix): number;
   (a: NumberTypedArray | Float32Array): number;
   <T extends Fraction | BigNumber>(a: ExactData<T>): T;
   (a: ExactData<bigint>): Fraction;
-  (...rest: unknown[]): unknown;
+  (first: number, ...rest: number[]): number;
+  <T extends Fraction | BigNumber>(first: T, ...rest: T[]): T;
+  (a: readonly unknown[] | Matrix): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
 }

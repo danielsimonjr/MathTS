@@ -154,6 +154,74 @@ describe('gen-public-overloads: sigTypes override', () => {
   });
 });
 
+describe('gen-public-overloads: leadingOverloads', () => {
+  const SOURCE = [
+    "export const h = mathTyped('h', {",
+    '  Number: (x: number): number => x,',
+    "  'Array | Matrix': (a: number[]): number => a.length,",
+    "  '...': (args: unknown[]): unknown => args,",
+    '});',
+    '',
+  ].join('\n');
+  const LEAD = ['(A: number[][]): number;', '(A: readonly number[][]): number;'];
+  const blockOf = (out: string): string[] =>
+    out
+      .slice(out.indexOf('export interface HCallable'), out.indexOf('PublicH'))
+      .split('\n')
+      .map((line) => line.trim());
+
+  it('writes the lines first among the overloads of that key, in the listed order', () => {
+    const { out, error } = generate(SOURCE, {
+      name: 'h',
+      leadingOverloads: { 'Array | Matrix': LEAD },
+    });
+    expect(error).toBe('');
+    const lines = blockOf(out);
+    const generic = lines.indexOf('(a: number[] | Matrix): number;');
+    expect(generic).toBeGreaterThan(0);
+    expect(lines.indexOf(LEAD[0])).toBe(generic - 2);
+    expect(lines.indexOf(LEAD[1])).toBe(generic - 1);
+  });
+
+  it('writes nothing extra when the entry has no leadingOverloads', () => {
+    const { out, error } = generate(SOURCE, { name: 'h' });
+    expect(error).toBe('');
+    expect(blockOf(out)).not.toContain(LEAD[0]);
+  });
+
+  it('fails when a key matches no signature key', () => {
+    const { out, error } = generate(SOURCE, {
+      name: 'h',
+      leadingOverloads: { 'Array, Array': LEAD },
+    });
+    expect(out).toBe('');
+    expect(error).toContain('h: leadingOverloads "Array, Array" matches no signature key');
+  });
+
+  it('fails when the lines are not an array of strings', () => {
+    const { out, error } = generate(SOURCE, {
+      name: 'h',
+      leadingOverloads: { 'Array | Matrix': '(A: number[][]): number;' },
+    });
+    expect(out).toBe('');
+    expect(error).toContain('h: leadingOverloads "Array | Matrix" must be an array of strings');
+  });
+
+  it('the committed det block keeps its two number[][] lines ahead of the generic line', () => {
+    const text = readFileSync(GENERATED, 'utf8');
+    const start = text.indexOf('export interface DetCallable {');
+    const lines = text
+      .slice(start, text.indexOf('\n}\n', start))
+      .split('\n')
+      .map((line) => line.trim());
+    expect(lines.slice(1, 4)).toEqual([
+      '(A: number[][]): number;',
+      '(A: readonly number[][]): number;',
+      '(a: number[] | Matrix): number | BigNumber | Complex;',
+    ]);
+  });
+});
+
 describe('gen-public-overloads: the typed-return contract in the committed file', () => {
   const text = readFileSync(GENERATED, 'utf8');
   const interfaceOf = (name: string): string => {
@@ -170,15 +238,35 @@ describe('gen-public-overloads: the typed-return contract in the committed file'
   });
 
   it.each(['MedianCallable', 'ModeCallable', 'MadCallable'])(
-    '%s takes a vector, a 2-D array and a Matrix',
+    '%s takes a readonly vector, a readonly 2-D array and a Matrix (#964)',
     (name) => {
-      expect(interfaceOf(name)).toContain('(a: number[] | number[][] | Matrix)');
+      expect(interfaceOf(name)).toContain(
+        '(a: readonly number[] | readonly (readonly number[])[] | Matrix)'
+      );
+      expect(interfaceOf(name)).not.toContain('(a: number[] | number[][] | Matrix)');
+    }
+  );
+
+  it.each(['MedianCallable', 'ModeCallable', 'MadCallable'])(
+    '%s has no zero-argument and no bare rest overload; its last overload takes a collection (#964)',
+    (name) => {
+      const block = interfaceOf(name);
+      expect(block).not.toContain('(...rest: unknown[]): unknown;');
+      expect(block).not.toContain('(...rest: number[])');
+      expect(block).toContain('(first: number, ...rest: number[])');
+      const overloads = block
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.endsWith(';') && !line.startsWith('readonly'));
+      expect(overloads[overloads.length - 1]).toMatch(
+        /^\(a: readonly unknown\[\] \| (NumberTypedArray \| )?Matrix/
+      );
     }
   );
 
   it('the dimension form returns one number per slice for a 2-D input', () => {
     expect(interfaceOf('MedianCallable')).toContain(
-      '(a: number[] | number[][] | Matrix, b: number | BigNumber): number | number[];'
+      '(a: readonly number[] | readonly (readonly number[])[] | Matrix, b: number | BigNumber): number | number[];'
     );
   });
 });

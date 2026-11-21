@@ -102,8 +102,10 @@ describe('the Matrix arm returns numbers because the public Matrix stores number
   });
 
   it('a compat matrix of BigNumber returns a BigNumber, and its type is unknown', () => {
-    // `matrix()` and `bignumber()` return `unknown`, so no overload names this input.
-    const compat = matrix([bignumber(1), bignumber(5), bignumber(3)]);
+    // `matrix()` and `bignumber()` return `unknown` (#1359), so no overload names this input.
+    // A value typed `unknown` is no argument of `median` (as for `mean`, #964): the one cast
+    // names the kind, and the elements stay `unknown`.
+    const compat = matrix([bignumber(1), bignumber(5), bignumber(3)]) as readonly unknown[];
     const result = median(compat);
     expectTypeOf(result).toEqualTypeOf<unknown>();
     expect((result as { toNumber(): number }).toNumber()).toBe(3);
@@ -135,9 +137,8 @@ describe('parallelFFT takes a vector', () => {
     expect(imag.length).toBe(4);
   });
 
-  it('refuses a 2-D array at compile time', () => {
-    // @ts-expect-error a 2-D array is not a vector, and its run-time result is NaN
-    const bins = parallelFFT(GRID);
-    expect(bins).toBeDefined();
+  it('refuses a 2-D array at compile time, and at run time with a TypeError (NaN bins before #964)', () => {
+    // @ts-expect-error a 2-D array is not a vector
+    expect(() => parallelFFT(GRID)).toThrow(/parallelFFT: expects number data/);
   });
 });
