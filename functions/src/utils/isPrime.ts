@@ -1,26 +1,21 @@
 import { deepMap } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
+import { modPow } from '../numbertheory/modular.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for isPrime.
 // Uses MathTS core's BigNumber method names (lessThanOrEqual/lessThan/equals/toBigInt), not
-// decimal.js's (lte/lt/eq). Core's BigNumber rounds a product to the configured precision, like
-// decimal.js. Core has one global precision and no constructor.clone, so the Miller-Rabin test
-// raises the global precision and then restores it.
+// decimal.js's (lte/lt/eq). A BigNumber of 2^32 or more runs the Miller-Rabin test on bigint, so
+// no product rounds to the configured precision (#1118, #1164).
 interface BigNumberType {
-  constructor: { precision: number; config(options: { precision: number }): unknown };
   lessThanOrEqual(n: number): boolean;
   gt(n: number): boolean;
   lessThan(n: number): boolean;
   mod(n: number): BigNumberType;
   equals(n: number): boolean;
-  sub(n: number | BigNumberType): BigNumberType;
-  div(n: number): BigNumberType;
-  add(n: number): BigNumberType;
-  mul(n: BigNumberType | number): BigNumberType;
+  isInteger(): boolean;
   toNumber(): number;
   toBigInt(): bigint;
-  toFixed(n: number): string;
 }
 
 interface IsPrimeDependencies {
@@ -64,6 +59,50 @@ export function trialPrime(x: number | bigint, c: TrialPrimeConsts<number | bigi
 
 const NUMBER_TRIAL = { zero: 0, one: 1, two: 2, three: 3, five: 5, six: 6 };
 const BIGINT_TRIAL = { zero: 0n, one: 1n, two: 2n, three: 3n, five: 5n, six: 6n };
+
+/** The 13 prime bases 2 to 41: a proof of primality below 3317044064679887385961981. */
+const MILLER_RABIN_BASES = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n];
+
+/**
+ * The least composite number that passes the Miller-Rabin test for the 13 prime bases 2 to 41
+ * (Sorenson and Webster, 2015). Below it the 13 bases decide, above it they do not.
+ */
+const MILLER_RABIN_PROOF_BOUND = 3317044064679887385961981n;
+
+/**
+ * Miller-Rabin primality test of an odd integer of 2^32 or more that no small prime divides.
+ *
+ * Below 3317044064679887385961981 the 13 prime bases 2 to 41 are a proof. At or above that value
+ * the test adds the base of mathjs, `floor(2 * (digits * ln 10)^2)`. The result is then
+ * probabilistic, as it is in mathjs: a composite number made to pass these bases can pass it. All
+ * products are exact, because the arithmetic is bigint.
+ */
+function isPrimeBigInt(n: bigint): boolean {
+  let d = n - 1n;
+  let r = 0;
+  while ((d & 1n) === 0n) {
+    d >>= 1n;
+    r += 1;
+  }
+  const bases = MILLER_RABIN_BASES.slice();
+  if (n >= MILLER_RABIN_PROOF_BOUND) {
+    bases.push(BigInt(Math.floor(2 * (n.toString().length * Math.LN10) ** 2)));
+  }
+  for (const a of bases) {
+    let x = modPow(a, d, n);
+    if (x === 1n || x === n - 1n) continue;
+    let witness = true;
+    for (let i = 1; i < r; i += 1) {
+      x = (x * x) % n;
+      if (x === n - 1n) {
+        witness = false;
+        break;
+      }
+    }
+    if (witness) return false;
+  }
+  return true;
+}
 
 const name = 'isPrime';
 const dependencies = ['typed'];
@@ -118,72 +157,9 @@ export const createIsPrime = /* #__PURE__ */ factory(
           return true;
         }
 
-        function modPow(
-          base: BigNumberType,
-          exponent: BigNumberType,
-          modulus: BigNumberType
-        ): BigNumberType | number {
-          // exponent can be huge, use non-recursive variant
-          let accumulator: BigNumberType | number = 1;
-          while (!exponent.equals(0)) {
-            if (exponent.mod(2).equals(0)) {
-              exponent = exponent.div(2);
-              base = base.mul(base).mod(modulus as unknown as number) as unknown as BigNumberType;
-            } else {
-              exponent = exponent.sub(1);
-              accumulator = base.mul(accumulator).mod(modulus as unknown as number);
-            }
-          }
-          return accumulator;
-        }
-
-        // A product of two values below n has at most twice the digits of n. With that precision
-        // every product, mod and halving is exact (#1118).
-        const BigNumber = n.constructor;
-        const precision = BigNumber.precision;
-        BigNumber.config({ precision: 2 * n.toFixed(0).length + 10 });
-        try {
-          let r = 0;
-
-          let d = n.sub(1);
-          while (d.mod(2).equals(0)) {
-            d = d.div(2);
-            r += 1;
-          }
-          let bases: number[] | null;
-          // https://en.wikipedia.org/wiki/Miller–Rabin_primality_test#Testing_against_small_sets_of_bases
-          if (n.toBigInt() < 3317044064679887385961981n) {
-            bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41].filter(
-              (x) => x < n.toNumber()
-            );
-          } else {
-            const max = Math.min(
-              n.toNumber() - 2,
-              Math.floor(2 * Math.pow(n.toFixed(0).length * Math.log(10), 2))
-            );
-            // The list from mathjs holds the one value `max`, repeated (#1164). One test with that
-            // base gives the same answer as the repeats, which took 2 minutes for 2^127 - 1.
-            bases = max >= 2 ? [max] : [];
-          }
-          for (let i = 0; i < bases.length; i += 1) {
-            const a = bases[i];
-            const adn = modPow(n.sub(n).add(a), d, n);
-            if (!(adn as BigNumberType).equals(1)) {
-              for (
-                let i = 0, x = adn as BigNumberType;
-                !x.equals(n.sub(1) as unknown as number);
-                i += 1, x = x.mul(x).mod(n as unknown as number) as unknown as BigNumberType
-              ) {
-                if (i === r - 1) {
-                  return false;
-                }
-              }
-            }
-          }
-          return true;
-        } finally {
-          BigNumber.config({ precision });
-        }
+        // NaN, Infinity and a fraction are not prime. The test below reads an integer.
+        if (!n.isInteger()) return false;
+        return isPrimeBigInt(n.toBigInt());
       },
 
       'Array | Matrix': typed.referToSelf(

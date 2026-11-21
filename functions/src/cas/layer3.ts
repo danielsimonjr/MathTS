@@ -12,6 +12,7 @@
  */
 
 import { eig } from '@danielsimonjr/mathts-matrix';
+import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
 import {
   trim,
   degree,
@@ -162,18 +163,8 @@ function intToRatPoly(p: IntPoly): Rat[] {
 function ratPolyToInt(p: Rat[]): { poly: IntPoly; den: bigint } {
   if (p.length === 0) return { poly: [], den: 1n };
   let lcm = 1n;
-  const gcd = (a: bigint, b: bigint): bigint => {
-    let x = a < 0n ? -a : a;
-    let y = b < 0n ? -b : b;
-    while (y !== 0n) {
-      const t = x % y;
-      x = y;
-      y = t;
-    }
-    return x;
-  };
   for (const r of p) {
-    const g = gcd(lcm, r.den);
+    const g = gcdBigInt(lcm, r.den);
     lcm = (lcm / g) * r.den;
   }
   return { poly: trim(p.map((r) => (r.num * lcm) / r.den)), den: lcm };

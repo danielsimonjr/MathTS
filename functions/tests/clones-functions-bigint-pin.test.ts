@@ -9,14 +9,7 @@ import type { IntPoly } from '../src/typed/factorization/integer-poly.js';
 import * as functionsApi from '../src/index.js';
 import { eulerNumbers } from '../src/index.js';
 import { chooseScalar } from '../src/wasm/special/scalars.js';
-import { createCombinations } from '../src/probability/combinations.js';
-import { createCombinationsWithRep } from '../src/probability/combinationsWithRep.js';
-import type { TypedFunction } from '../src/core/function/typed.js';
-import {
-  binomialProductBigNumber,
-  isPositiveInteger,
-  type BigNumberBinomialType,
-} from '../src/probability/bigint-binomial.js';
+import { BigNumber } from '@danielsimonjr/mathts-core';
 const P = (...c: number[]): IntPoly => c.map(BigInt);
 
 /** Independent exact binomial via bigint (oracle for rounded float path). */
@@ -36,85 +29,6 @@ describe('combinations factory number path (unchanged)', () => {
   });
 });
 
-type LegacyBn = BigNumberBinomialType & { __v: bigint };
-
-function legacyBnCoerce(x: BigNumberBinomialType | number): bigint {
-  return typeof x === 'number' ? BigInt(x) : (x as LegacyBn).__v;
-}
-
-function legacyBn(value: number | bigint, integer = true): LegacyBn {
-  const n = typeof value === 'bigint' ? value : BigInt(value);
-  // The fake is exact at every precision, so `config` has no effect and no result rounds.
-  class LegacyBigNumberCtor {
-    static precision = 64;
-    static config(): void {}
-    constructor(v: number) {
-      return legacyBn(BigInt(v));
-    }
-  }
-  const self: LegacyBn = {
-    __v: n,
-    constructor: LegacyBigNumberCtor as unknown as BigNumberBinomialType['constructor'],
-    minus(x) {
-      return legacyBn(n - legacyBnCoerce(x));
-    },
-    plus(x) {
-      return legacyBn(n + legacyBnCoerce(x));
-    },
-    times(x) {
-      return legacyBn(n * legacyBnCoerce(x));
-    },
-    dividedBy(x) {
-      const d = legacyBnCoerce(x);
-      if (n % d !== 0n) throw new Error('not divisible');
-      return legacyBn(n / d);
-    },
-    lt(x) {
-      return n < legacyBnCoerce(x);
-    },
-    gt(x) {
-      return n > legacyBnCoerce(x);
-    },
-    lte(x) {
-      return n <= legacyBnCoerce(x);
-    },
-    gte(x) {
-      return n >= legacyBnCoerce(x);
-    },
-    isInteger: () => integer,
-    e: (n < 0n ? -n : n).toString().length - 1,
-    toSignificantDigits: () => self,
-  };
-  return self;
-}
-
-function stubTyped(
-  _name: string,
-  signatures: Record<string, (...args: never[]) => unknown>
-): (n: unknown, k: unknown) => unknown {
-  return (n: unknown, k: unknown) => {
-    const key = typeof n === 'number' ? 'number, number' : 'BigNumber, BigNumber';
-    return signatures[key](n as never, k as never);
-  };
-}
-
-// The collection signatures use `typed.referToSelf`; this pin only exercises the scalar
-// BigNumber signature, so the stub resolves `self` to a function that must not be called.
-const stubTypedWithSelf = Object.assign(stubTyped, {
-  referToSelf: (cb: (self: never) => unknown) =>
-    cb((() => {
-      throw new Error('collection signature not under test');
-    }) as never),
-});
-
-const combinationsBn = createCombinations({
-  typed: stubTypedWithSelf as unknown as TypedFunction,
-}) as unknown as (n: BigNumberBinomialType, k: BigNumberBinomialType) => LegacyBn;
-
-const combinationsWithRepBn = createCombinationsWithRep({
-  typed: stubTyped as unknown as TypedFunction,
-}) as unknown as (n: BigNumberBinomialType, k: BigNumberBinomialType) => LegacyBn;
-
 describe('helpers stay off the package barrel', () => {
   it('does not export binomialProductBigNumber, schoolbookMul, isPositiveInteger, chooseScalar', () => {
     expect('binomialProductBigNumber' in functionsApi).toBe(false);
@@ -124,78 +38,55 @@ describe('helpers stay off the package barrel', () => {
   });
 });
 
-describe('isPositiveInteger (shared by both factories)', () => {
-  it('treats 0 as allowed (non-negative), rejects negatives and non-integers', () => {
-    expect(isPositiveInteger(legacyBn(0))).toBe(true);
-    expect(isPositiveInteger(legacyBn(1))).toBe(true);
-    expect(isPositiveInteger(legacyBn(-1))).toBe(false);
-    expect(isPositiveInteger(legacyBn(2, false))).toBe(false);
-  });
-});
+/** The typed `combinations` on core BigNumbers (the factory of the same name is gone, #1093). */
+const combinationsBn = (n: BigNumber, k: BigNumber): BigNumber =>
+  (functionsApi.combinations as (a: unknown, b: unknown) => BigNumber)(n, k);
+const bn = (value: string | number): BigNumber => BigNumber.parse(String(value));
 
-describe('binomialProductBigNumber', () => {
-  it('C(7, 5) = 21 and C(60, 30) above 2^53', () => {
-    expect((binomialProductBigNumber(legacyBn(7), legacyBn(5)) as LegacyBn).__v.toString()).toBe(
-      '21'
-    );
-    expect((binomialProductBigNumber(legacyBn(60), legacyBn(30)) as LegacyBn).__v.toString()).toBe(
-      '118264581564861424'
-    );
-  });
+/** The typed `combinationsWithRep` on core BigNumbers (the factory of the same name is gone, #1093). */
+const combinationsWithRepBn = (n: BigNumber, k: BigNumber): BigNumber =>
+  (functionsApi.combinationsWithRep as (a: unknown, b: unknown) => BigNumber)(n, k);
 
-  it('C(0, 0) = 1, C(5, 0) = 1, C(5, 1) = 5', () => {
-    expect((binomialProductBigNumber(legacyBn(0), legacyBn(0)) as LegacyBn).__v.toString()).toBe(
-      '1'
-    );
-    expect((binomialProductBigNumber(legacyBn(5), legacyBn(0)) as LegacyBn).__v.toString()).toBe(
-      '1'
-    );
-    expect((binomialProductBigNumber(legacyBn(5), legacyBn(1)) as LegacyBn).__v.toString()).toBe(
-      '5'
-    );
-  });
-
-  it('with-rep total n+k-1: C(5+3-1, 3)', () => {
-    expect((binomialProductBigNumber(legacyBn(7), legacyBn(3)) as LegacyBn).__v.toString()).toBe(
-      '35'
-    );
-  });
-});
-
-describe('combinations / combinationsWithRep BigNumber factories', () => {
-  it('C(7, 5) = 21 through the combinations factory', () => {
-    expect(combinationsBn(legacyBn(7), legacyBn(5)).__v.toString()).toBe('21');
+describe('combinations and combinationsWithRep (typed) BigNumber paths', () => {
+  it('C(7, 5) = 21 through the typed combinations', () => {
+    expect(combinationsBn(bn(7), bn(5)).toString()).toBe('21');
   });
 
   it('throws the combinations error strings', () => {
-    expect(() => combinationsBn(legacyBn(-1), legacyBn(0))).toThrow(TypeError);
-    expect(() => combinationsBn(legacyBn(-1), legacyBn(0))).toThrow(
+    expect(() => combinationsBn(bn(-1), bn(0))).toThrow(TypeError);
+    expect(() => combinationsBn(bn(-1), bn(0))).toThrow(
       'Positive integer value expected in function combinations'
     );
-    expect(() => combinationsBn(legacyBn(2, false), legacyBn(1))).toThrow(
+    expect(() => combinationsBn(bn('2.5'), bn(1))).toThrow(
       'Positive integer value expected in function combinations'
     );
-    expect(() => combinationsBn(legacyBn(3), legacyBn(4))).toThrow(
+    expect(() => combinationsBn(bn(3), bn(4))).toThrow(
       'k must be less than n in function combinations'
     );
   });
 
-  it('with-rep C(n+k-1, k) for (1,0), (5,0), (5,1), (3,3)', () => {
-    expect(combinationsWithRepBn(legacyBn(1), legacyBn(0)).__v.toString()).toBe('1');
-    expect(combinationsWithRepBn(legacyBn(5), legacyBn(0)).__v.toString()).toBe('1');
-    expect(combinationsWithRepBn(legacyBn(5), legacyBn(1)).__v.toString()).toBe('5');
-    expect(combinationsWithRepBn(legacyBn(3), legacyBn(3)).__v.toString()).toBe('10');
+  it('with-rep C(n+k-1, k) for (1,0), (5,0), (5,1), (3,3), (7,3)', () => {
+    expect(combinationsWithRepBn(bn(1), bn(0)).toString()).toBe('1');
+    expect(combinationsWithRepBn(bn(5), bn(0)).toString()).toBe('1');
+    expect(combinationsWithRepBn(bn(5), bn(1)).toString()).toBe('5');
+    expect(combinationsWithRepBn(bn(3), bn(3)).toString()).toBe('10');
+    expect(combinationsWithRepBn(bn(5), bn(3)).toString()).toBe('35');
+  });
+
+  it('with-rep C(60, 30) is above 2^53 and exact', () => {
+    // n = 31, k = 30: C(31 + 30 - 1, 30) = C(60, 30)
+    expect(combinationsWithRepBn(bn(31), bn(30)).toString()).toBe('118264581564861424');
   });
 
   it('throws the combinationsWithRep error strings', () => {
-    expect(() => combinationsWithRepBn(legacyBn(-1), legacyBn(1))).toThrow(TypeError);
-    expect(() => combinationsWithRepBn(legacyBn(-1), legacyBn(1))).toThrow(
+    expect(() => combinationsWithRepBn(bn(-1), bn(1))).toThrow(TypeError);
+    expect(() => combinationsWithRepBn(bn(-1), bn(1))).toThrow(
       'Positive integer value expected in function combinationsWithRep'
     );
-    expect(() => combinationsWithRepBn(legacyBn(0), legacyBn(1))).toThrow(
+    expect(() => combinationsWithRepBn(bn(0), bn(1))).toThrow(
       'k must be less than or equal to n + k - 1 in function combinationsWithRep'
     );
-    expect(() => combinationsWithRepBn(legacyBn(2, false), legacyBn(1))).toThrow(
+    expect(() => combinationsWithRepBn(bn('2.5'), bn(1))).toThrow(
       'Positive integer value expected in function combinationsWithRep'
     );
   });

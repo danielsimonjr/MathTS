@@ -8,14 +8,11 @@
  * The loops are the in-process drivers of `@danielsimonjr/mathts-parallel` (`ops/bitwise.ts`).
  * A length mismatch throws RangeError.
  *
- * BigNumber bitwise semantics: the mathjs-derived helpers in
- * `functions/src/utils/bignumber/bitwise.ts` operate on the
- * `decimal.js`-internal coefficient layout (`x.d` / `x.e` / `x.s`),
- * which `@danielsimonjr/mathts-core`'s `BigNumber` does not expose.
- * We therefore reimplement the BigNumber path by routing through
- * native `bigint` when the operand is a finite integer — that
- * matches what the mathjs path does on integers anyway. NaN /
- * non-integer inputs throw, mirroring mathjs behavior.
+ * BigNumber bitwise semantics: a finite integer operand goes through native `bigint`,
+ * and the result is a BigNumber. A NaN operand gives a BigNumber NaN, and a non-integer
+ * operand throws, as in mathjs. An infinite operand throws here. The expression parser
+ * scope runs the helpers of `functions/src/utils/bignumber/bitwise.ts`, which also read
+ * the infinite operands by the mathjs tables.
  *
  * @packageDocumentation
  */
@@ -80,6 +77,24 @@ function bigIntToBigNumber(value: bigint): BigNumber {
   return BigNumber.parse(value.toString());
 }
 
+/**
+ * True when an operand is NaN: the result is then a BigNumber NaN, as in mathjs. An operand that
+ * is finite and not an integer throws first, whatever the other operand is, so `(NaN, 1.5)` throws.
+ */
+function hasNaNOperand(fnName: string, ...values: BigNumber[]): boolean {
+  for (const value of values) {
+    if (value.isFinite() && !value.isInteger()) {
+      throw new Error(`Integers expected in function ${fnName}`);
+    }
+  }
+  return values.some((value) => value.isNaN());
+}
+
+/** The BigNumber NaN that a bitwise function returns for a NaN operand. */
+function bigNumberNaN(): BigNumber {
+  return BigNumber.parse('NaN');
+}
+
 /** Apply a native `bigint` binary op through the BigNumber boundary. */
 function bigNumberBinary(
   a: BigNumber,
@@ -87,6 +102,7 @@ function bigNumberBinary(
   fnName: string,
   op: (x: bigint, y: bigint) => bigint
 ): BigNumber {
+  if (hasNaNOperand(fnName, a, b)) return bigNumberNaN();
   const ai = bigNumberToBigInt(a, fnName);
   const bi = bigNumberToBigInt(b, fnName);
   return bigIntToBigNumber(op(ai, bi));
@@ -277,6 +293,7 @@ export const bitNot = mathTyped('bitNot', {
   bigint: (a: i64): i64 => ~a,
 
   BigNumber: (a: BigNumber): BigNumber => {
+    if (hasNaNOperand('bitNot', a)) return bigNumberNaN();
     const ai = bigNumberToBigInt(a, 'bitNot');
     return bigIntToBigNumber(~ai);
   },
@@ -305,6 +322,7 @@ export const leftShift = mathTyped('leftShift', {
   },
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
+    if (hasNaNOperand('leftShift', a, b)) return bigNumberNaN();
     const ai = bigNumberToBigInt(a, 'leftShift');
     const bi = bigNumberShiftCount(b, 'leftShift');
     return bigIntToBigNumber(ai << bi);
@@ -345,6 +363,7 @@ export const rightArithShift = mathTyped('rightArithShift', {
   },
 
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
+    if (hasNaNOperand('rightArithShift', a, b)) return bigNumberNaN();
     const ai = bigNumberToBigInt(a, 'rightArithShift');
     const bi = bigNumberShiftCount(b, 'rightArithShift');
     return bigIntToBigNumber(ai >> bi);

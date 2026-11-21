@@ -98,7 +98,8 @@ describe('#1002 permutations above 2^53 and at the 170! edge (BigInt oracle)', (
   it('is Infinity above k = 170 and exact below', () => {
     expect(fn('permutations')(171, 171)).toBe(Infinity);
     expect(fn('permutations')(200, 171)).toBe(Infinity);
-    expect(fn('permutations')(170, 170)).toBe(7.257415615307994e306);
+    // The product (n - k + 1) * ... * n is split at the midpoint, as mathjs does (#1097).
+    expect(fn('permutations')(170, 170)).toBe(7.257415615307998e306);
     expect(fn('permutations')(20, 10)).toBe(670442572800);
   });
 });

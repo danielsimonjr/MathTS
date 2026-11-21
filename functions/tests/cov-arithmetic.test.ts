@@ -168,7 +168,8 @@ describe('arithmetic — BigNumber scalar signatures', () => {
     // nthRoot computes the exponent 1/n in BigNumber precision (#1043).
     expect((nthRoot(B(8), 3) as BigNumber).toNumber()).toBe(2);
     expect((nthRoot(B(-27), 3) as BigNumber).toNumber()).toBe(-3);
-    expect((nthRoot(B(-16), 2) as BigNumber).isNaN()).toBe(true);
+    // A negative base with an even root has no real root: it throws, as the number path does (#1097).
+    expect(() => nthRoot(B(-16), 2)).toThrow('Root must be odd when a is negative.');
   });
 
   it('exp / log family on BigNumber', () => {

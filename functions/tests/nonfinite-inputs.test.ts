@@ -124,6 +124,8 @@ const THROWS_ON_NAN: Record<string, string[]> = {
   stirlingS2: ['TypeError'],
   subfactorial: ['Error'],
   unit: ['TypeError'],
+  // #1097: xgcd throws the mathjs integer error for NaN, Infinity and a fraction.
+  xgcd: ['Error'],
 };
 
 /** The error class of a thrown result, or null when the call returned. */
@@ -247,8 +249,8 @@ for (const name of ['gcd', 'lcm', 'xgcd']) {
       [val, 4],
       [12, val],
     ]) {
-      // #1002: gcd and lcm throw the mathjs integer error; xgcd keeps the NaN triple.
-      const want = name === 'xgcd' ? '[NaN,NaN,NaN]' : 'throws:Error';
+      // #1002 and #1097: gcd, lcm and xgcd throw the mathjs integer error.
+      const want = 'throws:Error';
       HANG_ROWS.push({
         job: { name, sig: 'number,number', args },
         expect: (o) => o === want,

@@ -11,6 +11,8 @@
  * lifting to p^k.
  */
 
+import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
+
 /** Dense polynomial over ℤ: index i holds the coefficient of x^i. */
 export type IntPoly = bigint[];
 
@@ -131,16 +133,7 @@ export function evaluate(p: IntPoly, x: bigint): bigint {
 }
 
 /** Non-negative gcd of two bigints (gcd(0,0) = 0). */
-export function bigintGcd(a: bigint, b: bigint): bigint {
-  let x = a < 0n ? -a : a;
-  let y = b < 0n ? -b : b;
-  while (y !== 0n) {
-    const t = x % y;
-    x = y;
-    y = t;
-  }
-  return x;
-}
+export const bigintGcd = gcdBigInt;
 
 /** Content of `p`: the non-negative gcd of its (trimmed) coefficients. */
 export function content(p: IntPoly): bigint {

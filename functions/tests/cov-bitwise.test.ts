@@ -101,13 +101,14 @@ describe('bitwise — BigNumber validation errors', () => {
   const half = BigNumber.fromNumber(0.5);
   const five = BigNumber.fromNumber(5);
 
-  it('NaN BigNumber operands throw for binary + unary ops', () => {
-    expect(() => bitAnd(NaNbn, five)).toThrow(/NaN not allowed/);
-    expect(() => bitOr(NaNbn, five)).toThrow(/NaN not allowed/);
-    expect(() => bitXor(NaNbn, five)).toThrow(/NaN not allowed/);
-    expect(() => bitNot(NaNbn)).toThrow(/NaN not allowed/);
-    expect(() => leftShift(NaNbn, five)).toThrow(/NaN not allowed/);
-    expect(() => rightArithShift(NaNbn, five)).toThrow(/NaN not allowed/);
+  it('a NaN BigNumber operand gives NaN, as in mathjs (#1097); rightLogShift still throws', () => {
+    const isNaNResult = (v: unknown): boolean => v instanceof BigNumber && v.isNaN();
+    expect(isNaNResult(bitAnd(NaNbn, five))).toBe(true);
+    expect(isNaNResult(bitOr(NaNbn, five))).toBe(true);
+    expect(isNaNResult(bitXor(NaNbn, five))).toBe(true);
+    expect(isNaNResult(bitNot(NaNbn))).toBe(true);
+    expect(isNaNResult(leftShift(NaNbn, five))).toBe(true);
+    expect(isNaNResult(rightArithShift(NaNbn, five))).toBe(true);
     expect(() => rightLogShift(NaNbn, five)).toThrow(/NaN not allowed/);
   });
 

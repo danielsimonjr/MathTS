@@ -151,8 +151,48 @@ describe('#1092 validation cost: only user data is validated', () => {
     Array.from({ length: N }, (_r, i) => Array.from({ length: N }, (_c, j) => offset + i + j));
 
   it('matrix(array) validates every element once', () => {
-    const data = rows(0);
+    // `validate` of the constructor tests a number leaf with `typeof` (a numeric array is the
+    // common case, and a `typeof` test is about 2 times faster), so only a leaf that is not a
+    // number reaches `Array.isArray`. A bigint leaf makes the count see each element.
+    const data = rows(0).map((row) => row.map((v) => BigInt(v)));
     expect(isArrayCalls(() => matrix(data))).toBeGreaterThanOrEqual(N * N);
+  });
+
+  it('matrix(array) of numbers reaches the last element', () => {
+    // A number leaf is not visible to the `Array.isArray` count, so check the reach directly:
+    // an array in the last place of the last row is found.
+    const data = rows(0) as unknown[][];
+    data[N - 1][N - 1] = [1];
+    expect(thrown(() => matrix(data))).toBeInstanceOf(Error);
+    data[N - 1][N - 1] = 1;
+    expect(thrown(() => matrix(data))).toBeUndefined();
+  });
+
+  /**
+   * Count the calls of the validation step of the constructor during fn. The instrument is the
+   * validation function itself, so a change of its inner loop (for example a `typeof` test that
+   * skips `Array.isArray` for a number) cannot blind it.
+   */
+  function validationCalls(fn: () => unknown): number {
+    const klass = MathJSDenseMatrix as unknown as {
+      _validateRows: (...args: unknown[]) => unknown;
+    };
+    const original = klass._validateRows;
+    let calls = 0;
+    klass._validateRows = function (this: unknown, ...args: unknown[]) {
+      calls++;
+      return original.apply(this, args);
+    };
+    try {
+      fn();
+    } finally {
+      klass._validateRows = original;
+    }
+    return calls;
+  }
+
+  it('matrix(array) calls the validation step once (positive control of the counter)', () => {
+    expect(validationCalls(() => matrix(rows(0)))).toBe(1);
   });
 
   it('add and multiply of two bridge matrices do not validate their result', () => {
@@ -163,8 +203,8 @@ describe('#1092 validation cost: only user data is validated', () => {
     // Warm both paths, so a one-time lazy setup is not counted.
     add(a, b);
     multiply(a, b);
-    expect(isArrayCalls(() => add(a, b))).toBeLessThan(N * N);
-    expect(isArrayCalls(() => multiply(a, b))).toBeLessThan(N * N);
+    expect(validationCalls(() => add(a, b))).toBe(0);
+    expect(validationCalls(() => multiply(a, b))).toBe(0);
   });
 });
 
