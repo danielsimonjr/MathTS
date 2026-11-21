@@ -1,5 +1,7 @@
 import { isBigNumber, isComplex, isFraction, isMatrix, isResultSet, isUnit } from './is.js';
 import { isPlainObject, isSafeProperty, setSafeProperty } from './customs.js';
+import { isPlainNumericBuffer } from './plain-numeric-buffer.js';
+import { NATIVE_MATRIX_BRAND } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * Functions copied onto the math namespace (`sin`, `min`, …). Safe evaluate may
@@ -56,21 +58,23 @@ function isHostIdentity(value: object): boolean {
   }
 }
 
+// `NATIVE_MATRIX_BRAND` (core) is the brand that `Matrix.prototype` of the matrix package carries;
+// `DenseMatrix` and `SparseMatrix` inherit it. Safe evaluate cannot make or read a symbol, so only
+// host code can put the brand on a value.
+
+function isNativeMatrix(value: object): boolean {
+  return (value as Record<symbol, unknown>)[NATIVE_MATRIX_BRAND] === true;
+}
+
 function isMathBrand(value: object): boolean {
   if (
     isComplex(value) ||
+    isNativeMatrix(value) ||
     isFraction(value) ||
     isBigNumber(value) ||
     isMatrix(value) ||
     isUnit(value) ||
     isResultSet(value)
-  ) {
-    return true;
-  }
-  if (
-    value instanceof Float64Array ||
-    value instanceof Float32Array ||
-    value instanceof Int32Array
   ) {
     return true;
   }
@@ -127,8 +131,6 @@ export function sanitizeEvaluateResult(
     return obj.map((entry) => sanitizeEvaluateResult(entry, seen, trusted));
   }
 
-  if (ArrayBuffer.isView(obj)) return value;
-
   if (isDataObject(obj)) {
     const out: Record<string, unknown> = {};
     for (const key of Object.keys(obj)) {
@@ -142,8 +144,13 @@ export function sanitizeEvaluateResult(
     return out;
   }
 
+  // The storage of a matrix of the matrix package passes here only, and only as a plain numeric
+  // buffer. A typed array on its own, in an object that has no matrix brand, of another kind, of
+  // a subclass, or with an own property goes to the recursive call, which refuses it.
+  const nativeMatrix = isNativeMatrix(obj);
   for (const key of Object.keys(obj)) {
     const child = (obj as Record<string, unknown>)[key];
+    if (nativeMatrix && isPlainNumericBuffer(child)) continue;
     if (child !== null && (typeof child === 'object' || typeof child === 'function')) {
       sanitizeEvaluateResult(child, seen, trusted);
     }

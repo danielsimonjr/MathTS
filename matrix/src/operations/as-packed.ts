@@ -5,9 +5,10 @@
  * in `@danielsimonjr/mathts-functions`.
  */
 
-import { DenseMatrix, isDenseMatrix } from '../types/DenseMatrix.js';
+import { DenseMatrix, assertNestedEntry, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { densifyForSolver } from './densify.js';
+import { implicitNumber } from './entry-rule.js';
 import { denseReader } from '../types/dense/storage.js';
 
 /** Row-major packed matrix given explicitly when length alone is ambiguous. */
@@ -96,6 +97,52 @@ function nestedFromPacked(data: Float64Array, rows: number, cols: number): numbe
   return nested;
 }
 
+/**
+ * Row and column count of a nested matrix. Throws the decomposition input error for a 1-D array,
+ * and a TypeError for a row that is not an array or that has another length than row 0. Reads no entry: a caller with entries of another type (the
+ * typed path of `lusolve`) uses it for the shape only.
+ */
+export function nestedMatrixShape(input: readonly unknown[]): { rows: number; cols: number } {
+  const rows = input.length;
+  const first = input[0];
+  // A 1-D array is no nested matrix: it gets the input error of every decomposition reader.
+  if (rows > 0 && !Array.isArray(first)) invalidDecompositionInput(input);
+  const cols = Array.isArray(first) ? first.length : 0;
+  for (let i = 0; i < rows; i++) {
+    const row = input[i];
+    if (!Array.isArray(row) || row.length !== cols) {
+      throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
+    }
+  }
+  return { rows, cols };
+}
+
+/**
+ * The entries of a rectangular nested matrix as numbers, by the entry rule of mathjs
+ * (`implicitNumber`: a numeric string, a boolean, `null` and `undefined` convert). An input of
+ * numbers is returned as it is; the copy starts at the first entry that is not a number.
+ * An entry with no conversion (a BigNumber, Fraction or Complex in this floating-point package,
+ * an array, an object) throws the entry TypeError of the DenseMatrix constructor.
+ */
+function numberEntries(input: readonly unknown[][], rows: number, cols: number): number[][] {
+  let out: number[][] | undefined;
+  for (let i = 0; i < rows; i++) {
+    const row = input[i];
+    for (let j = 0; j < cols; j++) {
+      const value = row[j];
+      if (typeof value === 'number') {
+        if (out !== undefined) out[i][j] = value;
+        continue;
+      }
+      const n = implicitNumber(value);
+      if (n === undefined) assertNestedEntry(value, i, j);
+      out ??= input.map((r) => r.slice()) as number[][];
+      out[i][j] = n as number;
+    }
+  }
+  return out ?? (input as number[][]);
+}
+
 function resolveDimensions(input: DecompositionMatrixInput): {
   rows: number;
   cols: number;
@@ -109,14 +156,8 @@ function resolveDimensions(input: DecompositionMatrixInput): {
     return { rows: dense.rows, cols: dense.cols, nested: dense.toArray() };
   }
   if (isNestedNumberMatrix(input)) {
-    const rows = input.length;
-    const cols = input[0]?.length ?? 0;
-    for (let i = 0; i < rows; i++) {
-      if (!Array.isArray(input[i]) || input[i].length !== cols) {
-        throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
-      }
-    }
-    return { rows, cols, nested: input };
+    const { rows, cols } = nestedMatrixShape(input);
+    return { rows, cols, nested: numberEntries(input, rows, cols) };
   }
   if (input instanceof Float64Array) {
     const size = squareSize(input.length);

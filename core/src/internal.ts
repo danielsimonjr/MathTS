@@ -240,4 +240,6 @@ export {
   withPow2Scale,
 } from './pow2-scale.js';
 export type { EntryRange } from './pow2-scale.js';
+export { convertToNumber, isNumberTypedArray } from './typed/number-input.js';
+export { NATIVE_MATRIX_BRAND } from './types/type-marker.js';
 export { notSquareError } from './square-error.js';
