@@ -35,6 +35,37 @@ export function assertRectangular(m: readonly unknown[]): asserts m is unknown[]
   }
 }
 
+/** The shape and entry access that every sparse matrix kind has. */
+export interface SparseLike {
+  rows: number;
+  cols: number;
+  get(i: number, j: number): number;
+  toArray?: () => number[][];
+}
+
+/**
+ * Reads the order of a square matrix from its size. The size of a boxed matrix comes from
+ * `size()`, and the size of a native or sparse matrix is `[rows, cols]`. The 1-D empty size
+ * `[0]` is the 0 x 0 matrix (the only Array form of an empty matrix is `[]`). A 1-D size `[k]`
+ * with k above 0 reads as k x 0.
+ *
+ * @param name - The name of the function, for the error message.
+ * @param size - The size of the matrix.
+ * @param ErrorType - The class of the error for a matrix that is not square. The default is `Error`.
+ * @returns The order n of an n x n matrix. The order of the empty matrix is 0.
+ * @throws An `ErrorType` when the matrix is not 2-D and square.
+ */
+export function squareOrder(
+  name: string,
+  size: readonly number[],
+  ErrorType: new (message: string) => Error = Error
+): number {
+  if (size.length === 1 && size[0] === 0) return 0;
+  if (size.length === 2 && size[0] === size[1]) return size[0];
+  const shown = size.length === 1 ? `${size[0]}×0` : size.join('×');
+  throw new ErrorType(`${name}: matrix must be square (got ${shown})`);
+}
+
 /** The type name of a value, for an error message: the class name of an object. */
 function typeNameOf(value: unknown): string {
   if (value === null) return 'null';

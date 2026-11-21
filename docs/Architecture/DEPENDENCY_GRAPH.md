@@ -12619,19 +12619,19 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import                                                                                                                                                                                                                                    |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@danielsimonjr/mathts-matrix` | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, isDenseMatrix, matMul, transposeNestedArray` |
-| `@danielsimonjr/mathts-core`   | `mathTyped`                                                                                                                                                                                                                               |
+| Package                        | Import                                                                                                                                                                                                                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@danielsimonjr/mathts-matrix` | `eig, svd, cholesky, cond, norm2, normFro, lowRankApprox, singularValues, matrixPinv, PinvOptions, matrixExpm, matrixLogm, matrixSqrtm, ExpmOptions, LogmOptions, SqrtmOptions, DenseMatrix, SparseMatrix, isDenseMatrix, isSparseMatrix, matMul, transposeNestedArray` |
+| `@danielsimonjr/mathts-core`   | `mathTyped`                                                                                                                                                                                                                                                             |
 
 **Internal Dependencies:**
 
-| File                            | Imports             | Type   |
-| ------------------------------- | ------------------- | ------ |
-| `../factories/scope.js`         | `factoryScope`      | Import |
-| `./number-matrix.js`            | `isNumberMatrix`    | Import |
-| `../factories/matrix-bridge.js` | `MathJSDenseMatrix` | Import |
-| `../utils/array.js`             | `arraySize`         | Import |
+| File                            | Imports                                   | Type   |
+| ------------------------------- | ----------------------------------------- | ------ |
+| `../factories/scope.js`         | `factoryScope`                            | Import |
+| `./number-matrix.js`            | `isNumberMatrix, squareOrder, SparseLike` | Import |
+| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`   | Import |
+| `../utils/array.js`             | `arraySize`                               | Import |
 
 **Exports:**
 
@@ -12653,7 +12653,8 @@ graph LR
 
 **Exports:**
 
-- Functions: `isNumberMatrix`, `assertRectangular`, `assertNumberScalar`, `hasNaN`, `numberVector`
+- Interfaces: `SparseLike`
+- Functions: `isNumberMatrix`, `assertRectangular`, `squareOrder`, `assertNumberScalar`, `hasNaN`, `numberVector`
 
 ---
 
@@ -21950,12 +21951,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1359   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 245801 |
-| Total Exports           | 7453   |
+| Total Lines of Code     | 245861 |
+| Total Exports           | 7454   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |
-| Total Interfaces        | 676    |
-| Total Functions         | 2630   |
+| Total Interfaces        | 677    |
+| Total Functions         | 2631   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

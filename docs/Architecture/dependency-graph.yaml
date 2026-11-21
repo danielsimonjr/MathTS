@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-11-21'
   totalFiles: 1359
   totalModules: 82
-  totalExports: 7453
+  totalExports: 7454
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -27443,9 +27443,12 @@ modules:
         - file: ./number-matrix.js
           imports:
             - isNumberMatrix
+            - squareOrder
+            - SparseLike
         - file: ../factories/matrix-bridge.js
           imports:
             - MathJSDenseMatrix
+            - MathJSSparseMatrix
         - file: ../utils/array.js
           imports:
             - arraySize
@@ -27470,7 +27473,9 @@ modules:
             - LogmOptions
             - SqrtmOptions
             - DenseMatrix
+            - SparseMatrix
             - isDenseMatrix
+            - isSparseMatrix
             - matMul
             - transposeNestedArray
         - package: '@danielsimonjr/mathts-core'
@@ -27540,12 +27545,16 @@ modules:
       exports:
         - isNumberMatrix
         - assertRectangular
+        - squareOrder
         - assertNumberScalar
         - hasNaN
         - numberVector
+      interfaces:
+        - SparseLike
       functions:
         - isNumberMatrix
         - assertRectangular
+        - squareOrder
         - assertNumberScalar
         - hasNaN
         - numberVector
@@ -47510,11 +47519,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1359
   totalModules: 82
-  totalLinesOfCode: 245801
-  totalExports: 7453
+  totalLinesOfCode: 245861
+  totalExports: 7454
   totalClasses: 64
-  totalInterfaces: 676
-  totalFunctions: 2630
+  totalInterfaces: 677
+  totalFunctions: 2631
   totalTypeGuards: 185
   totalEnums: 0
   totalConstants: 1701

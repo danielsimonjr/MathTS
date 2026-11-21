@@ -30,14 +30,16 @@ import {
   type LogmOptions,
   type SqrtmOptions,
   DenseMatrix,
+  SparseMatrix,
   isDenseMatrix,
+  isSparseMatrix,
   matMul as denseMatMul,
   transposeNestedArray as transpose,
 } from '@danielsimonjr/mathts-matrix';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { factoryScope } from '../factories/scope.js';
-import { isNumberMatrix } from './number-matrix.js';
-import { MathJSDenseMatrix } from '../factories/matrix-bridge.js';
+import { isNumberMatrix, squareOrder, type SparseLike } from './number-matrix.js';
+import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 import { arraySize } from '../utils/array.js';
 
 // =============================================================================
@@ -1180,8 +1182,10 @@ export const singularValues = mathTyped('singularValues', {
 /**
  * Compute the matrix exponential via Padé-13 scaling-and-squaring.
  *
- * Dispatches on `DenseMatrix` (returns `DenseMatrix`) or `Array` (number[][],
- * wraps in DenseMatrix, returns number[][]).
+ * A matrix argument gives a matrix of the same class and storage (#1264). A native
+ * `DenseMatrix` gives a native `DenseMatrix`, a boxed dense matrix (from `matrix()`) gives a
+ * boxed dense matrix, and a sparse matrix gives a sparse matrix of its own kind (the public CSR
+ * `SparseMatrix` or the boxed CSC matrix). An `Array` (number[][]) gives an `Array`.
  *
  * Algorithm: Higham (2005) "The scaling and squaring method for the matrix
  * exponential revisited." Accurate to near machine precision for general real
@@ -1193,30 +1197,55 @@ export const singularValues = mathTyped('singularValues', {
  * matrixExpm([[1,0],[0,1]])                     // => [[e,0],[0,e]]
  */
 export const matrixExpm = mathTyped('matrixExpm', {
-  DenseMatrix: (A: Parameters<typeof matrixExpmPrimitive>[0]) => matrixExpmPrimitive(A),
+  DenseMatrix: expmDense,
   'DenseMatrix, Object': (A: Parameters<typeof matrixExpmPrimitive>[0], _opts: ExpmOptions) =>
-    matrixExpmPrimitive(A),
+    expmDense(A),
   // A sparse matrix converts to an Array, and a 0 x n matrix converts to [], so the shape
-  // is read here, before the conversion (#1233). The result is an Array.
-  SparseMatrix: (A: SparseLike) => {
-    const { rows, cols } = A;
-    if (rows !== cols) {
-      throw new Error(`matrixExpm: matrix must be square (got ${rows}×${cols})`);
-    }
-    if (typeof A.toArray === 'function') return expmArray(A.toArray());
-    return expmArray(
-      Array.from({ length: rows }, (_, i) => Array.from({ length: cols }, (_, j) => A.get(i, j)))
-    );
-  },
+  // is read here, before the conversion (#1233). The result keeps the sparse kind (#1264).
+  SparseMatrix: expmSparse,
   Array: expmArray,
 });
 
-/** The shape and entry access that every sparse matrix kind has. */
-interface SparseLike {
-  rows: number;
-  cols: number;
-  get(i: number, j: number): number;
-  toArray?: () => number[][];
+/**
+ * The exponential of a dense matrix argument, in the class of the argument. A native
+ * `DenseMatrix` takes the matrix package. A boxed matrix (the dispatch type `DenseMatrix` also
+ * matches the boxed class) gives a boxed matrix, with its size read from `size()`, because a 0 x n
+ * matrix converts to `[]` and loses its shape.
+ *
+ * @param A - A native or boxed dense matrix.
+ * @returns A matrix of the same class as `A`.
+ * @throws An `Error` when `A` is not a square 2-D matrix.
+ */
+function expmDense(A: Parameters<typeof matrixExpmPrimitive>[0]) {
+  if (isDenseMatrix(A)) return matrixExpmPrimitive(A);
+  const n = squareOrder('matrixExpm', (A as unknown as { size(): number[] }).size());
+  if (n === 0) return new MathJSDenseMatrix({ data: [], size: [0, 0] });
+  const data = matrixExpmPrimitive(A).toArray();
+  return new MathJSDenseMatrix({ data, size: [n, n] });
+}
+
+/**
+ * The exponential of a sparse matrix, in the sparse kind of the argument: the public CSR
+ * `SparseMatrix` gives a `SparseMatrix`, and a boxed CSC matrix gives a boxed CSC matrix.
+ *
+ * @param A - A sparse matrix of either kind.
+ * @returns A sparse matrix of the same kind as `A`.
+ * @throws An `Error` when `A` is not square.
+ */
+function expmSparse(A: SparseLike) {
+  const n = squareOrder('matrixExpm', [A.rows, A.cols]);
+  const data =
+    n === 0
+      ? []
+      : expmArray(
+          typeof A.toArray === 'function'
+            ? A.toArray()
+            : Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => A.get(i, j)))
+        );
+  if (isSparseMatrix(A)) {
+    return SparseMatrix.fromDense(n === 0 ? DenseMatrix.zeros(0, 0) : DenseMatrix.fromArray(data));
+  }
+  return new MathJSSparseMatrix(data);
 }
 
 function expmArray(A: number[][]): number[][] {

@@ -10,11 +10,24 @@
  * mathjs 15.2.0 rule: a Matrix in gives a Matrix out, an Array in gives an Array out.
  */
 import { describe, expect, it } from 'vitest';
-import { matrix, sylvester as sylvesterFn } from '../src/index.js';
+import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
+import { expm as expmFn, matrix, sparse, sylvester as sylvesterFn, zeros } from '../src/index.js';
+
+type Fn1 = (a: unknown) => unknown;
 
 type Fn3 = (a: unknown, b: unknown, c: unknown) => unknown;
 
+type BridgeMatrix = { storage(): string; size(): number[]; toArray(): unknown };
+
+const expm = expmFn as unknown as Fn1;
+
 const sylvester = sylvesterFn as unknown as Fn3;
+
+/** The size of a bridge matrix (`size()`), a native dense or a public CSR matrix (`rows`, `cols`). */
+const sz = (r: unknown): number[] => {
+  const m = r as { size?: unknown; rows: number; cols: number };
+  return typeof m.size === 'function' ? (m.size as () => number[])() : [m.rows, m.cols];
+};
 
 const I2 = [
   [1, 0],
@@ -32,6 +45,88 @@ const expectCloseTo = (actual: unknown, expected: number[][], digits = 12) => {
     }
   }
 };
+
+const E = Math.E;
+
+const expE: number[][] = [
+  [E, 0],
+  [0, E],
+];
+
+describe('#1264 expm keeps the matrix class and storage', () => {
+  it('T1 a dense Matrix gives a dense Matrix with size()', () => {
+    const r = expm(matrix(I2)) as BridgeMatrix;
+    expect(Array.isArray(r)).toBe(false);
+    expect(typeof r.size).toBe('function');
+    expect(r.storage()).toBe('dense');
+    expect(r.size()).toEqual([2, 2]);
+    expectCloseTo(r.toArray(), expE);
+  });
+
+  it('T2 a sparse Matrix gives a sparse Matrix', () => {
+    const r = expm(sparse(I2)) as BridgeMatrix;
+    expect(Array.isArray(r)).toBe(false);
+    expect(r.storage()).toBe('sparse');
+    expect(r.size()).toEqual([2, 2]);
+    expectCloseTo(r.toArray(), expE);
+  });
+
+  it('T3 a public CSR SparseMatrix gives a public CSR SparseMatrix', () => {
+    const r = expm(SparseMatrix.fromDense(DenseMatrix.identity(2)));
+    expect(r instanceof SparseMatrix).toBe(true);
+    expect(sz(r)).toEqual([2, 2]);
+    const s = r as SparseMatrix;
+    expect(s.get(0, 0)).toBeCloseTo(E, 12);
+    expect(s.get(1, 1)).toBeCloseTo(E, 12);
+    expect(s.get(0, 1)).toBe(0);
+  });
+
+  it('T4 a native DenseMatrix stays a native DenseMatrix', () => {
+    const r = expm(DenseMatrix.identity(2));
+    expect(r instanceof DenseMatrix).toBe(true);
+    expectCloseTo((r as DenseMatrix).toArray(), expE);
+  });
+
+  it('T5 an Array stays an Array, and empty and non-square inputs follow the container rule', () => {
+    const arr = expm(I2);
+    expect(Array.isArray(arr)).toBe(true);
+    expectCloseTo(arr, expE);
+
+    const empty = expm(matrix([])) as BridgeMatrix;
+    expect(typeof empty.size).toBe('function');
+    expect(empty.storage()).toBe('dense');
+    expect(empty.size()).toEqual([0, 0]);
+
+    const emptySparse = expm(sparse([])) as BridgeMatrix;
+    expect(Array.isArray(emptySparse)).toBe(false);
+    expect(emptySparse.storage()).toBe('sparse');
+    expect(emptySparse.size()).toEqual([0, 0]);
+
+    const csr00 = expm(SparseMatrix.fromDense(DenseMatrix.zeros(0, 0)));
+    expect(csr00 instanceof SparseMatrix).toBe(true);
+    expect(sz(csr00)).toEqual([0, 0]);
+
+    expect(() =>
+      expm(
+        matrix([
+          [1, 2, 3],
+          [4, 5, 6],
+        ])
+      )
+    ).toThrow(/square/);
+    expect(() =>
+      expm(
+        matrix([
+          [1, 2, 3],
+          [4, 5, 6],
+        ])
+      )
+    ).toThrow(/2×3/);
+    expect(() => expm(zeros(0, 3))).toThrow(/0×3/);
+    expect(() => expm(matrix([1, 2, 3]))).toThrow(/square/);
+    expect(() => expm(sparse([[1, 2, 3]]))).toThrow(/square/);
+  });
+});
 
 describe('#1265 sylvester checks the shapes first', () => {
   const A23 = [

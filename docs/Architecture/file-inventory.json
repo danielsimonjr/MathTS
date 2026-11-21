@@ -9592,7 +9592,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1294
+      "loc": 1323
     },
     {
       "file": "functions/src/typed/normal-equations-solve.ts",
@@ -9606,7 +9606,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 117
+      "loc": 148
     },
     {
       "file": "functions/src/typed/numeric.ts",
@@ -11321,7 +11321,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 121
+      "loc": 222
     },
     {
       "file": "functions/tests/dogfood-1273-ragged-sparse.test.ts",
