@@ -1,5 +1,116 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.1
+
+### Patch Changes
+
+- 33acba1: `std`, `corr`, `skewness`, `kurtosis`, `describe`, the factory 2-norm, `parallelStatStd`, `parallelStatNorm`, the pool `variance` and the statistics that use the same sum now compute the result again with an exact power-of-2 scale when a sum of squares is below 2^-800 or overflows. Before, subnormal squares lost digits: `std([1e-160, 3e-160])` had a relative error of 5.6e-6, and `std` of data of order 1e-170 was 0. `skewness` and `kurtosis` do the same when the third or fourth powers leave the range. `linregress`, `linearRegression`, `partialCorrelation`, the effect sizes, the t tests, `fTest`, `bartlettTest`, `jarqueBera`, `dagostinoTest`, `acf`, `pacf`, `ljungBox`, `distance2D`, `distance3D`, `distanceND` and `gaussianKDE` use the same core helpers. `linregress` and `linearRegression` keep a finite slope when the two scales differ by more than the double range. Core adds `SQUARES_SAFE_MIN`, `ROOT_SAFE_MIN`, `squareSumsKeepDigits`, `powerOfTwoBelow`, `powerOfTwoScaleOf`, `scaleForVariance`, `divideByScale` and `stdFromSquaredDeviations`. Compat `std` and `variance` now use the functions implementations: they honour the dimension argument, the variadic form and BigNumber data, as mathjs does. (Refs #1280)
+- a5bc409: `add`, `subtract` and `mod` of two Arrays broadcast like mathjs and NumPy. The axes are right-aligned and an axis of size 1 stretches, so `add([9, 8], zeros([2, 1]))` is `[[9, 8], [9, 8]]` and `add([[1, 2], [3, 4]], [10, 20])` is `[[11, 22], [13, 24]]`. Before, the walk paired the first axes. Shapes that cannot broadcast throw `RangeError`, for example `add([[1, 2, 3]], [1, 2])`. `add(matrix([1, 2]), [[1, 2], [3, 4]])` follows from the same rule. The compat `add` and `subtract` send operands of different sizes to the same function: `create(all).add(matrix([1, 2]), matrix([[1, 2], [3, 4]]))` threw `Matrix dimensions must match` and is now `[[2, 4], [4, 6]]`. (Refs #1302)
+- 789a41a: A result matrix takes its size from the operands, not from its nested data. `multiply`, `add` and `subtract` of 0 x 0 matrices keep the size `[0, 0]`, `sparse(zeros(0, 3))` keeps the size 0 x 3, and compat `matrix(x, format)` keeps the size of a native matrix with a zero dimension. `freqz` throws a `RangeError` for a coefficient matrix that is not a vector. Compat `divide` of two native `DenseMatrix` operands gives a native `DenseMatrix`. (Refs #1337)
+- 33acba1: The public types of `median`, `mode` and `mad` give the number type for a `readonly number[]` argument, and `median('x')`, `median({})`, `median()`, `mad()`, `mode()` and `mode(array, 0)` are compile errors. A spread of a plain array (`median(...xs)`) no longer compiles: pass the array. `matrix()` and `sparse()` return the new public type `BridgeMatrix`, and `bignumber()` of a scalar returns `BigNumber`. So `median`, `mode`, `mad`, `mean`, `variance` and `std` of `matrix(x)` compile. The statistics functions take the new public type `MatrixValue`. Compat `matrix()` and `sparse()` return the same `BridgeMatrix`. At run time, `mode` of a Matrix inside the argument list throws a `TypeError` in place of the false NaN message. `parallelFFT`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `dct`, `dst`, `hilbertTransform`, `polymul`, `newtonInterp`, `polyFit` and the other callers of the shared sample copy throw a `TypeError` for an array entry with no numeric reading (a nested array such as the column `[[1], [3], [5]]`, an object, `undefined`, a string that is no number). A BigNumber, a Fraction and a numeric string entry still convert, and `''`, `' '`, `true` and `null` read as 0, 0, 1 and 0. `parallelStatStd` and `parallelStatVariance` throw the `TypeError` of `std` for an unknown normalization string. (Refs #964, Refs #1359)
+- 789a41a: `expm` of a matrix returns a matrix of the same class and storage. Before, `expm(matrix(A))` returned a native `DenseMatrix` with no `size` method, and `expm(sparse(A))` returned an Array. Now a dense matrix gives a dense matrix, a sparse matrix gives a sparse matrix of its own kind, and an Array gives an Array. A matrix with one or three dimensions now throws the square error with its real size. A matrix that is not square throws a `RangeError` at every site, as in mathjs; before, the same rule threw a plain `Error` at some sites. Each message stays the same, except `eigsh`: an empty input throws `eigsh: dense matrix input must be non-empty`, and a ragged input throws `eigsh: dense matrix input must be square`. A `catch` of `Error` still catches the error. `pinv`, `re`, `im`, `arg` and `setDistinct` of a matrix give a matrix (they gave an Array); `pinv([])` is `[]`, and a 1-D matrix gives a 1-D result. (Refs #1264)
+- 8879eea: `matrix(data, format)` checks its format, as in mathjs. A format other than `'dense'`, `'default'` or `'sparse'` throws `Unknown matrix type "foo".` (a boolean is read as a string), and a format that is not a string or boolean throws a `TypeError`. `matrix(sparseMatrix, 'dense')` and `matrix(sparseMatrix, 'default')` return a dense matrix with the same entries; before, they returned the sparse matrix. `matrix(m)` of a matrix, and `matrix(data)` of an Array, give a copy, as in mathjs. (Refs #1284)
+- 789a41a: `pow` of a 0 x 0 matrix returns a 0 x 0 matrix of the same kind: `pow([], 2)` is `[]`, and a Matrix gives a Matrix. Before, the call threw `TypeError`. A 0 x 3 matrix throws the square `RangeError`, and the exponent rule (a non-negative integer) holds for an empty matrix too. `pow` and `sqrtm` of a non-empty Matrix now return a Matrix, as mathjs does (a sparse matrix gives a dense matrix); an Array still gives an Array. A call of the `compat` adapter with a native `DenseMatrix` now returns a public `DenseMatrix` for a result with a zero dimension, where it returned `[]` or threw: `sqrtm`, `sylvester`, `kron`, `inv`, `map`, `larger`, `equal` and the factors of `qr`. (Refs #1278)
+- 8879eea: `zeros` and `ones` take an Array size, three or more sizes and a format, as in mathjs. `zeros([2, 3, 2])` is a 2 x 3 x 2 Array, `zeros(2, 3, 2)` is a matrix of size [2, 3, 2], `zeros([])` is `[]` and `zeros(2, 2, 'sparse')` is a sparse matrix. `zeros(n)` is still a `number[]` and `zeros(r, c)` is still a native DenseMatrix. (Refs #1288)
+- 8879eea: `matrix(undefined)` throws a `TypeError`, as in mathjs, and `matrix(undefined, 'sparse')` does too. Before, an explicit `undefined` data argument gave an empty matrix. A call with no argument, `matrix()`, is still an empty dense matrix, and `matrix(data, undefined)` is still read as no format. (Refs #1284)
+- a5bc409: `multiply` takes a 1-D operand, as mathjs does. A vector times a vector is the scalar product (`multiply([1, 2], [3, 4])` is 11, and it conjugates a Complex entry of the left vector, as `dot` does). A matrix times a vector and a vector times a matrix give a vector. A length mismatch throws `RangeError` with the mathjs text, and an operand of 3 or more dimensions throws `Error` with the mathjs text. `evaluate('[1,2]*[3,4]')` gives 11. The compat instance sends a 1-D operand to the same function: `create(all).multiply([[1, 2], [3, 4]], [1, 1])` threw `TypeError` and is now `[3, 7]`. A compat result of a 1-D matrix now has the mathjs shape, not a 1 x n row: `subtract(matrix([3, 4]), 1)` was `[[2, 3]]` and is `[2, 3]`, `multiply(matrix([1, 3, 4]), matrix([[-1], [0], [-2]]))` was `[[-9]]` and is `[-9]`, and `multiply(matrix([-3, 4, 4]), matrix([0, -4, 0]))` threw and is `-16`. A product with an empty axis follows mathjs: `multiply([[1], [2]], [[]])` threw `TypeError` and is `[[], []]`, and `multiply([[], []], [])` was `[0, 0]` and throws `TypeError`. (Refs #1007)
+- Updated dependencies [8879eea]
+- Updated dependencies [9cda207]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [b866b34]
+- Updated dependencies [a5bc409]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [9cda207]
+- Updated dependencies [9cda207]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [2df36db]
+- Updated dependencies [33acba1]
+- Updated dependencies [c12439a]
+- Updated dependencies [a5bc409]
+- Updated dependencies [c12439a]
+- Updated dependencies [789a41a]
+- Updated dependencies [f4df499]
+- Updated dependencies [2df36db]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [8879eea]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [33acba1]
+- Updated dependencies [f4df499]
+- Updated dependencies [b866b34]
+- Updated dependencies [6c87a8b]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [789a41a]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [a50902c]
+- Updated dependencies [789a41a]
+- Updated dependencies [a50902c]
+- Updated dependencies [a50902c]
+- Updated dependencies [4966096]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [8879eea]
+- Updated dependencies [89f1ec7]
+- Updated dependencies [c12439a]
+- Updated dependencies [789a41a]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [a50902c]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [a50902c]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [8879eea]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [4966096]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [6c87a8b]
+- Updated dependencies [a50902c]
+- Updated dependencies [a50902c]
+- Updated dependencies [a5bc409]
+- Updated dependencies [9cda207]
+- Updated dependencies [8879eea]
+- Updated dependencies [a5bc409]
+- Updated dependencies [2df36db]
+- Updated dependencies [c12439a]
+- Updated dependencies [c12439a]
+- Updated dependencies [6c87a8b]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [8879eea]
+- Updated dependencies [a5bc409]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [a5bc409]
+- Updated dependencies [b866b34]
+- Updated dependencies [6c87a8b]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [89f1ec7]
+- Updated dependencies [b866b34]
+- Updated dependencies [89f1ec7]
+- Updated dependencies [33acba1]
+- Updated dependencies [c12439a]
+- Updated dependencies [8879eea]
+- Updated dependencies [33acba1]
+- Updated dependencies [8879eea]
+- Updated dependencies [89f1ec7]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [f4df499]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [2df36db]
+- Updated dependencies [6c87a8b]
+- Updated dependencies [c12439a]
+- Updated dependencies [44d5dd0]
+- Updated dependencies [2df36db]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [4966096]
+- Updated dependencies [33acba1]
+- Updated dependencies [b866b34]
+  - @danielsimonjr/mathts-functions@0.88.0
+  - @danielsimonjr/mathts-core@0.30.0
+  - @danielsimonjr/mathts-matrix@0.13.0
+  - @danielsimonjr/mathts-parallel@0.12.1
+
 ## 0.7.0
 
 ### Minor Changes
