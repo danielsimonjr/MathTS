@@ -15,6 +15,8 @@ import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   add,
+  concat,
+  diag,
   bignumber,
   det,
   divide,
@@ -272,5 +274,18 @@ describe('S9 a 3-D operand keeps the error of mathjs (collectionSize reads every
     expect(() => div(2, A3)).toThrow(/must be two dimensional/);
     expect(() => (divide as Bin)(2, A3)).toThrow(/must be two dimensional/);
     expect(() => (divide as Bin)(2, matrix(A3))).toThrow(/must be two dimensional/);
+  });
+});
+
+// #1337 names concat and diag too. mathjs 15.2.0 gives the size [0] for both: concat joins the
+// nested data of two 0 x 0 matrices along the last axis, and the diagonal of a 0 x 0 matrix is a
+// vector of length 0. MathTS gives the same size, so these items are parity, not a defect.
+describe('#1337 concat and diag of 0 x 0 matrices: the size [0], as in mathjs', () => {
+  type Un = (...a: unknown[]) => unknown;
+  it('concat(zeros(0, 0), zeros(0, 0)) and diag(zeros(0, 0)) have the size [0]', () => {
+    expect(size(M.concat(M.zeros(0, 0), M.zeros(0, 0)))).toEqual([0]);
+    expect(size((concat as Un)(zeros(0, 0), zeros(0, 0)))).toEqual([0]);
+    expect(size(M.diag(M.zeros(0, 0)))).toEqual([0]);
+    expect(size((diag as Un)(zeros(0, 0)))).toEqual([0]);
   });
 });

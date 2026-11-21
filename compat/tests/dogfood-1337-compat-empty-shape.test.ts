@@ -126,3 +126,14 @@ describe('compat square rule and freqz', () => {
     expect(() => m.freqz(m.zeros(0, 3), m.zeros(3, 0))).toThrow(RangeError);
   });
 });
+
+// compat concat and diag of a native 0 x 0 matrix give []: the root result has the 1-D size [0]
+// (mathjs parity, #1337), and a native DenseMatrix has no 1-D form, so the compat result is the
+// Array of a vector of length 0. multiply keeps the 2-D size [0, 0] and so stays a matrix.
+describe('compat concat and diag of a native 0 x 0 matrix', () => {
+  it('give the empty vector []; multiply gives a 0 x 0 DenseMatrix', () => {
+    expect(m.concat(dense(0, 0), dense(0, 0))).toEqual([]);
+    expect(m.diag(dense(0, 0))).toEqual([]);
+    expect(sizeOf(m.multiply(dense(0, 0), dense(0, 0)))).toEqual([0, 0]);
+  });
+});
