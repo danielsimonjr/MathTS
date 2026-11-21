@@ -31,6 +31,8 @@ import {
 import { numberLiteral, registerWorkerKernels } from './worker-kernels.js';
 import {
   _lgamma,
+  sinPiScalar,
+  cosPiScalar,
   erfcSelfContained,
   factorial,
   upperGammaQ,
@@ -1406,18 +1408,19 @@ export const ellipticPi = mathTyped('ellipticPi', {
 registerWorkerKernels({
   erfc: [0, 0, () => kernelSource([erfcSelfContained, erfcScalar], '(x) => erfcScalar(x)')],
   erfi: [0, 0, () => kernelSource([erfiScalar], '(x) => erfiScalar(x)')],
-  lgamma: [0, 0, () => kernelSource([_lgamma], '(x) => _lgamma(x)')],
+  lgamma: [0, 0, () => kernelSource([sinPiScalar, _lgamma], '(x) => _lgamma(x)')],
   beta: [
     1,
     1,
-    (b: number) => kernelSource([_lgamma, betaScalar], `(a) => betaScalar(a, ${numberLiteral(b)})`),
+    (b: number) =>
+      kernelSource([sinPiScalar, _lgamma, betaScalar], `(a) => betaScalar(a, ${numberLiteral(b)})`),
   ],
   gammainc: [
     1,
     1,
     (a: number) =>
       kernelSource(
-        [_lgamma, upperGammaQ, gammaincScalar],
+        [sinPiScalar, _lgamma, upperGammaQ, gammaincScalar],
         `(x) => gammaincScalar(${numberLiteral(a)}, x)`
       ),
   ],
@@ -1426,7 +1429,7 @@ registerWorkerKernels({
     1,
     (a: number) =>
       kernelSource(
-        [_lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
+        [sinPiScalar, _lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
         `(x) => gammaincpScalar(${numberLiteral(a)}, x)`
       ),
   ],
@@ -1435,7 +1438,7 @@ registerWorkerKernels({
     2,
     (a: number, b: number) =>
       kernelSource(
-        [_lgamma, incompleteBetaFraction, betaincScalar],
+        [sinPiScalar, _lgamma, incompleteBetaFraction, betaincScalar],
         `(x) => betaincScalar(${numberLiteral(a)}, ${numberLiteral(b)}, x)`
       ),
   ],
@@ -1482,6 +1485,8 @@ registerWorkerKernels({
           besselGammaAux,
           besselJYTemme,
           besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
           _lgamma,
           besselJRealOrder,
           besselJScalar,
@@ -1507,6 +1512,8 @@ registerWorkerKernels({
           besselGammaAux,
           besselJYTemme,
           besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
           _lgamma,
           besselJRealOrder,
           besselYRealOrder,
@@ -1520,7 +1527,7 @@ registerWorkerKernels({
     1,
     (n: number) =>
       kernelSource(
-        [factorial, _lgamma, besselIScalar],
+        [factorial, sinPiScalar, _lgamma, besselIScalar],
         `(x) => besselIScalar(${numberLiteral(n)}, x)`
       ),
   ],

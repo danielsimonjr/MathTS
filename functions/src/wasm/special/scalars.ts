@@ -28,6 +28,39 @@
 type f64 = number;
 
 // =============================================================================
+// sin(pi x), cos(pi x) and 1/Gamma(x)
+// =============================================================================
+
+/**
+ * sin(pi x) with the argument reduced EXACTLY before it meets pi.
+ *
+ * `Math.sin(Math.PI * x)` rounds the product by ulp(pi * x), and next to a nonzero integer m the
+ * sine is about pi * (x - m), so the result keeps only log10(|dist| / ulp(pi * x)) digits
+ * (`sin(pi * -1.0000001)` is wrong from the tenth digit). Here `x - 2 * round(x / 2)` is exact
+ * (a double of at most 53 bits, as the difference of two doubles that share their leading bits),
+ * and so is `1 - a` for `a` in [0.5, 1]. The argument of `Math.sin` is then in [0, pi / 2] and
+ * computed from an exact difference. The result is exactly 0 at an integer and exactly +-1 at a
+ * half-integer. A non-finite x gives NaN. Standalone: `Math` only (see the serialization invariant).
+ */
+export function sinPiScalar(x: f64): f64 {
+  const r = x - 2 * Math.round(x / 2);
+  const a = Math.abs(r);
+  const s = a > 0.5 ? Math.sin(Math.PI * (1 - a)) : Math.sin(Math.PI * a);
+  return s === 0 ? 0 : r < 0 ? -s : s;
+}
+
+/**
+ * cos(pi x) with the same exact reduction as `sinPiScalar`. The result is exactly 0 at a
+ * half-integer and exactly +-1 at an integer. A non-finite x gives NaN. Standalone.
+ */
+export function cosPiScalar(x: f64): f64 {
+  const a = Math.abs(x - 2 * Math.round(x / 2));
+  if (a < 0.25) return Math.cos(Math.PI * a);
+  if (a <= 0.75) return Math.sin(Math.PI * (0.5 - a));
+  return -Math.cos(Math.PI * (1 - a));
+}
+
+// =============================================================================
 // Log-gamma
 // =============================================================================
 
@@ -43,7 +76,8 @@ export function _lgamma(x: f64): f64 {
     // negative for negative non-integer x and would yield NaN. (The earlier
     // typed/special.ts copy used bare sin and returned NaN for e.g. -0.5; the
     // WASM-bridge copy used abs and was correct. Reconciled to the correct form.)
-    const sinPiX = Math.abs(Math.sin(Math.PI * x));
+    // sinPiScalar reduces x exactly: Math.sin(Math.PI * x) lost digits next to an integer.
+    const sinPiX = Math.abs(sinPiScalar(x));
     if (sinPiX === 0) return Infinity;
     return Math.log(Math.PI / sinPiX) - _lgamma(1 - x);
   }
@@ -60,6 +94,19 @@ export function _lgamma(x: f64): f64 {
   }
   const t = x + g + 0.5;
   return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
+}
+
+/**
+ * Reciprocal gamma 1 / Gamma(z), with the sign of Gamma. It is 0 at a non-positive integer
+ * (where Gamma has a pole) and exact in sign everywhere: for z < 0 the reflection
+ * 1 / Gamma(z) = sin(pi z) Gamma(1 - z) / pi uses `sinPiScalar`. Overflows to +-Infinity when
+ * Gamma(1 - z) does (1 - z above 171.6). A NaN z gives NaN.
+ */
+export function rgammaScalar(z: f64): f64 {
+  if (z !== z) return NaN;
+  if (z > 0) return Math.exp(-_lgamma(z));
+  if (z === Math.floor(z)) return 0;
+  return (sinPiScalar(z) * Math.exp(_lgamma(1 - z))) / Math.PI;
 }
 
 /**
@@ -507,12 +554,12 @@ export function besselJRealOrder(nu: f64, x: f64): f64 {
   const an = Math.abs(nu);
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, false);
   if (nu >= 0) return besselJYTemme(an, x)[0];
-  // J_{-nu} = cos(nu pi) J_nu - sin(nu pi) Y_nu, with nu reduced to [0, 2) before the product
-  // with pi (see besselYRealOrder). The factor -sin(nu pi) goes into the Y recurrence, so the
-  // product is right also where Y_nu alone is outside the double range.
-  const f = an - 2 * Math.floor(an / 2);
-  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
-  const jy = besselJYTemme(an, x, -Math.sin(f * Math.PI));
+  // J_{-nu} = cos(nu pi) J_nu - sin(nu pi) Y_nu, with nu reduced exactly before the product with pi
+  // (sinPiScalar, cosPiScalar: cos is exactly 0 at a half-integer, and sin keeps its digits next
+  // to an integer). The factor -sin(nu pi) goes into the Y recurrence, so the product is right
+  // also where Y_nu alone is outside the double range.
+  const c = cosPiScalar(an);
+  const jy = besselJYTemme(an, x, -sinPiScalar(an));
   return c * jy[0] + jy[1];
 }
 
@@ -523,13 +570,12 @@ export function besselYRealOrder(nu: f64, x: f64): f64 {
   const an = Math.abs(nu);
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, true);
   if (nu >= 0) return besselJYTemme(an, x)[1];
-  // Y_{-nu} = sin(nu pi) J_nu + cos(nu pi) Y_nu. Reduce nu to [0, 2) before the product with pi:
-  // the product loses log2(nu) bits, and at a half-integer cos(nu pi) is exactly 0, not 1e-14,
-  // which times the huge Y_nu (besselY(-100.5, 1) = 6e-190, not -2e172) gave a wrong value. The
-  // function repeats the reduction inline because the worker kernels serialize it alone.
-  const f = an - 2 * Math.floor(an / 2);
-  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
-  const s = Math.sin(f * Math.PI);
+  // Y_{-nu} = sin(nu pi) J_nu + cos(nu pi) Y_nu. Reduce nu exactly before the product with pi
+  // (sinPiScalar, cosPiScalar): at a half-integer cos(nu pi) is exactly 0, not 1e-14, which times
+  // the huge Y_nu (besselY(-100.5, 1) = 6e-190, not -2e172) gave a wrong value, and next to an
+  // integer sin(nu pi) kept only a few digits.
+  const c = cosPiScalar(an);
+  const s = sinPiScalar(an);
   // The factor c goes into the Y recurrence: c Y_nu can be a double where Y_nu alone is not
   // (besselY(-151.5001, 1) = -2.8e305 with Y_nu = -9e308), and at a half-integer the term is 0.
   const jy = besselJYTemme(an, x, c);
