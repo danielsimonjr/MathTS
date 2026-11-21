@@ -110,5 +110,9 @@ const q7: unknown = math.median(math.bignumber(1), math.bignumber(2));
 // @ts-expect-error an object without the `isMatrix` flag is no matrix
 median({ toArray: () => [1, 2] });
 
+// The compat sparse matrix is the bridge matrix of `functions`: it has no `transpose` method.
+// @ts-expect-error the sparse bridge matrix has no transpose method
+math.sparse([[1]]).transpose();
+
 export { a, a2, b, c, d, dim, e, f, g, h, i, j, k, l, m };
 export { n1, n2, n3, n4, n5, n6, n7, n8, o1, o2, o3, p1, p2, q1, q2, q3, q4, q5, q6, q7 };

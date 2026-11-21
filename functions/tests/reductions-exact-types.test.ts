@@ -10,7 +10,6 @@
  */
 import { describe, expect, it } from 'vitest';
 import { BigNumber, Complex, Fraction, pairwiseDot, pairwiseSum } from '@danielsimonjr/mathts-core';
-import type { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { dot, matrix, max, mean, min, sparse, std, sum, variance } from '../src/index.js';
 
 const C = [new Complex(3, 4), new Complex(6, 8)];
@@ -305,9 +304,8 @@ describe('min and max follow mathjs on equal values, NaN and mixed types', () =>
 
 const B1 = B[1];
 
-// `matrix` returns `unknown` by design; the typed statistics overloads take a Matrix. This is the one
-// cast of the file.
-const dense = (data: unknown[]): DenseMatrix => matrix(data) as unknown as DenseMatrix;
+// `matrix` returns a BridgeMatrix, which the typed statistics overloads take.
+const dense = (data: unknown[]) => matrix(data);
 
 describe('mean, variance and std keep exact types', () => {
   it('mean of Complex, BigNumber and Fraction values', () => {
@@ -396,7 +394,7 @@ describe('mean, variance and std keep exact types', () => {
     const m = sparse([
       [f(1), f(2)],
       [f(3), f(4)],
-    ]) as unknown as DenseMatrix;
+    ]);
     for (const [fn, want] of [
       [mean, [2, 3]],
       [variance, [2, 2]],

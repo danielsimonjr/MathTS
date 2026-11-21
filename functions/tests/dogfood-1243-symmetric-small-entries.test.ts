@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import type BigNumber from 'bignumber.js';
+import type { BigNumber } from '@danielsimonjr/mathts-core';
 import { eigs as eigsRaw, bignumber, complex, matrix } from '../src/index.js';
 
 type EigResult = { values: unknown; eigenvectors?: { value: unknown; vector: unknown }[] };
 const eigs = eigsRaw as unknown as (m: unknown, o?: object) => EigResult;
 
-const bn = (x: number | string) => bignumber(x) as unknown as BigNumber;
+const bn = (x: number | string): BigNumber => bignumber(x);
 const num = (x: unknown): number =>
   typeof x === 'number' ? x : (x as { toNumber: () => number }).toNumber();
 

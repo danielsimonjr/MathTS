@@ -26,6 +26,7 @@ import {
 } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
 import type {
+  BridgeMatrix,
   PublicAbs,
   PublicAdd,
   PublicCos,
@@ -162,19 +163,8 @@ export function bignumber(value?: unknown): unknown {
   return _bignumber(value as object);
 }
 
-/** Matrix values returned from the compat `matrix` shim (native or mathjs bridge). */
-export type CompatMatrixValue =
-  | DenseMatrix
-  | SparseMatrix
-  | {
-      isMatrix: boolean;
-      toArray(): unknown;
-      subset(...args: unknown[]): unknown;
-      get(...args: unknown[]): unknown;
-      transpose(): CompatMatrixValue;
-      rows: number;
-      cols: number;
-    };
+/** Matrix values returned from the compat `matrix` shim (native, or the bridge matrix of `functions`). */
+export type CompatMatrixValue = DenseMatrix | SparseMatrix | BridgeMatrix;
 
 /** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
 function isCompatBridgeMatrix(x: unknown): boolean {
@@ -234,7 +224,7 @@ export function matrix(
   format?: 'dense' | 'sparse' | string
 ): CompatMatrixValue {
   if (arguments.length === 0) {
-    return _factoryMatrix() as unknown as CompatMatrixValue;
+    return _factoryMatrix();
   }
   if (isDenseMatrix(data) || isSparseMatrix(data)) {
     // A native matrix of the format that is asked for, or of no format, is returned as it is.
@@ -247,7 +237,7 @@ export function matrix(
       return _factorySparse({
         data: data.toArray(),
         size: matrixSize(data),
-      }) as unknown as CompatMatrixValue;
+      });
     }
     if (format !== 'sparse' && isSparseMatrix(data)) {
       return denseOfNested(data.toArray(), data);
@@ -255,7 +245,7 @@ export function matrix(
     return data;
   }
   // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
-  return _factoryMatrix(data as number[][], format) as unknown as CompatMatrixValue;
+  return _factoryMatrix(data as number[][], format);
 }
 
 /**
@@ -263,9 +253,9 @@ export function matrix(
  */
 export function sparse(data?: number[][]): CompatMatrixValue {
   if (data === undefined) {
-    return _factorySparse() as unknown as CompatMatrixValue;
+    return _factorySparse();
   }
-  return _factorySparse(data) as unknown as CompatMatrixValue;
+  return _factorySparse(data);
 }
 
 // =============================================================================

@@ -20,6 +20,16 @@ export interface BridgeMatrix extends MatrixValue {
   /** One entry, by an index array or by a row and a column. */
   get(indexOrRow: number[] | number, col?: number): unknown;
   valueOf(): unknown;
+  /** One entry set in place, by an index array. Returns the same matrix. */
+  set(index: number[], value: unknown, defaultValue?: unknown): BridgeMatrix;
+  /** A new matrix of the callback result for each entry. */
+  map(callback: (value: unknown, index: number[], matrix: BridgeMatrix) => unknown): BridgeMatrix;
+  /** Call the callback for each entry. */
+  forEach(callback: (value: unknown, index: number[], matrix: BridgeMatrix) => void): void;
+  /** The matrix with a new size; new entries take `defaultValue`. */
+  resize(size: number[], defaultValue?: unknown, copy?: boolean): BridgeMatrix;
+  /** The same entries in a new shape. */
+  reshape(size: number[], copy?: boolean): BridgeMatrix;
   clone(): BridgeMatrix;
   storage(): string;
   toString(): string;

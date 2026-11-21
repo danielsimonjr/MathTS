@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import type BigNumber from 'bignumber.js';
+import type { BigNumber } from '@danielsimonjr/mathts-core';
 import { eigs, bignumber, complex } from '../src/index.js';
 
-const bn = (x: number | string) => bignumber(x) as unknown as BigNumber;
+const bn = (x: number | string): BigNumber => bignumber(x);
 
 type Ri = { re: number; im: number };
 const toRi = (x: unknown): Ri => {
