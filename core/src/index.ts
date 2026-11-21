@@ -269,6 +269,7 @@ export {
   sumSquaredDeviationsChecked,
   SQUARES_SAFE_MIN,
   ROOT_SAFE_MIN,
+  squareSumsKeepDigits,
   powerOfTwoBelow,
   powerOfTwoScaleOf,
   scaleForVariance,

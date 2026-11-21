@@ -1,5 +1,10 @@
 import { factory } from '../utils/factory.js';
-import { BigNumber, pairwiseSum, pairwiseDot, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
+import {
+  BigNumber,
+  pairwiseSum,
+  pairwiseDot,
+  squareSumsKeepDigits,
+} from '@danielsimonjr/mathts-core';
 import { realScale } from '../utils/real-scale.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { typedArrayPairToNumbers } from './numeric-data.js';
@@ -20,9 +25,6 @@ function isPlainNumberArray(arr: unknown[]): arr is number[] {
   }
   return true;
 }
-
-/** The smallest positive normal double, 2^-1022. A smaller product has lost digits. */
-const MIN_NORMAL = 2 ** -1022;
 
 /**
  * A value above this magnitude can make the sum of the list leave the double range (two values
@@ -192,14 +194,7 @@ export const createCorr = /* #__PURE__ */ factory(
         // Each sum keeps its digits (a sum below SQUARES_SAFE_MIN can hold subnormal squares, also
         // when the product of the two sums is normal: #1280) and the product is a positive normal
         // double: no square left the range.
-        if (
-          sxx >= SQUARES_SAFE_MIN &&
-          syy >= SQUARES_SAFE_MIN &&
-          product >= MIN_NORMAL &&
-          product <= Number.MAX_VALUE
-        ) {
-          return r;
-        }
+        if (squareSumsKeepDigits(sxx, syy)) return r;
         // The squares or their product left the range of a double (#1257, #1280). An infinite
         // product gives a finite r of 0, so r is not the test. The correlation does not change when each
         // deviation list is divided by an exact power of 2. A constant list has no scale and

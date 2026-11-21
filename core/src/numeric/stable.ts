@@ -595,6 +595,29 @@ export const SQUARES_SAFE_MIN = 2 ** -800;
  */
 export const ROOT_SAFE_MIN = Math.sqrt(SQUARES_SAFE_MIN);
 
+/** The smallest normal double, 2^-1022: a smaller product has lost digits. */
+const MIN_NORMAL = 2 ** -1022;
+
+/**
+ * Whether two sums of squares give a correlation with every digit: each sum is at least
+ * {@link SQUARES_SAFE_MIN} (no square lost digits), and their product is a normal finite double
+ * (the square root of the product neither underflowed nor overflowed). When the result is false,
+ * the caller divides each variable by its own exact power of 2 and forms the sums again (#1280).
+ *
+ * @param saa - The sum of the squared deviations of the first variable.
+ * @param sbb - The sum of the squared deviations of the second variable.
+ * @returns True when `saa * sbb` can be used as it is.
+ */
+export function squareSumsKeepDigits(saa: number, sbb: number): boolean {
+  const product = saa * sbb;
+  return (
+    saa >= SQUARES_SAFE_MIN &&
+    sbb >= SQUARES_SAFE_MIN &&
+    product >= MIN_NORMAL &&
+    product <= Number.MAX_VALUE
+  );
+}
+
 /**
  * The power of 2 `p` with `p <= max < 2 * p`.
  *

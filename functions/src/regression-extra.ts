@@ -8,7 +8,7 @@ import {
   pairwiseDot,
   pairwiseSum,
   powerOfTwoScaleOf,
-  SQUARES_SAFE_MIN,
+  squareSumsKeepDigits,
   sumSquaredDeviations,
 } from '@danielsimonjr/mathts-core';
 import { studentTTwoSidedP } from './distribution-functions.js';
@@ -55,9 +55,6 @@ export function fitLine(a: number[], b: number[]): LineFit {
   return { slope, intercept, rValue, mx, sxx, syy, rss };
 }
 
-/** The smallest normal double: a product of two sums below it has lost digits. */
-const MIN_NORMAL = 2 ** -1022;
-
 /** A {@link LineFit} and the exact powers of 2 by which x and y were divided before the fit. */
 export interface ScaledLineFit {
   /** The fit of `x / sx` and `y / sy`. With `sx = sy = 1` it is the fit of the data. */
@@ -80,15 +77,7 @@ export interface ScaledLineFit {
  */
 export function fitLineScaled(a: number[], b: number[]): ScaledLineFit {
   const plain = fitLine(a, b);
-  const product = plain.sxx * plain.syy;
-  if (
-    plain.sxx >= SQUARES_SAFE_MIN &&
-    plain.syy >= SQUARES_SAFE_MIN &&
-    product >= MIN_NORMAL &&
-    product <= Number.MAX_VALUE
-  ) {
-    return { fit: plain, sx: 1, sy: 1 };
-  }
+  if (squareSumsKeepDigits(plain.sxx, plain.syy)) return { fit: plain, sx: 1, sy: 1 };
   const sx = powerOfTwoScaleOf(a);
   const sy = powerOfTwoScaleOf(b);
   if (sx === 1 && sy === 1) return { fit: plain, sx, sy };
@@ -105,12 +94,18 @@ export function unscaleLinregress(
   s: { sx: number; sy: number }
 ): LinregressResult {
   if (s.sx === 1 && s.sy === 1) return r;
+  // `sx` and `sy` are powers of 2, so `sy / sx` is exact unless it overflows or underflows
+  // (2^500 / 2^-600 overflows). Out of range the ratio is applied in two steps. Both steps move
+  // the value in the same direction, so the value between them is no farther from 1 than the
+  // result.
   const ratio = s.sy / s.sx;
+  const exact = ratio * s.sx === s.sy;
+  const toDataUnits = (v: number): number => (exact ? v * ratio : (v * s.sy) / s.sx);
   return {
     ...r,
-    slope: r.slope * ratio,
+    slope: toDataUnits(r.slope),
     intercept: r.intercept * s.sy,
-    stdErr: r.stdErr * ratio,
+    stdErr: toDataUnits(r.stdErr),
   };
 }
 

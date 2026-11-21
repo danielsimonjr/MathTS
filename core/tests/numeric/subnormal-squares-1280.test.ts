@@ -9,6 +9,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  squareSumsKeepDigits,
   SQUARES_SAFE_MIN,
   divideByScale,
   powerOfTwoBelow,
@@ -95,5 +96,26 @@ describe('scaleForVariance and divideByScale', () => {
     expect(out).toEqual([3, 0.5]);
     expect(out).not.toBe(xs);
     expect(divideByScale(new Float64Array([4, 8]), 4)).toEqual([1, 2]);
+  });
+});
+
+describe('squareSumsKeepDigits: the one test of the correlation and regression sums', () => {
+  it('is true for sums of order 1', () => {
+    expect(squareSumsKeepDigits(2, 3)).toBe(true);
+    expect(squareSumsKeepDigits(SQUARES_SAFE_MIN, 1)).toBe(true);
+  });
+  it('is false for a sum that can hold subnormal squares', () => {
+    expect(squareSumsKeepDigits(SQUARES_SAFE_MIN / 2, 2 ** 900)).toBe(false);
+    expect(squareSumsKeepDigits(0, 1)).toBe(false);
+  });
+  it('is false for a product outside the normal range', () => {
+    expect(squareSumsKeepDigits(2 ** -700, 2 ** -700)).toBe(false);
+    expect(squareSumsKeepDigits(2 ** 600, 2 ** 600)).toBe(false);
+    expect(squareSumsKeepDigits(2 ** -511, 2 ** -511)).toBe(true);
+    expect(squareSumsKeepDigits(2 ** -511, 2 ** -512)).toBe(false);
+  });
+  it('is false for NaN and for an infinite sum', () => {
+    expect(squareSumsKeepDigits(NaN, 1)).toBe(false);
+    expect(squareSumsKeepDigits(Infinity, 1)).toBe(false);
   });
 });

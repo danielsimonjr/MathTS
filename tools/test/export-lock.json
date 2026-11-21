@@ -847,6 +847,9 @@
       "setDeterministic": {
         "kind": "function"
       },
+      "squareSumsKeepDigits": {
+        "kind": "function"
+      },
       "stdFromSquaredDeviations": {
         "kind": "function"
       },

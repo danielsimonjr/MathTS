@@ -2,7 +2,7 @@
  * Generalized means, geometric standard deviation, robust regression slopes
  * and partial correlation (gap-analysis 2026-11-04, Batch A).
  */
-import { divideByScale, powerOfTwoScaleOf, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
+import { divideByScale, powerOfTwoScaleOf, squareSumsKeepDigits } from '@danielsimonjr/mathts-core';
 import { hasNaN, numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
 
@@ -125,9 +125,6 @@ export function siegelSlopes(x: Vec, y: Vec): { slope: number; intercept: number
   return { slope, intercept: medianOf(ys.map((v, i) => v - slope * xs[i])) };
 }
 
-/** The smallest normal double: a product of two sums below it has lost digits. */
-const MIN_NORMAL = 2 ** -1022;
-
 /** The sums of the cross products and of the squares of the deviations of `a` and `b`. */
 function deviationProducts(a: number[], b: number[]): { sab: number; saa: number; sbb: number } {
   const ma = meanOf(a);
@@ -152,13 +149,7 @@ function deviationProducts(a: number[], b: number[]): { sab: number; saa: number
  */
 function pearson(a: number[], b: number[]): number {
   let s = deviationProducts(a, b);
-  const product = s.saa * s.sbb;
-  const exact =
-    s.saa >= SQUARES_SAFE_MIN &&
-    s.sbb >= SQUARES_SAFE_MIN &&
-    product >= MIN_NORMAL &&
-    product <= Number.MAX_VALUE;
-  if (!exact) {
+  if (!squareSumsKeepDigits(s.saa, s.sbb)) {
     const sa = powerOfTwoScaleOf(a);
     const sb = powerOfTwoScaleOf(b);
     if (sa !== 1 || sb !== 1) s = deviationProducts(divideByScale(a, sa), divideByScale(b, sb));
