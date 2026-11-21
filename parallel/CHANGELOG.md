@@ -1,5 +1,26 @@
 # @danielsimonjr/mathts-parallel
 
+## 0.12.1
+
+### Patch Changes
+
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [789a41a]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [789a41a]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [b866b34]
+  - @danielsimonjr/mathts-core@0.30.0
+  - @danielsimonjr/mathts-workerpool@0.5.2
+
 ## 0.12.0
 
 ### Minor Changes

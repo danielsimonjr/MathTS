@@ -1,5 +1,33 @@
 # @danielsimonjr/mathts-linalg
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [789a41a]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [789a41a]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [b866b34]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [8879eea]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [2df36db]
+- Updated dependencies [aaa52d3]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [b866b34]
+  - @danielsimonjr/mathts-core@0.30.0
+  - @danielsimonjr/mathts-matrix@0.13.0
+
 ## 0.3.1
 
 ### Patch Changes

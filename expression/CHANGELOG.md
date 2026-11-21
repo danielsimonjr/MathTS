@@ -1,5 +1,42 @@
 # @danielsimonjr/mathts-expression
 
+## 0.14.2
+
+### Patch Changes
+
+- 3b2ffe6: The default expression scope returns a Complex for `sqrt` and `log` of a negative real and for a negative real to a non-integer power, as mathjs does: `sqrt(-4)` is `2i`, `log(-1)` is `πi` and `(-8)^(1/3)` is `1 + 1.732i`. These calls gave `NaN`. An integer power stays real, the real limits `(-0.5)^Infinity` and `(-8)^(-Infinity)` stay 0, and a `NaN` argument stays the number `NaN`.
+  
+  `Complex.pow` uses the algorithm of complex.js, so `pow` of a Complex equals mathjs bit for bit on core, the typed functions, compat and the evaluators: `sqrt(-4)^2` is `-4` and was `-4 + 4.9e-16i`, `i^2` is `-1`, and `pow(-8, 1/3)` is `1 + 1.732050807568877i` and was `1.0000000000000002 + 1.7320508075688772i`. Many other results change by one unit in the last place. A zero base follows the IEEE 754 pow rules: `0^y` is 0 for `y > 0` and `Infinity` for `y < 0`. mathjs gives `-0 + 0i` for `0^2` and `0 - Infinity i` for `0^(-1)`. Where complex.js computes `Infinity * 0` and gives `NaN + NaN i`, the result keeps the IEEE value: `(1e300 + 1e300i)^2` stays `Infinity + Infinity i`, and `(1e300 + 1e300i)^0.5` is finite (a part above about 2.7e154 made the squares in complex.js overflow). The new methods `Complex.cbrt()` and `Complex.cbrtRoots()` hold the mathjs cube root, and the typed, factory and default-scope `cbrt` of a Complex call them, so all three equal mathjs. (Refs #1086)
+- c12439a: Four small defects of the CAS and of the LaTeX output are fixed (Refs #1014; item 3, `symbolicEqual('(x+1)^2', 'x^2+2*x+1')`, is fixed with #1178).
+  
+  - `factor` of a polynomial with rational coefficients: `factor('x^2/2-1/2')` returned the input. It now returns `(x - 1)*(x + 1)/2`. The factor of the integer polynomial that the common denominator gives is divided by that denominator. `x^2-1/4` gives `(2*x - 1)*(2*x + 1)/4` and `2*x/3-2/3` gives `2*(x - 1)/3`. An irreducible polynomial (`x^2/2+1/2`) is returned as it is. The content path of `factor` also cut a number literal: `2*x/3-2/3` gave `2*(x/3 + -/3)`, `2^3*x+4` gave `2*(^3*x + 2)` and `4*x+2.5*y` gave `2*(2*x + .5*y)`, all with a wrong value. It now returns the input for these. It writes a negative term as `x - 1`, not `x + -1`.
+  - `symbolicPartialDerivative('x^2*y', 'x')` returned `d/dx(x^2*y)`. The term reader of the function cannot read a power of the variable with another symbol, so it leaves that placeholder. For such an input the function now returns the derivative of the expression tree: `2 * y * x`. A term that the term reader reads keeps its text.
+  - `realRoots([1, -3, 2])` returned `[0.49999999999272404, 1.0000000000218279]`: the bisection stops at a relative bracket width of 1e-10 and returned the middle. Newton steps inside the bracket now polish each root: the result is `[0.5, 1]`, and `[-6, 11, -6, 1]` gives `[1, 2, 3]`. A double root keeps the accuracy of the bisection. The documentation of `realRoots` states the order of the coefficients (ascending), the meaning of `tol` and the order of the roots (ascending, each once). `solve` of a polynomial uses `realRoots`, so its roots are more exact.
+  - The LaTeX of an operator that is a command (`\neg`, `\cdot`, `\wedge`, `\mod`) is no longer joined to an operand that starts with a letter: `parse('not true').toTex()` was `\negtrue` and is now `\neg true`. `2*true` gives `2\cdot true`. A digit and a symbol are not changed (`\neg1`, `\neg a`). (Refs #1014)
+- 6c87a8b: `quantileSeq` now uses the NumPy `method` for BigNumber, Fraction and Unit data and for a BigNumber probability. Before, these inputs gave the `linear` result for eight of the 13 methods: `quantileSeq([1, 2, 3, 4], bignumber(0.1), 'inverted_cdf')` gave 1.3 and the NumPy result is 1. One plan (`quantilePlan`) now gives the two order statistics and the weight for every type. A BigNumber probability uses exact BigNumber arithmetic.
+  
+  Every dimension form now accepts a method, an options object, and `sorted` with a method. `quantileSeq([[5, 2], [9, 1]], 0, 'hazen', 1)` threw "Too many arguments" and now gives `[2, 1]`. The expression language passes the method and the options object, and it counts `dim` from one.
+  
+  A NaN probability gives NaN. A BigNumber NaN probability gives a BigNumber NaN. Before, the result was `undefined`. NumPy raises `ValueError` for a NaN probability, and mathjs returns `undefined`. A probability outside 0 to 1 in a list now throws for every type of value.
+  
+  (Refs #1130)
+- ba1fdea: Safe evaluate returns a matrix of the matrix package. Before, it refused the matrix as a host object, so `inv(A)`, `pinv(A)` and `transpose(A)` threw for a DenseMatrix or SparseMatrix `A` in scope. Inside such a matrix, safe evaluate accepts a typed array only as a plain numeric buffer: a real Float64Array, Float32Array or Int32Array with the exact prototype of its kind and no own property other than its indices. A typed-array subclass now throws at every position, as a result and as the receiver of a method call. Core exports the matrix brand `NATIVE_MATRIX_BRAND` from `/internal`, and the matrix classes and the guard read this one definition. (Refs #1036)
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [789a41a]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [789a41a]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [b866b34]
+  - @danielsimonjr/mathts-core@0.30.0
+
 ## 0.14.1
 
 ### Patch Changes

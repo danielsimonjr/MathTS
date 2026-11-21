@@ -1,5 +1,39 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.13.0
+
+### Minor Changes
+
+- ba1fdea: `linsolve` accepts a DenseMatrix, a SparseMatrix or a MathJS matrix as `A`. It reads `b` with the new matrix-package reader `readRightHandSide`: a vector, a typed array of numbers, an `n x 1` column, a DenseMatrix or SparseMatrix of one column or one row, or a MathJS matrix. Entries of `A` and `b` follow the implicit rule of mathjs `lusolve`: a numeric string, a boolean, null and undefined convert (null and undefined are 0), and a non-numeric string throws `Cannot convert`. A BigNumber, Fraction or Complex entry is solved by the typed `lusolve`, and the result keeps that type, as in mathjs. An array inside a vector throws a TypeError. Core exports `convertToNumber` (number, string, boolean, bigint) and `isNumberTypedArray` from `/internal`; the matrix package exports `implicitNumber` and `isTypedScalar`. (Refs #977)
+- ba1fdea: `lstsq` reads `b` with `readRightHandSide`, so a DenseMatrix, SparseMatrix, typed-array or numeric-string `b` gives the solution. Before, a typed-array `b` gave zeros. A BigNumber, Fraction or Complex entry of `b` throws a TypeError that names the type (a BigNumber `b` gave zeros before). `matrixExpm`, `matrixLogm` and `matrixSqrtm` accept a nested array, a SparseMatrix and a MathJS matrix, as the decompositions do. The decomposition reader applies the implicit rule of mathjs: a numeric string, a boolean and null convert, and a non-numeric string throws `Cannot convert` (before, it became NaN). The `new DenseMatrix(rows, cols, array)` constructor throws a TypeError for an entry that is not a number. The matrix package exports `nestedMatrixShape`. (Refs #1003)
+- 2df36db: `eigs` and `eig` of a number matrix keep a complex pair beside a huge entry. The matrix `eig` deflates a zero diagonal entry against its neighbouring sub-diagonal entries, not against the norm of the whole matrix, so `[[1e20, 0, 0], [0, 0, 1], [0, -1, 0]]` keeps the pair +-i. The matrix `eig` balances the matrix before the QR iteration (the new export `balanceForEig`: a permutation that isolates eigenvalues, then a scaling by powers of 2), so `[[3, 0, 0], [1e10, 0, 1], [0, -1, 0]]` gives 3 and +-i, not 52.9, -49.9 and -0.0011. The order of the values of `eig` can change for a matrix that the permutation reorders. The QR step no longer stops when its shift is exactly 0, so `eig([[3, 1e-8, 0], [1e-8, 0, 1], [0, -1, 0]])` converges. The test that reads an eigenvalue as real uses the Gershgorin rows of the balanced active block, so `1e-5 +- i` beside 1e20 stays complex, and a coupling entry of 1e15 does not make +-i real. (Refs #1240)
+
+### Patch Changes
+
+- aaa52d3: The Schur deflation test now also uses the superdiagonal entry (Ahues and Tisseur, LAPACK dlahqr). A 2x2 block with complex eigenvalues is no longer split. matrixSqrtm gives the correct root for such a block. matrixLogm now returns the real principal logarithm of a matrix with a complex-conjugate eigenvalue pair. It threw an error before. The Padé step of matrixLogm now makes one elimination for each quadrature node, not one for each column: a matrix of size 100 takes 0.3 s, where it took 13 s. The results are identical. A block with a very large ratio of its two off-diagonal entries no longer gives a NaN matrix or an error. (Refs #1171)
+- 789a41a: `expm` of a matrix returns a matrix of the same class and storage. Before, `expm(matrix(A))` returned a native `DenseMatrix` with no `size` method, and `expm(sparse(A))` returned an Array. Now a dense matrix gives a dense matrix, a sparse matrix gives a sparse matrix of its own kind, and an Array gives an Array. A matrix with one or three dimensions now throws the square error with its real size. A matrix that is not square throws a `RangeError` at every site, as in mathjs; before, the same rule threw a plain `Error` at some sites. Each message stays the same, except `eigsh`: an empty input throws `eigsh: dense matrix input must be non-empty`, and a ragged input throws `eigsh: dense matrix input must be square`. A `catch` of `Error` still catches the error. `pinv`, `re`, `im`, `arg` and `setDistinct` of a matrix give a matrix (they gave an Array); `pinv([])` is `[]`, and a 1-D matrix gives a 1-D result. (Refs #1264)
+- aaa52d3: sqrtm of a singular matrix that has a real root (the zero matrix, a rank-1 matrix) returns the root. Before, it threw "Cannot calculate inverse, determinant is zero". When Denman-Beavers does not give a root, sqrtm now uses the Schur method of matrixSqrtm. matrixSqrtm of a singular symmetric matrix now returns a root that squares back to the matrix to 1e-12. Before, the root of a matrix of rank below n-1 missed the matrix by 1e-9, and sqrtm threw an error. (Refs #1170)
+- aaa52d3: sqrtm of a singular matrix returns a real root when one exists. It no longer returns a value that is not a root (a residual of 0.458 for the matrix of the issue). matrixSqrtm reads a negative Schur entry within rounding noise as a zero eigenvalue. It returns the root when the root passes its check. A matrix with no real root still throws. For a singular matrix, the error message is now "iterative method could not converge" in place of "Cannot calculate inverse". (Refs #1163)
+- 8879eea: `matrix([1, 2])`, `DenseMatrix.fromArray([1, 2])` and `new DenseMatrix([1, 2])` give a 1 x n row matrix. Before, they threw "DenseMatrix nested array must be a non-empty rectangular array of numbers". An empty array still throws, and a mix of numbers and rows throws a rectangular error. (Refs #1013)
+- aaa52d3: matrixLogm confirms each small eigenvalue on a second Schur form of a scaled copy of the matrix. A singular matrix with large entries now throws an error. Before, it gave a wrong finite result. A 2x2 block with a small complex pair takes the same checks. A small eigenvalue must also be at least 2 times the backward error of the Schur form. When a small eigenvalue is at that noise, the error has the name MatrixLogmNumericallySingularError and its message gives the remedy. (Refs #1174)
+- ba1fdea: Safe evaluate returns a matrix of the matrix package. Before, it refused the matrix as a host object, so `inv(A)`, `pinv(A)` and `transpose(A)` threw for a DenseMatrix or SparseMatrix `A` in scope. Inside such a matrix, safe evaluate accepts a typed array only as a plain numeric buffer: a real Float64Array, Float32Array or Int32Array with the exact prototype of its kind and no own property other than its indices. A typed-array subclass now throws at every position, as a result and as the receiver of a method call. Core exports the matrix brand `NATIVE_MATRIX_BRAND` from `/internal`, and the matrix classes and the guard read this one definition. (Refs #1036)
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [789a41a]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [789a41a]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [b866b34]
+  - @danielsimonjr/mathts-core@0.30.0
+  - @danielsimonjr/mathts-parallel@0.12.1
+
 ## 0.12.0
 
 ### Minor Changes
