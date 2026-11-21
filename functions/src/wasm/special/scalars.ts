@@ -1451,8 +1451,17 @@ export function besselIPositive(nu: f64, x: f64): f64 {
   let t: f64 = 1;
   if (f !== 0) t = (Math.pow(x, f) * Math.pow(2, -f)) / Math.exp(_lgamma(f + 1));
   let e = 0;
+  // Three roundings repeat at every step with the same error and add up over the steps: the sum
+  // f + j and the sum m + 1 + nu (the fraction f rounds to the grid of the binade) and the product
+  // h h (I_50.1(300.5) was 8.7e-15 off after 127 steps). Each error is exact (Fast2Sum,
+  // Veltkamp split). `err` is their sum as a relative error of t and of every term: a term is
+  // term (1 + err), and the sum of term * err is added at the end. A factor 1 + err cannot be
+  // applied to a term, because 1e-17 is below half an ulp of it.
+  let err = 0;
   for (let j = 1; j <= n; j++) {
-    t *= h / (f + j);
+    const fj = f + j;
+    t *= h / fj;
+    err -= (f - (fj - j)) / fj;
     if (t < down) {
       t *= up;
       e--;
@@ -1461,16 +1470,26 @@ export function besselIPositive(nu: f64, x: f64): f64 {
       e++;
     }
   }
+  const hs = h * 134217729;
+  const hh = hs - (hs - h);
+  const hl = h - hh;
   const q = h * h;
+  const qErr = q > 1e-290 && q < 1e290 ? (hh * hh - q + 2 * hh * hl + hl * hl) / q : 0;
   let sum = t;
+  let sumErr = t * err;
   let term = t;
   const cap = 2 * mstar + 100 + Math.ceil(10 * Math.sqrt(mstar + 1));
   let converged = false;
   for (let m = 0; m < cap; m++) {
-    term *= q / ((m + 1) * (m + 1 + nu));
+    const a = m + 1 + n;
+    const den = a + f;
+    term *= q / ((m + 1) * den);
+    err += qErr - (f - (den - a)) / den;
     sum += term;
+    sumErr += term * err;
     if (sum > up) {
       sum *= down;
+      sumErr *= down;
       term *= down;
       e++;
     }
@@ -1480,6 +1499,7 @@ export function besselIPositive(nu: f64, x: f64): f64 {
     }
   }
   if (!converged) return NaN;
+  sum += sumErr;
   while (e > 0 && sum !== Infinity) {
     sum *= up;
     e--;
