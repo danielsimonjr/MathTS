@@ -99,6 +99,7 @@ export const createSylvester = /* #__PURE__ */ factory(
      * @param {Matrix | Array} B  Matrix B
      * @param {Matrix | Array} C  Matrix C
      * @return {Matrix | Array}   Matrix X, solving the Sylvester equation
+     * @throws {RangeError} when A is not m x m, B is not n x n or C is not m x n
      */
     return typed(name, {
       'Matrix, Matrix, Matrix': _sylvester,
@@ -135,30 +136,32 @@ export const createSylvester = /* #__PURE__ */ factory(
     }
 
     function _sylvester(A: MatrixType, B: MatrixType, C: MatrixType): MatrixType {
-      // A is m x m and B is n x n. When m or n is 0, X is the empty m x n matrix (#1233).
+      // A is m x m, B is n x n and C is m x n. Every shape is checked before any product runs,
+      // so a wrong shape gives a RangeError and not an error of schur or multiply (#1265).
       const sa = _dims(A);
       const sb = _dims(B);
-      if (sa.length === 2 && sb.length === 2 && sa[0] === sa[1] && sb[0] === sb[1]) {
-        if (sa[0] === 0 || sb[0] === 0) {
-          // [] is the only Array form of a matrix with 0 rows, so a 1-D empty C is 0 x n.
-          const c1 = C.size();
-          const sc = sa[0] === 0 && c1.length === 1 && c1[0] === 0 ? [0, sb[0]] : c1;
-          if (sc.length !== 2 || sc[0] !== sa[0] || sc[1] !== sb[0]) {
-            throw new RangeError(
-              'Dimension mismatch: C must be ' +
-                sa[0] +
-                ' x ' +
-                sb[0] +
-                ' (size: [' +
-                sc.join(', ') +
-                '])'
-            );
-          }
-          return matrix([]).resize([sa[0], sb[0]]);
-        }
+      if (sa.length !== 2 || sa[0] !== sa[1]) {
+        throw new RangeError(
+          'Dimension mismatch: A must be a square matrix (size: [' + sa.join(', ') + '])'
+        );
       }
-      const n = B.size()[0];
-      const m = A.size()[0];
+      if (sb.length !== 2 || sb[0] !== sb[1]) {
+        throw new RangeError(
+          'Dimension mismatch: B must be a square matrix (size: [' + sb.join(', ') + '])'
+        );
+      }
+      const m = sa[0];
+      const n = sb[0];
+      // [] is the only Array form of a matrix with 0 rows, so a 1-D empty C is 0 x n.
+      const c1 = C.size();
+      const sc = m === 0 && c1.length === 1 && c1[0] === 0 ? [0, n] : c1;
+      if (sc.length !== 2 || sc[0] !== m || sc[1] !== n) {
+        throw new RangeError(
+          'Dimension mismatch: C must be ' + m + ' x ' + n + ' (size: [' + sc.join(', ') + '])'
+        );
+      }
+      // When m or n is 0, X is the empty m x n matrix (#1233).
+      if (m === 0 || n === 0) return matrix([]).resize([m, n]);
 
       const sA = schur(A);
       const F = sA.T;

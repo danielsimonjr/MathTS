@@ -1,19 +1,19 @@
 {
-  "generated": "2026-11-20",
-  "totalFiles": 2653,
+  "generated": "2026-11-21",
+  "totalFiles": 2655,
   "byDisposition": {
     "reachable": 26,
     "build-entry": 1333,
     "test-only": 0,
     "orphan": 0,
-    "test": 1228,
+    "test": 1230,
     "tool": 29,
     "config": 30,
     "example": 7
   },
   "byArea": {
     "src": 1359,
-    "tests": 1228,
+    "tests": 1230,
     "config": 30,
     "examples": 7,
     "tools": 29
@@ -23,12 +23,12 @@
     "@danielsimonjr/mathts-wasm": 27,
     "@danielsimonjr/mathts-ast": 4,
     "@danielsimonjr/mathts-autograd": 33,
-    "@danielsimonjr/mathts-compat": 43,
+    "@danielsimonjr/mathts-compat": 44,
     "@danielsimonjr/mathts-core": 150,
     "@danielsimonjr/mathts-evaluator": 5,
     "(root)": 71,
     "@danielsimonjr/mathts-expression": 575,
-    "@danielsimonjr/mathts-functions": 1257,
+    "@danielsimonjr/mathts-functions": 1258,
     "@danielsimonjr/mathts-gpu": 22,
     "@danielsimonjr/mathts-linalg": 6,
     "@danielsimonjr/mathts-matrix": 160,
@@ -654,6 +654,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 176
+    },
+    {
+      "file": "compat/tests/dogfood-1278-native-empty.test.ts",
+      "package": "@danielsimonjr/mathts-compat",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 123
     },
     {
       "file": "compat/tests/dogfood-1284-matrix-format.test.ts",
@@ -6316,7 +6323,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 211
+      "loc": 214
     },
     {
       "file": "functions/src/algebra/symbolicEqual.ts",
@@ -11209,7 +11216,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 286
+      "loc": 283
     },
     {
       "file": "functions/tests/dogfood-1235-slu-singular.test.ts",
@@ -11308,6 +11315,13 @@
       "area": "tests",
       "disposition": "test",
       "loc": 141
+    },
+    {
+      "file": "functions/tests/dogfood-1264-1265-1278-b2.test.ts",
+      "package": "@danielsimonjr/mathts-functions",
+      "area": "tests",
+      "disposition": "test",
+      "loc": 121
     },
     {
       "file": "functions/tests/dogfood-1273-ragged-sparse.test.ts",
