@@ -392,7 +392,8 @@ cd functions && bunx vitest run
 MathTS is an actively developed monorepo of 24 workspace packages (22 published for application use).
 The dependency graph has **2 runtime circular dependencies** (verified by
 `tools/create-dependency-graph` and `repo-tools check`; see
-`docs/Architecture/DEPENDENCY_GRAPH.md`).
+`docs/Architecture/DEPENDENCY_GRAPH.md`, which `bun run docs:deps` generates and the
+repository does not commit).
 
 Recent milestones (see [`ROADMAP.md`](./ROADMAP.md) "Recently shipped" and the package changelogs):
 
@@ -411,14 +412,15 @@ Recent milestones (see [`ROADMAP.md`](./ROADMAP.md) "Recently shipped" and the p
 
 Live metrics — file / export / module counts, per-file test coverage, and the
 WASM↔function pairing — are kept in **generated** reports rather than duplicated
-here (so they can't drift). Regenerate with `bun run docs:deps`:
+here (so they can't drift). `bun run build` and then `bun run docs:deps` write them; the
+repository does not commit them, so the file names below have no link:
 
-| Report                                                                             | Contents                            |
-| ---------------------------------------------------------------------------------- | ----------------------------------- |
-| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md)                 | Package & architecture metrics      |
-| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)       | Per-file test coverage              |
-| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md) | Dependency graph                    |
-| [`docs/Architecture/wasm-pairing.md`](./docs/Architecture/wasm-pairing.md)         | WASM accelerator ↔ function pairing |
+| Report                                                             | Contents                            |
+| ------------------------------------------------------------------ | ----------------------------------- |
+| [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md) | Package & architecture metrics      |
+| `docs/Architecture/TEST_COVERAGE.md` (generated)                   | Per-file test coverage              |
+| `docs/Architecture/DEPENDENCY_GRAPH.md` (generated)                | Dependency graph                    |
+| `docs/Architecture/wasm-pairing.md` (generated)                    | WASM accelerator ↔ function pairing |
 
 ### Known open items
 
@@ -448,8 +450,8 @@ message conventions (Conventional Commits), and the pre-commit hook setup.
 | [`CHANGELOG.md`](./CHANGELOG.md)                                                       | Full change history                                                       |
 | [`docs/Architecture/OVERVIEW.md`](./docs/Architecture/OVERVIEW.md)                     | Package metrics, two-layer code architecture                              |
 | [`docs/Architecture/ARCHITECTURE.md`](./docs/Architecture/ARCHITECTURE.md)             | Component design, circular-dependency audit                               |
-| [`docs/Architecture/DEPENDENCY_GRAPH.md`](./docs/Architecture/DEPENDENCY_GRAPH.md)     | Generated dependency graph                                                |
-| [`docs/Architecture/TEST_COVERAGE.md`](./docs/Architecture/TEST_COVERAGE.md)           | Per-file coverage report                                                  |
+| `docs/Architecture/DEPENDENCY_GRAPH.md` (generated, not committed)                     | Generated dependency graph                                                |
+| `docs/Architecture/TEST_COVERAGE.md` (generated, not committed)                        | Per-file coverage report                                                  |
 | [`docs/migration-guide.md`](./docs/migration-guide.md)                                 | Migrating from mathjs v15                                                 |
 | [`docs/reference/scalar-search.md`](./docs/reference/scalar-search.md)                 | ScalarNode toolkit, Pareto selection, and search                          |
 | [`TODO.md`](./TODO.md)                                                                 | Open items and deferred decisions                                         |

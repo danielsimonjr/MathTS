@@ -3,7 +3,7 @@
 A TypeScript rewrite of mathjs with WASM / WebGPU / WebWorker acceleration, organized as a Turborepo
 monorepo of 24 ESM-only packages. This document is the component-level map: what each package is for, its
 key exported types, and how the packages depend on one another. For the always-current dependency data see
-the generated [`DEPENDENCY_GRAPH.md`](./DEPENDENCY_GRAPH.md); for the higher-level narrative see
+the generated `DEPENDENCY_GRAPH.md` (`bun run docs:deps` writes it; the repository does not commit it); for the higher-level narrative see
 [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ## Table of Contents
@@ -416,7 +416,7 @@ no duplicated implementation. They let consumers install a focused domain.
 ## Component Dependencies
 
 Per-package edges (source of truth: each `package.json`; generated form:
-[`DEPENDENCY_GRAPH.md`](./DEPENDENCY_GRAPH.md)). No circular dependencies (0 cycles).
+`DEPENDENCY_GRAPH.md`, not committed). No circular dependencies (0 cycles).
 
 ```
 typed-function
@@ -455,11 +455,11 @@ at zero by the `check:duplicates` pre-commit gate (see [`ARCHITECTURE.md`](./ARC
 `repo-tools map` generates these values.
 Regenerate: `repo-tools map . --out=<dir>` · Check: `repo-tools check . --docs=docs/Architecture`
 
-> **No table here claims a reachability count.** The tables give size, structure and cycle counts only.
-> `FILE_INVENTORY.md` and `unused-analysis.md` in this directory give the reachability figures. The
-> repository generator writes them (`npm run docs:deps:full`), and the gate does not check them.
+> **No table here claims a file, export, line or reachability count.** The tables give
+> structure and cycle counts only. The generated `FILE_INVENTORY.md` and `unused-analysis.md`
+> give the file, export and reachability figures: run `bun run docs:deps` to produce them.
+> The repository does not commit them, and the gate does not check them.
 
-| Claim                | Value | Source                                                                                                       |
-| -------------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
-| totalTypeScriptFiles | 2830  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
-| totalExports         | 9829  | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
+| Claim        | Value | Source                                                                                                       |
+| ------------ | ----- | ------------------------------------------------------------------------------------------------------------ |
+| totalModules | 6     | `repo-tools map . --out=<tmp>`, `statistics` of its dependency-graph.json; `repo-tools check` fails on drift |
