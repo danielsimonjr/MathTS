@@ -83,7 +83,7 @@ import {
   subtract as _matSubtract,
   multiply as _matMultiply,
 } from '@danielsimonjr/mathts-matrix';
-import { matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -191,7 +191,7 @@ function isCompatBridgeMatrix(x: unknown): boolean {
  */
 function denseOfNested(arr: unknown[], m: unknown): DenseMatrix {
   const size = axesOf(m);
-  if (size !== null && size.length === 2 && size[0] * size[1] === 0) {
+  if (size !== null && isEmpty2DSize(size)) {
     return DenseMatrix.zeros(size[0], size[1]);
   }
   return DenseMatrix.fromArray(arr as number[][]);
@@ -284,7 +284,7 @@ const toDenseMatrix = (x: MatrixLike): DenseMatrix => compatToDenseMatrix(x);
 const unwrap = (r: unknown): unknown => {
   if (!isCompatBridgeMatrix(r)) return r;
   const size = axesOf(r);
-  if (size !== null && size.length === 2 && size[0] * size[1] === 0) return r;
+  if (isEmpty2DSize(size)) return r;
   return (r as { toArray(): unknown }).toArray();
 };
 

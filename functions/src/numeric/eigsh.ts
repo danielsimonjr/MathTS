@@ -61,9 +61,9 @@ function toMatvecAndSize(
   if (isDenseMatrix(a)) {
     const rows = a;
     const n = rows.length;
-    if (n === 0) throw new Error('eigsh: dense matrix input must be square and non-empty');
+    if (n === 0) throw new Error('eigsh: dense matrix input must be non-empty');
     if (rows.some((row) => row.length !== n)) {
-      throw notSquareError('eigsh: dense matrix input must be square and non-empty');
+      throw notSquareError('eigsh: dense matrix input must be square');
     }
     return {
       n,

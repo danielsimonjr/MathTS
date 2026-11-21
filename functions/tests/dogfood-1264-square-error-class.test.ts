@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DenseMatrix, eig, lu, matrixLogm } from '@danielsimonjr/mathts-matrix';
-import { expm, lusolve, matrix, pow, schur, sparse, zeros } from '../src/index.js';
+import { eigsh, expm, lusolve, matrix, pow, schur, sparse, zeros } from '../src/index.js';
 
 describe('a matrix that is not square throws a RangeError, as mathjs does', () => {
   it('expm of a 2 x 3, a 0 x 3 and a 3-D matrix', () => {
@@ -106,5 +106,16 @@ describe('source guard: no square throw outside notSquareError', () => {
       .filter((file) => hasSquareThrow(readFileSync(file, 'utf8')))
       .map((file) => relative(root, file));
     expect(hits).toEqual([]);
+  });
+});
+
+describe('one message has one error class (eigsh)', () => {
+  it('an empty dense input throws its own text, not the square text', () => {
+    expect(() => eigsh([], 1)).toThrow(/eigsh: dense matrix input must be non-empty/);
+    expect(() => eigsh([], 1)).not.toThrow(/square/);
+  });
+  it('a ragged dense input throws the square RangeError', () => {
+    expect(() => eigsh([[1, 2], [3]], 1)).toThrow(RangeError);
+    expect(() => eigsh([[1, 2], [3]], 1)).toThrow(/eigsh: dense matrix input must be square/);
   });
 });

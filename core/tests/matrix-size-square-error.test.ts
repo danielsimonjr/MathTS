@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 // `matrixSize` is the one reader of the size that a matrix reports (#1337). The nested array of a
 // matrix does not carry the size of an empty matrix: `toArray()` of a 0 x 3 matrix is `[]`.
 // `notSquareError` is the one error of the square rule (RangeError, as in mathjs).
-import { matrixSize, notSquareError } from '../src/internal.js';
+import { isEmpty2DSize, matrixSize, notSquareError } from '../src/internal.js';
 
 describe('matrixSize: the size that a matrix reports', () => {
   it('reads size(), then the size property {rows, cols}, then numeric rows and cols', () => {
@@ -35,5 +35,18 @@ describe('notSquareError: one class for the square rule', () => {
     expect(e).toBeInstanceOf(RangeError);
     expect(e).toBeInstanceOf(Error);
     expect(e.message).toBe('Matrix must be square (size: [2, 3])');
+  });
+});
+
+describe('isEmpty2DSize: a 2-D size with a zero axis', () => {
+  it('is true for 0 x n and n x 0, false otherwise', () => {
+    expect(isEmpty2DSize([0, 0])).toBe(true);
+    expect(isEmpty2DSize([0, 3])).toBe(true);
+    expect(isEmpty2DSize([3, 0])).toBe(true);
+    expect(isEmpty2DSize([2, 3])).toBe(false);
+    expect(isEmpty2DSize([0])).toBe(false);
+    expect(isEmpty2DSize([0, 3, 2])).toBe(false);
+    expect(isEmpty2DSize(null)).toBe(false);
+    expect(isEmpty2DSize(undefined)).toBe(false);
   });
 });

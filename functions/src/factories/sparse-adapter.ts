@@ -16,6 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { isEmpty2DSize } from '@danielsimonjr/mathts-core/internal';
 import {
   DenseMatrix,
   SparseMatrix,
@@ -103,7 +104,7 @@ export function cscToPublic(m: MathJSSparseMatrix): SparseMatrix | unknown[][] {
  */
 export function denseToPublic(m: MathJSDenseMatrix): DenseMatrix | unknown[] {
   const size = m.size();
-  if (size.length === 2 && size[0] * size[1] === 0) return DenseMatrix.zeros(size[0], size[1]);
+  if (isEmpty2DSize(size)) return DenseMatrix.zeros(size[0], size[1]);
   const data = m.toArray() as unknown[];
   const numeric2d =
     data.length > 0 &&

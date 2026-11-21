@@ -137,6 +137,7 @@ export { createUnitClass, unitDependencies, Unit as CoreUnit } from './types/uni
 export type { NestedArray, IdentifiedValue } from './array.js';
 export {
   arraySize,
+  isEmpty2DSize,
   matrixSize,
   validate,
   validateIndexSourceSize,

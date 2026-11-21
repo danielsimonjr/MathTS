@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
-import { det, expm, matrix, pinv, pow, sparse, zeros } from '../src/index.js';
+import { det, expm, matrix, pinv, pow, size, sparse, zeros } from '../src/index.js';
 
 type Boxed = { size(): number[]; storage(): string };
 type Un = (a: unknown, ...rest: unknown[]) => unknown;
@@ -59,5 +59,30 @@ describe('one size reader for every matrix kind', () => {
   it('pinv of a public CSR 0 x 3 matrix has the transposed size', () => {
     const out = (pinv as Un)(csr) as SparseMatrix;
     expect([out.rows, out.cols]).toEqual([3, 0]);
+  });
+});
+
+describe('the public size reads a matrix through matrixSize', () => {
+  const sizeFn = size as Un;
+  it.each([
+    ['native dense 0 x 3', () => DenseMatrix.zeros(0, 3), [0, 3]],
+    ['native dense 2 x 0', () => DenseMatrix.zeros(2, 0), [2, 0]],
+    ['public CSR 0 x 3', () => SparseMatrix.zeros(0, 3), [0, 3]],
+    ['boxed dense 0 x 3', () => zeros(0, 3), [0, 3]],
+    ['boxed sparse 0 x 3', () => sparse(zeros(0, 3) as never), [0, 3]],
+    [
+      'boxed dense 2 x 3',
+      () =>
+        matrix([
+          [1, 2, 3],
+          [4, 5, 6],
+        ]),
+      [2, 3],
+    ],
+  ])('%s', (_label, make, expected) => {
+    expect(sizeFn(make())).toEqual(expected);
+  });
+  it('a plain object with rows and cols is not a matrix', () => {
+    expect(() => sizeFn({ rows: 2, cols: 3 })).toThrow(TypeError);
   });
 });

@@ -94,6 +94,18 @@ export function matrixSize(m: unknown): number[] | undefined {
 }
 
 /**
+ * Tells if a size is the size of a 2-D matrix with a zero axis (0 x n or n x 0). The nested data
+ * of such a matrix is `[]` or a list of empty rows, so it does not show the size; a caller builds
+ * the result from the size alone.
+ *
+ * @param size - A size array, or `null` or `undefined` for a value with no size.
+ * @returns `true` when the size has two entries and one of them is 0.
+ */
+export function isEmpty2DSize(size: readonly number[] | null | undefined): boolean {
+  return size != null && size.length === 2 && (size[0] === 0 || size[1] === 0);
+}
+
+/**
  * Recursively validate whether each element in a multi dimensional array
  * has a size corresponding to the provided size array.
  * @param array - Array to be validated

@@ -11,7 +11,11 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { formatGeneric, getArrayDataType } from '@danielsimonjr/mathts-core/internal';
+import {
+  formatGeneric,
+  getArrayDataType,
+  isEmpty2DSize,
+} from '@danielsimonjr/mathts-core/internal';
 import { typeOf } from '../utils/is.js';
 import {
   arraySize,
@@ -846,7 +850,7 @@ export class MathJSSparseMatrix {
    * Every other size takes the data (`_fromDenseArray`).
    */
   private _fromSizedDense(nested: unknown[][], size: unknown): void {
-    if (Array.isArray(size) && size.length === 2 && size[0] * size[1] === 0) {
+    if (Array.isArray(size) && isEmpty2DSize(size)) {
       const [rows, cols] = size as [number, number];
       this._values = [];
       this._index = [];

@@ -1278,6 +1278,9 @@
       "isDenseMatrix": {
         "kind": "function"
       },
+      "isEmpty2DSize": {
+        "kind": "function"
+      },
       "isEmptyIndex": {
         "kind": "function"
       },

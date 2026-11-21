@@ -127,7 +127,7 @@ import {
   powReal,
   nthRootReal,
 } from './complex-promotion.js';
-import { notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { isEmpty2DSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -413,7 +413,7 @@ function publicSparseOrDense(
   data: unknown[][],
   size: readonly number[]
 ): SparseMatrix | MathJSDenseMatrix {
-  if (size.length === 2 && size[0] * size[1] === 0) {
+  if (isEmpty2DSize(size)) {
     return SparseMatrix.fromDense(DenseMatrix.zeros(size[0], size[1]));
   }
   for (const row of data) {
@@ -447,12 +447,7 @@ function matrixProduct(a: unknown, b: unknown): unknown[][] {
   // A product with an empty axis (`[2, 1] x [1, 0]` is `[[], []]`) takes the generic product:
   // `DenseMatrix` holds no empty axis. The sizes show the empty axis, because the nested form
   // of a 0 x n matrix is `[]`.
-  if (
-    !isNumberMatrix(na) ||
-    !isNumberMatrix(nb) ||
-    sizeA[0] * sizeA[1] === 0 ||
-    sizeB[0] * sizeB[1] === 0
-  ) {
+  if (!isNumberMatrix(na) || !isNumberMatrix(nb) || isEmpty2DSize(sizeA) || isEmpty2DSize(sizeB)) {
     assertRectangular(na);
     assertRectangular(nb);
     return genericMatrixProduct(na, nb, sizeA, sizeB);
