@@ -93,6 +93,13 @@
       "script": "functions/tests/helpers/sparse-product-1271-perf-gate.mjs",
       "limit": 3,
       "needs": ["functions/dist/index.js"]
+    },
+    {
+      "name": "complex-parse-linear",
+      "script": "core/tests/helpers/complex-parse-scaling-perf-gate.mjs",
+      "limit": 30,
+      "selfTestScale": 4,
+      "needs": ["core/dist/index.js"]
     }
   ]
 }

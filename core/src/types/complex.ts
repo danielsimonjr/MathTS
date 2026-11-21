@@ -180,10 +180,19 @@ export class Complex implements IComplex {
    */
   static parse(str: string): Complex {
     const invalid = (): SyntaxError => new SyntaxError('Invalid Param');
+    // Each run of white space is tested once, on the two characters that touch it. A pattern with
+    // a look-behind and a look-ahead tests the run again from every start position inside it: its
+    // time grows with the square of the run length (23 s for 1e5 spaces). The number pattern is
+    // `\d+(?:\.\d*)?`, not `\d+\.?\d*`: both name the same strings, but two adjacent `\d`
+    // quantifiers split a long digit run in every possible way when the exponent is missing.
     const tokens = str
       .replace(/_/g, '')
-      .replace(/(?<![\d.eE\s])\s+|\s+(?![\d.eE\s])/g, '')
-      .match(/\d+\.?\d*[eE][+-]?\d+|\d+\.?\d*|\.\d+|Infinity|[^]/g);
+      .replace(/\s+/g, (run: string, at: number, whole: string) =>
+        /[\d.eE]/.test(whole[at - 1] ?? '') && /[\d.eE]/.test(whole[at + run.length] ?? '')
+          ? run
+          : ''
+      )
+      .match(/\d+(?:\.\d*)?[eE][+-]?\d+|\d+(?:\.\d*)?|\.\d+|Infinity|[^]/g);
     if (tokens === null) throw invalid();
     let re = 0;
     let im = 0;
