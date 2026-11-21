@@ -2,10 +2,12 @@
  * Isolated Node gate: `BigNumber.fromBigInt` of a power of ten removes its trailing zeros in
  * fewer than O(zeros * size) steps.
  *
- * Baseline: 10^10000. Candidate: 10^40000 (4 times the zeros and 4 times the size). A loop that
- * removes one zero in each step does 4 times the divisions on numbers 4 times as long, so the
- * ratio is about 16. Division by the powers 10^(2^j) does about 3 * log2(zeros) divisions, so the
- * ratio is that of a few long divisions on a number 4 times as long.
+ * Baseline: one division of 10^40000 by 10^20000. Candidate: `fromBigInt(10^40000)`. Division by
+ * the powers 10^(2^j) does about 3 * log2(zeros) divisions, most of them shorter than the
+ * baseline division, so the ratio is about 7 to 9 (Node 22 and Node 26). A loop that removes one
+ * zero in each step does 40000 divisions of the whole number: a ratio of 600 to 1800. Both arms
+ * divide numbers of the same size, so the ratio does not depend on how the engine scales a long
+ * division with its size.
  * Limit and round counts: tools/test/wall-clock-gates.json ("bignumber-from-bigint-zeros").
  * stdout: one JSON line, see reportGate.
  */
@@ -17,19 +19,19 @@ import {
 } from '../../../tools/test/wall-clock-perf-gate.mjs';
 
 const gate = loadGateConfig('bignumber-from-bigint-zeros');
-const small = 10n ** 10000n;
-const large = 10n ** 40000n;
+const value = 10n ** 40000n;
+const divisor = 10n ** 20000n;
 
-let checksum = 0;
+let checksum = 0n;
 
 const result = wallClockAbGate(
   () => {
-    checksum += BigNumber.fromBigInt(small).e;
+    checksum += value / divisor;
   },
   () => {
-    checksum += BigNumber.fromBigInt(large).e;
+    checksum += BigInt(BigNumber.fromBigInt(value).e);
   },
   gate
 );
 
-reportGate(gate, result, { checksum });
+reportGate(gate, result, { checksum: String(checksum % 1000003n) });

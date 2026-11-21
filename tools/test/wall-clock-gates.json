@@ -85,7 +85,7 @@
     {
       "name": "bignumber-from-bigint-zeros",
       "script": "functions/tests/helpers/bignumber-from-bigint-zeros-perf-gate.mjs",
-      "limit": 12,
+      "limit": 40,
       "needs": ["core/dist/index.js"]
     },
     {
