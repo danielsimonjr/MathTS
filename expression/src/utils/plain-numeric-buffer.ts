@@ -1,6 +1,7 @@
 /**
- * One rule for a typed array in the expression sandbox (#1036). The result guard
- * (`safe-result.ts`) and the member-access receiver allowlist (`customs.ts`) both use it.
+ * The typed-array rules of the expression sandbox (#1036). The member-access receiver allowlist
+ * (`customs.ts`) uses `isExactStorageArray` (real kind and exact prototype, O(1)). The result
+ * guard (`safe-result.ts`) uses `isPlainNumericBuffer`, which also counts the own keys.
  */
 
 /**

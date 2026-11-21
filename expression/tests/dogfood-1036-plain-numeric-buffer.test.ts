@@ -80,8 +80,9 @@ describe('issue #1036: a typed array passes only as a plain numeric buffer of a 
 
 // The member-access receiver allowlist (`isSandboxReceiver` in customs.ts) used the same
 // `instanceof` rule, so a method of a typed-array subclass ran from an expression, although a
-// method of any other class instance is refused as a host object. One rule serves both checks.
-describe('issue #1036: the receiver allowlist takes a typed array only as a plain numeric buffer', () => {
+// method of any other class instance is refused as a host object. The receiver now takes the O(1)
+// part of the rule (real kind, exact prototype); the result guard adds the own-key count.
+describe('issue #1036: the receiver allowlist takes a typed array only with its exact kind and prototype', () => {
   class MethodVec extends Float64Array {
     leak(): string {
       return 'host method ran';

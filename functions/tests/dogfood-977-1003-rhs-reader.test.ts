@@ -47,10 +47,11 @@ describe('issue #977/#1003: one right-hand-side reader for linsolve and lstsq', 
       expectSolution(solve(A, [['5'], ['11']]), [1, 2]);
     });
 
-    it(`${name}: a Fraction, a boolean and null convert, as in mathjs lusolve`, () => {
+    it(`${name}: a Fraction, a boolean, null and undefined convert, as in mathjs lusolve`, () => {
       expectSolution(solve(D, [fraction(1, 2), 1]), [0.25, 0.5]);
       expectSolution(solve(D, [true, false]), [0.5, 0]);
       expectSolution(solve(D, [null, 1]), [0, 0.5]);
+      expectSolution(solve(D, [undefined, 1]), [0, 0.5]);
     });
 
     it(`${name}: a non-numeric string and a mixed vector throw, as in mathjs`, () => {

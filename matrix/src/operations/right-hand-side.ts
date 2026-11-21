@@ -14,11 +14,12 @@ export type RightHandSide =
 
 /**
  * Read one entry as a number. A number, a numeric string, a boolean, a bigint, a Fraction and a
- * BigNumber convert (`convertToNumber`); `null` is 0, as in mathjs `lusolve`. Every other value
- * (a Complex, an array, `undefined`, an object) throws a `TypeError` with its position.
+ * BigNumber convert (`convertToNumber`); `null` and `undefined` (a hole of a sparse array) are 0,
+ * as in mathjs 15.2.0 `lusolve`. Every other value (a Complex, an array, an object) throws a
+ * `TypeError` with its position.
  */
 function entry(name: string, value: unknown, at: string): number {
-  if (value === null) return 0;
+  if (value === null || value === undefined) return 0;
   const n = convertToNumber(value);
   if (n === undefined) {
     throw new TypeError(`${name}: b${at} is a ${typeOf(value)}, expected a number`);
