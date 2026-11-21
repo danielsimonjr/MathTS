@@ -275,8 +275,8 @@ function solverRhsVector(b: unknown): number[] {
  *   `DenseMatrix` with one column or one row (a 1-D `DenseMatrix` is a row), or a MathJS matrix of
  *   size `[n]` or `[n, 1]`.
  * @returns Solution vector x
- * @throws {TypeError} if `A` is not a square matrix type, or `b` has another shape or holds a non-number.
- * @throws {Error} if the matrix is empty, not square, singular, or `b` has the wrong length.
+ * @throws TypeError if `A` is not a square matrix type, or `b` has another shape or holds a non-number.
+ * @throws Error if the matrix is empty, not square, singular, or `b` has the wrong length.
  *
  * @example
  * linsolve([[2, 1], [1, 3]], [5, 10]) // => [1, 3]
