@@ -26,6 +26,7 @@ import {
   extrema,
   isComplex,
 } from '@danielsimonjr/mathts-core';
+import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
 import { euclidSnap } from './euclid.js';
 import { f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection } from './f64-kernels.js';
 import {
@@ -1638,16 +1639,7 @@ export const gcd: GcdFunction = mathTyped('gcd', {
     }
     return euclidSnap(a, b, Math.floor);
   },
-  'bigint, bigint': (a: i64, b: i64): i64 => {
-    a = a < 0n ? -a : a;
-    b = b < 0n ? -b : b;
-    while (b !== 0n) {
-      const t = b;
-      b = a % b;
-      a = t;
-    }
-    return a;
-  },
+  'bigint, bigint': (a: i64, b: i64): i64 => gcdBigInt(a, b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
     // NaN, Infinity and a fraction have no integer gcd. The loop below never ends on them.
     if (!a.isInteger() || !b.isInteger()) {

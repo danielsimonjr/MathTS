@@ -1,10 +1,10 @@
 metadata:
   name: mathts
   version: 0.1.0
-  lastUpdated: '2026-11-20'
+  lastUpdated: '2026-11-21'
   totalFiles: 1359
   totalModules: 82
-  totalExports: 7453
+  totalExports: 7454
 entryPoints:
   - file: packages/typed-function/src/index.ts
     type: main
@@ -1596,6 +1596,10 @@ modules:
             - IndexError
             - createIndexError
           reExport: true
+        - file: ./types/bigint-gcd.js
+          imports:
+            - gcdBigInt
+          reExport: true
         - file: ./string.js
           imports:
             - format
@@ -1784,6 +1788,7 @@ modules:
         - DimensionError
         - IndexError
         - createIndexError
+        - gcdBigInt
         - formatGeneric
         - stringify
         - escape
@@ -1922,6 +1927,7 @@ modules:
         - DimensionError
         - IndexError
         - createIndexError
+        - gcdBigInt
         - format
         - stringify
         - escape
@@ -14508,6 +14514,11 @@ modules:
           directory: matrix
           imports:
             - eig
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - gcdBigInt
+          subpath: internal
       exports:
         - detZ
         - resultantZ
@@ -19141,7 +19152,12 @@ modules:
           imports:
             - assertAllocSize
             - assertLoopOrder
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - gcdBigInt
+          subpath: internal
       exports:
         - linearDiophantine
         - pellSolve
@@ -19169,7 +19185,15 @@ modules:
         - file: ../wasm/special/scalars.js
           imports:
             - chooseScalar
-      workspaceDependencies: []
+        - file: ./modular.js
+          imports:
+            - modPow
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - gcdBigInt
+          subpath: internal
       exports:
         - continuedFraction
         - eulerNumbers
@@ -19765,6 +19789,11 @@ modules:
           imports:
             - Fraction
             - isFraction
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - gcdBigInt
+          subpath: internal
       exports:
         - rationalNullspace
       interfaces:
@@ -25214,6 +25243,11 @@ modules:
         - package: '@danielsimonjr/mathts-core'
           directory: core
           imports:
+            - gcdBigInt
+          subpath: internal
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
             - pairwiseSum
             - pairwiseSumChecked
             - neumaierSum
@@ -26380,8 +26414,14 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies: []
-      workspaceDependencies: []
+      workspaceDependencies:
+        - package: '@danielsimonjr/mathts-core'
+          directory: core
+          imports:
+            - gcdBigInt
+          subpath: internal
       exports:
+        - bigintGcd
         - trim
         - degree
         - lc
@@ -26395,7 +26435,6 @@ modules:
         - scalarMul
         - equals
         - evaluate
-        - bigintGcd
         - content
         - primitivePart
         - exactDivide
@@ -26417,7 +26456,6 @@ modules:
         - scalarMul
         - equals
         - evaluate
-        - bigintGcd
         - content
         - primitivePart
         - exactDivide
@@ -26425,6 +26463,8 @@ modules:
         - polyGcdZ
         - landauMignotte
         - modSymmetric
+      constants:
+        - bigintGcd
     functions/src/typed/factorization/kronecker-factor.ts:
       description: Multivariate factorization over ℤ via Kronecker substitution (Layer 2 v1).
       externalDependencies: []
@@ -47510,15 +47550,15 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 1359
   totalModules: 82
-  totalLinesOfCode: 245798
-  totalExports: 7453
+  totalLinesOfCode: 245744
+  totalExports: 7454
   totalClasses: 64
   totalInterfaces: 676
-  totalFunctions: 2630
+  totalFunctions: 2629
   totalTypeGuards: 185
   totalEnums: 0
-  totalConstants: 1701
-  totalReExports: 3194
+  totalConstants: 1702
+  totalReExports: 3195
   totalTypeOnlyImports: 685
   runtimeCircularDeps: 2
   typeOnlyCircularDeps: 3

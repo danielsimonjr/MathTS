@@ -2,10 +2,10 @@
   "metadata": {
     "name": "mathts",
     "version": "0.1.0",
-    "lastUpdated": "2026-11-20",
+    "lastUpdated": "2026-11-21",
     "totalFiles": 1359,
     "totalModules": 82,
-    "totalExports": 7453
+    "totalExports": 7454
   },
   "entryPoints": [
     {
@@ -1686,6 +1686,11 @@
             "reExport": true
           },
           {
+            "file": "./types/bigint-gcd.js",
+            "imports": ["gcdBigInt"],
+            "reExport": true
+          },
+          {
             "file": "./string.js",
             "imports": ["format", "stringify", "escape", "compareText", "GeneralFormatOptions"],
             "reExport": true
@@ -1889,6 +1894,7 @@
           "DimensionError",
           "IndexError",
           "createIndexError",
+          "gcdBigInt",
           "formatGeneric",
           "stringify",
           "escape",
@@ -2028,6 +2034,7 @@
           "DimensionError",
           "IndexError",
           "createIndexError",
+          "gcdBigInt",
           "format",
           "stringify",
           "escape",
@@ -15317,6 +15324,12 @@
             "package": "@danielsimonjr/mathts-matrix",
             "directory": "matrix",
             "imports": ["eig"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["gcdBigInt"],
+            "subpath": "internal"
           }
         ],
         "exports": [
@@ -20443,7 +20456,14 @@
             "imports": ["assertAllocSize", "assertLoopOrder"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["gcdBigInt"],
+            "subpath": "internal"
+          }
+        ],
         "exports": [
           "linearDiophantine",
           "pellSolve",
@@ -20475,9 +20495,20 @@
           {
             "file": "../wasm/special/scalars.js",
             "imports": ["chooseScalar"]
+          },
+          {
+            "file": "./modular.js",
+            "imports": ["modPow"]
           }
         ],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["gcdBigInt"],
+            "subpath": "internal"
+          }
+        ],
         "exports": [
           "continuedFraction",
           "eulerNumbers",
@@ -20994,6 +21025,12 @@
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
             "imports": ["Fraction", "isFraction"]
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["gcdBigInt"],
+            "subpath": "internal"
           }
         ],
         "exports": ["rationalNullspace"],
@@ -26891,6 +26928,12 @@
           {
             "package": "@danielsimonjr/mathts-core",
             "directory": "core",
+            "imports": ["gcdBigInt"],
+            "subpath": "internal"
+          },
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
             "imports": [
               "pairwiseSum",
               "pairwiseSumChecked",
@@ -28126,8 +28169,16 @@
         "externalDependencies": [],
         "nodeDependencies": [],
         "internalDependencies": [],
-        "workspaceDependencies": [],
+        "workspaceDependencies": [
+          {
+            "package": "@danielsimonjr/mathts-core",
+            "directory": "core",
+            "imports": ["gcdBigInt"],
+            "subpath": "internal"
+          }
+        ],
         "exports": [
+          "bigintGcd",
           "trim",
           "degree",
           "lc",
@@ -28141,7 +28192,6 @@
           "scalarMul",
           "equals",
           "evaluate",
-          "bigintGcd",
           "content",
           "primitivePart",
           "exactDivide",
@@ -28164,7 +28214,6 @@
           "scalarMul",
           "equals",
           "evaluate",
-          "bigintGcd",
           "content",
           "primitivePart",
           "exactDivide",
@@ -28172,7 +28221,8 @@
           "polyGcdZ",
           "landauMignotte",
           "modSymmetric"
-        ]
+        ],
+        "constants": ["bigintGcd"]
       },
       "functions/src/typed/factorization/kronecker-factor.ts": {
         "description": "Multivariate factorization over ℤ via Kronecker substitution (Layer 2 v1).",
@@ -50365,15 +50415,15 @@
   "statistics": {
     "totalTypeScriptFiles": 1359,
     "totalModules": 82,
-    "totalLinesOfCode": 245798,
-    "totalExports": 7453,
+    "totalLinesOfCode": 245744,
+    "totalExports": 7454,
     "totalClasses": 64,
     "totalInterfaces": 676,
-    "totalFunctions": 2630,
+    "totalFunctions": 2629,
     "totalTypeGuards": 185,
     "totalEnums": 0,
-    "totalConstants": 1701,
-    "totalReExports": 3194,
+    "totalConstants": 1702,
+    "totalReExports": 3195,
     "totalTypeOnlyImports": 685,
     "runtimeCircularDeps": 2,
     "typeOnlyCircularDeps": 3,

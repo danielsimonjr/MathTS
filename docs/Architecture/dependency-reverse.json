@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-20",
+  "generated": "2026-11-21",
   "dependents": {
     "packages/workerpool/src/pool-types.ts": ["packages/workerpool/src/index.ts"],
     "packages/workerpool/src/compile-function-source.ts": [
@@ -136,6 +136,12 @@
       "core/src/types/matrix/Range.ts",
       "core/src/types/unit/Unit.ts"
     ],
+    "core/src/types/bigint-gcd.ts": [
+      "core/src/internal.ts",
+      "core/src/types/bignumber.ts",
+      "core/src/types/fraction.ts",
+      "core/src/types/unit/exact-scale.ts"
+    ],
     "core/src/bignumber-formatter.ts": ["core/src/internal.ts", "core/src/string.ts"],
     "core/src/types/unit/index.ts": ["core/src/internal.ts", "core/src/types/unit.ts"],
     "core/src/collection.ts": ["core/src/internal.ts"],
@@ -165,11 +171,6 @@
       "core/src/types/complex.ts",
       "core/src/types/dual.ts",
       "core/src/types/fraction.ts"
-    ],
-    "core/src/types/bigint-gcd.ts": [
-      "core/src/types/bignumber.ts",
-      "core/src/types/fraction.ts",
-      "core/src/types/unit/exact-scale.ts"
     ],
     "core/src/types/unit/errors.ts": ["core/src/types/unit.ts", "core/src/types/unit/Unit.ts"],
     "core/src/types/unit/va-var.ts": ["core/src/types/unit/Unit.ts"],
@@ -2311,7 +2312,8 @@
     "functions/src/numeric/finite-differences.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/modular.ts": [
       "functions/src/index.ts",
-      "functions/src/numbertheory/arithmetic-functions.ts"
+      "functions/src/numbertheory/arithmetic-functions.ts",
+      "functions/src/numbertheory/extra.ts"
     ],
     "functions/src/numbertheory/arithmetic-functions.ts": ["functions/src/index.ts"],
     "functions/src/numbertheory/sequences.ts": ["functions/src/index.ts"],

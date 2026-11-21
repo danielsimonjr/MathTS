@@ -673,6 +673,7 @@ graph LR
 | `./error/MathjsError.js`     | `MathjsError`                                                                                                                                                                                                                                                                                                                                                                                                                               | Re-export             |
 | `./error/DimensionError.js`  | `DimensionError`                                                                                                                                                                                                                                                                                                                                                                                                                            | Re-export             |
 | `./error/IndexError.js`      | `IndexError, createIndexError`                                                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
+| `./types/bigint-gcd.js`      | `gcdBigInt`                                                                                                                                                                                                                                                                                                                                                                                                                                 | Re-export             |
 | `./string.js`                | `format, stringify, escape, compareText, GeneralFormatOptions`                                                                                                                                                                                                                                                                                                                                                                              | Re-export             |
 | `./bignumber-formatter.js`   | `format, toEngineering, toExponential, toFixed, BigNumberValue`                                                                                                                                                                                                                                                                                                                                                                             | Re-export             |
 | `./types/unit/index.js`      | `createUnitClass, unitDependencies, Unit`                                                                                                                                                                                                                                                                                                                                                                                                   | Re-export             |
@@ -694,7 +695,7 @@ graph LR
 
 **Exports:**
 
-- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `validateDimension`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `UNIT_FLOOR_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `EntryRange`
+- Re-exports: `* from ./is.js`, `* from ./number.js`, `* from ./object.js`, `* from ./factory.js`, `hasOwnProperty`, `endsWith`, `warnOnce`, `memoize`, `DEFAULT_CONFIG`, `MathjsError`, `DimensionError`, `IndexError`, `createIndexError`, `gcdBigInt`, `format`, `stringify`, `escape`, `compareText`, `GeneralFormatOptions`, `toEngineering`, `toExponential`, `toFixed`, `BigNumberValue`, `createUnitClass`, `unitDependencies`, `Unit`, `arraySize`, `validate`, `validateIndexSourceSize`, `validateIndex`, `isEmptyIndex`, `resize`, `reshape`, `processSizesWildcard`, `squeeze`, `unsqueeze`, `flatten`, `map`, `forEach`, `filter`, `filterRegExp`, `join`, `identify`, `generalize`, `getArrayDataType`, `last`, `initial`, `concat`, `broadcastSizes`, `checkBroadcastingRules`, `broadcastTo`, `broadcastArrays`, `stretch`, `get`, `deepMap`, `deepForEach`, `clone`, `containsCollections`, `reduce`, `scatter`, `validateDimension`, `_switch`, `ObjectWrappingMap`, `PartitionedMap`, `createEmptyMap`, `createMap`, `toObject`, `assign`, `isObjectWrappingMap`, `sha384OfBuffer`, `loadWasmManifest`, `verifyWasmIntegrity`, `resolvePackagedWasm`, `defaultWasmLocation`, `WasmModuleLoader`, `allocAsHeader`, `importModule`, `SQUARED`, `FOURTH`, `ABS_CUTOFF_LO`, `UNIT_LO`, `UNIT_FLOOR_LO`, `pow2ScaleExponent`, `ldexp`, `ldexpMatrix`, `entryRange`, `allFinite`, `withPow2Scale`, `WasmMemoryHandle`, `CompiledWasmModule`, `AbortSignalLike`, `MemoizedFunction`, `ConfigOptions`, `MathJsConfig`, `ComplexValue`, `ComplexConstructor`, `BigNumberConstructor`, `FractionConstructor`, `FractionValue`, `Numeric`, `PrefixDef`, `PrefixTable`, `BaseUnitDef`, `UnitDef`, `UnitComponent`, `UnitSystemEntry`, `UnitSystem`, `UnitJSON`, `ConverterFn`, `TypeConverters`, `ParseOptions`, `ConvertOptions`, `UnitFormatOptions`, `CreateUnitOptions`, `CreateUnitDefObject`, `UnitConfig`, `SubtractScalar`, `ScalarBinaryOp`, `ScalarUnaryOp`, `UnitDependencies`, `UnitInstance`, `UnitConstructor`, `NestedArray`, `IdentifiedValue`, `LoadingMetrics`, `WasmManifest`, `EntryRange`
 
 ---
 
@@ -5805,9 +5806,10 @@ graph LR
 
 **Workspace Dependencies:**
 
-| Package                        | Import |
-| ------------------------------ | ------ |
-| `@danielsimonjr/mathts-matrix` | `eig`  |
+| Package                        | Import      |
+| ------------------------------ | ----------- |
+| `@danielsimonjr/mathts-matrix` | `eig`       |
+| `@danielsimonjr/mathts-core`   | `gcdBigInt` |
 
 **Internal Dependencies:**
 
@@ -8170,6 +8172,12 @@ graph LR
 
 ### `functions/src/numbertheory/diophantine.ts` - Diophantine and lattice-style integer problems: linear Diophantine equations,
 
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `gcdBigInt` |
+
 **Internal Dependencies:**
 
 | File                 | Imports                            | Type   |
@@ -8184,12 +8192,19 @@ graph LR
 
 ### `functions/src/numbertheory/extra.ts` - Number-theory fills — closes gaps left by the existing combinatorics/number-theory
 
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `gcdBigInt` |
+
 **Internal Dependencies:**
 
 | File                         | Imports           | Type   |
 | ---------------------------- | ----------------- | ------ |
 | `../utils/limits.js`         | `assertAllocSize` | Import |
 | `../wasm/special/scalars.js` | `chooseScalar`    | Import |
+| `./modular.js`               | `modPow`          | Import |
 
 **Exports:**
 
@@ -8596,6 +8611,7 @@ graph LR
 | Package                      | Import                 |
 | ---------------------------- | ---------------------- |
 | `@danielsimonjr/mathts-core` | `Fraction, isFraction` |
+| `@danielsimonjr/mathts-core` | `gcdBigInt`            |
 
 **Exports:**
 
@@ -11858,6 +11874,7 @@ graph LR
 | Package                          | Import                                                                                                                                    |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `@danielsimonjr/mathts-core`     | `mathTyped, Complex, Fraction, BigNumber, Dual, DimensionMismatchError, extrema, isComplex`                                               |
+| `@danielsimonjr/mathts-core`     | `gcdBigInt`                                                                                                                               |
 | `@danielsimonjr/mathts-core`     | `pairwiseSum, pairwiseSumChecked, neumaierSum, norm2, pairwiseDot, pairwiseDotChecked, sumSquaredDeviations, sumSquaredDeviationsChecked` |
 | `@danielsimonjr/mathts-core`     | `pow, round, fix, equal`                                                                                                                  |
 | `@danielsimonjr/mathts-core`     | `UnitInstance, TypedFunction`                                                                                                             |
@@ -12260,10 +12277,17 @@ graph LR
 
 ### `functions/src/typed/factorization/integer-poly.ts` - Dense univariate polynomial arithmetic over ℤ, backed by `bigint[]`.
 
+**Workspace Dependencies:**
+
+| Package                      | Import      |
+| ---------------------------- | ----------- |
+| `@danielsimonjr/mathts-core` | `gcdBigInt` |
+
 **Exports:**
 
 - Types: `IntPoly`
-- Functions: `trim`, `degree`, `lc`, `isZero`, `zipIntPoly`, `add`, `sub`, `neg`, `schoolbookMul`, `mul`, `scalarMul`, `equals`, `evaluate`, `bigintGcd`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
+- Functions: `trim`, `degree`, `lc`, `isZero`, `zipIntPoly`, `add`, `sub`, `neg`, `schoolbookMul`, `mul`, `scalarMul`, `equals`, `evaluate`, `content`, `primitivePart`, `exactDivide`, `derivative`, `polyGcdZ`, `landauMignotte`, `modSymmetric`
+- Constants: `bigintGcd`
 
 ---
 
@@ -21035,8 +21059,8 @@ graph LR
 | `functions/src/typed/expression-eval-barrel`           | 26 files     | 1 file     |
 | `expression/src/transform/index`                       | 25 files     | 1 file     |
 | `assembly/src/index`                                   | 25 files     | 0 files    |
+| `core/src/internal`                                    | 24 files     | 0 files    |
 | `functions/src/typed/number-matrix`                    | 0 files      | 24 files   |
-| `core/src/internal`                                    | 23 files     | 0 files    |
 | `tensor/src/Tensor`                                    | 3 files      | 20 files   |
 | `functions/src/type/matrix/utils/matAlgo12xSfs`        | 2 files      | 19 files   |
 | `functions/src/typed/cas`                              | 20 files     | 1 file     |
@@ -21905,6 +21929,7 @@ graph TD
     N22 --> N26
     N22 --> N24
     N22 --> N25
+    N22 --> N35
     N22 --> N14
     N22 --> N13
     N22 --> N15
@@ -21937,7 +21962,6 @@ graph TD
     N47 --> N57
     N49 --> N46
     N49 --> N72
-    N49 --> N50
 ```
 
 ---
@@ -21950,12 +21974,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1359   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 245798 |
-| Total Exports           | 7453   |
-| Total Re-exports        | 3194   |
+| Total Lines of Code     | 245744 |
+| Total Exports           | 7454   |
+| Total Re-exports        | 3195   |
 | Total Classes           | 64     |
 | Total Interfaces        | 676    |
-| Total Functions         | 2630   |
+| Total Functions         | 2629   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |
