@@ -1,0 +1,5 @@
+---
+'@danielsimonjr/mathts-functions': minor
+---
+
+`besselI` and `besselK` accept a real order. Before, both functions rounded the order to an integer, so `besselI(0.5, 1)` was `0.5652` (the value is `0.9377`), `besselI(-0.5, 1)` was `0.5652` (the value is `1.2312`) and `besselK(1.49, 3)` was `0.0402` (the value is `0.04783`). A negative real order of `besselI` is `I_nu = I_an + (2/pi) sin(an pi) K_an`, and the K term carries its factor, so the sum is correct next to an integer order. `besselI` of a negative `x` is `(-1)^n I_n(|x|)` for an integer order and `NaN` for a real order. `besselI(2, 800)` is `Infinity` and was `NaN`. `besselI(0.5, 1e-300)` is `7.98e-151` and was `0`. `besselI(0, x)` is about six times faster for `x` from 0 to 20 (3.0 to 3.4 microseconds a call before, 0.5 after). A series that does not converge gives `NaN`, never a partial sum. A call that needs more than 2500000000 steps throws `RangeError`, and the array form counts the total steps of its elements. One known limit stays: `besselK` of `x` above about 745 is `0` (#1362). (Refs #1331)

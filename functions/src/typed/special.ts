@@ -799,12 +799,17 @@ export const besselY1 = mathTyped('besselY1', {
 });
 
 /**
- * Bessel function of the first kind, general integer order n: J_n(x).
+ * Bessel function of the first kind, J_nu(x), for a real order.
+ *
+ * The zero bound of J runs before the order limit, so a huge order with a small x gives 0 at
+ * once. An order above 2500000000 that passes the bound throws a RangeError, and one call near
+ * that limit takes up to about 20 s. The array form counts the total steps of its elements
+ * (`assertBesselArrayWork`). J_nu(x) of a negative real order at x = 0 is a signed Infinity.
  *
  * Float64Array paths at ≥ WASM_SPECIAL_THRESHOLD consult the bridge; Bessel kernels
  * are absent from `wasmPolicyAllows` (`functions/src/wasm/policy.ts`), so JS runs.
  *
- * @param n - Order (integer)
+ * @param n - Order (real)
  * @param x - Input value, or Float64Array of values
  * @returns J_n(x)
  */
@@ -820,12 +825,17 @@ export const besselJ = mathTyped('besselJ', {
 });
 
 /**
- * Bessel function of the second kind, general integer order n: Y_n(x).
+ * Bessel function of the second kind, Y_nu(x), for a real order.
+ *
+ * The overflow bound of Y runs before the order limit: Y_n(x) below -1.8e308 is -Infinity at
+ * once. An order above 2500000000 that passes the bound throws a RangeError, and one call near
+ * that limit takes up to about 20 s. The array form counts the total steps of its elements
+ * (`assertBesselArrayWork`).
  *
  * Float64Array paths at ≥ WASM_SPECIAL_THRESHOLD consult the bridge; Bessel kernels
  * are absent from `wasmPolicyAllows` (`functions/src/wasm/policy.ts`), so JS runs.
  *
- * @param n - Order (integer)
+ * @param n - Order (real)
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns Y_n(x)
  */
