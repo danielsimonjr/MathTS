@@ -6974,7 +6974,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 300
+      "loc": 304
     },
     {
       "file": "functions/src/fit-scalar.ts",
@@ -7576,7 +7576,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 336
+      "loc": 354
     },
     {
       "file": "functions/src/matrix/squeeze.ts",
@@ -9340,7 +9340,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 3274
+      "loc": 3345
     },
     {
       "file": "functions/src/typed/bitwise.ts",
@@ -9592,7 +9592,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 1323
+      "loc": 1316
     },
     {
       "file": "functions/src/typed/normal-equations-solve.ts",
@@ -9606,7 +9606,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "src",
       "disposition": "build-entry",
-      "loc": 148
+      "loc": 161
     },
     {
       "file": "functions/src/typed/numeric.ts",
@@ -11321,7 +11321,7 @@
       "package": "@danielsimonjr/mathts-functions",
       "area": "tests",
       "disposition": "test",
-      "loc": 222
+      "loc": 369
     },
     {
       "file": "functions/tests/dogfood-1273-ragged-sparse.test.ts",

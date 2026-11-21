@@ -66,6 +66,19 @@ export function squareOrder(
   throw new ErrorType(`${name}: matrix must be square (got ${shown})`);
 }
 
+/**
+ * Reads the entries of a square sparse matrix as a nested array. A sparse matrix with a
+ * `toArray` method gives its own conversion; another one gives its entries by `get`.
+ *
+ * @param A - A sparse matrix of either kind.
+ * @param n - The order of `A`, from `squareOrder`.
+ * @returns The `n` x `n` nested array of the entries.
+ */
+export function sparseToArray(A: SparseLike, n: number): number[][] {
+  if (typeof A.toArray === 'function') return A.toArray();
+  return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => A.get(i, j)));
+}
+
 /** The type name of a value, for an error message: the class name of an object. */
 function typeNameOf(value: unknown): string {
   if (value === null) return 'null';

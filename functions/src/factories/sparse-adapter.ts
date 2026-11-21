@@ -95,11 +95,15 @@ export function cscToPublic(m: MathJSSparseMatrix): SparseMatrix | unknown[][] {
 
 /**
  * Output rule for a call that received a public `DenseMatrix` (dense in, dense out). A
- * two-dimensional result of numbers becomes the public `DenseMatrix`. Any other result (a
- * boolean, Complex, BigNumber or Fraction entry, or one dimension) is the nested `Array` of the
- * same values. The public class stores a `Float64Array`, and cannot hold such a result.
+ * two-dimensional result of numbers becomes the public `DenseMatrix`. An empty two-dimensional
+ * result (0 x 0, 0 x n or n x 0) has no entry, so it is a public `DenseMatrix` of the same size;
+ * its nested array cannot show the size of an n x 0 result. Any other result (a boolean,
+ * Complex, BigNumber or Fraction entry, or one dimension) is the nested `Array` of the same
+ * values. The public class stores a `Float64Array`, and cannot hold such a result.
  */
 export function denseToPublic(m: MathJSDenseMatrix): DenseMatrix | unknown[] {
+  const size = m.size();
+  if (size.length === 2 && size[0] * size[1] === 0) return DenseMatrix.zeros(size[0], size[1]);
   const data = m.toArray() as unknown[];
   const numeric2d =
     data.length > 0 &&

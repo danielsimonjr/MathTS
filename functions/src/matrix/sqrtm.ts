@@ -60,6 +60,7 @@ interface Dependencies {
   size: TypedFunction<number[]>;
   max: TypedFunction<number | BigNumber>;
   identity: TypedFunction<Matrix>;
+  matrix: TypedFunction<Matrix>;
 }
 
 const name = 'sqrtm';
@@ -75,12 +76,26 @@ const dependencies = [
   'size',
   'max',
   'identity',
+  'matrix',
 ];
 
 export const createSqrtm = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, abs, add, multiply, map, sqrt, subtract, inv, size, max, identity }: Dependencies) => {
+  ({
+    typed,
+    abs,
+    add,
+    multiply,
+    map,
+    sqrt,
+    subtract,
+    inv,
+    size,
+    max,
+    identity,
+    matrix,
+  }: Dependencies) => {
     const _maxIterations = 1e3;
     const _tolerance = 1e-6;
     // The largest `_residual` of a root. The worst value over 3,000 random matrices that
@@ -316,7 +331,10 @@ export const createSqrtm = /* #__PURE__ */ factory(
             const cols = sizeArray[1];
             if (rows === cols) {
               if (rows === 0) return (A as Matrix).clone();
-              return _sqrtmScaled(A as Scalar[][] | Matrix);
+              // `identity(size(A))` is an Array, so the iteration can end in an Array. A
+              // Matrix in gives a Matrix out (#1278).
+              const root = _sqrtmScaled(A as Scalar[][] | Matrix);
+              return isMatrix(A) && !isMatrix(root) ? matrix(root) : root;
             } else {
               throw new RangeError(
                 'Matrix must be square ' + '(size: ' + format(sizeArray, {}) + ')'

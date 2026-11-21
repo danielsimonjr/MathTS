@@ -11868,7 +11868,7 @@ graph LR
 
 | File                                   | Imports                                                                                                                                                                                                                                       | Type               |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `./number-matrix.js`                   | `assertRectangular, isNumberMatrix, numberVector`                                                                                                                                                                                             | Import             |
+| `./number-matrix.js`                   | `assertRectangular, isNumberMatrix, numberVector, sparseToArray, squareOrder, SparseLike`                                                                                                                                                     | Import             |
 | `../factories/scope.js`                | `factoryScope`                                                                                                                                                                                                                                | Import             |
 | `./euclid.js`                          | `euclidSnap`                                                                                                                                                                                                                                  | Import             |
 | `./f64-kernels.js`                     | `f64Unary, f64UnaryDispatched, mapEachLeaf, unaryCollection`                                                                                                                                                                                  | Import             |
@@ -12626,12 +12626,12 @@ graph LR
 
 **Internal Dependencies:**
 
-| File                            | Imports                                   | Type   |
-| ------------------------------- | ----------------------------------------- | ------ |
-| `../factories/scope.js`         | `factoryScope`                            | Import |
-| `./number-matrix.js`            | `isNumberMatrix, squareOrder, SparseLike` | Import |
-| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`   | Import |
-| `../utils/array.js`             | `arraySize`                               | Import |
+| File                            | Imports                                                  | Type   |
+| ------------------------------- | -------------------------------------------------------- | ------ |
+| `../factories/scope.js`         | `factoryScope`                                           | Import |
+| `./number-matrix.js`            | `isNumberMatrix, squareOrder, sparseToArray, SparseLike` | Import |
+| `../factories/matrix-bridge.js` | `MathJSDenseMatrix, MathJSSparseMatrix`                  | Import |
+| `../utils/array.js`             | `arraySize`                                              | Import |
 
 **Exports:**
 
@@ -12654,7 +12654,7 @@ graph LR
 **Exports:**
 
 - Interfaces: `SparseLike`
-- Functions: `isNumberMatrix`, `assertRectangular`, `squareOrder`, `assertNumberScalar`, `hasNaN`, `numberVector`
+- Functions: `isNumberMatrix`, `assertRectangular`, `squareOrder`, `sparseToArray`, `assertNumberScalar`, `hasNaN`, `numberVector`
 
 ---
 
@@ -21951,12 +21951,12 @@ graph TD
 | ----------------------- | ------ |
 | Total TypeScript Files  | 1359   |
 | Total Modules           | 82     |
-| Total Lines of Code     | 245861 |
-| Total Exports           | 7454   |
+| Total Lines of Code     | 245960 |
+| Total Exports           | 7455   |
 | Total Re-exports        | 3194   |
 | Total Classes           | 64     |
 | Total Interfaces        | 677    |
-| Total Functions         | 2631   |
+| Total Functions         | 2632   |
 | Total Type Guards       | 185    |
 | Total Enums             | 0      |
 | Type-only Imports       | 685    |

@@ -38,7 +38,7 @@ import {
 } from '@danielsimonjr/mathts-matrix';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { factoryScope } from '../factories/scope.js';
-import { isNumberMatrix, squareOrder, type SparseLike } from './number-matrix.js';
+import { isNumberMatrix, squareOrder, sparseToArray, type SparseLike } from './number-matrix.js';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from '../factories/matrix-bridge.js';
 import { arraySize } from '../utils/array.js';
 
@@ -1234,14 +1234,7 @@ function expmDense(A: Parameters<typeof matrixExpmPrimitive>[0]) {
  */
 function expmSparse(A: SparseLike) {
   const n = squareOrder('matrixExpm', [A.rows, A.cols]);
-  const data =
-    n === 0
-      ? []
-      : expmArray(
-          typeof A.toArray === 'function'
-            ? A.toArray()
-            : Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => A.get(i, j)))
-        );
+  const data = n === 0 ? [] : expmArray(sparseToArray(A, n));
   if (isSparseMatrix(A)) {
     return SparseMatrix.fromDense(n === 0 ? DenseMatrix.zeros(0, 0) : DenseMatrix.fromArray(data));
   }

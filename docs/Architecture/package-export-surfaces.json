@@ -4068,6 +4068,7 @@
       "sparse",
       "sparseMatrixFromVectors",
       "sparseProduct",
+      "sparseToArray",
       "spearman",
       "spearmanr",
       "spectralClustering",

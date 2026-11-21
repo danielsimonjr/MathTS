@@ -5,7 +5,7 @@
     "lastUpdated": "2026-11-21",
     "totalFiles": 1359,
     "totalModules": 82,
-    "totalExports": 7454
+    "totalExports": 7455
   },
   "entryPoints": [
     {
@@ -26765,7 +26765,14 @@
         "internalDependencies": [
           {
             "file": "./number-matrix.js",
-            "imports": ["assertRectangular", "isNumberMatrix", "numberVector"]
+            "imports": [
+              "assertRectangular",
+              "isNumberMatrix",
+              "numberVector",
+              "sparseToArray",
+              "squareOrder",
+              "SparseLike"
+            ]
           },
           {
             "file": "../factories/scope.js",
@@ -29280,7 +29287,7 @@
           },
           {
             "file": "./number-matrix.js",
-            "imports": ["isNumberMatrix", "squareOrder", "SparseLike"]
+            "imports": ["isNumberMatrix", "squareOrder", "sparseToArray", "SparseLike"]
           },
           {
             "file": "../factories/matrix-bridge.js",
@@ -29389,6 +29396,7 @@
           "isNumberMatrix",
           "assertRectangular",
           "squareOrder",
+          "sparseToArray",
           "assertNumberScalar",
           "hasNaN",
           "numberVector"
@@ -29398,6 +29406,7 @@
           "isNumberMatrix",
           "assertRectangular",
           "squareOrder",
+          "sparseToArray",
           "assertNumberScalar",
           "hasNaN",
           "numberVector"
@@ -50370,11 +50379,11 @@
   "statistics": {
     "totalTypeScriptFiles": 1359,
     "totalModules": 82,
-    "totalLinesOfCode": 245861,
-    "totalExports": 7454,
+    "totalLinesOfCode": 245960,
+    "totalExports": 7455,
     "totalClasses": 64,
     "totalInterfaces": 677,
-    "totalFunctions": 2631,
+    "totalFunctions": 2632,
     "totalTypeGuards": 185,
     "totalEnums": 0,
     "totalConstants": 1701,

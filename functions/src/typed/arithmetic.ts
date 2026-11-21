@@ -14,7 +14,14 @@
  * @packageDocumentation
  */
 
-import { assertRectangular, isNumberMatrix, numberVector } from './number-matrix.js';
+import {
+  assertRectangular,
+  isNumberMatrix,
+  numberVector,
+  sparseToArray,
+  squareOrder,
+  type SparseLike,
+} from './number-matrix.js';
 import { factoryScope } from '../factories/scope.js';
 import {
   mathTyped,
@@ -1186,6 +1193,70 @@ export const sign = mathTyped('sign', {
 // Power and Root Operations
 // =============================================================================
 
+/** The message of the TypeError for a matrix power of a 1-D array or matrix. */
+const POW_NOT_2D =
+  'pow(Array, number): expected a square 2-D matrix; use dotPow for element-wise power';
+
+/**
+ * Checks the exponent of a matrix power. Every matrix path calls this before it returns a
+ * result, an empty result included, so the exponent rule does not depend on the size.
+ *
+ * @param b - The exponent.
+ * @throws An `Error` when `b` is not a non-negative integer.
+ */
+function assertMatrixExponent(b: f64): void {
+  if (!Number.isInteger(b) || b < 0) {
+    throw new Error(
+      'pow: only non-negative integer exponents are supported for matrices here; ' +
+        'use matrixPower(A, p) for negative or fractional powers'
+    );
+  }
+}
+
+/**
+ * The power of a square matrix of numbers by binary exponentiation on the native `DenseMatrix`
+ * backend. The 0 x 0 matrix `[]` gives `[]` for every valid exponent.
+ *
+ * @param m - The square matrix as a nested array.
+ * @param b - The exponent, a non-negative integer.
+ * @returns The power as a nested array.
+ * @throws A `RangeError` when `m` is not square, and an `Error` when `b` is not a non-negative integer.
+ */
+function matrixPowNumber(m: number[][], b: f64): number[][] {
+  const n = m.length;
+  if (m.some((row) => row.length !== n)) {
+    throw new RangeError(`pow: matrix must be square (got ${n}×${m[0]?.length ?? 0})`);
+  }
+  assertMatrixExponent(b);
+  if (n === 0) return [];
+  let result = DenseMatrix.identity(n);
+  let base = DenseMatrix.fromArray(m);
+  let e = b;
+  while (e > 0) {
+    if (e % 2 === 1) result = backendManager.multiply(result, base);
+    e = Math.floor(e / 2);
+    if (e > 0) base = backendManager.multiply(base, base);
+  }
+  return result.toArray();
+}
+
+/**
+ * The power of a boxed dense matrix (from `matrix()`), in the boxed class. The shape comes from
+ * `size()`, because a 0 x n matrix converts to `[]` and loses its shape.
+ *
+ * @param a - The boxed matrix.
+ * @param b - The exponent, a non-negative integer.
+ * @returns A boxed `n` x `n` matrix.
+ * @throws A `TypeError` for a 1-D matrix, a `RangeError` for a matrix that is not square, and an `Error` for a bad exponent.
+ */
+function powBoxedDense(a: { size(): number[]; toArray(): unknown }, b: f64): MathJSDenseMatrix {
+  const size = a.size();
+  if (size.length === 1 && size[0] > 0) throw new TypeError(POW_NOT_2D);
+  const n = squareOrder('pow', size, RangeError);
+  const data = matrixPowNumber(n === 0 ? [] : (a.toArray() as number[][]), b);
+  return new MathJSDenseMatrix({ data, size: [n, n] });
+}
+
 /**
  * Power function
  */
@@ -1217,32 +1288,32 @@ export const pow = mathTyped('pow', {
   // exponentiation on the native DenseMatrix backend (accelerated matmul, B2). Element-
   // wise power is `dotPow`; negative/fractional matrix powers need eigendecomposition —
   // use the async `matrixPower(A, p)`.
+  // A matrix argument gives a matrix of a class that the argument decides (#1264, #1278). The shape
+  // is read here, before the Matrix to Array conversion, because a 0 x n matrix converts to [].
+  'DenseMatrix, number': (a: DenseMatrix, b: f64) => {
+    if (!isDenseMatrix(a)) return powBoxedDense(a as never, b);
+    const n = squareOrder('pow', [a.rows, a.cols], RangeError);
+    if (n === 0) {
+      assertMatrixExponent(b);
+      return DenseMatrix.zeros(0, 0);
+    }
+    return DenseMatrix.fromArray(matrixPowNumber(a.toArray(), b));
+  },
+  // A non-empty sparse matrix gives a dense matrix, as mathjs does. The 0 x 0 matrix keeps its kind.
+  'SparseMatrix, number': (a: SparseLike, b: f64) => {
+    const n = squareOrder('pow', [a.rows, a.cols], RangeError);
+    if (n === 0) {
+      assertMatrixExponent(b);
+      return isSparseMatrix(a)
+        ? SparseMatrix.fromDense(DenseMatrix.zeros(0, 0))
+        : new MathJSSparseMatrix([]);
+    }
+    return new MathJSDenseMatrix({ data: matrixPowNumber(sparseToArray(a, n), b), size: [n, n] });
+  },
   'Array, number': (a: unknown[], b: f64): number[][] => {
-    if (!Array.isArray(a[0])) {
-      throw new TypeError(
-        'pow(Array, number): expected a square 2-D matrix; use dotPow for element-wise power'
-      );
-    }
-    const m = a as number[][];
-    const n = m.length;
-    if (m.some((row) => row.length !== n)) {
-      throw new RangeError(`pow: matrix must be square (got ${n}×${m[0]?.length ?? 0})`);
-    }
-    if (!Number.isInteger(b) || b < 0) {
-      throw new Error(
-        'pow: only non-negative integer exponents are supported for matrices here; ' +
-          'use matrixPower(A, p) for negative or fractional powers'
-      );
-    }
-    let result = DenseMatrix.identity(n);
-    let base = DenseMatrix.fromArray(m);
-    let e = b;
-    while (e > 0) {
-      if (e % 2 === 1) result = backendManager.multiply(result, base);
-      e = Math.floor(e / 2);
-      if (e > 0) base = backendManager.multiply(base, base);
-    }
-    return result.toArray();
+    // [] is the 0 x 0 matrix, the only Array form of an empty matrix
+    if (a.length > 0 && !Array.isArray(a[0])) throw new TypeError(POW_NOT_2D);
+    return matrixPowNumber(a as number[][], b);
   },
 });
 

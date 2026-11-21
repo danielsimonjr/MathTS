@@ -11,15 +11,30 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
-import { expm as expmFn, matrix, sparse, sylvester as sylvesterFn, zeros } from '../src/index.js';
+import {
+  bignumber,
+  expm as expmFn,
+  matrix,
+  pow as powFn,
+  sparse,
+  sqrtm as sqrtmFn,
+  sylvester as sylvesterFn,
+  zeros,
+} from '../src/index.js';
 
 type Fn1 = (a: unknown) => unknown;
+
+type Fn2 = (a: unknown, b: unknown) => unknown;
 
 type Fn3 = (a: unknown, b: unknown, c: unknown) => unknown;
 
 type BridgeMatrix = { storage(): string; size(): number[]; toArray(): unknown };
 
 const expm = expmFn as unknown as Fn1;
+
+const pow = powFn as unknown as Fn2;
+
+const sqrtm = sqrtmFn as unknown as Fn1;
 
 const sylvester = sylvesterFn as unknown as Fn3;
 
@@ -234,5 +249,170 @@ describe('#1265 sylvester checks the shapes first', () => {
       [-0.25, 0.25],
       [1.5, -1.25],
     ]);
+  });
+});
+
+describe('#1278 pow of a 0 x 0 matrix and of a non-empty Matrix', () => {
+  const M = () =>
+    matrix([
+      [1, 1],
+      [0, 1],
+    ]);
+  const cube = [
+    [1, 3],
+    [0, 1],
+  ];
+
+  it('T9 an empty Array gives [] and a non-integer exponent still throws', () => {
+    expect(pow([], 2)).toEqual([]);
+    expect(pow([], 0)).toEqual([]);
+    expect(() => pow([], 1.5)).toThrow(/integer/);
+  });
+
+  it('T10 a 0 x 0 Matrix gives a 0 x 0 Matrix of the same storage', () => {
+    for (const a of [matrix([]), zeros(0, 0)]) {
+      const r = pow(a, 2) as BridgeMatrix;
+      expect(Array.isArray(r)).toBe(false);
+      expect(typeof r.size).toBe('function');
+      expect(r.storage()).toBe('dense');
+      expect(r.size()).toEqual([0, 0]);
+    }
+    const s = pow(sparse([]), 2) as BridgeMatrix;
+    expect(Array.isArray(s)).toBe(false);
+    expect(s.storage()).toBe('sparse');
+    expect(s.size()).toEqual([0, 0]);
+
+    const native = pow(DenseMatrix.zeros(0, 0), 2) as DenseMatrix;
+    expect(native instanceof DenseMatrix).toBe(true);
+    expect([native.rows, native.cols]).toEqual([0, 0]);
+  });
+
+  it('T11 a 0 x 3 matrix throws the square RangeError', () => {
+    expect(() => pow(zeros(0, 3), 2)).toThrow(RangeError);
+    expect(() => pow(zeros(0, 3), 2)).toThrow(/square/);
+    expect(() => pow(DenseMatrix.zeros(0, 3), 2)).toThrow(RangeError);
+    expect(() => pow(DenseMatrix.zeros(0, 3), 2)).toThrow(/square/);
+  });
+
+  it('T12 a non-empty Matrix gives a Matrix, an Array gives an Array', () => {
+    const d = pow(M(), 3) as BridgeMatrix;
+    expect(Array.isArray(d)).toBe(false);
+    expect(d.storage()).toBe('dense');
+    expect(d.toArray()).toEqual(cube);
+
+    const s = pow(
+      sparse([
+        [1, 1],
+        [0, 1],
+      ]),
+      3
+    ) as BridgeMatrix;
+    expect(Array.isArray(s)).toBe(false);
+    expect(s.storage()).toBe('dense');
+    expect(s.toArray()).toEqual(cube);
+
+    const a = pow(
+      [
+        [1, 1],
+        [0, 1],
+      ],
+      3
+    );
+    expect(Array.isArray(a)).toBe(true);
+    expect(a).toEqual(cube);
+  });
+
+  it('T12b the exponent conversions and the existing errors stay', () => {
+    for (const e of [3n, bignumber(3)]) {
+      const r = pow(M(), e) as BridgeMatrix;
+      expect(Array.isArray(r)).toBe(false);
+      expect(r.toArray()).toEqual(cube);
+    }
+    expect(() => pow(M(), -1)).toThrow(/non-negative integer/);
+    expect(() => pow(M(), 1.5)).toThrow(/non-negative integer/);
+    expect(() => pow(matrix([1, 2]), 2)).toThrow(TypeError);
+    expect(() => pow(matrix([1, 2]), 2)).toThrow(/2-D/);
+
+    const id = pow(M(), 0) as BridgeMatrix;
+    expect(Array.isArray(id)).toBe(false);
+    expect(id.toArray()).toEqual(I2);
+
+    const native = pow(
+      DenseMatrix.fromArray([
+        [1, 1],
+        [0, 1],
+      ]),
+      3
+    );
+    expect(native instanceof DenseMatrix).toBe(true);
+    expect((native as DenseMatrix).toArray()).toEqual(cube);
+
+    const csr = pow(SparseMatrix.fromDense(DenseMatrix.identity(2)), 2);
+    expect(Array.isArray(csr)).toBe(false);
+    expect(sz(csr)).toEqual([2, 2]);
+
+    const csr00 = pow(SparseMatrix.fromDense(DenseMatrix.zeros(0, 0)), 2);
+    expect(csr00 instanceof SparseMatrix).toBe(true);
+    expect(sz(csr00)[0]).toBe(0);
+  });
+
+  it('T12c an exponent that is not a non-negative integer fails before an empty result', () => {
+    for (const a of [[], matrix([]), zeros(0, 0), sparse([]), DenseMatrix.zeros(0, 0)]) {
+      expect(() => pow(a, 1.5)).toThrow(/non-negative integer/);
+      expect(() => pow(a, -1)).toThrow(/non-negative integer/);
+    }
+  });
+});
+
+describe('#1278 sqrtm of a non-empty Matrix returns a Matrix', () => {
+  it('T15 root sqrtm keeps the container', () => {
+    const r = sqrtm(
+      matrix([
+        [4, 0],
+        [0, 9],
+      ])
+    ) as BridgeMatrix;
+    expect(Array.isArray(r)).toBe(false);
+    expect(r.storage()).toBe('dense');
+    expect(r.size()).toEqual([2, 2]);
+    expectCloseTo(
+      r.toArray(),
+      [
+        [2, 0],
+        [0, 3],
+      ],
+      9
+    );
+
+    const s = sqrtm(
+      sparse([
+        [4, 0],
+        [0, 9],
+      ])
+    ) as BridgeMatrix;
+    expect(Array.isArray(s)).toBe(false);
+    expect(s.storage()).toBe('dense');
+    expectCloseTo(
+      s.toArray(),
+      [
+        [2, 0],
+        [0, 3],
+      ],
+      9
+    );
+
+    const a = sqrtm([
+      [4, 0],
+      [0, 9],
+    ]);
+    expect(Array.isArray(a)).toBe(true);
+    expectCloseTo(
+      a,
+      [
+        [2, 0],
+        [0, 3],
+      ],
+      9
+    );
   });
 });
