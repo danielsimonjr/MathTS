@@ -190,6 +190,16 @@ describe('#964 the same defect in the other callers of toSamples', () => {
     expect(() => toSamples('t', [1, undefined])).toThrow(/got a undefined at index 1/);
     expect(() => toSamples('t', [[]])).toThrow(/got a Array at index 0/);
   });
+  it('toSamples keeps the Float64Array reading of an empty string, a blank, true and null', () => {
+    // The engine reads '' and ' ' as 0, true as 1 and null as 0, as mathjs number() does (#977).
+    expect(Array.from(toSamples('t', [1, '', ' ', true, null]))).toEqual([1, 0, 0, 1, 0]);
+  });
+  it('toSamples throws for a column vector [[1], [3], [5]] (it read as [1, 3, 5])', () => {
+    expect(() => toSamples('t', [[1], [3], [5]])).toThrow(
+      /t: expects number data, got a Array at index 0/
+    );
+    expect(() => dct([[1], [3], [5]] as never)).toThrow(TypeError);
+  });
   it('GUARD: dct of a number array and of a BigNumber array keep their values', () => {
     expect(dct([1, 2])).toEqual(dct([bignumber(1), bignumber(2)] as never));
   });

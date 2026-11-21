@@ -18,6 +18,7 @@ import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 import { medianInPlace, minFrom, quickSelectInPlace } from '../utils/median-numbers.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { hasNaN } from './number-matrix.js';
+import { normalizationFromSecondArg } from '../statistics/numeric-data.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -133,6 +134,8 @@ export const parallelStatVariance = mathTyped('parallelStatVariance', {
     data: Float64Array,
     normalization: NormalizationType
   ): Promise<f64> => {
+    // An unknown normalization throws the TypeError of `variance`; it read as 'unbiased'.
+    normalizationFromSecondArg(normalization);
     const result = await computePool.variance(data);
     const n = data.length;
 
@@ -202,7 +205,9 @@ export const parallelStatStd = mathTyped('parallelStatStd', {
   ): Promise<f64> => {
     // The std comes from the pool's population std, not from a root of the variance: the squares
     // of data of order 1e-160 are subnormal, so a root of the variance lost digits (#1280). The
-    // factor sqrt(n / (n - k)) is a degree-1 scale, so it cannot underflow.
+    // factor sqrt(n / (n - k)) is a degree-1 scale, so it cannot underflow. An unknown
+    // normalization throws the TypeError of `std`; it read as 'unbiased'.
+    normalizationFromSecondArg(normalization);
     const n = data.length;
     if (n === 0) return NaN;
     const populationStd = (await computePool.variance(data)).result.std;

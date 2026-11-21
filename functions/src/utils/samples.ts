@@ -9,7 +9,9 @@ import { typeOf } from './is.js';
  * Another entry is read as the engine reads it when it writes into a Float64Array, so a
  * BigNumber, a Fraction and a numeric string keep their numeric reading (#1042). An entry that
  * has no numeric reading throws: an Array or a typed array (the engine reads `[[1]]` as 1 and
- * `[[1, 2]]` as NaN), an object or a string that reads as NaN, and `undefined`.
+ * `[[1, 2]]` as NaN; so a column `[[1], [3], [5]]` throws), an object or a string that reads as NaN,
+ * and `undefined`. An empty string, a blank string, `true` and `null` keep the engine reading
+ * (0, 0, 1 and 0), as mathjs `number()` does.
  */
 function arrayToSamples(fn: string, signal: readonly unknown[]): Float64Array {
   const n = signal.length;
