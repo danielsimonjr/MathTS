@@ -1768,17 +1768,39 @@ function xgcdBigNumber(a: BigNumber, b: BigNumber): [BigNumber, BigNumber | numb
   return [BigNumber.fromBigInt(g), g === 0n ? 0 : BigNumber.fromBigInt(x), BigNumber.fromBigInt(y)];
 }
 
+/** The largest safe integer as a bigint. */
+const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
+
+/**
+ * `xgcd` of two numbers. The loop runs on bigints, so it is exact. A Bezout coefficient above
+ * 2^53 does not convert to a number without rounding, and a rounded coefficient breaks
+ * `a*x + b*y = g` (`xgcd(2^60, 3)`: y = -384307168202282325 becomes -384307168202282300).
+ * The gcd always converts exactly: it is a power of two times a divisor of the odd parts of
+ * the operands, which have at most 53 bits.
+ * @throws Error when an operand is NaN, Infinity or not an integer
+ * @throws RangeError when a coefficient is not a safe integer
+ */
+function xgcdNumber(a: f64, b: f64): [f64, f64, f64] {
+  if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error(XGCD_INTEGER_MESSAGE);
+  const [g, x, y] = xgcdBigInt(BigInt(a), BigInt(b));
+  for (const c of [x, y]) {
+    if (c > MAX_SAFE_BIGINT || c < -MAX_SAFE_BIGINT) {
+      throw new RangeError(
+        'A coefficient of xgcd is not a safe integer: use bigint or BigNumber operands for the exact result'
+      );
+    }
+  }
+  return [Number(g), Number(x), Number(y)];
+}
+
 /**
  * Extended greatest common divisor
  * Returns [gcd, x, y] where gcd = a*x + b*y (Bezout coefficients). The operands must be integers.
- * The results of two BigNumbers (or a BigNumber and a number) are BigNumbers.
+ * The results of two BigNumbers (or a BigNumber and a number) are BigNumbers. For two numbers a
+ * coefficient above 2^53 throws a RangeError; bigint and BigNumber operands give it exactly.
  */
 export const xgcd = mathTyped('xgcd', {
-  'number, number': (a: f64, b: f64): [f64, f64, f64] => {
-    if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error(XGCD_INTEGER_MESSAGE);
-    const [g, x, y] = xgcdBigInt(BigInt(a), BigInt(b));
-    return [Number(g), Number(x), Number(y)];
-  },
+  'number, number': xgcdNumber,
   'bigint, bigint': (a: i64, b: i64): [i64, i64, i64] => xgcdBigInt(a, b),
   'BigNumber, BigNumber': xgcdBigNumber,
   'BigNumber, number': (a: BigNumber, b: f64) => xgcdBigNumber(a, BigNumber.fromNumber(b)),

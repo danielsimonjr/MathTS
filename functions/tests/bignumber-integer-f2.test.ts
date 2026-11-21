@@ -63,8 +63,28 @@ describe('#1164 A xgcd of integers longer than a double', () => {
     });
   }
 
-  it('#1164 xgcd(2^60, 3) is exact above 2^53 (mathjs gives the wrong [3, 0, 1])', () => {
-    expect(fn('xgcd')(2 ** 60, 3)).toEqual([1, 1, -384307168202282300]);
+  it('#1164 xgcd of numbers throws a RangeError when a coefficient is not a safe integer (mathjs gives the wrong [3, 0, 1])', () => {
+    // The exact y of xgcd(2^60, 3) is -384307168202282325: as a number it rounds to
+    // -384307168202282300, and 2^60 * 1 + 3 * that is 64, not 1.
+    expect(() => fn('xgcd')(2 ** 60, 3)).toThrow(RangeError);
+    expect(() => fn('xgcd')(2 ** 60, 3)).toThrow(/not a safe integer/);
+    expect(() => fn('xgcd')(1e20, 3)).toThrow(RangeError);
+    // The exact triples of the same operands through bigint and BigNumber.
+    expect(fn('xgcd')(2n ** 60n, 3n)).toEqual([1n, 1n, -384307168202282325n]);
+    expect((fn('xgcd')(bn((2n ** 60n).toString()), bn(3)) as BigNumber[]).map(big)).toEqual([
+      '1',
+      '1',
+      '-384307168202282325',
+    ]);
+    expect(fn('xgcd')(10n ** 20n, 3n)).toEqual([1n, 1n, -33333333333333333333n]);
+    // Operands above 2^53 with safe coefficients keep a number result; the gcd is exact.
+    expect(fn('xgcd')(2 ** 60, 0)).toEqual([2 ** 60, 1, 0]);
+    expect(fn('xgcd')(2 ** 60, 2 ** 61)).toEqual([2 ** 60, 1, 0]);
+    expect(fn('xgcd')(2 ** 60, 4)).toEqual([4, 0, 1]);
+    // The largest safe coefficient is still returned.
+    const m = Number.MAX_SAFE_INTEGER;
+    const [g, x, y] = fn('xgcd')(m, m - 1) as number[];
+    expect(BigInt(m) * BigInt(x) + BigInt(m - 1) * BigInt(y)).toBe(BigInt(g));
   });
 
   it('#1097 xgcd of numbers follows the mathjs signs and has no negative zero', () => {
