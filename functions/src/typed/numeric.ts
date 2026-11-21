@@ -32,7 +32,12 @@ import { collectionSize, matrixRows, squareOrder, type MatrixArgument } from './
 import { factoryScope } from '../factories/scope.js';
 import { numericJacobian } from '../numeric/numeric-jacobian.js';
 import { rosenbrockSolve } from '../numeric/solveODE.js';
-import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from '../numeric/ode-step-limit.js';
+import {
+  odeAcceptedBudget,
+  odeFastestDecayRate,
+  odeMaxAttempts,
+  odeMaxStepsError,
+} from '../numeric/ode-step-limit.js';
 import { quadValue } from '../numeric/adaptive-quad.js';
 import { levenbergMarquardt, nelderMead } from '../optimization-extra.js';
 export {
@@ -1147,6 +1152,7 @@ function _adaptiveRK45System(
       tCurrent: t,
       tFinal: tf,
       lastStepMag: Math.abs(h),
+      fastestDecayRate: odeFastestDecayRate((yj) => f(t, yj), y),
     });
 
   while (ongoing() && ts.length - 1 < maxAccepted) {
