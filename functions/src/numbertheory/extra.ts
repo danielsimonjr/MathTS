@@ -14,6 +14,8 @@
 
 import { assertAllocSize } from '../utils/limits.js';
 import { chooseScalar } from '../wasm/special/scalars.js';
+import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
+import { modPow } from './modular.js';
 
 // =============================================================================
 // continuedFraction — simple continued fraction expansion
@@ -138,19 +140,6 @@ export function stirlingS1(n: number, k: number): number {
 // Shared BigInt modular-arithmetic helpers (discreteLog / primitiveRoot)
 // =============================================================================
 
-/** Modular exponentiation `base^exp mod m` via BigInt (avoids overflow). */
-function modPowBig(base: bigint, exp: bigint, mod: bigint): bigint {
-  let b = ((base % mod) + mod) % mod;
-  let e = exp;
-  let result = 1n;
-  while (e > 0n) {
-    if (e & 1n) result = (result * b) % mod;
-    b = (b * b) % mod;
-    e >>= 1n;
-  }
-  return result;
-}
-
 /** Modular multiplicative inverse of `a` modulo `mod` via the extended Euclidean algorithm. */
 function modInverseBig(a: bigint, mod: bigint): bigint {
   let oldR = a;
@@ -255,7 +244,7 @@ export function discreteLog(g: number, h: number, p: number): number {
   // it is the smallest one, because each smaller x failed this test. b stays below N.
   let count = 0;
   let factor = 1n;
-  for (let d = gcdBig(a, N); d !== 1n; d = gcdBig(a, N)) {
+  for (let d = gcdBigInt(a, N); d !== 1n; d = gcdBigInt(a, N)) {
     if (b % d !== 0n) return -1;
     b /= d;
     N /= d;
@@ -269,19 +258,13 @@ export function discreteLog(g: number, h: number, p: number): number {
   return x < 0 ? -1 : x + count;
 }
 
-/** Greatest common divisor of two non-negative BigInts. */
-function gcdBig(x: bigint, y: bigint): bigint {
-  while (y !== 0n) [x, y] = [y, x % y];
-  return x;
-}
-
 /**
  * Smallest `x >= 0` with `G^x === H (mod P)` for `gcd(G, P) = 1` and `P >= 2`, else `-1`.
  * `pOriginal` is the caller's modulus, for the error message.
  */
 function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number): number {
   // H has no inverse modulo P, so no power of the unit G equals it.
-  if (gcdBig(H, P) !== 1n) return -1;
+  if (gcdBigInt(H, P) !== 1n) return -1;
   const mNumber = Math.max(1, Math.ceil(Math.sqrt(Number(P) - 1)));
   // The table holds at most 2^24 entries. Above that, walk the powers of g with no table.
   if (mNumber > MAX_BABY_STEPS) return discreteLogSmallOrder(G, H, P, pOriginal, mNumber);
@@ -313,7 +296,7 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
   // Giant steps: gamma_i = h * (g^-m)^i mod p. When the baby steps returned to 1, the table
   // holds every power of g, so the first lookup decides.
   const rounds = cycled ? 1n : m;
-  const gm = modPowBig(G, m, P);
+  const gm = modPow(G, m, P);
   const gInvM = modInverseBig(gm, P);
   let gamma = H;
   for (let i = 0n; i < rounds; i++) {
@@ -322,7 +305,7 @@ function discreteLogCoprime(G: bigint, H: bigint, P: bigint, pOriginal: number):
     while (steps[s] !== 0) {
       if (keys[s] === key) {
         const j = BigInt(steps[s] - 1);
-        if (modPowBig(G, j, P) === gamma) return Number(i * m + j);
+        if (modPow(G, j, P) === gamma) return Number(i * m + j);
       }
       s = (s + 1) & mask;
     }
@@ -387,7 +370,7 @@ export function primitiveRoot(n: number): number {
     if (gcdInt(g, n) !== 1) continue;
     let isRoot = true;
     for (const q of phiFactors) {
-      if (modPowBig(BigInt(g), BigInt(phi / q), N) === 1n) {
+      if (modPow(BigInt(g), BigInt(phi / q), N) === 1n) {
         isRoot = false;
         break;
       }
@@ -439,7 +422,7 @@ export function multiplicativeOrder(a: number, n: number): number {
   const aBig = BigInt(amod);
   let ord = phi;
   for (const q of distinctPrimeFactors(phi)) {
-    while (ord % q === 0 && modPowBig(aBig, BigInt(ord / q), nBig) === 1n) {
+    while (ord % q === 0 && modPow(aBig, BigInt(ord / q), nBig) === 1n) {
       ord /= q;
     }
   }

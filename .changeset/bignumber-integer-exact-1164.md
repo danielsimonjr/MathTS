@@ -1,0 +1,14 @@
+---
+'@danielsimonjr/mathts-core': patch
+'@danielsimonjr/mathts-functions': patch
+---
+
+`xgcd`, `combinations` and `isPrime` give exact results for BigNumber integers of any size. `xgcd` of BigNumbers computes the Bezout coefficients as exact integers, so `a*x + b*y = g` holds at every precision and for a negative operand (`xgcd(-1, 2)` is `[1, 1, 1]`, and `xgcd(0, 0)` is `[0, 0, 0]`). `xgcd` throws `Parameters in function xgcd must be integer numbers` for NaN, Infinity and a non-integer number; before, it returned NaN values or floored the operand. `combinations` of two BigNumbers computes the exact binomial coefficient and rounds the result one time to the precision. `isPrime` of a BigNumber of 2^32 or more runs the Miller-Rabin test on bigint, so no product rounds, and NaN, Infinity and a non-integer value of that size give `false`. Below 3317044064679887385961981 the 13 prime bases 2 to 41 are a proof; from that value the test adds the base of mathjs and is probabilistic, as in mathjs.
+
+The return type of a call with one BigNumber and one number changes. `xgcd(bignumber(12), 8)` and `combinations(bignumber(200), 100)` now return BigNumbers, as mathjs does. Before, the BigNumber was converted to a number and the call returned numbers. A bigint or a Fraction argument of `combinations` still gives a number.
+
+`xgcd` of two numbers throws a `RangeError` when a Bezout coefficient is not a safe integer, because a rounded coefficient breaks `a*x + b*y = g` (`xgcd(2^60, 3)` gave `[1, 1, -384307168202282300]`; the exact `y` is `-384307168202282325`). Bigint and BigNumber operands give the exact coefficients. mathjs gives the wrong `[3, 0, 1]` there.
+
+The BigNumber `combinations`, `combinationsWithRep`, `permutations` and `multinomial` of a long loop run at a working precision in O(k) steps, and a rounding proof checks each result: the error bound of the steps gives an interval for the exact value, and the result is accepted only when both ends of the interval round to the same value at the precision (else more guard digits, and at last the exact loop). So each result is the exact value rounded one time, for every rounding mode. A cost model in limb operations selects the exact loop or the working loop; `combinations(bignumber('1e10000'), 2)` takes milliseconds. `catalan` and `bellNumbers` of a BigNumber use the same proof: `catalan` rounded the binomial coefficient and then the quotient (two roundings), and the guard digits of `bellNumbers` did not cover the n(n + 1) / 2 additions behind the last entry of its triangle.
+
+In `@danielsimonjr/mathts-core`, `BigNumber.fromBigInt` and the normalization of every BigNumber result remove trailing zeros by powers 10^(2^j), not one zero per step: `BigNumber.fromBigInt(10n ** 100000n)` took 25 s and `xgcd(bignumber('1e100000'), bignumber('1e99999'))` 24 s; each now takes milliseconds. (Refs #1164)

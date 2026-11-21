@@ -30,6 +30,7 @@ import { Tensor } from '../Tensor.js';
 import { Index } from '../named-index.js';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { lu as matrixLU } from '@danielsimonjr/mathts-matrix';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Configures the row (contracting) axes of A and b for `tensorSolve`. */
 export interface TensorSolveOpts {
@@ -222,7 +223,7 @@ export function tensorSolve(A: Tensor, b: Tensor, opts?: TensorSolveOpts): Tenso
 
   // A must be square after reshaping.
   if (numRowsA !== numColsA) {
-    throw new Error(
+    throw notSquareError(
       `tensorSolve: reshaped A must be square (got ${numRowsA}×${numColsA}); ` +
         'non-square systems are not supported — use tensorPinv for least-squares'
     );

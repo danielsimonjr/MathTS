@@ -5,6 +5,7 @@
  */
 
 import { assertAllocSize, assertLoopOrder } from '../utils/limits.js';
+import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
 
 /** Number of continued-fraction steps after which pellSolve stops. */
 const PELL_MAX_STEPS = 100000;
@@ -193,12 +194,6 @@ export function egyptianFraction(p: number, q: number): number[] {
   assertLoopOrder('egyptianFraction', 'floor(p / q)', Number(whole));
   const out: number[] = new Array<number>(Number(whole)).fill(1);
   num -= whole * den;
-  const bgcd = (x: bigint, y: bigint): bigint => {
-    let a = x < 0n ? -x : x;
-    let b = y < 0n ? -y : y;
-    while (b !== 0n) [a, b] = [b, a % b];
-    return a;
-  };
   while (num > 0n) {
     // Smallest denominator d with 1/d <= num/den: d = ceil(den/num).
     const d = (den + num - 1n) / num;
@@ -207,7 +202,7 @@ export function egyptianFraction(p: number, q: number): number[] {
     let nn = num * d - den;
     let nd = den * d;
     if (nn > 0n) {
-      const g = bgcd(nn, nd);
+      const g = gcdBigInt(nn, nd);
       nn /= g;
       nd /= g;
     }

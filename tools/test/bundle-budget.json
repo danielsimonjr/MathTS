@@ -11,7 +11,7 @@
     "packages/workerpool/dist/worker.js": 25655,
     "packages/workerpool/package.json": 2745,
     "core/dist/index.js": 251071,
-    "core/dist/internal.js": 252671,
+    "core/dist/internal.js": 255532,
     "core/package.json": 2024,
     "matrix/dist/index.js": 235944,
     "matrix/package.json": 2569,
@@ -20,7 +20,7 @@
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 73674,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2152724,
+    "functions/dist/index.js": 2174747,
     "functions/dist/subpath-evaluate.js": 1395643,
     "functions/package.json": 3607,
     "functions/dist/wasm/mathts-as.wasm": 64091,
@@ -54,7 +54,7 @@
     "assembly/build/mathts.wasm": 64091,
     "assembly/build/mathts-debug.wasm": 124385,
     "assembly/package.json": 2432,
-    "compat/dist/index.js": 31427,
+    "compat/dist/index.js": 31985,
     "compat/package.json": 2274,
     "gpu/dist/index.js": 18116,
     "gpu/package.json": 2189,
@@ -179,19 +179,19 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1325451
+      "bytes": 1293525
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1325818
+      "bytes": 1293892
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1335422
+      "bytes": 1303496
     },
     {
       "label": "expression evaluate",
@@ -203,13 +203,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1926606
+      "bytes": 1893828
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1935939
+      "bytes": 1903149
     }
   ]
 }

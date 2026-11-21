@@ -2,7 +2,7 @@ import { factory } from '../utils/factory.js';
 import { assertLoopOrder } from '../utils/limits.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
-import { atWorkPrecision, type PrecisionClass } from '../utils/bignumber/work-precision.js';
+import { roundedBell } from '../probability/rounded-loop.js';
 
 // Type definitions for combinatorics
 type BigNumberType = BigNumber;
@@ -15,16 +15,15 @@ interface BellNumbersDependencies {
   isNegative: (x: NumericValue) => boolean;
   isInteger: (x: NumericValue) => boolean;
   stirlingS2: (n: NumericValue, k: NumericValue) => NumericValue;
-  bignumber?: (x: number) => BigNumberType;
 }
 
 const name = 'bellNumbers';
-const dependencies = ['typed', 'addScalar', 'isNegative', 'isInteger', 'stirlingS2', '?bignumber'];
+const dependencies = ['typed', 'addScalar', 'isNegative', 'isInteger', 'stirlingS2'];
 
 export const createBellNumbers = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, addScalar, isNegative, isInteger, stirlingS2, bignumber }: BellNumbersDependencies) => {
+  ({ typed, addScalar, isNegative, isInteger, stirlingS2 }: BellNumbersDependencies) => {
     /**
      * The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is S.
      * bellNumbers only takes integer arguments.
@@ -58,22 +57,8 @@ export const createBellNumbers = /* #__PURE__ */ factory(
         if (typeof n !== 'number') {
           const nn = n.toNumber();
           assertLoopOrder('bellNumbers', 'n', nn, 2000);
-          // BigNumber add rounds to the precision (#1118). No entry of the triangle is larger than
-          // the result, so a result that fits the precision is exact. The guard digits hold the
-          // rounding error of the 2 n additions behind an entry, and the result rounds one time.
-          const C = bignumber!(1).constructor as unknown as PrecisionClass;
-          const guardDigits = String(nn).length + 11;
-          return atWorkPrecision(C, C.precision + guardDigits, () => {
-            let row: BigNumberType[] = [bignumber!(1)];
-            for (let m = 1; m <= nn; m++) {
-              const next: BigNumberType[] = [row[row.length - 1]];
-              for (let j = 0; j < row.length; j++) {
-                next.push(addScalar(next[j], row[j]) as BigNumberType);
-              }
-              row = next;
-            }
-            return row[0];
-          });
+          // A working-precision triangle with a rounding proof (#1164).
+          return roundedBell(nn) as unknown as BigNumberType;
         }
 
         // Sum (k=0, n) S(n,k).

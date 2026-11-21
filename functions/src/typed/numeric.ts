@@ -25,6 +25,7 @@ import {
   entryRange,
   ldexp,
   pow2ScaleExponent,
+  notSquareError,
 } from '@danielsimonjr/mathts-core/internal';
 import { pivotTolerance } from '../algebra/solver/pivot-tolerance.js';
 import type { Matrix as MathJSMatrix } from '../utils/is.js';
@@ -269,7 +270,7 @@ export function linsolve(
   const n = rows.length;
   if (n === 0) throw new Error('linsolve: empty matrix');
   if ((rows[0] as unknown[] | undefined)?.length !== n) {
-    throw new Error('linsolve: matrix must be square');
+    throw notSquareError('linsolve: matrix must be square');
   }
   const rhs = readRightHandSide('linsolve', b, n);
   let values: readonly unknown[];

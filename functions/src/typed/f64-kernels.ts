@@ -9,6 +9,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { DenseMatrix, isDenseMatrix } from '@danielsimonjr/mathts-matrix';
 import { deepMap } from '../utils/collection.js';
+import { collectionSize } from './number-matrix.js';
 import {
   elementwiseUnaryDispatch,
   type WasmElementwiseOp,
@@ -138,17 +139,17 @@ function leavesStayReal(value: unknown, domain: UnaryRealSpec['inRealDomain']): 
 function unaryOnMatrix(matrix: NumericMatrix, apply: Apply, spec: UnaryRealSpec): unknown {
   const factory = matrix as unknown as {
     create?: (data: unknown[]) => unknown;
-    size?: () => number[];
     toArray(): unknown[];
   };
   const create = typeof factory.create === 'function' ? factory.create : undefined;
-  if (create !== undefined && typeof factory.size === 'function' && factory.size().length !== 2) {
+  const size = collectionSize(matrix);
+  if (create !== undefined && size.length !== 2) {
     const nested = factory.toArray();
     if (leavesStayReal(nested, spec.inRealDomain)) return matrix.map(spec.real);
     return create.call(matrix, unaryOnArray(nested, apply, spec));
   }
 
-  const { rows, cols } = matrix;
+  const [rows, cols] = size;
   let numeric = true;
   for (let i = 0; i < rows && numeric; i++) {
     for (let j = 0; j < cols; j++) {

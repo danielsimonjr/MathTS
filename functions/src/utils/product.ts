@@ -14,6 +14,8 @@ export function product(i: number, n: number): number {
     return n;
   }
 
-  const half = (n + i) >> 1; // divide (n + i) by 2 and truncate to integer
+  // The midpoint of i and n. `n - i` is exact for safe integers, and `(n + i) / 2` is not: the
+  // sum rounds above 2^53 and the recursion would not end.
+  const half = i + Math.floor((n - i) / 2);
   return product(i, half) * product(half + 1, n);
 }

@@ -11,7 +11,11 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { formatGeneric, getArrayDataType } from '@danielsimonjr/mathts-core/internal';
+import {
+  formatGeneric,
+  getArrayDataType,
+  isEmpty2DSize,
+} from '@danielsimonjr/mathts-core/internal';
 import { typeOf } from '../utils/is.js';
 import {
   arraySize,
@@ -144,9 +148,9 @@ export class MathJSDenseMatrix {
       // Untrusted nested data: every row must match the size of the first one (mathjs `validate`).
       // A producer that knows the size passes `{ data, size }`, which is not validated or copied.
       // As in mathjs, the matrix holds a copy, so a write to the matrix does not change `data`.
-      this._size = inferSize(data);
-      validate(data, this._size);
-      this._data = copyAxes(data, this._size.length) as number[][];
+      const { rows, size } = MathJSDenseMatrix._validateRows(data);
+      this._size = size;
+      this._data = copyAxes(rows, size.length) as number[][];
     } else if (
       typeof data !== 'object' ||
       !Array.isArray((data as { data?: unknown }).data) ||
@@ -642,6 +646,25 @@ export class MathJSDenseMatrix {
   }
 
   /**
+   * The one validation step of the constructor for untrusted nested data: every row has the size
+   * of the first one, and a matrix inside the data is replaced by its nested array (mathjs
+   * `preprocess`). One pass checks the dimensions and looks for a matrix, so plain numeric data
+   * costs no second pass. The `{ data, size }` form never calls it; a test counts its calls to
+   * prove that an operation does not validate the result that it built itself.
+   * @throws DimensionError when the rows do not have the size of the first one
+   */
+  static _validateRows(data: number[][]): { rows: number[][]; size: number[] } {
+    let rows = data;
+    let size = inferSize(rows);
+    if (validateFindMatrix(rows, size)) {
+      rows = unwrapNestedMatrices(rows) as number[][];
+      size = inferSize(rows);
+      validate(rows, size);
+    }
+    return { rows, size };
+  }
+
+  /**
    * Swap rows i and j (by reference) in a raw 2-D data array. Required by the
    * dense `lup` factory's partial-pivoting step (`DenseMatrix._swapRows(j, pi,
    * data)`); its absence made any LU decomposition that needed a pivot swap
@@ -746,6 +769,7 @@ export class MathJSSparseMatrix {
   constructor(
     data?:
       | unknown[][]
+      | MathJSDenseMatrix
       | {
           values?: unknown[] | null;
           index?: number[];
@@ -788,7 +812,7 @@ export class MathJSSparseMatrix {
       this._index = [];
       this._ptr = [];
       this._size = [];
-      this._fromDenseArray(data._data);
+      this._fromSizedDense(data._data, data._size);
       this._datatype = data._datatype;
       return;
     }
@@ -803,7 +827,11 @@ export class MathJSSparseMatrix {
       this._index = [];
       this._ptr = [];
       this._size = [];
-      this._fromDenseArray(data as unknown[][]);
+      // A matrix inside the data is replaced by its nested array first, as the dense
+      // constructor does (mathjs `preprocess`); else the matrix would be one entry.
+      this._fromDenseArray(
+        (hasMatrixElement(data) ? unwrapNestedMatrices(data) : data) as unknown[][]
+      );
       return;
     }
 
@@ -814,7 +842,7 @@ export class MathJSSparseMatrix {
       this._index = [];
       this._ptr = [];
       this._size = [];
-      this._fromDenseArray(data.data);
+      this._fromSizedDense(data.data, data.size);
       this._datatype = data.datatype ?? data._datatype;
       return;
     }
@@ -837,6 +865,23 @@ export class MathJSSparseMatrix {
     this._ptr = ptr ?? [0];
     this._size = size ?? [0, 0];
     this._datatype = data.datatype ?? data._datatype;
+  }
+
+  /**
+   * Convert nested dense data of a known size to CSC format. The nested data of a matrix with a
+   * zero axis is `[]` for every 0 x n matrix, so the size decides that case, not the data (#1337).
+   * Every other size takes the data (`_fromDenseArray`).
+   */
+  private _fromSizedDense(nested: unknown[][], size: unknown): void {
+    if (Array.isArray(size) && isEmpty2DSize(size)) {
+      const [rows, cols] = size as [number, number];
+      this._values = [];
+      this._index = [];
+      this._ptr = new Array<number>(cols + 1).fill(0);
+      this._size = [rows, cols];
+      return;
+    }
+    this._fromDenseArray(nested);
   }
 
   /**
@@ -1447,6 +1492,39 @@ Object.defineProperty(MathJSSparseMatrix.prototype, 'type', {
 });
 
 // ---------------------------------------------------------------------------
+// Matrices of a stated size
+// ---------------------------------------------------------------------------
+
+/**
+ * A dense matrix of the nested data of a result, with the size of that result.
+ *
+ * Nested data does not show the size of an empty matrix: `[]` is the Array form of a 0 x 0 matrix
+ * and of every 0 x n matrix, and `arraySize([])` is `[0]`. A function that builds a matrix from the
+ * data of its result therefore states the size from the sizes of its operands (the rule of its
+ * operation: the broadcast size, the product size, the transposed size). It never reads the size
+ * from the result data. This is the one constructor for that case.
+ *
+ * @param data - The nested entries of the result. The data is not validated.
+ * @param size - The size of the result.
+ * @returns A dense matrix of that size.
+ */
+export function denseOfSize(data: unknown[], size: readonly number[]): MathJSDenseMatrix {
+  return new MathJSDenseMatrix({ data: data as number[][], size: [...size] });
+}
+
+/**
+ * A sparse matrix (CSC) of the nested data of a result, with the size of that result. A result
+ * with an empty axis holds no entry, so it is built from its size alone.
+ *
+ * @param data - The nested entries of the result.
+ * @param size - The size of the result.
+ * @returns A sparse matrix of that size.
+ */
+export function sparseOfSize(data: unknown[][], size: readonly number[]): MathJSSparseMatrix {
+  return new MathJSSparseMatrix({ data, size: [...size] });
+}
+
+// ---------------------------------------------------------------------------
 // matrix() factory function — creates matrices from data
 // ---------------------------------------------------------------------------
 
@@ -1521,7 +1599,7 @@ export function createMatrixBridge() {
         : data.clone();
     }
     if (data instanceof MathJSDenseMatrix)
-      return sparse ? new MathJSSparseMatrix(data._data) : data.clone();
+      return sparse ? new MathJSSparseMatrix(data) : data.clone();
     // A storage object from a caller: the constructor trusts { data, size } (internal producers
     // pass it), so check here that the data has the size, as mathjs does.
     if (!sparse) {
@@ -1560,6 +1638,79 @@ function isStorageObject(x: object): boolean {
     Array.isArray(o.ptr ?? o._ptr) &&
     Array.isArray(o.size ?? o._size)
   );
+}
+
+/** True when `value` is a matrix: the flag that the two matrix classes of this file define. */
+function isMatrixValue(value: unknown): value is { toArray(): unknown } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { isMatrix?: unknown }).isMatrix === true
+  );
+}
+
+/**
+ * `validate` of core (every row has the size of the first one) with one more result: it returns
+ * true, and stops, when an element of the data is a matrix. The data is not checked then; the
+ * caller unwraps the matrices and validates the result. A number leaf costs one `typeof` test.
+ * @throws DimensionError as `validate` does
+ */
+function validateFindMatrix(data: unknown[], size: number[]): boolean {
+  if (size.length === 0) {
+    validate(data, size);
+    return false;
+  }
+  return validateLevel(data, size, 0);
+}
+
+function validateLevel(array: unknown[], size: number[], dim: number): boolean {
+  const len = array.length;
+  if (len !== size[dim]) {
+    if (hasMatrixElement(array)) return true;
+    throw new DimensionError(len, size[dim]);
+  }
+  if (dim === size.length - 1) return validateLeaves(array, size);
+  for (let i = 0; i < len; i++) {
+    const child = array[i];
+    if (!Array.isArray(child)) {
+      if (isMatrixValue(child)) return true;
+      throw new DimensionError(size.length - 1, size.length, '<');
+    }
+    if (validateLevel(child, size, dim + 1)) return true;
+  }
+  return false;
+}
+
+/**
+ * The last dimension: none of the elements may be an array. The loop is a function of its own, so
+ * the engine reads the numbers of a numeric array without boxing them (about 2 times faster).
+ */
+function validateLeaves(array: unknown[], size: number[]): boolean {
+  for (let i = 0; i < array.length; i++) {
+    const child = array[i];
+    // A number is the common leaf. The engine folds this test for a numeric array, so the loop
+    // costs the same as the plain `validate` (measured, 500 x 500: the test `typeof child ===
+    // 'object'` first was 1.4 times slower).
+    if (typeof child === 'number') continue;
+    if (Array.isArray(child)) throw new DimensionError(size.length + 1, size.length, '>');
+    if (isMatrixValue(child)) return true;
+  }
+  return false;
+}
+
+/** True when an element of the nested array `data`, at any level, is a matrix. */
+function hasMatrixElement(data: unknown[]): boolean {
+  for (let i = 0; i < data.length; i++) {
+    const value = data[i];
+    if (Array.isArray(value) ? hasMatrixElement(value) : isMatrixValue(value)) return true;
+  }
+  return false;
+}
+
+/** `data` with every matrix, at any level, replaced by its nested array. */
+function unwrapNestedMatrices(data: unknown): unknown {
+  if (isMatrixValue(data)) return unwrapNestedMatrices(data.toArray());
+  return Array.isArray(data) ? data.map(unwrapNestedMatrices) : data;
 }
 
 /** A short type name for an error message: null, number, BigNumber, Complex, ... */

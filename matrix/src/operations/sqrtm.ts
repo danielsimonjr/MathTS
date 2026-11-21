@@ -37,6 +37,7 @@ import {
   ABS_CUTOFF_LO,
   SQUARED,
 } from './common.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -532,7 +533,8 @@ export interface SqrtmOptions {
 export function matrixSqrtm(input: SquareFunctionInput, opts?: SqrtmOptions): DenseMatrix {
   const A = squareFunctionInput(input);
   const n = A.rows;
-  if (n !== A.cols) throw new Error(`matrixSqrtm: matrix must be square (got ${A.rows}×${A.cols})`);
+  if (n !== A.cols)
+    throw notSquareError(`matrixSqrtm: matrix must be square (got ${A.rows}×${A.cols})`);
   if (n === 0) return DenseMatrix.zeros(0, 0);
   if (n === 1) {
     const val = A.get(0, 0);

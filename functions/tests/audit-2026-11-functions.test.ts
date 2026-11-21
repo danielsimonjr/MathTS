@@ -32,9 +32,7 @@ import {
   periodogram,
 } from '../src/index.js';
 import type { FrequencyResponse, TransferFunction, SolveODESolution } from '../src/index.js';
-import { factoryScope } from '../src/factories/scope.js';
-import { createCombinations } from '../src/probability/combinations.js';
-import type { TypedFunction } from '../src/core/function/typed.js';
+import { combinations as typedCombinations } from '../src/index.js';
 
 // ---------------------------------------------------------------------------
 // Seeded bootstrap: O(n) resample / permutation must not change results.
@@ -308,9 +306,7 @@ describe('qr of a SparseMatrix', () => {
 // ---------------------------------------------------------------------------
 
 describe('combinations collection support', () => {
-  const combinations = createCombinations(
-    factoryScope as unknown as { typed: TypedFunction }
-  ) as unknown as (n: unknown, k: unknown) => unknown;
+  const combinations = typedCombinations as unknown as (n: unknown, k: unknown) => unknown;
 
   it('maps over a collection of n or of k', () => {
     expect(combinations([4, 5, 6], 2)).toEqual([6, 10, 15]);

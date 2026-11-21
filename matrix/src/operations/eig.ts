@@ -12,6 +12,7 @@ import {
   type RepeatedEigenvalue,
 } from './eig-multiplicity.js';
 import { decompositionInputToNestedArray, type DecompositionMatrixInput } from './as-packed.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 export type { RepeatedEigenvalue };
 
@@ -806,7 +807,7 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
   // Check dimensions
   for (let i = 0; i < n; i++) {
     if (A[i].length !== n) {
-      throw new Error('Matrix must be square');
+      throw notSquareError('Matrix must be square');
     }
     for (let j = 0; j < n; j++) {
       if (!Number.isFinite(A[i][j])) throw new RangeError('eig: matrix has a non-finite entry');

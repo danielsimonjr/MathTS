@@ -21,6 +21,7 @@ import { createRng } from '../probability/util/seededRNG.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 import { lgammaNumber } from '../plain/number/probability.js';
 import { assertAllocSize } from '../utils/limits.js';
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /** Options for the multivariate samplers (shared shape with mvnSample). */
 export interface SampleSeedOptions {
@@ -127,7 +128,7 @@ function validateScale(scale: readonly (readonly number[])[], fn: string): numbe
   }
   const p = scale.length;
   for (const row of scale) {
-    if (row.length !== p) throw new Error(`${fn}: scale must be a ${p}x${p} square matrix`);
+    if (row.length !== p) throw notSquareError(`${fn}: scale must be a ${p}x${p} square matrix`);
   }
   for (let i = 0; i < p; i++) {
     for (let j = i + 1; j < p; j++) {

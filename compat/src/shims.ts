@@ -42,6 +42,7 @@ import {
   subtract as _subtract,
   multiply as _multiply,
   divide as _divide,
+  inv as _inv,
   pow as _pow,
   sqrt as _sqrt,
   abs as _abs,
@@ -82,6 +83,7 @@ import {
   subtract as _matSubtract,
   multiply as _matMultiply,
 } from '@danielsimonjr/mathts-matrix';
+import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -182,13 +184,26 @@ function isCompatBridgeMatrix(x: unknown): boolean {
   return false;
 }
 
+/**
+ * A native `DenseMatrix` of the nested data `arr`. `DenseMatrix.fromArray` holds no empty axis,
+ * and the nested data of a matrix with a zero axis does not show its size (`[]` is 0 x 3 as well
+ * as 0 x 0). So the size of the operand `m` decides the empty case.
+ */
+function denseOfNested(arr: unknown[], m: unknown): DenseMatrix {
+  const size = axesOf(m);
+  if (size !== null && isEmpty2DSize(size)) {
+    return DenseMatrix.zeros(size[0], size[1]);
+  }
+  return DenseMatrix.fromArray(arr as number[][]);
+}
+
 /** Normalize compat/matrix inputs to a native `DenseMatrix` for linear algebra shims. */
 function compatToDenseMatrix(m: unknown): DenseMatrix {
   if (isDenseMatrix(m)) {
     return m;
   }
   if (isSparseMatrix(m)) {
-    return DenseMatrix.fromArray(m.toArray() as number[][]);
+    return denseOfNested(m.toArray(), m);
   }
   if (Array.isArray(m)) {
     return DenseMatrix.fromArray(m as number[][]);
@@ -196,7 +211,7 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
   if (typeof m === 'object' && m !== null && 'toArray' in m) {
     const arr = (m as { toArray(): unknown }).toArray();
     if (Array.isArray(arr)) {
-      return DenseMatrix.fromArray(arr as number[][]);
+      return denseOfNested(arr, m);
     }
   }
   throw new TypeError('Expected DenseMatrix or 2D array');
@@ -222,11 +237,13 @@ export function matrix(
     if (format === undefined) return data;
     // The factory checks the format, so an unknown one throws the mathjs TypeError here too.
     _factoryMatrix([], format);
+    // The nested data of a matrix with a zero axis does not show its size, so the size of the
+    // source goes with the data (#1337).
     if (format === 'sparse' && isDenseMatrix(data)) {
-      return _factorySparse(data.toArray()) as CompatMatrixValue;
+      return _factorySparse({ data: data.toArray(), size: matrixSize(data) }) as CompatMatrixValue;
     }
     if (format !== 'sparse' && isSparseMatrix(data)) {
-      return DenseMatrix.fromArray(data.toArray());
+      return denseOfNested(data.toArray(), data);
     }
     return data;
   }
@@ -260,17 +277,20 @@ const isMatrixLike = (x: unknown): x is MatrixLike =>
 
 const toDenseMatrix = (x: MatrixLike): DenseMatrix => compatToDenseMatrix(x);
 
-const unwrap = (r: unknown): unknown =>
-  isCompatBridgeMatrix(r) && !isDenseMatrix(r)
-    ? (r as { toArray(): unknown }).toArray()
-    : isDenseMatrix(r)
-      ? r.toArray()
-      : r;
+/**
+ * An arithmetic result as the nested Array of its entries. A matrix with a zero axis stays a
+ * matrix: its nested Array `[]` does not show the size, and reads as 0 x 0.
+ */
+const unwrap = (r: unknown): unknown => {
+  if (!isCompatBridgeMatrix(r)) return r;
+  const size = axesOf(r);
+  if (isEmpty2DSize(size)) return r;
+  return (r as { toArray(): unknown }).toArray();
+};
 
 /** The axis lengths of an Array or a matrix operand, read along the first elements; null for a scalar. */
 const axesOf = (x: unknown): number[] | null => {
-  if (isDenseMatrix(x) || isSparseMatrix(x)) return [x.rows, x.cols];
-  if (isCompatBridgeMatrix(x)) return (x as unknown as { size(): number[] }).size();
+  if (isCompatBridgeMatrix(x)) return matrixSize(x) ?? null;
   if (!Array.isArray(x)) return null;
   const axes: number[] = [];
   for (let level: unknown = x; Array.isArray(level); level = level[0]) axes.push(level.length);
@@ -347,14 +367,24 @@ const makeUnaryFastPath = (scalarFn: (...args: unknown[]) => unknown, fp: UnaryN
     }
     return scalarFn.apply(undefined, arguments as unknown as unknown[]);
   };
-  // The shim keeps the typed function's surface (name, length, signatures, ...).
-  for (const key of Reflect.ownKeys(scalarFn)) {
-    if (key === 'prototype') continue;
-    const desc = Object.getOwnPropertyDescriptor(scalarFn, key);
-    if (desc) Object.defineProperty(fast, key, desc);
-  }
-  return fast;
+  return withTypedSurface(fast, scalarFn);
 };
+
+/**
+ * Gives a shim the surface of the typed function that it wraps (name, length, signatures, ...).
+ *
+ * @param shim - The shim function.
+ * @param typedFn - The typed function.
+ * @returns The shim.
+ */
+function withTypedSurface<T extends object>(shim: T, typedFn: object): T {
+  for (const key of Reflect.ownKeys(typedFn)) {
+    if (key === 'prototype') continue;
+    const desc = Object.getOwnPropertyDescriptor(typedFn, key);
+    if (desc) Object.defineProperty(shim, key, desc);
+  }
+  return shim;
+}
 
 type OneArg = <T>(value: T) => T;
 export const add = makeArithmetic(
@@ -374,7 +404,21 @@ export const multiply = makeArithmetic(
   false,
   (a, b) => a * b
 ) as typeof _multiply;
-export const divide: TypedFunction = _divide;
+/**
+ * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
+ * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed
+ * function gives the boxed class for every matrix operand. Every other call goes to the typed
+ * function.
+ */
+export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
+  if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
+    return _matMultiply(a, _inv(b) as DenseMatrix);
+  }
+  return (_divide as (...args: unknown[]) => unknown).apply(
+    undefined,
+    arguments as unknown as unknown[]
+  );
+}, _divide) as TypedFunction;
 export const pow: TypedFunction = _pow;
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
@@ -583,7 +627,7 @@ export function det(m: CompatMatrixValue | number[][]): number {
   const matrix = compatToDenseMatrix(m);
 
   if (matrix.rows !== matrix.cols) {
-    throw new Error('Determinant requires a square matrix');
+    throw notSquareError('Determinant requires a square matrix');
   }
 
   const n = matrix.rows;

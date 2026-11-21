@@ -1236,6 +1236,9 @@
       "formatGeneric": {
         "kind": "function"
       },
+      "gcdBigInt": {
+        "kind": "function"
+      },
       "generalize": {
         "kind": "function"
       },
@@ -1282,6 +1285,9 @@
         "kind": "function"
       },
       "isDenseMatrix": {
+        "kind": "function"
+      },
+      "isEmpty2DSize": {
         "kind": "function"
       },
       "isEmptyIndex": {
@@ -1383,6 +1389,9 @@
       "mapObject": {
         "kind": "function"
       },
+      "matrixSize": {
+        "kind": "function"
+      },
       "memoize": {
         "kind": "function"
       },
@@ -1390,6 +1399,9 @@
         "kind": "function"
       },
       "normalizeFormatOptions": {
+        "kind": "function"
+      },
+      "notSquareError": {
         "kind": "function"
       },
       "pick": {

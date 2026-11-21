@@ -37,6 +37,8 @@ export { DEFAULT_CONFIG } from './config.js';
 export { MathjsError } from './error/MathjsError.js';
 export { DimensionError } from './error/DimensionError.js';
 export { IndexError, createIndexError } from './error/IndexError.js';
+// The one bigint greatest common divisor of the monorepo (non-negative for any signs).
+export { gcdBigInt } from './types/bigint-gcd.js';
 
 // mathjs-style factory helpers (name-sorted DAG loader), consolidated from the
 // duplicate copies formerly in expression/src/utils/factory.ts and
@@ -137,6 +139,8 @@ export { createUnitClass, unitDependencies, Unit as CoreUnit } from './types/uni
 export type { NestedArray, IdentifiedValue } from './array.js';
 export {
   arraySize,
+  isEmpty2DSize,
+  matrixSize,
   validate,
   validateIndexSourceSize,
   validateIndex,
@@ -238,3 +242,4 @@ export {
 export type { EntryRange } from './pow2-scale.js';
 export { convertToNumber, isNumberTypedArray } from './typed/number-input.js';
 export { NATIVE_MATRIX_BRAND } from './types/type-marker.js';
+export { notSquareError } from './square-error.js';
