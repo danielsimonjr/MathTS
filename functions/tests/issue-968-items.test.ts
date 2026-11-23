@@ -467,6 +467,25 @@ describe('#968 item 6: the stiffness hint names a stiff problem only', () => {
     expect(system).toMatch(/stiff/);
   });
 
+  it('uses the sign of the requested interval when identifying decay', () => {
+    const growsForward: OdeFn = (_t, y) => [1000 * y[0], y[1]];
+    for (const method of ['RK23', 'RK45']) {
+      const opts = { method, maxIter: 10 };
+      expect(messageOf(() => solve(growsForward, [10, 0], [1, 1], opts))).toMatch(/stiff/);
+      expect(messageOf(() => solve(stiffLinear, [10, 0], [1, 1], opts))).not.toMatch(/stiff/);
+    }
+  });
+
+  it('reports the budget without a stiffness hint when a saddle grows', () => {
+    const saddle: OdeFn = (_t, y) => [-1000 * y[0], 1000 * y[1]];
+    const rk = messageOf(() => solve(saddle, [0, 1], [1, 1], { method: 'RK45', maxIter: 5 }));
+    const system = messageOf(() => solveSystem(saddle, [1, 1], [0, 1], { maxSteps: 5 }));
+    expect(rk).toMatch(/exceeded maxIter=5/);
+    expect(rk).not.toMatch(/stiff/);
+    expect(system).toMatch(/exceeded maxSteps=5/);
+    expect(system).not.toMatch(/stiff/);
+  });
+
   it('11: an f that throws at the points of the hint does not replace the budget error', () => {
     const run = (throwFrom: number): { message: string; calls: number } => {
       let calls = 0;

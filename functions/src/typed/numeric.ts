@@ -1149,7 +1149,7 @@ function _adaptiveRK45System(
       tCurrent: t,
       tFinal: tf,
       lastStepMag: Math.abs(h),
-      fastestDecayRate: odeFastestDecayRate((yj) => f(t, yj), y),
+      fastestDecayRate: odeFastestDecayRate((yj) => f(t, yj), y, tf - t),
     });
 
   while (ongoing() && ts.length - 1 < maxAccepted) {

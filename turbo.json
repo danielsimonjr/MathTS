@@ -44,7 +44,9 @@
         "build",
         "@danielsimonjr/mathts-compat#build",
         "@danielsimonjr/mathts-statistics#build",
-        "@danielsimonjr/mathts-trigonometry#build"
+        "@danielsimonjr/mathts-trigonometry#build",
+        "@danielsimonjr/mathts-units#build",
+        "@danielsimonjr/mathts-arithmetic#build"
       ],
       "outputs": []
     },
@@ -54,8 +56,18 @@
         "build",
         "@danielsimonjr/mathts-compat#build",
         "@danielsimonjr/mathts-statistics#build",
-        "@danielsimonjr/mathts-trigonometry#build"
+        "@danielsimonjr/mathts-trigonometry#build",
+        "@danielsimonjr/mathts-units#build",
+        "@danielsimonjr/mathts-arithmetic#build"
       ],
+      "outputs": ["coverage/**"]
+    },
+    "@danielsimonjr/mathts-expression#test": {
+      "dependsOn": ["^build", "build", "@danielsimonjr/mathts-functions#build"],
+      "outputs": []
+    },
+    "@danielsimonjr/mathts-expression#test:coverage": {
+      "dependsOn": ["^build", "build", "@danielsimonjr/mathts-functions#build"],
       "outputs": ["coverage/**"]
     },
     "typecheck": {
@@ -68,6 +80,18 @@
         "build",
         "@danielsimonjr/mathts-matrix#build",
         "@danielsimonjr/mathts-functions#build"
+      ],
+      "outputs": []
+    },
+    "@danielsimonjr/mathts-functions#typecheck": {
+      "dependsOn": [
+        "^build",
+        "build",
+        "@danielsimonjr/mathts-compat#build",
+        "@danielsimonjr/mathts-statistics#build",
+        "@danielsimonjr/mathts-trigonometry#build",
+        "@danielsimonjr/mathts-units#build",
+        "@danielsimonjr/mathts-arithmetic#build"
       ],
       "outputs": []
     },

@@ -3,7 +3,14 @@
  * Bridges statistics ↔ linear algebra; reuses core's pairwise sums + the `studentTTwoSidedP` tail
  * for the slope's significance test. Matches `scipy.stats.linregress`.
  */
-import { pairwiseDot, pairwiseSum, sumSquaredDeviations } from '@danielsimonjr/mathts-core';
+import {
+  divideByScale,
+  pairwiseDot,
+  pairwiseSum,
+  powerOfTwoScaleOf,
+  squareSumsKeepDigits,
+  sumSquaredDeviations,
+} from '@danielsimonjr/mathts-core';
 import { studentTTwoSidedP } from './distribution-functions.js';
 import { numberVector } from './typed/number-matrix.js';
 
@@ -18,6 +25,8 @@ export interface LineFit {
   mx: number;
   /** Σ(x − x̄)². */
   sxx: number;
+  /** Σ(y − ȳ)². */
+  syy: number;
   /** Residual sum of squares Σ(y − ŷ)², summed from the residuals themselves. */
   rss: number;
 }
@@ -43,7 +52,61 @@ export function fitLine(a: number[], b: number[]): LineFit {
   const rValue = sxy / Math.sqrt(sxx * syy);
   const residuals = b.map((v, i) => v - (slope * a[i] + intercept));
   const rss = pairwiseDot(residuals, residuals);
-  return { slope, intercept, rValue, mx, sxx, rss };
+  return { slope, intercept, rValue, mx, sxx, syy, rss };
+}
+
+/** A {@link LineFit} and the exact powers of 2 by which x and y were divided before the fit. */
+export interface ScaledLineFit {
+  /** The fit of `x / sx` and `y / sy`. With `sx = sy = 1` it is the fit of the data. */
+  fit: LineFit;
+  /** The scale of x, a power of 2. */
+  sx: number;
+  /** The scale of y, a power of 2. */
+  sy: number;
+}
+
+/**
+ * {@link fitLine} for data of any magnitude (#1280). The fit of the data is kept (same bits) when
+ * both sums of squares keep their digits (each is at least `SQUARES_SAFE_MIN`) and their product
+ * is a normal double: no square lost digits, and `rValue` does not divide by an underflowed or
+ * an overflowed product. Else x and y are each divided by their own exact power of 2 and fitted
+ * again: the correlation does not change, and {@link unscaleLinregress} gives the slope, the
+ * intercept and the standard errors back in the units of the data. A predictor that is
+ * constant stays constant (`sxx = 0`). The sums are not multiplied back: they leave the range
+ * that the scale gave them.
+ */
+export function fitLineScaled(a: number[], b: number[]): ScaledLineFit {
+  const plain = fitLine(a, b);
+  if (squareSumsKeepDigits(plain.sxx, plain.syy)) return { fit: plain, sx: 1, sy: 1 };
+  const sx = powerOfTwoScaleOf(a);
+  const sy = powerOfTwoScaleOf(b);
+  if (sx === 1 && sy === 1) return { fit: plain, sx, sy };
+  return { fit: fitLine(divideByScale(a, sx), divideByScale(b, sy)), sx, sy };
+}
+
+/**
+ * The result of {@link linregressFromFit} on a {@link ScaledLineFit}, in the units of the data:
+ * the slope and its standard error times `sy / sx`, the intercept times `sy`. The correlation,
+ * R² and the p-value do not depend on the units.
+ */
+export function unscaleLinregress(
+  r: LinregressResult,
+  s: { sx: number; sy: number }
+): LinregressResult {
+  if (s.sx === 1 && s.sy === 1) return r;
+  // `sx` and `sy` are powers of 2, so `sy / sx` is exact unless it overflows or underflows
+  // (2^500 / 2^-600 overflows). Out of range the ratio is applied in two steps. Both steps move
+  // the value in the same direction, so the value between them is no farther from 1 than the
+  // result.
+  const ratio = s.sy / s.sx;
+  const exact = ratio * s.sx === s.sy;
+  const toDataUnits = (v: number): number => (exact ? v * ratio : (v * s.sy) / s.sx);
+  return {
+    ...r,
+    slope: toDataUnits(r.slope),
+    intercept: r.intercept * s.sy,
+    stdErr: toDataUnits(r.stdErr),
+  };
 }
 
 /** Result of `linearRegression`: the fitted line and its statistics. */
@@ -69,9 +132,9 @@ export function linearRegression(x: Vec, y: Vec): LinregressResult {
   if (b.length !== n) throw new Error(`linearRegression: length mismatch ${n} vs ${b.length}`);
   if (n < 3)
     throw new Error('linearRegression: need at least 3 points for a slope significance test');
-  const fit = fitLine(a, b);
-  if (fit.sxx === 0) throw new Error('linearRegression: predictor x has zero variance');
-  return linregressFromFit(fit, n);
+  const scaled = fitLineScaled(a, b);
+  if (scaled.fit.sxx === 0) throw new Error('linearRegression: predictor x has zero variance');
+  return unscaleLinregress(linregressFromFit(scaled.fit, n), scaled);
 }
 
 /**

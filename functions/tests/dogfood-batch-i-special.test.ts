@@ -202,7 +202,14 @@ describe('#1132 besselJ and besselY: one work bound per array call', () => {
   });
   it('an element with its own limit error keeps its own message', () => {
     expect(() => besselJ(3e9, fill(4, 5e9))).toThrow(/besselJ: n = 3000000000 exceeds/);
-    expect(() => besselY(3e9, fill(2048, 5))).toThrow(/besselY: n = 3000000000 exceeds/);
+    // x = 5 would give -Infinity at once (Y_3e9(5) is below -1e308, bound before the limit, #1331).
+    expect(() => besselY(3e9, fill(2048, 3e9))).toThrow(/besselY: n = 3000000000 exceeds/);
+    expect(Array.from(besselY(3e9, fill(4, 5)) as Float64Array)).toEqual([
+      -Infinity,
+      -Infinity,
+      -Infinity,
+      -Infinity,
+    ]);
   });
   it('besselJ(2.4e9, 2048 elements at 1000) is 0 for every element (zero bound, no steps)', () => {
     const r = besselJ(2.4e9, fill(2048, 1000)) as Float64Array;
@@ -649,8 +656,10 @@ describe('#1289 besselY: an overflow is -Infinity, not NaN', () => {
     expect(rel(besselY(-20.5, 1) as number, 6.01429082926e-26)).toBeLessThan(1e-9);
     expect(rel(besselY(-60.5, 2) as number, 1.51700688916e-83)).toBeLessThan(1e-9);
   });
-  it('a non-finite x still gives NaN', () => {
-    expect(besselY(1e8, Infinity)).toBeNaN();
+  it('x = Infinity gives the limit 0; a NaN, zero or negative x gives NaN', () => {
+    // Y_nu(x) -> 0 as x -> Infinity (the amplitude sqrt(2 / (pi x)) -> 0; mpmath gives 0). The
+    // scalar returned NaN from sin(Infinity) before the limit was a rule.
+    expect(besselY(1e8, Infinity)).toBe(0);
     expect(besselY(5, NaN)).toBeNaN();
     expect(besselY(400, 0)).toBeNaN();
     expect(besselY(400, -1)).toBeNaN();

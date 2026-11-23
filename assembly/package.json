@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-wasm",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "MathTS WebAssembly module - high-performance numerical computing",
   "type": "module",
   "main": "build/mathts.js",
@@ -12,10 +12,17 @@
       "default": "./build/mathts.js"
     },
     "./wasm": {
-      "import": "./build/mathts.wasm"
+      "import": "./build/mathts.wasm",
+      "default": "./build/mathts.wasm"
     },
     "./debug": {
-      "import": "./build/mathts-debug.wasm"
+      "import": "./build/mathts-debug.wasm",
+      "default": "./build/mathts-debug.wasm"
+    },
+    "./debug.js": {
+      "types": "./build/mathts-debug.d.ts",
+      "import": "./build/mathts-debug.js",
+      "default": "./build/mathts-debug.js"
     },
     "./package.json": "./package.json"
   },
@@ -27,10 +34,10 @@
     "asbuild:debug": "asc src/index.ts --target debug",
     "asbuild:release": "asc src/index.ts --target release",
     "asbuild": "bun run asbuild:debug && bun run asbuild:release && bun run gen:manifest",
-    "gen:manifest": "node scripts/gen-wasm-manifest.mjs && node scripts/patch-dts.mjs",
+    "gen:manifest": "node scripts/gen-wasm-manifest.mjs && node scripts/patch-dts.mjs && node scripts/patch-glue.mjs",
     "build": "bun run asbuild && node ../tools/ensure-js-sourcemaps.mjs",
     "clean": "rm -rf build/",
-    "test": "node tests/run.js && node tests/f64-buffer-clone.test.mjs && node tests/complex-abs-1259.test.mjs && node tests/special-numtheory.test.mjs && node tests/polynomial.test.mjs && node tests/signal.test.mjs && node tests/linalg.test.mjs && node tests/curvefit.test.mjs && node tests/optimization.test.mjs && node tests/approx.test.mjs && node tests/tensor.test.mjs && node tests/phase2-kernels.test.mjs && bun run test:diff",
+    "test": "node tests/run.js && node tests/f64-buffer-clone.test.mjs && node tests/complex-abs-1259.test.mjs && node tests/special-numtheory.test.mjs && node tests/polynomial.test.mjs && node tests/signal.test.mjs && node tests/linalg.test.mjs && node tests/curvefit.test.mjs && node tests/optimization.test.mjs && node tests/approx.test.mjs && node tests/tensor.test.mjs && node tests/phase2-kernels.test.mjs && node tests/glue-write-back.test.mjs && node tests/glue-table-sweep.test.mjs && node tests/qr-column-range.test.mjs && node tests/subpath-imports.test.mjs && bun run test:diff",
     "test:diff": "node tests/diff-special.test.mjs && node tests/diff-decomposition.test.mjs",
     "coverage:matrix": "python -X utf8 tests/audit/coverage_matrix.py",
     "golden:gen": "python -X utf8 tests/golden/generate_goldens.py",

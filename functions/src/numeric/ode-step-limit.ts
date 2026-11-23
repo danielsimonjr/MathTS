@@ -79,7 +79,8 @@ export function odeForwardJacobian(
  * The fastest decay rate mu = max(0, max_i(-Re lambda_i)) of the linearised problem y' = fy(y) at
  * `y`, with the lambda_i the eigenvalues of the forward-difference Jacobian. It is 0 when the
  * system is larger than `ODE_HINT_MAX_DIMENSION`, when a Jacobian entry or an eigenvalue is not
- * finite, and when `fy` or the eigenvalue solve throws.
+ * finite, when a growing mode gains more than one e-fold over the remaining interval, and when
+ * `fy` or the eigenvalue solve throws. Reversing integration reverses growth and decay.
  *
  * The hint is optional information on an error that is thrown anyway. An error of the user's `fy`
  * at a perturbed point must never replace the budget error, so every failure here gives 0. This
@@ -87,7 +88,8 @@ export function odeForwardJacobian(
  */
 export function odeFastestDecayRate(
   field: (y: number[]) => number[] | number,
-  y: number[]
+  y: number[],
+  remainingTime: number
 ): number {
   if (y.length === 0 || y.length > ODE_HINT_MAX_DIMENSION) return 0;
   // A scalar equation may return a number: every call is normalised to an Array.
@@ -101,7 +103,9 @@ export function odeFastestDecayRate(
     let mu = 0;
     for (const lambda of eigvals(jacobian)) {
       if (!Number.isFinite(lambda.re) || !Number.isFinite(lambda.im)) return 0;
-      mu = Math.max(mu, -lambda.re);
+      const growth = lambda.re * Math.sign(remainingTime);
+      if (growth * Math.abs(remainingTime) > 1) return 0;
+      mu = Math.max(mu, -growth);
     }
     return mu;
   } catch {

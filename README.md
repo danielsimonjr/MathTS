@@ -18,7 +18,7 @@ artefacts) and `@danielsimonjr/mathts-typed-function` (fork consumed via npm ali
 
 <!-- BEGIN GENERATED FUNCTIONS STATS (tools/sync-readme-functions-stats.mjs) -->
 
-The function layer (`@danielsimonjr/mathts-functions` 0.87.0) exposes **1,385 exports** in
+The function layer (`@danielsimonjr/mathts-functions` 0.88.0) exposes **1,385 exports** in
 27 categories — arithmetic through CAS, special functions, statistics and hypothesis tests,
 quadrature and optimisation, number theory, signal processing, linear algebra and geometry.
 <!-- END GENERATED FUNCTIONS STATS -->
@@ -389,7 +389,7 @@ cd functions && bunx vitest run
 
 ## Status
 
-MathTS is an actively developed monorepo of 24 workspace packages (22 published for application use).
+MathTS is an actively developed monorepo of 24 published workspace packages.
 The dependency graph has **2 runtime circular dependencies** (verified by
 `tools/create-dependency-graph` and `repo-tools check`; see
 `docs/Architecture/DEPENDENCY_GRAPH.md`, which `bun run docs:deps` generates and the

@@ -61,6 +61,10 @@ npm install @danielsimonjr/mathts-statistics
   SciPy `stats.gamma(a=2, scale=2)` maps to `gammaDist(2, { scale: 2 })` or `gammaDist({ shape: 2, scale: 2 })`;
   `gammaDist(2, 2)` is rate `2` (SciPy `scale=0.5`, pdf(1) ≈ 0.541). Passing `rate` and `scale`
   together throws. Shape, rate, and scale must be finite and strictly positive.
+  **`exponentialDist` parameterization:** the argument is the **rate** (`mean = 1/rate`), so
+  SciPy `stats.expon(scale=2)` is `exponentialDist(0.5)`. A constructor throws a `TypeError` for an
+  argument that it would ignore, such as `gammaDist(2, 2, { scale: 2 })` or an unknown option key.
+  `docs/advanced.md` has the table of every constructor and its SciPy equivalent.
 - **Hypothesis tests** — `studentTTest` (one-sample vs `popmean` or two-sample Welch), `studentTTestPaired`, `anova`, `anova2`,
   `chiSquareTest`, `kolmogorovSmirnovTest` + `kolmogorovSmirnov2Test`, `mannWhitneyTest`,
   `shapiroWilkTest`, `leveneTest`, `bartlettTest`, `proportionZTest`, `binomialTest`, `fTest`,
@@ -68,6 +72,9 @@ npm install @danielsimonjr/mathts-statistics
   `dagostinoTest`, `friedmanTest`, `multipleComparison`, `principalComponentAnalysis`.
   `chiSquareTest`, `kolmogorovSmirnovTest`, `mannWhitneyTest` and `shapiroWilkTest` return a
   Promise, so call them with `await`. The other tests in this list return their result directly.
+  `wilcoxon` uses the exact signed-rank distribution through 50 differences when there are
+  no zeros or ties. With zeros or ties it enumerates sign assignments through 13 differences.
+  The remaining cases use the normal approximation.
 - **Probability & combinatorics** — `combinations`, `combinationsWithRep`, `permutations`,
   `multinomial`, `factorial`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`,
   `subfactorial`, `bernoulli`, `gamma`, `lgamma`, `kldivergence`, and seedable RNG (`random`,

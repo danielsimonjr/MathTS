@@ -2975,6 +2975,15 @@ export const createUnitClass = /* #__PURE__ */ factory(
       VELOCITY: {
         dimensions: [0, 1, -1, 0, 0, 0, 0, 0, 0, 0],
       },
+      ACCELERATION: {
+        dimensions: [0, 1, -2, 0, 0, 0, 0, 0, 0, 0], // m/s²
+      },
+      RADIATION_DOSE: {
+        dimensions: [0, 2, -2, 0, 0, 0, 0, 0, 0, 0], // J/kg
+      },
+      CATALYTIC_ACTIVITY: {
+        dimensions: [0, 0, -1, 0, 0, 0, 1, 0, 0, 0], // mol/s
+      },
       VISCOSITY: {
         dimensions: [1, -1, -1, 0, 0, 0, 0, 0, 0, 0], // Pa·s
       },

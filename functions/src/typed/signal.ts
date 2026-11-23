@@ -206,16 +206,16 @@ type FftResultPromise = Promise<{ real: Float64Array; imag: Float64Array; origin
 export const parallelFFT = mathTyped('parallelFFT', {
   // FFT of number array
   Array: (signal: number[]): FftResult => {
-    const n: i32 = signal.length;
+    // `toSamples` rejects an entry with no numeric reading (a nested Array gave NaN bins, #964).
+    const samples = toSamples('parallelFFT', signal);
+    const n: i32 = samples.length;
     if (n === 0) return { real: new Float64Array(0), imag: new Float64Array(0), originalLength: 0 };
 
     const paddedLength: i32 = nextPowerOf2(n);
     const real = new Float64Array(paddedLength);
     const imag = new Float64Array(paddedLength);
 
-    for (let i: i32 = 0; i < n; i++) {
-      real[i] = signal[i];
-    }
+    real.set(samples);
 
     const result = fftCoreFloat64(real, imag, false);
     return { ...result, originalLength: n };
@@ -393,7 +393,10 @@ export const parallelConv = mathTyped('parallelConv', {
 
   // Convolution of number arrays
   'Array, Array': async (x: number[], h: number[]): Promise<Float64Array> => {
-    return parallelConv(new Float64Array(x), new Float64Array(h)) as Promise<Float64Array>;
+    return parallelConv(
+      toSamples('parallelConv', x, 'x'),
+      toSamples('parallelConv', h, 'h')
+    ) as Promise<Float64Array>;
   },
 });
 
@@ -411,7 +414,10 @@ export const parallelXCorr = mathTyped('parallelXCorr', {
   },
 
   'Array, Array': async (x: number[], h: number[]): Promise<Float64Array> => {
-    return parallelXCorr(new Float64Array(x), new Float64Array(h)) as Promise<Float64Array>;
+    return parallelXCorr(
+      toSamples('parallelXCorr', x, 'x'),
+      toSamples('parallelXCorr', h, 'h')
+    ) as Promise<Float64Array>;
   },
 });
 
@@ -424,7 +430,7 @@ export const parallelAutoCorr = mathTyped('parallelAutoCorr', {
   },
 
   Array: async (x: number[]): Promise<Float64Array> => {
-    return parallelAutoCorr(new Float64Array(x)) as Promise<Float64Array>;
+    return parallelAutoCorr(toSamples('parallelAutoCorr', x)) as Promise<Float64Array>;
   },
 });
 

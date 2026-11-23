@@ -14,6 +14,86 @@ function expModelNode() {
 }
 
 describe('fitScalarParameters', () => {
+  it('recognizes an exact starting solution without evaluating a trial point', () => {
+    let calls = 0;
+    const residual = ([a]: number[]) => {
+      calls++;
+      return [a - 1];
+    };
+    const jacobian = () => [[1]];
+    expect(levenbergMarquardt(residual, [1], { maxIter: 3, jacobian })).toEqual({
+      x: [1],
+      residualNorm: 0,
+      iterations: 0,
+      converged: true,
+    });
+    expect(calls).toBe(1);
+    expect(levenbergMarquardt(residual, [1], { maxIter: 0, jacobian }).converged).toBe(false);
+
+    for (const maxIterations of [0, 3]) {
+      const fit = fitScalarParameters(
+        scalar.symbol('a'),
+        [new Float64Array([0])],
+        new Float64Array([1]),
+        ['x'],
+        { parameters: ['a'], initial: [1], restarts: 0, maxIterations }
+      );
+      expect(fit.loss).toBe(0);
+      expect(fit.converged).toBe(maxIterations > 0);
+    }
+  });
+
+  it('keeps the incumbent when an undamped correction overshoots', () => {
+    const node = scalar.op('^', [scalar.symbol('a'), scalar.number(2)]);
+    const fit = (maxIterations: number) =>
+      fitScalarParameters(node, [new Float64Array([0])], new Float64Array([1]), ['x'], {
+        parameters: ['a'],
+        initial: [0.1],
+        restarts: 0,
+        maxIterations,
+      });
+
+    const result = fit(1);
+    expect(result.loss).toBeLessThanOrEqual(fit(0).loss);
+    expect(result.loss).toBe((result.parameters[0] ** 2 - 1) ** 2);
+  });
+
+  it.each(['lm', 'bfgs', 'nelder-mead'] as const)(
+    'keeps %s within each bound shape',
+    (algorithm) => {
+      const cases = [
+        [0, Infinity, 1],
+        [-Infinity, 2, 1],
+        [-Infinity, Infinity, 1],
+        [0, 1e-10, 5e-11],
+        [1, 1 + Number.EPSILON, 1],
+        [2, 2, 0],
+      ];
+      for (const maxIterations of [0, 3]) {
+        for (const [lo, hi, initial] of cases) {
+          const result = fitScalarParameters(
+            scalar.symbol('a'),
+            [new Float64Array([0])],
+            new Float64Array([1]),
+            ['x'],
+            {
+              parameters: ['a'],
+              initial: [initial],
+              bounds: [[lo, hi]],
+              algorithm,
+              maxIterations,
+              restarts: 2,
+              rng: createSeededRng(19),
+            }
+          );
+          expect(Number.isFinite(result.parameters[0])).toBe(true);
+          expect(result.parameters[0]).toBeGreaterThanOrEqual(lo);
+          expect(result.parameters[0]).toBeLessThanOrEqual(hi);
+        }
+      }
+    }
+  );
+
   it('recovers planted noise-free a*exp(-b*x)+c', () => {
     const node = expModelNode();
     const xs = new Float64Array([0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5]);

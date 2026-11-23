@@ -12,12 +12,13 @@
  * @packageDocumentation
  */
 
-import { mathTyped, neumaierCumsum } from '@danielsimonjr/mathts-core';
+import { mathTyped, neumaierCumsum, norm2, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 import { medianInPlace, minFrom, quickSelectInPlace } from '../utils/median-numbers.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { hasNaN } from './number-matrix.js';
+import { normalizationFromSecondArg } from '../statistics/numeric-data.js';
 
 // =============================================================================
 // AssemblyScript-Compatible Type Aliases
@@ -133,6 +134,8 @@ export const parallelStatVariance = mathTyped('parallelStatVariance', {
     data: Float64Array,
     normalization: NormalizationType
   ): Promise<f64> => {
+    // An unknown normalization throws the TypeError of `variance`; it read as 'unbiased'.
+    normalizationFromSecondArg(normalization);
     const result = await computePool.variance(data);
     const n = data.length;
 
@@ -200,8 +203,24 @@ export const parallelStatStd = mathTyped('parallelStatStd', {
     data: Float64Array,
     normalization: NormalizationType
   ): Promise<f64> => {
-    const variance = await parallelStatVariance(data, normalization);
-    return Math.sqrt(variance as number);
+    // The std comes from the pool's population std, not from a root of the variance: the squares
+    // of data of order 1e-160 are subnormal, so a root of the variance lost digits (#1280). The
+    // factor sqrt(n / (n - k)) is a degree-1 scale, so it cannot underflow. An unknown
+    // normalization throws the TypeError of `std`; it read as 'unbiased'.
+    normalizationFromSecondArg(normalization);
+    const n = data.length;
+    if (n === 0) return NaN;
+    const populationStd = (await computePool.variance(data)).result.std;
+    switch (normalization) {
+      case 'uncorrected':
+        return populationStd;
+      case 'biased':
+        return populationStd * Math.sqrt(n / (n + 1));
+      case 'unbiased':
+      default:
+        if (n === 1) return 0;
+        return populationStd * Math.sqrt(n / (n - 1));
+    }
   },
 
   // Number array
@@ -464,12 +483,15 @@ export const parallelStatNorm = mathTyped('parallelStatNorm', {
   // With p-norm parameter
   'Float64Array, number': (data: Float64Array, p: f64): f64 => {
     if (p === 2) {
-      // Euclidean norm
-      let sum: f64 = 0;
+      // Euclidean norm. One plain pass keeps the speed and the bits of the plain path; the scaled
+      // 2-norm of core (about 2 to 4.6 times slower) runs only when the sum of squares left the
+      // range in which every digit is kept: subnormal squares, an underflow to 0 or an overflow
+      // (#1280). A NaN sum is not in that range, so it takes the scaled norm too.
+      let sumSq: f64 = 0;
       for (let i: i32 = 0; i < data.length; i++) {
-        sum += data[i] * data[i];
+        sumSq += data[i] * data[i];
       }
-      return Math.sqrt(sum);
+      return sumSq >= SQUARES_SAFE_MIN && sumSq < Infinity ? Math.sqrt(sumSq) : norm2(data);
     } else if (p === 1) {
       // Manhattan norm
       let sum: f64 = 0;
@@ -765,11 +787,13 @@ export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
  * @param arr - Input array (not modified)
  * @param k - Zero-based index of the desired order statistic
  * @returns The k-th smallest element
+ * @throws RangeError If the input contains a NaN or k is out of range
  */
 export function quickSelect(arr: number[], k: i32): f64 {
   if (k < 0 || k >= arr.length) {
     throw new RangeError(`k=${k} is out of range for array of length ${arr.length}`);
   }
+  if (hasNaN(arr)) throw new RangeError('quickSelect: input contains NaN');
   const a = new Float64Array(arr); // work on a copy
   return quickSelectInPlace(a, 0, a.length - 1, k);
 }
@@ -788,12 +812,12 @@ export function medianSelect(arr: number[]): f64 {
   if (n === 1) return arr[0];
 
   const mid: i32 = Math.floor(n / 2);
+  const a = new Float64Array(arr);
   if (n % 2 === 1) {
-    return quickSelect(arr, mid);
+    return quickSelectInPlace(a, 0, n - 1, mid);
   }
   // For even length, average of two middle elements. After the select at `mid - 1`, the next
   // order statistic is the smallest value right of it.
-  const a = new Float64Array(arr);
   const lower = quickSelectInPlace(a, 0, n - 1, mid - 1);
   const upper = minFrom(a, mid);
   return (lower + upper) / 2;
@@ -805,9 +829,11 @@ export function medianSelect(arr: number[]): f64 {
  * @param arr - Input array (not modified)
  * @param k - Number of smallest elements to return
  * @returns Array of k smallest elements, sorted ascending
+ * @throws RangeError If k is positive and the input contains a NaN
  */
 export function minSelect(arr: number[], k: i32): number[] {
   if (k <= 0) return [];
+  if (hasNaN(arr)) throw new RangeError('minSelect: input contains NaN');
   if (k >= arr.length) return arr.slice().sort((a, b) => a - b);
 
   const a = new Float64Array(arr);
@@ -823,9 +849,11 @@ export function minSelect(arr: number[], k: i32): number[] {
  * @param arr - Input array (not modified)
  * @param k - Number of largest elements to return
  * @returns Array of k largest elements, sorted descending
+ * @throws RangeError If k is positive and the input contains a NaN
  */
 export function maxSelect(arr: number[], k: i32): number[] {
   if (k <= 0) return [];
+  if (hasNaN(arr)) throw new RangeError('maxSelect: input contains NaN');
   if (k >= arr.length) return arr.slice().sort((a, b) => b - a);
 
   const a = new Float64Array(arr);

@@ -53,8 +53,10 @@ import {
   pairwiseDotChecked,
   sumSquaredDeviations,
   sumSquaredDeviationsChecked,
+  ROOT_SAFE_MIN,
+  SQUARES_SAFE_MIN,
 } from '@danielsimonjr/mathts-core';
-import { isDegenerate as isDegenerateReal, rescaled } from '../utils/real-scale.js';
+import { rootOfSquaresLostDigits, rescaled } from '../utils/real-scale.js';
 import {
   finiteNumbers,
   normalizationFromSecondArg,
@@ -2223,7 +2225,7 @@ function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
     // The sum of squares overflows above about 1e154 and loses its digits below about
     // 1e-150 (#1104), and it is NaN for an infinite entry with a NaN entry. Then the scaled norm
     // is returned; `norm2` also applies the IEEE rule to a non-finite entry (#1259).
-    if (s >= 2 ** -800 && s < Infinity) return Math.sqrt(s);
+    if (s >= SQUARES_SAFE_MIN && s < Infinity) return Math.sqrt(s);
     return norm2(data.flat());
   }
   if (p === 1) {
@@ -3170,7 +3172,8 @@ const exactStd = (...args: unknown[]): unknown => exactSqrt(exactVariance(...arg
  * is returned as it is.
  */
 function scaledStdResult(result: unknown, args: unknown[]): unknown {
-  const isBad = (x: unknown): boolean => (Array.isArray(x) ? x.some(isBad) : isDegenerateReal(x));
+  const isBad = (x: unknown): boolean =>
+    Array.isArray(x) ? x.some(isBad) : rootOfSquaresLostDigits(x);
   if (!isBad(result)) return result;
   const xs = statData(args[0]);
   if (xs === undefined) return result;
@@ -3223,7 +3226,8 @@ function withScaledStd<T extends object>(signatures: T): T {
   type Impl = (...a: unknown[]) => unknown;
   // A result that is a finite nonzero number needs no recomputation: the check is one comparison,
   // so a fixed arity keeps the call free of an argument array.
-  const plain = (r: unknown): boolean => typeof r === 'number' && r !== 0 && Number.isFinite(r);
+  const plain = (r: unknown): boolean =>
+    typeof r === 'number' && r >= ROOT_SAFE_MIN && r < Infinity;
   const wrapped: Record<string, unknown> = {};
   for (const [key, impl] of Object.entries(signatures)) {
     const f = impl as Impl;

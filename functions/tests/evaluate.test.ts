@@ -65,6 +65,18 @@ describe('evaluate()', () => {
       expect(evaluate('log(1)')).toBeCloseTo(0);
     });
 
+    it.each([
+      ['ceil(8.123, 2)', 8.13],
+      ['floor(8.123, 2)', 8.12],
+      ['fix(-8.123, 2)', -8.12],
+      ['ceil(8.123)', 9],
+      ['floor(8.123)', 8],
+      ['fix(-8.123)', -8],
+    ] as const)('rounds %s through both evaluator entry points', (expr, want) => {
+      expect(evaluate(expr)).toBe(want);
+      expect(compileExpr(expr).evaluate()).toBe(want);
+    });
+
     it('pow(2, 8) = 256', () => {
       expect(evaluate('pow(2, 8)')).toBe(256);
     });

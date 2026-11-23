@@ -16,12 +16,6 @@ import { describe, it, expect } from 'vitest';
 import * as math from '../src/index.js';
 
 const { solveODE, bignumber, unaryMinus } = math;
-/** The typed arithmetic with the loose call signature that these tests need. */
-const ops = math as unknown as Record<
-  'subtract' | 'divide' | 'multiply' | 'abs',
-  (...a: unknown[]) => unknown
->;
-
 type Fn = (t: unknown, y: unknown) => unknown;
 type Solution = { t: unknown[]; y: unknown[] };
 
@@ -82,19 +76,12 @@ describe('#1156 BigNumber step size underflow', () => {
     });
   }
 
-  it('3: an infinite tol accepts the first trial; t does not become NaN', () => {
-    // An infinite tol: every finite error estimate is below it. The
-    // first-step guess is undefined (y0 does not fit in a double), so h is the span, and the run
-    // takes one Dormand-Prince step with z = -1: y1 = y0 * R(-1), R(-1) = 221/600.
-    const y0 = bignumber('1e400');
+  it('rejects an infinite tolerance before evaluating a large BigNumber state', () => {
     const c = counted(decay, 50);
-    const r = solve(c.f, [0, 1], y0, { tol: Infinity });
-    expect(Number(r.t.at(-1))).toBe(1);
-    const expected = ops.multiply(y0, ops.divide(bignumber(221), bignumber(600)));
-    // The tableau is built from doubles (bignumber(1/5), mathjs parity): about 1e-16 relative.
-    const deviation = ops.abs(ops.subtract(ops.divide(r.y.at(-1), expected), 1));
-    expect(Number(deviation)).toBeLessThanOrEqual(1e-14);
-    expect(c.calls()).toBeLessThanOrEqual(50);
+    expect(() => solve(c.f, [0, 1], bignumber('1e400'), { tol: Infinity })).toThrow(
+      /tol.*finite and positive/
+    );
+    expect(c.calls()).toBe(0);
   });
 });
 
@@ -113,11 +100,11 @@ describe('#1156 number step size underflow names its cause', () => {
   }
 
   for (const method of ['RK45', 'RK23']) {
-    it(`7b: tol -1 with ${method} stops with a step size underflow, not with a NaN step`, () => {
+    it(`7b: tol -1 with ${method} fails validation before integrating`, () => {
       const c = counted(decay, 10000);
       const message = messageOf(() => solve(c.f, [0, 1], 1, { method, tol: -1 }));
-      expect(message).toMatch(/step size underflow/);
-      expect(c.calls()).toBeLessThanOrEqual(5000);
+      expect(message).toMatch(/tol.*finite and positive/);
+      expect(c.calls()).toBe(0);
     });
   }
 });

@@ -1,5 +1,5 @@
 import { isConstantNode } from '../utils/is.js';
-import { isExactPolynomialIdentity } from '../cas/exact-identity.js';
+import { isExactPolynomialIdentity, isSyntacticPolynomialIdentity } from '../cas/exact-identity.js';
 import { factory } from '../utils/factory.js';
 import type { MathNode } from '../utils/node.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -35,7 +35,8 @@ export const createSymbolicEqual = /* #__PURE__ */ factory(
     /**
      * Attempts to determine if two expressions are symbolically equal, i.e.
      * one is the result of valid algebraic manipulations on the other.
-     * Two expressions are equal when they are the same polynomial over their
+     * Identical polynomial syntax proves equality without expansion.
+     * Two expressions are also equal when they are the same polynomial over their
      * variables and function calls, with exact rational coefficients (so
      * `(x+1)^2` equals `x^2+2*x+1`, and `sqrt(2)/3+1/3` equals `(sqrt(2)+1)/3`),
      * or when the difference of the two expressions simplifies down to 0.
@@ -75,6 +76,7 @@ export const createSymbolicEqual = /* #__PURE__ */ factory(
      *     is found.
      */
     function _symbolicEqual(e1: MathNode, e2: MathNode, options: SimplifyOptions = {}): boolean {
+      if (isSyntacticPolynomialIdentity(e1, e2)) return true;
       // With options, the caller picks the rules (a context can make a product non-commutative),
       // and an exact comparison with the default ring rules would override them.
       if (Object.keys(options).length === 0 && isExactPolynomialIdentity(e1, e2)) return true;

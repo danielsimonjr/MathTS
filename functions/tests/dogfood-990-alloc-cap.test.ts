@@ -82,9 +82,9 @@ describe('dogfood #990 allocation cap', () => {
       new RangeError('zeros: result too large (1000000000×0 exceeds limit of 100000000 elements)')
     );
     expect(() => zeros([1e5, 1e4, 0])).toThrow(RangeError);
-    expect(() => (matrix([1]) as { resize(s: number[]): unknown }).resize([1e9, 0])).toThrow(
-      RangeError
-    );
+    expect(() =>
+      (matrix([1]) as unknown as { resize(s: number[]): unknown }).resize([1e9, 0])
+    ).toThrow(RangeError);
     expect(zeros([0, 5])).toEqual([]);
     expect(zeros([5, 0])).toEqual([[], [], [], [], []]);
   });

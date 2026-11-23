@@ -284,10 +284,24 @@ export function ceil_f64(a: f64): f64 {
 }
 
 /**
- * Round to nearest
+ * Round to the nearest integer; a tie goes away from zero (`0.5` gives 1, `-2.5` gives -3).
+ *
+ * This is a raw scalar kernel with no configuration, and it works on the exact double. The
+ * `round` of `@danielsimonjr/mathts-functions` first applies its `relTol`, which reads
+ * `0.49999999999999994` as the tie 0.5 and gives 1; this kernel gives 0 for it, because that
+ * double is below the tie. A zero input gives +0, and a negative input that rounds to zero
+ * gives -0 (`-0.4`), as `round` does. NaN gives NaN and an infinity gives itself.
+ *
+ * The WebAssembly instruction `nearest` is not used: it rounds a tie to the even integer
+ * (`0.5` gives 0, `2.5` gives 2). `floor(a + 0.5)` is not used either: `0.49999999999999994 +
+ * 0.5` rounds up to 1. `a - trunc(a)` is exact for every finite double, so the test of the
+ * tie is exact; for an infinity it is NaN, and for NaN the test is false, so both return
+ * `trunc(a)`.
  */
 export function round_f64(a: f64): f64 {
-  return nearest(a);
+  if (a == 0.0) return 0.0;
+  const t = trunc(a);
+  return abs(a - t) >= 0.5 ? t + copysign<f64>(1.0, a) : t;
 }
 
 /**
