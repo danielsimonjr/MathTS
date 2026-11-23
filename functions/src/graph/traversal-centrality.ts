@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 /**
  * Graph Traversal, All-Pairs Shortest Paths, and Distance-Based Centrality
  *
@@ -33,7 +34,7 @@
  * A directed edge i -> j exists when `adj[i][j]` is finite and nonzero.
  * Neighbors are visited in ascending index order.
  *
- * @param adj - Adjacency matrix (directed reading; not symmetrized)
+ * @param adjInput - Adjacency matrix (directed reading; not symmetrized)
  * @param start - Source node index
  * @returns Node indices in BFS visitation order
  *
@@ -41,7 +42,8 @@
  * const adj = [[0,1,Infinity],[1,0,1],[Infinity,1,0]];
  * bfs(adj, 0) // => [0, 1, 2]
  */
-export function bfs(adj: number[][], start: number): number[] {
+export function bfs(adjInput: NativeMatrixInput<number[][]>, start: number): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (start < 0 || start >= n) {
     throw new Error('bfs: start out of bounds');
@@ -70,7 +72,7 @@ export function bfs(adj: number[][], start: number): number[] {
  *
  * A directed edge i -> j exists when `adj[i][j]` is finite and nonzero.
  *
- * @param adj - Adjacency matrix (directed reading; not symmetrized)
+ * @param adjInput - Adjacency matrix (directed reading; not symmetrized)
  * @param start - Source node index
  * @returns Node indices in DFS visitation order
  *
@@ -78,7 +80,8 @@ export function bfs(adj: number[][], start: number): number[] {
  * const adj = [[0,1,Infinity],[1,0,1],[Infinity,1,0]];
  * dfs(adj, 0) // => [0, 1, 2]
  */
-export function dfs(adj: number[][], start: number): number[] {
+export function dfs(adjInput: NativeMatrixInput<number[][]>, start: number): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (start < 0 || start >= n) {
     throw new Error('dfs: start out of bounds');
@@ -123,14 +126,15 @@ function _hasWeightedEdge(w: number): boolean {
  *
  * Time complexity: O(V^3).
  *
- * @param adj - Adjacency matrix (directed reading)
+ * @param adjInput - Adjacency matrix (directed reading)
  * @returns n x n matrix of shortest-path distances
  *
  * @example
  * const adj = [[0,1,Infinity],[1,0,1],[Infinity,1,0]];
  * floydWarshall(adj)[0][2] // => 2
  */
-export function floydWarshall(adj: number[][]): number[][] {
+export function floydWarshall(adjInput: NativeMatrixInput<number[][]>): number[][] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   const dist: number[][] = Array.from({ length: n }, () => new Array(n).fill(Infinity));
 
@@ -180,7 +184,7 @@ export interface BellmanFordResult {
  *
  * Time complexity: O(V*E) (O(V^3) on a dense adjacency matrix).
  *
- * @param adj - Adjacency matrix (directed reading)
+ * @param adjInput - Adjacency matrix (directed reading)
  * @param source - Source node index
  * @returns `{ dist, hasNegativeCycle }`
  *
@@ -188,7 +192,11 @@ export interface BellmanFordResult {
  * const adj = [[0,1,Infinity],[1,0,1],[Infinity,1,0]];
  * bellmanFord(adj, 0) // => { dist: [0, 1, 2], hasNegativeCycle: false }
  */
-export function bellmanFord(adj: number[][], source: number): BellmanFordResult {
+export function bellmanFord(
+  adjInput: NativeMatrixInput<number[][]>,
+  source: number
+): BellmanFordResult {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (source < 0 || source >= n) {
     throw new Error('bellmanFord: source out of bounds');
@@ -250,14 +258,15 @@ export function bellmanFord(adj: number[][], source: number): BellmanFordResult 
  * distance function computes the incoming distance to u for directed
  * graphs"). For undirected graphs (symmetric `adj`) direction is moot.
  *
- * @param adj - Adjacency matrix (directed reading)
+ * @param adjInput - Adjacency matrix (directed reading)
  * @returns Closeness centrality score for each node (length = n)
  *
  * @example
  * const adj = [[0,1,Infinity],[1,0,1],[Infinity,1,0]];
  * closenessCentrality(adj) // middle node scores highest
  */
-export function closenessCentrality(adj: number[][]): number[] {
+export function closenessCentrality(adjInput: NativeMatrixInput<number[][]>): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   const dist = floydWarshall(adj);
   const result = new Array(n).fill(0);
@@ -295,14 +304,15 @@ export function closenessCentrality(adj: number[][]): number[] {
  * matching `networkx.harmonic_centrality`'s directed-graph default. For
  * undirected graphs (symmetric `adj`) direction is moot.
  *
- * @param adj - Adjacency matrix (directed reading)
+ * @param adjInput - Adjacency matrix (directed reading)
  * @returns Harmonic centrality score for each node (length = n)
  *
  * @example
  * const adj = [[0,1,Infinity],[1,0,1],[Infinity,1,0]];
  * harmonicCentrality(adj) // => [1.5, 2, 1.5] (middle node reaches both neighbors at distance 1)
  */
-export function harmonicCentrality(adj: number[][]): number[] {
+export function harmonicCentrality(adjInput: NativeMatrixInput<number[][]>): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   const dist = floydWarshall(adj);
   const result = new Array(n).fill(0);

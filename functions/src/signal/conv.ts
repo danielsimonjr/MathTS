@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { fft, ifft, fft2, ifft2, complex, type ComplexNumber } from './fft.js';
 
 /**
@@ -415,8 +416,8 @@ export function conv2FFT(
 /**
  * 2D Convolution with automatic method selection
  *
- * @param image - 2D input array
- * @param kernel - 2D convolution kernel
+ * @param imageInput - 2D input array
+ * @param kernelInput - 2D convolution kernel
  * @param mode - Output mode: 'full' (default), 'same', or 'valid'
  * @returns 2D convolution result
  *
@@ -436,7 +437,13 @@ export function conv2FFT(
  * const edges = conv2(image, sobelX, 'same');
  * ```
  */
-export function conv2(image: number[][], kernel: number[][], mode: ConvMode = 'full'): number[][] {
+export function conv2(
+  imageInput: NativeMatrixInput<number[][]>,
+  kernelInput: NativeMatrixInput<number[][]>,
+  mode: ConvMode = 'full'
+): number[][] {
+  const kernel: number[][] = nativeMatrixRows(kernelInput);
+  const image: number[][] = nativeMatrixRows(imageInput);
   const imageRows = image.length;
   const imageCols = image[0]?.length ?? 0;
   const kernelRows = kernel.length;

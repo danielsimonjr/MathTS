@@ -13,6 +13,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { delaunay } from './delaunay.js';
 import { circumcircle } from './circumcircle.js';
 
@@ -37,14 +38,18 @@ function circumradius(a: number[], b: number[], c: number[]): number {
 /**
  * Alpha shape of a set of 2-D points.
  *
- * @param points - Array of `[x, y]` points (at least 3, not all collinear).
+ * @param pointsInput - Array of `[x, y]` points (at least 3, not all collinear).
  * @param alpha - Positive alpha parameter; triangles with circumradius `≤ 1/alpha`
  *   are kept. Smaller `alpha` → looser shape (→ convex hull); larger `alpha` →
  *   tighter shape that can open holes/concavities.
  * @returns An {@link AlphaShapeResult} (kept triangles + boundary edges).
  * @throws When given fewer than 3 points, a non-2-D point set, or `alpha ≤ 0`.
  */
-export function alphaShape(points: number[][], alpha: number): AlphaShapeResult {
+export function alphaShape(
+  pointsInput: NativeMatrixInput<number[][]>,
+  alpha: number
+): AlphaShapeResult {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   if (!(alpha > 0)) throw new Error('alphaShape: alpha must be positive');
   const { simplices: tris } = delaunay(points);
   const threshold = 1 / alpha;

@@ -15,6 +15,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { delaunay } from './delaunay.js';
 import { circumcircle } from './circumcircle.js';
 
@@ -45,14 +46,15 @@ function circumcenter(a: number[], b: number[], c: number[]): number[] | null {
 /**
  * Voronoi diagram of a set of 2-D points (the dual of {@link delaunay}).
  *
- * @param points - Array of `[x, y]` points (at least 3, not all collinear).
+ * @param pointsInput - Array of `[x, y]` points (at least 3, not all collinear).
  * @returns A {@link VoronoiResult}.
  * @throws When given fewer than 3 points or a non-2-D point set.
  *
  * @example
  * voronoi([[0,0],[1,0],[0,1],[1,1],[0.5,0.5]]).vertices.length // == triangle count
  */
-export function voronoi(points: number[][]): VoronoiResult {
+export function voronoi(pointsInput: NativeMatrixInput<number[][]>): VoronoiResult {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const { simplices: tris } = delaunay(points);
   const vertices: number[][] = [];
   const simplices: number[][] = [];

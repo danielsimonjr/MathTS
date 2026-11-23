@@ -9,6 +9,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import {
   divideByScale,
   norm2,
@@ -120,10 +121,11 @@ export function triangleArea(a: number[], b: number[], c: number[]): f64 {
  * Compute the area of a simple polygon given its vertices (2D) using the shoelace formula.
  * Vertices should be ordered (clockwise or counter-clockwise).
  *
- * @param vertices - Array of [x, y] vertices
+ * @param verticesInput - Array of [x, y] vertices
  * @returns Unsigned area of the polygon
  */
-export function polygonArea(vertices: number[][]): f64 {
+export function polygonArea(verticesInput: NativeMatrixInput<number[][]>): f64 {
+  const vertices: number[][] = nativeMatrixRows(verticesInput);
   const n: i32 = vertices.length;
   if (n < 3) return 0;
   let area: f64 = 0;
@@ -147,10 +149,11 @@ export function polygonArea(vertices: number[][]): f64 {
  * (indices + area/volume, 2-D and 3-D) is `convexHull` in
  * `../geometry/hull.ts`.
  *
- * @param points - Array of [x, y] points
+ * @param pointsInput - Array of [x, y] points
  * @returns Convex hull vertices (coordinates) in CCW order
  */
-export function convexHull2D(points: number[][]): number[][] {
+export function convexHull2D(pointsInput: NativeMatrixInput<number[][]>): number[][] {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const n: i32 = points.length;
   if (n <= 1) return points.slice();
   if (n === 2) return points.slice();
@@ -214,10 +217,14 @@ export function convexHull2D(points: number[][]): number[][] {
  * Determine if a 2D point lies inside a polygon using the ray casting algorithm.
  *
  * @param point - The test point [x, y]
- * @param polygon - Array of polygon vertices [x, y]
+ * @param polygonInput - Array of polygon vertices [x, y]
  * @returns true if point is inside the polygon
  */
-export function pointInPolygon(point: number[], polygon: number[][]): boolean {
+export function pointInPolygon(
+  point: number[],
+  polygonInput: NativeMatrixInput<number[][]>
+): boolean {
+  const polygon: number[][] = nativeMatrixRows(polygonInput);
   const x: f64 = point[0];
   const y: f64 = point[1];
   const n: i32 = polygon.length;
@@ -511,13 +518,14 @@ export function area(shape: Shape): f64 {
 /**
  * Compute the centroid of a polygon.
  *
- * @param vertices - Array of [x, y] vertices in order
+ * @param verticesInput - Array of [x, y] vertices in order
  * @returns Centroid [x, y]
  *
  * @example
  * centroid([[0,0], [4,0], [4,3], [0,3]]) // => [2, 1.5]
  */
-export function centroid(vertices: number[][]): number[] {
+export function centroid(verticesInput: NativeMatrixInput<number[][]>): number[] {
+  const vertices: number[][] = nativeMatrixRows(verticesInput);
   const n: i32 = vertices.length;
   if (n === 0) throw new Error('centroid: empty polygon');
   if (n <= 2) {
@@ -613,10 +621,11 @@ export function coordinateTransform(
 /**
  * Perimeter of a polygon.
  *
- * @param vertices - Array of [x, y] vertices in order
+ * @param verticesInput - Array of [x, y] vertices in order
  * @returns Perimeter length
  */
-export function polygonPerimeter(vertices: number[][]): f64 {
+export function polygonPerimeter(verticesInput: NativeMatrixInput<number[][]>): f64 {
+  const vertices: number[][] = nativeMatrixRows(verticesInput);
   const n: i32 = vertices.length;
   if (n < 2) return 0;
   let perimeter: f64 = 0;
@@ -676,10 +685,11 @@ export function minkowskiDistance(a: number[], b: number[], p: f64): f64 {
 /**
  * Delaunay triangulation using Bowyer-Watson algorithm.
  *
- * @param points - Array of [x, y] points
+ * @param pointsInput - Array of [x, y] points
  * @returns Array of triangles, each an array of 3 point indices
  */
-export function delaunayTriangulation(points: number[][]): number[][] {
+export function delaunayTriangulation(pointsInput: NativeMatrixInput<number[][]>): number[][] {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const n: i32 = points.length;
   if (n < 3) return [];
 
@@ -777,14 +787,15 @@ export function delaunayTriangulation(points: number[][]): number[][] {
  * Voronoi diagram from Delaunay triangulation (dual graph).
  * Returns Voronoi vertices and regions.
  *
- * @param points - Array of [x, y] points
+ * @param pointsInput - Array of [x, y] points
  * @param bounds - Clipping bounds [minX, minY, maxX, maxY]
  * @returns `{ vertices: number[][], regions: number[][] }`
  */
 export function voronoiDiagram(
-  points: number[][],
+  pointsInput: NativeMatrixInput<number[][]>,
   bounds: [f64, f64, f64, f64]
 ): { vertices: number[][]; regions: number[][] } {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   if (!Array.isArray(bounds) || bounds.length !== 4) {
     throw new TypeError(
       'voronoiDiagram: bounds must be a [xMin, yMin, xMax, yMax] tuple (the clipping box)'
@@ -850,10 +861,11 @@ export interface KDTreeNode {
 /**
  * Build a k-d tree for spatial queries.
  *
- * @param points - Array of points (each same dimensionality)
+ * @param pointsInput - Array of points (each same dimensionality)
  * @returns Root node of the k-d tree
  */
-export function kdTree(points: number[][]): KDTreeNode | null {
+export function kdTree(pointsInput: NativeMatrixInput<number[][]>): KDTreeNode | null {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   if (points.length === 0) return null;
   const dim: i32 = points[0].length;
 
@@ -924,14 +936,15 @@ function distanceNDSq(a: number[], b: number[]): f64 {
 /**
  * One-shot nearest-neighbor search: builds a k-d tree and queries it.
  *
- * @param points - Array of points (each same dimensionality)
+ * @param pointsInput - Array of points (each same dimensionality)
  * @param query - Query point
  * @returns `{ point, index, distance }` of the nearest neighbor, or null
  */
 export function nearestNeighbor(
-  points: number[][],
+  pointsInput: NativeMatrixInput<number[][]>,
   query: number[]
 ): { point: number[]; index: i32; distance: f64 } | null {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const n = points.length;
   if (n === 0) return null;
 
@@ -954,12 +967,13 @@ export type HullFace3D = [i32, i32, i32];
  * Compute the 3-D convex hull of a set of points using QuickHull (incremental
  * variant — Barber, Dobkin, Huhdanpaa 1996).
  *
- * @param points - Array of 3-D points, each `[x, y, z]`.
+ * @param pointsInput - Array of 3-D points, each `[x, y, z]`.
  * @returns Array of triangular faces.  Each face is `[i, j, k]` where i/j/k
  *          are indices into `points`, oriented CCW from outside.
  * @throws Error when the input is degenerate (fewer than 4 non-coplanar points).
  */
-export function convexHull3D(points: number[][]): HullFace3D[] {
+export function convexHull3D(pointsInput: NativeMatrixInput<number[][]>): HullFace3D[] {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const n: i32 = points.length;
   if (n < 4) {
     throw new Error('convexHull3D: at least 4 non-coplanar points are required');
@@ -1121,14 +1135,17 @@ function convexHull3DJS(points: number[][]): HullFace3D[] {
  * large point sets are computed across the worker pool; small sets — or an
  * uninitialized pool — fall back to a sequential computation.
  *
- * @param points - Array of `n` points, each a coordinate array of equal length
+ * @param pointsInput - Array of `n` points, each a coordinate array of equal length
  * @returns `n x n` distance matrix
  *
  * @example
  * await distanceMatrix([[0, 0], [3, 0], [0, 4]])
  * // [[0, 3, 4], [3, 0, 5], [4, 5, 0]]
  */
-export async function distanceMatrix(points: number[][]): Promise<number[][]> {
+export async function distanceMatrix(
+  pointsInput: NativeMatrixInput<number[][]>
+): Promise<number[][]> {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const n: i32 = points.length;
   if (n === 0) return [];
   const dim: i32 = points[0].length;

@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { lfilter, realPolyMul } from '../signal-filter-extra.js';
 import type { ComplexNumber } from './fft.js';
 import { numberVector } from '../typed/number-matrix.js';
@@ -192,11 +193,15 @@ function trimLeading(p: number[]): number[] {
  * num is returned without leading zeros.
  */
 export function ss2tf(
-  A: number[][],
-  B: number[][],
-  C: number[][],
-  D: number[][]
+  AInput: NativeMatrixInput<number[][]>,
+  BInput: NativeMatrixInput<number[][]>,
+  CInput: NativeMatrixInput<number[][]>,
+  DInput: NativeMatrixInput<number[][]>
 ): { num: number[]; den: number[] } {
+  const D: number[][] = nativeMatrixRows(DInput);
+  const C: number[][] = nativeMatrixRows(CInput);
+  const B: number[][] = nativeMatrixRows(BInput);
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = A.length;
   if (B[0]?.length !== 1 || C.length !== 1)
     throw new RangeError('ss2tf: only SISO systems are supported');

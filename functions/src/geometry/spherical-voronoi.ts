@@ -15,6 +15,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { convexHull3D } from '../typed/geometry.js';
 
 /** Structured spherical-Voronoi result (mirrors `scipy.spatial.SphericalVoronoi`). */
@@ -68,7 +69,7 @@ function sphericalTriangleArea(a: number[], b: number[], c: number[]): number {
 /**
  * Spherical Voronoi diagram of points on a sphere.
  *
- * @param points - Array of `[x, y, z]` points on (or near) the sphere. At least
+ * @param pointsInput - Array of `[x, y, z]` points on (or near) the sphere. At least
  *   4 points, not all coplanar with the centre.
  * @param radius - Sphere radius (default `1`).
  * @param center - Sphere centre (default origin).
@@ -76,10 +77,11 @@ function sphericalTriangleArea(a: number[], b: number[], c: number[]): number {
  * @throws When given fewer than 4 points or a non-3-D point set.
  */
 export function sphericalVoronoi(
-  points: number[][],
+  pointsInput: NativeMatrixInput<number[][]>,
   radius = 1,
   center: number[] = [0, 0, 0]
 ): SphericalVoronoiResult {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   if (!Array.isArray(points) || points.length < 4) {
     throw new Error('sphericalVoronoi: requires at least 4 points');
   }

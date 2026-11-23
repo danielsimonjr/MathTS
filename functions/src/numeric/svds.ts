@@ -17,6 +17,7 @@
  *
  * @packageDocumentation
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { norm2 } from '@danielsimonjr/mathts-core';
 import { eigsh } from './eigsh.js';
 
@@ -70,7 +71,8 @@ function matvecAt(A: number[][], y: number[], n: number): number[] {
  * @example
  * svds([[1,2,0],[0,3,1],[4,0,2]], 2) // => { U, s: [σ₁, σ₂] (descending), V }
  */
-export function svds(A: number[][], k = 1, opts?: SvdsOptions): SvdsResult {
+export function svds(AInput: NativeMatrixInput<number[][]>, k = 1, opts?: SvdsOptions): SvdsResult {
+  const A: number[][] = nativeMatrixRows(AInput);
   const m = A.length;
   const n = A[0]?.length ?? 0;
   if (m === 0 || n === 0 || A.some((row) => row.length !== n)) {

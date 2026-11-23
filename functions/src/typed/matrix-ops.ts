@@ -12,6 +12,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import {
   eig,
   svd,
@@ -111,14 +112,15 @@ function assertSquare(A: number[][], name: string): i32 {
  * Uses the Faddeev-LeVerrier algorithm which computes the coefficients
  * from traces of successive matrix powers, achieving O(n^4) complexity.
  *
- * @param A - Square matrix (n x n)
+ * @param AInput - Square matrix (n x n)
  * @returns Coefficient array of length n+1 (ascending power order)
  *
  * @example
  * // Matrix [[2,1],[1,2]] has char poly lambda^2 - 4*lambda + 3
  * characteristicPolynomial([[2,1],[1,2]]) // => [3, -4, 1]
  */
-export function characteristicPolynomial(A: number[][]): number[] {
+export function characteristicPolynomial(AInput: NativeMatrixInput<number[][]>): number[] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'characteristicPolynomial');
 
   // coeffs[k] is the coefficient of lambda^k
@@ -156,7 +158,7 @@ export function characteristicPolynomial(A: number[][]): number[] {
  * stability. The result has leading 1s in each pivot column and zeros
  * in all other entries of pivot columns.
  *
- * @param A - Matrix (m x n), not modified in place
+ * @param AInput - Matrix (m x n), not modified in place
  * @param tol - Tolerance for zero detection (default 1e-10)
  * @returns RREF matrix (m x n)
  *
@@ -164,7 +166,8 @@ export function characteristicPolynomial(A: number[][]): number[] {
  * rowReduce([[1,2,3],[4,5,6],[7,8,9]])
  * // => [[1,0,-1],[0,1,2],[0,0,0]]
  */
-export function rowReduce(A: number[][], tol: f64 = 1e-10): number[][] {
+export function rowReduce(AInput: NativeMatrixInput<number[][]>, tol: f64 = 1e-10): number[][] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const m = A.length;
   if (m === 0) return [];
   const n = A[0].length;
@@ -229,7 +232,7 @@ export function rowReduce(A: number[][], tol: f64 = 1e-10): number[][] {
  * The rank is the number of nonzero rows in the reduced row echelon form,
  * which equals the number of pivot columns.
  *
- * @param A - Matrix (m x n)
+ * @param AInput - Matrix (m x n)
  * @param tol - Tolerance for zero detection (default 1e-10)
  * @returns Rank (number of linearly independent rows/columns)
  *
@@ -237,7 +240,8 @@ export function rowReduce(A: number[][], tol: f64 = 1e-10): number[][] {
  * matrixRank([[1,2],[2,4]]) // => 1
  * matrixRank([[1,0],[0,1]]) // => 2
  */
-export function matrixRank(A: number[][], tol: f64 = 1e-10): i32 {
+export function matrixRank(AInput: NativeMatrixInput<number[][]>, tol: f64 = 1e-10): i32 {
+  const A: number[][] = nativeMatrixRows(AInput);
   const rref = rowReduce(A, tol);
   let r = 0;
   for (let i = 0; i < rref.length; i++) {
@@ -324,14 +328,15 @@ export interface HessenbergResult {
  * Computes Q and H such that A = Q * H * Q^T, where H is upper Hessenberg
  * (zero below the first subdiagonal) and Q is orthogonal.
  *
- * @param A - Square matrix (n x n)
+ * @param AInput - Square matrix (n x n)
  * @returns Object with H (Hessenberg) and Q (orthogonal)
  *
  * @example
  * const { H, Q } = hessenbergForm([[1,2,3],[4,5,6],[7,8,9]]);
  * // H is upper Hessenberg, Q is orthogonal, A = Q * H * Q^T
  */
-export function hessenbergForm(A: number[][]): HessenbergResult {
+export function hessenbergForm(AInput: NativeMatrixInput<number[][]>): HessenbergResult {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'hessenbergForm');
   const H = cloneMatrix(A);
   const Q = eye(n);
@@ -419,7 +424,7 @@ export function hessenbergForm(A: number[][]): HessenbergResult {
  * For fractional p: uses eigendecomposition A = V * diag(lambda) * V^{-1},
  * then A^p = V * diag(lambda^p) * V^{-1}.
  *
- * @param A - Square matrix (n x n)
+ * @param AInput - Square matrix (n x n)
  * @param p - Exponent (integer or fractional)
  * @returns A^p as an n x n matrix
  *
@@ -427,7 +432,8 @@ export function hessenbergForm(A: number[][]): HessenbergResult {
  * matrixPower([[1,1],[0,1]], 3) // => [[1,3],[0,1]]
  * matrixPower([[4,0],[0,9]], 0.5) // => [[2,0],[0,3]]
  */
-export function matrixPower(A: number[][], p: f64): number[][] {
+export function matrixPower(AInput: NativeMatrixInput<number[][]>, p: f64): number[][] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'matrixPower');
 
   // p = 0 -> identity
@@ -552,14 +558,15 @@ function matPowFractional(A: number[][], p: f64): number[][] {
  * with inverse scaling and squaring. For general matrices, uses eigendecomposition:
  * log(A) = V * diag(log(lambda_i)) * V^{-1}.
  *
- * @param A - Square matrix with positive real eigenvalues
+ * @param AInput - Square matrix with positive real eigenvalues
  * @returns log(A) as an n x n matrix
  *
  * @example
  * // log(exp([[0,1],[0,0]])) should recover [[0,1],[0,0]]
  * matrixLog([[1,1],[0,1]]) // => [[0,1],[0,0]]
  */
-export function matrixLog(A: number[][]): number[][] {
+export function matrixLog(AInput: NativeMatrixInput<number[][]>): number[][] {
+  const A: number[][] = nativeMatrixRows(AInput);
   assertSquare(A, 'matrixLog');
 
   // Use inverse scaling and squaring: repeatedly take square roots
@@ -730,14 +737,15 @@ export interface PolarResult {
  * U is unitary (orthogonal for real matrices) and P is symmetric positive
  * semi-definite. Computed via SVD: if A = W*S*V^T, then U = W*V^T and P = V*S*V^T.
  *
- * @param A - Square matrix (n x n)
+ * @param AInput - Square matrix (n x n)
  * @returns Object with U (unitary) and P (positive semi-definite)
  *
  * @example
  * const { U, P } = polarDecomposition([[1,0],[0,2]]);
  * // U is identity (or close), P = [[1,0],[0,2]]
  */
-export function polarDecomposition(A: number[][]): PolarResult {
+export function polarDecomposition(AInput: NativeMatrixInput<number[][]>): PolarResult {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'polarDecomposition');
 
   const { U: W, S, V } = svd(A);
@@ -781,14 +789,15 @@ export interface JordanResult {
  * and reasonably well-conditioned eigenvectors. For matrices with complex
  * eigenvalues, only the real parts are used.
  *
- * @param A - Square matrix (n x n)
+ * @param AInput - Square matrix (n x n)
  * @returns Object with J (Jordan form) and P (transformation matrix)
  *
  * @example
  * // Diagonal matrix with distinct eigenvalues
  * jordanForm([[2,0],[0,3]]) // => { J: [[2,0],[0,3]], P: ... }
  */
-export function jordanForm(A: number[][]): JordanResult {
+export function jordanForm(AInput: NativeMatrixInput<number[][]>): JordanResult {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'jordanForm');
   const { values, vectors } = eig(A, { computeVectors: true });
 

@@ -7,6 +7,7 @@
  * values exceeding a tolerance (numpy/MATLAB `orth` convention), and the
  * result is the leading `r` columns of `U`.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from './matrix/native-matrix-rows.js';
 import { svd } from '@danielsimonjr/mathts-matrix';
 
 /** Options for {@link orth}. */
@@ -29,7 +30,8 @@ export interface OrthOptions {
  * @example
  * orth([[1,0,1],[0,1,1],[1,1,2]])  // rank 2 -> 3x2 matrix, U^T U = I
  */
-export function orth(A: number[][], opts: OrthOptions = {}): number[][] {
+export function orth(AInput: NativeMatrixInput<number[][]>, opts: OrthOptions = {}): number[][] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const { U, S } = svd(A);
   const m = A.length;
   const n = A[0]?.length ?? 0;

@@ -5,6 +5,7 @@
  * - `newcombePairedInterval`: Newcombe (1998) method 10 for a paired difference.
  * - `cohensKappa`: Cohen's kappa for a square agreement matrix.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { normalQuantile } from '../distribution-functions.js';
 import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
@@ -87,10 +88,13 @@ export function newcombePairedInterval(
 
 /**
  * Computes Cohen's kappa for a square agreement matrix of counts.
- * @param matrix Square, non-empty matrix of non-negative finite counts.
+ * @param matrixInput Square, non-empty matrix of non-negative finite counts.
  * @returns Kappa, or NaN when the chance agreement is 1.
  */
-export function cohensKappa(matrix: readonly (readonly number[])[]): number {
+export function cohensKappa(
+  matrixInput: NativeMatrixInput<readonly (readonly number[])[]>
+): number {
+  const matrix: readonly (readonly number[])[] = nativeMatrixRows(matrixInput);
   const size = matrix.length;
   if (size === 0) {
     throw new RangeError('matrix must be a non-empty square matrix');

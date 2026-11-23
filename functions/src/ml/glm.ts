@@ -15,6 +15,7 @@
  * statsmodels' `GLM.fit` initialization (`mustart = y + 0.1` for Poisson,
  * `mustart = y` for Gamma) and unit-deviance formulas.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { linsolve } from '../typed/numeric.js';
 
 /** Supported exponential-family distributions. */
@@ -120,7 +121,7 @@ function getFamily(family: GlmFamily): FamilyFns {
  * scoring). Supports `family: 'poisson'` (log link only) and `family:
  * 'gamma'` (log or inverse link).
  *
- * @param X - Design matrix (rows = observations, cols = predictors)
+ * @param XInput - Design matrix (rows = observations, cols = predictors)
  * @param y - Response vector (non-negative for Poisson, strictly positive for Gamma)
  * @param opts - `family` (required), `link` (default `'log'`), `intercept`
  *   (default true), `tol` (default 1e-10), `maxIter` (default 100)
@@ -129,7 +130,12 @@ function getFamily(family: GlmFamily): FamilyFns {
  * glm([[1], [2], [3], [4], [5]], [1, 2, 3, 5, 8], { family: 'poisson' })
  * // => coefficients ~= [-0.374104, 0.492678] (matches statsmodels sm.GLM(..., family=Poisson()))
  */
-export function glm(X: number[][], y: number[], opts: GlmOptions): GlmResult {
+export function glm(
+  XInput: NativeMatrixInput<number[][]>,
+  y: number[],
+  opts: GlmOptions
+): GlmResult {
+  const X: number[][] = nativeMatrixRows(XInput);
   const n = X.length;
   if (n === 0) throw new Error('glm: empty design matrix');
   if (y.length !== n) throw new Error(`glm: length mismatch (X has ${n} rows, y has ${y.length})`);

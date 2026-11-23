@@ -13,6 +13,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { dwt } from '../typed/signal.js';
 import { idwtPeriodization } from './wavelet-filters.js';
 import { convDirect } from './conv.js';
@@ -66,11 +67,15 @@ export function wavedec(x: number[], wavelet: string = 'haar', level: number = 1
  * (`coeffs[0]` = cA_level) up to the finest detail (`coeffs[coeffs.length-1]`
  * = cD_1), reconstructing the original signal.
  *
- * @param coeffs - Coefficient arrays as returned by `wavedec`
+ * @param coeffsInput - Coefficient arrays as returned by `wavedec`
  * @param wavelet - Wavelet name (passed through to `idwt`)
  * @returns Reconstructed signal
  */
-export function waverec(coeffs: number[][], wavelet: string = 'haar'): number[] {
+export function waverec(
+  coeffsInput: NativeMatrixInput<number[][]>,
+  wavelet: string = 'haar'
+): number[] {
+  const coeffs: number[][] = nativeMatrixRows(coeffsInput);
   if (coeffs.length < 2) {
     throw new Error('waverec: coeffs must contain at least [cA, cD]');
   }

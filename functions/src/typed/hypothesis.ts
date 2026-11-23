@@ -29,6 +29,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import {
   mulberry32 as _makeMulberry32,
   divideByScale,
@@ -698,13 +699,14 @@ export async function chiSquareTest(
  *
  * Tests whether the means of multiple groups are equal.
  *
- * @param groups - Array of sample arrays (at least 2 groups)
+ * @param groupsInput - Array of sample arrays (at least 2 groups)
  * @returns ANOVA result with F-statistic and p-value
  *
  * @example
  * anova([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
  */
-export function anova(groups: f64[][]): AnovaResult {
+export function anova(groupsInput: NativeMatrixInput<f64[][]>): AnovaResult {
+  const groups: f64[][] = nativeMatrixRows(groupsInput);
   if (groups.length < 2) throw new Error('anova: need at least 2 groups');
 
   const k = groups.length;
@@ -1420,7 +1422,7 @@ function _approxProbit(p: f64): f64 {
  *
  * Reduces dimensionality of data by finding the directions of maximum variance.
  *
- * @param data - 2D array where each row is an observation, each column a variable
+ * @param dataInput - 2D array where each row is an observation, each column a variable
  * @param k - Number of principal components to keep (default: all)
  * @returns PCA result with components, explained variance ratios, and scores
  *
@@ -1429,7 +1431,11 @@ function _approxProbit(p: f64): f64 {
  * result.components  // [[0.707, 0.707]]
  * result.explained   // [1.0]
  */
-export function principalComponentAnalysis(data: f64[][], k?: number): PCAResult {
+export function principalComponentAnalysis(
+  dataInput: NativeMatrixInput<f64[][]>,
+  k?: number
+): PCAResult {
+  const data: f64[][] = nativeMatrixRows(dataInput);
   const n = data.length;
   if (n < 2) throw new Error('principalComponentAnalysis: need at least 2 observations');
   const p = data[0].length;
@@ -1675,9 +1681,10 @@ export interface VarianceTestResult {
  * @example leveneTest([[8.1,8.3,7.9],[9.1,9.5,8.9]]) // { statistic, pValue, degreesOfFreedom }
  */
 export function leveneTest(
-  groups: f64[][],
+  groupsInput: NativeMatrixInput<f64[][]>,
   center: 'median' | 'mean' = 'median'
 ): VarianceTestResult {
+  const groups: f64[][] = nativeMatrixRows(groupsInput);
   const k = groups.length;
   if (k < 2) throw new Error('leveneTest: need at least 2 groups');
   let N = 0;
@@ -1711,7 +1718,8 @@ export function leveneTest(
  *
  * @example bartlettTest([[8.1,8.3,7.9],[9.1,9.5,8.9]]) // { statistic, pValue, degreesOfFreedom }
  */
-export function bartlettTest(groups: f64[][]): VarianceTestResult {
+export function bartlettTest(groupsInput: NativeMatrixInput<f64[][]>): VarianceTestResult {
+  const groups: f64[][] = nativeMatrixRows(groupsInput);
   const k = groups.length;
   if (k < 2) throw new Error('bartlettTest: need at least 2 groups');
   let N = 0;
@@ -1982,11 +1990,12 @@ export function dagostinoTest(data: f64[]): NormalityTestResult {
  * Friedman test - non-parametric repeated-measures ANOVA across k related
  * groups of the same n blocks. chi-square with k-1 df. scipy.stats.friedmanchisquare.
  */
-export function friedmanTest(groups: f64[][]): {
+export function friedmanTest(groupsInput: NativeMatrixInput<f64[][]>): {
   statistic: f64;
   pValue: f64;
   degreesOfFreedom: number;
 } {
+  const groups: f64[][] = nativeMatrixRows(groupsInput);
   const k = groups.length;
   if (k < 3) throw new Error('friedmanTest: need at least 3 related groups');
   const n = groups[0].length;
@@ -2249,7 +2258,12 @@ function _quadForm(d: number[], M: number[][]): f64 {
  *
  * @example mahalanobis([1,2], [2.5,1], [[2,0.5],[0.5,1]]) // 1.8126539343
  */
-export function mahalanobis(u: number[], v: number[], cov: number[][]): f64 {
+export function mahalanobis(
+  u: number[],
+  v: number[],
+  covInput: NativeMatrixInput<number[][]>
+): f64 {
+  const cov: number[][] = nativeMatrixRows(covInput);
   if (u.length !== v.length || cov.length !== u.length) {
     throw new Error('mahalanobis: u, v, and cov dimensions must match');
   }
@@ -2274,7 +2288,8 @@ export interface HotellingResult {
  *
  * @example hotellingT2(data, [5, 7]) // { statistic, fStatistic, pValue, degreesOfFreedom }
  */
-export function hotellingT2(data: f64[][], mu0: f64[]): HotellingResult {
+export function hotellingT2(dataInput: NativeMatrixInput<f64[][]>, mu0: f64[]): HotellingResult {
+  const data: f64[][] = nativeMatrixRows(dataInput);
   const n = data.length;
   const p = mu0.length;
   if (n <= p) throw new Error('hotellingT2: need more observations than variables');

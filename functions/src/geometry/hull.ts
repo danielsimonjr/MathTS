@@ -21,6 +21,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { convexHull3D } from '../typed/geometry.js';
 
 /** Structured convex-hull result (mirrors `scipy.spatial.ConvexHull`). */
@@ -137,7 +138,7 @@ function convexHull3DResult(points: number[][]): ConvexHullResult {
 /**
  * Convex hull of a set of 2-D or 3-D points.
  *
- * @param points - Array of points, all `[x, y]` (2-D) or all `[x, y, z]` (3-D).
+ * @param pointsInput - Array of points, all `[x, y]` (2-D) or all `[x, y, z]` (3-D).
  * @returns A {@link ConvexHullResult}.
  * @throws When fewer than 3 (2-D) / 4 (3-D) points are given, or the points are
  *   not 2- or 3-dimensional.
@@ -146,7 +147,8 @@ function convexHull3DResult(points: number[][]): ConvexHullResult {
  * convexHull([[0,0],[2,0],[2,2],[0,2],[1,1]])
  * // { vertices: [0,1,2,3], simplices: [[0,1],[1,2],[2,3],[3,0]], area: 8, volume: 4 }
  */
-export function convexHull(points: number[][]): ConvexHullResult {
+export function convexHull(pointsInput: NativeMatrixInput<number[][]>): ConvexHullResult {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   if (!Array.isArray(points) || points.length === 0) {
     throw new Error('convexHull: requires a non-empty array of points');
   }

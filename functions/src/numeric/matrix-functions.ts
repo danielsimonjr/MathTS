@@ -45,6 +45,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { eig } from '@danielsimonjr/mathts-matrix';
 /**
  * A complex number as a plain `{re, im}` pair. Consolidated onto
@@ -333,7 +334,7 @@ function cIsFinite(M: ComplexMatrix): boolean {
  * are singular at a repeated eigenvalue (e.g. `sqrt`/`log` at 0), or when a
  * needed numerical derivative order exceeds the built-in stencils.
  *
- * @param A - Square real matrix, as a plain 2-D array.
+ * @param AInput - Square real matrix, as a plain 2-D array.
  * @param f - Scalar function to apply to the spectrum, e.g. `cos`, `sin`,
  *   `sqrt`, `exp`, `log`, extended to complex arguments.
  * @param fDerivs - Optional analytic derivatives of `f`: `fDerivs[k]` is
@@ -343,10 +344,11 @@ function cIsFinite(M: ComplexMatrix): boolean {
  * @returns `{ re, im }` — the (possibly complex) matrix `f(A)`.
  */
 export function funm(
-  A: number[][],
+  AInput: NativeMatrixInput<number[][]>,
   f: ScalarComplexFunction,
   fDerivs?: ScalarComplexFunction[]
 ): ComplexMatrix {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = A.length;
   if (n === 0) return { re: [], im: [] };
   for (const row of A) {
@@ -479,12 +481,14 @@ function trigDerivs(base: typeof complexCos, n: number): ScalarComplexFunction[]
 
 /** Matrix cosine `cos(A)`, via {@link funm} with {@link complexCos}. Passes
  * exact analytic derivatives so defective matrices are machine-precise. */
-export function cosm(A: number[][]): ComplexMatrix {
+export function cosm(AInput: NativeMatrixInput<number[][]>): ComplexMatrix {
+  const A: number[][] = nativeMatrixRows(AInput);
   return funm(A, complexCos, trigDerivs(complexCos, A.length));
 }
 
 /** Matrix sine `sin(A)`, via {@link funm} with {@link complexSin}. Passes
  * exact analytic derivatives so defective matrices are machine-precise. */
-export function sinm(A: number[][]): ComplexMatrix {
+export function sinm(AInput: NativeMatrixInput<number[][]>): ComplexMatrix {
+  const A: number[][] = nativeMatrixRows(AInput);
   return funm(A, complexSin, trigDerivs(complexSin, A.length));
 }

@@ -7,6 +7,7 @@
  * interpolation, circulant ↔ FFT, companion ↔ polynomial roots, `logdet` ↔
  * Gaussian likelihoods (stats).
  */
+import { nativeMatrixRows, type NativeMatrixInput } from './matrix/native-matrix-rows.js';
 import { DenseMatrix, lu, matrixSchur } from '@danielsimonjr/mathts-matrix';
 import { inv as _invRaw, eigs as _eigsRaw, qr as _qrRaw } from './factories/index.js';
 import { multiply as _multiplyRaw } from './typed/arithmetic.js';
@@ -52,21 +53,25 @@ type Vec = readonly number[] | Float64Array;
  * future enhancement for that regime.
  */
 export function generalizedEig(
-  A: readonly number[][],
-  B: readonly number[][]
+  AInput: NativeMatrixInput<readonly number[][]>,
+  BInput: NativeMatrixInput<readonly number[][]>
 ): { values: Array<number | { re: number; im: number }>; eigenvectors?: unknown } {
+  const B: readonly number[][] = nativeMatrixRows(BInput);
+  const A: readonly number[][] = nativeMatrixRows(AInput);
   const Binv = _inv(B as number[][]);
   const M = _multiply(Binv, A as number[][]);
   return _eigs(M);
 }
 
 /** Lower-triangular part of `A`, zeroing entries above the `k`-th diagonal. */
-export function tril(A: readonly number[][], k = 0): number[][] {
+export function tril(AInput: NativeMatrixInput<readonly number[][]>, k = 0): number[][] {
+  const A: readonly number[][] = nativeMatrixRows(AInput);
   return A.map((row, i) => row.map((v, j) => (j - i <= k ? v : 0)));
 }
 
 /** Upper-triangular part of `A`, zeroing entries below the `k`-th diagonal. */
-export function triu(A: readonly number[][], k = 0): number[][] {
+export function triu(AInput: NativeMatrixInput<readonly number[][]>, k = 0): number[][] {
+  const A: readonly number[][] = nativeMatrixRows(AInput);
   return A.map((row, i) => row.map((v, j) => (j - i >= k ? v : 0)));
 }
 
@@ -131,9 +136,10 @@ export function companion(coeffs: Vec): number[][] {
  * Fiedler vector / spectral clustering.
  */
 export function laplacianMatrix(
-  adjacency: readonly number[][],
+  adjacencyInput: NativeMatrixInput<readonly number[][]>,
   opts: { normalized?: boolean } = {}
 ): number[][] {
+  const adjacency: readonly number[][] = nativeMatrixRows(adjacencyInput);
   const n = adjacency.length;
   const deg = adjacency.map((row) => row.reduce((s, v) => s + v, 0));
   if (opts.normalized) {
@@ -152,7 +158,11 @@ export function laplacianMatrix(
  * `numpy.linalg.slogdet`), stable where `log(det(A))` would overflow. Returns
  * `{ sign, value }` with `det = sign · exp(value)`.
  */
-export function logdet(A: readonly number[][]): { sign: number; value: number } {
+export function logdet(AInput: NativeMatrixInput<readonly number[][]>): {
+  sign: number;
+  value: number;
+} {
+  const A: readonly number[][] = nativeMatrixRows(AInput);
   const { U, P } = lu(DenseMatrix.fromArray(A as number[][])) as {
     U: { toArray(): number[][] };
     P: number[];
@@ -191,9 +201,11 @@ export function logdet(A: readonly number[][]): { sign: number; value: number } 
  * contract of `scipy.linalg.qz` (the factors are not unique).
  */
 export function qz(
-  A: readonly number[][],
-  B: readonly number[][]
+  AInput: NativeMatrixInput<readonly number[][]>,
+  BInput: NativeMatrixInput<readonly number[][]>
 ): { AA: number[][]; BB: number[][]; Q: number[][]; Z: number[][] } {
+  const B: readonly number[][] = nativeMatrixRows(BInput);
+  const A: readonly number[][] = nativeMatrixRows(AInput);
   const Aa = A as number[][];
   const Bb = B as number[][];
   const M = _multiply(_inv(Bb), Aa);

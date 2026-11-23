@@ -8,6 +8,7 @@
  * `noncentralChi2PDF` (`typed/distributions.ts`). No distribution math is
  * duplicated: only the mixture weighting is new.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { chiSquaredCDF, chiSquaredSF, fCDF } from '../distribution-functions.js';
 import { chiSquaredDist, normalDist } from '../typed/dist-objects.js';
 import { besselIScalar } from '../wasm/special/scalars.js';
@@ -226,9 +227,10 @@ export interface McNemarResult {
  * mcnemar([[10, 5], [3, 12]], { correction: false }); // { chi2: 0.5, pValue: ... }
  */
 export function mcnemar(
-  table: readonly (readonly number[])[],
+  tableInput: NativeMatrixInput<readonly (readonly number[])[]>,
   opts: McNemarOptions = {}
 ): McNemarResult {
+  const table: readonly (readonly number[])[] = nativeMatrixRows(tableInput);
   if (table.length !== 2 || table[0].length !== 2 || table[1].length !== 2) {
     throw new Error('mcnemar: table must be 2x2');
   }
@@ -263,7 +265,10 @@ export interface CochranQResult {
  * @example
  * cochranQ([[1, 1, 0], [1, 0, 0], [1, 1, 1], [0, 1, 0], [1, 1, 0]]);
  */
-export function cochranQ(data: readonly (readonly number[])[]): CochranQResult {
+export function cochranQ(
+  dataInput: NativeMatrixInput<readonly (readonly number[])[]>
+): CochranQResult {
+  const data: readonly (readonly number[])[] = nativeMatrixRows(dataInput);
   const n = data.length;
   if (n === 0) throw new Error('cochranQ: data must have at least one row');
   const k = data[0].length;

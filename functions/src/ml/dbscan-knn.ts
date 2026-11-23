@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 /**
  * Density-based clustering (DBSCAN) + k-nearest-neighbour classifier/regressor
  * (Phase 3 Task 4 — ML primitives).
@@ -35,7 +36,7 @@ function regionQuery(points: number[][], i: number, eps: number): number[] {
  * neighborhood but that are not themselves core are labeled as border points
  * of that cluster; points never reached are **noise** (`-1`).
  *
- * @param points - Row-vectors (n × d)
+ * @param pointsInput - Row-vectors (n × d)
  * @param eps - Neighborhood radius (Euclidean)
  * @param minPts - Minimum neighborhood size (including the point itself) for a core point
  * @returns 0-based cluster label per point; `-1` marks noise
@@ -44,7 +45,12 @@ function regionQuery(points: number[][], i: number, eps: number): number[] {
  * dbscan([[0, 0], [0.1, 0.1], [10, 10], [50, 50]], 1.0, 2)
  * // => [0, 0, -1, -1]  (one 2-point cluster, two noise points)
  */
-export function dbscan(points: number[][], eps: number, minPts: number): number[] {
+export function dbscan(
+  pointsInput: NativeMatrixInput<number[][]>,
+  eps: number,
+  minPts: number
+): number[] {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const n = points.length;
   const labels = new Array<number>(n).fill(-2); // -2 = unvisited, -1 = noise, >= 0 = cluster id
   let clusterId = -1;
@@ -108,18 +114,20 @@ function kNearestIndices(train: number[][], q: number[], k: number): number[] {
  * points (Euclidean distance). Ties are broken by the label of the single
  * nearest point among the tied labels.
  *
- * @param train - Training row-vectors (n × d)
+ * @param trainInput - Training row-vectors (n × d)
  * @param labels - Training labels (length n)
- * @param query - Query row-vectors (m × d)
+ * @param queryInput - Query row-vectors (m × d)
  * @param k - Number of neighbors
  * @returns Predicted label per query row
  */
 export function knnClassify(
-  train: number[][],
+  trainInput: NativeMatrixInput<number[][]>,
   labels: (number | string)[],
-  query: number[][],
+  queryInput: NativeMatrixInput<number[][]>,
   k: number
 ): (number | string)[] {
+  const query: number[][] = nativeMatrixRows(queryInput);
+  const train: number[][] = nativeMatrixRows(trainInput);
   return query.map((q) => {
     const idx = kNearestIndices(train, q, k);
     const counts = new Map<number | string, number>();
@@ -149,18 +157,20 @@ export function knnClassify(
  * k-nearest-neighbour regressor: mean of the `k` closest training targets
  * (Euclidean distance).
  *
- * @param train - Training row-vectors (n × d)
+ * @param trainInput - Training row-vectors (n × d)
  * @param targets - Training targets (length n)
- * @param query - Query row-vectors (m × d)
+ * @param queryInput - Query row-vectors (m × d)
  * @param k - Number of neighbors
  * @returns Predicted (mean) target per query row
  */
 export function knnRegress(
-  train: number[][],
+  trainInput: NativeMatrixInput<number[][]>,
   targets: number[],
-  query: number[][],
+  queryInput: NativeMatrixInput<number[][]>,
   k: number
 ): number[] {
+  const query: number[][] = nativeMatrixRows(queryInput);
+  const train: number[][] = nativeMatrixRows(trainInput);
   return query.map((q) => {
     const idx = kNearestIndices(train, q, k);
     const sum = idx.reduce((acc, i) => acc + targets[i], 0);

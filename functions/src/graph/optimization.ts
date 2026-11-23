@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 /**
  * Graph Optimization — Max-Flow/Min-Cut, A* Search, Hungarian Assignment
@@ -65,7 +66,7 @@ function _bfsResidual(residual: number[][], source: number, sink: number): numbe
  *
  * Time complexity: O(V*E^2) (O(V^5) on a dense adjacency matrix).
  *
- * @param capacity - Capacity matrix (directed reading; `capacity[i][j]` is
+ * @param capacityInput - Capacity matrix (directed reading; `capacity[i][j]` is
  *   the capacity of edge i -> j; 0 or negative means no edge)
  * @param source - Source node index
  * @param sink - Sink node index
@@ -75,7 +76,12 @@ function _bfsResidual(residual: number[][], source: number, sink: number): numbe
  * const cap = [[0,3,2,0],[0,0,1,2],[0,0,0,3],[0,0,0,0]];
  * maxFlow(cap, 0, 3).maxFlow // => 5
  */
-export function maxFlow(capacity: number[][], source: number, sink: number): MaxFlowResult {
+export function maxFlow(
+  capacityInput: NativeMatrixInput<number[][]>,
+  source: number,
+  sink: number
+): MaxFlowResult {
+  const capacity: number[][] = nativeMatrixRows(capacityInput);
   const n = capacity.length;
   if (source < 0 || source >= n || sink < 0 || sink >= n) {
     throw new Error('maxFlow: source or sink out of bounds');
@@ -130,7 +136,7 @@ export interface MinCutResult {
  * `maxFlow`, then BFS the residual graph from `source` — reachable nodes
  * form the source-side partition `S`, the rest form `T`.
  *
- * @param capacity - Capacity matrix (directed reading)
+ * @param capacityInput - Capacity matrix (directed reading)
  * @param source - Source node index
  * @param sink - Sink node index
  * @returns `{ value, partition: [S, T] }`
@@ -139,7 +145,12 @@ export interface MinCutResult {
  * const cap = [[0,3,2,0],[0,0,1,2],[0,0,0,3],[0,0,0,0]];
  * minCut(cap, 0, 3) // => { value: 5, partition: [[0, ...], [...]] }
  */
-export function minCut(capacity: number[][], source: number, sink: number): MinCutResult {
+export function minCut(
+  capacityInput: NativeMatrixInput<number[][]>,
+  source: number,
+  sink: number
+): MinCutResult {
+  const capacity: number[][] = nativeMatrixRows(capacityInput);
   const n = capacity.length;
   if (source < 0 || source >= n || sink < 0 || sink >= n) {
     throw new Error('minCut: source or sink out of bounds');
@@ -192,7 +203,7 @@ export interface AStarResult {
  *
  * A directed edge i -> j exists when `adj[i][j]` is finite and nonzero.
  *
- * @param adj - Adjacency matrix (directed reading; edge weights should be
+ * @param adjInput - Adjacency matrix (directed reading; edge weights should be
  *   non-negative for optimality)
  * @param start - Source node index
  * @param goal - Target node index
@@ -204,11 +215,12 @@ export interface AStarResult {
  * astar(adj, 0, 2, () => 0) // => { path: [0, 1, 2], cost: 2 }
  */
 export function astar(
-  adj: number[][],
+  adjInput: NativeMatrixInput<number[][]>,
   start: number,
   goal: number,
   heuristic: (node: number) => number
 ): AStarResult {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (!Array.isArray(adj) || !Number.isInteger(n) || n < 0) {
     throw notSquareError('astar: adjacency must be a square number[][]');
@@ -293,7 +305,7 @@ export interface HungarianResult {
  * Jonker-Volgenant-style potential/shortest-augmenting-path formulation
  * (1-indexed internally per the classical presentation).
  *
- * @param cost - Square cost matrix (`cost[i][j]` = cost of assigning row i
+ * @param costInput - Square cost matrix (`cost[i][j]` = cost of assigning row i
  *   to column j)
  * @returns `{ assignment, cost }`
  *
@@ -301,7 +313,8 @@ export interface HungarianResult {
  * hungarian([[4,1,3],[2,0,5],[3,2,2]])
  * // => { assignment: [1, 0, 2], cost: 5 } (scipy linear_sum_assignment)
  */
-export function hungarian(cost: number[][]): HungarianResult {
+export function hungarian(costInput: NativeMatrixInput<number[][]>): HungarianResult {
+  const cost: number[][] = nativeMatrixRows(costInput);
   const n = cost.length;
   if (n === 0) {
     return { assignment: [], cost: 0 };

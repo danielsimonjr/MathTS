@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 /**
  * Structured and indefinite direct linear solvers.
@@ -74,7 +75,13 @@ export function thomasSolve(sub: number[], diag: number[], sup: number[], d: num
  * @example
  * solveBanded(1, 1, [[2, -1, 0], [-1, 2, -1], [0, -1, 2]], [1, 0, 1]) // => [1, 1, 1]
  */
-export function solveBanded(l: number, u: number, A: number[][], b: number[]): number[] {
+export function solveBanded(
+  l: number,
+  u: number,
+  AInput: NativeMatrixInput<number[][]>,
+  b: number[]
+): number[] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = A.length;
   if (b.length !== n) {
     throw new Error(`solveBanded: A is ${n}x? but b has length ${b.length}`);
@@ -240,7 +247,8 @@ export interface LDLResult {
  * const { L, D, perm } = ldl([[1, 2, 3], [2, 1, 4], [3, 4, 1]]);
  * // L D L^T reconstructs A with rows/cols permuted by perm.
  */
-export function ldl(A: number[][]): LDLResult {
+export function ldl(AInput: NativeMatrixInput<number[][]>): LDLResult {
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = A.length;
   for (const row of A) {
     if (row.length !== n) throw notSquareError('ldl: A must be a square matrix');

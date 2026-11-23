@@ -9,6 +9,7 @@
  * (`typed/hypothesis.ts`) with the same three corrections under the name used
  * by `statsmodels.stats.multitest.multipletests`.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { chiSquaredSF } from '../distribution-functions.js';
 
 /** Result of {@link chi2Contingency}. */
@@ -49,9 +50,10 @@ export interface Chi2ContingencyOptions {
  * // { chi2: 0.7937, pValue: 0.373, dof: 1, expected: [[12, 18], [28, 42]], cramersV }
  */
 export function chi2Contingency(
-  table: readonly (readonly number[])[],
+  tableInput: NativeMatrixInput<readonly (readonly number[])[]>,
   opts: Chi2ContingencyOptions = {}
 ): Chi2ContingencyResult {
+  const table: readonly (readonly number[])[] = nativeMatrixRows(tableInput);
   const rows = table.length;
   if (rows < 2) throw new Error('chi2Contingency: table needs at least 2 rows');
   const cols = table[0].length;

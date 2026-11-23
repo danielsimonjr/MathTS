@@ -6,6 +6,7 @@
  * to an arbitrary number of predictors via the normal equations, with the same
  * `studentTTwoSidedP`-based significance testing (the tail computed directly).
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { pairwiseDot, sumSquaredDeviations } from '@danielsimonjr/mathts-core';
 import { matMul as matmul } from '@danielsimonjr/mathts-matrix';
 import { studentTTwoSidedP } from '../distribution-functions.js';
@@ -108,7 +109,7 @@ function invertUnscaled(a: number[][]): number[][] {
  * with full inference: standard errors, t/p-values per coefficient, R²/adjusted-R²,
  * the overall model F-statistic, and residuals.
  *
- * @param X - Design matrix (rows = observations, cols = predictors)
+ * @param XInput - Design matrix (rows = observations, cols = predictors)
  * @param y - Response vector (length = number of observations)
  * @param opts - `intercept` (default true) prepends a column of ones to X
  *
@@ -116,7 +117,12 @@ function invertUnscaled(a: number[][]): number[][] {
  * ols([[1, 1], [2, 0], [3, 1], [4, 0]], [6, 5, 10, 9])
  * // => coefficients ~= [1, 2, 3] (y = 1 + 2*x1 + 3*x2), r2 = 1
  */
-export function ols(X: number[][], y: number[], opts?: OlsOptions): OlsResult {
+export function ols(
+  XInput: NativeMatrixInput<number[][]>,
+  y: number[],
+  opts?: OlsOptions
+): OlsResult {
+  const X: number[][] = nativeMatrixRows(XInput);
   const n = X.length;
   if (n === 0) throw new Error('ols: empty design matrix');
   if (y.length !== n) throw new Error(`ols: length mismatch (X has ${n} rows, y has ${y.length})`);

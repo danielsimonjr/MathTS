@@ -23,6 +23,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { isDeterministic, mulberry32 as _makeMulberry32 } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import {
@@ -1577,7 +1578,11 @@ export interface MultivariateDistribution {
  *
  * @example multivariateNormal([0, 0], [[1, 0.5],[0.5, 2]]).pdf([0, 0]) // 0.1203098284
  */
-export function multivariateNormal(mean: number[], cov: number[][]): MultivariateDistribution {
+export function multivariateNormal(
+  mean: number[],
+  covInput: NativeMatrixInput<number[][]>
+): MultivariateDistribution {
+  let cov: number[][] = nativeMatrixRows(covInput);
   _noIgnoredOptions('multivariateNormal', arguments, 2);
   const k = mean.length;
   if (cov.length !== k || cov.some((row) => row.length !== k)) {

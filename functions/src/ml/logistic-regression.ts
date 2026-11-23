@@ -5,6 +5,7 @@
  * on the Bernoulli log-likelihood, i.e. iteratively reweighted least squares (IRLS):
  * each step solves `(XᵀWX) Δ = Xᵀ(y - p)` for the Newton update, `W = diag(p(1-p))`.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { linsolve } from '../typed/numeric.js';
 
 /** Options for `logisticRegression`. */
@@ -49,7 +50,7 @@ const MAX_STEP_NORM = 25;
  * Binary logistic regression `P(y=1|x) = sigmoid(xᵀβ)` fit by IRLS (Newton-Raphson
  * on the Bernoulli log-likelihood).
  *
- * @param X - Design matrix (rows = observations, cols = predictors)
+ * @param XInput - Design matrix (rows = observations, cols = predictors)
  * @param y - Binary labels, each in {0, 1}
  * @param opts - `intercept` (default true) prepends a column of ones to X;
  *   `tol` (default 1e-8) convergence tolerance; `maxIter` (default 100)
@@ -60,10 +61,11 @@ const MAX_STEP_NORM = 25;
  * m.predict([[3]]) // => [1]
  */
 export function logisticRegression(
-  X: number[][],
+  XInput: NativeMatrixInput<number[][]>,
   y: number[],
   opts?: LogisticRegressionOptions
 ): LogisticRegressionResult {
+  const X: number[][] = nativeMatrixRows(XInput);
   const n = X.length;
   if (n === 0) throw new Error('logisticRegression: empty design matrix');
   if (y.length !== n) {
