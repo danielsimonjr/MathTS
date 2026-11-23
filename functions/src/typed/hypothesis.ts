@@ -34,7 +34,6 @@ import {
   divideByScale,
   scaleForVariance,
 } from '@danielsimonjr/mathts-core';
-import { normalDist } from './dist-objects.js';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 import {
@@ -233,11 +232,13 @@ const CHI_BOOTSTRAP_MAX_DRAWS = 20 * MAX_LOOP_ORDER;
 /**
  * Maximum bootstrap count times sample size for the resampling tests (#1154), set near 20 s of
  * work as for `chiSquareTest`. Rates measured with bun on the build machine under load:
- * `kolmogorovSmirnovTest` 0.9-1.15 us per value per resample (the CDF call), so 2e7 takes
- * 18-23 s; `shapiroWilkTest` 63-218 ns, so 1e8 takes 6-22 s; `mannWhitneyTest` 16-68 ns per
+ * KS with a custom CDF keeps the former cap. With the built-in normal CDF, the ranks cache
+ * their CDF values and each draw is scored with a linear count scan.
+ * `shapiroWilkTest` 63-218 ns, so 1e8 takes 6-22 s; `mannWhitneyTest` 16-68 ns per
  * pooled value per permutation, so 3e8 takes 5-20 s. The range is the load of the machine.
  */
-const KS_BOOTSTRAP_MAX_WORK = 2 * MAX_LOOP_ORDER;
+const KS_BOOTSTRAP_MAX_WORK = 10 * MAX_LOOP_ORDER;
+const KS_CUSTOM_BOOTSTRAP_MAX_WORK = 2 * MAX_LOOP_ORDER;
 const SW_BOOTSTRAP_MAX_WORK = 10 * MAX_LOOP_ORDER;
 const MW_BOOTSTRAP_MAX_WORK = 30 * MAX_LOOP_ORDER;
 
@@ -807,8 +808,7 @@ export async function kolmogorovSmirnovTest(
   if (typeof resolvedCdf === 'string') {
     const name = resolvedCdf.toLowerCase();
     if (name === 'norm' || name === 'normal') {
-      const cdf = normalDist(0, 1).cdf;
-      resolvedCdf = (x: f64) => cdf(x);
+      resolvedCdf = undefined; // Same standard normal as the omitted argument.
     } else {
       throw new TypeError(
         `kolmogorovSmirnovTest: unknown distribution name "${resolvedCdf}". ` +
@@ -879,27 +879,40 @@ export async function kolmogorovSmirnovTest(
   // --- Bootstrap path (Slice 5.11) ------------------------------------------
   if (B === 0) return baseResult;
 
-  // Each resample draws and scores `n` values, so the work is B * n (#1154).
-  assertLoopOrder('kolmogorovSmirnovTest', 'bootstrap * sample size', B * n, KS_BOOTSTRAP_MAX_WORK);
+  // Each resample draws and scores n values. The built-in CDF is evaluated only once.
+  const maxWork = cdfFn ? KS_CUSTOM_BOOTSTRAP_MAX_WORK : KS_BOOTSTRAP_MAX_WORK;
+  assertLoopOrder('kolmogorovSmirnovTest', 'bootstrap * sample size', B * n, maxWork);
 
   const rng = opts?.bootstrapSeed !== undefined ? _makeMulberry32(opts.bootstrapSeed) : Math.random;
-  const cdf = cdfFn || _normalCDF;
-
-  /**
-   * One bootstrap iteration: resample with replacement, sort, compute D.
-   */
-  function _ksBootstrapOnce(): f64 {
-    const resample = _sortedResample(sorted, n, rng);
-    let d = 0;
-    for (let i = 0; i < n; i++) {
-      const cv = cdf(resample[i]);
-      d = Math.max(d, Math.abs((i + 1) / n - cv), Math.abs(cv - i / n));
-    }
-    return d;
-  }
-
   const bootstrapStats = new Float64Array(B);
-  for (let idx = 0; idx < B; idx++) bootstrapStats[idx] = _ksBootstrapOnce();
+  if (cdfFn) {
+    for (let draw = 0; draw < B; draw++) {
+      const resample = _sortedResample(sorted, n, rng);
+      let d = 0;
+      for (let i = 0; i < n; i++) {
+        const cv = cdfFn(resample[i]);
+        d = Math.max(d, Math.abs((i + 1) / n - cv), Math.abs(cv - i / n));
+      }
+      bootstrapStats[draw] = d;
+    }
+  } else {
+    const counts = new Uint32Array(n);
+    for (let draw = 0; draw < B; draw++) {
+      counts.fill(0);
+      for (let i = 0; i < n; i++) counts[Math.floor(rng() * n)]++;
+      let rank = 0;
+      let d = 0;
+      for (let i = 0; i < n; i++) {
+        if (counts[i] === 0) continue;
+        const end = rank + counts[i];
+        const cv = cdfValues[i];
+        // The extreme empirical CDF values for repeated samples are at the two ends of the run.
+        d = Math.max(d, Math.abs(end / n - cv), Math.abs(cv - rank / n));
+        rank = end;
+      }
+      bootstrapStats[draw] = d;
+    }
+  }
 
   let countGe = 0;
   for (let i = 0; i < B; i++) {
