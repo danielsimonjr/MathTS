@@ -32,11 +32,11 @@ import {
 import { numberLiteral, registerWorkerKernels } from './worker-kernels.js';
 import {
   _lgamma,
+  sinPiScalar,
+  cosPiScalar,
   erfcSelfContained,
-  factorial,
   upperGammaQ,
   incompleteBetaFraction,
-  besselHankel,
   besselJ0Series,
   besselJ1Series,
   besselY0Series,
@@ -46,6 +46,15 @@ import {
   besselHankelReal,
   besselGammaAux,
   besselJYTemme,
+  besselJYLarge,
+  besselJSeriesReal,
+  besselYTemmeSmall,
+  besselYTemmeStart,
+  besselYUpward,
+  besselCF1,
+  besselJUnderflows,
+  besselYLogBound,
+  rgammaScalar,
   airyUCoeffs,
   airyAsymPQ,
   airyScalar,
@@ -55,6 +64,12 @@ import {
   gammaincpScalar,
   betaincScalar,
   besselIScalar,
+  besselIPlan,
+  besselIPositive,
+  besselKGate,
+  besselKReal,
+  besselKScalar,
+  besselUniformExponent,
   besselJ0Scalar,
   besselJ1Scalar,
   besselY0Scalar,
@@ -75,6 +90,8 @@ import {
   besselY1Dispatch,
   besselYDispatch,
   assertBesselArrayWork,
+  assertBesselIArrayWork,
+  assertBesselKArrayWork,
   airyAiDispatch,
   airyBiDispatch,
   ellipticKDispatch,
@@ -141,7 +158,9 @@ function erfiScalar(x: f64): f64 {
 function digammaScalar(x: f64): f64 {
   if (x <= 0 && x === Math.floor(x)) return NaN;
   if (x < 0) {
-    return digammaScalar(-x + 1) + Math.PI / Math.tan(Math.PI * -x);
+    // psi(x) = psi(1 - x) - pi cot(pi x). The exact reduction keeps the digits next to a negative
+    // integer, where Math.PI * -x rounded (digamma(-10.0000000001) was 3.7e-6 off).
+    return digammaScalar(-x + 1) + (Math.PI * cosPiScalar(-x)) / sinPiScalar(-x);
   }
 
   let result = 0;
@@ -163,111 +182,15 @@ function digammaScalar(x: f64): f64 {
 }
 
 // ---------------------------------------------------------------------------
-// Bessel J0/J1/Y0/Y1 scalars (besselHankel/besselJ*Series/besselY*Series and
+// Bessel J0/J1/Y0/Y1 scalars (besselHankelReal, besselJYTemme, besselJ*Series/besselY*Series and
 // besselJ0/J1/Y0/Y1/J/Y scalars) live in ../wasm/special/scalars.ts — single
 // source of truth shared with the WASM-bridge JS fallbacks. They stay
 // self-contained (inlined literals) so kernelSource can serialize them.
 // ---------------------------------------------------------------------------
 
-// Modified Bessel K_0 and K_1 by the uniformly-accurate Numerical Recipes
-// `bessik` method, specialized to the fractional order mu = 0 (integer order).
-// Two regimes, both machine-precision — no series/asymptotic crossover to
-// floor the error near x≈8..11:
-//   x <  2 : Temme's power series (DLMF 10.31 / NR §6.7), with the mu=0 limits
-//            gam1 = -gamma (Euler), gam2 = gampl = gammi = 1.
-//   x >= 2 : Steed's continued fraction CF2 (NR eq. 6.7.34) + normalization by
-//            the exp(-x)*sqrt(pi/2x) prefactor; K1 from the Wronskian relation.
-// Returns [K0(x), K1(x)]; caller handles x<=0 and the order recurrence for n>=2.
-function besselK01(x: f64): f64[] {
-  const EPS = 1e-16;
-  const xi = 1.0 / x;
-  const xi2 = 2.0 * xi;
-  let rkmu: f64;
-  let rk1: f64;
-  if (x < 2.0) {
-    // Temme series (mu = 0): gam1 = -gamma, gam2 = 1, gampl = gammi = 1.
-    const x2 = 0.5 * x;
-    const d = -Math.log(x2);
-    let ff = -0.5772156649015328606 + d; // f0 = gam1 - gam2*ln(x/2) = -(ln(x/2)+gamma)
-    let sum = ff;
-    let p = 0.5; // p0 = 0.5*e/gampl, e=1
-    let q = 0.5; // q0 = 0.5/(e*gammi)
-    let c = 1.0;
-    const dd = x2 * x2;
-    let sum1 = p;
-    for (let i = 1; i <= 10000; i++) {
-      ff = (i * ff + p + q) / (i * i); // xmu2 = 0
-      c *= dd / i;
-      p /= i;
-      q /= i;
-      const del = c * ff;
-      sum += del;
-      sum1 += c * (p - i * ff);
-      if (Math.abs(del) < Math.abs(sum) * EPS) break;
-    }
-    rkmu = sum;
-    rk1 = sum1 * xi2;
-  } else {
-    // Steed's CF2 (mu = 0). a1 = 0.25 - xmu2 = 0.25.
-    const a1 = 0.25;
-    let b = 2.0 * (1.0 + x);
-    let d = 1.0 / b;
-    let h = d;
-    let delh = d;
-    let q1 = 0.0;
-    let q2 = 1.0;
-    let q = a1;
-    let cc = a1;
-    let a = -a1;
-    let s = 1.0 + q * delh;
-    for (let i = 2; i <= 10000; i++) {
-      a -= 2 * (i - 1);
-      cc = (-a * cc) / i;
-      const qnew = (q1 - b * q2) / a;
-      q1 = q2;
-      q2 = qnew;
-      q += cc * qnew;
-      b += 2.0;
-      d = 1.0 / (b + a * d);
-      delh = (b * d - 1.0) * delh;
-      h += delh;
-      const dels = q * delh;
-      s += dels;
-      if (Math.abs(dels / s) < EPS) break;
-    }
-    h = a1 * h;
-    rkmu = (Math.sqrt(Math.PI / (2.0 * x)) * Math.exp(-x)) / s;
-    rk1 = rkmu * (x + 0.5 - h) * xi; // xmu = 0
-  }
-  return [rkmu, rk1];
-}
-
-/** Modified Bessel function of the second kind, K_n(x). */
-function besselKScalar(n: f64, x: f64): f64 {
-  // A non-finite order has no defined value, and the recurrence below would never end.
-  if (!Number.isFinite(n)) return NaN;
-  const ni = Math.round(Math.abs(n));
-  if (x <= 0) return NaN;
-  const k01 = besselK01(x);
-  const k0 = k01[0];
-  const k1 = k01[1];
-  if (ni === 0) return k0;
-  if (ni === 1) return k1;
-  // Upward recurrence in order is stable for K (K_n grows with n). The loop has no order
-  // limit: it returns within a few thousand steps at the first Infinity or NaN, or at two
-  // zeros in a row (an underflowed K_0 and K_1 keep every later value at 0).
-  let kPrev = k0;
-  let kCurr = k1;
-  for (let k = 1; k < ni; k++) {
-    const kNext = ((2 * k) / x) * kCurr + kPrev;
-    kPrev = kCurr;
-    kCurr = kNext;
-    // Every term is positive, so an overflow to Infinity stays Infinity, and a NaN stays NaN.
-    if (!(kCurr < Infinity)) return kCurr;
-    if (kCurr === 0 && kPrev === 0) return 0;
-  }
-  return kCurr;
-}
+// Modified Bessel K_nu for a real order: `besselKScalar` and `besselKReal` in
+// ../wasm/special/scalars.ts, next to the negative-order I that needs them. A kernel serializes a
+// function with its source, so a scalar must call its helpers in its own module.
 
 // Complete elliptic integrals K(m) and E(m) — ellipticKScalar /
 // ellipticECompleteScalar — live in ../wasm/special/scalars.ts (shared with the
@@ -305,12 +228,16 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
   let prev = 1,
     curr = x;
   for (let k = 2; k <= ni; k++) {
-    const next = 2 * x * curr - prev;
+    let next = 2 * x * curr - prev;
     if (!Number.isFinite(next)) {
+      // The product 2 x T_{k-1} is about twice the result, so it can leave the range one step
+      // before T_k does. 2 (x T_{k-1} - prev / 2) is the same value (scaling by 2 is exact) with
+      // no such intermediate. It is computed only here, so every finite result keeps its bits.
+      next = 2 * (x * curr - 0.5 * prev);
       if (Number.isNaN(next)) return NaN;
       // For |x| > 1, |T_k(x)| grows with k and T_k(x) has the sign (-1)^k when x < -1, so the
       // first overflow decides the result. A further step would compute Infinity - Infinity.
-      return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
+      if (!Number.isFinite(next)) return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
     }
     prev = curr;
     curr = next;
@@ -325,15 +252,36 @@ function hermiteHScalar(n: f64, x: f64): f64 {
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 2 * x;
-  // No order limit: the values overflow and give NaN within a few hundred steps for every x.
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  // The literal is MAX_RECURRENCE_ORDER of utils/limits.ts. The values leave the double range
+  // after a few hundred steps, but the sign of H_n(x) oscillates with n (H_1000(1.5) < 0 and
+  // H_1001(1.5) < 0 with H_300(10) > 0), so the recurrence runs to the end on a rescaled copy.
+  if (ni > 2500000000) {
+    throw new RangeError(`hermiteH: n = ${ni} exceeds the supported maximum of 2500000000`);
+  }
+  // Scaling by a power of 2 is exact. `curr` stays at or below 2^600 after each step, so a step
+  // leaves the range only when |x| is above about 2^422 (or infinite); the true value is then the
+  // leading term (2 x)^n, with its sign. `e` counts the scales: H_n(x) = curr * 2^(600 e).
+  const big = Math.pow(2, 600);
+  const small = Math.pow(2, -600);
   let prev = 1,
-    curr = 2 * x;
+    curr = 2 * x,
+    e = 0;
   for (let k = 2; k <= ni; k++) {
     const next = 2 * x * curr - 2 * (k - 1) * prev;
     if (Number.isNaN(next)) return NaN;
+    if (!Number.isFinite(next)) return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
     prev = curr;
     curr = next;
+    if (Math.abs(curr) > big) {
+      prev *= small;
+      curr *= small;
+      e++;
+    }
   }
+  // Scale back in steps: the value is +-Infinity (with the sign of the scaled recurrence) when it
+  // is out of range. There is no shortcut "e >= 2 gives Infinity": H_1001(0) is exactly 0.
+  for (let i = 0; i < e && curr !== 0 && Number.isFinite(curr); i++) curr *= big;
   return curr;
 }
 
@@ -349,14 +297,29 @@ function laguerreLScalar(n: f64, x: f64): f64 {
   if (ni > 1000000000) {
     throw new RangeError(`laguerreL: n = ${ni} exceeds the supported maximum of 1000000000`);
   }
+  // Rescaled recurrence (see hermiteHScalar): the values overflow and their sign oscillates with
+  // n (L_1001(3000) < 0 and L_2000(3000) > 0). The numerator (2k - 1 - x) L_{k-1} is about k times
+  // the result, so it overflowed before the result did.
+  const big = Math.pow(2, 600);
+  const small = Math.pow(2, -600);
   let prev = 1,
-    curr = 1 - x;
+    curr = 1 - x,
+    e = 0;
   for (let k = 2; k <= ni; k++) {
     const next = ((2 * k - 1 - x) * curr - (k - 1) * prev) / k;
     if (Number.isNaN(next)) return NaN;
+    // A step out of range means |x| above about 2^422: the value is the leading term
+    // (-x)^n / n! with its sign.
+    if (!Number.isFinite(next)) return x > 0 && ni % 2 === 1 ? -Infinity : Infinity;
     prev = curr;
     curr = next;
+    if (Math.abs(curr) > big) {
+      prev *= small;
+      curr *= small;
+      e++;
+    }
   }
+  for (let i = 0; i < e && curr !== 0 && Number.isFinite(curr); i++) curr *= big;
   return curr;
 }
 
@@ -374,8 +337,18 @@ function legendrePScalar(n: f64, x: f64): f64 {
   let prev = 1,
     curr = x;
   for (let k = 2; k <= ni; k++) {
-    const next = ((2 * k - 1) * x * curr - (k - 1) * prev) / k;
-    if (Number.isNaN(next)) return NaN;
+    let next = ((2 * k - 1) * x * curr - (k - 1) * prev) / k;
+    if (!Number.isFinite(next)) {
+      // The numerator (2k - 1) x P_{k-1} is about k times the result, so it can leave the range
+      // before P_k does (legendreP(741, 1.5) gave NaN). x P_{k-1} + ((k - 1) / k) (x P_{k-1} - prev)
+      // is the same value with no such intermediate. It is computed only here, so every finite
+      // result keeps its bits.
+      next = x * curr + ((k - 1) / k) * (x * curr - prev);
+      if (Number.isNaN(next)) return NaN;
+      // For |x| > 1, P_k is monotone in k (|P_k(x)| >= |x|^k) with the sign of x^k, so the first
+      // overflow decides. |x| <= 1 never overflows. A further step would compute Infinity - Infinity.
+      if (!Number.isFinite(next)) return x < 0 && ni % 2 === 1 ? -Infinity : Infinity;
+    }
     prev = curr;
     curr = next;
   }
@@ -831,12 +804,17 @@ export const besselY1 = mathTyped('besselY1', {
 });
 
 /**
- * Bessel function of the first kind, general integer order n: J_n(x).
+ * Bessel function of the first kind, J_nu(x), for a real order.
+ *
+ * The zero bound of J runs before the order limit, so a huge order with a small x gives 0 at
+ * once. An order above 2500000000 that passes the bound throws a RangeError, and one call near
+ * that limit takes up to about 20 s. The array form counts the total steps of its elements
+ * (`assertBesselArrayWork`). J_nu(x) of a negative real order at x = 0 is a signed Infinity.
  *
  * Float64Array paths at ≥ WASM_SPECIAL_THRESHOLD consult the bridge; Bessel kernels
  * are absent from `wasmPolicyAllows` (`functions/src/wasm/policy.ts`), so JS runs.
  *
- * @param n - Order (integer)
+ * @param n - Order (real)
  * @param x - Input value, or Float64Array of values
  * @returns J_n(x)
  */
@@ -852,12 +830,17 @@ export const besselJ = mathTyped('besselJ', {
 });
 
 /**
- * Bessel function of the second kind, general integer order n: Y_n(x).
+ * Bessel function of the second kind, Y_nu(x), for a real order.
+ *
+ * The overflow bound of Y runs before the order limit: Y_n(x) below -1.8e308 is -Infinity at
+ * once. An order above 2500000000 that passes the bound throws a RangeError, and one call near
+ * that limit takes up to about 20 s. The array form counts the total steps of its elements
+ * (`assertBesselArrayWork`).
  *
  * Float64Array paths at ≥ WASM_SPECIAL_THRESHOLD consult the bridge; Bessel kernels
  * are absent from `wasmPolicyAllows` (`functions/src/wasm/policy.ts`), so JS runs.
  *
- * @param n - Order (integer)
+ * @param n - Order (real)
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns Y_n(x)
  */
@@ -873,29 +856,42 @@ export const besselY = mathTyped('besselY', {
 });
 
 /**
- * Modified Bessel function of the first kind, I_n(x).
+ * Modified Bessel function of the first kind, I_nu(x), for a real order.
  *
- * @param n - Order (integer)
+ * A negative x gives (-1)^n I_n(|x|) for an integer order and NaN for any other order. The
+ * work of one call is about nu + 2 m steps (m is the index of the largest term of the series);
+ * a call above 2500000000 steps throws a RangeError, and the array form counts the total of its
+ * elements (`besselIPlan`).
+ *
+ * @param n - Order (real)
  * @param x - Input value, or Float64Array of values
- * @returns I_n(x)
+ * @returns I_nu(x)
  */
 export const besselI = mathTyped('besselI', {
   'number, number': besselIScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => besselIScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselIArrayWork(n, x);
+    return f64Unary(x, (v) => besselIScalar(n, v));
+  },
 });
 
 /**
- * Modified Bessel function of the second kind, K_n(x).
+ * Modified Bessel function of the second kind, K_nu(x), for a real order (K_(-nu) = K_nu).
  *
- * @param n - Order (integer)
+ * A value far outside the double range returns 0 or Infinity at once (`besselKGate`). Otherwise
+ * the work of one call is about |nu| steps; an order above 2500000000 throws a RangeError, and
+ * the array form counts the total of its elements.
+ *
+ * @param n - Order (real)
  * @param x - Input value (must be positive), or Float64Array of values
  * @returns K_n(x)
  */
 export const besselK = mathTyped('besselK', {
   'number, number': besselKScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => besselKScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertBesselKArrayWork(n, x);
+    return f64Unary(x, (v) => besselKScalar(n, v));
+  },
 });
 
 // =============================================================================
@@ -969,6 +965,7 @@ export const ellipticE = mathTyped('ellipticE', {
 /** The per-call budget of each polynomial family: the order limit of its scalar (#1290). */
 const POLYNOMIAL_CALL_BUDGET = {
   chebyshevT: MAX_CHEBYSHEV_ORDER,
+  hermiteH: MAX_RECURRENCE_ORDER,
   laguerreL: MAX_LAGUERRE_ORDER,
   legendreP: MAX_RECURRENCE_ORDER,
 } as const;
@@ -988,10 +985,11 @@ function overflowSteps(kind: 'chebyshevT' | 'legendreP', ni: number, x: number):
 }
 
 /**
- * Throw a RangeError when one array call of `chebyshevT`, `legendreP` or `laguerreL` needs more
- * recurrence steps than the order limit of its scalar. The scalar limit bounds one element, so
- * an array of 1000 elements at the largest degree ran for hours. A degree that the scalar
- * rejects keeps the message of the scalar. `laguerreL` counts the full degree for every element.
+ * Throw a RangeError when one array call of `chebyshevT`, `hermiteH`, `legendreP` or `laguerreL`
+ * needs more recurrence steps than the order limit of its scalar. The scalar limit bounds one
+ * element, so an array of 1000 elements at the largest degree ran for hours. A degree that the
+ * scalar rejects keeps the message of the scalar. `laguerreL` and `hermiteH` count the full degree
+ * for every element that is not NaN.
  *
  * @param kind - Polynomial family
  * @param n - Degree
@@ -1009,7 +1007,13 @@ function assertPolynomialArrayWork(
   if (ni < 2 || ni > max || ni * xs.length <= max) return;
   let steps = 0;
   for (let i = 0; i < xs.length; i++) {
-    steps += kind === 'laguerreL' ? (Number.isNaN(xs[i]) ? 0 : ni) : overflowSteps(kind, ni, xs[i]);
+    // laguerreL and hermiteH run the full degree for every element that is not NaN.
+    steps +=
+      kind === 'laguerreL' || kind === 'hermiteH'
+        ? Number.isNaN(xs[i])
+          ? 0
+          : ni
+        : overflowSteps(kind, ni, xs[i]);
   }
   assertArrayWork(kind, n, xs.length, Math.ceil(steps), max);
 }
@@ -1038,8 +1042,10 @@ export const chebyshevT = mathTyped('chebyshevT', {
  */
 export const hermiteH = mathTyped('hermiteH', {
   'number, number': hermiteHScalar,
-  'number, Float64Array': (n: f64, x: Float64Array): Float64Array =>
-    f64Unary(x, (v) => hermiteHScalar(n, v)),
+  'number, Float64Array': (n: f64, x: Float64Array): Float64Array => {
+    assertPolynomialArrayWork('hermiteH', n, x);
+    return f64Unary(x, (v) => hermiteHScalar(n, v));
+  },
 });
 
 /**
@@ -1407,18 +1413,19 @@ export const ellipticPi = mathTyped('ellipticPi', {
 registerWorkerKernels({
   erfc: [0, 0, () => kernelSource([erfcSelfContained, erfcScalar], '(x) => erfcScalar(x)')],
   erfi: [0, 0, () => kernelSource([erfiScalar], '(x) => erfiScalar(x)')],
-  lgamma: [0, 0, () => kernelSource([_lgamma], '(x) => _lgamma(x)')],
+  lgamma: [0, 0, () => kernelSource([sinPiScalar, _lgamma], '(x) => _lgamma(x)')],
   beta: [
     1,
     1,
-    (b: number) => kernelSource([_lgamma, betaScalar], `(a) => betaScalar(a, ${numberLiteral(b)})`),
+    (b: number) =>
+      kernelSource([sinPiScalar, _lgamma, betaScalar], `(a) => betaScalar(a, ${numberLiteral(b)})`),
   ],
   gammainc: [
     1,
     1,
     (a: number) =>
       kernelSource(
-        [_lgamma, upperGammaQ, gammaincScalar],
+        [sinPiScalar, _lgamma, upperGammaQ, gammaincScalar],
         `(x) => gammaincScalar(${numberLiteral(a)}, x)`
       ),
   ],
@@ -1427,7 +1434,7 @@ registerWorkerKernels({
     1,
     (a: number) =>
       kernelSource(
-        [_lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
+        [sinPiScalar, _lgamma, upperGammaQ, gammaincScalar, gammaincpScalar],
         `(x) => gammaincpScalar(${numberLiteral(a)}, x)`
       ),
   ],
@@ -1436,27 +1443,79 @@ registerWorkerKernels({
     2,
     (a: number, b: number) =>
       kernelSource(
-        [_lgamma, incompleteBetaFraction, betaincScalar],
+        [sinPiScalar, _lgamma, incompleteBetaFraction, betaincScalar],
         `(x) => betaincScalar(${numberLiteral(a)}, ${numberLiteral(b)}, x)`
       ),
   ],
-  digamma: [0, 0, () => kernelSource([digammaScalar], '(x) => digammaScalar(x)')],
+  digamma: [
+    0,
+    0,
+    () => kernelSource([sinPiScalar, cosPiScalar, digammaScalar], '(x) => digammaScalar(x)'),
+  ],
   besselJ0: [
     0,
     0,
-    () => kernelSource([besselHankel, besselJ0Series, besselJ0Scalar], '(x) => besselJ0Scalar(x)'),
+    () =>
+      kernelSource(
+        [
+          besselJ0Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselJ0Scalar,
+        ],
+        '(x) => besselJ0Scalar(x)'
+      ),
   ],
   besselJ1: [
     0,
     0,
-    () => kernelSource([besselHankel, besselJ1Series, besselJ1Scalar], '(x) => besselJ1Scalar(x)'),
+    () =>
+      kernelSource(
+        [
+          besselJ1Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselJ1Scalar,
+        ],
+        '(x) => besselJ1Scalar(x)'
+      ),
   ],
   besselY0: [
     0,
     0,
     () =>
       kernelSource(
-        [besselHankel, besselJ0Series, besselY0Series, besselY0Scalar],
+        [
+          besselJ0Series,
+          besselY0Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselY0Scalar,
+        ],
         '(x) => besselY0Scalar(x)'
       ),
   ],
@@ -1465,7 +1524,21 @@ registerWorkerKernels({
     0,
     () =>
       kernelSource(
-        [besselHankel, besselJ1Series, besselY1Series, besselY1Scalar],
+        [
+          besselJ1Series,
+          besselY1Series,
+          besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
+          besselJYTemme,
+          besselHankelReal,
+          sinPiScalar,
+          cosPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselY1Scalar,
+        ],
         '(x) => besselY1Scalar(x)'
       ),
   ],
@@ -1475,15 +1548,24 @@ registerWorkerKernels({
     (n: number) =>
       kernelSource(
         [
-          besselHankel,
           besselJ0Series,
           besselJ1Series,
           besselJ0Scalar,
           besselJ1Scalar,
           besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
           besselJYTemme,
           besselHankelReal,
+          besselJYLarge,
+          sinPiScalar,
+          cosPiScalar,
           _lgamma,
+          rgammaScalar,
+          besselJSeriesReal,
+          besselJUnderflows,
+          besselYLogBound,
           besselJRealOrder,
           besselJScalar,
         ],
@@ -1496,7 +1578,6 @@ registerWorkerKernels({
     (n: number) =>
       kernelSource(
         [
-          besselHankel,
           besselJ0Series,
           besselJ1Series,
           besselY0Series,
@@ -1506,9 +1587,20 @@ registerWorkerKernels({
           besselY0Scalar,
           besselY1Scalar,
           besselGammaAux,
+          besselCF1,
+          besselYTemmeStart,
+          besselYUpward,
           besselJYTemme,
           besselHankelReal,
+          besselJYLarge,
+          sinPiScalar,
+          cosPiScalar,
           _lgamma,
+          rgammaScalar,
+          besselJSeriesReal,
+          besselYTemmeSmall,
+          besselJUnderflows,
+          besselYLogBound,
           besselJRealOrder,
           besselYRealOrder,
           besselYScalar,
@@ -1521,7 +1613,18 @@ registerWorkerKernels({
     1,
     (n: number) =>
       kernelSource(
-        [factorial, _lgamma, besselIScalar],
+        [
+          sinPiScalar,
+          _lgamma,
+          rgammaScalar,
+          besselGammaAux,
+          besselUniformExponent,
+          besselKGate,
+          besselKReal,
+          besselIPlan,
+          besselIPositive,
+          besselIScalar,
+        ],
         `(x) => besselIScalar(${numberLiteral(n)}, x)`
       ),
   ],
@@ -1529,7 +1632,10 @@ registerWorkerKernels({
     1,
     1,
     (n: number) =>
-      kernelSource([besselK01, besselKScalar], `(x) => besselKScalar(${numberLiteral(n)}, x)`),
+      kernelSource(
+        [besselGammaAux, besselUniformExponent, besselKGate, besselKReal, besselKScalar],
+        `(x) => besselKScalar(${numberLiteral(n)}, x)`
+      ),
   ],
   ellipticK: [0, 0, () => kernelSource([ellipticKScalar], '(m) => ellipticKScalar(m)')],
   ellipticE: [

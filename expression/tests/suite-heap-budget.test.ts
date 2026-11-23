@@ -36,9 +36,12 @@ describe('expression suite heap budget (#878)', () => {
     const gc = (globalThis as { gc?: () => void }).gc;
     if (gc) gc();
     const before = process.memoryUsage().heapUsed;
-    const { parse, evaluate, math } = await import('./helpers/bootstrap.js');
-    expect(math.enableGpu).toBeUndefined();
-    expect(math.gpuMatmul).toBeUndefined();
+    // Measure the evaluator users import. The source coverage bootstrap
+    // also transforms the full TypeScript factory graph inside this test's
+    // timeout, even though that compilation is absent from the shipped entry.
+    const { parse, evaluate } = await import('@danielsimonjr/mathts-functions/evaluate');
+    expect(() => evaluate('enableGpu')).toThrow(/Undefined symbol/);
+    expect(() => evaluate('gpuMatmul')).toThrow(/Undefined symbol/);
     for (let i = 0; i < 64; i++) {
       evaluate(`${i} + ${i + 1}`);
       parse(`sin(${i})`);

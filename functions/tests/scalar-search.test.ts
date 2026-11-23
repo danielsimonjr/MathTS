@@ -597,6 +597,35 @@ describe('searchScalars: one front row per canonical key (SR-8)', () => {
     parameters: new Float64Array([3]),
   });
 
+  it('retains a real nested power seed in both insertion orders', async () => {
+    const x = b.symbol('x');
+    const absolute = b.op('^', [b.op('^', [x, b.number(2)]), b.number(0.5)]);
+    const columns = [new Float64Array([-2, -1, 0, 1, 2])];
+    const observed = new Float64Array([2, 1, 0, 1, 2]);
+    const problem = { variables: ['x'], columns, observed };
+    for (const seeds of [
+      [x, absolute],
+      [absolute, x],
+    ]) {
+      const { result } = await runSearch(problem, {
+        grammar: {
+          variables: ['x'],
+          literals: [2, 0.5],
+          binary: ['^'],
+          unary: [],
+          maxSize: 5,
+          maxDepth: 3,
+        },
+        seeds,
+        rng: createSeededRng(7),
+        maxEvaluations: 2,
+        populationSize: 2,
+        optimizeProbability: 0,
+      });
+      expect(result.front.map((row) => row.loss)).toContain(0);
+    }
+  });
+
   it('keeps one front row when two stored shapes share a canonical key', () => {
     expect(scalarCanonicalKey(padded)).toBe(scalarCanonicalKey(square));
     const { front, fittedParameters } = hallFrontForTest([ind(square, 4, 3), ind(padded, 2, 5)]);
@@ -2511,8 +2540,7 @@ describe('searchScalars: simplify', () => {
     });
     expect(result.front).toHaveLength(1);
     expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(simplified));
-    // The stored tree is the simplified shape (a/(b/c) and a*c/b share a canonical
-    // key, so only the structure and the rounding-sensitive loss tell them apart).
+    // The stored tree is the explicitly simplified shape.
     expect(result.front[0]!.item).toEqual(simplified);
     const direct = await runSearch(problem, {
       grammar: quotientGrammar,

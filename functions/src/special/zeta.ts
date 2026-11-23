@@ -2,6 +2,7 @@ import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber as BigNumberType } from '../types.js';
 import { atWorkPrecision, type PrecisionClass } from '../utils/bignumber/work-precision.js';
+import { cosPiScalar, sinPiScalar } from '../wasm/special/scalars.js';
 
 // Type definitions for zeta function
 interface ComplexType {
@@ -144,12 +145,46 @@ export const createZeta = /* #__PURE__ */ factory(
      * @return {number | Complex | BigNumber}    The Riemann Zeta of `s`
      */
     function zetaNumber(s: number): number {
-      return zetaNumeric(
+      // A negative even integer is a trivial zero. The reflection gives sin(pi s / 2) = 0 times a
+      // gamma that is Infinity above s = -342: 0 * Infinity is NaN. Every even double of size
+      // 2^53 or more is an even integer, so zeta(-1e300) is 0 too.
+      if (s < 0 && s % 2 === 0) return 0;
+      const value = zetaNumeric(
         s,
         (value: number) => value,
         () => 20,
         () => pi as number
       );
+      // Below s = -649 the factor pi^(s - 3/2) is 0 and the gamma above is Infinity, so the
+      // product is NaN where the value is out of range. Every factor except the sine is positive:
+      // the value is the infinity with the sign of sin(pi s / 2), from the exact reduction.
+      // Above s = -1 a NaN is not an overflow, so it stays.
+      if (Number.isNaN(value) && s < -1 && Number.isFinite(s)) {
+        return sinPiScalar(s / 2) < 0 ? -Infinity : Infinity;
+      }
+      return value;
+    }
+
+    /**
+     * sin(pi s / 2) with the argument reduced exactly. Math.sin(Math.PI / 2 * s) rounds the
+     * product, so next to a nonzero even integer it kept few digits (zeta(-2.0000001) was 8e-10
+     * off), and for an odd integer of 2^52 or more its sign was noise. s / 2 is exact. A Complex
+     * s = a + bi gives sin(pi a / 2) cosh(pi b / 2) + i cos(pi a / 2) sinh(pi b / 2). A BigNumber
+     * is computed at the work precision, which `reflectedZeta` sets to hold the cancellation.
+     * @param {number | BigNumber | Complex} s   the argument
+     * @param {number | BigNumber} piValue   pi in the type of the call
+     * @returns {number | BigNumber | Complex} sin(pi s / 2)
+     */
+    function sinHalfPi(s: NumericValue, piValue: NumericValue): NumericValue {
+      if (typeof s === 'number') return sinPiScalar(s / 2);
+      if (typeof (s as ComplexType).re === 'number') {
+        const { re, im } = s as ComplexType;
+        return new Complex!(
+          sinPiScalar(re / 2) * Math.cosh((Math.PI * im) / 2),
+          cosPiScalar(re / 2) * Math.sinh((Math.PI * im) / 2)
+        );
+      }
+      return sin(multiply(divide(piValue, 2), s));
     }
 
     return typed(name, {
@@ -208,7 +243,8 @@ export const createZeta = /* #__PURE__ */ factory(
      * for each digit of the distance to the nearest even integer below |s|), and the integer
      * digits of s in the arguments of sin and pow. An infinite factor (gamma(1 - s) above the
      * exponent range) gives NaN; the value is then infinite with the sign of sin(pi s / 2),
-     * because the other factors are positive.
+     * because the other factors are positive. A BigNumber gamma sets its own work precision, so
+     * the two half gammas of the reflection need no term of their own here.
      * @param {BigNumber} s   the argument
      * @param {ExactBigNumber} x   s with the exact methods
      * @param {number} precision   the precision of the result
@@ -344,11 +380,20 @@ export const createZeta = /* #__PURE__ */ factory(
           dTable ? integerPowers(s, n, createValue) : undefined
         );
       } else {
-        // Function Equation for reflection to x < 1
+        // Symmetric functional equation, with the duplication formula Gamma(1 - s) =
+        // 2^-s pi^(-1/2) Gamma((1 - s) / 2) Gamma(1 - s / 2) applied to the usual one:
+        //   zeta(s) = pi^(s - 3/2) sin(pi s / 2) Gamma((1 - s) / 2) Gamma(1 - s / 2) zeta(1 - s).
+        // The usual form multiplies 2^s pi^(s - 1) sin(pi s / 2) by Gamma(1 - s). Gamma(1 - s)
+        // overflows at s = -170.5, where the value of zeta is 1.7e171: zeta(-170.5) was Infinity.
+        // Here every partial product stays below the final magnitude over the whole finite range,
+        // and for Re(s) < 0 both gamma arguments have a real part above 1/2 (no pole).
         const piValue = getPi();
-        let c = multiply(pow(2, s), pow(piValue, subtract(s, 1)));
-        c = multiply(c, sin(multiply(divide(piValue, 2), s)));
-        c = multiply(c, gamma(subtract(1, s)));
+        let c = multiply(
+          pow(piValue, subtract(s, createValue(1.5))),
+          gamma(divide(subtract(1, s), 2))
+        );
+        c = multiply(c, sinHalfPi(s, piValue));
+        c = multiply(c, gamma(subtract(1, divide(s, 2))));
         return multiply(
           c,
           zeta(subtract(1, s) as T, createValue, determineDigits, getRe, getPi, dTable)
