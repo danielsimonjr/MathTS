@@ -24,10 +24,12 @@
  */
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 import { DualTensor } from './dual-tensor.js';
+import { assertSameShape } from './shape.js';
 
 /**
  * Compute the value and full Jacobian of `fn` at point `x` using forward-mode
- * automatic differentiation (dual numbers).
+ * automatic differentiation (dual numbers). For an elementwise map, use
+ * {@link forwardDiagonalGrad} to obtain its diagonal without a dense allocation.
  *
  * @param fn - Pure function operating on Tensors via add/sub/mul/scale.
  *   Must be traceable: at runtime it receives a DualTensor (structurally
@@ -91,4 +93,31 @@ export function forwardGrad(
     value: yPrimal,
     jacobian: new Tensor(jacobianShape, jacobianData),
   };
+}
+
+/**
+ * Compute the value and Jacobian diagonal of a same-shape elementwise map.
+ * Each output must depend only on the input at its matching flat index.
+ * The output shape is checked and elementwise dependence is a caller requirement.
+ *
+ * A single trace with an all-ones tangent evaluates J·1. For a diagonal
+ * Jacobian this is its diagonal, stored with the same shape as the input.
+ *
+ * @example
+ * ```ts
+ * const { value, diagonal } = forwardDiagonalGrad(x => x.mul(x), input);
+ * ```
+ */
+export function forwardDiagonalGrad(
+  fn: (x: DualTensor) => DualTensor,
+  x: Tensor
+): { value: Tensor; diagonal: Tensor } {
+  const seed = DualTensor.fromTensor(x);
+  seed.tangent.fill(1);
+  const result = fn(seed);
+  if (!(result instanceof DualTensor)) {
+    throw new TypeError('forwardDiagonalGrad: fn must return a DualTensor');
+  }
+  assertSameShape(result.shape, seed.shape, 'autograd', 'forwardDiagonalGrad');
+  return { value: result.toPrimalTensor(), diagonal: result.toTangentTensor() };
 }
