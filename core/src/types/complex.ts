@@ -3,6 +3,7 @@
  * @module @danielsimonjr/mathts-core/types/complex
  */
 
+import { ldexp, pow2ScaleExponent } from '../pow2-scale.js';
 import type { Scalar, IComplex } from './interfaces.js';
 import { COMPLEX_BRAND, defineTypeMarkers } from './type-marker.js';
 
@@ -430,17 +431,36 @@ export class Complex implements IComplex {
    */
   divide(other: Scalar): Complex {
     if (isComplex(other)) {
-      const denom = other.re * other.re + other.im * other.im;
-      if (denom === 0) {
+      const { re: c, im: d } = other;
+      if (c === 0 && d === 0) {
         return new Complex(
           this.re !== 0 ? (this.re > 0 ? Infinity : -Infinity) : NaN,
           this.im !== 0 ? (this.im > 0 ? Infinity : -Infinity) : NaN
         );
       }
-      return new Complex(
-        (this.re * other.re + this.im * other.im) / denom,
-        (this.im * other.re - this.re * other.im) / denom
-      );
+      const numeratorMax = Math.max(Math.abs(this.re), Math.abs(this.im));
+      const denominatorMax = Math.max(Math.abs(c), Math.abs(d));
+      if (Number.isFinite(numeratorMax) && Number.isFinite(denominatorMax)) {
+        if (d === 0) return new Complex(this.re / c, this.im / c);
+        if (c === 0) return new Complex(this.im / d, -this.re / d);
+        const numeratorScale = pow2ScaleExponent(numeratorMax, -450, 450);
+        const denominatorScale = pow2ScaleExponent(denominatorMax, -450, 450);
+        if (numeratorScale !== 0 || denominatorScale !== 0) {
+          // Independently normalize both operands, then restore their ratio.
+          const a = ldexp(this.re, numeratorScale);
+          const b = ldexp(this.im, numeratorScale);
+          const u = ldexp(c, denominatorScale);
+          const v = ldexp(d, denominatorScale);
+          const denominator = u * u + v * v;
+          const exponent = denominatorScale - numeratorScale;
+          return new Complex(
+            ldexp((a * u + b * v) / denominator, exponent),
+            ldexp((b * u - a * v) / denominator, exponent)
+          );
+        }
+      }
+      const denom = c * c + d * d;
+      return new Complex((this.re * c + this.im * d) / denom, (this.im * c - this.re * d) / denom);
     }
     const n = Number(other.valueOf());
     if (n === 0) {

@@ -9,13 +9,14 @@ interface ComplexType {
   re: number;
   im: number;
   add(n: number | ComplexType): ComplexType;
-  sub(n: number): ComplexType;
+  sub(n: number | ComplexType): ComplexType;
   div(n: ComplexType): ComplexType;
   mul(n: number | ComplexType): ComplexType;
   neg(): ComplexType;
   exp(): ComplexType;
   sin(): ComplexType;
   pow(n: ComplexType): ComplexType;
+  log(): ComplexType;
 }
 
 interface ComplexConstructor {
@@ -159,6 +160,10 @@ export const createGamma = /* #__PURE__ */ factory(
 
       // y = sqrt(2 * pi) * t ** (z + 0.5) * exp(-t) * x
       const twoPiSqrt = Math.sqrt(2 * Math.PI);
+      if (Math.max(Math.abs(n.re), Math.abs(n.im)) > 100) {
+        // Combine the Lanczos factors' logarithms before exponentiating.
+        return t.log().mul(z.add(0.5)).sub(t).add(x.log()).add(Math.log(twoPiSqrt)).exp();
+      }
       const tpow = t.pow(z.add(0.5));
       const expt = t.neg().exp();
 
