@@ -17,6 +17,7 @@
  * @packageDocumentation
  */
 
+import { collectionBinaryRows } from './collection-binary.js';
 import { mathTyped, BigNumber } from '@danielsimonjr/mathts-core';
 import { mapEachLeaf } from './f64-kernels.js';
 import {
@@ -184,6 +185,7 @@ function i32Unary(a: Int32Array): Int32Array {
  * ```
  */
 export const bitAnd = mathTyped('bitAnd', {
+  ...collectionBinaryRows('bitAnd'),
   'number, number': (a: i32, b: i32): i32 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Integers expected in function bitAnd');
@@ -219,6 +221,7 @@ export const bitAnd = mathTyped('bitAnd', {
 // =============================================================================
 
 export const bitOr = mathTyped('bitOr', {
+  ...collectionBinaryRows('bitOr'),
   'number, number': (a: i32, b: i32): i32 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Integers expected in function bitOr');
@@ -251,6 +254,7 @@ export const bitOr = mathTyped('bitOr', {
 // =============================================================================
 
 export const bitXor = mathTyped('bitXor', {
+  ...collectionBinaryRows('bitXor'),
   'number, number': (a: i32, b: i32): i32 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Integers expected in function bitXor');
@@ -307,6 +311,7 @@ export const bitNot = mathTyped('bitNot', {
 // =============================================================================
 
 export const leftShift = mathTyped('leftShift', {
+  ...collectionBinaryRows('leftShift'),
   'number, number': (a: i32, b: i32): i32 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Integers expected in function leftShift');
@@ -348,6 +353,7 @@ export const leftShift = mathTyped('leftShift', {
 // =============================================================================
 
 export const rightArithShift = mathTyped('rightArithShift', {
+  ...collectionBinaryRows('rightArithShift'),
   'number, number': (a: i32, b: i32): i32 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Integers expected in function rightArithShift');
@@ -389,6 +395,7 @@ export const rightArithShift = mathTyped('rightArithShift', {
 // =============================================================================
 
 export const rightLogShift = mathTyped('rightLogShift', {
+  ...collectionBinaryRows('rightLogShift'),
   'number, number': (a: i32, b: i32): i32 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Integers expected in function rightLogShift');

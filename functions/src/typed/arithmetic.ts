@@ -103,7 +103,7 @@ import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { assertInnerDimensions, sparseProduct } from './sparse-product.js';
-import { collectionRelationalRows, unitsEqual } from './collection-relational.js';
+import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
 import { exactReductions } from './exact-reductions.js';
 import {
   ROUND_DECIMALS_NOT_INTEGER,
@@ -1839,8 +1839,8 @@ interface GcdOverloads {
   (a: Fraction, b: Fraction, ...rest: Fraction[]): Fraction;
 }
 
-/** The scalar types of `gcd` and `lcm` that take more than two values. */
-const GCD_SCALARS = 'number | bigint | BigNumber | Fraction';
+/** The scalar and collection types accepted by variadic gcd and lcm. */
+const GCD_OPERANDS = 'number | bigint | BigNumber | Fraction | Matrix | Array';
 
 /**
  * The signature of `gcd` and `lcm` for three or more values: the function folds over the values
@@ -1861,6 +1861,7 @@ export type GcdFunction = GcdOverloads & TypedFunction;
  * Greatest common divisor
  */
 export const gcd: GcdFunction = mathTyped('gcd', {
+  ...collectionBinaryRows('gcd'),
   'number, number': (a: f64, b: f64): f64 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Parameters in function gcd must be integer numbers');
@@ -1871,7 +1872,7 @@ export const gcd: GcdFunction = mathTyped('gcd', {
   'Fraction, Fraction': fractionGcd,
   'Fraction, number': (a: Fraction, b: f64): Fraction => fractionGcd(a, Fraction.fromNumber(b)),
   'number, Fraction': (a: f64, b: Fraction): Fraction => fractionGcd(Fraction.fromNumber(a), b),
-  [`${GCD_SCALARS}, ${GCD_SCALARS}, ...${GCD_SCALARS}`]: variadicGcdSignature(),
+  [`${GCD_OPERANDS}, ${GCD_OPERANDS}, ...${GCD_OPERANDS}`]: variadicGcdSignature(),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
     // NaN, Infinity and a fraction have no integer gcd. The loop below never ends on them.
     if (!a.isInteger() || !b.isInteger()) {
@@ -1899,6 +1900,7 @@ export const gcd: GcdFunction = mathTyped('gcd', {
  * Least common multiple
  */
 export const lcm = mathTyped('lcm', {
+  ...collectionBinaryRows('lcm'),
   'number, number': (a: f64, b: f64): f64 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Parameters in function lcm must be integer numbers');
@@ -1916,7 +1918,7 @@ export const lcm = mathTyped('lcm', {
   'Fraction, Fraction': fractionLcm,
   'Fraction, number': (a: Fraction, b: f64): Fraction => fractionLcm(a, Fraction.fromNumber(b)),
   'number, Fraction': (a: f64, b: Fraction): Fraction => fractionLcm(Fraction.fromNumber(a), b),
-  [`${GCD_SCALARS}, ${GCD_SCALARS}, ...${GCD_SCALARS}`]: variadicGcdSignature(),
+  [`${GCD_OPERANDS}, ${GCD_OPERANDS}, ...${GCD_OPERANDS}`]: variadicGcdSignature(),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
     if (!a.isInteger() || !b.isInteger()) {
       throw new Error('Parameters in function lcm must be integer numbers');
@@ -2259,7 +2261,7 @@ export const equal = mathTyped('equal', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => coreEqual(a, b),
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitsEqual(a, b),
   // An Array or a matrix against any operand: the element-wise comparison of mathjs (#975).
-  ...collectionRelationalRows('equal'),
+  ...collectionBinaryRows('equal'),
 });
 
 /**
@@ -2271,7 +2273,7 @@ export const smaller = mathTyped('smaller', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) < 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) < 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) < 0,
-  ...collectionRelationalRows('smaller'),
+  ...collectionBinaryRows('smaller'),
 });
 
 /**
@@ -2283,7 +2285,7 @@ export const larger = mathTyped('larger', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) > 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) > 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) > 0,
-  ...collectionRelationalRows('larger'),
+  ...collectionBinaryRows('larger'),
 });
 
 /**
@@ -2295,7 +2297,7 @@ export const smallerEq = mathTyped('smallerEq', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) <= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) <= 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) <= 0,
-  ...collectionRelationalRows('smallerEq'),
+  ...collectionBinaryRows('smallerEq'),
 });
 
 /**
@@ -2307,7 +2309,7 @@ export const largerEq = mathTyped('largerEq', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) >= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) >= 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) >= 0,
-  ...collectionRelationalRows('largerEq'),
+  ...collectionBinaryRows('largerEq'),
 });
 
 /**
@@ -2320,7 +2322,7 @@ export const compare = mathTyped('compare', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): i32 => a.compare(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): i32 => a.compare(b),
   'Unit, Unit': (a: Unit, b: Unit): i32 => unitCmp(a, b),
-  ...collectionRelationalRows('compare'),
+  ...collectionBinaryRows('compare'),
 });
 
 // =============================================================================

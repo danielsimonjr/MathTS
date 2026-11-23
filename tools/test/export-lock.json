@@ -1392,6 +1392,9 @@
       "isString": {
         "kind": "function"
       },
+      "isUnaryCollectionCallback": {
+        "kind": "function"
+      },
       "isUndefined": {
         "kind": "function"
       },
@@ -1555,6 +1558,9 @@
         "kind": "function"
       },
       "typeOf": {
+        "kind": "function"
+      },
+      "unaryCollectionCallback": {
         "kind": "function"
       },
       "unitDependencies": {
