@@ -606,10 +606,12 @@ function buildUnsafeScopedMathNamespace(
  * @param hiddenNames - Names of the math scope that the instance does not resolve
  *   (compat hides the internal names of the functions namespace, #1216). An imported
  *   name resolves even when it is in this list. Default: none.
+ * @param matrixLiterals - Whether the host enables Matrix literals according to its live config.
  */
 export function createInstanceEvaluator(
   importedExpressionScope: Record<string, unknown>,
-  hiddenNames: Iterable<string> = []
+  hiddenNames: Iterable<string> = [],
+  matrixLiterals = false
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
@@ -617,6 +619,12 @@ export function createInstanceEvaluator(
   const hidden: ReadonlySet<string> = new Set(hiddenNames);
   const safeScope = buildScopedMathNamespace(importedExpressionScope, hidden);
   const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope, hidden);
+  if (matrixLiterals) {
+    const key = Symbol.for('mathts.expression.matrixLiterals');
+    const enabled = () => liveConfig.matrix === 'Matrix';
+    Object.defineProperty(safeScope, key, { value: enabled });
+    Object.defineProperty(unsafeScope, key, { value: enabled });
+  }
   const safeEvaluate = createEvaluate(parse, safeScope, configFingerprint);
   const unsafeEvaluate = createEvaluate(parse, unsafeScope, configFingerprint);
 

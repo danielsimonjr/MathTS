@@ -174,9 +174,9 @@ interface MathInstanceOverrides {
   transpose: typeof shims.transpose;
   det: typeof shims.det;
   identity: typeof shims.identity;
-  zeros: typeof shims.zeros;
+  zeros: typeof mathFunctions.zeros;
   ones: typeof shims.ones;
-  size: typeof shims.size;
+  size: typeof mathFunctions.size;
 
   // Type checking
   isComplex: typeof shims.isComplex;
@@ -440,19 +440,9 @@ export function create(
     transpose: shims.transpose,
     det: shims.det,
     identity: shims.identity,
-    zeros: shims.zeros,
+    zeros: mathFunctions.zeros,
     ones: shims.ones,
-    size: wrapWithInstanceConfig(
-      ((...args: unknown[]) => {
-        const dims = (mathFunctions.size as (...a: unknown[]) => unknown)(...args);
-        if (currentConfig.matrix === 'Matrix' && Array.isArray(dims)) {
-          return (mathFunctions.matrix as (data: unknown) => unknown)(dims);
-        }
-        return dims;
-      }) as (...args: unknown[]) => unknown,
-      currentConfig,
-      usesOverlay
-    ),
+    size: mathFunctions.size,
 
     // Type checking
     isComplex: shims.isComplex,

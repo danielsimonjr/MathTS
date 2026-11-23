@@ -3,13 +3,12 @@
  *
  * The compat shim took two numbers only: `zeros([2, 3, 2])` returned `[0]` and `zeros(2, 3, 2)`
  * a 2 x 3 matrix. Every row below is compared with `zeros` / `ones` of the mathjs devDependency.
- * The two forms that compat has always had stay as they are: `zeros(n)` is a `number[]` and
- * `zeros(r, c)` is a native DenseMatrix.
+ * Directly imported helpers also cover the original native representations.
  */
 import { describe, it, expect } from 'vitest';
 import * as mathjs from 'mathjs';
 import { DenseMatrix } from '@danielsimonjr/mathts-matrix';
-import { create, all } from '../src/index.js';
+import { create, all, zeros, ones } from '../src/index.js';
 
 type Fn = (...a: unknown[]) => unknown;
 const math = create(all) as unknown as Record<string, Fn>;
@@ -132,17 +131,17 @@ describe('compat zeros and ones with a format (#1288)', () => {
   });
 });
 
-describe('compat zeros and ones keep the two forms that compat had (#1288)', () => {
+describe('direct zeros and ones imports keep the native forms (#1288)', () => {
   it('zeros(n) and ones(n) are number[] of length n', () => {
-    expect(math.zeros(3)).toEqual([0, 0, 0]);
-    expect(math.ones(3)).toEqual([1, 1, 1]);
-    expect(math.zeros(0)).toEqual([]);
-    expect(Array.isArray(math.zeros(3))).toBe(true);
+    expect(zeros(3)).toEqual([0, 0, 0]);
+    expect(ones(3)).toEqual([1, 1, 1]);
+    expect(zeros(0)).toEqual([]);
+    expect(Array.isArray(zeros(3))).toBe(true);
   });
 
   it('zeros(r, c) and ones(r, c) are native DenseMatrix of r x c', () => {
-    const z = math.zeros(2, 3);
-    const o = math.ones(2, 3);
+    const z = zeros(2, 3);
+    const o = ones(2, 3);
     expect(z).toBeInstanceOf(DenseMatrix);
     expect(o).toBeInstanceOf(DenseMatrix);
     expect((z as DenseMatrix).rows).toBe(2);
