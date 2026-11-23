@@ -393,7 +393,7 @@ toDegrees(Math.PI); // 180
 | `bitNot(x)`             | Bitwise NOT (unary)                      | number, bigint, BigNumber, Int32Array | —     |
 | `leftShift(x, n)`       | Bitwise left shift                       | number, bigint, BigNumber, Int32Array | —     |
 | `rightArithShift(x, n)` | Arithmetic (sign-preserving) right shift | number, bigint, BigNumber, Int32Array | —     |
-| `rightLogShift(x, n)`   | Logical (zero-filling) right shift       | number, bigint, BigNumber, Int32Array | —     |
+| `rightLogShift(x, n)`   | Logical (zero-filling) right shift       | number, bigint, Int32Array            | —     |
 
 `Int32Array` paths are synchronous and return a new `Int32Array`; a length mismatch
 throws `RangeError`. Bitwise ops have **no** WASM dispatch entry in `wasmPolicyAllows`,

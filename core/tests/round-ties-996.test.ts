@@ -325,8 +325,8 @@ describe('core round of the other types (#996)', () => {
     expect((round(B(2.5)) as BigNumber).toString()).toBe('3');
   });
 
-  it('core BigNumber round has no relTol snap (the typed round has it)', () => {
-    expect((round(B('0.49999999999999999999')) as BigNumber).toString()).toBe('0');
+  it('core BigNumber round snaps within the configured tolerance', () => {
+    expect((round(B('0.49999999999999999999')) as BigNumber).toString()).toBe('1');
   });
 
   it('a Fraction tie goes toward +Infinity (the Fraction rule, unchanged)', () => {

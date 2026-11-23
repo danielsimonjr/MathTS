@@ -21,6 +21,7 @@
  */
 import { DEFAULT_CONFIG } from '../config.js';
 import { nearlyEqual, roundNumberWide } from '../number.js';
+import { ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals } from './round-bignumber.js';
 import { BigNumber, isBigNumber } from '../types/bignumber.js';
 import { Complex, isComplex } from '../types/complex.js';
 import { Fraction, isFraction } from '../types/fraction.js';
@@ -179,7 +180,7 @@ export function fix(x: NumericScalar): NumericScalar {
  * | Type | Tie |
  * | --- | --- |
  * | number | Away from zero, after a snap to `relTol` (`round(-2.5)` is -3, `round(1.005, 2)` is 1.01). |
- * | BigNumber | Away from zero (`round(-2.5)` is -3). Core has no `relTol` snap; the typed `round` of `functions` has it. |
+ * | BigNumber | Away from zero, after a snap to `relTol` (`round(-2.5)` is -3). |
  * | Fraction | Toward +Infinity (`round(-5/2)` is -2). |
  * | Complex | Toward +Infinity in each part (`round(-2.5 + 2.5i)` is -2 + 3i). |
  *
@@ -197,10 +198,13 @@ export function round(x: NumericScalar, decimals: number = 0): NumericScalar {
   if (typeof x === 'bigint') return x;
   assertNumericScalar(x, 'round');
   if (!Number.isInteger(decimals)) {
-    throw new TypeError('Number of decimals in function round must be an integer');
+    throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
   }
   if (isComplex(x)) return x.round(decimals);
-  if (isBigNumber(x)) return x.round(decimals, 'halfUp');
+  if (isBigNumber(x)) {
+    const { relTol, absTol } = DEFAULT_CONFIG;
+    return roundBigNumberDecimals(x, decimals, relTol, absTol, 'halfUp');
+  }
   return x.round(decimals);
 }
 

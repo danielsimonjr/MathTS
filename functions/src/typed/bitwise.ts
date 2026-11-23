@@ -1,3 +1,4 @@
+import { rejectBigNumberShift } from '../bitwise/rightLogShift.js';
 /**
  * Typed Bitwise Functions
  *
@@ -394,42 +395,38 @@ export const rightArithShift = mathTyped('rightArithShift', {
 // Logical Right Shift
 // =============================================================================
 
-export const rightLogShift = mathTyped('rightLogShift', {
-  ...collectionBinaryRows('rightLogShift'),
-  'number, number': (a: i32, b: i32): i32 => {
-    if (!Number.isInteger(a) || !Number.isInteger(b)) {
-      throw new Error('Integers expected in function rightLogShift');
-    }
-    return a >>> b;
-  },
+export const rightLogShift = rejectBigNumberShift(
+  mathTyped('rightLogShift', {
+    ...collectionBinaryRows('rightLogShift'),
+    'number, number': (a: i32, b: i32): i32 => {
+      if (!Number.isInteger(a) || !Number.isInteger(b)) {
+        throw new Error('Integers expected in function rightLogShift');
+      }
+      return a >>> b;
+    },
 
-  'bigint, bigint': (a: i64, b: i64): i64 => {
-    if (b < 0n) {
-      throw new Error('Negative shift count not allowed in function rightLogShift');
-    }
-    return logShiftBigInt(a, b);
-  },
+    'bigint, bigint': (a: i64, b: i64): i64 => {
+      if (b < 0n) {
+        throw new Error('Negative shift count not allowed in function rightLogShift');
+      }
+      return logShiftBigInt(a, b);
+    },
 
-  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
-    const ai = bigNumberToBigInt(a, 'rightLogShift');
-    const bi = bigNumberShiftCount(b, 'rightLogShift');
-    return bigIntToBigNumber(logShiftBigInt(ai, bi));
-  },
+    'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
+      i32Binary('rightLogShift', a, b, rightLogShiftOp),
 
-  'Int32Array, Int32Array': (a: Int32Array, b: Int32Array): Int32Array =>
-    i32Binary('rightLogShift', a, b, rightLogShiftOp),
-
-  'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
-    rest.reduce(
-      (acc: i32, val: i32): i32 => {
-        if (!Number.isInteger(val)) {
-          throw new Error('Integers expected in function rightLogShift');
-        }
-        return acc >>> val;
-      },
-      (a >>> b) as i32
-    ),
-});
+    'number, number, ...number': (a: i32, b: i32, rest: i32[]): i32 =>
+      rest.reduce(
+        (acc: i32, val: i32): i32 => {
+          if (!Number.isInteger(val)) {
+            throw new Error('Integers expected in function rightLogShift');
+          }
+          return acc >>> val;
+        },
+        (a >>> b) as i32
+      ),
+  })
+);
 
 // =============================================================================
 // Barrel
