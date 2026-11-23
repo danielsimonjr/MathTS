@@ -326,14 +326,17 @@ export const createQr = /* #__PURE__ */ factory(
 
     /**
      * Householder needs square roots, so Fraction cells cannot stay in ℚ.
-     * Promote them to IEEE numbers (valueOf) and keep the existing number path.
+     * Promote them to IEEE numbers (valueOf). Read missing entries as zero,
+     * like the matrix package decomposition reader.
      */
-    function promoteFractionEntries(data: unknown[][]): void {
+    function normalizeQrEntries(data: unknown[][]): void {
       for (let r = 0; r < data.length; r++) {
         const row = data[r];
         for (let c = 0; c < row.length; c++) {
           const v = row[c];
-          if (isFraction(v)) {
+          if (v === null || v === undefined) {
+            row[c] = 0;
+          } else if (isFraction(v)) {
             row[c] = Number((v as { valueOf(): unknown }).valueOf());
           }
         }
@@ -605,9 +608,13 @@ export const createQr = /* #__PURE__ */ factory(
      */
     function _denseQRScaled(m: DenseMatrix): QRResult {
       let src = m;
-      if ((m._data as unknown[][]).some((row) => row.some(isFraction))) {
+      if (
+        (m._data as unknown[][]).some(
+          (row) => row.includes(null) || row.includes(undefined) || row.some(isFraction)
+        )
+      ) {
         src = m.clone();
-        promoteFractionEntries(src._data as unknown[][]);
+        normalizeQrEntries(src._data as unknown[][]);
       }
       const data = src._data as unknown[][];
       if (data.length === 0) return _denseQRimpl(src, true);
