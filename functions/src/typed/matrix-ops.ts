@@ -16,6 +16,8 @@ import {
   eig,
   svd,
   cholesky as matrixCholesky,
+  decompositionInputToNestedArray,
+  type DecompositionMatrixInput,
   cond as matrixCond,
   norm2 as matrixNorm2,
   normFro as matrixNormFro,
@@ -270,7 +272,7 @@ export interface CholeskyResult {
  * diagonal entries. The matrix must be symmetric and positive definite,
  * otherwise an error is thrown.
  *
- * @param A - Symmetric positive-definite matrix (n x n)
+ * @param input - Symmetric positive-definite matrix (n x n)
  * @returns Object with L (lower triangular factor)
  * @throws Error if matrix is not symmetric or not positive definite
  *
@@ -278,7 +280,8 @@ export interface CholeskyResult {
  * cholesky([[4,2],[2,3]])
  * // => { L: [[2,0],[1, Math.sqrt(2)]] }
  */
-export function cholesky(A: number[][]): CholeskyResult {
+export function cholesky(input: DecompositionMatrixInput): CholeskyResult {
+  const A = decompositionInputToNestedArray(input);
   const n = assertSquare(A, 'cholesky');
   const tol = 1e-10;
 

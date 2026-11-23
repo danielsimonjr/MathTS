@@ -8,7 +8,7 @@
 import { DenseMatrix, assertNestedEntry, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
 import { arraySize } from '@danielsimonjr/mathts-core/internal';
-import { densifyForSolver } from './densify.js';
+import { DEFAULT_SOLVER_MAX_ELEMENTS, densifyForSolver } from './densify.js';
 import { implicitNumber } from './entry-rule.js';
 import { denseReader } from '../types/dense/storage.js';
 
@@ -19,6 +19,13 @@ export interface PackedMatrixDescriptor {
   cols: number;
 }
 
+/** Matrix container supplied by the mathjs-compatible bridge. */
+interface BoxedDecompositionMatrix {
+  readonly isMatrix: boolean;
+  size(): number[];
+  toArray(): unknown;
+}
+
 /**
  * Inputs accepted by matrix-package dense decompositions. A `SparseMatrix` is
  * densified with `densifyForSolver` before the factorization runs, so the element
@@ -26,10 +33,15 @@ export interface PackedMatrixDescriptor {
  * a second loaded copy of this package is accepted.
  */
 export type DecompositionMatrixInput =
-  DenseMatrix | SparseMatrix | number[][] | Float64Array | PackedMatrixDescriptor;
+  | DenseMatrix
+  | SparseMatrix
+  | BoxedDecompositionMatrix
+  | number[][]
+  | Float64Array
+  | PackedMatrixDescriptor;
 
 const ACCEPTED_TYPES_MSG =
-  'DenseMatrix, SparseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }';
+  'DenseMatrix, SparseMatrix, boxed Matrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }';
 
 function isNestedNumberMatrix(value: unknown): value is number[][] {
   if (!Array.isArray(value)) {
@@ -203,6 +215,31 @@ function resolveDimensions(input: DecompositionMatrixInput): {
     const { rows, cols, data } = input;
     return { rows, cols, nested: nestedFromPacked(data, rows, cols) };
   }
+  if (
+    input !== null &&
+    typeof input === 'object' &&
+    'isMatrix' in input &&
+    input.isMatrix === true &&
+    typeof input.size === 'function' &&
+    'toArray' in input &&
+    typeof input.toArray === 'function'
+  ) {
+    const shape = input.size();
+    if (shape.length !== 2 || shape.some((d) => !Number.isSafeInteger(d) || d < 0)) {
+      throw new RangeError('Matrix decomposition requires a two-dimensional matrix');
+    }
+    const [rows, cols] = shape;
+    if (rows * cols > DEFAULT_SOLVER_MAX_ELEMENTS) {
+      throw new RangeError(`Matrix ${rows}x${cols} is too large to copy for a dense solver`);
+    }
+    const data = input.toArray();
+    if (!isNestedNumberMatrix(data)) return invalidDecompositionInput(input);
+    const actual = nestedMatrixShape(data);
+    if (actual.rows !== rows || (rows !== 0 && actual.cols !== cols)) {
+      throw new RangeError('Matrix decomposition input data does not match its shape');
+    }
+    return { rows, cols, nested: numberEntries(data, rows, cols) };
+  }
   return invalidDecompositionInput(input);
 }
 
@@ -254,10 +291,10 @@ function copyNestedRows(nested: number[][], transpose: boolean): number[][] {
 export function decompositionSource(input: DecompositionMatrixInput): DecompositionSource {
   const reader = isDenseMatrix(input) ? denseReader(input) : null;
   if (reader) return reader;
-  const nested = decompositionInputToNestedArray(input);
+  const { nested, rows, cols } = resolveDimensions(input);
   return {
-    rows: nested.length,
-    cols: nested[0]?.length ?? 0,
+    rows,
+    cols,
     copyRows: (transpose) => copyNestedRows(nested, transpose),
     sumOfSquares: () => {
       let sum = 0;
@@ -289,9 +326,6 @@ export function decompositionInputToDenseMatrix(input: DecompositionMatrixInput)
   }
   if (isPackedMatrixDescriptor(input)) {
     return new DenseMatrix(input.rows, input.cols, new Float64Array(input.data));
-  }
-  if (!isNestedNumberMatrix(input)) {
-    invalidDecompositionInput(input);
   }
   const { rows, cols, nested } = resolveDimensions(input);
   return new DenseMatrix(rows, cols, nested);
