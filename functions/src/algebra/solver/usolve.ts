@@ -252,7 +252,7 @@ export const createUsolve = /* #__PURE__ */ factory(
         let xj: unknown;
 
         const vjj = mdata[j][j];
-        if (typeof vjj === 'number' ? vjj === 0 : equalScalar(vjj, 0)) {
+        if (isZeroEntry(vjj, equalScalar)) {
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 
@@ -325,7 +325,7 @@ export const createUsolve = /* #__PURE__ */ factory(
           }
         }
 
-        if (typeof vjj === 'number' ? vjj === 0 : equalScalar(vjj, 0)) {
+        if (isZeroEntry(vjj, equalScalar)) {
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 
