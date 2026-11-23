@@ -46,6 +46,13 @@ interface Dependencies {
   mathWithTransform: Record<string, unknown>;
 }
 
+const parsedNodeScopes = new WeakMap<MathNode, Record<string, unknown>>();
+
+/** Bind a parsed node whose constructor is shared across runtime math scopes. */
+export function bindParsedNodeScope(node: MathNode, math: Record<string, unknown>): void {
+  parsedNodeScopes.set(node, math);
+}
+
 const name = 'Node';
 const dependencies = ['mathWithTransform'];
 
@@ -117,7 +124,7 @@ export const createNode = /* #__PURE__ */ factory(
        *                variables.
        */
       compile(): CompiledExpression {
-        const expr = this._compile(mathWithTransform, {});
+        const expr = this._compile(parsedNodeScopes.get(this) ?? mathWithTransform, {});
         const args: Record<string, unknown> = {};
         const context: unknown = null;
 

@@ -63,7 +63,10 @@ export interface FactoryFunction<_TDeps = unknown, TResult = unknown> {
 /**
  * Type for the create callback function
  */
-export type CreateFunction<TDeps extends object, TResult> = (dependencies: TDeps) => TResult;
+export type CreateFunction<TDeps extends object, TResult> = (
+  dependencies: TDeps,
+  supplied?: Record<string, unknown>
+) => TResult;
 
 /**
  * Supplies default dependencies for a factory. `supplied` is the scope the
@@ -134,7 +137,7 @@ export function factory<
 
     assertDependencies(name, dependencies, resolved);
 
-    return create(deps);
+    return create(deps, scope);
   }
 
   assertAndCreate.isFactory = true as const;
