@@ -31,24 +31,17 @@ describe('dogfood G32b formatting and units', () => {
     expect(huge.d).toBe(3);
   });
 
-  it('#744 size formats as [2, 3] when config.matrix is Matrix', () => {
-    mt.config({ matrix: 'Matrix' });
-    const s = mt.size(mt.zeros(2, 3));
-    expect(String(s)).toBe('[2, 3]');
-    expect(s.constructor.name).toBe('MathJSDenseMatrix');
-    expect(
-      String(
+  it('size returns an Array in both matrix modes, as in mathjs 15', () => {
+    for (const matrix of ['Matrix', 'Array'] as const) {
+      mt.config({ matrix });
+      expect(mt.size(mt.zeros(2, 3))).toEqual([2, 3]);
+      expect(
         mt.size([
           [1, 2, 3],
           [4, 5, 6],
         ])
-      )
-    ).toBe('[2, 3]');
-
-    mt.config({ matrix: 'Array' });
-    const asArray = mt.size(mt.zeros(2, 3));
-    expect(Array.isArray(asArray)).toBe(true);
-    expect(asArray).toEqual([2, 3]);
+      ).toEqual([2, 3]);
+    }
     mt.config({ matrix: 'Matrix' });
   });
 

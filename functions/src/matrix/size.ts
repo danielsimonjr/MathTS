@@ -33,8 +33,7 @@ export const createSize = /* #__PURE__ */ factory(name, dependencies, ({ typed }
    * Calculate the size of a matrix or scalar. Always returns an Array containing numbers.
    *
    * Note that in mathjs v14 and older, function size could return a Matrix depending on
-   * the input type and configuration. The compat `math.size` applies that config; this
-   * factory always returns a number array so internal callers can read `.length` / `.join`.
+   * the input type and configuration. Mathjs 15 returns a plain array for every input.
    *
    * Syntax:
    *
