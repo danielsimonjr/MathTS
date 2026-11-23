@@ -29,7 +29,7 @@ describe('Parallel Float64Array overloads — arithmetic unary (tanh)', () => {
   it('tanh Float64Array matches scalar overload element-wise', async () => {
     // 250 values > threshold of 64, so the worker path is taken.
     const xs = Float64Array.from({ length: 250 }, (_, i) => -5 + i * 0.04);
-    const result = await (tanh(xs) as Promise<Float64Array>);
+    const result = await (tanh(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(tanh(xs[i]) as number, 12);

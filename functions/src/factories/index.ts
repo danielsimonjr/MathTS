@@ -1,3 +1,5 @@
+import type { MathNode } from '@danielsimonjr/mathts-expression';
+import type { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 /**
  * Activated mathjs leaf factory functions.
  *
@@ -26,6 +28,29 @@ import type {
   PublicMedian,
   PublicMode,
 } from '../typed/public-type-exports.js';
+
+type ScalarValue = number | CoreComplex | CoreBigNumber | CoreFraction;
+type FactoryCallable<Factory extends (...args: never[]) => unknown, Call> = Omit<
+  ReturnType<Factory>,
+  never
+> &
+  Call;
+
+interface MatrixSliceCall {
+  <T>(value: readonly (readonly T[])[], index: number): T[][];
+  (value: BridgeMatrix, index: number): BridgeMatrix;
+  (value: unknown, index: number): unknown[] | BridgeMatrix;
+}
+
+interface MatrixFromVectorsCall {
+  <T>(...vectors: readonly (readonly T[])[]): T[][];
+  (...vectors: (readonly unknown[] | BridgeMatrix)[]): unknown[][] | BridgeMatrix;
+}
+
+interface SpectralResult<Container> {
+  values: Container;
+  eigenvectors?: { value: ScalarValue; vector: Container }[];
+}
 
 // ---------------------------------------------------------------------------
 // Tier 1: all imports
@@ -229,7 +254,13 @@ export const isNegative = createIsNegative(factoryScope as Parameters<typeof cre
 export const isNumeric = createIsNumeric(factoryScope as Parameters<typeof createIsNumeric>[0]);
 export const isPositive = createIsPositive(factoryScope as Parameters<typeof createIsPositive>[0]);
 export const isPrime = createIsPrime(factoryScope as Parameters<typeof createIsPrime>[0]);
-export const numeric = createNumeric(factoryScope as Parameters<typeof createNumeric>[0]);
+export const numeric = createNumeric(factoryScope as Parameters<typeof createNumeric>[0]) as {
+  (value: unknown, outputType?: 'number'): number;
+  (value: unknown, outputType: 'bigint'): bigint;
+  (value: unknown, outputType: 'BigNumber'): CoreBigNumber;
+  (value: unknown, outputType: 'Fraction'): CoreFraction;
+  (value: unknown, outputType: string): number | bigint | CoreBigNumber | CoreFraction;
+};
 export const typeOf = createTypeOf(factoryScope as Parameters<typeof createTypeOf>[0]);
 
 // ---------------------------------------------------------------------------
@@ -441,7 +472,16 @@ factoryScope.ones = ones;
 export const diag = createDiag(factoryScope as Parameters<typeof createDiag>[0]);
 factoryScope.diag = diag;
 
-export const kron = createKron(factoryScope as Parameters<typeof createKron>[0]);
+export const kron = createKron(factoryScope as Parameters<typeof createKron>[0]) as FactoryCallable<
+  typeof createKron,
+  {
+    (left: readonly unknown[], right: readonly unknown[]): unknown[];
+    (
+      left: readonly unknown[] | BridgeMatrix,
+      right: readonly unknown[] | BridgeMatrix
+    ): unknown[] | BridgeMatrix;
+  }
+>;
 factoryScope.kron = kron;
 
 export const matrixFromFunction = createMatrixFromFunction(
@@ -451,12 +491,12 @@ factoryScope.matrixFromFunction = matrixFromFunction;
 
 export const matrixFromColumns = createMatrixFromColumns(
   factoryScope as Parameters<typeof createMatrixFromColumns>[0]
-);
+) as FactoryCallable<typeof createMatrixFromColumns, MatrixFromVectorsCall>;
 factoryScope.matrixFromColumns = matrixFromColumns;
 
 export const matrixFromRows = createMatrixFromRows(
   factoryScope as Parameters<typeof createMatrixFromRows>[0]
-);
+) as FactoryCallable<typeof createMatrixFromRows, MatrixFromVectorsCall>;
 factoryScope.matrixFromRows = matrixFromRows;
 
 export const count = createCount(factoryScope as Parameters<typeof createCount>[0]);
@@ -567,10 +607,16 @@ factoryScope.inv = factoryInv;
 // (factory path is pure-JS over boxed number[][], ~144ms for 80×80). Singular
 // and all other inputs delegate to the factory unchanged.
 export const inv = ((m: unknown) =>
-  acceleratedInv(
-    m,
-    factoryInv as unknown as (x: unknown) => unknown
-  )) as unknown as typeof factoryInv;
+  acceleratedInv(m, factoryInv as unknown as (x: unknown) => unknown)) as FactoryCallable<
+  typeof createInv,
+  {
+    (value: number): number;
+    (value: readonly (readonly number[])[]): number[][];
+    (value: DenseMatrix): DenseMatrix;
+    (value: BridgeMatrix): BridgeMatrix;
+    (value: unknown): ScalarValue | ScalarValue[] | ScalarValue[][] | BridgeMatrix;
+  }
+>;
 // `divide(scalar, square matrix)` multiplies by this `inv` (#960). Registered here because the
 // typed arithmetic module cannot import the factory layer.
 registerDivideInverse(inv as unknown as (m: unknown) => unknown);
@@ -875,7 +921,13 @@ factoryScope.composition = composition;
 // matrix
 export const partitionSelect = createPartitionSelect(
   factoryScope as Parameters<typeof createPartitionSelect>[0]
-);
+) as FactoryCallable<
+  typeof createPartitionSelect,
+  {
+    <T>(values: T[], index: number, compare?: 'asc' | 'desc' | ((a: T, b: T) => number)): T;
+    (values: unknown, index: number, compare?: unknown): unknown;
+  }
+>;
 factoryScope.partitionSelect = partitionSelect;
 
 export const qr = createQr(factoryScope as Parameters<typeof createQr>[0]);
@@ -1161,6 +1213,8 @@ import { createCreateUnit } from '../type/unit/function/createUnit.js';
 import { createUnitFunction } from '../type/unit/function/unit.js';
 import {
   type BigNumber as CoreBigNumber,
+  type Complex as CoreComplex,
+  type UnitInstance as CoreUnit,
   Fraction as CoreFraction,
   isBigNumber as coreIsBigNumber,
   isFraction as coreIsFraction,
@@ -1209,10 +1263,36 @@ export const factory_subtract = createSubtract(
 );
 factoryScope.subtract = factory_subtract;
 
-export const factory_divide = createDivide(factoryScope as Parameters<typeof createDivide>[0]);
+export const factory_divide = createDivide(
+  factoryScope as Parameters<typeof createDivide>[0]
+) as FactoryCallable<
+  typeof createDivide,
+  {
+    (a: number, b: number): number;
+    (
+      ...args: unknown[]
+    ):
+      | ScalarValue
+      | bigint
+      | CoreUnit
+      | MathNode
+      | unknown[]
+      | BridgeMatrix
+      | DenseMatrix
+      | SparseMatrix;
+  }
+>;
 factoryScope.divide = factory_divide;
 
-export const ifft = createIfft(factoryScope as Parameters<typeof createIfft>[0]);
+export const ifft = createIfft(factoryScope as Parameters<typeof createIfft>[0]) as FactoryCallable<
+  typeof createIfft,
+  {
+    (values: readonly (number | CoreComplex)[] | Float64Array, length?: number): CoreComplex[];
+    (values: readonly (readonly (number | CoreComplex)[])[], length?: number): CoreComplex[][];
+    (values: BridgeMatrix, length?: number): BridgeMatrix;
+    (values: unknown, length?: number): unknown[] | BridgeMatrix;
+  }
+>;
 factoryScope.ifft = ifft;
 
 const _Index = createIndexClass(factoryScope as Parameters<typeof createIndexClass>[0]);
@@ -1268,10 +1348,15 @@ import { createIndex as createIndexFn } from '../type/matrix/function/index.js';
 const _Spa = createSpaClass(factoryScope as Parameters<typeof createSpaClass>[0]);
 factoryScope.Spa = _Spa;
 
-export const column = createColumn(factoryScope as Parameters<typeof createColumn>[0]);
+export const column = createColumn(
+  factoryScope as Parameters<typeof createColumn>[0]
+) as FactoryCallable<typeof createColumn, MatrixSliceCall>;
 factoryScope.column = column;
 
-export const row = createRow(factoryScope as Parameters<typeof createRow>[0]);
+export const row = createRow(factoryScope as Parameters<typeof createRow>[0]) as FactoryCallable<
+  typeof createRow,
+  MatrixSliceCall
+>;
 factoryScope.row = row;
 
 export const cross = createCross(factoryScope as Parameters<typeof createCross>[0]);
@@ -1280,7 +1365,16 @@ factoryScope.cross = cross;
 export const diff = createDiff(factoryScope as Parameters<typeof createDiff>[0]);
 factoryScope.diff = diff;
 
-export const sqrtm = createSqrtm(factoryScope as Parameters<typeof createSqrtm>[0]);
+export const sqrtm = createSqrtm(
+  factoryScope as Parameters<typeof createSqrtm>[0]
+) as FactoryCallable<
+  typeof createSqrtm,
+  {
+    (values: readonly (readonly ScalarValue[])[]): ScalarValue[][];
+    (values: BridgeMatrix): BridgeMatrix;
+    (values: unknown): ScalarValue | ScalarValue[] | ScalarValue[][] | BridgeMatrix;
+  }
+>;
 factoryScope.sqrtm = sqrtm;
 
 export const lup = createLup(factoryScope as Parameters<typeof createLup>[0]);
@@ -1408,7 +1502,20 @@ export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean; matricize?: b
         factoryScope.matrix as (data: unknown[]) => unknown
       )
     : correctEigs(m, opts, factoryFn);
-}) as unknown as typeof factoryEigs;
+}) as FactoryCallable<
+  typeof createEigs,
+  {
+    (
+      value: readonly (readonly ScalarValue[])[],
+      opts?: { eigenvectors?: boolean; matricize?: boolean }
+    ): SpectralResult<ScalarValue[]>;
+    (
+      value: BridgeMatrix,
+      opts?: { eigenvectors?: boolean; matricize?: boolean }
+    ): SpectralResult<BridgeMatrix | ScalarValue[]>;
+    (value: unknown, options?: unknown): SpectralResult<BridgeMatrix | ScalarValue[]>;
+  }
+>;
 
 export const lusolve = createLusolve(factoryScope as Parameters<typeof createLusolve>[0]);
 factoryScope.lusolve = lusolve;
@@ -1726,8 +1833,21 @@ export const fermiCoupling = createFermiCoupling(
 // Collision-free named exports — the scope already holds the constructors.
 // ---------------------------------------------------------------------------
 
-export const complex = factoryScope.complex as (re?: number, im?: number) => unknown;
-export const fraction = factoryScope.fraction as (n: number, d?: number) => unknown;
+export const complex = factoryScope.complex as {
+  (re?: number | string | bigint | boolean | null | ScalarValue, im?: number): CoreComplex;
+  (value: readonly unknown[]): unknown[];
+  (value: BridgeMatrix): BridgeMatrix;
+  (value: unknown): CoreComplex | unknown[] | BridgeMatrix;
+};
+export const fraction = factoryScope.fraction as {
+  (
+    n: number | bigint | string | boolean | CoreBigNumber | CoreFraction,
+    d?: number | bigint
+  ): CoreFraction;
+  (value: readonly unknown[]): unknown[];
+  (value: BridgeMatrix): BridgeMatrix;
+  (value: unknown): CoreFraction | unknown[] | BridgeMatrix;
+};
 /**
  * Convert a value to BigNumber. An Array or a Matrix converts element by element, a Unit
  * converts its value, a Fraction and a bigint convert without loss, and null gives 0.

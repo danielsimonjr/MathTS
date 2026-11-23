@@ -149,9 +149,9 @@ describe('trigonometry — Float64Array sequential fallback (below parallel thre
   const small = Float64Array.from([0.1, 0.3, 0.7, 1.1]);
 
   it('csc/sec/cot sequential', async () => {
-    const c = await (csc(small) as Promise<Float64Array>);
-    const s = await (sec(small) as Promise<Float64Array>);
-    const t = await (cot(small) as Promise<Float64Array>);
+    const c = await (csc(small) as Float64Array);
+    const s = await (sec(small) as Float64Array);
+    const t = await (cot(small) as Float64Array);
     for (let i = 0; i < small.length; i++) {
       expect(c[i]).toBeCloseTo(1 / Math.sin(small[i]), 10);
       expect(s[i]).toBeCloseTo(1 / Math.cos(small[i]), 10);
@@ -161,9 +161,9 @@ describe('trigonometry — Float64Array sequential fallback (below parallel thre
 
   it('asin/acos/atan sequential', async () => {
     const xs = Float64Array.from([-0.9, -0.2, 0.3, 0.8]);
-    const a = await (asin(xs) as Promise<Float64Array>);
-    const b = await (acos(xs) as Promise<Float64Array>);
-    const c = await (atan(xs) as Promise<Float64Array>);
+    const a = await (asin(xs) as Float64Array);
+    const b = await (acos(xs) as Float64Array);
+    const c = await (atan(xs) as Float64Array);
     for (let i = 0; i < xs.length; i++) {
       expect(a[i]).toBeCloseTo(Math.asin(xs[i]), 10);
       expect(b[i]).toBeCloseTo(Math.acos(xs[i]), 10);
@@ -172,9 +172,9 @@ describe('trigonometry — Float64Array sequential fallback (below parallel thre
   });
 
   it('asinh/acosh/atanh sequential', async () => {
-    const a = await (asinh(Float64Array.from([0.1, 0.5, 1, 2])) as Promise<Float64Array>);
-    const b = await (acosh(Float64Array.from([1, 1.5, 2, 3])) as Promise<Float64Array>);
-    const c = await (atanh(Float64Array.from([-0.5, 0, 0.3, 0.6])) as Promise<Float64Array>);
+    const a = await (asinh(Float64Array.from([0.1, 0.5, 1, 2])) as Float64Array);
+    const b = await (acosh(Float64Array.from([1, 1.5, 2, 3])) as Float64Array);
+    const c = await (atanh(Float64Array.from([-0.5, 0, 0.3, 0.6])) as Float64Array);
     expect(a[1]).toBeCloseTo(Math.asinh(0.5), 10);
     expect(b[2]).toBeCloseTo(Math.acosh(2), 10);
     expect(c[3]).toBeCloseTo(Math.atanh(0.6), 10);

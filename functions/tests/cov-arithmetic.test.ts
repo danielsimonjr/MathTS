@@ -328,11 +328,11 @@ describe('arithmetic — Float64Array sequential fallbacks (below threshold)', (
   const xs = Float64Array.from([1, 4, 9, 16]);
 
   it('sign/cube/cbrt sequential', async () => {
-    const s = await (sign(Float64Array.from([-2, 0, 3])) as Promise<Float64Array>);
+    const s = await (sign(Float64Array.from([-2, 0, 3])) as Float64Array);
     expect(Array.from(s)).toEqual([-1, 0, 1]);
-    const c = await (cube(Float64Array.from([2, 3])) as Promise<Float64Array>);
+    const c = await (cube(Float64Array.from([2, 3])) as Float64Array);
     expect(Array.from(c)).toEqual([8, 27]);
-    const cb = await (cbrt(Float64Array.from([8, 27])) as Promise<Float64Array>);
+    const cb = await (cbrt(Float64Array.from([8, 27])) as Float64Array);
     expect(cb[0]).toBeCloseTo(2, 10);
     expect(cb[1]).toBeCloseTo(3, 10);
   });
@@ -340,32 +340,32 @@ describe('arithmetic — Float64Array sequential fallbacks (below threshold)', (
   it('log10/log2/log1p/expm1 sequential', async () => {
     const l10 = log10(Float64Array.from([1, 10, 100]));
     expect(Array.from(l10).map((v) => Math.round(v))).toEqual([0, 1, 2]);
-    const l2 = await (log2(Float64Array.from([1, 2, 8])) as Promise<Float64Array>);
+    const l2 = await (log2(Float64Array.from([1, 2, 8])) as Float64Array);
     expect(Array.from(l2).map((v) => Math.round(v))).toEqual([0, 1, 3]);
-    const l1p = await (log1p(Float64Array.from([0, 1])) as Promise<Float64Array>);
+    const l1p = await (log1p(Float64Array.from([0, 1])) as Float64Array);
     expect(l1p[1]).toBeCloseTo(Math.log1p(1), 10);
-    const em1 = await (expm1(Float64Array.from([0, 1])) as Promise<Float64Array>);
+    const em1 = await (expm1(Float64Array.from([0, 1])) as Float64Array);
     expect(em1[1]).toBeCloseTo(Math.expm1(1), 10);
   });
 
   it('round/floor/ceil/fix sequential', async () => {
     const vals = Float64Array.from([1.4, 1.6, -1.4, -1.6]);
-    const r = await (round(vals) as Promise<Float64Array>);
+    const r = await (round(vals) as Float64Array);
     expect(Array.from(r)).toEqual([1, 2, -1, -2]);
-    const f = await (floor(vals) as Promise<Float64Array>);
+    const f = await (floor(vals) as Float64Array);
     expect(Array.from(f)).toEqual([1, 1, -2, -2]);
-    const ce = await (ceil(vals) as Promise<Float64Array>);
+    const ce = await (ceil(vals) as Float64Array);
     expect(Array.from(ce)).toEqual([2, 2, -1, -1]);
-    const fx = await (fix(vals) as Promise<Float64Array>);
+    const fx = await (fix(vals) as Float64Array);
     expect(Array.from(fx)).toEqual([1, 1, -1, -1]);
   });
 
   it('sinh/cosh/tanh sequential', async () => {
-    const sh = await (sinh(Float64Array.from([0, 1])) as Promise<Float64Array>);
+    const sh = await (sinh(Float64Array.from([0, 1])) as Float64Array);
     expect(sh[1]).toBeCloseTo(Math.sinh(1), 10);
-    const ch = await (cosh(Float64Array.from([0, 1])) as Promise<Float64Array>);
+    const ch = await (cosh(Float64Array.from([0, 1])) as Float64Array);
     expect(ch[1]).toBeCloseTo(Math.cosh(1), 10);
-    const th = await (tanh(Float64Array.from([0, 1])) as Promise<Float64Array>);
+    const th = await (tanh(Float64Array.from([0, 1])) as Float64Array);
     expect(th[1]).toBeCloseTo(Math.tanh(1), 10);
     expect(xs.length).toBe(4);
   });

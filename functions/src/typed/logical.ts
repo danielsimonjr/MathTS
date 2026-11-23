@@ -222,7 +222,10 @@ export const nullish = mathTyped('nullish', {
   // Since typed-function would convert known types above, this signature
   // effectively receives only null, undefined, or unconvertible values.
   'any, any': (a: unknown, b: unknown): unknown => a ?? b,
-});
+}) as {
+  <Left, Right>(left: Left, right: Right): Left extends null | undefined ? Right : Left;
+  readonly signatures: Readonly<Record<string, (...args: unknown[]) => unknown>>;
+};
 
 // =============================================================================
 // Barrel export

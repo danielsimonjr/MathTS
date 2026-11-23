@@ -344,6 +344,246 @@ export interface ParallelFFTCallable {
 }
 export type PublicParallelFFT = ParallelFFTCallable;
 
+export interface CscCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: UnitInstance): number | Complex;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicCsc = CscCallable;
+
+export interface SecCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: UnitInstance): number | Complex;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicSec = SecCallable;
+
+export interface CotCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: UnitInstance): number | Complex;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicCot = CotCallable;
+
+export interface AsinCallable {
+  (a: number): number | Complex;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): (number | Complex)[];
+  (a: number[][]): (number | Complex)[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix | (number | Complex)[][];
+  (a: SparseMatrix): SparseMatrix | (number | Complex)[][];
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAsin = AsinCallable;
+
+export interface AcosCallable {
+  (a: number): number | Complex;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): (number | Complex)[];
+  (a: number[][]): (number | Complex)[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix | (number | Complex)[][];
+  (a: SparseMatrix): SparseMatrix | (number | Complex)[][];
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAcos = AcosCallable;
+
+export interface AtanCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAtan = AtanCallable;
+
+export interface AcscCallable {
+  (a: number): number | Complex;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: number[]): (number | Complex)[];
+  (a: number[][]): (number | Complex)[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix | (number | Complex)[][];
+  (a: SparseMatrix): SparseMatrix | (number | Complex)[][];
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAcsc = AcscCallable;
+
+export interface AsecCallable {
+  (a: number): number | Complex;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: number[]): (number | Complex)[];
+  (a: number[][]): (number | Complex)[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix | (number | Complex)[][];
+  (a: SparseMatrix): SparseMatrix | (number | Complex)[][];
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAsec = AsecCallable;
+
+export interface AcotCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAcot = AcotCallable;
+
+export interface AsinhCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAsinh = AsinhCallable;
+
+export interface AcoshCallable {
+  (a: number): number | Complex;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): (number | Complex)[];
+  (a: number[][]): (number | Complex)[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix | (number | Complex)[][];
+  (a: SparseMatrix): SparseMatrix | (number | Complex)[][];
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAcosh = AcoshCallable;
+
+export interface AtanhCallable {
+  (a: number): number | Complex;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): (number | Complex)[];
+  (a: number[][]): (number | Complex)[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix | (number | Complex)[][];
+  (a: SparseMatrix): SparseMatrix | (number | Complex)[][];
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicAtanh = AtanhCallable;
+
+export interface SinhCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicSinh = SinhCallable;
+
+export interface CoshCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicCosh = CoshCallable;
+
+export interface TanhCallable {
+  (a: number): number;
+  (a: Complex): Complex;
+  (a: BigNumber): BigNumber;
+  (a: NumberTypedArray): Float64Array;
+  (a: number[]): number[];
+  (a: number[][]): number[][];
+  (a: readonly ElementwiseLeaf[]): unknown[];
+  (a: DenseMatrix): DenseMatrix;
+  (a: SparseMatrix): SparseMatrix;
+  (a: unknown): unknown;
+  readonly name: string;
+  readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
+}
+export type PublicTanh = TanhCallable;
+
 export interface EvaluateCallable {
   (expr: string, scope?: Record<string, unknown>, options?: PhysicsEvaluateOptions): number;
   (exprs: string[], scope?: Record<string, unknown>, options?: PhysicsEvaluateOptions): number[];

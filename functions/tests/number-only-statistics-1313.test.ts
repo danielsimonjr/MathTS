@@ -15,7 +15,7 @@ describe('number-only statistics reject boxed data (#1313)', () => {
     ['BigNumber', bignumber(2)],
     ['Fraction', fraction(3, 2)],
   ])('reports %s in each numeric input path', async (kind, boxed) => {
-    const exact = boxed as number;
+    const exact = boxed as unknown as number;
     const input = [1, exact, 3];
     const message = (name: string) => new RegExp(`^${name}: expects number data, got a ${kind}`);
     await expect(chiSquareTest(input, [2, 2, 2])).rejects.toThrow(message('chiSquareTest'));

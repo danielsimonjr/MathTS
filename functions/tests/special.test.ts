@@ -245,20 +245,20 @@ describe('Special function parallel array overloads', () => {
 
   it('single-argument overloads match the scalar implementation', async () => {
     const xs = Float64Array.from({ length: 300 }, (_, i) => 0.05 + i * 0.03);
-    const cases: Array<[Promise<Float64Array>, (v: number) => number]> = [
-      [erfc(xs) as Promise<Float64Array>, (v) => erfc(v) as number],
-      [digamma(xs) as Promise<Float64Array>, (v) => digamma(v) as number],
-      [besselJ0(xs) as Promise<Float64Array>, (v) => besselJ0(v) as number],
-      [besselY1(xs) as Promise<Float64Array>, (v) => besselY1(v) as number],
-      [lambertW(xs) as Promise<Float64Array>, (v) => lambertW(v) as number],
-      [erfi(xs) as Promise<Float64Array>, (v) => erfi(v) as number],
-      [expIntegralEi(xs) as Promise<Float64Array>, (v) => expIntegralEi(v) as number],
-      [fresnelC(xs) as Promise<Float64Array>, (v) => fresnelC(v) as number],
+    const cases: Array<[Float64Array, (v: number) => number]> = [
+      [erfc(xs) as Float64Array, (v) => erfc(v) as number],
+      [digamma(xs) as Float64Array, (v) => digamma(v) as number],
+      [besselJ0(xs) as Float64Array, (v) => besselJ0(v) as number],
+      [besselY1(xs) as Float64Array, (v) => besselY1(v) as number],
+      [lambertW(xs) as Float64Array, (v) => lambertW(v) as number],
+      [erfi(xs) as Float64Array, (v) => erfi(v) as number],
+      [expIntegralEi(xs) as Float64Array, (v) => expIntegralEi(v) as number],
+      [fresnelC(xs) as Float64Array, (v) => fresnelC(v) as number],
       // Airy Ai/Bi exercise both the |x|<=5 series and the x>5 asymptotic
       // branches (sample x reaches ~7.7) through the serialized worker kernel,
       // guarding the canonical airy scalars against scalar-vs-array drift.
-      [airyAi(xs) as Promise<Float64Array>, (v) => airyAi(v) as number],
-      [airyBi(xs) as Promise<Float64Array>, (v) => airyBi(v) as number],
+      [airyAi(xs) as Float64Array, (v) => airyAi(v) as number],
+      [airyBi(xs) as Float64Array, (v) => airyBi(v) as number],
     ];
     for (const [arrPromise, scalar] of cases) {
       const arr = await arrPromise;
@@ -273,14 +273,14 @@ describe('Special function parallel array overloads', () => {
     const xs = Float64Array.from({ length: 300 }, (_, i) => 0.1 + i * 0.03);
     const ms = Float64Array.from({ length: 300 }, (_, i) => (i / 300) * 0.98);
 
-    const jn = await (besselJ(3, xs) as Promise<Float64Array>);
-    const kn = await (besselK(2, xs) as Promise<Float64Array>);
-    const gi = await (gammainc(2, xs) as Promise<Float64Array>);
-    const bi = await (betainc(2, 3, ms) as Promise<Float64Array>);
-    const lp = await (legendreP(5, ms) as Promise<Float64Array>);
-    const ek = await (ellipticK(ms) as Promise<Float64Array>);
-    const ee = await (ellipticE(ms) as Promise<Float64Array>);
-    const bt = await (beta(xs, 3) as Promise<Float64Array>);
+    const jn = await (besselJ(3, xs) as Float64Array);
+    const kn = await (besselK(2, xs) as Float64Array);
+    const gi = await (gammainc(2, xs) as Float64Array);
+    const bi = await (betainc(2, 3, ms) as Float64Array);
+    const lp = await (legendreP(5, ms) as Float64Array);
+    const ek = await (ellipticK(ms) as Float64Array);
+    const ee = await (ellipticE(ms) as Float64Array);
+    const bt = await (beta(xs, 3) as Float64Array);
 
     for (const i of sample) {
       expect(jn[i]).toBeCloseTo(besselJ(3, xs[i]) as number, 9);

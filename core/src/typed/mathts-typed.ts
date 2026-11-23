@@ -102,6 +102,71 @@ export type SignatureImpl = (...args: never[]) => unknown;
 /** Signature record accepted by the MathTS typed factory (see {@link SignatureImpl}). */
 export type SignatureRecord = Record<string, SignatureImpl | ReferTo | ReferToSelf>;
 
+/** The union of the return types of the declared runtime signatures. */
+type SignatureResult<Impl> = Impl extends (...args: never[]) => infer Result
+  ? Result
+  : Impl extends ReferTo | ReferToSelf
+    ? unknown
+    : never;
+
+/** Signature keys with a concrete scalar or typed-array input at the call site. */
+interface DirectInputTypes {
+  number: number;
+  bigint: bigint;
+  boolean: boolean;
+  string: string;
+  Complex: Complex;
+  BigNumber: BigNumber;
+  Fraction: Fraction;
+  Float64Array: Float64Array;
+  Float32Array: Float32Array;
+  Int32Array: Int32Array;
+}
+
+type TrimSignature<Part extends string> = Part extends ` ${infer Rest}`
+  ? TrimSignature<Rest>
+  : Part extends `${infer Rest} `
+    ? TrimSignature<Rest>
+    : Part;
+
+type DirectArgument<Part extends string> = Part extends `${infer Left}|${infer Right}`
+  ? DirectArgument<Left> | DirectArgument<Right>
+  : TrimSignature<Part> extends keyof DirectInputTypes
+    ? DirectInputTypes[TrimSignature<Part>]
+    : never;
+
+type DirectArguments<Key extends string> = Key extends `${infer Head},${infer Tail}`
+  ? [DirectArgument<Head>] extends [never]
+    ? never
+    : [DirectArguments<Tail>] extends [never]
+      ? never
+      : [DirectArgument<Head>, ...DirectArguments<Tail>]
+  : [DirectArgument<Key>] extends [never]
+    ? never
+    : [DirectArgument<Key>];
+
+type DirectImplementations<Signatures extends SignatureRecord> = {
+  [Key in keyof Signatures & string]: DirectArguments<Key> extends never
+    ? never
+    : Signatures[Key] extends SignatureImpl
+      ? (...args: DirectArguments<Key>) => SignatureResult<Signatures[Key]>
+      : never;
+}[keyof Signatures & string];
+
+type FirstOverloads<Union> = (Union extends unknown ? (signature: Union) => void : never) extends (
+  signature: infer Overloads
+) => void
+  ? Overloads
+  : never;
+
+/**
+ * Use exact argument matches first. Keep the general call for dynamic dispatch,
+ * including conversions and signatures whose return value depends on runtime data.
+ */
+type TypedResult<Signatures extends SignatureRecord> = Omit<TypedFunction, never> &
+  FirstOverloads<DirectImplementations<Signatures>> &
+  ((...args: unknown[]) => SignatureResult<Signatures[keyof Signatures]>);
+
 /**
  * The MathTS typed-function factory type.
  *
@@ -112,8 +177,11 @@ export type SignatureRecord = Record<string, SignatureImpl | ReferTo | ReferToSe
  * overly-strict published call signatures while preserving every method).
  */
 export interface MathTSTyped extends Omit<TypedInstance, never> {
-  (name: string, signatures: SignatureRecord): TypedFunction;
-  (signatures: SignatureRecord): TypedFunction;
+  <Signatures extends SignatureRecord>(
+    name: string,
+    signatures: Signatures
+  ): TypedResult<Signatures>;
+  <Signatures extends SignatureRecord>(signatures: Signatures): TypedResult<Signatures>;
   // Mirror of typed-function's variadic overload (compose/merge form), kept so
   // `MathTSTyped` remains assignable to `TypedInstance`.
   (

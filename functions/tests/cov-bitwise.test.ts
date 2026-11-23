@@ -36,41 +36,41 @@ describe('bitwise — large Int32Array dispatch (>= WASM threshold)', () => {
   const sample = [0, 1, 100, N - 1];
 
   it('bitAnd large array matches JS oracle (no WASM module -> ComputePool)', async () => {
-    const r = await (bitAnd(a, b) as Promise<Int32Array>);
+    const r = await (bitAnd(a, b) as Int32Array);
     expect(r.length).toBe(N);
     for (const i of sample) expect(r[i]).toBe(a[i] & b[i]);
   });
 
   it('bitOr large array', async () => {
-    const r = await (bitOr(a, b) as Promise<Int32Array>);
+    const r = await (bitOr(a, b) as Int32Array);
     for (const i of sample) expect(r[i]).toBe(a[i] | b[i] | 0);
   });
 
   it('bitXor large array', async () => {
-    const r = await (bitXor(a, b) as Promise<Int32Array>);
+    const r = await (bitXor(a, b) as Int32Array);
     for (const i of sample) expect(r[i]).toBe((a[i] ^ b[i]) | 0);
   });
 
   it('bitNot large array', async () => {
-    const r = await (bitNot(a) as Promise<Int32Array>);
+    const r = await (bitNot(a) as Int32Array);
     for (const i of sample) expect(r[i]).toBe(~a[i]);
   });
 
   it('leftShift large array', async () => {
     const shifts = Int32Array.from({ length: N }, (_, i) => i % 31);
-    const r = await (leftShift(a, shifts) as Promise<Int32Array>);
+    const r = await (leftShift(a, shifts) as Int32Array);
     for (const i of sample) expect(r[i]).toBe((a[i] << shifts[i]) | 0);
   });
 
   it('rightArithShift large array', async () => {
     const shifts = Int32Array.from({ length: N }, (_, i) => i % 31);
-    const r = await (rightArithShift(a, shifts) as Promise<Int32Array>);
+    const r = await (rightArithShift(a, shifts) as Int32Array);
     for (const i of sample) expect(r[i]).toBe(a[i] >> shifts[i]);
   });
 
   it('rightLogShift large array', async () => {
     const shifts = Int32Array.from({ length: N }, (_, i) => i % 31);
-    const r = await (rightLogShift(a, shifts) as Promise<Int32Array>);
+    const r = await (rightLogShift(a, shifts) as Int32Array);
     for (const i of sample) expect(r[i]).toBe((a[i] >>> shifts[i]) | 0);
   });
 });

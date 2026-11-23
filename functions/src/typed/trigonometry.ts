@@ -1,3 +1,17 @@
+import type {
+  PublicCsc,
+  PublicSec,
+  PublicCot,
+  PublicAsin,
+  PublicAcos,
+  PublicAtan,
+  PublicAcsc,
+  PublicAsec,
+  PublicAcot,
+  PublicAsinh,
+  PublicAcosh,
+  PublicAtanh,
+} from './public-type-exports.js';
 /**
  * Typed Trigonometric Functions
  *
@@ -87,10 +101,10 @@ export const tan = mathTyped('tan', {
  * Cosecant function (1/sin)
  */
 export const csc = mathTyped('csc', {
-  number: (a: number) => 1 / Math.sin(a),
-  Complex: (a: Complex) => a.sin().inverse(),
-  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.sin()),
-  Unit: (a: UnitInstance) =>
+  number: (a: number): number => 1 / Math.sin(a),
+  Complex: (a: Complex): Complex => a.sin().inverse(),
+  BigNumber: (a: BigNumber): BigNumber => BigNumber.fromNumber(1).divide(a.sin()),
+  Unit: (a: UnitInstance): number | Complex =>
     trigFromAngleUnit(
       a,
       'csc',
@@ -101,16 +115,16 @@ export const csc = mathTyped('csc', {
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'csc', (x) => 1 / Math.sin(x)),
   'Array | Matrix': unaryCollection({ real: (x) => 1 / Math.sin(x), wasmKernel: 'csc' }),
-});
+}) as PublicCsc;
 
 /**
  * Secant function (1/cos)
  */
 export const sec = mathTyped('sec', {
-  number: (a: number) => 1 / Math.cos(a),
-  Complex: (a: Complex) => a.cos().inverse(),
-  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.cos()),
-  Unit: (a: UnitInstance) =>
+  number: (a: number): number => 1 / Math.cos(a),
+  Complex: (a: Complex): Complex => a.cos().inverse(),
+  BigNumber: (a: BigNumber): BigNumber => BigNumber.fromNumber(1).divide(a.cos()),
+  Unit: (a: UnitInstance): number | Complex =>
     trigFromAngleUnit(
       a,
       'sec',
@@ -121,16 +135,16 @@ export const sec = mathTyped('sec', {
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'sec', (x) => 1 / Math.cos(x)),
   'Array | Matrix': unaryCollection({ real: (x) => 1 / Math.cos(x), wasmKernel: 'sec' }),
-});
+}) as PublicSec;
 
 /**
  * Cotangent function (1/tan)
  */
 export const cot = mathTyped('cot', {
-  number: (a: number) => 1 / Math.tan(a),
-  Complex: (a: Complex) => a.tan().inverse(),
-  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a.tan()),
-  Unit: (a: UnitInstance) =>
+  number: (a: number): number => 1 / Math.tan(a),
+  Complex: (a: Complex): Complex => a.tan().inverse(),
+  BigNumber: (a: BigNumber): BigNumber => BigNumber.fromNumber(1).divide(a.tan()),
+  Unit: (a: UnitInstance): number | Complex =>
     trigFromAngleUnit(
       a,
       'cot',
@@ -141,7 +155,7 @@ export const cot = mathTyped('cot', {
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'cot', (x) => 1 / Math.tan(x)),
   'Array | Matrix': unaryCollection({ real: (x) => 1 / Math.tan(x), wasmKernel: 'cot' }),
-});
+}) as PublicCot;
 
 // =============================================================================
 // Inverse Trigonometric Functions
@@ -151,44 +165,44 @@ export const cot = mathTyped('cot', {
  * Arc sine (inverse sine)
  */
 export const asin = mathTyped('asin', {
-  number: (a: number) => {
+  number: (a: number): number | Complex => {
     if (staysRealUnitInterval(a)) return Math.asin(a);
     return new Complex(a, 0).asin();
   },
-  Complex: (a: Complex) => a.asin(),
-  BigNumber: (a: BigNumber) => a.asin(),
+  Complex: (a: Complex): Complex => a.asin(),
+  BigNumber: (a: BigNumber): BigNumber => a.asin(),
 
   // Values outside the real domain give NaN, as Math.asin does, on Float64Array.
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.asin),
   'Array | Matrix': unaryCollection({ real: Math.asin, inRealDomain: staysRealUnitInterval }),
-});
+}) as PublicAsin;
 
 /**
  * Arc cosine (inverse cosine)
  */
 export const acos = mathTyped('acos', {
-  number: (a: number) => {
+  number: (a: number): number | Complex => {
     if (staysRealUnitInterval(a)) return Math.acos(a);
     return new Complex(a, 0).acos();
   },
-  Complex: (a: Complex) => a.acos(),
-  BigNumber: (a: BigNumber) => a.acos(),
+  Complex: (a: Complex): Complex => a.acos(),
+  BigNumber: (a: BigNumber): BigNumber => a.acos(),
 
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.acos),
   'Array | Matrix': unaryCollection({ real: Math.acos, inRealDomain: staysRealUnitInterval }),
-});
+}) as PublicAcos;
 
 /**
  * Arc tangent (inverse tangent)
  */
 export const atan = mathTyped('atan', {
-  number: (a: number) => Math.atan(a),
-  Complex: (a: Complex) => a.atan(),
-  BigNumber: (a: BigNumber) => a.atan(),
+  number: (a: number): number => Math.atan(a),
+  Complex: (a: Complex): Complex => a.atan(),
+  BigNumber: (a: BigNumber): BigNumber => a.atan(),
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'atan', Math.atan),
   'Array | Matrix': unaryCollection({ real: Math.atan, wasmKernel: 'atan' }),
-});
+}) as PublicAtan;
 
 /**
  * Arc tangent with two arguments (atan2)
@@ -203,40 +217,40 @@ export const atan2 = mathTyped('atan2', {
  * Arc cosecant
  */
 export const acsc = mathTyped('acsc', {
-  number: (a: number) => acscReal(a),
-  Complex: (a: Complex) => a.inverse().asin(),
+  number: (a: number): number | Complex => acscReal(a),
+  Complex: (a: Complex): Complex => a.inverse().asin(),
   // BigNumber: acsc(a) = asin(1/a) — matches the forward csc's BigNumber path.
-  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).asin(),
+  BigNumber: (a: BigNumber): BigNumber => BigNumber.fromNumber(1).divide(a).asin(),
   'Array | Matrix': unaryCollection({
     real: (x) => Math.asin(1 / x),
     inRealDomain: staysRealAbsAtLeastOne,
   }),
-});
+}) as PublicAcsc;
 
 /**
  * Arc secant
  */
 export const asec = mathTyped('asec', {
-  number: (a: number) => asecReal(a),
-  Complex: (a: Complex) => a.inverse().acos(),
+  number: (a: number): number | Complex => asecReal(a),
+  Complex: (a: Complex): Complex => a.inverse().acos(),
   // BigNumber: asec(a) = acos(1/a).
-  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).acos(),
+  BigNumber: (a: BigNumber): BigNumber => BigNumber.fromNumber(1).divide(a).acos(),
   'Array | Matrix': unaryCollection({
     real: (x) => Math.acos(1 / x),
     inRealDomain: staysRealAbsAtLeastOne,
   }),
-});
+}) as PublicAsec;
 
 /**
  * Arc cotangent
  */
 export const acot = mathTyped('acot', {
-  number: (a: number) => Math.atan(1 / a),
-  Complex: (a: Complex) => a.inverse().atan(),
+  number: (a: number): number => Math.atan(1 / a),
+  Complex: (a: Complex): Complex => a.inverse().atan(),
   // BigNumber: acot(a) = atan(1/a).
-  BigNumber: (a: BigNumber) => BigNumber.fromNumber(1).divide(a).atan(),
+  BigNumber: (a: BigNumber): BigNumber => BigNumber.fromNumber(1).divide(a).atan(),
   'Array | Matrix': unaryCollection({ real: (x) => Math.atan(1 / x) }),
-});
+}) as PublicAcot;
 
 // =============================================================================
 // Inverse Hyperbolic Functions
@@ -246,42 +260,42 @@ export const acot = mathTyped('acot', {
  * Inverse hyperbolic sine
  */
 export const asinh = mathTyped('asinh', {
-  number: (a: number) => Math.asinh(a),
-  Complex: (a: Complex) => a.asinh(),
-  BigNumber: (a: BigNumber) => a.asinh(),
+  number: (a: number): number => Math.asinh(a),
+  Complex: (a: Complex): Complex => a.asinh(),
+  BigNumber: (a: BigNumber): BigNumber => a.asinh(),
 
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.asinh),
   'Array | Matrix': unaryCollection({ real: Math.asinh }),
-});
+}) as PublicAsinh;
 
 /**
  * Inverse hyperbolic cosine
  */
 export const acosh = mathTyped('acosh', {
-  number: (a: number) => {
+  number: (a: number): number | Complex => {
     if (staysRealAcosh(a)) return Math.acosh(a);
     if (a <= -1) {
       return new Complex(Math.log(Math.sqrt(a * a - 1) - a), Math.PI);
     }
     return new Complex(a, 0).acosh();
   },
-  Complex: (a: Complex) => a.acosh(),
-  BigNumber: (a: BigNumber) => a.acosh(),
+  Complex: (a: Complex): Complex => a.acosh(),
+  BigNumber: (a: BigNumber): BigNumber => a.acosh(),
 
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, Math.acosh),
   'Array | Matrix': unaryCollection({ real: Math.acosh, inRealDomain: staysRealAcosh }),
-});
+}) as PublicAcosh;
 
 /**
  * Inverse hyperbolic tangent
  */
 export const atanh = mathTyped('atanh', {
-  number: (a: number) => {
+  number: (a: number): number | Complex => {
     if (staysRealUnitInterval(a)) return Math.atanh(a);
     return new Complex(a, 0).atanh();
   },
-  Complex: (a: Complex) => a.atanh(),
-  BigNumber: (a: BigNumber) => a.atanh(),
+  Complex: (a: Complex): Complex => a.atanh(),
+  BigNumber: (a: BigNumber): BigNumber => a.atanh(),
 
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'atanh', Math.atanh),
   'Array | Matrix': unaryCollection({
@@ -289,7 +303,7 @@ export const atanh = mathTyped('atanh', {
     wasmKernel: 'atanh',
     inRealDomain: staysRealUnitInterval,
   }),
-});
+}) as PublicAtanh;
 
 // =============================================================================
 // Utility Functions

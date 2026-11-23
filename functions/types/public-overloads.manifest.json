@@ -94,6 +94,69 @@
       "name": "parallelFFT",
       "source": "src/typed/signal.ts",
       "sigTypes": { "Array": "readonly number[]" }
-    }
+    },
+    {
+      "name": "csc",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "sec",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "cot",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "asin",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "acos",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "atan",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "acsc",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "asec",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "acot",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "asinh",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "acosh",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    {
+      "name": "atanh",
+      "source": "src/typed/trigonometry.ts",
+      "fallback": ["(a: unknown): unknown;"]
+    },
+    { "name": "sinh", "source": "src/typed/arithmetic.ts", "fallback": ["(a: unknown): unknown;"] },
+    { "name": "cosh", "source": "src/typed/arithmetic.ts", "fallback": ["(a: unknown): unknown;"] },
+    { "name": "tanh", "source": "src/typed/arithmetic.ts", "fallback": ["(a: unknown): unknown;"] }
   ]
 }

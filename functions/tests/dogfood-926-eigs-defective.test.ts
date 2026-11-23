@@ -127,7 +127,7 @@ describe('#926 eigs and eig: groups, values and the vector option', () => {
         [0, 0, 3],
       ],
       { eigenvectors: false }
-    ) as Record<string, unknown>;
+    );
     expect(Object.keys(r)).toEqual(['values']);
     expect(r.values).toEqual([2, 2, 3]);
   });

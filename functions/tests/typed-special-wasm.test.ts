@@ -345,7 +345,7 @@ describe('typed/special.ts bessel array overloads use bridge', () => {
   it('besselJ0 typed array overload (< threshold) resolves correctly', async () => {
     const { besselJ0 } = await import('../src/typed/special.js');
     const xs = linspace(0.1, 5.0, 50);
-    const result = await (besselJ0(xs) as Promise<Float64Array>);
+    const result = await (besselJ0(xs) as Float64Array);
     const js = besselJ0JS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - js[i])).toBeLessThan(TOL_AGREE);
@@ -355,7 +355,7 @@ describe('typed/special.ts bessel array overloads use bridge', () => {
   it('besselJ0 typed array overload (≥ threshold) uses bridge and resolves correctly', async () => {
     const { besselJ0 } = await import('../src/typed/special.js');
     const xs = linspace(0.1, 10.0, WASM_SPECIAL_THRESHOLD);
-    const result = await (besselJ0(xs) as Promise<Float64Array>);
+    const result = await (besselJ0(xs) as Float64Array);
     const js = besselJ0JS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - js[i])).toBeLessThan(TOL_AGREE);
@@ -365,7 +365,7 @@ describe('typed/special.ts bessel array overloads use bridge', () => {
   it('besselJ typed (n=5, xs ≥ threshold) resolves correctly', async () => {
     const { besselJ } = await import('../src/typed/special.js');
     const xs = linspace(1.0, 15.0, WASM_SPECIAL_THRESHOLD);
-    const result = await (besselJ(5, xs) as Promise<Float64Array>);
+    const result = await (besselJ(5, xs) as Float64Array);
     const js = besselJnJS(5, xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - js[i])).toBeLessThan(TOL_AGREE);
@@ -375,7 +375,7 @@ describe('typed/special.ts bessel array overloads use bridge', () => {
   it('besselY0 typed array overload (≥ threshold) resolves correctly', async () => {
     const { besselY0 } = await import('../src/typed/special.js');
     const xs = linspace(0.5, 10.0, WASM_SPECIAL_THRESHOLD);
-    const result = await (besselY0(xs) as Promise<Float64Array>);
+    const result = await (besselY0(xs) as Float64Array);
     const js = besselY0JS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - js[i])).toBeLessThan(TOL_AGREE);
@@ -552,7 +552,7 @@ describe('Airy dispatch threshold behaviour', () => {
   it('airyAi typed array overload (≥ threshold) resolves correctly', async () => {
     const { airyAi } = await import('../src/typed/special.js');
     const xs = linspace(-2.0, 2.0, WASM_SPECIAL_THRESHOLD);
-    const result = await (airyAi(xs) as Promise<Float64Array>);
+    const result = await (airyAi(xs) as Float64Array);
     const jr = airyAiJS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_AIRY_AGREE);
@@ -562,7 +562,7 @@ describe('Airy dispatch threshold behaviour', () => {
   it('airyBi typed array overload (≥ threshold) resolves correctly', async () => {
     const { airyBi } = await import('../src/typed/special.js');
     const xs = linspace(-2.0, 2.0, WASM_SPECIAL_THRESHOLD);
-    const result = await (airyBi(xs) as Promise<Float64Array>);
+    const result = await (airyBi(xs) as Float64Array);
     const jr = airyBiJS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_AIRY_AGREE);
@@ -738,7 +738,7 @@ describe('Elliptic K/E dispatch threshold behaviour', () => {
   it('ellipticK typed array overload (≥ threshold) resolves correctly', async () => {
     const { ellipticK } = await import('../src/typed/special.js');
     const ms = linspace(0.01, 0.9, WASM_SPECIAL_THRESHOLD);
-    const result = await (ellipticK(ms) as Promise<Float64Array>);
+    const result = await (ellipticK(ms) as Float64Array);
     const jr = ellipticKJS(ms);
     for (let i = 0; i < ms.length; i++) {
       expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_ELLIPTIC_AGREE);
@@ -748,7 +748,7 @@ describe('Elliptic K/E dispatch threshold behaviour', () => {
   it('ellipticE typed array overload (≥ threshold) resolves correctly', async () => {
     const { ellipticE } = await import('../src/typed/special.js');
     const ms = linspace(0.0, 0.99, WASM_SPECIAL_THRESHOLD);
-    const result = await (ellipticE(ms) as Promise<Float64Array>);
+    const result = await (ellipticE(ms) as Float64Array);
     const jr = ellipticEJS(ms);
     for (let i = 0; i < ms.length; i++) {
       expect(Math.abs(result[i] - jr[i])).toBeLessThan(TOL_ELLIPTIC_AGREE);
@@ -895,7 +895,7 @@ describe('lgamma WASM dispatch (Slice 5.8)', () => {
   it('lgamma typed array overload (≥ threshold) resolves within 1e-12 of JS', async () => {
     const { lgamma } = await import('../src/typed/special.js');
     const xs = linspace(1.0, 20.0, WASM_SPECIAL_THRESHOLD);
-    const result = await (lgamma(xs) as Promise<Float64Array>);
+    const result = await (lgamma(xs) as Float64Array);
     const jr = lgammaJS(xs);
     for (let i = 0; i < xs.length; i++) {
       expect(Math.abs(result[i] - jr[i])).toBeLessThan(1e-12);
@@ -906,7 +906,7 @@ describe('lgamma WASM dispatch (Slice 5.8)', () => {
   it('lgamma typed array overload (< threshold) resolves correctly', async () => {
     const { lgamma } = await import('../src/typed/special.js');
     const xs = new Float64Array([1, 2, 0.5, 10]);
-    const result = await (lgamma(xs) as Promise<Float64Array>);
+    const result = await (lgamma(xs) as Float64Array);
     expect(Math.abs(result[0])).toBeLessThan(1e-14); // lgamma(1)=0
     expect(Math.abs(result[1])).toBeLessThan(1e-14); // lgamma(2)=0
     expect(Math.abs(result[2] - 0.5723649429247001)).toBeLessThan(TOL_LGAMMA);

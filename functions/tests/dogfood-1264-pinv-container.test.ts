@@ -42,7 +42,7 @@ describe('pinv keeps the container (mathjs 15.2.0)', () => {
       [0, 3],
       [3, 0],
     ]) {
-      const out = pinv(SparseMatrix.fromDense(DenseMatrix.zeros(r, c)) as never);
+      const out = pinv(SparseMatrix.fromDense(DenseMatrix.zeros(r, c)));
       expect(out instanceof SparseMatrix).toBe(true);
       expect(size(out)).toEqual([c, r]);
     }

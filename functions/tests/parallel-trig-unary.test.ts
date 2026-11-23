@@ -29,7 +29,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
   it('csc Float64Array matches scalar overload element-wise', async () => {
     // Avoid multiples of pi where sin(x) = 0 (csc undefined).
     const xs = Float64Array.from({ length: 250 }, (_, i) => 0.1 + i * 0.04);
-    const result = await (csc(xs) as Promise<Float64Array>);
+    const result = await (csc(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(csc(xs[i]) as number, 12);
@@ -39,7 +39,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
   it('sec Float64Array matches scalar overload element-wise', async () => {
     // Avoid multiples of pi/2 where cos(x) = 0 (sec undefined).
     const xs = Float64Array.from({ length: 250 }, (_, i) => 0.1 + i * 0.04);
-    const result = await (sec(xs) as Promise<Float64Array>);
+    const result = await (sec(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(sec(xs[i]) as number, 12);
@@ -49,7 +49,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
   it('cot Float64Array matches scalar overload element-wise', async () => {
     // Avoid multiples of pi where tan(x) = 0 (cot undefined).
     const xs = Float64Array.from({ length: 250 }, (_, i) => 0.1 + i * 0.04);
-    const result = await (cot(xs) as Promise<Float64Array>);
+    const result = await (cot(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(cot(xs[i]) as number, 12);
@@ -59,7 +59,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
   it('asin Float64Array matches scalar overload element-wise (domain [-1, 1])', async () => {
     // Stay within [-1, 1] so Math.asin returns real values.
     const xs = Float64Array.from({ length: 250 }, (_, i) => -1 + i * (2 / 249));
-    const result = await (asin(xs) as Promise<Float64Array>);
+    const result = await (asin(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(Math.asin(xs[i]), 12);
@@ -69,7 +69,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
   it('acos Float64Array matches scalar overload element-wise (domain [-1, 1])', async () => {
     // Stay within [-1, 1] so Math.acos returns real values.
     const xs = Float64Array.from({ length: 250 }, (_, i) => -1 + i * (2 / 249));
-    const result = await (acos(xs) as Promise<Float64Array>);
+    const result = await (acos(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(Math.acos(xs[i]), 12);
@@ -78,7 +78,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
 
   it('atan Float64Array matches scalar overload element-wise', async () => {
     const xs = Float64Array.from({ length: 250 }, (_, i) => -10 + i * 0.08);
-    const result = await (atan(xs) as Promise<Float64Array>);
+    const result = await (atan(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(atan(xs[i]) as number, 12);
@@ -87,7 +87,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
 
   it('asinh Float64Array matches scalar overload element-wise', async () => {
     const xs = Float64Array.from({ length: 250 }, (_, i) => -5 + i * 0.04);
-    const result = await (asinh(xs) as Promise<Float64Array>);
+    const result = await (asinh(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(asinh(xs[i]) as number, 12);
@@ -97,7 +97,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
   it('acosh Float64Array matches scalar overload element-wise (domain [1, ∞))', async () => {
     // acosh is only real for x >= 1.
     const xs = Float64Array.from({ length: 250 }, (_, i) => 1 + i * 0.04);
-    const result = await (acosh(xs) as Promise<Float64Array>);
+    const result = await (acosh(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(acosh(xs[i]) as number, 12);
@@ -107,7 +107,7 @@ describe('Parallel Float64Array overloads — trigonometry unary', () => {
   it('atanh Float64Array matches scalar overload element-wise (domain (-1, 1))', async () => {
     // atanh is real for |x| < 1.
     const xs = Float64Array.from({ length: 250 }, (_, i) => -0.99 + i * (1.98 / 249));
-    const result = await (atanh(xs) as Promise<Float64Array>);
+    const result = await (atanh(xs) as Float64Array);
     expect(result.length).toBe(250);
     for (const i of sample) {
       expect(result[i]).toBeCloseTo(atanh(xs[i]) as number, 12);

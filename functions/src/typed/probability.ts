@@ -705,7 +705,15 @@ export const pickRandom = mathTyped('pickRandom', {
     _pick(entries(arr), n, weights),
   'Array | Matrix, Array, number': (arr: unknown[] | Matrix, weights: number[], n: number) =>
     _pick(entries(arr), n, weights),
-});
+}) as {
+  <T>(values: readonly T[], weights?: number[]): PickRandomLeaf<T>;
+  <T>(values: readonly T[], count: number, weights?: number[]): PickRandomLeaf<T>[];
+  <T>(values: readonly T[], weights: number[], count: number): PickRandomLeaf<T>[];
+  (values: Matrix, weights?: number[]): unknown;
+  (values: Matrix, count: number, weights?: number[]): unknown[];
+};
+
+type PickRandomLeaf<T> = T extends readonly (infer Entry)[] ? PickRandomLeaf<Entry> : T;
 
 /** All entries of an array or a matrix, in row order. */
 function entries(x: unknown[] | Matrix): unknown[] {
