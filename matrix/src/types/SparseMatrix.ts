@@ -970,8 +970,9 @@ export class SparseMatrix extends Matrix<number> {
   }
 
   /**
-   * Apply a function to each element (including zeros)
-   * Warning: This may create a dense result
+   * Apply a numeric callback as `fn(value, row, col)`.
+   * Wrap unary callbacks with optional positional arguments before passing them.
+   * Includes implicit zero entries and can produce a structurally dense result.
    */
   map(fn: (value: number, row: number, col: number) => number): SparseMatrix {
     const entries: Array<{ row: number; col: number; value: number }> = [];
