@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { DenseMatrix } from '../src/types/DenseMatrix.js';
-import { matrix } from '../src/typed-operations.js';
+import { matrix, size } from '../src/typed-operations.js';
 
 describe('#1013 and #1310 a rank-1 DenseMatrix uses 1 x n storage', () => {
   it('matrix([1, 2]) is a 1 x 2 row', () => {
@@ -16,6 +16,7 @@ describe('#1013 and #1310 a rank-1 DenseMatrix uses 1 x n storage', () => {
     expect(m.rows).toBe(1);
     expect(m.cols).toBe(2);
     expect(m.shape).toEqual([2]);
+    expect(size(m)).toEqual([2]);
     expect(m.clone().shape).toEqual([2]);
     expect(m.map((x) => 2 * x).shape).toEqual([2]);
     expect(m.toArray()).toEqual([[1, 2]]);

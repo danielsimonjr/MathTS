@@ -281,7 +281,7 @@ export const pow: TypedFunction = mathTyped('pow', {
  * Get matrix dimensions
  */
 export const size: TypedFunction = mathTyped('size', {
-  DenseMatrix: (a: DenseMatrix) => [a.rows, a.cols],
+  DenseMatrix: (a: DenseMatrix) => a.shape,
   Array: rectangularArraySize,
 } as Signatures);
 
