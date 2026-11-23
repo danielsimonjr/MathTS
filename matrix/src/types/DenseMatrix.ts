@@ -43,6 +43,7 @@ function readNestedMatrix(nested: readonly unknown[]): {
   rows: number;
   cols: number;
   data: number[][];
+  rank: 1 | 2;
 } {
   if (nested.length === 0) {
     throw new TypeError(
@@ -64,7 +65,7 @@ function readNestedMatrix(nested: readonly unknown[]): {
       row.push(value);
     }
     assertDenseMatrixSize(1, rows);
-    return { rows: 1, cols: rows, data: [row] };
+    return { rows: 1, cols: rows, data: [row], rank: 1 };
   }
   if (first.length === 0) {
     throw new TypeError(
@@ -92,7 +93,7 @@ function readNestedMatrix(nested: readonly unknown[]): {
     data.push(numeric);
   }
   assertDenseMatrixSize(rows, cols);
-  return { rows, cols, data };
+  return { rows, cols, data, rank: 2 };
 }
 
 /**
@@ -105,6 +106,15 @@ export class DenseMatrix extends Matrix<number> {
   readonly type = 'DenseMatrix' as const;
   readonly rows: number;
   readonly cols: number;
+  readonly #rank: 1 | 2;
+
+  /**
+   * Logical dimensions. A flat input is rank 1 and uses one row internally.
+   * An explicit row matrix such as `[[1, 2]]` remains rank 2.
+   */
+  get shape(): number[] {
+    return this.#rank === 1 ? [this.cols] : [this.rows, this.cols];
+  }
 
   /**
    * Internal data storage (row-major Float64Array)
@@ -137,13 +147,14 @@ export class DenseMatrix extends Matrix<number> {
     rows: number | number[][] | number[],
     cols?: number,
     data?: Float64Array | number[] | number[][],
-    viewConfig?: { isView: boolean; offset: number; rowStride: number }
+    viewConfig?: { isView: boolean; offset: number; rowStride: number; rank?: 1 | 2 }
   ) {
     super();
 
     let nRows: number;
     let nCols: number;
     let dataArg = data;
+    let rank = viewConfig?.rank ?? 2;
 
     if (Array.isArray(rows)) {
       if (cols !== undefined || dataArg !== undefined) {
@@ -155,6 +166,7 @@ export class DenseMatrix extends Matrix<number> {
       nRows = nested.rows;
       nCols = nested.cols;
       dataArg = nested.data;
+      rank = nested.rank;
       cols = nCols;
       rows = nRows;
     } else {
@@ -170,6 +182,7 @@ export class DenseMatrix extends Matrix<number> {
 
     this.rows = nRows;
     this.cols = nCols;
+    this.#rank = rank;
 
     if (viewConfig) {
       // View into existing data
@@ -243,8 +256,15 @@ export class DenseMatrix extends Matrix<number> {
    * Create a matrix from a nested array. A 1-D array gives a 1 x n row matrix.
    */
   static fromArray(arr: number[][] | number[]): DenseMatrix {
-    const nested = readNestedMatrix(arr);
-    return new DenseMatrix(nested.rows, nested.cols, nested.data);
+    if (arr.length === 0) {
+      return new DenseMatrix(1, 0, new Float64Array(0), {
+        isView: false,
+        offset: 0,
+        rowStride: 0,
+        rank: 1,
+      });
+    }
+    return new DenseMatrix(arr);
   }
 
   /**
@@ -336,7 +356,7 @@ export class DenseMatrix extends Matrix<number> {
     this.checkBounds(row, col);
     const newData = this.toFlatFloat64Array();
     newData[row * this.cols + col] = value;
-    return new DenseMatrix(this.rows, this.cols, newData);
+    return this.withPackedStorage(newData);
   }
 
   /**
@@ -499,7 +519,7 @@ export class DenseMatrix extends Matrix<number> {
    * Scalar multiplication
    */
   scale(scalar: number): DenseMatrix {
-    return new DenseMatrix(this.rows, this.cols, arithmetic.scale(this, scalar));
+    return this.withPackedStorage(arithmetic.scale(this, scalar));
   }
 
   /**
@@ -601,7 +621,16 @@ export class DenseMatrix extends Matrix<number> {
    * Clone the matrix
    */
   clone(): DenseMatrix {
-    return new DenseMatrix(this.rows, this.cols, this.toFlatFloat64Array());
+    return this.withPackedStorage(this.toFlatFloat64Array());
+  }
+
+  private withPackedStorage(data: Float64Array): DenseMatrix {
+    return new DenseMatrix(this.rows, this.cols, data, {
+      isView: false,
+      offset: 0,
+      rowStride: this.cols,
+      rank: this.#rank,
+    });
   }
 
   /**
@@ -696,7 +725,7 @@ export class DenseMatrix extends Matrix<number> {
         result[i * this.cols + j] = fn(this.get(i, j), i, j);
       }
     }
-    return new DenseMatrix(this.rows, this.cols, result);
+    return this.withPackedStorage(result);
   }
 
   /**

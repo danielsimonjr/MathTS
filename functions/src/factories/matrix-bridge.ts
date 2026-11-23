@@ -650,7 +650,9 @@ export class MathJSDenseMatrix {
 
   /** Create from native DenseMatrix. */
   static fromNative(dm: DenseMatrix): MathJSDenseMatrix {
-    return new MathJSDenseMatrix({ data: dm.toArray(), size: [dm.rows, dm.cols] });
+    const size = dm.shape;
+    const data = size.length === 1 ? dm.toFlatArray() : dm.toArray();
+    return denseOfSize(data, size);
   }
 
   /**

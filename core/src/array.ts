@@ -25,6 +25,7 @@ import { format } from './string.js';
 import { DimensionError } from './error/DimensionError.js';
 import { IndexError } from './error/IndexError.js';
 import { deepStrictEqual } from './object.js';
+import { NATIVE_MATRIX_BRAND } from './types/type-marker.js';
 
 // Type definitions
 /**
@@ -73,7 +74,7 @@ function isDimension(x: unknown): x is number {
  * `[0]`. A caller that needs the true size reads it from the matrix with this function.
  *
  * The function reads, in this order: the `size()` method (the MathJS contract; it returns the size
- * array), the `size` property of a matrix of this repository (`{ rows, cols }`), and the numeric
+ * array), the logical shape of a native matrix, the `size` property of a matrix of this repository (`{ rows, cols }`), and the numeric
  * `rows` and `cols` properties. A `rows` or `cols` that is not a number (a method) is not read.
  *
  * @param m - Any value.
@@ -85,6 +86,10 @@ export function matrixSize(m: unknown): number[] | undefined {
   if (typeof size === 'function') {
     const reported: unknown = size.call(m);
     return Array.isArray(reported) && reported.every(isDimension) ? reported.slice() : undefined;
+  }
+  if ((m as Record<symbol, unknown>)[NATIVE_MATRIX_BRAND] === true) {
+    const shape = (m as { shape?: unknown }).shape;
+    if (Array.isArray(shape) && shape.every(isDimension)) return shape.slice();
   }
   if (typeof size === 'object' && size !== null) {
     const dims = size as { rows?: unknown; cols?: unknown };
