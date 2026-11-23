@@ -62,7 +62,7 @@ export function transpose(A: number[][]): number[][] {
 /**
  * Matrix inverse via Gauss-Jordan. Returns null on singular input.
  *
- * Pivot `|a| < 1e-15` is treated as singular. Not on the package barrel;
+ * A zero or non-finite pivot cannot be inverted. Not on the package barrel;
  * `logm` and `sqrtm` import it from this module.
  *
  * @internal
@@ -81,7 +81,7 @@ export function matInv(A: number[][]): number[][] | null {
  * Solve `A X = B` by Gauss–Jordan elimination with partial pivoting.
  *
  * `rhs[row]` is one row of `B` (one column, or the identity). Returns `null`
- * when a pivot satisfies `|pivot| < 1e-15`. A zero elimination factor is
+ * when a pivot is zero or non-finite. A zero elimination factor is
  * skipped. Columns to the left of the pivot are already eliminated and are
  * not rewritten; the returned right-hand block matches a loop that rewrites
  * those columns too (checked on random systems before this helper replaced
@@ -94,7 +94,7 @@ export function matInv(A: number[][]): number[][] | null {
  * @param a - Square coefficient matrix. Not modified.
  * @param rhs - Right-hand side, one array per row, each of the same width.
  * @returns `X` with the same shape as `rhs`, or `null` when `A` is singular
- *   at the 1e-15 pivot cutoff. An empty `a` returns an empty array.
+ *   or non-finite. An empty `a` returns an empty array.
  */
 export function gaussJordanSolve(a: number[][], rhs: number[][]): number[][] | null {
   const n = a.length;
@@ -120,7 +120,7 @@ export function gaussJordanSolve(a: number[][], rhs: number[][]): number[][] | n
     if (maxRow !== col) [M[col], M[maxRow]] = [M[maxRow], M[col]];
 
     const pivot = M[col][col];
-    if (Math.abs(pivot) < 1e-15) return null;
+    if (pivot === 0 || !Number.isFinite(pivot)) return null;
 
     for (let j = col; j < n + width; j++) M[col][j] /= pivot;
     for (let row = 0; row < n; row++) {
