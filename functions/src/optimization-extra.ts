@@ -198,6 +198,7 @@ export function levenbergMarquardt(
   let cost = pairwiseDot(r, r);
   let iter = 0;
   for (; iter < maxIter; iter++) {
+    if (cost === 0 && r.every((value) => value === 0)) break;
     const J = jacobian
       ? (() => {
           const Jx = jacobian(x);

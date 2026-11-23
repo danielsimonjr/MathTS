@@ -42,7 +42,7 @@
   "l1: exact data: zero residual everywhere (L1 sign(0) is 0)": {
     "parameters": [2, 1],
     "loss": 0,
-    "converged": false,
+    "converged": true,
     "evaluations": 1,
     "validRows": 9,
     "standardErrors": null
@@ -90,7 +90,7 @@
   "huber: exact data: zero residual everywhere (L1 sign(0) is 0)": {
     "parameters": [2, 1],
     "loss": 0,
-    "converged": false,
+    "converged": true,
     "evaluations": 1,
     "validRows": 9,
     "standardErrors": null

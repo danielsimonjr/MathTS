@@ -136,22 +136,27 @@ function isFixedBound(lo: number, hi: number): boolean {
 }
 
 function nudgeInterior(x: number, lo: number, hi: number): number {
-  const eps = Math.max(1e-8, 1e-8 * Math.abs(hi - lo));
   if (isFiniteBound(lo) && isFiniteBound(hi)) {
+    const width = hi - lo;
+    const scale = Number.isFinite(width) ? width : Math.max(Math.abs(lo), Math.abs(hi));
+    const eps = Math.min(width / 4, 1e-8 * Math.max(1, scale));
     return Math.min(hi - eps, Math.max(lo + eps, x));
   }
   if (isFiniteBound(lo) && !isFiniteBound(hi)) {
-    return Math.max(lo + eps, x);
+    const interior = lo + 1e-8 * Math.max(1, Math.abs(lo));
+    return Math.max(Number.isFinite(interior) ? interior : lo, x);
   }
   if (!isFiniteBound(lo) && isFiniteBound(hi)) {
-    return Math.min(hi - eps, x);
+    const interior = hi - 1e-8 * Math.max(1, Math.abs(hi));
+    return Math.min(Number.isFinite(interior) ? interior : hi, x);
   }
   return x;
 }
 
 function xToZ(x: number, lo: number, hi: number): number {
   if (isFiniteBound(lo) && isFiniteBound(hi)) {
-    const t = (x - lo) / (hi - lo);
+    const width = hi - lo;
+    const t = Number.isFinite(width) ? (x - lo) / width : (x / 2 - lo / 2) / (hi / 2 - lo / 2);
     const clamped = Math.min(1 - 1e-15, Math.max(1e-15, t));
     return Math.log(clamped / (1 - clamped));
   }
@@ -167,7 +172,8 @@ function xToZ(x: number, lo: number, hi: number): number {
 function zToX(z: number, lo: number, hi: number): number {
   if (isFiniteBound(lo) && isFiniteBound(hi)) {
     const s = 1 / (1 + Math.exp(-z));
-    return lo + (hi - lo) * s;
+    const width = hi - lo;
+    return Number.isFinite(width) ? Math.min(hi, lo + width * s) : lo * (1 - s) + hi * s;
   }
   if (isFiniteBound(lo) && !isFiniteBound(hi)) {
     return lo + Math.exp(z);
@@ -182,7 +188,11 @@ function dxDz(_x: number, z: number, lo: number, hi: number): number {
   if (isFiniteBound(lo) && isFiniteBound(hi)) {
     const ez = Math.exp(-z);
     const denom = (1 + ez) ** 2;
-    return ((hi - lo) * ez) / denom;
+    const width = hi - lo;
+    if (Number.isFinite(width)) return (width * ez) / denom;
+    const s = 1 / (1 + Math.exp(-Math.abs(z)));
+    const derivative = s * s * Math.exp(-Math.abs(z));
+    return hi * derivative - lo * derivative;
   }
   if (isFiniteBound(lo) && !isFiniteBound(hi)) {
     return Math.exp(z);
@@ -191,6 +201,25 @@ function dxDz(_x: number, z: number, lo: number, hi: number): number {
     return -Math.exp(z);
   }
   return 1;
+}
+
+// Classify the expression in the free parameters. Calls and powers are
+// treated conservatively whenever they depend on a free parameter.
+function parameterDegree(node: ScalarNode, free: ReadonlySet<string>): number {
+  switch (node.kind) {
+    case 'number':
+      return 0;
+    case 'symbol':
+      return free.has(node.name) ? 1 : 0;
+    case 'call':
+      return parameterDegree(node.arg, free) === 0 ? 0 : Infinity;
+    case 'op': {
+      const degrees = node.args.map((child) => parameterDegree(child, free));
+      if (node.op === '+') return Math.max(...degrees);
+      if (node.op === '*') return degrees.reduce((sum, degree) => sum + degree, 0);
+      return degrees.every((degree) => degree === 0) ? 0 : Infinity;
+    }
+  }
 }
 
 function sameParams(a: ArrayLike<number>, b: ArrayLike<number>): boolean {
@@ -818,6 +847,8 @@ export function fitScalarParameters(
       bestLoss = loss;
       bestX = Float64Array.from(x);
       bestConverged = converged;
+    } else if (converged && loss === bestLoss && sameParams(x, bestX)) {
+      bestConverged = true;
     }
   }
 
@@ -834,7 +865,16 @@ export function fitScalarParameters(
   // the caller asked for zero iterations.
   if (algorithm === 'lm' && lossTag === 'l2' && pFree > 0 && options.maxIterations !== 0) {
     const fromBest = glsStep(bestX);
-    if (fromBest) {
+    // The affine, unconstrained normal equations give the least-squares
+    // minimizer even when evaluation rounds its objective slightly above LM's.
+    const affine =
+      freeIdx.every((pi) => !isFiniteBound(boundsLo[pi]) && !isFiniteBound(boundsHi[pi])) &&
+      parameterDegree(node, new Set(freeIdx.map((pi) => paramNames[pi]))) <= 1;
+    if (
+      fromBest &&
+      (fromBest.loss < bestLoss ||
+        (affine && fromBest.loss - bestLoss <= Number.EPSILON * bestLoss))
+    ) {
       bestX = fromBest.x;
       bestLoss = fromBest.loss;
     }
