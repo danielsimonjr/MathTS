@@ -1,3 +1,4 @@
+import { isBigNumber } from '@danielsimonjr/mathts-core';
 import { clone } from '../../utils/object.js';
 import { realScale } from '../../utils/real-scale.js';
 import type BigNumber from 'bignumber.js';
@@ -117,7 +118,17 @@ export function createComplexEigs({
   function close(a: Scalar, b: Scalar, prec: Scalar): boolean {
     const aa = abs(a) as Scalar;
     const ab = abs(b) as Scalar;
-    return le(abs(subtract(a, b) as Scalar), multiplyScalar(prec, lt(aa, ab) ? ab : aa));
+    const magnitude = lt(aa, ab) ? ab : aa;
+    // The Complex magnitude is already a double, even during a BigNumber solve.
+    const bound =
+      typeof prec === 'number'
+        ? multiplyScalar(prec, magnitude)
+        : multiplyScalar(prec, toBig(magnitude));
+    const difference =
+      (typeof a === 'number' && isBigNumber(b)) || (typeof b === 'number' && isBigNumber(a))
+        ? toBig(a).minus(toBig(b))
+        : (subtract(a, b) as Scalar);
+    return le(abs(difference), bound);
   }
 
   /**
@@ -655,7 +666,11 @@ export function createComplexEigs({
     }
 
     // standard sorting
-    lambdas.sort((a, b) => +(subtract(abs(a), abs(b)) as number));
+    lambdas.sort((a, b) => {
+      const aa = abs(a);
+      const ab = abs(b);
+      return lt(aa, ab) ? -1 : gt(aa, ab) ? 1 : 0;
+    });
 
     // the algorithm didn't converge
     if (lastConvergenceBefore > 100) {
@@ -787,7 +802,8 @@ export function createComplexEigs({
             : !toBig(magnitude).isFinite())
         )
           return false;
-        const unit = v.map((x) => divideScalar(x, magnitude));
+        const denominator = big && typeof magnitude === 'number' ? bignumber(magnitude) : magnitude;
+        const unit = v.map((x) => divideScalar(x, denominator));
         const product = flatten(multiply(shifted, unit) as Scalar[] | Scalar[][]);
         return product.every((x) => le(abs(x), tolerance));
       };
@@ -919,7 +935,13 @@ export function createComplexEigs({
           const am = abs(b[m]) as Scalar;
           if (lt(solved, am)) solved = am;
         }
-        const limit = multiplyScalar(tolerance, multiplyScalar(rowTop[i], solved));
+        // A Complex magnitude is a double; convert it explicitly before it
+        // participates in a BigNumber rounding test.
+        const rowScale = rowTop[i];
+        const limit =
+          isBigNumber(tolerance) || isBigNumber(rowScale) || isBigNumber(solved)
+            ? toBig(tolerance).times(toBig(rowScale)).times(toBig(solved))
+            : multiplyScalar(tolerance, multiplyScalar(rowScale, solved));
         if (!le(abs(b[i]) as Scalar, limit)) {
           // this vector has no solution, but other vectors may have one
           B.splice(k, 1);
@@ -1253,7 +1275,12 @@ export function createComplexEigs({
     const cplx = type === 'Complex';
     const one: Scalar = big ? bignumber(1) : cplx ? complex(1) : 1;
 
-    return multiply(divideScalar(one, norm(v)), v as unknown as Scalar[][]) as unknown as Scalar[];
+    const magnitude = norm(v);
+    const denominator = big && typeof magnitude === 'number' ? bignumber(magnitude) : magnitude;
+    return multiply(
+      divideScalar(one, denominator),
+      v as unknown as Scalar[][]
+    ) as unknown as Scalar[];
   }
 
   return complexEigs;

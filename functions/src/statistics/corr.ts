@@ -1,6 +1,7 @@
 import { factory } from '../utils/factory.js';
 import {
   BigNumber,
+  isFraction,
   pairwiseSum,
   pairwiseDot,
   squareSumsKeepDigits,
@@ -143,7 +144,12 @@ export const createCorr = /* #__PURE__ */ factory(
       const sxx = sum(dX.map((dx: unknown) => multiply(dx, dx)));
       const syy = sum(dY.map((dy: unknown) => multiply(dy, dy)));
       const product = multiply(sxx, syy);
-      return { r: divide(sxy, sqrt(product)), product };
+      const denominator = sqrt(product);
+      const r =
+        isFraction(sxy) && typeof denominator === 'number'
+          ? sxy.valueOf() / denominator
+          : divide(sxy, denominator);
+      return { r, product };
     }
 
     /**

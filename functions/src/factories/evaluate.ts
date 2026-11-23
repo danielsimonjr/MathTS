@@ -180,12 +180,58 @@ export const parse = factoryScope.parse as Parameters<typeof createEvaluate>[0];
  * `precision`, ...) through the overlay-aware view in `factoryScope.config`,
  * so a compiled expression is only reusable under the same config values.
  */
-const liveConfig = factoryScope.config as Record<string, unknown>;
+const liveConfig = factoryScope.config as Record<string, unknown> & { precision: number };
 function configFingerprint(): string {
   let key = '';
   for (const k in liveConfig) key += k + '=' + String(liveConfig[k]) + ';';
   return key;
 }
+
+const preciseConstants: Record<string, () => BigNumber> = {
+  e: () => BigNumber.eAt(),
+  pi: () => BigNumber.piAt(),
+  π: () => BigNumber.piAt(),
+  tau: () => BigNumber.piAt().multiply(2),
+  phi: () => BigNumber.fromNumber(5).sqrt().add(1).divide(2),
+  SQRT2: () => BigNumber.fromNumber(2).sqrt(),
+  SQRT1_2: () => BigNumber.fromNumber(0.5).sqrt(),
+  LN2: () => BigNumber.ln2At(),
+  LN10: () => BigNumber.ln10At(),
+  LOG2E: () => BigNumber.fromNumber(1).divide(BigNumber.ln2At()),
+  LOG10E: () => BigNumber.fromNumber(1).divide(BigNumber.ln10At()),
+};
+
+/** Compute a constant with guard digits under the evaluator's live precision. */
+function evaluatePreciseConstant(compute: () => BigNumber): BigNumber {
+  const { precision } = liveConfig;
+  const saved = BigNumber.config();
+  BigNumber.config({ precision: precision + 8 });
+  try {
+    return compute().roundToPrecision(precision);
+  } finally {
+    BigNumber.config({ precision: saved.precision });
+  }
+}
+
+/** Bind built-in constants under the live numeric config while preserving imported overrides. */
+function bindNumericConstants(
+  scope: Record<string, unknown>,
+  imported: Record<string, unknown> = {}
+): void {
+  for (const [name, precise] of Object.entries(preciseConstants)) {
+    if (!Object.hasOwn(scope, name) || Object.hasOwn(imported, name)) continue;
+    const number = (evaluateConstantsAndOverrides as Record<string, number>)[name];
+    Object.defineProperty(scope, name, {
+      configurable: true,
+      enumerable: true,
+      get: () => (liveConfig.number === 'BigNumber' ? evaluatePreciseConstant(precise) : number),
+    });
+  }
+}
+
+bindNumericConstants(mathScope);
+bindNumericConstants(unsafeMathScope);
+bindNumericConstants(factoryScope.mathWithTransform as Record<string, unknown>);
 
 const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
 const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint);
@@ -579,9 +625,13 @@ function buildScopedMathNamespace(
   imported: Record<string, unknown>,
   hidden: ReadonlySet<string>
 ): Record<string, unknown> {
-  const base: Record<string, unknown> = { ...mathScope };
-  for (const key of hidden) delete base[key];
-  return omitEvaluateInternals({ ...base, ...scrubImportedExpressionScope(imported) });
+  const base: Record<string, unknown> = {};
+  for (const key of Object.keys(mathScope)) {
+    if (!hidden.has(key)) base[key] = Object.getOwnPropertyDescriptor(mathScope, key)?.value;
+  }
+  const scoped = omitEvaluateInternals({ ...base, ...scrubImportedExpressionScope(imported) });
+  bindNumericConstants(scoped, imported);
+  return scoped;
 }
 
 function buildUnsafeScopedMathNamespace(

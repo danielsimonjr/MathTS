@@ -262,10 +262,10 @@ export const createNorm = /* #__PURE__ */ factory(
           : toBig(v).divide(toBig(scale));
       let n: number | BigNumberType = 0;
       x.forEach(function (value: number | BigNumberType | ComplexType) {
-        const term = pow(ratio(abs(value) as number | CoreBigNumber), p);
+        const term = powForNorm(ratio(abs(value) as number | CoreBigNumber), p);
         n = add(term, n) as number | BigNumberType;
       });
-      return multiply(scale, pow(n, 1 / p)) as number | BigNumberType;
+      return multiply(scale, powForNorm(n, p, true)) as number | BigNumberType;
     }
 
     /** The sign of a - b with no tolerance: `larger` and `smaller` read tiny values as equal. */
@@ -281,6 +281,14 @@ export const createNorm = /* #__PURE__ */ factory(
 
     function toBig(v: number | CoreBigNumber): CoreBigNumber {
       return typeof v === 'number' ? CoreBigNumber.fromNumber(v) : v;
+    }
+
+    function powForNorm(value: unknown, exponent: number, reciprocal = false): unknown {
+      if (isCoreBig(value)) {
+        const power = CoreBigNumber.fromNumber(exponent);
+        return pow(value, reciprocal ? CoreBigNumber.fromNumber(1).divide(power) : power);
+      }
+      return pow(value, reciprocal ? 1 / exponent : exponent);
     }
 
     function _vectorNorm(
@@ -304,7 +312,7 @@ export const createNorm = /* #__PURE__ */ factory(
           let n: number | BigNumberType = 0;
           // skip zeros since abs(0) === 0
           x.forEach(function (value: number | BigNumberType | ComplexType) {
-            n = add(pow(abs(value), p), n) as number | BigNumberType;
+            n = add(powForNorm(abs(value), p), n) as number | BigNumberType;
           }, true);
           // A BigNumber sum means a BigNumber entry: the scaled 2-norm replaces it (#1255). The
           // test is on the sum, so a vector of numbers pays for no second pass.
@@ -313,7 +321,7 @@ export const createNorm = /* #__PURE__ */ factory(
             if (scaled !== undefined) return scaled;
           }
           // sqrt is exact for a perfect square and rounds once; pow(n, 0.5) goes through exp/ln.
-          const plain = (p === 2 ? sqrt(n) : pow(n, 1 / p)) as number | BigNumberType;
+          const plain = (p === 2 ? sqrt(n) : powForNorm(n, p, true)) as number | BigNumberType;
           return p === 2 ? _finiteOr(plain, x) : _scaledPNorm(x, p, n, plain);
         }
         return Number.POSITIVE_INFINITY;

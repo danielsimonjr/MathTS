@@ -62,6 +62,7 @@ export function isTypedWasmAvailable(): boolean {
 
 import { Complex, isComplex as _isComplex } from '../types/complex.js';
 import { isDual } from '../types/dual.js';
+import { digits } from '../number.js';
 import {
   bigNumberToNumber,
   bigintToNumber,
@@ -407,7 +408,16 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
   {
     from: 'number',
     to: 'BigNumber',
-    convert: (n: unknown) => BigNumber.fromNumber(n as number),
+    convert: (n: unknown) => {
+      const value = n as number;
+      if (digits(value) > 15) {
+        throw new TypeError(
+          `Cannot implicitly convert a number with >15 significant digits to BigNumber (value: ${value}). ` +
+            'Use function bignumber(x) to convert to BigNumber.'
+        );
+      }
+      return BigNumber.fromNumber(value);
+    },
   },
   // -------------------------------------------------------------------------
   // To Complex conversions
@@ -434,7 +444,17 @@ export const MATHTS_CONVERSIONS: ConversionDef[] = [
   {
     from: 'number',
     to: 'Fraction',
-    convert: (n: unknown) => Fraction.fromNumber(n as number),
+    convert: (n: unknown) => {
+      const value = n as number;
+      const fraction = Fraction.fromNumber(value, 10000000n);
+      if (fraction.valueOf() !== value) {
+        throw new TypeError(
+          `Cannot implicitly convert a number to a Fraction when there will be a loss of precision (value: ${value}). ` +
+            'Use function fraction(x) to convert to Fraction.'
+        );
+      }
+      return fraction;
+    },
   },
   {
     from: 'bigint',

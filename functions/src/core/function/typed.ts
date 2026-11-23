@@ -36,6 +36,7 @@
  * @returns The created typed-function
  */
 
+import { Fraction as CoreFraction } from '@danielsimonjr/mathts-core';
 import typedFunction from 'typed-function';
 import { factory } from '../../utils/factory.js';
 import {
@@ -411,7 +412,8 @@ export const createTyped = /* #__PURE__ */ factory(
             throwNoFraction(x);
           }
 
-          const f = new Fraction(x);
+          const f =
+            Fraction === CoreFraction ? CoreFraction.fromNumber(x, 10000000n) : new Fraction(x);
           if (f.valueOf() !== x) {
             throw new TypeError(
               'Cannot implicitly convert a number to a Fraction when there will be a loss of precision ' +
