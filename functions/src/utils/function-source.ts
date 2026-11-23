@@ -395,6 +395,11 @@ export function parameterName(entry: string): string | undefined {
  */
 export function callbackArity(fn: (...args: never[]) => unknown): CallbackArity {
   const list = readParameterList(fn.toString());
+  // Bound functions expose no formal parameters in source. Their remaining fixed arity
+  // is available through length, but any rest parameter is hidden by the binding.
+  if (fn.name.startsWith('bound ') && list?.params.length === 0) {
+    return { count: fn.length, rest: undefined };
+  }
   return {
     count: Math.max(fn.length, list?.params.length ?? 0),
     rest: list === undefined ? undefined : list.params.some((p) => p.startsWith('...')),

@@ -20,6 +20,7 @@
  * @packageDocumentation
  */
 
+import { unaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import { mathTyped, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 import { formatBigNumber } from '@danielsimonjr/mathts-core/internal';
 import { format as formatValue } from '../utils/string.js';
@@ -196,49 +197,51 @@ export const oct = mathTyped('oct', {
  * format(NaN)                                 // 'NaN'
  * ```
  */
-export const format = mathTyped('format', {
-  // Single-arg: format with defaults. A BigNumber is formatted here, before `formatValue`,
-  // so that every digit is kept. `isBigNumber` reads the brand, which also matches a
-  // BigNumber of a second copy of core (#1033).
-  any: (x: unknown): string => {
-    if (isBigNumber(x)) {
-      const bn = x as unknown as {
-        isNaN: () => boolean;
-        isFinite: () => boolean;
-        isNegative: () => boolean;
-        toString: () => string;
-      };
-      if (bn.isNaN()) return 'NaN';
-      if (!bn.isFinite()) return bn.isNegative() ? '-Infinity' : 'Infinity';
-      return bn.toString();
-    }
-    return formatValue(x, undefined);
-  },
-
-  // Two-arg: format with options/precision. For BigNumber+number we use toPrecision
-  // directly; for everything else we delegate to formatValue.
-  'any, any': (x: unknown, options: unknown): string => {
-    assertFormatPrecision(options);
-    if (isBigNumber(x)) {
-      const bn = x as unknown as {
-        isNaN: () => boolean;
-        isFinite: () => boolean;
-        isNegative: () => boolean;
-        toPrecision: (p: number) => string;
-        toString: () => string;
-      };
-      if (bn.isNaN()) return 'NaN';
-      if (!bn.isFinite()) return bn.isNegative() ? '-Infinity' : 'Infinity';
-      if (typeof options === 'number') {
-        return bn.toPrecision(options);
+export const format = /* #__PURE__ */ unaryCollectionCallback(
+  mathTyped('format', {
+    // Single-arg: format with defaults. A BigNumber is formatted here, before `formatValue`,
+    // so that every digit is kept. `isBigNumber` reads the brand, which also matches a
+    // BigNumber of a second copy of core (#1033).
+    any: (x: unknown): string => {
+      if (isBigNumber(x)) {
+        const bn = x as unknown as {
+          isNaN: () => boolean;
+          isFinite: () => boolean;
+          isNegative: () => boolean;
+          toString: () => string;
+        };
+        if (bn.isNaN()) return 'NaN';
+        if (!bn.isFinite()) return bn.isNegative() ? '-Infinity' : 'Infinity';
+        return bn.toString();
       }
-      // For options-object, fall through to formatValue which handles the BigNumber methods
-      // that DO exist (toFixed, toExponential, toPrecision, toSignificantDigits).
+      return formatValue(x, undefined);
+    },
+
+    // Two-arg: format with options/precision. For BigNumber+number we use toPrecision
+    // directly; for everything else we delegate to formatValue.
+    'any, any': (x: unknown, options: unknown): string => {
+      assertFormatPrecision(options);
+      if (isBigNumber(x)) {
+        const bn = x as unknown as {
+          isNaN: () => boolean;
+          isFinite: () => boolean;
+          isNegative: () => boolean;
+          toPrecision: (p: number) => string;
+          toString: () => string;
+        };
+        if (bn.isNaN()) return 'NaN';
+        if (!bn.isFinite()) return bn.isNegative() ? '-Infinity' : 'Infinity';
+        if (typeof options === 'number') {
+          return bn.toPrecision(options);
+        }
+        // For options-object, fall through to formatValue which handles the BigNumber methods
+        // that DO exist (toFixed, toExponential, toPrecision, toSignificantDigits).
+        return formatValue(x, options);
+      }
       return formatValue(x, options);
-    }
-    return formatValue(x, options);
-  },
-});
+    },
+  })
+);
 
 // =============================================================================
 // print — string template interpolation
