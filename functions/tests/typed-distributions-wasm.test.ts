@@ -171,7 +171,7 @@ describe('gammaPDF (Slice 5.8)', () => {
     const k = 2,
       theta = 2;
     const lgK = refLgamma(k);
-    const result = await (gammaPDF(xs, k, theta) as Promise<Float64Array>);
+    const result = await (gammaPDF(xs, k, { scale: theta }) as Promise<Float64Array>);
     for (let i = 0; i < xs.length; i++) {
       const ref = Math.exp((k - 1) * Math.log(xs[i]) - xs[i] / theta - lgK - k * Math.log(theta));
       expect(Math.abs(result[i] - ref)).toBeLessThan(TOL_AGREE);
@@ -185,7 +185,7 @@ describe('gammaPDF (Slice 5.8)', () => {
     const k = 3,
       theta = 1.5;
     const lgK = refLgamma(k);
-    const result = await (gammaPDF(xs, k, theta) as Promise<Float64Array>);
+    const result = await (gammaPDF(xs, k, { scale: theta }) as Promise<Float64Array>);
     for (let i = 0; i < xs.length; i++) {
       const ref = Math.exp((k - 1) * Math.log(xs[i]) - xs[i] / theta - lgK - k * Math.log(theta));
       expect(Math.abs(result[i] - ref)).toBeLessThan(TOL_AGREE);
