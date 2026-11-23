@@ -56,7 +56,7 @@ describe('dense JS backend reach', () => {
   });
 
   describe('DenseMatrix.multiply', () => {
-    it('32×32 stays JS with zero WASM/manager calls (flop count 32³ > 256)', () => {
+    it('32×32 stays JS with zero WASM/manager calls (flop count 32³ > 24³)', () => {
       const n = 32;
       const a = DenseMatrix.random(n, n);
       const b = DenseMatrix.random(n, n);
@@ -193,8 +193,8 @@ describe('dense JS backend reach', () => {
     });
 
     it('DEFAULT_EXTENDED_HINTS matches DEFAULT_CONFIG and DEFAULT_BACKEND_HINTS', () => {
-      expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.wasm).toBe(256);
-      expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.multiply).toBe(256);
+      expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.wasm).toBe(13_824);
+      expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.multiply).toBe(13_824);
       expect(DEFAULT_EXTENDED_HINTS.operationThresholds.transpose?.wasm).toBe(2000);
       expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.transpose).toBe(2000);
       expect(DEFAULT_EXTENDED_HINTS.operationThresholds.decomposition?.wasm).toBe(100);
@@ -214,10 +214,10 @@ describe('dense JS backend reach', () => {
       );
     });
 
-    it('setConfig(debug) does not overwrite measured multiply WASM threshold with stale 500', () => {
-      expect(backendManager.getHints().operationThresholds?.multiply?.wasm).toBe(256);
+    it('setConfig(debug) does not overwrite the measured multiply WASM threshold', () => {
+      expect(backendManager.getHints().operationThresholds?.multiply?.wasm).toBe(13_824);
       setConfig({ debug: true });
-      expect(backendManager.getHints().operationThresholds?.multiply?.wasm).toBe(256);
+      expect(backendManager.getHints().operationThresholds?.multiply?.wasm).toBe(13_824);
     });
   });
 });

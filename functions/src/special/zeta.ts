@@ -43,6 +43,20 @@ const BORWEIN_GUARD_DIGITS = 10;
 /** The Euler-Mascheroni constant: zeta(s) = 1 / (s - 1) + EULER_GAMMA + O(s - 1) next to the pole. */
 const EULER_GAMMA = 0.5772156649015329;
 
+// B_(2k)/(2k)! for the Euler–Maclaurin tail of the Dirichlet series.
+const eulerMaclaurinCoefficients = [
+  1 / 12,
+  -1 / 720,
+  1 / 30240,
+  -1 / 1209600,
+  1 / 47900160,
+  -691 / 1307674368000,
+  1 / 74724249600,
+  -3617 / 10670622842880000,
+  43867 / 5109094217170944000,
+  -174611 / 802857662698291200000,
+];
+
 type NumericValue = number | BigNumberType | ComplexType;
 
 /** d(k, n) of the Borwein series for an integer k from 0 to n. */
@@ -59,11 +73,9 @@ interface ZetaDependencies {
   pow: NumericFn;
   divide: NumericFn;
   factorial: NumericFn;
-  equal: TypedFunction;
   smallerEq: TypedFunction;
-  isBounded: TypedFunction;
-  isNegative: TypedFunction;
   gamma: NumericFn;
+  lgamma: NumericFn;
   sin: NumericFn;
   subtract: NumericFn;
   add: NumericFn;
@@ -79,11 +91,9 @@ const dependencies = [
   'pow',
   'divide',
   'factorial',
-  'equal',
   'smallerEq',
-  'isBounded',
-  'isNegative',
   'gamma',
+  'lgamma',
   'sin',
   'subtract',
   'add',
@@ -101,11 +111,9 @@ export const createZeta = /* #__PURE__ */ factory(
     pow,
     divide,
     factorial,
-    equal,
     smallerEq,
-    isBounded,
-    isNegative,
     gamma,
+    lgamma,
     sin,
     subtract,
     add,
@@ -145,16 +153,25 @@ export const createZeta = /* #__PURE__ */ factory(
      * @return {number | Complex | BigNumber}    The Riemann Zeta of `s`
      */
     function zetaNumber(s: number): number {
+      if (Number.isNaN(s) || s === 1 || s === -Infinity) return NaN;
+      if (s === Infinity) return 1;
+      if (Math.abs(s) <= 1e-4) {
+        // Taylor series at zero. Reflection through 1 - s rounds away part of a small s.
+        return (
+          -0.5 + s * (-0.9189385332046727 + s * (-1.0031782279542925 - s * 1.0007851944770425))
+        );
+      }
       // A negative even integer is a trivial zero. The reflection gives sin(pi s / 2) = 0 times a
       // gamma that is Infinity above s = -342: 0 * Infinity is NaN. Every even double of size
       // 2^53 or more is an even integer, so zeta(-1e300) is 0 too.
       if (s < 0 && s % 2 === 0) return 0;
-      const value = zetaNumeric(
+      const value = zeta(
         s,
-        (value: number) => value,
+        (value) => value,
         () => 20,
+        (value) => value,
         () => pi as number
-      );
+      ) as number;
       // Below s = -649 the factor pi^(s - 3/2) is 0 and the gamma above is Infinity, so the
       // product is NaN where the value is out of range. Every factor except the sine is positive:
       // the value is the infinity with the sign of sin(pi s / 2), from the exact reduction.
@@ -205,8 +222,7 @@ export const createZeta = /* #__PURE__ */ factory(
         const precision = BigNumber!.precision;
         const digits = Math.ceil((precision + BORWEIN_GUARD_DIGITS) / BORWEIN_DIGITS_PER_TERM);
         if (negative) return reflectedZeta(s, x, precision, digits);
-        // A BigNumber is exact: 0 and 1 are the only special values. zetaNumeric compares with
-        // config.relTol and config.absTol (1e-12), so it gave NaN for 1 + 1e-25 and -0.5 for 1e-40.
+        // Use exact comparison so nearby inputs retain their significant digits.
         if (x.isZero()) return createValue(-0.5);
         if (x.equals(1)) return createValue(NaN);
         // 1 - 2^(1 - s) loses one digit for each digit of |s - 1| below 1.
@@ -283,38 +299,6 @@ export const createZeta = /* #__PURE__ */ factory(
     }
 
     /**
-     * Compute the Riemann zeta function of a real number or BigNumber `s`.
-     *
-     * @param {number | BigNumber} s
-     * @param {(value: number) => number | BigNumber} createValue
-     * @param {(value: number | BigNumber | Complex) => number} determineDigits
-     * @returns {number | BigNumber}
-     */
-    function zetaNumeric<T extends number | BigNumberType>(
-      s: T,
-      createValue: (value: number) => T,
-      determineDigits: (value: T) => number,
-      getPi: () => NumericValue,
-      dTable?: DTable
-    ): T {
-      // NaN is the only value not equal to itself. Without the guard, !isBounded(NaN) gives 1.
-      if (!equal(s, s)) {
-        return createValue(NaN);
-      }
-      if (equal(s, 0)) {
-        return createValue(-0.5);
-      }
-      if (equal(s, 1)) {
-        return createValue(NaN);
-      }
-      if (!isBounded(s)) {
-        return isNegative(s) ? createValue(NaN) : createValue(1);
-      }
-
-      return zeta(s, createValue, determineDigits, (s: T) => s as number, getPi, dTable) as T;
-    }
-
-    /**
      * Compute the Riemann zeta function of a complex number `s`.
      *
      * @param {Complex} s
@@ -333,8 +317,14 @@ export const createZeta = /* #__PURE__ */ factory(
       if (s.re === Infinity && s.im === 0) {
         return new Complex!(1);
       }
-      if (s.im === Infinity || s.re === -Infinity) {
+      if (!Number.isFinite(s.im) || !Number.isFinite(s.re)) {
         return new Complex!(NaN, NaN);
+      }
+
+      if (s.im === 0) return new Complex!(zetaNumber(s.re), 0);
+      // The direct symmetric reflection is accurate until its gamma factors get too large.
+      if (Math.abs(s.im) > 100 || s.re < -224) {
+        return s.re < 0 ? zetaComplexReflected(s) : zetaComplexEulerMaclaurin(s);
       }
 
       return zeta(
@@ -344,6 +334,64 @@ export const createZeta = /* #__PURE__ */ factory(
         (s: ComplexType) => s.re,
         () => pi as number
       ) as ComplexType;
+    }
+
+    function zetaComplexEulerMaclaurin({ re, im }: ComplexType): ComplexType {
+      if (re > 54) return new Complex!(1, 0);
+      // With N >= |s|, the correction terms shrink by about 1/(2*pi)^2.
+      const n = Math.max(32, Math.ceil(Math.hypot(re, im)));
+      if (n > 1_000_000) throw new RangeError('zeta: complex argument exceeds the supported range');
+      let real = 0;
+      let imaginary = 0;
+      for (let k = 1; k < n; k++) {
+        const log = Math.log(k);
+        const radius = Math.exp(-re * log);
+        real += radius * Math.cos(im * log);
+        imaginary -= radius * Math.sin(im * log);
+      }
+      const s = new Complex!(re, im);
+      const tail = pow(n, subtract(0, s));
+      let result = add(
+        new Complex!(real, imaginary),
+        multiply(tail, add(0.5, divide(n, subtract(s, 1))))
+      );
+      let correction = multiply(tail, divide(s, n));
+      for (let k = 0; k < eulerMaclaurinCoefficients.length; k++) {
+        result = add(result, multiply(eulerMaclaurinCoefficients[k], correction));
+        const j = 2 * k + 1;
+        correction = multiply(correction, divide(add(s, j), n), divide(add(s, j + 1), n));
+      }
+      return result as ComplexType;
+    }
+
+    function zetaComplexReflected(s: ComplexType): ComplexType {
+      // Combine the magnitude and phase of the functional equation before exponentiating.
+      const halfReal = s.re / 2;
+      const halfImaginary = Math.PI * (s.im / 2);
+      const magnitude = Math.abs(halfImaginary);
+      const sineReal = sinPiScalar(halfReal) * (1 + Math.exp(-2 * magnitude));
+      const sineImaginary =
+        Math.sign(halfImaginary) * cosPiScalar(halfReal) * -Math.expm1(-2 * magnitude);
+      const reflected = new Complex!(1 - s.re, -s.im);
+      const value = zetaComplexEulerMaclaurin(reflected);
+      const gammaLog = lgamma(reflected) as ComplexType;
+      const logTwoPi = Math.log(2 * Math.PI);
+      const radiusLog =
+        s.re * logTwoPi -
+        Math.log(Math.PI) +
+        magnitude -
+        Math.LN2 +
+        Math.log(Math.hypot(sineReal, sineImaginary)) +
+        gammaLog.re +
+        Math.log(Math.hypot(value.re, value.im));
+      const phase =
+        s.im * logTwoPi +
+        Math.atan2(sineImaginary, sineReal) +
+        gammaLog.im +
+        Math.atan2(value.im, value.re);
+      const component = (part: number): number =>
+        Math.sign(part) * Math.exp(radiusLog + Math.log(Math.abs(part)));
+      return new Complex!(component(Math.cos(phase)), component(Math.sin(phase)));
     }
 
     /**
@@ -434,7 +482,12 @@ export const createZeta = /* #__PURE__ */ factory(
       dAt: DFn = (k) => d(k, n),
       powAt: DFn = (k) => pow(k, s)
     ): NumericValue {
-      const c = divide(1, multiply(dAt(createValue(0)), subtract(1, pow(2, subtract(1, s)))));
+      // expm1 retains the small difference in Borwein's denominator at the pole.
+      const etaFactor =
+        typeof s === 'number'
+          ? -Math.expm1((1 - s) * Math.LN2)
+          : subtract(1, pow(2, subtract(1, s)));
+      const c = divide(1, multiply(dAt(createValue(0)), etaFactor));
       let S = createValue(0);
       for (let k = createValue(1); smallerEq(k, n); k = add(k, 1)) {
         S = add(S, divide(multiply((-1) ** ((k as number) - 1), dAt(k)), powAt(k)));

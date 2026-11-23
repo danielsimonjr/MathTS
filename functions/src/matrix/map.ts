@@ -1,4 +1,5 @@
 import { optimizeCallback } from '../utils/optimizeCallback.js';
+import { callbackArity } from '../utils/function-source.js';
 import { arraySize, broadcastSizes, broadcastTo, get, deepMap } from '../utils/array.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -270,10 +271,8 @@ export const createMap = /* #__PURE__ */ factory(
       // Check if the callback function uses `arguments`
       if (/arguments/.test(callbackStr)) return 2;
 
-      // Extract the parameters of the callback function
-      const paramsStr = callbackStr.match(/\(.*?\)/);
-      // Check if the callback function uses rest parameters
-      if (/\.\.\./.test(String(paramsStr))) return 2;
+      // A rest parameter takes every argument. An unreadable source takes every argument too.
+      if (callbackArity(callback).rest !== false) return 2;
       if (callback.length > numberOfArrays + 1) {
         return 2;
       }

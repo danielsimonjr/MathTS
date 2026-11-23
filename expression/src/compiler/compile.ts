@@ -42,6 +42,9 @@ export interface CompiledExpression {
 /** A math-namespace function resolved and invoked dynamically at runtime. */
 type MathFunction = (...args: unknown[]) => unknown;
 
+// This host setting uses a symbol so it cannot be resolved as an expression name.
+const MATRIX_LITERALS = Symbol.for('mathts.expression.matrixLiterals');
+
 /**
  * Duck-typed discriminant flags this tree-walker reads off a parsed node.
  * The compiler dispatches on these `isXxxNode` booleans (the mathjs
@@ -467,8 +470,11 @@ function compileArrayNode(
 ): EvalFunction {
   const items = (node as MathNode & { items: MathNode[] }).items;
   const evalItems: EvalFunction[] = items.map((item) => compileNode(item, math, argNames, depth));
+  const useMatrix = (math as Record<symbol, (() => boolean) | undefined>)[MATRIX_LITERALS];
+  const matrix = useMatrix?.() ? (math.matrix as MathFunction) : undefined;
   return function evalArrayNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
-    return evalItems.map((e) => e(scope, args, context));
+    const values = evalItems.map((e) => e(scope, args, context));
+    return matrix ? matrix(values) : values;
   };
 }
 

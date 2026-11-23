@@ -27,3 +27,8 @@ describe('#1177 item 1: a power of a sum that cancels to 0', () => {
     expect(detailed.expression.toString()).toBe('0');
   });
 });
+
+it('prints a negative leading coefficient as a unary minus', () => {
+  expect(String(rationalize('-2*x'))).toBe('-2 * x');
+  expect(String(rationalize('-2*x^2 - x + 3'))).toBe('-2 * x ^ 2 - x + 3');
+});

@@ -89,6 +89,12 @@
       "needs": ["core/dist/index.js"]
     },
     {
+      "name": "bignumber-large-rounding",
+      "script": "functions/tests/helpers/bignumber-large-rounding-perf-gate.mjs",
+      "limit": 20,
+      "needs": ["core/dist/index.js"]
+    },
+    {
       "name": "simplify-coefficient-cap",
       "script": "functions/tests/helpers/simplify-coefficient-cap-perf-gate.mjs",
       "limit": 3,

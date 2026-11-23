@@ -8,11 +8,11 @@
  * conflicts with the active typed implementations.
  */
 
-import { factoryScope } from './scope.js';
+import { factoryScope, type TypedBuilder } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
 import { add, multiply } from '../typed/arithmetic.js';
 import { registerDivideInverse } from '../typed/divide-inverse.js';
-import { registerCollectionRelational } from '../typed/collection-relational.js';
+import { registerCollectionBinary } from '../typed/collection-binary.js';
 import { registerExactReductions } from '../typed/exact-reductions.js';
 import type {
   BridgeMatrix,
@@ -570,7 +570,7 @@ export const inv = ((m: unknown) =>
 // typed arithmetic module cannot import the factory layer.
 registerDivideInverse(inv as unknown as (m: unknown) => unknown);
 // The typed comparison functions take collections through the factory ports (#975, #1307).
-registerCollectionRelational(factoryScope);
+registerCollectionBinary(factoryScope);
 
 // arithmetic (conflicting names use factory_ prefix)
 export const factory_cbrt = createCbrt(factoryScope as Parameters<typeof createCbrt>[0]);
@@ -1160,7 +1160,7 @@ import {
   isBigNumber as coreIsBigNumber,
   isFraction as coreIsFraction,
   isMatrix as coreIsMatrix,
-  isUnit as coreIsUnit,
+  mathTyped as coreTyped,
 } from '@danielsimonjr/mathts-core';
 import { createUnitClass } from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
@@ -1747,42 +1747,84 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+/** The call forms of {@link number}. */
+interface NumberFunction {
+  (x?: number | string | boolean | bigint | null | CoreBigNumber | CoreFraction): number;
+  (x: unknown, valuelessUnit: string): number;
+  (x: readonly unknown[]): number[];
+  (x: unknown, valuelessUnit?: string): unknown;
+}
+
+/** Read the text of a number: `'NaN'` gives NaN, and a text that is not a number throws. */
+function numberOfText(x: string): number {
+  if (x === 'NaN') return NaN;
+  const n = Number(x);
+  if (Number.isNaN(n)) throw new SyntaxError(`String "${x}" is not a valid number`);
+  return n;
+}
+
+/**
+ * The fallback of `number`: a BigNumber or a Fraction of another library has the marker but not
+ * the brand of core, and converts through its value. Any other value has no signature, so the
+ * call throws the TypeError that mathjs throws.
+ */
+function numberOfOtherValue(x: unknown): number {
+  const o = (x ?? {}) as { isBigNumber?: boolean; isFraction?: boolean; valueOf(): unknown };
+  if (o.isBigNumber === true || o.isFraction === true) return Number(o.valueOf());
+  const actual =
+    x === undefined || x === null ? String(x) : ((x as { type?: string }).type ?? typeof x);
+  throw new TypeError(
+    'Unexpected type of argument in function number (expected: number or string or boolean or ' +
+      `BigNumber or Fraction or Unit or Array or Matrix or null or bigint, actual: ${actual}, index: 0)`
+  );
+}
+
+/** The signatures of `number` with one argument, each also with `undefined` as the second. */
+function numberSignatures(): Record<string, unknown> {
+  const typed = coreTyped as unknown as TypedBuilder;
+  const oneArgument: Record<string, unknown> = {
+    number: (x: number) => x,
+    string: numberOfText,
+    'boolean | bigint': (x: boolean | bigint) => Number(x),
+    null: () => 0,
+    'BigNumber | Fraction': (x: CoreBigNumber | CoreFraction) => Number(x.valueOf()),
+    // mathjs gives the same unit and converts its value to a number.
+    Unit: typed.referToSelf((self) => (x: unknown) => {
+      const clone = (x as { clone(): { value: unknown } }).clone();
+      clone.value = self((x as { value: unknown }).value);
+      return clone;
+    }),
+    'Array | Matrix': typed.referToSelf((self) => (x: unknown) => mapCollection(x, (v) => self(v))),
+    any: numberOfOtherValue,
+  };
+  const signatures: Record<string, unknown> = { '': () => 0, ...oneArgument };
+  for (const [types, implementation] of Object.entries(oneArgument)) {
+    signatures[`${types}, undefined`] = implementation;
+  }
+  // A unit and a collection of units read their number in a named unit.
+  signatures['Unit, string | Unit'] = typed.referToSelf(
+    (self) => (x: unknown, valuelessUnit: unknown) =>
+      self((x as { toNumeric(u: unknown): unknown }).toNumeric(valuelessUnit))
+  );
+  signatures['Array | Matrix, string | Unit'] = typed.referToSelf(
+    (self) => (x: unknown, valuelessUnit: unknown) =>
+      mapCollection(x, (v) => self(v, valuelessUnit))
+  );
+  return signatures;
+}
+
 /**
  * Convert a value to a number, as mathjs `number` does. A string that is not a number throws
  * (`'NaN'` gives NaN). A unit with a valueless unit gives its value in that unit. A unit alone
  * gives the same unit with a number value. An array or a matrix converts element-wise.
+ *
+ * The function is a typed-function, as in mathjs. The callback adapters of `map`, `forEach`,
+ * `filter`, the Matrix methods and `evaluate` read its signatures, so `map(x, number)` passes the
+ * value alone. With a plain function whose second parameter is optional, the adapters passed the
+ * index as the unit (#1160). `number(undefined)`, `number({})` and `number(complex)` throw a
+ * TypeError, as in mathjs.
  */
-export function number(
-  x?: number | string | boolean | bigint | null | CoreBigNumber | CoreFraction
-): number;
-export function number(x: unknown, valuelessUnit: string): number;
-export function number(x: readonly unknown[]): number[];
-export function number(x: unknown, valuelessUnit?: string): unknown;
-export function number(x?: unknown, valuelessUnit?: string): unknown {
-  if (valuelessUnit !== undefined && !coreIsUnit(x) && !Array.isArray(x) && !coreIsMatrix(x)) {
-    throw new TypeError('number(x, valuelessUnit) takes a unit, an array or a matrix as x');
-  }
-  if (x === undefined || x === null) return 0;
-  const mapped = mapCollection(x, (v) => number(v, valuelessUnit as string));
-  if (mapped !== undefined) return mapped;
-  if (coreIsUnit(x)) {
-    if (valuelessUnit === undefined) {
-      // mathjs gives the same unit and converts its value to a number.
-      const clone = (x as unknown as { clone(): { value: unknown } }).clone();
-      clone.value = number(clone.value);
-      return clone;
-    }
-    return number((x as unknown as { toNumeric(u: string): unknown }).toNumeric(valuelessUnit));
-  }
-  if (typeof x === 'string') {
-    if (x === 'NaN') return NaN;
-    const n = Number(x);
-    if (Number.isNaN(n)) throw new SyntaxError(`String "${x}" is not a valid number`);
-    return n;
-  }
-  if (coreIsBigNumber(x) || coreIsFraction(x)) return Number(x.valueOf());
-  return Number(x);
-}
+export const number = coreTyped('number', numberSignatures() as never) as unknown as NumberFunction;
 
 /** Convert a value to a string, as mathjs `string` does. An array or a matrix converts element-wise. */
 export function string(x?: unknown): string;

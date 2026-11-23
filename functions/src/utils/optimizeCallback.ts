@@ -1,6 +1,8 @@
+import { isUnaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import typed from 'typed-function';
 import { get, arraySize } from './array.js';
 import { typeOf as _typeOf } from './is.js';
+import { callbackArity } from './function-source.js';
 
 /** A generic callable; callbacks/signatures handled here are dynamically typed. */
 type AnyFunction = (...args: unknown[]) => unknown;
@@ -39,6 +41,8 @@ export function optimizeCallback<T, R>(
   name: string,
   isUnary?: boolean
 ): OptimizedCallback<unknown, R> {
+  if (isUnaryCollectionCallback(callback))
+    return { isUnary: true, fn: callback as (...args: unknown[]) => R };
   const typedAny = typed as unknown as {
     isTypedFunction: (fn: AnyFunction) => boolean;
     resolve: (fn: AnyFunction, args: unknown[]) => AnyFunction | null;
@@ -136,8 +140,9 @@ function _findSingleSignatureWithArity(
  * This function checks the following conditions to determine if the callback is unary:
  * 1. The callback function should have exactly one parameter.
  * 2. The callback function should not use the `arguments` object.
- * 3. The callback function should not use rest parameters (`...`).
- * If in doubt, this function shall return `false` to be safe
+ * 3. The callback function should not use rest parameters (`...`). The parameter list is read
+ *    with `callbackArity`, so a parenthesised default value does not hide a rest parameter.
+ * If in doubt (the source cannot be read), this function shall return `false` to be safe
  *
  * @param callback - The callback function to be checked.
  * @returns Returns `true` if the callback is unary, otherwise `false`.
@@ -149,11 +154,8 @@ function _findIfCallbackIsUnary(callback: AnyFunction): boolean {
   // Check if the callback function uses `arguments`
   if (/arguments/.test(callbackStr)) return false;
 
-  // Extract the parameters of the callback function
-  const paramsStr = callbackStr.match(/\(.*?\)/);
-  // Check if the callback function uses rest parameters
-  if (paramsStr && /\.\.\./.test(paramsStr[0])) return false;
-  return true;
+  // A rest parameter takes more than one argument. An unreadable source is not unary.
+  return callbackArity(callback).rest === false;
 }
 
 function _findNumberOfArgumentsTyped<T>(

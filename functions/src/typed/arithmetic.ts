@@ -106,7 +106,7 @@ import { modWithFloor } from '../arithmetic/mod-with-floor.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { assertInnerDimensions, sparseProduct } from './sparse-product.js';
-import { collectionRelationalRows, unitsEqual } from './collection-relational.js';
+import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
 import { exactReductions } from './exact-reductions.js';
 import {
   ROUND_DECIMALS_NOT_INTEGER,
@@ -633,6 +633,15 @@ function denseMatrixProduct(a: unknown, b: unknown): MathJSDenseMatrix {
   return denseOfSize(matrixProduct(a, b), productSize(a, b));
 }
 
+/** A mixed-storage matrix product keeps the sparse operand's storage family. */
+function mixedSparseMatrixProduct(a: unknown, b: unknown): unknown {
+  const size = productSize(a, b);
+  const data = matrixProduct(a, b);
+  return isSparseMatrix(a) || isSparseMatrix(b)
+    ? publicSparseOrDense(data, size)
+    : sparseOfSize(data, size);
+}
+
 /** True when a matrix operand has other than two axes (a factory matrix of size `[n]`). */
 function isNotTwoDimensional(m: unknown): boolean {
   return collectionSize(m).length !== 2;
@@ -647,8 +656,15 @@ function toNested(m: unknown): unknown {
 // Leaf operations for the element-wise walks above — deferred closures so they
 // resolve the binary `add` / `subtract` / `multiply` at call time (after all are defined).
 const addOp: ScalarOp = (x, y) => (add as unknown as ScalarOp)(x, y);
+const addCollectionOp: ScalarOp = (x, y) =>
+  typeof x === 'string' || typeof y === 'string'
+    ? (factoryScope.addScalar as ScalarOp)(x, y)
+    : addOp(x, y);
 const subOp: ScalarOp = (x, y) => (subtract as unknown as ScalarOp)(x, y);
-const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
+const mulOp: ScalarOp = (x, y) =>
+  typeof x === 'string' || typeof y === 'string'
+    ? (factoryScope.multiplyScalar as ScalarOp)(x, y)
+    : (multiply as unknown as ScalarOp)(x, y);
 
 const addForNumberPath: { fn?: object } = {};
 const subtractForNumberPath: { fn?: object } = {};
@@ -723,7 +739,7 @@ function scalarCollectionSignatures(
   return rows;
 }
 
-const addKernels = elementwiseKernels(addForNumberPath, addOp);
+const addKernels = elementwiseKernels(addForNumberPath, addCollectionOp);
 const subtractKernels = elementwiseKernels(subtractForNumberPath, subOp);
 const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp, true);
 const divideKernels = elementwiseKernels(divideForNumberPath, divOp, true);
@@ -836,7 +852,8 @@ const unitDiv = (a: unknown, b: unknown): unknown => asUnit(a).divide(b);
  *
  * `null`, `undefined`, strings, symbols, functions, and objects that are not a
  * numeric type, Unit, matrix, array, or typed array throw
- * `TypeError: add: unexpected type …`. A numeric string is not coerced to Complex.
+ * `TypeError: add: unexpected type …` when passed as scalar arguments.
+ * Numeric strings inside collections use the scalar factory conversions.
  * `bigint` mixed with `number` returns a `number`, not a Fraction.
  */
 export const add = withBinaryScalarGuards(
@@ -882,26 +899,26 @@ export const add = withBinaryScalarGuards(
     // broadcast. Leaves fold through the binary `add`, so number / Complex /
     // Fraction / BigNumber elements all work.
     'Array, Array': (a: unknown[], b: unknown[]): unknown =>
-      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'Array, number': (a: unknown[], b: f64): unknown =>
-      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'number, Array': (a: f64, b: unknown[]): unknown =>
-      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseNumber(addForNumberPath.fn!, addCollectionOp, a, b),
 
     // Element-wise matrix addition (mathjs parity). Sparse⊕sparse stays sparse so
     // the CSparse algebra factories (csAmd's C = A + A', etc.) get CSC output.
     'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'DenseMatrix, number': (a: unknown, b: f64): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'number, DenseMatrix': (a: f64, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'SparseMatrix, number': (a: unknown, b: f64): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'number, SparseMatrix': (a: f64, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
 
     // An Array with a matrix, and a dense with a sparse matrix (mathjs parity): a dense matrix.
     // Without these rows typed-function converts the matrix to an Array, and the sum loses its
@@ -1117,15 +1134,14 @@ export const multiply = withBinaryScalarGuards(
     'SparseMatrix, Array': (a: unknown, b: unknown[]): unknown => mulOp(a, arrayAsSparseOrDense(b)),
     'Array, SparseMatrix': (a: unknown[], b: unknown): unknown => mulOp(arrayAsSparseOrDense(a), b),
 
-    // Matrix product with a sparse operand. mathjs returns a sparse matrix for two sparse
-    // operands and a dense matrix for a sparse and a dense operand. The sparse product reads
-    // the stored entries only (#1271); it never builds a dense matrix. A sparse matrix has
-    // two axes, so a vector case comes from the dense operand only.
+    // A 2-D matrix product with a sparse operand returns sparse storage in either order.
+    // For two sparse operands, read only stored entries (#1271). A sparse matrix has two axes,
+    // so a vector case comes from the dense operand only.
     'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
       sparseProduct(a, b, addOp, mulOp),
     // A sparse matrix times a 1-D dense matrix is a sparse column of size [r, 1] (mathjs).
     'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
-      if (!isNotTwoDimensional(b)) return denseMatrixProduct(a, b);
+      if (!isNotTwoDimensional(b)) return mixedSparseMatrixProduct(a, b);
       const column = (matrixVectorProduct(a, b) as unknown[]).map((x) => [x]);
       const size = [column.length, 1];
       return isSparseMatrix(a) ? publicSparseOrDense(column, size) : sparseOfSize(column, size);
@@ -1133,7 +1149,7 @@ export const multiply = withBinaryScalarGuards(
     // A 1-D dense matrix times a sparse matrix is a dense vector of size [c]. mathjs throws
     // here; the product is defined, so MathTS returns it.
     'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      isNotTwoDimensional(a) ? denseVectorProduct(a, b) : denseMatrixProduct(a, b),
+      isNotTwoDimensional(a) ? denseVectorProduct(a, b) : mixedSparseMatrixProduct(a, b),
 
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
@@ -1971,8 +1987,8 @@ interface GcdOverloads {
   (a: Fraction, b: Fraction, ...rest: Fraction[]): Fraction;
 }
 
-/** The scalar types of `gcd` and `lcm` that take more than two values. */
-const GCD_SCALARS = 'number | bigint | BigNumber | Fraction';
+/** The scalar and collection types accepted by variadic gcd and lcm. */
+const GCD_OPERANDS = 'number | bigint | BigNumber | Fraction | Matrix | Array';
 
 /**
  * The signature of `gcd` and `lcm` for three or more values: the function folds over the values
@@ -1993,6 +2009,7 @@ export type GcdFunction = GcdOverloads & TypedFunction;
  * Greatest common divisor
  */
 export const gcd: GcdFunction = mathTyped('gcd', {
+  ...collectionBinaryRows('gcd'),
   'number, number': (a: f64, b: f64): f64 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Parameters in function gcd must be integer numbers');
@@ -2003,7 +2020,7 @@ export const gcd: GcdFunction = mathTyped('gcd', {
   'Fraction, Fraction': fractionGcd,
   'Fraction, number': (a: Fraction, b: f64): Fraction => fractionGcd(a, Fraction.fromNumber(b)),
   'number, Fraction': (a: f64, b: Fraction): Fraction => fractionGcd(Fraction.fromNumber(a), b),
-  [`${GCD_SCALARS}, ${GCD_SCALARS}, ...${GCD_SCALARS}`]: variadicGcdSignature(),
+  [`${GCD_OPERANDS}, ${GCD_OPERANDS}, ...${GCD_OPERANDS}`]: variadicGcdSignature(),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
     // NaN, Infinity and a fraction have no integer gcd. The loop below never ends on them.
     if (!a.isInteger() || !b.isInteger()) {
@@ -2031,6 +2048,7 @@ export const gcd: GcdFunction = mathTyped('gcd', {
  * Least common multiple
  */
 export const lcm = mathTyped('lcm', {
+  ...collectionBinaryRows('lcm'),
   'number, number': (a: f64, b: f64): f64 => {
     if (!Number.isInteger(a) || !Number.isInteger(b)) {
       throw new Error('Parameters in function lcm must be integer numbers');
@@ -2048,7 +2066,7 @@ export const lcm = mathTyped('lcm', {
   'Fraction, Fraction': fractionLcm,
   'Fraction, number': (a: Fraction, b: f64): Fraction => fractionLcm(a, Fraction.fromNumber(b)),
   'number, Fraction': (a: f64, b: Fraction): Fraction => fractionLcm(Fraction.fromNumber(a), b),
-  [`${GCD_SCALARS}, ${GCD_SCALARS}, ...${GCD_SCALARS}`]: variadicGcdSignature(),
+  [`${GCD_OPERANDS}, ${GCD_OPERANDS}, ...${GCD_OPERANDS}`]: variadicGcdSignature(),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber => {
     if (!a.isInteger() || !b.isInteger()) {
       throw new Error('Parameters in function lcm must be integer numbers');
@@ -2285,9 +2303,19 @@ function exactNorm(arr: unknown[], p?: number | string): unknown {
 /** The norm of a 1-D or 2-D array; see {@link norm}. */
 function arrayNorm(arr: unknown[], p?: f64 | string): unknown {
   if (!isNumberArrayDeep(arr)) return exactNorm(arr, p);
-  if (is2DArray(arr)) return matrixNorm(arr as f64[][], p);
+  if (is2DArray(arr)) {
+    const rows = arr as f64[][];
+    if (rows[0].length === 0) throw new RangeError('Invalid matrix dimensions');
+    return matrixNorm(rows, p);
+  }
   if (typeof p === 'string') return matrixNorm([arr as f64[]], p);
   return vectorNorm(arr as f64[], p);
+}
+
+function boxedNorm(m: { toArray(): unknown }, p?: number | string): unknown {
+  const size = collectionSize(m);
+  if (size.length === 2 && size.includes(0)) throw new RangeError('Invalid matrix dimensions');
+  return arrayNorm(m.toArray() as unknown[], p);
 }
 
 export const norm = mathTyped('norm', {
@@ -2301,12 +2329,8 @@ export const norm = mathTyped('norm', {
   Array: (arr: unknown[]): unknown => arrayNorm(arr),
   'Array, number': (arr: unknown[], p: f64): unknown => arrayNorm(arr, p),
   'Array, string': (arr: unknown[], p: string): unknown => arrayNorm(arr, p),
-  'DenseMatrix | SparseMatrix': (m: { toArray(): unknown }): unknown =>
-    arrayNorm(m.toArray() as unknown[]),
-  'DenseMatrix | SparseMatrix, number | string': (
-    m: { toArray(): unknown },
-    p: f64 | string
-  ): unknown => arrayNorm(m.toArray() as unknown[], p),
+  'DenseMatrix | SparseMatrix': (m: { toArray(): unknown }): unknown => boxedNorm(m),
+  'DenseMatrix | SparseMatrix, number | string': boxedNorm,
 
   // Float64Array norm (Euclidean), synchronous. The worker version is computePool.norm.
   Float64Array: (a: Float64Array): f64 => {
@@ -2385,7 +2409,7 @@ export const equal = mathTyped('equal', {
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => coreEqual(a, b),
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitsEqual(a, b),
   // An Array or a matrix against any operand: the element-wise comparison of mathjs (#975).
-  ...collectionRelationalRows('equal'),
+  ...collectionBinaryRows('equal'),
 });
 
 /**
@@ -2397,7 +2421,7 @@ export const smaller = mathTyped('smaller', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) < 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) < 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) < 0,
-  ...collectionRelationalRows('smaller'),
+  ...collectionBinaryRows('smaller'),
 });
 
 /**
@@ -2409,7 +2433,7 @@ export const larger = mathTyped('larger', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) > 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) > 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) > 0,
-  ...collectionRelationalRows('larger'),
+  ...collectionBinaryRows('larger'),
 });
 
 /**
@@ -2421,7 +2445,7 @@ export const smallerEq = mathTyped('smallerEq', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) <= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) <= 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) <= 0,
-  ...collectionRelationalRows('smallerEq'),
+  ...collectionBinaryRows('smallerEq'),
 });
 
 /**
@@ -2433,7 +2457,7 @@ export const largerEq = mathTyped('largerEq', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) >= 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) >= 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) >= 0,
-  ...collectionRelationalRows('largerEq'),
+  ...collectionBinaryRows('largerEq'),
 });
 
 /**
@@ -2446,7 +2470,7 @@ export const compare = mathTyped('compare', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): i32 => a.compare(b),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): i32 => a.compare(b),
   'Unit, Unit': (a: Unit, b: Unit): i32 => unitCmp(a, b),
-  ...collectionRelationalRows('compare'),
+  ...collectionBinaryRows('compare'),
 });
 
 // =============================================================================
@@ -2520,6 +2544,13 @@ function extremumWalk(xs: unknown[], isMax: boolean, state: { m: number; nan: bo
 /** The numeric types that `min` and `max` compare exactly when their types differ. */
 const EXTREMUM_TYPES = ['number', 'Fraction', 'BigNumber', 'bigint'] as const;
 
+function assertNonemptyMatrixReduction(m: unknown, quantity: string): void {
+  const size = collectionSize(m);
+  if (size.length >= 2 && size.includes(0)) {
+    throw new Error(`Cannot calculate ${quantity} of an empty array`);
+  }
+}
+
 /**
  * The signatures that `min` and `max` share. Two arguments of different types go to the exact
  * function, which returns the winning argument itself. A conversion to one common type would
@@ -2542,6 +2573,7 @@ function extremumSignatures(name: 'min' | 'max'): Record<string, (...args: never
     'number, number': pick,
     Array: (arr: unknown[]): unknown => numberExtremum(arr, isMax) ?? exact(arr),
     Matrix: (m: unknown): unknown => {
+      assertNonemptyMatrixReduction(m, name);
       const v = (m as { valueOf(): unknown }).valueOf();
       return (Array.isArray(v) ? numberExtremum(v, isMax) : undefined) ?? exact(m);
     },
@@ -2906,9 +2938,14 @@ export const mean = mathTyped('mean', {
     return meanOfNumeric(skipNaN ? finiteNumbers(a, true) : a);
   },
 
-  Matrix: (m: unknown): f64 => (meanOfInput(m, false) ?? exactMean(m)) as f64,
-  'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 =>
-    meanWithOptions(m, undefined, opts) as f64,
+  Matrix: (m: unknown): f64 => {
+    assertNonemptyMatrixReduction(m, 'the mean');
+    return (meanOfInput(m, false) ?? exactMean(m)) as f64;
+  },
+  'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 => {
+    assertNonemptyMatrixReduction(m, 'the mean');
+    return meanWithOptions(m, undefined, opts) as f64;
+  },
   'Matrix, number | BigNumber': (
     m: unknown,
     dim: number | { valueOf(): number }
@@ -3323,12 +3360,17 @@ const stdSignatures = {
     return Math.sqrt(varianceOf(skipNaN ? finiteNumbers(a, true) : a, request));
   },
 
-  Matrix: (m: unknown): f64 => (sqrtNumber(varianceWith(m, UNBIASED, false)) ?? exactStd(m)) as f64,
+  Matrix: (m: unknown): f64 => {
+    assertNonemptyMatrixReduction(m, 'variance');
+    return (sqrtNumber(varianceWith(m, UNBIASED, false)) ?? exactStd(m)) as f64;
+  },
   'Matrix, string': (m: unknown, norm: string): f64 => {
+    assertNonemptyMatrixReduction(m, 'variance');
     const { request, skipNaN } = normalizationFromSecondArg(norm);
     return (sqrtNumber(varianceWith(m, request, skipNaN)) ?? exactStd(m, norm)) as f64;
   },
   'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
+    assertNonemptyMatrixReduction(m, 'variance');
     const { request, skipNaN } = normalizationFromSecondArg(arg);
     return (sqrtNumber(varianceWith(m, request, skipNaN)) ??
       exactVarianceWith('std', m, undefined, request, skipNaN)) as f64;
@@ -3487,14 +3529,17 @@ export function matmul(
  * Transpose. With `rows` and `cols`, `data` is a row-major `rows x cols` Float64Array and the
  * result is a new `cols x rows` Float64Array. With one argument, `data` is a matrix or a nested
  * array, and the result has the same storage, as in mathjs.
+ *
+ * The function is a typed-function, as in mathjs. A callback adapter (`map`, `forEach`,
+ * `filter`, the Matrix methods and `evaluate`) reads its signatures, so it passes the value alone
+ * and not the index as `rows`.
+ * @throws TypeError when a typed array has no rows and cols, or when the arguments have no signature
  * @throws Error when a Float64Array does not hold rows*cols elements
  */
-export function transpose(data: Float64Array, rows: i32, cols: i32): Float64Array;
-export function transpose<T>(data: readonly (readonly T[])[]): T[][];
-export function transpose<T>(data: readonly T[]): T[];
-export function transpose(data: unknown): unknown;
-export function transpose(data: unknown, rows?: i32, cols?: i32): unknown {
-  if (rows === undefined && cols === undefined) {
+export const transpose = mathTyped('transpose', {
+  'any, number, number': (data: Float64Array, rows: i32, cols: i32): Float64Array =>
+    transposeFlat(data, rows, cols),
+  any: (data: unknown): unknown => {
     if (ArrayBuffer.isView(data)) {
       throw new TypeError(
         'transpose: a typed array needs rows and cols: transpose(data, rows, cols)'
@@ -3503,12 +3548,13 @@ export function transpose(data: unknown, rows?: i32, cols?: i32): unknown {
     // A matrix of the matrix package has its own transpose, which keeps its class.
     if (isDenseMatrix(data) || isSparseMatrix(data)) return data.transpose();
     return exactReductions('transpose').transpose(data);
-  }
-  if (typeof rows !== 'number' || typeof cols !== 'number') {
-    throw new TypeError('transpose: pass one matrix, or data, rows and cols');
-  }
-  return transposeFlat(data as Float64Array, rows, cols);
-}
+  },
+}) as {
+  (data: Float64Array, rows: i32, cols: i32): Float64Array;
+  <T>(data: readonly (readonly T[])[]): T[][];
+  <T>(data: readonly T[]): T[];
+  (data: unknown): unknown;
+};
 
 function transposeFlat(data: Float64Array, rows: i32, cols: i32): Float64Array {
   if (data.length !== rows * cols) {

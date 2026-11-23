@@ -686,7 +686,8 @@ export class DenseMatrix extends Matrix<number> {
   // =========================================================================
 
   /**
-   * Apply a function to each element
+   * Apply a numeric callback as `fn(value, row, col)`.
+   * Wrap unary callbacks with optional positional arguments before passing them.
    */
   map(fn: (value: number, row: number, col: number) => number): DenseMatrix {
     const result = new Float64Array(this.rows * this.cols);

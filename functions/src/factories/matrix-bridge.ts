@@ -10,6 +10,7 @@
  * rewriting each one.
  */
 
+import { isUnaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import {
   formatGeneric,
@@ -17,6 +18,7 @@ import {
   isEmpty2DSize,
 } from '@danielsimonjr/mathts-core/internal';
 import { typeOf } from '../utils/is.js';
+import { callbackArity } from '../utils/function-source.js';
 import {
   arraySize,
   validate,
@@ -85,12 +87,16 @@ function matrixIndexSelectors(index: MatrixIndexLike): IndexSelector[] {
  * Adapt a callback so it is invoked with as many arguments as it can accept —
  * the mathjs callback contract. Typed functions (e.g. compiled expression
  * lambdas, signature 'any,any') reject surplus arguments, so probe the widest
- * arity they resolve; plain functions use their declared length (rest-args
- * closures, length 0, receive everything).
+ * arity they resolve. A plain function gets as many arguments as it has parameters,
+ * and a default value counts (`function.length` stops at the first one, so
+ * `(a, s = 1) => a` gets the index as `s`, as in mathjs). A function with a rest parameter,
+ * a function with no parameter and a function with three or more parameters receive
+ * every argument. So does a function whose source cannot be read.
  */
 function _adaptCallbackArity(
   callback: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
+  if (isUnaryCollectionCallback(callback)) return (value: unknown) => callback(value);
   const t = mathTyped as unknown as {
     isTypedFunction(fn: unknown): boolean;
     resolve(fn: unknown, args: unknown[]): unknown;
@@ -110,9 +116,9 @@ function _adaptCallbackArity(
       return callback(...args.slice(0, arity));
     };
   }
-  const declared = callback.length;
-  if (declared >= 1 && declared < 3) {
-    return (...args: unknown[]) => callback(...args.slice(0, declared));
+  const { count, rest } = callbackArity(callback);
+  if (rest === false && count >= 1 && count < 3) {
+    return (...args: unknown[]) => callback(...args.slice(0, count));
   }
   return callback;
 }
@@ -1144,13 +1150,16 @@ export class MathJSSparseMatrix {
    * An unstored element goes to the callback as 0.
    * With `skipZeros` true, the callback runs for the stored entries only.
    * A result that equals zero is not stored.
-   * Callback signature: (value, index, matrix) => newValue
+   * Callback signature: (value, index, matrix) => newValue. The callback gets as many arguments
+   * as it has parameters (see `_adaptCallbackArity`), so a constructor such as `fraction` and a
+   * function with a rest parameter work as they do on a dense matrix.
    */
   map(
     callback: (value: unknown, index: number[], matrix: MathJSSparseMatrix) => unknown,
     skipZeros = false
   ): MathJSSparseMatrix {
     const [rows, cols] = this._size;
+    const cb = _adaptCallbackArity(callback as (...args: unknown[]) => unknown);
     const newValues: unknown[] = [];
     const newIndex: number[] = [];
     const newPtr: number[] = [0];
@@ -1165,7 +1174,7 @@ export class MathJSSparseMatrix {
       if (skipZeros) {
         for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
           const i = this._index[k];
-          store(callback(this._values ? this._values[k] : 1, [i, j], this), i);
+          store(cb(this._values ? this._values[k] : 1, [i, j], this), i);
         }
       } else {
         // Row indexes can be unordered, so index the stored entries, then visit every row.
@@ -1174,7 +1183,7 @@ export class MathJSSparseMatrix {
           stored.set(this._index[k], this._values ? this._values[k] : 1);
         }
         for (let i = 0; i < rows; i++) {
-          store(callback(stored.has(i) ? stored.get(i) : 0, [i, j], this), i);
+          store(cb(stored.has(i) ? stored.get(i) : 0, [i, j], this), i);
         }
       }
       newPtr.push(newValues.length);
@@ -1201,12 +1210,13 @@ export class MathJSSparseMatrix {
     skipZeros = false
   ): void {
     const [rows, cols] = this._size;
+    const cb = _adaptCallbackArity(callback as (...args: unknown[]) => unknown);
     for (let j = 0; j < cols; j++) {
       if (skipZeros) {
         for (let k = this._ptr[j]; k < this._ptr[j + 1]; k++) {
           const i = this._index[k];
           const v = this._values ? this._values[k] : 1;
-          callback(v, [i, j], this);
+          cb(v, [i, j], this);
         }
         continue;
       }
@@ -1216,7 +1226,7 @@ export class MathJSSparseMatrix {
         stored.set(this._index[k], this._values ? this._values[k] : 1);
       }
       for (let i = 0; i < rows; i++) {
-        callback(stored.has(i) ? stored.get(i) : 0, [i, j], this);
+        cb(stored.has(i) ? stored.get(i) : 0, [i, j], this);
       }
     }
   }

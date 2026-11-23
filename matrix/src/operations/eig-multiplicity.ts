@@ -319,21 +319,25 @@ function staircase(
  *   every pair. A symmetric matrix has no Jordan block: its groups use the tolerance of a
  *   double eigenvalue for every size and have as many independent eigenvectors as
  *   members, with no factorization.
+ * @param balancedScale - The norm of balanced diagonal blocks, when available. Off-block
+ *   couplings affect nullity but do not affect how close the eigenvalues are.
  * @returns One entry per repeated eigenvalue, ordered by its first member in `values`.
  */
 export function repeatedEigenvalueReport(
   A: number[][],
   values: Array<{ re: number; im: number }>,
-  _symmetricFlag: boolean
+  _symmetricFlag: boolean,
+  balancedScale?: number
 ): RepeatedEigenvalue[] {
   let normF = 0;
   for (const row of A) for (const v of row) normF = Math.hypot(normF, v);
   // A smaller asymmetry than the rank floor cannot be told from rounding.
   const symmetric = isRoundingSymmetric(A);
-  const baseTol = linkTolerance(2, normF);
+  const spectralScale = balancedScale ?? normF;
+  const baseTol = linkTolerance(2, spectralScale);
   const rankTol = Math.sqrt(EIG_EPS) * normF;
   const screenLimit = (SCREEN_FACTOR * rankTol) ** 2;
-  const maxHeight = symmetric ? baseTol : linkTolerance(MAX_TRACKED_BLOCK, normF);
+  const maxHeight = symmetric ? baseTol : linkTolerance(MAX_TRACKED_BLOCK, spectralScale);
 
   const found: Array<{ first: number; entry: RepeatedEigenvalue }> = [];
   const pending = linkageTree(values, maxHeight);
@@ -354,7 +358,7 @@ export function repeatedEigenvalueReport(
     let independent = -1;
     if (symmetric) {
       independent = m;
-    } else if (cluster.height <= linkTolerance(m, normF)) {
+    } else if (cluster.height <= linkTolerance(m, spectralScale)) {
       // Centred second moment, a complex number: sum of (lambda_i - mean)^2.
       let sRe = 0;
       let sIm = 0;

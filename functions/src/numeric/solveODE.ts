@@ -41,11 +41,14 @@ const dependencies = [
 /**
  * Butcher Tableau structure for Runge-Kutta methods
  */
+type RungeKuttaCoefficient = number | BigNumber;
+type RungeKuttaRatio = (numerator: number, denominator?: number) => RungeKuttaCoefficient;
+
 interface ButcherTableau {
-  a: number[][] | BigNumber[][];
-  c: (number | null)[] | (BigNumber | null)[];
-  b: number[] | BigNumber[];
-  bp: number[] | BigNumber[];
+  a: RungeKuttaCoefficient[][];
+  c: (RungeKuttaCoefficient | null)[];
+  b: RungeKuttaCoefficient[];
+  bp: RungeKuttaCoefficient[];
 }
 
 /**
@@ -1670,7 +1673,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
     // dependency, and `stiffODESolver` (functions/src/typed/numeric.ts) needs to call the same
     // engine directly without depending on this factory instance.
 
-    function _rk(butcherTableau: ButcherTableau, rkMethod: 'RK23' | 'RK45') {
+    function _rk(tableau: (ratio: RungeKuttaRatio) => ButcherTableau, rkMethod: 'RK23' | 'RK45') {
       // generates an adaptive runge kutta method from it's butcher tableau
 
       return function (
@@ -1707,14 +1710,13 @@ export const createSolveODE = /* #__PURE__ */ factory(
         const maxDelta = options.maxDelta ? options.maxDelta : 5;
         const maxIter = odeAcceptedBudget(options.maxIter as number | undefined);
         const attemptCap = odeMaxAttempts(maxIter);
-        const [a, c, b, bp] = hasBigNumbers
-          ? [
-              bignumber(butcherTableau.a),
-              bignumber(butcherTableau.c),
-              bignumber(butcherTableau.b),
-              bignumber(butcherTableau.bp),
-            ]
-          : [butcherTableau.a, butcherTableau.c, butcherTableau.b, butcherTableau.bp];
+        const ratio: RungeKuttaRatio = hasBigNumbers
+          ? (numerator, denominator = 1) =>
+              (denominator === 1
+                ? bignumber(numerator)
+                : divide(bignumber(numerator), bignumber(denominator))) as BigNumber
+          : (numerator, denominator = 1) => numerator / denominator;
+        const { a, c, b, bp } = tableau(ratio);
 
         let h;
         const firstStepGuess = firstStep ? undefined : _firstStepGuess(f, t0, tf, y0, tspan);
@@ -1893,16 +1895,15 @@ export const createSolveODE = /* #__PURE__ */ factory(
       // Bogacki–Shampine method
 
       // Define the butcher table
-      const a: number[][] = [[], [1 / 2], [0, 3 / 4], [2 / 9, 1 / 3, 4 / 9]];
-
-      const c: (number | null)[] = [null, 1 / 2, 3 / 4, 1];
-      const b: number[] = [2 / 9, 1 / 3, 4 / 9, 0];
-      const bp: number[] = [7 / 24, 1 / 4, 1 / 3, 1 / 8];
-
-      const butcherTableau: ButcherTableau = { a, c, b, bp };
-
-      // Solve an adaptive step size rk method
-      return _rk(butcherTableau, 'RK23')(f, tspan, y0, options);
+      return _rk(
+        (q) => ({
+          a: [[], [q(1, 2)], [q(0), q(3, 4)], [q(2, 9), q(1, 3), q(4, 9)]],
+          c: [null, q(1, 2), q(3, 4), q(1)],
+          b: [q(2, 9), q(1, 3), q(4, 9), q(0)],
+          bp: [q(7, 24), q(1, 4), q(1, 3), q(1, 8)],
+        }),
+        'RK23'
+      )(f, tspan, y0, options);
     }
 
     function _rk45(
@@ -1914,32 +1915,31 @@ export const createSolveODE = /* #__PURE__ */ factory(
       // Dormand Prince method
 
       // Define the butcher tableau
-      const a: number[][] = [
-        [],
-        [1 / 5],
-        [3 / 40, 9 / 40],
-        [44 / 45, -56 / 15, 32 / 9],
-        [19372 / 6561, -25360 / 2187, 64448 / 6561, -212 / 729],
-        [9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656],
-        [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84],
-      ];
-
-      const c: (number | null)[] = [null, 1 / 5, 3 / 10, 4 / 5, 8 / 9, 1, 1];
-      const b: number[] = [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0];
-      const bp: number[] = [
-        5179 / 57600,
-        0,
-        7571 / 16695,
-        393 / 640,
-        -92097 / 339200,
-        187 / 2100,
-        1 / 40,
-      ];
-
-      const butcherTableau: ButcherTableau = { a, c, b, bp };
-
-      // Solve an adaptive step size rk method
-      return _rk(butcherTableau, 'RK45')(f, tspan, y0, options);
+      return _rk(
+        (q) => ({
+          a: [
+            [],
+            [q(1, 5)],
+            [q(3, 40), q(9, 40)],
+            [q(44, 45), q(-56, 15), q(32, 9)],
+            [q(19372, 6561), q(-25360, 2187), q(64448, 6561), q(-212, 729)],
+            [q(9017, 3168), q(-355, 33), q(46732, 5247), q(49, 176), q(-5103, 18656)],
+            [q(35, 384), q(0), q(500, 1113), q(125, 192), q(-2187, 6784), q(11, 84)],
+          ],
+          c: [null, q(1, 5), q(3, 10), q(4, 5), q(8, 9), q(1), q(1)],
+          b: [q(35, 384), q(0), q(500, 1113), q(125, 192), q(-2187, 6784), q(11, 84), q(0)],
+          bp: [
+            q(5179, 57600),
+            q(0),
+            q(7571, 16695),
+            q(393, 640),
+            q(-92097, 339200),
+            q(187, 2100),
+            q(1, 40),
+          ],
+        }),
+        'RK45'
+      )(f, tspan, y0, options);
     }
 
     /**

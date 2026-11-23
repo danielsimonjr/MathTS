@@ -154,13 +154,33 @@ function digitCount(coefficient: bigint, min = 1): number {
     while (digits > 1 && coefficient < pow10(digits - 1)) digits--;
     return digits;
   }
+  return largeDecimalDigits(coefficient).digits;
+}
+
+/** Count digits and give the corresponding upper power. Adjacent powers share the same bigint. */
+function largeDecimalDigits(coefficient: bigint): { digits: number; power: bigint } {
   const hex = coefficient.toString(16);
   const bits = (hex.length - 1) * 4 + (32 - Math.clz32(parseInt(hex[0], 16)));
   let digits = Math.floor((bits - 1) * LOG10_2) + 1;
-  while (coefficient >= pow10(digits)) digits++;
-  while (digits > 1 && coefficient < pow10(digits - 1)) digits--;
-  return digits;
+  let power = pow10(digits);
+  if (coefficient >= power) {
+    do {
+      power *= 10n;
+      digits++;
+    } while (coefficient >= power);
+  } else {
+    let lower = power / 10n;
+    while (digits > 1 && coefficient < lower) {
+      power = lower;
+      digits--;
+      lower = power / 10n;
+    }
+  }
+  return { digits, power };
 }
+
+// Below this threshold the cached divisors and the short digit probe are cheaper.
+const LARGE_ROUNDING_COEFFICIENT = pow10(POW10_CACHE_SIZE - 1);
 
 /** `floor(value^(1/n))` of a positive bigint, by Newton steps that fall onto the root. */
 function integerRoot(value: bigint, n: 2 | 3): bigint {
@@ -1651,10 +1671,22 @@ export class BigNumber implements MathTSValue {
   /** Rounds a finite, nonzero value whose coefficient has more than `precision` digits. */
   private roundExcessDigits(precision: number, mode: RoundingMode): BigNumber {
     // The coefficient does not fit, so it has at least precision + 1 digits.
-    const lowest = cachedPrecision(precision) ? precision + 1 : 1;
-    const digitsToRemove = digitCount(this._coefficient, lowest) - precision;
-    const divisor = pow10(digitsToRemove);
-    const halfDivisor = pow10Half(digitsToRemove);
+    const precisionIsCached = cachedPrecision(precision);
+    let digitsToRemove: number;
+    let divisor: bigint;
+    if (precisionIsCached && this._coefficient >= LARGE_ROUNDING_COEFFICIENT) {
+      // The digit count already built 10^digits. Reuse it instead of exponentiating
+      // again for the rounding divisor and evicting that power from the large cache.
+      const { digits, power } = largeDecimalDigits(this._coefficient);
+      digitsToRemove = digits - precision;
+      divisor = power / pow10(precision);
+    } else {
+      digitsToRemove =
+        digitCount(this._coefficient, precisionIsCached ? precision + 1 : 1) - precision;
+      divisor = pow10(digitsToRemove);
+    }
+    const halfDivisor =
+      digitsToRemove < POW10_CACHE_SIZE ? pow10Half(digitsToRemove) : divisor / 2n;
     let rounded: bigint;
     if (mode === 'halfUp') {
       // A tie rounds away from zero, so one division of the coefficient plus a half decides.

@@ -16,6 +16,7 @@
  * @packageDocumentation
  */
 
+import { collectionBinaryRows } from './collection-binary.js';
 import { mathTyped, Complex, BigNumber } from '@danielsimonjr/mathts-core';
 import { mapEachLeaf } from './f64-kernels.js';
 
@@ -86,6 +87,7 @@ export const not = mathTyped('not', {
  * ```
  */
 export const and = mathTyped('and', {
+  ...collectionBinaryRows('and'),
   'any, any': (a: unknown, b: unknown): boolean => isTruthy(a) && isTruthy(b),
 
   'number, number': (a: number, b: number): boolean => isTruthyNumber(a) && isTruthyNumber(b),
@@ -121,6 +123,7 @@ export const and = mathTyped('and', {
  * ```
  */
 export const or = mathTyped('or', {
+  ...collectionBinaryRows('or'),
   'any, any': (a: unknown, b: unknown): boolean => isTruthy(a) || isTruthy(b),
 
   'number, number': (a: number, b: number): boolean => isTruthyNumber(a) || isTruthyNumber(b),
@@ -156,6 +159,7 @@ export const or = mathTyped('or', {
  * ```
  */
 export const xor = mathTyped('xor', {
+  ...collectionBinaryRows('xor'),
   'any, any': (a: unknown, b: unknown): boolean => isTruthy(a) !== isTruthy(b),
 
   'number, number': (a: number, b: number): boolean => isTruthyNumber(a) !== isTruthyNumber(b),
