@@ -1,3 +1,4 @@
+import { isUnaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import { factory } from '../../utils/factory.js';
 
 import { TypedFunction } from '../../types.js';
@@ -20,6 +21,10 @@ export const createTransformCallback = /* #__PURE__ */ factory(
      * @returns {*} - The transformed callback function.
      */
     return function (callback: unknown, numberOfArrays: number): unknown {
+      if (numberOfArrays === 1 && isUnaryCollectionCallback(callback)) {
+        const fn = callback as AnyFunction;
+        return (value: unknown) => fn(value);
+      }
       if ((typed as TypedWithGuard).isTypedFunction(callback)) {
         return _transformTypedCallbackFunction(callback, numberOfArrays);
       } else {

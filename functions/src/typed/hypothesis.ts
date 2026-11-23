@@ -49,7 +49,7 @@ import { kernelSource } from './parallel-map.js';
 import { studentTQuantile, normalQuantile } from '../distribution-functions.js';
 import { multipleTest } from '../stats/inference-extra.js';
 import { assertAllocSize, assertLoopOrder, MAX_LOOP_ORDER } from '../utils/limits.js';
-import { hasNaN } from './number-matrix.js';
+import { assertNumberScalar, hasNaN, numberVector } from './number-matrix.js';
 import { scaledDeviationSums } from '../utils/deviation-sums.js';
 
 /** Largest `n` that `binomialTest` accepts (`binomialTest(5e10 + 1e5, 1e11)` takes 7.1 s). */
@@ -533,6 +533,7 @@ export async function chiSquareTest(
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
         const v = obs2d[i][j];
+        assertNumberScalar('chiSquareTest', v);
         rowTotals[i] += v;
         colTotals[j] += v;
         grand += v;
@@ -567,6 +568,8 @@ export async function chiSquareTest(
 
   // Validate expected values upfront (cannot be deferred to workers)
   for (let i = 0; i < expected.length; i++) {
+    assertNumberScalar('chiSquareTest', obs1d[i]);
+    assertNumberScalar('chiSquareTest', expected[i]);
     if (expected[i] <= 0) throw new Error('chiSquareTest: expected values must be positive');
   }
 
@@ -798,6 +801,7 @@ export async function kolmogorovSmirnovTest(
   opts?: BootstrapOptions
 ): Promise<KSTestResult | KSBootstrapResult> {
   const B = _bootstrapCount('kolmogorovSmirnovTest', opts);
+  sample = numberVector('kolmogorovSmirnovTest', sample);
   if (sample.length < 1) throw new Error('kolmogorovSmirnovTest: sample must be non-empty');
   let resolvedCdf = cdfFn;
   if (typeof resolvedCdf === 'string') {
@@ -995,6 +999,8 @@ export async function mannWhitneyTest(
   opts?: BootstrapOptions
 ): Promise<MannWhitneyResult | MWBootstrapResult> {
   const B = _bootstrapCount('mannWhitneyTest', opts);
+  sample1 = numberVector('mannWhitneyTest', sample1);
+  sample2 = numberVector('mannWhitneyTest', sample2);
   if (sample1.length < 1 || sample2.length < 1) {
     throw new Error('mannWhitneyTest: both samples must be non-empty');
   }
@@ -1180,7 +1186,11 @@ export async function shapiroWilkTest(
 
   // Sort — sort_f64 AS only when wasmPolicyAllows('sort_f64', n) (n ≥ 1_048_576; policy.ts).
   const sorted = new Float64Array(n);
-  for (let k = 0; k < n; k++) sorted[k] = sample[k];
+  for (let k = 0; k < n; k++) {
+    const value = sample[k];
+    assertNumberScalar('shapiroWilkTest', value);
+    sorted[k] = value;
+  }
   sortF64Dispatch(sorted);
 
   const m = _mean(Array.from(sorted));
