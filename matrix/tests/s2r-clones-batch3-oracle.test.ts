@@ -204,13 +204,16 @@ describe('S2R batch3 — matInv (G57 oracle)', () => {
     ).toBeNull();
   });
 
-  it('pivot |a| < 1e-15 is singular; |a| === 1e-15 is kept', () => {
+  it('small nonzero pivots are retained when the inverse is representable', () => {
     expect(
       matInv([
         [1e-16, 0],
         [0, 1],
       ])
-    ).toBeNull();
+    ).toEqual([
+      [1e16, 0],
+      [0, 1],
+    ]);
     const inv = matInv([
       [1e-15, 0],
       [0, 1],

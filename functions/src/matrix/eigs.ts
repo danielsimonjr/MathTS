@@ -8,7 +8,8 @@ import { typeOf, isNumber, isBigNumber, isComplex, isFraction } from '../utils/i
 // Type definitions
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
-import { notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { ldexp, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { isExactZero } from '../utils/isExactZero.js';
 
 /** Scalar types supported by eigs */
 type Scalar = number | BigNumber | Complex;
@@ -407,6 +408,59 @@ export const createEigs = /* #__PURE__ */ factory(
       return doScaledComplexEigs(arr, N, prec, type, computeVectors);
     }
 
+    /** Connected components of the nonzero pattern, treating either direction as a coupling. */
+    function independentBlocks(arr: Scalar[][]): number[][] {
+      const seen = new Uint8Array(arr.length);
+      const blocks: number[][] = [];
+      for (let i = 0; i < arr.length; i++) {
+        if (seen[i]) continue;
+        const block = [i];
+        seen[i] = 1;
+        for (let j = 0; j < block.length; j++) {
+          const row = block[j];
+          for (let k = 0; k < arr.length; k++) {
+            if (seen[k] || (isExactZero(arr[row][k]) && isExactZero(arr[k][row]))) continue;
+            seen[k] = 1;
+            block.push(k);
+          }
+        }
+        blocks.push(block);
+      }
+      return blocks;
+    }
+
+    function solveIndependentBlocks(
+      arr: Scalar[][],
+      blocks: number[][],
+      prec: number | BigNumber,
+      type: DataType,
+      computeVectors: boolean
+    ): EigenResult {
+      const values: Scalar[] = [];
+      const eigenvectors: EigenvectorResult[] = [];
+      for (const block of blocks) {
+        const submatrix = block.map((i) => block.map((j) => arr[i][j]));
+        const result = doScaledComplexEigs(submatrix, block.length, prec, type, computeVectors);
+        values.push(...(result.values as Scalar[]));
+        for (const pair of result.eigenvectors ?? []) {
+          const zero = isComplex(pair.value) ? complex(0) : type === 'BigNumber' ? bignumber(0) : 0;
+          const vector = new Array<Scalar>(arr.length).fill(zero);
+          block.forEach((row, i) => {
+            vector[row] = (pair.vector as Scalar[])[i];
+          });
+          eigenvectors.push({ value: pair.value, vector });
+        }
+      }
+      const byMagnitude = (a: Scalar, b: Scalar): number => {
+        const left = bignumber(abs(a));
+        const right = bignumber(abs(b));
+        return left.lt(right) ? -1 : left.gt(right) ? 1 : 0;
+      };
+      values.sort(byMagnitude);
+      eigenvectors.sort((a, b) => byMagnitude(a.value, b.value));
+      return computeVectors ? { values, eigenvectors } : { values };
+    }
+
     /**
      * The general solver squares and multiplies entries, so a BigNumber matrix with entries near
      * the exponent bounds gives NaN (#1257). When the squares of the largest entry can leave the
@@ -421,6 +475,40 @@ export const createEigs = /* #__PURE__ */ factory(
       type: DataType,
       computeVectors: boolean
     ): EigenResult {
+      if (N === 1) {
+        const value = arr[0][0];
+        const one = type === 'BigNumber' ? bignumber(1) : type === 'Complex' ? complex(1) : 1;
+        return computeVectors
+          ? { values: [value], eigenvectors: [{ value, vector: [one] }] }
+          : { values: [value] };
+      }
+      const blocks = independentBlocks(arr);
+      if (blocks.length > 1) return solveIndependentBlocks(arr, blocks, prec, type, computeVectors);
+      if (type === 'Complex') {
+        let max = 0;
+        for (const row of arr) {
+          for (const entry of row as Complex[]) {
+            max = Math.max(max, Math.abs(entry.re), Math.abs(entry.im));
+          }
+        }
+        const exponent =
+          max > 2 ** 400 || (max > 0 && max < 2 ** -400) ? -Math.floor(Math.log2(max)) : 0;
+        if (exponent !== 0) {
+          const scaleComplex = (value: Complex, e: number): Complex =>
+            complex(ldexp(value.re, e), ldexp(value.im, e));
+          const scaled = arr.map((row) =>
+            row.map((entry) => scaleComplex(entry as Complex, exponent))
+          );
+          const result = doComplexEigs(scaled, N, prec, type, computeVectors);
+          const up = (value: Scalar): Scalar =>
+            typeof value === 'number'
+              ? ldexp(value, -exponent)
+              : scaleComplex(value as Complex, -exponent);
+          result.values = (result.values as Scalar[]).map(up);
+          for (const pair of result.eigenvectors ?? []) pair.value = up(pair.value);
+          return result;
+        }
+      }
       const scale = type === 'BigNumber' ? realScale(arr.flat()) : undefined;
       if (
         scale === undefined ||
