@@ -633,6 +633,15 @@ function denseMatrixProduct(a: unknown, b: unknown): MathJSDenseMatrix {
   return denseOfSize(matrixProduct(a, b), productSize(a, b));
 }
 
+/** A mixed-storage matrix product keeps the sparse operand's storage family. */
+function mixedSparseMatrixProduct(a: unknown, b: unknown): unknown {
+  const size = productSize(a, b);
+  const data = matrixProduct(a, b);
+  return isSparseMatrix(a) || isSparseMatrix(b)
+    ? publicSparseOrDense(data, size)
+    : sparseOfSize(data, size);
+}
+
 /** True when a matrix operand has other than two axes (a factory matrix of size `[n]`). */
 function isNotTwoDimensional(m: unknown): boolean {
   return collectionSize(m).length !== 2;
@@ -1125,15 +1134,14 @@ export const multiply = withBinaryScalarGuards(
     'SparseMatrix, Array': (a: unknown, b: unknown[]): unknown => mulOp(a, arrayAsSparseOrDense(b)),
     'Array, SparseMatrix': (a: unknown[], b: unknown): unknown => mulOp(arrayAsSparseOrDense(a), b),
 
-    // Matrix product with a sparse operand. mathjs returns a sparse matrix for two sparse
-    // operands and a dense matrix for a sparse and a dense operand. The sparse product reads
-    // the stored entries only (#1271); it never builds a dense matrix. A sparse matrix has
-    // two axes, so a vector case comes from the dense operand only.
+    // A 2-D matrix product with a sparse operand returns sparse storage in either order.
+    // For two sparse operands, read only stored entries (#1271). A sparse matrix has two axes,
+    // so a vector case comes from the dense operand only.
     'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
       sparseProduct(a, b, addOp, mulOp),
     // A sparse matrix times a 1-D dense matrix is a sparse column of size [r, 1] (mathjs).
     'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
-      if (!isNotTwoDimensional(b)) return denseMatrixProduct(a, b);
+      if (!isNotTwoDimensional(b)) return mixedSparseMatrixProduct(a, b);
       const column = (matrixVectorProduct(a, b) as unknown[]).map((x) => [x]);
       const size = [column.length, 1];
       return isSparseMatrix(a) ? publicSparseOrDense(column, size) : sparseOfSize(column, size);
@@ -1141,7 +1149,7 @@ export const multiply = withBinaryScalarGuards(
     // A 1-D dense matrix times a sparse matrix is a dense vector of size [c]. mathjs throws
     // here; the product is defined, so MathTS returns it.
     'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      isNotTwoDimensional(a) ? denseVectorProduct(a, b) : denseMatrixProduct(a, b),
+      isNotTwoDimensional(a) ? denseVectorProduct(a, b) : mixedSparseMatrixProduct(a, b),
 
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),

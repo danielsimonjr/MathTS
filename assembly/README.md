@@ -109,6 +109,11 @@ runs as a step of `gen:manifest`. The build fails when an export or a parameter 
 that list. The debug glue (`@danielsimonjr/mathts-wasm/debug.js`) throws `mathts glue: <export> wrote its input
 parameter <param>` when a kernel writes a parameter that the list marks `in`.
 
+The ESM glue reuses temporary WASM memory after a synchronous adapted call finishes copying
+its results back to JavaScript. A live `Complex` handle keeps the heap intact. Calling the raw
+`__new` or `__pin` exports disables automatic reuse until an explicit `heap_reset()`.
+Only reset when all caller-owned pointers and `Complex` handles from that heap are finished.
+
 ### Dense decompositions (AS exports)
 
 From `algebra/decomposition.ts` (used by matrix `WASMBackend` tests, not public

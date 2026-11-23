@@ -53,6 +53,31 @@ for (const [label, wasm] of [
 ]) {
   const t = (name, fn) => test(`${label}: ${name}`, fn);
 
+  t('reuses scratch memory across repeated matrix calls', () => {
+    const n = 64;
+    const a = new Float64Array(n * n).fill(1);
+    const b = new Float64Array(n * n).fill(2);
+    const out = zeros(n * n);
+    const before = wasm.memory.buffer.byteLength;
+    for (let i = 0; i < 1000; i++) wasm.matrix_multiply(a, n, n, b, n, out);
+    assert.ok(out.every((value) => value === 128));
+    assert.ok(wasm.memory.buffer.byteLength - before < 1024 * 1024);
+  });
+
+  t('keeps temporary buffers live through nested adapted calls', () => {
+    const a = [1, 2, 3, 4];
+    const b = [5, 6, 7, 8];
+    Object.defineProperty(b, 0, {
+      get() {
+        assert.equal(wasm.array_sum(f64(1, 2, 3)), 6);
+        return 5;
+      },
+    });
+    const out = zeros(4);
+    wasm.matrix_multiply(a, 2, 2, b, 2, out);
+    near(out, [19, 22, 43, 50]);
+  });
+
   t('matrix_multiply writes the product into result', () => {
     const c = zeros(4);
     wasm.matrix_multiply(f64(1, 2, 3, 4), 2, 2, f64(5, 6, 7, 8), 2, c);
@@ -214,6 +239,19 @@ for (const [label, wasm] of [
     near(second, [5, 10]);
   });
 }
+
+test('release: keeps a live Complex handle across array calls', () => {
+  const value = release.complex(3, 4);
+  release.array_sum(f64(1, 2, 3, 4));
+  assert.equal(release.complex_abs(value), 5);
+});
+
+test('debug: keeps caller-owned raw allocations across array calls', () => {
+  const pointer = debug.__new(8, 1);
+  new Float64Array(debug.memory.buffer, pointer, 1)[0] = 123;
+  debug.array_sum(f64(1, 2, 3, 4));
+  assert.equal(new Float64Array(debug.memory.buffer, pointer, 1)[0], 123);
+});
 
 // ---------------------------------------------------------------------------------------------
 // Part 2: patchGlue on a stub glue and a fake kernel object
