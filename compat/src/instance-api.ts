@@ -150,7 +150,8 @@ export function wireMathjsInstanceApi(
 
   let evaluator = createInstanceEvaluator(
     expressionLayers.mathWithTransform,
-    COMPAT_INTERNAL_NAMES
+    COMPAT_INTERNAL_NAMES,
+    true
   );
 
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
@@ -158,7 +159,11 @@ export function wireMathjsInstanceApi(
 
   function rebindEvaluator(): void {
     scrubDenylist(expressionLayers.mathWithTransform);
-    evaluator = createInstanceEvaluator(expressionLayers.mathWithTransform, COMPAT_INTERNAL_NAMES);
+    evaluator = createInstanceEvaluator(
+      expressionLayers.mathWithTransform,
+      COMPAT_INTERNAL_NAMES,
+      true
+    );
     instance.evaluate = runBound(evaluator.evaluate);
     instance.compile = runBound(evaluator.compile);
     instance.compileExpr = instance.compile;

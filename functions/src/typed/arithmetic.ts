@@ -99,7 +99,10 @@ import { arraySize, broadcastTo } from '../utils/array.js';
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
 import { withBinaryScalarGuards } from './invalid-scalar-guards.js';
 import { atWorkPrecision } from '../utils/bignumber/work-precision.js';
-import { flooredModBigNumber } from '../utils/bignumber/floored-mod.js';
+import { flooredModSnappedBigNumber } from '../utils/bignumber/floored-mod.js';
+import { nearlyEqual as bigNearlyEqual } from '../utils/bignumber/nearlyEqual.js';
+import { snapBig, snapNumber } from '../arithmetic/snap-to-round.js';
+import { modWithFloor } from '../arithmetic/mod-with-floor.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { assertInnerDimensions, sparseProduct } from './sparse-product.js';
@@ -917,6 +920,22 @@ export const add = withBinaryScalarGuards(
     'number, SparseMatrix': (a: f64, b: unknown): unknown =>
       elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
 
+    // An Array with a matrix, and a dense with a sparse matrix (mathjs parity): a dense matrix.
+    // Without these rows typed-function converts the matrix to an Array, and the sum loses its
+    // matrix type. Two sparse operands stay sparse (above).
+    'DenseMatrix, Array': (a: unknown, b: unknown[]): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'Array, DenseMatrix': (a: unknown[], b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'SparseMatrix, Array': (a: unknown, b: unknown[]): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'Array, SparseMatrix': (a: unknown[], b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+    'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
+      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+
     // A Unit, Complex, Fraction or BigNumber scalar and an Array or a matrix, in either
     // order: the per-element sums.
     ...scalarCollectionSignatures({ scalarFirst: addKernels, collectionFirst: addKernels }),
@@ -1004,6 +1023,21 @@ export const subtract = mathTyped('subtract', {
   'number, SparseMatrix': (a: f64, b: unknown): unknown =>
     elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
 
+  // An Array with a matrix, and a dense with a sparse matrix (mathjs parity): a dense matrix.
+  // The rows are the ones of `add`.
+  'DenseMatrix, Array': (a: unknown, b: unknown[]): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'Array, DenseMatrix': (a: unknown[], b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'SparseMatrix, Array': (a: unknown, b: unknown[]): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'Array, SparseMatrix': (a: unknown[], b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+  'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+
   // A Unit, Complex, Fraction or BigNumber scalar and an Array or a matrix, in either
   // order: the per-element differences.
   ...scalarCollectionSignatures({ scalarFirst: subtractKernels, collectionFirst: subtractKernels }),
@@ -1013,6 +1047,17 @@ subtractForNumberPath.fn = subtract;
 // =============================================================================
 // Multiplication
 // =============================================================================
+
+/** An Array as a dense matrix of its size (`collectionSize` reads every axis of the Array). */
+function arrayAsDense(a: unknown[]): MathJSDenseMatrix {
+  return denseOfSize(a, collectionSize(a));
+}
+
+/** A 2-D Array as a sparse matrix; any other Array (a vector, an N-D Array) as a dense matrix. */
+function arrayAsSparseOrDense(a: unknown[]): MathJSDenseMatrix | MathJSSparseMatrix {
+  const size = collectionSize(a);
+  return size.length === 2 ? sparseOfSize(a as unknown[][], size) : denseOfSize(a, size);
+}
 
 /** The product of two operands, one of them a matrix, as a boxed dense matrix (a vector gives a vector). */
 function denseProduct(a: unknown, b: unknown): unknown {
@@ -1077,6 +1122,17 @@ export const multiply = withBinaryScalarGuards(
     // reaching it via the Matrix~>Array conversion would strip the matrix type
     // (breaking callers like `sylvester` that call `.toArray()` on the product).
     'DenseMatrix, DenseMatrix': denseProduct,
+
+    // An Array with a matrix gives a matrix (mathjs parity). The Array takes the storage of its
+    // partner and the matrix rows decide the product, so the result is the one of two matrices.
+    // Without these rows typed-function converts the matrix to an Array, and the product loses
+    // its matrix type. A sparse partner takes a sparse 2-D Array and a dense 1-D Array: the
+    // result of a sparse matrix times a 1-D vector is then a sparse column (mathjs), and of a
+    // 1-D vector times a sparse matrix the dense vector that the row below defines.
+    'DenseMatrix, Array': (a: unknown, b: unknown[]): unknown => mulOp(a, arrayAsDense(b)),
+    'Array, DenseMatrix': (a: unknown[], b: unknown): unknown => mulOp(arrayAsDense(a), b),
+    'SparseMatrix, Array': (a: unknown, b: unknown[]): unknown => mulOp(a, arrayAsSparseOrDense(b)),
+    'Array, SparseMatrix': (a: unknown[], b: unknown): unknown => mulOp(arrayAsSparseOrDense(a), b),
 
     // A 2-D matrix product with a sparse operand returns sparse storage in either order.
     // For two sparse operands, read only stored entries (#1271). A sparse matrix has two axes,
@@ -1594,6 +1650,81 @@ function roundNumberLive(a: f64, decimals: f64): f64 {
   return roundNumberWide(a, decimals, relTol, absTol);
 }
 
+/**
+ * `toward(a)` (the floor or the ceiling) of a number, snapped as mathjs does (`snapNumber`): a
+ * value within the live `relTol` and `absTol` of an integer gives that integer, so
+ * `floor(2.9999999999999996)` is 3 and not 2. An integer needs no snap, and it keeps its sign of
+ * zero. The snap candidate is the typed `round`, so one rule and one tolerance serve all of them.
+ *
+ * The snap moves a value only when `nearlyEqual(a, r)` holds for the candidate `r`, and `r` is
+ * the floor or the ceiling of `a`. So a value that is farther from both than the bound
+ * `max(relTol * (|a| + 1), absTol)` cannot snap, and the function returns `toward(a)` with no
+ * call of `round`. That test is exact, and it makes the common case (a value far from an integer)
+ * about as cheap as `Math.floor`.
+ */
+function snapDirectedWith(a: f64, toward: (x: f64) => f64, relTol: f64, absTol: f64): f64 {
+  const t = toward(a);
+  if (t === a) return t;
+  const distance = Math.min(a - Math.floor(a), Math.ceil(a) - a);
+  if (distance > Math.max(relTol * (Math.abs(a) + 1), absTol)) return t;
+  return snapNumber(a, toward, (v) => roundNumberWide(v, 0, relTol, absTol), relTol, absTol);
+}
+
+/** `snapDirectedWith` for the live tolerances. An integer reads no config. */
+function snapDirectedNumber(a: f64, toward: (x: f64) => f64): f64 {
+  const t = toward(a);
+  if (t === a) return t;
+  const { relTol, absTol } = liveConfig();
+  return snapDirectedWith(a, toward, relTol, absTol);
+}
+
+/** Floor of a number with the mathjs snap to an integer. */
+function floorNumberSnapped(a: f64): f64 {
+  return snapDirectedNumber(a, Math.floor);
+}
+
+/** Ceiling of a number with the mathjs snap to an integer. */
+function ceilNumberSnapped(a: f64): f64 {
+  return snapDirectedNumber(a, Math.ceil);
+}
+
+/** Truncation of a number toward zero, as mathjs defines it: floor above zero, else ceiling. */
+function fixNumberSnapped(a: f64): f64 {
+  return a > 0 ? floorNumberSnapped(a) : ceilNumberSnapped(a);
+}
+
+/**
+ * The function for one call that works on many numbers: the live tolerances are read once, and
+ * not once for each element (the config view reads a getter for each key). Its result for a
+ * number equals the one of `floorNumberSnapped`, `ceilNumberSnapped` or `fixNumberSnapped`.
+ */
+function snappedNumbersOfCall(kind: 'floor' | 'ceil' | 'fix'): (a: f64) => f64 {
+  const { relTol, absTol } = liveConfig();
+  if (kind === 'floor') return (a) => snapDirectedWith(a, Math.floor, relTol, absTol);
+  if (kind === 'ceil') return (a) => snapDirectedWith(a, Math.ceil, relTol, absTol);
+  return (a) => snapDirectedWith(a, a > 0 ? Math.floor : Math.ceil, relTol, absTol);
+}
+
+/**
+ * `toward(a)` of a BigNumber with the mathjs snap (`snapBig`), with the live tolerances: the
+ * floor or the ceiling is replaced by the nearest integer when `a` is within tolerance of it.
+ */
+function snapDirectedBigNumber(a: BigNumber, toward: (v: BigNumber) => BigNumber): BigNumber {
+  // An integer is its own floor and ceiling, so nothing can snap: no config read, no rounding.
+  if (a.isInteger()) return toward(a);
+  const { relTol, absTol } = liveConfig();
+  return snapBig(
+    a,
+    toward,
+    (v) => roundBigNumberDecimals(v, 0, relTol, absTol),
+    (x, y) => bigNearlyEqual(x, y, relTol, absTol)
+  );
+}
+
+const floorBigNumberSnapped = (a: BigNumber): BigNumber =>
+  snapDirectedBigNumber(a, (v) => v.floor());
+const ceilBigNumberSnapped = (a: BigNumber): BigNumber => snapDirectedBigNumber(a, (v) => v.ceil());
+
 /** Throws the mathjs TypeError for a decimal count that is not an integer. */
 function assertIntegerDecimals(decimals: f64): void {
   if (!Number.isInteger(decimals)) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
@@ -1750,44 +1881,57 @@ export const round = mathTyped('round', {
  * Floor (round down)
  */
 export const floor = mathTyped('floor', {
-  number: (a: f64): f64 => Math.floor(a),
+  // A number and a BigNumber snap to an integer within the live tolerance (mathjs parity). A
+  // Fraction is exact, and a Complex does not snap in mathjs.
+  number: floorNumberSnapped,
   Fraction: (a: Fraction): Fraction => a.floor(),
-  BigNumber: (a: BigNumber): BigNumber => a.floor(),
+  BigNumber: floorBigNumberSnapped,
   Complex: (a: Complex): Complex => new Complex(Math.floor(a.re), Math.floor(a.im)),
 
   // Float64Array floor (synchronous)
-  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.floor(x)),
-  'Array | Matrix': unaryCollection({ real: Math.floor }),
+  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, snappedNumbersOfCall('floor')),
+  'Array | Matrix': unaryCollection({
+    real: floorNumberSnapped,
+    realOfCall: () => snappedNumbersOfCall('floor'),
+  }),
 });
 
 /**
  * Ceiling (round up)
  */
 export const ceil = mathTyped('ceil', {
-  number: (a: f64): f64 => Math.ceil(a),
+  number: ceilNumberSnapped,
   Fraction: (a: Fraction): Fraction => a.ceil(),
-  BigNumber: (a: BigNumber): BigNumber => a.ceil(),
+  BigNumber: ceilBigNumberSnapped,
   Complex: (a: Complex): Complex => new Complex(Math.ceil(a.re), Math.ceil(a.im)),
 
   // Float64Array ceil (synchronous)
-  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.ceil(x)),
-  'Array | Matrix': unaryCollection({ real: Math.ceil }),
+  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, snappedNumbersOfCall('ceil')),
+  'Array | Matrix': unaryCollection({
+    real: ceilNumberSnapped,
+    realOfCall: () => snappedNumbersOfCall('ceil'),
+  }),
 });
 
 /**
  * Truncate (round toward zero)
  */
 export const fix = mathTyped('fix', {
-  number: (a: f64): f64 => Math.trunc(a),
-  // Rich-type policy cases DELEGATE to core's scalar `fix` (truncate toward zero:
-  // floor for non-negative, ceil for negative). Removes the duplicated policy.
+  number: fixNumberSnapped,
+  // Fraction and Complex DELEGATE to core's scalar `fix` (truncate toward zero: floor for
+  // non-negative, ceil for negative). Removes the duplicated policy. A BigNumber takes the
+  // snapped floor or ceiling, as mathjs does.
   Fraction: (a: Fraction): Fraction => coreFix(a) as Fraction,
-  BigNumber: (a: BigNumber): BigNumber => coreFix(a) as BigNumber,
+  BigNumber: (a: BigNumber): BigNumber =>
+    a.isNegative() ? ceilBigNumberSnapped(a) : floorBigNumberSnapped(a),
   Complex: (a: Complex): Complex => coreFix(a) as Complex,
 
-  // Float64Array fix, synchronous (truncate toward zero, matching the 'number' overload)
-  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.trunc(x)),
-  'Array | Matrix': unaryCollection({ real: Math.trunc }),
+  // Float64Array fix, synchronous (the 'number' overload on each element)
+  Float64Array: (a: Float64Array): Float64Array => f64Unary(a, snappedNumbersOfCall('fix')),
+  'Array | Matrix': unaryCollection({
+    real: fixNumberSnapped,
+    realOfCall: () => snappedNumbersOfCall('fix'),
+  }),
 });
 
 // =============================================================================
@@ -1807,10 +1951,14 @@ const MOD_SCALAR_TYPES = ['number', 'bigint', 'Fraction', 'BigNumber'] as const;
  * sparse. The operands do not broadcast: arrays of different lengths throw a `RangeError`.
  */
 export const mod = mathTyped('mod', {
-  'number, number': (a: f64, b: f64): f64 => (b === 0 ? a : ((a % b) + b) % b),
+  // The kernel is shared with the factory `mod`: exact for two integers, else the mathjs
+  // formula with the snapped floor.
+  'number, number': (a: f64, b: f64): f64 => modWithFloor(a, b, floorNumberSnapped),
   'bigint, bigint': (a: i64, b: i64): i64 => (b === 0n ? a : ((a % b) + b) % b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (b.isZero() ? a : a.mod(b)),
-  'BigNumber, BigNumber': flooredModBigNumber,
+  // The floored remainder of the BigNumber, with the snapped floor of the number kernel.
+  'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
+    flooredModSnappedBigNumber(a, b, floorBigNumberSnapped),
 
   'Array, Array': modKernels.array,
   'DenseMatrix, DenseMatrix': modKernels.matrix,

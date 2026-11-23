@@ -32,13 +32,12 @@ import {
   gammaincScalar,
 } from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
+import { assertAllocSize } from '../utils/limits.js';
 import { isBigNumber, isFraction } from '../utils/is.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 
-// =============================================================================
-// Type Definitions
-// =============================================================================
-
+// ======================================================================// Type Definitions
+// ======================================================================
 /** 64-bit float (default for decimals) */
 type f64 = number;
 
@@ -99,10 +98,8 @@ export interface Distribution {
   sampleN: (n: number, opts?: SampleNOptions) => Promise<Float64Array>;
 }
 
-// =============================================================================
-// Internal Helpers
-// =============================================================================
-
+// ======================================================================// Internal Helpers
+// ======================================================================
 const SQRT_2PI = Math.sqrt(2 * Math.PI);
 
 /**
@@ -283,10 +280,8 @@ function _logFactorial(n: number): f64 {
   return 0.5 * Math.log(2 * Math.PI * n) + n * Math.log(n) - n + 1 / (12 * n);
 }
 
-// =============================================================================
-// Batch Sampling Helpers (Slice 5.12)
-// =============================================================================
-
+// ======================================================================// Batch Sampling Helpers (Slice 5.12)
+// ======================================================================
 /**
  * Fan out distribution sampling to workers or fall back to JS loop.
  *
@@ -303,6 +298,13 @@ async function _sampleNDispatch(
   opts: SampleNOptions | undefined,
   jsFallback: (n: number, rng: () => number) => Float64Array
 ): Promise<Float64Array> {
+  // The count is checked before any allocation or worker dispatch. The function is async, so a
+  // bad count is a rejected Promise. A negative or fractional count made `new Float64Array`
+  // throw an engine error, and a huge one allocated until the process ran out of memory.
+  if (!Number.isSafeInteger(n) || n < 0) {
+    throw new RangeError(`sampleN: count must be a non-negative integer (got ${n})`);
+  }
+  assertAllocSize('sampleN', [n]);
   // The function is async, so an unknown key rejects the returned promise.
   if (opts !== undefined && opts !== null) _onlyKeys('sampleN', opts, ['seed', 'workerCount']);
   const seed = opts?.seed !== undefined ? opts.seed >>> 0 : (Math.random() * 0xffffffff) >>> 0;
@@ -323,10 +325,8 @@ async function _sampleNDispatch(
   return Promise.resolve(jsFallback(n, rng));
 }
 
-// =============================================================================
-// normalDist
-// =============================================================================
-
+// ======================================================================// normalDist
+// ======================================================================
 /**
  * Create a normal (Gaussian) distribution object.
  *
@@ -380,10 +380,8 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
   });
 }
 
-// =============================================================================
-// betaDist
-// =============================================================================
-
+// ======================================================================// betaDist
+// ======================================================================
 /**
  * Create a Beta distribution object.
  *
@@ -472,10 +470,8 @@ function _gammaRandomRng(alpha: f64, rng: () => number): f64 {
   return gammaSampleRng(alpha, rng);
 }
 
-// =============================================================================
-// binomialDist
-// =============================================================================
-
+// ======================================================================// binomialDist
+// ======================================================================
 /**
  * Create a Binomial distribution object.
  *
@@ -549,10 +545,8 @@ export function binomialDist(n: number, p: f64): Distribution {
   });
 }
 
-// =============================================================================
-// chiSquaredDist
-// =============================================================================
-
+// ======================================================================// chiSquaredDist
+// ======================================================================
 /**
  * Create a Chi-squared distribution object.
  *
@@ -621,10 +615,8 @@ export function chiSquaredDist(k: number): Distribution {
   });
 }
 
-// =============================================================================
-// exponentialDist
-// =============================================================================
-
+// ======================================================================// exponentialDist
+// ======================================================================
 /**
  * Create an Exponential distribution object.
  *
@@ -665,10 +657,8 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
   });
 }
 
-// =============================================================================
-// fDist
-// =============================================================================
-
+// ======================================================================// fDist
+// ======================================================================
 /**
  * Create an F-distribution object.
  *
@@ -888,10 +878,8 @@ export function gammaDist(
   });
 }
 
-// =============================================================================
-// logNormalDist
-// =============================================================================
-
+// ======================================================================// logNormalDist
+// ======================================================================
 /**
  * Create a Log-Normal distribution object.
  *
@@ -940,10 +928,8 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
   });
 }
 
-// =============================================================================
-// poissonDist
-// =============================================================================
-
+// ======================================================================// poissonDist
+// ======================================================================
 /**
  * Create a Poisson distribution object.
  *
@@ -1013,10 +999,8 @@ export function poissonDist(lambda: f64): Distribution {
   });
 }
 
-// =============================================================================
-// tDist (Student's t)
-// =============================================================================
-
+// ======================================================================// tDist (Student's t)
+// ======================================================================
 /**
  * Create a Student's t-distribution object.
  *
@@ -1082,10 +1066,8 @@ export function tDist(nu: f64): Distribution {
   });
 }
 
-// =============================================================================
-// uniformDist
-// =============================================================================
-
+// ======================================================================// uniformDist
+// ======================================================================
 /**
  * Create a Uniform distribution object.
  *
@@ -1132,10 +1114,8 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
   });
 }
 
-// =============================================================================
-// weibullDist
-// =============================================================================
-
+// ======================================================================// weibullDist
+// ======================================================================
 /**
  * Create a Weibull distribution object.
  *
@@ -1185,10 +1165,8 @@ export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
   });
 }
 
-// =============================================================================
-// hypergeometricDist / negativeBinomialDist (Wave 3 — stats completeness)
-// =============================================================================
-
+// ======================================================================// hypergeometricDist / negativeBinomialDist (Wave 3 — stats completeness)
+// ======================================================================
 /** log C(n, r) = ln(n! / (r!·(n−r)!)) via log-factorials (integer args). */
 function _logChoose(n: number, r: number): f64 {
   if (r < 0 || r > n) return -Infinity;
@@ -1327,11 +1305,9 @@ export function negativeBinomialDist(r: number, p: f64): Distribution {
   });
 }
 
-// =============================================================================
-// Wave F — common distributions: Pareto, Rayleigh, triangular, discrete-uniform,
+// ======================================================================// Wave F — common distributions: Pareto, Rayleigh, triangular, discrete-uniform,
 // Gumbel, inverse-Gaussian (Wald), and multivariate normal (stats gap-closure)
-// =============================================================================
-
+// ======================================================================
 const EULER_GAMMA = 0.5772156649015329;
 
 /** Inverse-transform continuous sampler using a distribution's quantile. */
