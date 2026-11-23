@@ -40,6 +40,14 @@ describe('#1347 guarded conversions for mixed scalar arguments', () => {
     expect(actual.im).toBeCloseTo(expected.im, 14);
   });
 
+  it('takes logarithms before narrowing an extreme BigNumber in the complex path', () => {
+    const actual = log(bignumber('1e400'), -2) as { re: number; im: number };
+    const numerator = 400 * Math.LN10;
+    const squaredMagnitude = Math.LN2 ** 2 + Math.PI ** 2;
+    expect(actual.re).toBeCloseTo((numerator * Math.LN2) / squaredMagnitude, 11);
+    expect(actual.im).toBeCloseTo((-numerator * Math.PI) / squaredMagnitude, 11);
+  });
+
   it('rejects a mixed Fraction logarithm without changing other exact operands', () => {
     expect(() => (log as (a: unknown, b: unknown) => unknown)(fraction(2), 3)).toThrow(
       /Cannot implicitly convert a Fraction to BigNumber/

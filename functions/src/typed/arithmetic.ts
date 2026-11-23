@@ -1750,9 +1750,10 @@ function assertIntegerDecimals(decimals: f64): void {
 function logMixedReal(a: BigNumber | number, base: BigNumber | number): BigNumber | Complex {
   const negative = (x: BigNumber | number) => (typeof x === 'number' ? x < 0 : x.isNegative());
   if (!isPredictableMode() && (negative(a) || negative(base))) {
-    return Complex.fromNumber(Number(a))
-      .log()
-      .divide(Complex.fromNumber(Number(base)).log());
+    return logBigNumberBase(
+      typeof a === 'number' ? BigNumber.fromNumber(a) : a,
+      typeof base === 'number' ? BigNumber.fromNumber(base) : base
+    );
   }
   return logBigNumberBase(
     mathTyped.convert(a, 'BigNumber') as BigNumber,
