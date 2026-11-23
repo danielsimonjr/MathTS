@@ -296,11 +296,20 @@ function collectFactors(node: ScalarNode): Factor[] {
   if (node.kind === 'op' && node.op === '^') {
     assertPowerArity(node.args);
     const [base, expNode] = node.args;
-    if (expNode.kind === 'number' && Number.isFinite(expNode.value)) {
-      return collectFactors(base).map((f) => ({
-        base: f.base,
-        exp: f.exp * expNode.value,
-      }));
+    if (expNode.kind === 'number' && Number.isSafeInteger(expNode.value)) {
+      const exponent = expNode.value;
+      const factors = collectFactors(base);
+      // Integer powers preserve real signs. An inverse factor must remain
+      // inside a nonpositive power so that it is still undefined at zero.
+      // Fractional and symbolic powers are collected as opaque bases.
+      if (
+        factors.every(
+          (factor) =>
+            (factor.exp >= 0 || exponent > 0) && Number.isSafeInteger(factor.exp * exponent)
+        )
+      ) {
+        return factors.map((factor) => ({ base: factor.base, exp: factor.exp * exponent }));
+      }
     }
     return [{ base: node, exp: 1 }];
   }
@@ -534,15 +543,7 @@ function canon(node: ScalarNode): ScalarNode {
         assertPowerArity(args);
         const base = canon(args[0]);
         const expCanon = canon(args[1]);
-        if (expCanon.kind === 'number' && Number.isFinite(expCanon.value)) {
-          return fromProduct(
-            collectFactors(base).map((f) => ({
-              base: f.base,
-              exp: f.exp * expCanon.value,
-            }))
-          );
-        }
-        return { kind: 'op', op: '^', args: [base, expCanon] };
+        return fromProduct(collectFactors({ kind: 'op', op: '^', args: [base, expCanon] }));
       }
       throw new ScalarBuildError(`unknown scalar operator '${String(op)}'`);
     }
