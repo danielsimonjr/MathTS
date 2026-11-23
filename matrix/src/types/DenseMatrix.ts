@@ -106,14 +106,14 @@ export class DenseMatrix extends Matrix<number> {
   readonly type = 'DenseMatrix' as const;
   readonly rows: number;
   readonly cols: number;
-  private readonly rank: 1 | 2;
+  readonly #rank: 1 | 2;
 
   /**
    * Logical dimensions. A flat input is rank 1 and uses one row internally.
    * An explicit row matrix such as `[[1, 2]]` remains rank 2.
    */
   get shape(): number[] {
-    return this.rank === 1 ? [this.cols] : [this.rows, this.cols];
+    return this.#rank === 1 ? [this.cols] : [this.rows, this.cols];
   }
 
   /**
@@ -182,7 +182,7 @@ export class DenseMatrix extends Matrix<number> {
 
     this.rows = nRows;
     this.cols = nCols;
-    this.rank = rank;
+    this.#rank = rank;
 
     if (viewConfig) {
       // View into existing data
@@ -621,7 +621,7 @@ export class DenseMatrix extends Matrix<number> {
       isView: false,
       offset: 0,
       rowStride: this.cols,
-      rank: this.rank,
+      rank: this.#rank,
     });
   }
 
