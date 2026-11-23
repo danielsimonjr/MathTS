@@ -1736,23 +1736,35 @@ export function bartlettTest(groups: f64[][]): VarianceTestResult {
   }
   // The pooled variance is read in the frame of the largest scale: a group below it has a weight
   // of 0 there, as it has in the exact sum.
+  const pooledVars = vars.map((variance, i) => {
+    const ratio = scales[i] / top;
+    return variance * ratio * ratio;
+  });
   let pooledNum = 0;
   let sumInv = 0;
   for (let i = 0; i < k; i++) {
-    const ni = groups[i].length;
-    const r = scales[i] / top;
-    pooledNum += (ni - 1) * vars[i] * r * r;
-    sumInv += 1 / (ni - 1);
+    const df = groups[i].length - 1;
+    pooledNum += df * pooledVars[i];
+    sumInv += 1 / df;
   }
   const sp2 = pooledNum / (N - k);
-  // (N - k) ln(sp2) - sum (ni - 1) ln(si2) is a sum of (ni - 1) ln(sp2 / si2): the two large
-  // logarithms no longer cancel. The scales enter as exact exponents, so no variance has to be
-  // representable. For groups of one scale the exponent is 0 and the term is the plain ratio.
+  // The weighted deviations t = si²/sp² - 1 sum to zero. Adding them to each
+  // -log1p(t) term leaves the statistic unchanged and avoids cancellation when
+  // the input variances are almost equal.
   const lnTop = Math.log2(top);
   let numerator = 0;
   for (let i = 0; i < k; i++) {
-    const exponent = Math.log2(scales[i]) - lnTop;
-    numerator += (groups[i].length - 1) * (Math.log(sp2 / vars[i]) - 2 * exponent * Math.LN2);
+    const t = (pooledVars[i] - sp2) / sp2;
+    let term: number;
+    if (Math.abs(t) < 1e-3) {
+      term = t * t * (0.5 + t * (-1 / 3 + t * (1 / 4 + t * (-1 / 5 + t / 6))));
+    } else if (t > -0.5) {
+      term = t - Math.log1p(t);
+    } else {
+      const exponent = Math.log2(scales[i]) - lnTop;
+      term = t + Math.log(sp2) - Math.log(vars[i]) - 2 * exponent * Math.LN2;
+    }
+    numerator += (groups[i].length - 1) * term;
   }
   const C = 1 + (sumInv - 1 / (N - k)) / (3 * (k - 1));
   const T = numerator / C;

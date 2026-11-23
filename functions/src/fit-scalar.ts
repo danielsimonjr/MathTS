@@ -7,14 +7,19 @@
  * @packageDocumentation
  */
 
-import { pairwiseDot, pairwiseSum, type SeededRng } from '@danielsimonjr/mathts-core';
+import {
+  divideByScale,
+  norm2,
+  pairwiseDot,
+  pairwiseSum,
+  powerOfTwoScaleOf,
+  type SeededRng,
+} from '@danielsimonjr/mathts-core';
 import type { ScalarNode } from '@danielsimonjr/mathts-expression';
 import { bfgs } from './numeric/bfgs.js';
 import { nelderMead, levenbergMarquardt, type LMOptions } from './optimization-extra.js';
 import { compileScalarGradient } from './scalar-compile.js';
-import { inv as _invRaw } from './factories/index.js';
-
-const _inv = _invRaw as unknown as (m: number[][]) => number[][];
+import { lstsq, qr } from '@danielsimonjr/mathts-matrix';
 
 /**
  * Residual a frozen row pays inside the fitter when the tree is invalid or
@@ -588,10 +593,14 @@ export function fitScalarParameters(
     return J;
   }
 
+  function scaledJacobian(cols: number[][]) {
+    const scales = cols.map((col) => powerOfTwoScaleOf(col));
+    return { J: jacobianMatrix(cols.map((col, i) => divideByScale(col, scales[i]))), scales };
+  }
+
   /**
-   * One undamped GLS step `(JᵀJ)⁻¹ Jᵀr` at `x` — the same linear algebra as
-   * standard errors, not an iterative optimizer. Returns null when a frozen
-   * row is inactive or `inv` reports a singular `JᵀJ`.
+   * One undamped GLS step from the least-squares problem J Δx = -r.
+   * Returns null if a frozen row is inactive or the step is nonfinite.
    */
   function glsStep(x: Float64Array): { x: Float64Array<ArrayBuffer>; loss: number } | null {
     const batch = evaluateAt(x);
@@ -604,27 +613,14 @@ export function fitScalarParameters(
       rVec[j] = sqrtW(row) * (batch.values[row] - observed[row]);
     }
     const cols = buildJacobianColumns(Array.from(x), batch, false, null);
-    const JtJ: number[][] = Array.from({ length: pFree }, () => new Array<number>(pFree).fill(0));
-    const Jtr = new Array<number>(pFree).fill(0);
-    for (let a = 0; a < pFree; a++) {
-      for (let b = 0; b < pFree; b++) {
-        JtJ[a][b] = pairwiseDot(cols[a], cols[b]);
-      }
-      Jtr[a] = pairwiseDot(cols[a], rVec);
-    }
-    let JtJinv: number[][];
-    try {
-      JtJinv = _inv(JtJ);
-    } catch (e) {
-      if (!(e instanceof Error) || !/determinant is zero|singular|zero pivot/i.test(e.message)) {
-        throw e;
-      }
-      return null;
-    }
+    if (cols.some((col) => col.some((x) => !Number.isFinite(x)))) return null;
+    if (rVec.some((r) => !Number.isFinite(r))) return null;
+    const { J, scales } = scaledJacobian(cols);
+    const correction = lstsq(J, rVec);
     const xNew = new Float64Array(x.length);
     xNew.set(x);
     for (let fi = 0; fi < pFree; fi++) {
-      const step = -pairwiseDot(JtJinv[fi], Jtr);
+      const step = -correction[fi] / scales[fi];
       if (!Number.isFinite(step)) {
         return null;
       }
@@ -865,7 +861,7 @@ export function fitScalarParameters(
   // the caller asked for zero iterations.
   if (algorithm === 'lm' && lossTag === 'l2' && pFree > 0 && options.maxIterations !== 0) {
     const fromBest = glsStep(bestX);
-    // The affine, unconstrained normal equations give the least-squares
+    // The affine, unconstrained QR solve gives the least-squares
     // minimizer even when evaluation rounds its objective slightly above LM's.
     const affine =
       freeIdx.every((pi) => !isFiniteBound(boundsLo[pi]) && !isFiniteBound(boundsHi[pi])) &&
@@ -904,43 +900,27 @@ export function fitScalarParameters(
       }
       if (ok) {
         const cols = buildJacobianColumns(Array.from(bestX), batch, false, null);
-        const rss = pairwiseDot(rVec, rVec);
-        const sigma2 = rss / (m - pFree);
-        const JtJ: number[][] = Array.from({ length: pFree }, () =>
-          new Array<number>(pFree).fill(0)
-        );
-        for (let a = 0; a < pFree; a++) {
-          for (let b = 0; b < pFree; b++) {
-            JtJ[a][b] = pairwiseDot(cols[a], cols[b]);
-          }
-        }
-        try {
-          const JtJinv = _inv(JtJ);
-          standardErrors = new Float64Array(p);
-          for (let fi = 0; fi < freeIdx.length; fi++) {
-            const pi = freeIdx[fi];
-            const v = sigma2 * JtJinv[fi][fi];
-            if (!Number.isFinite(v) || v < 0) {
-              standardErrors = null;
-              break;
-            }
-            standardErrors[pi] = Math.sqrt(v);
-          }
-          if (standardErrors) {
-            for (let i = 0; i < p; i++) {
-              if (fixed[i]) {
-                standardErrors[i] = 0;
+        const { J, scales } = scaledJacobian(cols);
+        if (J.every((row) => row.every(Number.isFinite))) {
+          const R = qr(J, { mode: 'reduced' }).R.toArray();
+          const cutoff = Number.EPSILON * Math.max(m, pFree) * Math.sqrt(m);
+          if (R.every((row, i) => Math.abs(row[i]) > cutoff)) {
+            const residualScale = powerOfTwoScaleOf(rVec);
+            const standardDeviation =
+              residualScale * (norm2(divideByScale(rVec, residualScale)) / Math.sqrt(m - pFree));
+            const errors = new Float64Array(p);
+            for (let i = 0; i < pFree; i++) {
+              // Row i of R^-1, from forward substitution with the transpose of R.
+              const inverseRow = new Array<number>(pFree).fill(0);
+              for (let j = i; j < pFree; j++) {
+                let value = j === i ? 1 : 0;
+                for (let k = i; k < j; k++) value -= R[k][j] * inverseRow[k];
+                inverseRow[j] = value / R[j][j];
               }
+              errors[freeIdx[i]] = standardDeviation * (norm2(inverseRow) / scales[i]);
             }
+            if (errors.every(Number.isFinite)) standardErrors = errors;
           }
-        } catch (e) {
-          if (
-            !(e instanceof Error) ||
-            !/determinant is zero|singular|zero pivot/i.test(e.message)
-          ) {
-            throw e;
-          }
-          standardErrors = null;
         }
       }
     }

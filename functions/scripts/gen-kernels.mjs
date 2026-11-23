@@ -33,8 +33,7 @@ const HEADER_LINES = [
   'type In = KernelInput;',
   'type Out = KernelOutput;',
   '',
-  '/** Lower bound of the sum of squares for the plain square root. */',
-  'const SUM_SQ_MIN = 1e-280;',
+  "import { SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';",
   '/** Upper bound of the sum of squares for the plain square root. */',
   'const SUM_SQ_MAX = 1e280;',
 ];
@@ -56,7 +55,7 @@ function sqrtExpr(sumSqName, inputName, size) {
   }
   return (
     sumSqName +
-    ' > SUM_SQ_MIN && ' +
+    ' > SQUARES_SAFE_MIN && ' +
     sumSqName +
     ' < SUM_SQ_MAX ? Math.sqrt(' +
     sumSqName +
@@ -293,7 +292,7 @@ function buildRows() {
       'const y = w1 * h;',
       'const z = w2 * h;',
       'const vSq = 0 + x * x + y * y + z * z;',
-      'const vNorm = vSq > SUM_SQ_MIN && vSq < SUM_SQ_MAX ? Math.sqrt(vSq) : Math.hypot(x, y, z);',
+      'const vNorm = vSq > SQUARES_SAFE_MIN && vSq < SUM_SQ_MAX ? Math.sqrt(vSq) : Math.hypot(x, y, z);',
       'const ew = 1;',
       'const sn = ew * Math.sin(vNorm);',
       'const s0 = vNorm === 0 ? ew : ew * Math.cos(vNorm);',

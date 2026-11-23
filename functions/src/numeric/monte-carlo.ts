@@ -33,6 +33,12 @@
  *
  * @packageDocumentation
  */
+import {
+  divideByScale,
+  pairwiseSum,
+  powerOfTwoScaleOf,
+  sumSquaredDeviations,
+} from '@danielsimonjr/mathts-core';
 import { createRng } from '../probability/util/seededRNG.js';
 
 type f64 = number;
@@ -210,21 +216,18 @@ export function monteCarloIntegrate(
     throw new Error(`monteCarloIntegrate: unknown method '${String(method)}'`);
   }
 
-  let sum = 0;
-  let sumSq = 0;
-  for (const u of unitPoints) {
-    const x = u.map((ui, d) => bounds[d][0] + ui * (bounds[d][1] - bounds[d][0]));
-    const fx = f(x);
-    sum += fx;
-    sumSq += fx * fx;
+  const values = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = unitPoints[i].map((u, d) => bounds[d][0] + u * (bounds[d][1] - bounds[d][0]));
+    values[i] = f(x);
   }
-  const mean = sum / n;
+  const scale = powerOfTwoScaleOf(values);
+  const scaled = scale === 1 ? values : divideByScale(values, scale);
+  const mean = (pairwiseSum(scaled) / n) * scale;
   const estimate = volume * mean;
 
-  if (method !== 'uniform') {
-    return { estimate, stderr: 0 };
-  }
-  const variance = n > 1 ? Math.max(0, sumSq - n * mean * mean) / (n - 1) : 0;
-  const stderr = volume * Math.sqrt(variance / n);
+  if (method !== 'uniform' || n === 1) return { estimate, stderr: 0 };
+
+  const stderr = volume * (scale * Math.sqrt(sumSquaredDeviations(scaled) / (n - 1) / n));
   return { estimate, stderr };
 }
