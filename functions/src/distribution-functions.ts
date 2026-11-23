@@ -14,6 +14,7 @@ import {
   chiSquaredDist as chiSquared,
   fDist as fisherF,
   gammaDist as gammaD,
+  type GammaDistOptions,
   betaDist as betaD,
 } from './typed/dist-objects.js';
 import { betaincScalar, gammaincpScalar } from './wasm/special/scalars.js';
@@ -68,12 +69,18 @@ export const fSF = (x: number, d1: number, d2: number): number => {
  * A non-finite argument returns NaN. `gammaDist` throws on invalid parameters;
  * this free function keeps the plain-scalar NaN contract.
  */
-export const gammaCDF = (x: number, shape: number, rate = 1): number =>
-  !Number.isFinite(shape) || !Number.isFinite(rate) || Number.isNaN(x)
+export const gammaCDF = (x: number, shape: number, rate: number | GammaDistOptions = 1): number =>
+  !Number.isFinite(shape) || (typeof rate === 'number' && !Number.isFinite(rate)) || Number.isNaN(x)
     ? NaN
     : gammaD(shape, rate).cdf(x);
-export const gammaQuantile = (p: number, shape: number, rate = 1): number =>
-  nanIn(p, shape, rate) ? NaN : gammaD(shape, rate).quantile(p);
+export const gammaQuantile = (
+  p: number,
+  shape: number,
+  rate: number | GammaDistOptions = 1
+): number =>
+  nanIn(p, shape) || (typeof rate === 'number' && Number.isNaN(rate))
+    ? NaN
+    : gammaD(shape, rate).quantile(p);
 
 /** Beta CDF / quantile with shape parameters `a`, `b`. */
 export const betaCDF = (x: number, a: number, b: number): number => betaD(a, b).cdf(x);

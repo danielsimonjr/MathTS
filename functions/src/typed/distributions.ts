@@ -15,6 +15,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { WASM_SPECIAL_THRESHOLD, lgammaDispatch, lgammaJS } from '../wasm/special/wasm-bridge.js';
 import { _lgamma, erfcSelfContained, normalCDFScalar } from '../wasm/special/scalars.js';
+import { gammaDist, type GammaDistOptions } from './dist-objects.js';
 import { f64Unary } from './f64-kernels.js';
 import { kernelSource } from './parallel-map.js';
 import { numberLiteral, registerWorkerKernels } from './worker-kernels.js';
@@ -440,52 +441,35 @@ export const betaPDF = mathTyped('betaPDF', {
 // =============================================================================
 
 /**
- * Gamma PDF scalar:
- *   f(x; k, θ) = x^(k-1) · exp(-x/θ) / (Γ(k) · θ^k),  x > 0.
- * Returns 0 for x ≤ 0.
- */
-function gammaPDFScalar(x: f64, shape: f64, scale: f64): f64 {
-  if (shape <= 0 || scale <= 0) return NaN;
-  if (x <= 0) return 0;
-  return Math.exp((shape - 1) * Math.log(x) - x / scale - _lgamma(shape) - shape * Math.log(scale));
-}
-
-/**
- * Gamma probability density function.
+ * Gamma probability density. The positional parameter is the rate, with default 1.
  *
- * f(x; k, θ) = x^(k-1) · exp(−x/θ) / (Γ(k) · θ^k),  x > 0.
- *
- * Float64Array paths pre-compute scalar `_lgamma(shape)` once (no array `lgamma_f64` band
- * at typical PDF lengths; see `functions/src/wasm/policy.ts`).
- *
- * @param x     - Sample value(s)
- * @param shape - Shape parameter k > 0
- * @param scale - Scale parameter θ > 0
+ * @param x - Sample value or array of samples
+ * @param shape - Positive shape parameter
+ * @param rateOrOptions - Positive rate, `{ rate }`, or SciPy-style `{ scale }`
  * @returns PDF value(s)
- *
- * @example
- * gammaPDF(1, 1, 1) // ~0.3679 (Exponential(1) at x=1)
  */
 export const gammaPDF = mathTyped('gammaPDF', {
-  'number, number, number': (x: f64, shape: f64, scale: f64): f64 =>
-    gammaPDFScalar(x, shape, scale),
-  'Float64Array, number, number': (x: Float64Array, shape: f64, scale: f64): Float64Array => {
-    const out = new Float64Array(x.length);
-    // lgamma(shape) is constant — compute once
-    const lgShape = _lgamma(shape);
-    const logScale = Math.log(scale);
-    const logConstant = lgShape + shape * logScale; // lgamma(k) + k·ln(θ)
-
-    for (let i = 0; i < x.length; i++) {
-      const xi = x[i];
-      if (xi <= 0) {
-        out[i] = 0;
-      } else {
-        out[i] = Math.exp((shape - 1) * Math.log(xi) - xi / scale - logConstant);
-      }
+  'number, number': (x: f64, shape: f64): f64 => gammaDist(shape).pdf(x),
+  'number, number, number | Object': (
+    x: f64,
+    shape: f64,
+    rateOrOptions: f64 | GammaDistOptions
+  ): f64 => {
+    if (
+      !Number.isFinite(shape) ||
+      (typeof rateOrOptions === 'number' && !Number.isFinite(rateOrOptions))
+    ) {
+      return NaN;
     }
-    return out;
+    return gammaDist(shape, rateOrOptions).pdf(x);
   },
+  'Float64Array, number': (x: Float64Array, shape: f64): Float64Array =>
+    f64Unary(x, gammaDist(shape).pdf),
+  'Float64Array, number, number | Object': (
+    x: Float64Array,
+    shape: f64,
+    rateOrOptions: f64 | GammaDistOptions
+  ): Float64Array => f64Unary(x, gammaDist(shape, rateOrOptions).pdf),
 });
 
 // =============================================================================
