@@ -12,6 +12,7 @@
  * coordinate-descent lasso algorithm (Friedman, Hastie & Tibshirani 2010,
  * "Regularization Paths for Generalized Linear Models via Coordinate Descent").
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { divideByScale, norm2, powerOfTwoScaleOf } from '@danielsimonjr/mathts-core';
 import { linsolve } from '../typed/numeric.js';
 
@@ -95,7 +96,7 @@ function softThreshold(a: number, lambda: number): number {
  * Ridge regression (L2-penalized least squares) with a closed-form solution on
  * centered data: `β = (XᵀX + αI)⁻¹Xᵀy`. The intercept is never penalized.
  *
- * @param X - Design matrix (rows = observations, cols = predictors)
+ * @param XInput - Design matrix (rows = observations, cols = predictors)
  * @param y - Response vector (length = number of observations)
  * @param alpha - L2 penalty strength (`alpha >= 0`; `alpha = 0` is OLS)
  * @param opts - `intercept` (default true)
@@ -105,11 +106,12 @@ function softThreshold(a: number, lambda: number): number {
  * // => { coefficients: [2], intercept: 0 } (recovers the exact OLS fit)
  */
 export function ridge(
-  X: number[][],
+  XInput: NativeMatrixInput<number[][]>,
   y: number[],
   alpha: number,
   opts?: RidgeOptions
 ): RegularizedRegressionResult {
+  const X: number[][] = nativeMatrixRows(XInput);
   const { n, p } = validate(X, y, 'ridge');
   if (alpha < 0) throw new Error('ridge: alpha must be non-negative');
   const useIntercept = opts?.intercept !== false;
@@ -223,7 +225,7 @@ function finishPenalized(
  * penalties drive coefficients to exactly 0 (sparse solutions). The intercept
  * is never penalized.
  *
- * @param X - Design matrix (rows = observations, cols = predictors)
+ * @param XInput - Design matrix (rows = observations, cols = predictors)
  * @param y - Response vector (length = number of observations)
  * @param alpha - L1 penalty strength (`alpha >= 0`; `alpha = 0` ~ OLS)
  * @param opts - `intercept` (default true), `maxIter` (default 1000), `tol` (default 1e-7)
@@ -233,11 +235,12 @@ function finishPenalized(
  * // => coefficients[0] === 0 (penalty overwhelms the signal)
  */
 export function lasso(
-  X: number[][],
+  XInput: NativeMatrixInput<number[][]>,
   y: number[],
   alpha: number,
   opts?: CoordinateDescentOptions
 ): RegularizedRegressionResult {
+  const X: number[][] = nativeMatrixRows(XInput);
   const { n, p } = validate(X, y, 'lasso');
   if (alpha < 0) throw new Error('lasso: alpha must be non-negative');
   return finishPenalized(X, y, n, p, alpha, 0, opts);
@@ -250,7 +253,7 @@ export function lasso(
  * `lasso`. `l1Ratio = 1` is pure lasso; `l1Ratio = 0` is (coordinate-descent)
  * ridge. The intercept is never penalized.
  *
- * @param X - Design matrix (rows = observations, cols = predictors)
+ * @param XInput - Design matrix (rows = observations, cols = predictors)
  * @param y - Response vector (length = number of observations)
  * @param alpha - Overall penalty strength (`alpha >= 0`)
  * @param l1Ratio - Mixing parameter in `[0, 1]` between L1 and L2
@@ -261,12 +264,13 @@ export function lasso(
  * // => finite coefficients blending ridge shrinkage and lasso sparsity
  */
 export function elasticNet(
-  X: number[][],
+  XInput: NativeMatrixInput<number[][]>,
   y: number[],
   alpha: number,
   l1Ratio: number,
   opts?: CoordinateDescentOptions
 ): RegularizedRegressionResult {
+  const X: number[][] = nativeMatrixRows(XInput);
   const { n, p } = validate(X, y, 'elasticNet');
   if (alpha < 0) throw new Error('elasticNet: alpha must be non-negative');
   if (l1Ratio < 0 || l1Ratio > 1) throw new Error('elasticNet: l1Ratio must be in [0, 1]');

@@ -15,6 +15,7 @@
  *     as an observation, each column as a variable (the data-matrix convention).
  *   - `zscore` uses population std (`ddof=0`); `sem` uses sample std (`ddof=1`).
  */
+import { nativeMatrixRows, type NativeMatrixInput } from './matrix/native-matrix-rows.js';
 import { divideByScale, scaleForVariance, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
 import { deviationSums, scaledDeviationSums } from './utils/deviation-sums.js';
@@ -352,7 +353,11 @@ export function cov(
  *     `np.corrcoef` layout. `corrcoef([[1,2,3],[4,5,6]], { rowvar: true })`
  *     returns the 2×2 matrix `[[1,1],[1,1]]`.
  */
-export function corrcoef(matrix: number[][], opts: CovLayoutOptions = {}): number[][] {
+export function corrcoef(
+  matrixInput: NativeMatrixInput<number[][]>,
+  opts: CovLayoutOptions = {}
+): number[][] {
+  const matrix: number[][] = nativeMatrixRows(matrixInput);
   matrix.forEach((r, i) => numberVector(`corrcoef row ${i}`, r));
   const c = cov(matrix, undefined, 1, opts) as number[][];
   const n = c.length;

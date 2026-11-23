@@ -16,6 +16,7 @@
  * invariants (simplex/SPD membership, moment convergence), while
  * `dirichletPdf` is pinned exactly against `scipy.stats.dirichlet.pdf`.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { cholesky } from '../typed/matrix-ops.js';
 import { createRng } from '../probability/util/seededRNG.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
@@ -157,10 +158,11 @@ function validateScale(scale: readonly (readonly number[])[], fn: string): numbe
  */
 export function wishartSample(
   df: number,
-  scale: readonly (readonly number[])[],
+  scaleInput: NativeMatrixInput<readonly (readonly number[])[]>,
   n = 1,
   opts?: SampleSeedOptions
 ): number[][][] {
+  const scale: readonly (readonly number[])[] = nativeMatrixRows(scaleInput);
   const p = validateScale(scale, 'wishartSample');
   if (!(df > p - 1)) {
     throw new Error(`wishartSample: df must be greater than p−1 = ${p - 1}`);

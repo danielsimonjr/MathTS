@@ -2,6 +2,7 @@
  * Subspace angles, matrix sign, fractional matrix power and Cholesky rank-1
  * up/downdates (Gap-analysis 2026-11-04 Batch E8).
  */
+import { nativeMatrixRows, type NativeMatrixInput } from './matrix/native-matrix-rows.js';
 import { matrixExpm, matrixLogm, singularValues } from './typed/matrix-ops.js';
 
 type Vec = readonly number[] | Float64Array;
@@ -50,7 +51,12 @@ function invDet(A: number[][]): { inv: number[][]; det: number } {
  * Qb - Qa Qaᵀ Qb (arcsin), the rest from those of Qaᵀ Qb (arccos), so small angles
  * keep full relative accuracy.
  */
-export function subspaceAngles(A: number[][], B: number[][]): number[] {
+export function subspaceAngles(
+  AInput: NativeMatrixInput<number[][]>,
+  BInput: NativeMatrixInput<number[][]>
+): number[] {
+  const B: number[][] = nativeMatrixRows(BInput);
+  const A: number[][] = nativeMatrixRows(AInput);
   const orthonormal = (M: number[][]): number[][] => {
     const cols = transpose(M);
     const basis: number[][] = [];
@@ -88,7 +94,11 @@ export function subspaceAngles(A: number[][], B: number[][]): number[] {
  * Matrix sign function sign(A) by the determinant-scaled Newton iteration
  * X <- (mu X + (mu X)^-1) / 2 with mu = |det X|^(-1/n). Returns the n x n sign matrix.
  */
-export function signm(A: number[][], opts: { tol?: number; maxIter?: number } = {}): number[][] {
+export function signm(
+  AInput: NativeMatrixInput<number[][]>,
+  opts: { tol?: number; maxIter?: number } = {}
+): number[][] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const tol = opts.tol ?? 1e-12;
   const maxIter = opts.maxIter ?? 100;
   const n = A.length;
@@ -136,7 +146,11 @@ function integerPower(A: number[][], t: number): number[][] {
  * Fractional matrix power A^t = expm(t * logm(A)) for a matrix with a principal
  * logarithm. Integer t is computed exactly by repeated multiplication.
  */
-export function fractionalMatrixPower(A: number[][], t: number): number[][] {
+export function fractionalMatrixPower(
+  AInput: NativeMatrixInput<number[][]>,
+  t: number
+): number[][] {
+  const A: number[][] = nativeMatrixRows(AInput);
   if (Number.isInteger(t)) return integerPower(A, t);
   const L = _logm(A);
   return _expm(L.map((row) => row.map((x) => x * t)));
@@ -146,7 +160,8 @@ export function fractionalMatrixPower(A: number[][], t: number): number[][] {
  * Cholesky factor of L Lᵀ + x xᵀ, given the lower-triangular factor L.
  * Standard rank-1 update (Golub & Van Loan, Alg. 6.5.4).
  */
-export function choleskyUpdate(L: number[][], x: Vec): number[][] {
+export function choleskyUpdate(LInput: NativeMatrixInput<number[][]>, x: Vec): number[][] {
+  const L: number[][] = nativeMatrixRows(LInput);
   const n = L.length;
   const out = L.map((r) => r.slice());
   const w = Array.from(x);
@@ -168,7 +183,8 @@ export function choleskyUpdate(L: number[][], x: Vec): number[][] {
  *
  * @throws RangeError if the downdated matrix is not positive definite
  */
-export function choleskyDowndate(L: number[][], x: Vec): number[][] {
+export function choleskyDowndate(LInput: NativeMatrixInput<number[][]>, x: Vec): number[][] {
+  const L: number[][] = nativeMatrixRows(LInput);
   const n = L.length;
   const out = L.map((r) => r.slice());
   const w = Array.from(x);

@@ -14,6 +14,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { norm2 } from '@danielsimonjr/mathts-core';
 
 /** A linear operator: either a dense matrix or a matvec callback `x -> A x`. */
@@ -155,7 +156,11 @@ function sparsityPattern(a: number[][]): boolean[][] {
  * @example
  * incompleteLU([[4,1,0],[1,4,1],[0,1,4]]) // tridiagonal → exact LU (no fill)
  */
-export function incompleteLU(a: readonly number[][]): { L: number[][]; U: number[][] } {
+export function incompleteLU(aInput: NativeMatrixInput<readonly number[][]>): {
+  L: number[][];
+  U: number[][];
+} {
+  const a: readonly number[][] = nativeMatrixRows(aInput);
   const n = a.length;
   const pattern = sparsityPattern(a as number[][]);
   const LU = (a as number[][]).map((row) => row.slice());
@@ -194,7 +199,10 @@ export function incompleteLU(a: readonly number[][]): { L: number[][]; U: number
  * @example
  * incompleteCholesky([[4,1,0],[1,4,1],[0,1,4]]) // tridiagonal → exact Cholesky
  */
-export function incompleteCholesky(a: readonly number[][]): { L: number[][] } {
+export function incompleteCholesky(aInput: NativeMatrixInput<readonly number[][]>): {
+  L: number[][];
+} {
+  const a: readonly number[][] = nativeMatrixRows(aInput);
   const n = a.length;
   const src = a as number[][];
   const pattern = sparsityPattern(src);

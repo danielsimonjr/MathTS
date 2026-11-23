@@ -3,6 +3,7 @@
  * latter reusing the `laplacianMatrix` connector and the corrected `eigs`. k-means
  * uses a deterministic maximin (Gonzalez) seeding so results are reproducible.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from './matrix/native-matrix-rows.js';
 import { eigs as _eigsRaw } from './factories/index.js';
 import { laplacianMatrix } from './linalg-extra.js';
 import { notSquareError } from '@danielsimonjr/mathts-core/internal';
@@ -35,10 +36,11 @@ export interface KMeansResult {
  * cluster `labels`, `centroids`, and the total within-cluster sum of squares (`inertia`).
  */
 export function kmeans(
-  data: readonly number[][],
+  dataInput: NativeMatrixInput<readonly number[][]>,
   k: number,
   opts: { maxIter?: number } = {}
 ): KMeansResult {
+  const data: readonly number[][] = nativeMatrixRows(dataInput);
   const { maxIter = 100 } = opts;
   const n = data.length;
   if (n === 0) throw new Error('kmeans: data is empty');
@@ -106,10 +108,11 @@ export function kmeans(
  * embedding. Returns a label per node.
  */
 export function spectralClustering(
-  adjacency: readonly number[][],
+  adjacencyInput: NativeMatrixInput<readonly number[][]>,
   k: number,
   opts: { maxIter?: number } = {}
 ): number[] {
+  const adjacency: readonly number[][] = nativeMatrixRows(adjacencyInput);
   // `adjacency` is a square n×n affinity/adjacency matrix (NOT a point cloud). A
   // non-square input otherwise reaches the eigensolver and loops forever, so fail fast.
   const n0 = adjacency.length;

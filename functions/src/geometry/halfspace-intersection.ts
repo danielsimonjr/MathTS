@@ -55,6 +55,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { convexHull } from './hull.js';
 
 /** Structured halfspace-intersection result (mirrors SciPy's vertex output). */
@@ -205,7 +206,7 @@ function originStrictlyInside(
 /**
  * Enumerate the vertices of the bounded polytope defined by a set of halfspaces.
  *
- * @param halfspaces - Rows `[a_1, …, a_d, b]` denoting `a·x + b ≤ 0`
+ * @param halfspacesInput - Rows `[a_1, …, a_d, b]` denoting `a·x + b ≤ 0`
  *   (SciPy's `Ax + b ≤ 0` convention). All rows must have length `d + 1`.
  * @param interiorPoint - A point `x₀` of length `d` that is **strictly interior**
  *   to the polytope (every `aᵢ·x₀ + bᵢ < 0`).
@@ -221,9 +222,10 @@ function originStrictlyInside(
  * ).vertices; // the four corners (CCW)
  */
 export function halfspaceIntersection(
-  halfspaces: number[][],
+  halfspacesInput: NativeMatrixInput<number[][]>,
   interiorPoint: number[]
 ): HalfspaceIntersectionResult {
+  const halfspaces: number[][] = nativeMatrixRows(halfspacesInput);
   if (!Array.isArray(halfspaces) || halfspaces.length === 0) {
     throw new Error('halfspaceIntersection: requires a non-empty array of halfspaces');
   }

@@ -15,6 +15,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { delaunayTriangulation } from '../typed/geometry.js';
 
 /** Structured Delaunay result (mirrors `scipy.spatial.Delaunay`). */
@@ -26,14 +27,15 @@ export interface DelaunayResult {
 /**
  * Delaunay triangulation of a set of 2-D points.
  *
- * @param points - Array of `[x, y]` points (at least 3, not all collinear).
+ * @param pointsInput - Array of `[x, y]` points (at least 3, not all collinear).
  * @returns A {@link DelaunayResult}.
  * @throws When given fewer than 3 points or a non-2-D point set.
  *
  * @example
  * delaunay([[0,0],[1,0],[0,1],[1,1],[0.5,0.5]]).simplices.length // 4
  */
-export function delaunay(points: number[][]): DelaunayResult {
+export function delaunay(pointsInput: NativeMatrixInput<number[][]>): DelaunayResult {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   if (!Array.isArray(points) || points.length < 3) {
     throw new Error('delaunay: requires at least 3 points');
   }

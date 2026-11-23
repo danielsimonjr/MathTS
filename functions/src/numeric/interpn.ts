@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 /**
  * Regular-grid N-D multilinear interpolation — `scipy.interpolate.interpn`
  * (default `method='linear'`, `bounds_error=True`).
@@ -80,13 +81,13 @@ function locateOnAxis(grid: readonly number[], x: number): AxisLocation {
 /**
  * Regular-grid multilinear interpolation, matching `scipy.interpolate.interpn`.
  *
- * @param grids - One strictly-increasing coordinate array per dimension (1 for
+ * @param gridsInput - One strictly-increasing coordinate array per dimension (1 for
  *   1-D, 2 for bilinear, 3 for trilinear, etc.).
  * @param values - Sampled values on the grid, nested `grids.length` levels
  *   deep and shaped `grids.map(g => g.length)` (e.g. for 2-D,
  *   `values[i][j] === f(grids[0][i], grids[1][j])`); for 1-D, a flat
  *   `number[]`.
- * @param query - Points to interpolate at, each with `grids.length` coordinates.
+ * @param queryInput - Points to interpolate at, each with `grids.length` coordinates.
  * @returns The interpolated value at each query point.
  * @throws If a grid axis is not strictly increasing, if `values`' shape
  *   doesn't match `grids`, or if a query point falls outside the grid's
@@ -99,10 +100,12 @@ function locateOnAxis(grid: readonly number[], x: number): AxisLocation {
  * interpn([xs, ys], vals, [[0.5, 0.5]]); // [1] (exact — f is affine)
  */
 export function interpn(
-  grids: readonly (readonly number[])[],
+  gridsInput: NativeMatrixInput<readonly (readonly number[])[]>,
   values: NDArrayInput,
-  query: readonly (readonly number[])[]
+  queryInput: NativeMatrixInput<readonly (readonly number[])[]>
 ): number[] {
+  const query: readonly (readonly number[])[] = nativeMatrixRows(queryInput);
+  const grids: readonly (readonly number[])[] = nativeMatrixRows(gridsInput);
   if (grids.length === 0) throw new Error('interpn: at least one grid axis is required');
 
   for (const grid of grids) {

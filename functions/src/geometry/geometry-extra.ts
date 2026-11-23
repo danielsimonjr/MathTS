@@ -5,6 +5,7 @@
  *
  * @packageDocumentation
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { matMul, svd } from '@danielsimonjr/mathts-matrix';
 import { setIsSubset, setMultiplicity } from '../typed/set.js';
 import { flatten } from '../utils/array.js';
@@ -20,7 +21,11 @@ import { rankNearest } from '../ml/dbscan-knn.js';
  * @example
  * boundingBox([[1,2],[3,0],[2,5]])  // { min: [1,0], max: [3,5] }
  */
-export function boundingBox(points: number[][]): { min: number[]; max: number[] } {
+export function boundingBox(pointsInput: NativeMatrixInput<number[][]>): {
+  min: number[];
+  max: number[];
+} {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   if (points.length === 0) throw new Error('boundingBox: requires at least one point');
   const dims = points[0].length;
   const min = points[0].slice();
@@ -92,7 +97,12 @@ function matTranspose(A: number[][]): number[][] {
  * procrustes([[0,0],[1,0],[0,1]], [[0,0],[0,1],[-1,0]])
  * // R ~ 90° rotation, disparity ~ 0
  */
-export function procrustes(A: number[][], B: number[][]): ProcrustesResult {
+export function procrustes(
+  AInput: NativeMatrixInput<number[][]>,
+  BInput: NativeMatrixInput<number[][]>
+): ProcrustesResult {
+  const B: number[][] = nativeMatrixRows(BInput);
+  const A: number[][] = nativeMatrixRows(AInput);
   if (A.length !== B.length || A.length === 0) {
     throw new Error('procrustes: A and B must have the same non-zero number of rows');
   }
@@ -140,7 +150,12 @@ function euclideanDist(a: number[], b: number[]): number {
  * @example
  * kdTreeKNN([[0,0],[1,0],[5,5]], [0,0], 2)  // [0, 1]
  */
-export function kdTreeKNN(points: number[][], query: number[], k: number): number[] {
+export function kdTreeKNN(
+  pointsInput: NativeMatrixInput<number[][]>,
+  query: number[],
+  k: number
+): number[] {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   return rankNearest(points, query, Math.max(0, k), euclideanDist);
 }
 
@@ -150,7 +165,12 @@ export function kdTreeKNN(points: number[][], query: number[], k: number): numbe
  * @example
  * kdTreeRadius([[0,0],[1,0],[5,5]], [0,0], 2)  // [0, 1]
  */
-export function kdTreeRadius(points: number[][], query: number[], r: number): number[] {
+export function kdTreeRadius(
+  pointsInput: NativeMatrixInput<number[][]>,
+  query: number[],
+  r: number
+): number[] {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const result: number[] = [];
   for (let i = 0; i < points.length; i++) {
     if (euclideanDist(points[i], query) <= r) result.push(i);

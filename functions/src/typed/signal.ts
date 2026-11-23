@@ -15,6 +15,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { windowFunctionCore, type SpectralSegmentOptions } from '../signal/spectral-segments.js';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { assertAllocSize } from '../utils/limits.js';
@@ -778,10 +779,14 @@ export function dwt(x: number[], wavelet: string = 'haar'): { approx: number[]; 
  * column. It is synchronous at every size. For worker threads, call
  * `computePool.fftBatch` from `@danielsimonjr/mathts-parallel` on the packed rows.
  *
- * @param x - 2D input (rows x cols), each value is real
+ * @param xInput - 2D input (rows x cols), each value is real
  * @returns `{ real: number[][], imag: number[][] }`
  */
-export function fft2d(x: number[][]): { real: number[][]; imag: number[][] } {
+export function fft2d(xInput: NativeMatrixInput<number[][]>): {
+  real: number[][];
+  imag: number[][];
+} {
+  const x: number[][] = nativeMatrixRows(xInput);
   if (!Array.isArray(x)) throw new TypeError('fft2d: expected a 2-D array');
   const rows: i32 = x.length;
   // No elements, no spectrum: keep the input shape. Padding 0 to a power of two would give 1x1.

@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 /**
  * Graph Coloring, Cliques, Community Detection, Katz Centrality, Isomorphism
  *
@@ -59,7 +60,7 @@ function _undirectedEdgeExists(adj: number[][], i: number, j: number): boolean {
  * result is always a *proper* coloring (no edge connects two same-colored
  * vertices).
  *
- * @param adj - Adjacency matrix (undirected reading: `adj[i][j]` or
+ * @param adjInput - Adjacency matrix (undirected reading: `adj[i][j]` or
  *   `adj[j][i]` nonzero means an edge)
  * @returns Color index (0-based) for each vertex, length = n
  *
@@ -67,7 +68,8 @@ function _undirectedEdgeExists(adj: number[][], i: number, j: number): boolean {
  * const adj = [[0,1,1],[1,0,1],[1,1,0]]; // triangle K3
  * graphColoring(adj) // => [0, 1, 2] (needs 3 colors)
  */
-export function graphColoring(adj: number[][]): number[] {
+export function graphColoring(adjInput: NativeMatrixInput<number[][]>): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   const colors = new Array<number>(n).fill(-1);
   if (n === 0) return colors;
@@ -108,7 +110,7 @@ export function graphColoring(adj: number[][]): number[] {
  * keeping the largest. Exact (not a heuristic), but exponential worst-case —
  * intended for small-to-moderate graphs.
  *
- * @param adj - Adjacency matrix (undirected reading)
+ * @param adjInput - Adjacency matrix (undirected reading)
  * @returns Vertex indices of a maximum clique, ascending order
  *
  * @example
@@ -116,7 +118,8 @@ export function graphColoring(adj: number[][]): number[] {
  * const adj = [[0,1,1,1],[1,0,1,0],[1,1,0,0],[1,0,0,0]];
  * maxClique(adj) // => [0, 1, 2]
  */
-export function maxClique(adj: number[][]): number[] {
+export function maxClique(adjInput: NativeMatrixInput<number[][]>): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (n === 0) return [];
 
@@ -280,7 +283,7 @@ function _louvainAggregate(
  * but deterministic — no random seed is used, so the same graph always
  * produces the same partition.
  *
- * @param adj - Weighted undirected adjacency matrix (symmetric; `adj[i][j]`
+ * @param adjInput - Weighted undirected adjacency matrix (symmetric; `adj[i][j]`
  *   = edge weight, 0 = no edge)
  * @returns Partition as an array of vertex-index groups (every vertex
  *   appears in exactly one group)
@@ -289,7 +292,8 @@ function _louvainAggregate(
  * // Two triangles 0-1-2 and 3-4-5 joined by a single bridge edge 2-3
  * louvainCommunities(adj) // => [[0,1,2],[3,4,5]] (two communities)
  */
-export function louvainCommunities(adj: number[][]): number[][] {
+export function louvainCommunities(adjInput: NativeMatrixInput<number[][]>): number[][] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (n === 0) return [];
   if (n === 1) return [[0]];
@@ -377,7 +381,7 @@ function _solveLinearSystem(A: number[][], b: number[]): number[] {
  * adjacency matrix's largest eigenvalue) for the system to be well-posed;
  * an ill-conditioned/singular system throws.
  *
- * @param adj - Adjacency matrix (directed reading; weighted or unweighted)
+ * @param adjInput - Adjacency matrix (directed reading; weighted or unweighted)
  * @param alpha - Attenuation factor (must satisfy `alpha < 1/λ_max`)
  * @param beta - Constant added at every node (default 1)
  * @returns L2-normalized Katz centrality score per vertex
@@ -386,7 +390,12 @@ function _solveLinearSystem(A: number[][], b: number[]): number[] {
  * const adj = [[0,1,1],[1,0,1],[1,1,0]]; // triangle K3
  * katzCentrality(adj, 0.1) // all three equal (symmetric graph)
  */
-export function katzCentrality(adj: number[][], alpha: number, beta: number = 1): number[] {
+export function katzCentrality(
+  adjInput: NativeMatrixInput<number[][]>,
+  alpha: number,
+  beta: number = 1
+): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (n === 0) return [];
 
@@ -426,8 +435,8 @@ export function katzCentrality(adj: number[][], alpha: number, beta: number = 1)
  * worst-case (graph isomorphism has no known polynomial algorithm in
  * general) — intended for small-to-moderate graphs.
  *
- * @param graphA - Adjacency matrix (directed reading)
- * @param graphB - Adjacency matrix (directed reading)
+ * @param graphAInput - Adjacency matrix (directed reading)
+ * @param graphBInput - Adjacency matrix (directed reading)
  * @returns Whether the two graphs are isomorphic
  *
  * @example
@@ -435,7 +444,12 @@ export function katzCentrality(adj: number[][], alpha: number, beta: number = 1)
  * const c3 = [[0,1,1],[1,0,1],[1,1,0]]; // C3 === K3 for n=3
  * isIsomorphic(k3, c3) // => true
  */
-export function isIsomorphic(graphA: number[][], graphB: number[][]): boolean {
+export function isIsomorphic(
+  graphAInput: NativeMatrixInput<number[][]>,
+  graphBInput: NativeMatrixInput<number[][]>
+): boolean {
+  const graphB: number[][] = nativeMatrixRows(graphBInput);
+  const graphA: number[][] = nativeMatrixRows(graphAInput);
   const n = graphA.length;
   if (graphB.length !== n) return false;
   if (n === 0) return true;

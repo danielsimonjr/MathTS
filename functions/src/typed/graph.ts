@@ -31,6 +31,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { mulberry32 } from '@danielsimonjr/mathts-core';
 import { assertAllocSize } from '../utils/limits.js';
 import { aggregateRestartVectors, type RestartAggregation } from './aggregate-restart.js';
@@ -45,7 +46,7 @@ export { CENTRALITY_WORKER_THRESHOLD };
 /**
  * Create an adjacency matrix from an edge list.
  *
- * @param edges - Array of [from, to] or [from, to, weight] tuples
+ * @param edgesInput - Array of [from, to] or [from, to, weight] tuples
  * @param n - Number of nodes in the graph
  * @param directed - Whether the graph is directed (default false)
  * @returns n x n adjacency matrix
@@ -55,10 +56,11 @@ export { CENTRALITY_WORKER_THRESHOLD };
  * // => [[0, 1, 0], [1, 0, 1], [0, 1, 0]] (undirected)
  */
 export function adjacencyMatrix(
-  edges: number[][],
+  edgesInput: NativeMatrixInput<number[][]>,
   n: number,
   directed: boolean = false
 ): number[][] {
+  const edges: number[][] = nativeMatrixRows(edgesInput);
   if (n < 0 || !Number.isInteger(n)) {
     throw new Error('adjacencyMatrix: n must be a non-negative integer');
   }
@@ -125,7 +127,7 @@ function dijkstraScan(adj: number[][], start: number): { dist: number[]; prev: n
  *
  * Time complexity: O(V^2) with simple linear scan.
  *
- * @param adj - Adjacency matrix (weights must be non-negative)
+ * @param adjInput - Adjacency matrix (weights must be non-negative)
  * @param start - Source node index
  * @param end - Destination node index
  * @returns Array of node indices forming the shortest path
@@ -134,7 +136,12 @@ function dijkstraScan(adj: number[][], start: number): { dist: number[]; prev: n
  * const adj = [[0,1,0],[1,0,1],[0,1,0]];
  * shortestPath(adj, 0, 2) // => [0, 1, 2]
  */
-export function shortestPath(adj: number[][], start: number, end: number): number[] {
+export function shortestPath(
+  adjInput: NativeMatrixInput<number[][]>,
+  start: number,
+  end: number
+): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   if (!Array.isArray(adj)) throw new TypeError('shortestPath: adj must be an array');
   // A non-integer end never reaches -1 in the path walk below.
   if (!Number.isInteger(start) || !Number.isInteger(end)) {
@@ -166,14 +173,15 @@ export function shortestPath(adj: number[][], start: number, end: number): numbe
  *
  * Time complexity: O(V^2)
  *
- * @param adj - Adjacency matrix (undirected, symmetric)
+ * @param adjInput - Adjacency matrix (undirected, symmetric)
  * @returns Array of MST edges as [from, to, weight]
  *
  * @example
  * const adj = [[0,2,0],[2,0,1],[0,1,0]];
  * minimumSpanningTree(adj) // => [[0, 1, 2], [1, 2, 1]]
  */
-export function minimumSpanningTree(adj: number[][]): number[][] {
+export function minimumSpanningTree(adjInput: NativeMatrixInput<number[][]>): number[][] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (n === 0) return [];
 
@@ -218,14 +226,15 @@ export function minimumSpanningTree(adj: number[][]): number[][] {
  * Returns an array of component arrays, where each component is an
  * array of node indices belonging to that component.
  *
- * @param adj - Adjacency matrix (undirected)
+ * @param adjInput - Adjacency matrix (undirected)
  * @returns Array of connected components
  *
  * @example
  * const adj = [[0,1,0],[1,0,0],[0,0,0]];
  * connectedComponents(adj) // => [[0, 1], [2]]
  */
-export function connectedComponents(adj: number[][]): number[][] {
+export function connectedComponents(adjInput: NativeMatrixInput<number[][]>): number[][] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   const visited = new Array(n).fill(false);
   const components: number[][] = [];
@@ -261,14 +270,15 @@ export function connectedComponents(adj: number[][]): number[][] {
  *
  * Returns an array of SCC arrays, each containing node indices.
  *
- * @param adj - Adjacency matrix (directed)
+ * @param adjInput - Adjacency matrix (directed)
  * @returns Array of strongly connected components
  *
  * @example
  * const adj = [[0,1,0],[0,0,1],[1,0,0]];
  * stronglyConnectedComponents(adj) // => [[2, 1, 0]]
  */
-export function stronglyConnectedComponents(adj: number[][]): number[][] {
+export function stronglyConnectedComponents(adjInput: NativeMatrixInput<number[][]>): number[][] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   const index = new Array(n).fill(-1);
   const lowlink = new Array(n).fill(0);
@@ -325,14 +335,15 @@ export function stronglyConnectedComponents(adj: number[][]): number[][] {
  * Returns an array of node indices in topological order.
  * Throws if the graph contains a cycle.
  *
- * @param adj - Adjacency matrix (directed, acyclic)
+ * @param adjInput - Adjacency matrix (directed, acyclic)
  * @returns Topologically sorted node indices
  *
  * @example
  * const adj = [[0,1,0],[0,0,1],[0,0,0]];
  * topologicalSort(adj) // => [0, 1, 2]
  */
-export function topologicalSort(adj: number[][]): number[] {
+export function topologicalSort(adjInput: NativeMatrixInput<number[][]>): number[] {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   const inDegree = new Array(n).fill(0);
 
@@ -376,14 +387,15 @@ export function topologicalSort(adj: number[][]): number[] {
  *
  * A graph is connected if there is a path between every pair of vertices.
  *
- * @param adj - Adjacency matrix (undirected)
+ * @param adjInput - Adjacency matrix (undirected)
  * @returns true if the graph is connected
  *
  * @example
  * isConnected([[0,1],[1,0]]) // => true
  * isConnected([[0,0],[0,0]]) // => false
  */
-export function isConnected(adj: number[][]): boolean {
+export function isConnected(adjInput: NativeMatrixInput<number[][]>): boolean {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (n <= 1) return true;
 
@@ -415,7 +427,7 @@ export function isConnected(adj: number[][]): boolean {
  * Uses Dijkstra's algorithm internally.
  * Returns Infinity if no path exists.
  *
- * @param adj - Adjacency matrix
+ * @param adjInput - Adjacency matrix
  * @param start - Source node index
  * @param end - Destination node index
  * @returns Shortest path distance (sum of edge weights)
@@ -424,7 +436,12 @@ export function isConnected(adj: number[][]): boolean {
  * const adj = [[0,3,0],[3,0,2],[0,2,0]];
  * graphDistance(adj, 0, 2) // => 5
  */
-export function graphDistance(adj: number[][], start: number, end: number): number {
+export function graphDistance(
+  adjInput: NativeMatrixInput<number[][]>,
+  start: number,
+  end: number
+): number {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const n = adj.length;
   if (start < 0 || start >= n || end < 0 || end >= n) {
     throw new Error('graphDistance: start or end out of bounds');
@@ -639,7 +656,7 @@ async function dispatchCentrality(
  * The Promise.all fan-out still keeps the event loop responsive for consumers
  * that `await` the result.
  *
- * @param adj  - Directed adjacency matrix
+ * @param adjInput  - Directed adjacency matrix
  * @param opts - PageRank + restart options
  *
  * @example
@@ -652,9 +669,10 @@ async function dispatchCentrality(
  * const result = await pageRank(adj, { restarts: 8, restartSeed: 42 });
  */
 export async function pageRank(
-  adj: number[][],
+  adjInput: NativeMatrixInput<number[][]>,
   opts?: PageRankOptions & CentralityRestartOptions
 ): Promise<PageRankResult | PageRankRestartResult> {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const d = opts?.dampingFactor ?? 0.85;
   const maxIter = opts?.maxIter ?? 100;
   const tol = opts?.tol ?? 1e-6;
@@ -831,7 +849,7 @@ function _aggregateBetweenness(
  * Worker-dispatch strategy: Option B — all restarts run on the main thread
  * via `Promise.all`.
  *
- * @param adj  - Adjacency matrix
+ * @param adjInput  - Adjacency matrix
  * @param opts - Betweenness + restart options
  *
  * @example
@@ -839,9 +857,10 @@ function _aggregateBetweenness(
  * const { centrality } = await betweennessCentrality(adj);
  */
 export async function betweennessCentrality(
-  adj: number[][],
+  adjInput: NativeMatrixInput<number[][]>,
   opts?: BetweennessOptions & CentralityRestartOptions
 ): Promise<BetweennessResult | BetweennessRestartResult> {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const directed = opts?.directed ?? false;
   const normalise = opts?.normalized ?? opts?.normalise ?? true;
   return dispatchCentrality(
@@ -999,7 +1018,7 @@ function _aggregateEigenvector(
  * Worker-dispatch strategy: Option B — all restarts run on the main thread
  * via `Promise.all`.
  *
- * @param adj  - Adjacency matrix (undirected, non-negative weights)
+ * @param adjInput  - Adjacency matrix (undirected, non-negative weights)
  * @param opts - Eigenvector + restart options
  *
  * @example
@@ -1008,9 +1027,10 @@ function _aggregateEigenvector(
  * // all ≈ [0.577, 0.577, 0.577] (symmetric k3)
  */
 export async function eigenvectorCentrality(
-  adj: number[][],
+  adjInput: NativeMatrixInput<number[][]>,
   opts?: EigenvectorOptions & CentralityRestartOptions
 ): Promise<EigenvectorResult | EigenvectorRestartResult> {
+  const adj: number[][] = nativeMatrixRows(adjInput);
   const maxIter = opts?.maxIter ?? 100;
   const tol = opts?.tol ?? 1e-6;
   return dispatchCentrality(

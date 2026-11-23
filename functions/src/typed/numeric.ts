@@ -11,6 +11,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import {
   decompositionInputToNestedArray,
   isTypedScalar,
@@ -458,11 +459,12 @@ const LEAST_SQUARES_PIVOT_TOL = 1e-13;
 /**
  * Least squares solution: minimize ||Ax - b||^2 via normal equations.
  *
- * @param A - Matrix (m x n), m >= n
+ * @param AInput - Matrix (m x n), m >= n
  * @param b - Right-hand side (length m)
  * @returns Least squares solution x (length n)
  */
-export function leastSquares(A: number[][], b: number[]): number[] {
+export function leastSquares(AInput: NativeMatrixInput<number[][]>, b: number[]): number[] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const m = A.length;
   const n = A[0].length;
 
@@ -705,11 +707,12 @@ export function pchip(xs: number[], ys: number[], x: f64): f64 {
 /**
  * Evaluate a Bezier curve at parameter t.
  *
- * @param controlPoints - Array of control points (each a number[])
+ * @param controlPointsInput - Array of control points (each a number[])
  * @param t - Parameter in [0, 1]
  * @returns Point on curve
  */
-export function bezierCurve(controlPoints: number[][], t: f64): number[] {
+export function bezierCurve(controlPointsInput: NativeMatrixInput<number[][]>, t: f64): number[] {
+  const controlPoints: number[][] = nativeMatrixRows(controlPointsInput);
   if (controlPoints.length === 0) throw new Error('bezierCurve: need at least 1 control point');
 
   // De Casteljau's algorithm
@@ -731,12 +734,17 @@ export function bezierCurve(controlPoints: number[][], t: f64): number[] {
 /**
  * Evaluate a B-spline at parameter t.
  *
- * @param controlPoints - Array of control points
+ * @param controlPointsInput - Array of control points
  * @param degree - Spline degree (must be < number of control points)
  * @param t - Parameter in [0, 1]
  * @returns Point on B-spline
  */
-export function bspline(controlPoints: number[][], degree: i32, t: f64): number[] {
+export function bspline(
+  controlPointsInput: NativeMatrixInput<number[][]>,
+  degree: i32,
+  t: f64
+): number[] {
+  const controlPoints: number[][] = nativeMatrixRows(controlPointsInput);
   const n = controlPoints.length;
   const p = degree;
 
@@ -834,18 +842,19 @@ export function loess(xs: number[], ys: number[], x: f64, bandwidth: f64 = 0.3):
 /**
  * Scattered data gridding using inverse distance weighting.
  *
- * @param points - Array of [x, y] data locations
+ * @param pointsInput - Array of [x, y] data locations
  * @param values - Corresponding values
  * @param xi - x-coordinates of grid
  * @param yi - y-coordinates of grid
  * @returns 2D array of interpolated values [yi.length][xi.length]
  */
 export function griddata(
-  points: number[][],
+  pointsInput: NativeMatrixInput<number[][]>,
   values: number[],
   xi: number[],
   yi: number[]
 ): number[][] {
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const result: number[][] = [];
   const p = 2; // IDW power
 
@@ -882,18 +891,20 @@ export function griddata(
 /**
  * Radial basis function interpolation.
  *
- * @param points - Data point locations (array of number[])
+ * @param pointsInput - Data point locations (array of number[])
  * @param values - Data values
- * @param xi - Query points
+ * @param xiInput - Query points
  * @param kernel - RBF kernel: 'gaussian' | 'multiquadric' | 'thinplate' (default 'gaussian')
  * @returns Interpolated values at xi
  */
 export function rbfInterpolate(
-  points: number[][],
+  pointsInput: NativeMatrixInput<number[][]>,
   values: number[],
-  xi: number[][],
+  xiInput: NativeMatrixInput<number[][]>,
   kernel: 'gaussian' | 'multiquadric' | 'thinplate' = 'gaussian'
 ): number[] {
+  const xi: number[][] = nativeMatrixRows(xiInput);
+  const points: number[][] = nativeMatrixRows(pointsInput);
   const n = points.length;
   const dim = points[0].length;
 
@@ -1754,14 +1765,15 @@ function rankAndCutoff(M: number[][]): { rank: i32; cut: f64 } {
 /**
  * Numerical rank of a matrix.
  *
- * @param A - Matrix (m x n)
+ * @param AInput - Matrix (m x n)
  * @param tol - Explicit absolute tolerance on the pivots of a Gaussian elimination. Without
  *   it, the rank is the number of singular values above `max(S) * max(m, n) * eps`, as NumPy
  *   `matrix_rank` counts. A matrix with a NaN or infinite entry has no singular values, so
  *   it is eliminated after a power-of-2 scale into [2^-20, 2^400] with the tolerance 1e-10.
  * @returns Numerical rank
  */
-export function rank(A: number[][], tol?: f64): i32 {
+export function rank(AInput: NativeMatrixInput<number[][]>, tol?: f64): i32 {
+  const A: number[][] = nativeMatrixRows(AInput);
   const m = A.length;
   if (m === 0) return 0;
   const n = A[0].length;
@@ -1851,10 +1863,11 @@ function rrefPivots(
  * be above the singular-value cutoff of the matrix. A matrix with a NaN or infinite entry
  * is eliminated with the absolute pivot tolerance 1e-10.
  *
- * @param A - Matrix (m x n)
+ * @param AInput - Matrix (m x n)
  * @returns Array of basis vectors spanning the null space
  */
-export function nullspace(A: number[][]): number[][] {
+export function nullspace(AInput: NativeMatrixInput<number[][]>): number[][] {
+  const A: number[][] = nativeMatrixRows(AInput);
   const m = A.length;
   if (m === 0) return [];
   const n = A[0].length;
@@ -2086,13 +2099,20 @@ export function padeApproximant(
  * Quadratic programming: minimize 0.5 * x^T H x + f^T x subject to A x <= b.
  * Uses projected gradient descent.
  *
- * @param H - Hessian matrix (n x n, positive definite)
+ * @param HInput - Hessian matrix (n x n, positive definite)
  * @param f - Linear term (length n)
- * @param A - Inequality constraint matrix (m x n)
+ * @param AInput - Inequality constraint matrix (m x n)
  * @param b - Inequality constraint bounds (length m)
  * @returns Solution vector x
  */
-export function quadprog(H: number[][], f: number[], A: number[][], b: number[]): number[] {
+export function quadprog(
+  HInput: NativeMatrixInput<number[][]>,
+  f: number[],
+  AInput: NativeMatrixInput<number[][]>,
+  b: number[]
+): number[] {
+  const A: number[][] = nativeMatrixRows(AInput);
+  const H: number[][] = nativeMatrixRows(HInput);
   const n = f.length;
   const mConstraints = A.length;
   let x = new Array(n).fill(0);

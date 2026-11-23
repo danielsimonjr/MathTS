@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 /**
  * Quaternion algebra and rotation conversions. This module is the one
@@ -298,7 +299,10 @@ export function quaternionToAxisAngle(q: Quat): {
  * @example
  * quaternionFromRotationMatrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])  // [1, 0, 0, 0]
  */
-export function quaternionFromRotationMatrix(m: readonly (readonly number[])[]): number[] {
+export function quaternionFromRotationMatrix(
+  mInput: NativeMatrixInput<readonly (readonly number[])[]>
+): number[] {
+  const m: readonly (readonly number[])[] = nativeMatrixRows(mInput);
   if (m.length !== 3 || m.some((row) => !row || row.length !== 3)) {
     throw new Error('quaternionFromRotationMatrix: matrix must be 3 by 3');
   }

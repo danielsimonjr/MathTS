@@ -5,6 +5,7 @@
  * Hadamard (Sylvester), Pascal, DFT, Hankel, block-diagonal, Khatri-Rao,
  * Fiedler, Leslie and Helmert matrices.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from './matrix/native-matrix-rows.js';
 import { Complex } from '@danielsimonjr/mathts-core';
 import { assertAllocSize, assertLoopOrder } from './utils/limits.js';
 
@@ -146,7 +147,12 @@ export function blockDiag(...blocks: ReadonlyArray<ReadonlyArray<readonly number
  *
  * @throws RangeError if the column counts differ
  */
-export function khatriRao(A: number[][], B: number[][]): number[][] {
+export function khatriRao(
+  AInput: NativeMatrixInput<number[][]>,
+  BInput: NativeMatrixInput<number[][]>
+): number[][] {
+  const B: number[][] = nativeMatrixRows(BInput);
+  const A: number[][] = nativeMatrixRows(AInput);
   const k = A[0]?.length ?? 0;
   if ((B[0]?.length ?? 0) !== k) {
     throw new RangeError('khatriRao: A and B must have the same number of columns');

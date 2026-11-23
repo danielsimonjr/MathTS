@@ -19,6 +19,7 @@
  * with a matching `ConstantKernel(σ_f²)·RBF(ℓ)` (or `Matern`) kernel and
  * `alpha=α`.
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { cholesky } from '../typed/matrix-ops.js';
 
 /** Supported covariance kernels. */
@@ -161,10 +162,11 @@ function normalizeTrainingInputs(
  * gp.predict([[-0.5], [10]]); // mean ≈ [1.5872, ~0], std ≈ [0.1453, 1.2247]
  */
 export function gaussianProcessRegression(
-  X: readonly (readonly number[])[],
+  XInput: NativeMatrixInput<readonly (readonly number[])[]>,
   y: readonly number[],
   options: GPOptions = {}
 ): GPModel {
+  const X: readonly (readonly number[])[] = nativeMatrixRows(XInput);
   const kernel = options.kernel ?? 'rbf';
   const ell = options.lengthScale ?? 1;
   const sf2 = options.signalVariance ?? 1;

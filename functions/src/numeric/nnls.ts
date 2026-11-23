@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { leastSquares } from '../typed/numeric.js';
 
 /** Options shared by `nnls` and `lsqBounded`. */
@@ -73,7 +74,7 @@ function residualNorm(
  * index from `P` and re-solving. Terminates when no inactive index has a
  * positive gradient (KKT optimality) or `maxIter` is exhausted.
  *
- * @param A - Matrix (m x n)
+ * @param AInput - Matrix (m x n)
  * @param b - Right-hand side (length m)
  * @param opts - Options (tol, maxIter; default maxIter = 3n)
  * @returns `{ x, residual }` with `x >= 0` (up to `tol`) and `residual = ||Ax - b||_2`
@@ -81,7 +82,12 @@ function residualNorm(
  * @example
  * nnls([[1, 0], [0, 1]], [3, -2]) // => { x: [3, 0], residual: 2 }
  */
-export function nnls(A: number[][], b: number[], opts: NnlsOptions = {}): NnlsResult {
+export function nnls(
+  AInput: NativeMatrixInput<number[][]>,
+  b: number[],
+  opts: NnlsOptions = {}
+): NnlsResult {
+  const A: number[][] = nativeMatrixRows(AInput);
   const m = A.length;
   const n = A[0]?.length ?? 0;
   const tol = opts.tol ?? 1e-10;
@@ -176,7 +182,7 @@ function clip(v: readonly number[], lower: readonly number[], upper: readonly nu
  * when the projected-gradient norm `||x - clip(x - g, lower, upper)||` is
  * below `tol`.
  *
- * @param A - Matrix (m x n)
+ * @param AInput - Matrix (m x n)
  * @param b - Right-hand side (length m)
  * @param lower - Per-component lower bounds (length n)
  * @param upper - Per-component upper bounds (length n)
@@ -187,12 +193,13 @@ function clip(v: readonly number[], lower: readonly number[], upper: readonly nu
  * lsqBounded([[1, 0], [0, 1]], [5, -3], [0, 0], [2, 2]) // => { x: [2, 0], residual: ... }
  */
 export function lsqBounded(
-  A: number[][],
+  AInput: NativeMatrixInput<number[][]>,
   b: number[],
   lower: number[],
   upper: number[],
   opts: LsqBoundedOptions = {}
 ): LsqBoundedResult {
+  const A: number[][] = nativeMatrixRows(AInput);
   const m = A.length;
   const n = A[0]?.length ?? 0;
   const tol = opts.tol ?? 1e-10;

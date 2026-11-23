@@ -1,3 +1,4 @@
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { matMul as matmul } from '@danielsimonjr/mathts-matrix';
 
 /**
@@ -194,7 +195,12 @@ function unvecRowMajor(v: number[], n: number): number[][] {
  * @example
  * dlyap([[0.5, 0], [0, 0.5]], [[1, 0], [0, 1]]) // => (4/3) * I  (since 0.25x - x + 1 = 0)
  */
-export function dlyap(A: number[][], Q: number[][]): number[][] {
+export function dlyap(
+  AInput: NativeMatrixInput<number[][]>,
+  QInput: NativeMatrixInput<number[][]>
+): number[][] {
+  const Q: number[][] = nativeMatrixRows(QInput);
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'dlyap');
   assertSquare(Q, 'dlyap');
   if (Q.length !== n) throw new Error('dlyap: A and Q must have the same size');
@@ -239,7 +245,16 @@ const RICCATI_TOL = 1e-13;
  * care([[0, 1], [0, 0]], [[0], [1]], [[1, 0], [0, 1]], [[1]])
  * // => [[sqrt(3), 1], [1, sqrt(3)]]  (pinned vs scipy.linalg.solve_continuous_are)
  */
-export function care(A: number[][], B: number[][], Q: number[][], R: number[][]): number[][] {
+export function care(
+  AInput: NativeMatrixInput<number[][]>,
+  BInput: NativeMatrixInput<number[][]>,
+  QInput: NativeMatrixInput<number[][]>,
+  RInput: NativeMatrixInput<number[][]>
+): number[][] {
+  const R: number[][] = nativeMatrixRows(RInput);
+  const Q: number[][] = nativeMatrixRows(QInput);
+  const B: number[][] = nativeMatrixRows(BInput);
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'care');
   assertSquare(Q, 'care');
   if (Q.length !== n) throw new Error('care: A and Q must have the same size');
@@ -314,7 +329,16 @@ export function care(A: number[][], B: number[][], Q: number[][], R: number[][])
  * // => [[2.94712297, 2.36920541], [2.36920541, 4.61313426]]
  * //    (pinned vs scipy.linalg.solve_discrete_are)
  */
-export function dare(A: number[][], B: number[][], Q: number[][], R: number[][]): number[][] {
+export function dare(
+  AInput: NativeMatrixInput<number[][]>,
+  BInput: NativeMatrixInput<number[][]>,
+  QInput: NativeMatrixInput<number[][]>,
+  RInput: NativeMatrixInput<number[][]>
+): number[][] {
+  const R: number[][] = nativeMatrixRows(RInput);
+  const Q: number[][] = nativeMatrixRows(QInput);
+  const B: number[][] = nativeMatrixRows(BInput);
+  const A: number[][] = nativeMatrixRows(AInput);
   const n = assertSquare(A, 'dare');
   assertSquare(Q, 'dare');
   if (Q.length !== n) throw new Error('dare: A and Q must have the same size');

@@ -16,6 +16,7 @@
  * `jacobiSN`/`jacobiCN`/`jacobiDN` (Phase 5 special functions, `m = k²`
  * convention, matching scipy's `ellipk`/`ellipj`).
  */
+import { nativeMatrixRows, type NativeMatrixInput } from '../matrix/native-matrix-rows.js';
 import { Complex, isComplex } from '@danielsimonjr/mathts-core';
 import {
   analogToDigital,
@@ -660,7 +661,11 @@ export function zpk2sos(z: readonly ZpkRoot[], p: readonly ZpkRoot[], k: number)
  * produced by `zpk2sos`) to `x`, each biquad in direct-form-II transposed.
  * Matches `scipy.signal.sosfilt(sos, x)`.
  */
-export function sosfilt(sos: readonly (readonly number[])[], x: Vec): number[] {
+export function sosfilt(
+  sosInput: NativeMatrixInput<readonly (readonly number[])[]>,
+  x: Vec
+): number[] {
+  const sos: readonly (readonly number[])[] = nativeMatrixRows(sosInput);
   let y = numberVector('sosfilt', x);
   for (const section of sos) {
     if (section.length !== 6)
