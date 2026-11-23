@@ -39,6 +39,9 @@ math.complex(2, 3); // 2 + 3i
 - `math.matrix([[1, 2]])` returns a dense mathjs-style Matrix with `.size()` and `.toArray()`.
   Passing an existing native MathTS matrix through `math.matrix` preserves its class when
   no storage conversion is requested.
+- `math.add`, `math.subtract`, and `math.multiply` preserve boxed Matrix results.
+  Matrix literals and numeric-dimension `math.zeros` follow the instance's `matrix`
+  setting. `math.size` returns a plain array of dimensions, as in mathjs 15.
 - Direct named imports (`add`, `matrix`, …) come from `compat/src/shims.ts`. There is
   no package-level named `import` / `createUnit` / `config` export (use the instance).
 - Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions`
