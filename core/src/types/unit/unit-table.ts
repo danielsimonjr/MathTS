@@ -60,6 +60,9 @@ export type UnitBaseKey =
   | 'SOLID_ANGLE'
   | 'NONE'
   | 'VELOCITY'
+  | 'ACCELERATION'
+  | 'RADIATION_DOSE'
+  | 'CATALYTIC_ACTIVITY'
   | 'VISCOSITY'
   | 'KINEMATIC_VISCOSITY'
   | 'ACOUSTIC_IMPEDANCE'
@@ -370,6 +373,15 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
     cycles: true,
   },
   Hz: { base: 'FREQUENCY', prefixes: 'SHORT', scale: '1', reciprocal: true, cycles: true },
+  Bq: { base: 'FREQUENCY', prefixes: 'SHORT', scale: '1' },
+  becquerel: { base: 'FREQUENCY', prefixes: 'LONG', scale: '1' },
+  Gy: { base: 'RADIATION_DOSE', prefixes: 'SHORT', scale: '1' },
+  gray: { base: 'RADIATION_DOSE', prefixes: 'LONG', scale: '1' },
+  Sv: { base: 'RADIATION_DOSE', prefixes: 'SHORT', scale: '1' },
+  sievert: { base: 'RADIATION_DOSE', prefixes: 'LONG', scale: '1' },
+  kat: { base: 'CATALYTIC_ACTIVITY', prefixes: 'SHORT', scale: '1' },
+  katal: { base: 'CATALYTIC_ACTIVITY', prefixes: 'LONG', scale: '1' },
+  Gal: { base: 'ACCELERATION', prefixes: 'SHORT', scale: '0.01' }, // cm/s²
   rad: { base: 'ANGLE', prefixes: 'SHORT', scale: '1' },
   radian: { base: 'ANGLE', prefixes: 'LONG', scale: '1' },
   deg: { base: 'ANGLE', prefixes: 'SHORT', scale: 'pi/180' },
@@ -446,10 +458,9 @@ export const UNIT_ROWS: Readonly<Record<string, UnitRow>> = Object.freeze({
   bytes: { base: 'BIT', prefixes: 'BINARY_LONG', scale: '8' },
 
   // --- Supplementary units and astronomical spellings; scales as written in this table. ---
-  // `bit` stays the storage unit (1 byte = 8 bit). A nat is the coherent
-  // dimensionless unit of information; an information bit is `ln2` nat, registered
-  // with createUnit's `exact` rather than by redefining storage `bit`.
+  // A shannon is an information bit. A storage bit belongs to the BIT dimension.
   nat: { base: 'NONE', prefixes: 'NONE', scale: '1' },
+  shannon: { base: 'NONE', prefixes: 'LONG', scale: 'ln2' },
   percent: { base: 'NONE', prefixes: 'NONE', scale: '1e-2' },
   ppm: { base: 'NONE', prefixes: 'NONE', scale: '1e-6' },
   ppb: { base: 'NONE', prefixes: 'NONE', scale: '1e-9' },

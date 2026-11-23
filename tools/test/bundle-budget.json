@@ -10,7 +10,7 @@
     "packages/workerpool/dist/index.js": 56393,
     "packages/workerpool/dist/worker.js": 25655,
     "packages/workerpool/package.json": 2745,
-    "core/dist/index.js": 257162,
+    "core/dist/index.js": 259779,
     "core/dist/internal.js": 262198,
     "core/package.json": 2024,
     "matrix/dist/index.js": 237296,
@@ -208,13 +208,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1893828
+      "bytes": 1913649
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1903149
+      "bytes": 1922970
     }
   ]
 }
