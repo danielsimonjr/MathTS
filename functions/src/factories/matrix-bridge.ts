@@ -10,6 +10,7 @@
  * rewriting each one.
  */
 
+import { isUnaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import {
   formatGeneric,
@@ -95,6 +96,7 @@ function matrixIndexSelectors(index: MatrixIndexLike): IndexSelector[] {
 function _adaptCallbackArity(
   callback: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
+  if (isUnaryCollectionCallback(callback)) return (value: unknown) => callback(value);
   const t = mathTyped as unknown as {
     isTypedFunction(fn: unknown): boolean;
     resolve(fn: unknown, args: unknown[]): unknown;

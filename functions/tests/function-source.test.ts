@@ -241,7 +241,7 @@ describe('readParameterList: the header', () => {
     expect(readParameterList(Math.sqrt.toString())).toMatchObject({ kind: 'function', params: [] });
     const bound = ((a: number, ...r: number[]) => a + r.length).bind(null);
     expect(params(bound.toString())).toEqual([]);
-    expect(callbackArity(bound).rest).toBe(false);
+    expect(callbackArity(bound).rest).toBeUndefined();
     // The count is the larger of the declared length and the number of entries.
     expect(callbackArity(Math.sqrt)).toEqual({ count: 1, rest: false });
     expect(callbackArity(Math.pow)).toEqual({ count: 2, rest: false });

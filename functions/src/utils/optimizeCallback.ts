@@ -1,3 +1,4 @@
+import { isUnaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import typed from 'typed-function';
 import { get, arraySize } from './array.js';
 import { typeOf as _typeOf } from './is.js';
@@ -40,6 +41,8 @@ export function optimizeCallback<T, R>(
   name: string,
   isUnary?: boolean
 ): OptimizedCallback<unknown, R> {
+  if (isUnaryCollectionCallback(callback))
+    return { isUnary: true, fn: callback as (...args: unknown[]) => R };
   const typedAny = typed as unknown as {
     isTypedFunction: (fn: AnyFunction) => boolean;
     resolve: (fn: AnyFunction, args: unknown[]) => AnyFunction | null;
