@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { BigNumber } from '@danielsimonjr/mathts-core';
 import {
   quantileSeq,
   bignumber,
@@ -113,21 +114,31 @@ describe('quantileSeq with a BigNumber N or probability returns one type (#1112)
 });
 
 describe('solveODE with BigNumber input (#1112)', () => {
-  // The BigNumber path converts the Butcher tableau with bignumber(); tableau c holds a null.
   const f = (_t: unknown, y: unknown): unknown => (multiply as Any)(-1, y);
-  // RK45 starts from the first-step heuristic, as the number path does (#1120): 5 steps, y(1) = 0.3678805744341225 (number path).
-  const first64 = '0.36788057443412245541986884420576302195736409491568977934073905';
+  // The independent stability polynomial of Dormand–Prince on y' = -y.
+  function expectTrajectory(t: unknown[], y: unknown[][]): void {
+    let expected = new BigNumber(1);
+    for (let i = 1; i < t.length; i++) {
+      const z = new BigNumber(str(t[i - 1])).sub(new BigNumber(str(t[i])));
+      let stability = new BigNumber(1).div(600);
+      for (const denominator of [120, 24, 6, 2, 1, 1]) {
+        stability = stability.mul(z).add(new BigNumber(1).div(denominator));
+      }
+      expected = expected.mul(stability);
+      expect(new BigNumber(str(y[i][0])).sub(expected).abs().lt('1e-60')).toBe(true);
+    }
+  }
   it('RK45 on y′ = −y with a BigNumber y0 returns BigNumber steps', () => {
     const r = (solveODE as Any)(f, [0, 1], [B(1)]) as { t: unknown[]; y: unknown[][] };
     expect(r.t.length).toBe(6);
     expect(isBig(r.t[5])).toBe(true);
     expect(str(r.t[5])).toBe('1');
     expect(isBig(r.y[5][0])).toBe(true);
-    expect(str(r.y[5][0]).startsWith(first64)).toBe(true);
+    expectTrajectory(r.t, r.y);
   });
   it('RK45 with a BigNumber tspan returns the same result', () => {
     const r = (solveODE as Any)(f, [B(0), B(1)], [1]) as { t: unknown[]; y: unknown[][] };
     expect(r.t.length).toBe(6);
-    expect(str(r.y[5][0]).startsWith(first64)).toBe(true);
+    expectTrajectory(r.t, r.y);
   });
 });
