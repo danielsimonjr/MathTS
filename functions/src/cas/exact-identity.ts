@@ -113,6 +113,50 @@ function operatorName(node: Node): string | null {
   return null;
 }
 
+/**
+ * Recognize polynomial syntax without expanding products or forming coefficients.
+ * Keep calls and operators that can be undefined out of the structural shortcut.
+ */
+export function isSyntacticPolynomialIdentity(a: MathNode, b: MathNode): boolean {
+  return a.equals(b) && isPlainPolynomialSyntax(a as unknown as Node);
+}
+
+function isPlainPolynomialSyntax(node: Node): boolean {
+  switch (node.type) {
+    case 'ConstantNode':
+      return (
+        typeof node.value === 'bigint' ||
+        (typeof node.value === 'number' && Number.isFinite(node.value))
+      );
+    case 'SymbolNode':
+      return typeof node.name === 'string' && !NON_NUMBER_SYMBOLS.has(node.name);
+    case 'ParenthesisNode':
+      return node.content !== undefined && isPlainPolynomialSyntax(node.content);
+    case 'OperatorNode': {
+      const op = operatorName(node);
+      const args = node.args ?? [];
+      if (args.length === 1 && (op === 'unaryMinus' || op === 'unaryPlus')) {
+        return isPlainPolynomialSyntax(args[0]);
+      }
+      if (args.length !== 2) return false;
+      if (op === 'add' || op === 'subtract' || op === 'multiply') {
+        return args.every(isPlainPolynomialSyntax);
+      }
+      if (op !== 'pow') return false;
+      const [base, exponent] = args;
+      return (
+        exponent.type === 'ConstantNode' &&
+        typeof exponent.value === 'number' &&
+        Number.isSafeInteger(exponent.value) &&
+        exponent.value >= 0 &&
+        isPlainPolynomialSyntax(base)
+      );
+    }
+    default:
+      return false;
+  }
+}
+
 function callName(node: Node): string | null {
   const fn = node.fn;
   if (typeof fn === 'string') return fn;
