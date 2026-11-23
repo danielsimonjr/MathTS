@@ -162,3 +162,21 @@ describe('maxSelect', () => {
     expect(result).toEqual([3, 3, 2]);
   });
 });
+
+describe('selection with NaN input', () => {
+  it.each([
+    [NaN, 1, 2],
+    [1, NaN, 2],
+    [1, 2, NaN],
+  ])('rejects NaN at any position when selecting a nonempty result', (a, b, c) => {
+    const input = [a, b, c];
+    expect(() => quickSelect(input, 1)).toThrow('quickSelect: input contains NaN');
+    for (const count of [1, input.length]) {
+      expect(() => minSelect(input, count)).toThrow('minSelect: input contains NaN');
+      expect(() => maxSelect(input, count)).toThrow('maxSelect: input contains NaN');
+    }
+    expect(medianSelect(input)).toBeNaN();
+    expect(minSelect(input, 0)).toEqual([]);
+    expect(maxSelect(input, 0)).toEqual([]);
+  });
+});

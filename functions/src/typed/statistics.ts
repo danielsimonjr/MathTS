@@ -787,11 +787,13 @@ export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
  * @param arr - Input array (not modified)
  * @param k - Zero-based index of the desired order statistic
  * @returns The k-th smallest element
+ * @throws {RangeError} If the input contains a NaN or k is out of range
  */
 export function quickSelect(arr: number[], k: i32): f64 {
   if (k < 0 || k >= arr.length) {
     throw new RangeError(`k=${k} is out of range for array of length ${arr.length}`);
   }
+  if (hasNaN(arr)) throw new RangeError('quickSelect: input contains NaN');
   const a = new Float64Array(arr); // work on a copy
   return quickSelectInPlace(a, 0, a.length - 1, k);
 }
@@ -810,12 +812,12 @@ export function medianSelect(arr: number[]): f64 {
   if (n === 1) return arr[0];
 
   const mid: i32 = Math.floor(n / 2);
+  const a = new Float64Array(arr);
   if (n % 2 === 1) {
-    return quickSelect(arr, mid);
+    return quickSelectInPlace(a, 0, n - 1, mid);
   }
   // For even length, average of two middle elements. After the select at `mid - 1`, the next
   // order statistic is the smallest value right of it.
-  const a = new Float64Array(arr);
   const lower = quickSelectInPlace(a, 0, n - 1, mid - 1);
   const upper = minFrom(a, mid);
   return (lower + upper) / 2;
@@ -827,9 +829,11 @@ export function medianSelect(arr: number[]): f64 {
  * @param arr - Input array (not modified)
  * @param k - Number of smallest elements to return
  * @returns Array of k smallest elements, sorted ascending
+ * @throws {RangeError} If k is positive and the input contains a NaN
  */
 export function minSelect(arr: number[], k: i32): number[] {
   if (k <= 0) return [];
+  if (hasNaN(arr)) throw new RangeError('minSelect: input contains NaN');
   if (k >= arr.length) return arr.slice().sort((a, b) => a - b);
 
   const a = new Float64Array(arr);
@@ -845,9 +849,11 @@ export function minSelect(arr: number[], k: i32): number[] {
  * @param arr - Input array (not modified)
  * @param k - Number of largest elements to return
  * @returns Array of k largest elements, sorted descending
+ * @throws {RangeError} If k is positive and the input contains a NaN
  */
 export function maxSelect(arr: number[], k: i32): number[] {
   if (k <= 0) return [];
+  if (hasNaN(arr)) throw new RangeError('maxSelect: input contains NaN');
   if (k >= arr.length) return arr.slice().sort((a, b) => b - a);
 
   const a = new Float64Array(arr);
