@@ -21,7 +21,7 @@
     "autograd/dist/index.js": 74174,
     "autograd/package.json": 2250,
     "functions/dist/index.js": 2206829,
-    "functions/dist/subpath-evaluate.js": 1430456,
+    "functions/dist/subpath-evaluate.js": 1445120,
     "functions/package.json": 3740,
     "functions/dist/wasm/mathts-as.wasm": 66864,
     "expression/dist/index.js": 366761,
