@@ -247,7 +247,7 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
 /** Hermite polynomial H_n(x) (physicist's convention). */
 function hermiteHScalar(n: f64, x: f64): f64 {
   // A non-finite order has no defined value, and the recurrence below would never end.
-  if (!Number.isFinite(n)) return NaN;
+  if (!Number.isFinite(n) || n < 0) return NaN;
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 2 * x;
