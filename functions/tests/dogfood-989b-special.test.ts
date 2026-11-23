@@ -126,11 +126,9 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   it('the besselJ worker kernel holds the downward-sweep limit', () => {
     expect(workerKernel('besselJ', 5)).toContain(String(MAX_BESSEL_J_SWEEP));
   });
-  it('besselJ refuses a downward sweep above its limit (over 60 s before the fix)', () => {
+  it('uses a bounded expansion above the old downward sweep limit', () => {
     const n = MAX_BESSEL_J_SWEEP;
-    expect(() => besselJ(n, n - 1)).toThrow(
-      new RegExp(`exceeds the supported maximum of ${MAX_BESSEL_J_SWEEP}$`)
-    );
+    expect(besselJ(n, n - 1)).toBeCloseTo(0.000420568474896717, 12);
   });
   it('besselJ with a small x still returns 0 at once above the sweep limit', () => {
     expect(besselJ(2e9, 5)).toBe(0);

@@ -365,6 +365,108 @@ const _BESSEL_J_MAX_SWEEP: f64 = 1200000000.0;
 // 2^-700, the exact rescale factor of the downward sweep. A constant, so no call computes it.
 const _BESSEL_J_DOWN: f64 = 1.90109156629516e-211;
 
+// Large integer orders use the Airy uniform approximation through x = n.
+function _besselUniformJY(n: f64, x: f64, y: bool): f64 {
+  const signedScale = y ? -1.0 : 1.0;
+  if (x > 4 * n * n) return _besselHankel(n, x, y);
+
+  const below = x <= n;
+  const delta = (x - n) / n;
+  const w = Math.sqrt(Math.abs(delta * (2 + delta)));
+  const nThird = Math.cbrt(n);
+  if (w === 0) {
+    const airy = y ? _airyBi(0) : _airyAi(0);
+    return signedScale * (Math.cbrt(2) / nThird) * airy;
+  }
+
+  let integral: f64;
+  if (w < 0.25) {
+    // atanh(w)-w and w-atan(w) share this series, with opposite signs.
+    const square = (below ? 1 : -1) * w * w;
+    let term = w * w * w;
+    integral = term / 3;
+    for (let k = 5; k <= 31; k += 2) {
+      term *= square;
+      integral += term / k;
+    }
+  } else {
+    integral = below ? Math.log1p(w) + (isFinite(n / x) ? Math.log(n / x) : Math.log(n) - Math.log(x)) - w : w - Math.atan(w);
+  }
+
+  const phase = n * integral;
+  const root = Math.cbrt(1.5 * phase);
+  const argument = root * root;
+  if (argument <= 5) {
+    const factor = Math.sqrt(Math.sqrt((4 * argument) / (nThird * nThird * w * w))) / nThird;
+    const t = below ? argument : -argument;
+    return signedScale * factor * (y ? _airyBi(t) : _airyAi(t));
+  }
+
+  if (below) {
+    let series: f64 = 0;
+    let term: f64 = 1;
+    let previous = Infinity;
+    let coefficient: f64 = 1;
+    for (let k: i32 = 0; k <= AIRY_U_MAX; k++) {
+      const part = coefficient * term;
+      if (Math.abs(part) > previous) break;
+      series += part;
+      previous = Math.abs(part);
+      term *= (y ? 1.0 : -1.0) / phase;
+      coefficient = _airyU(coefficient, k + 1);
+    }
+    const denominator = Math.sqrt(Math.PI * n * w) * (y ? Math.SQRT1_2 : Math.SQRT2);
+    // Apply the reflection multiplier and the finite prefactor in the exponent.
+    const logValue =
+      (y ? phase : -phase) + Math.log((Math.abs(signedScale) * series) / denominator);
+    return Math.sign(signedScale) * Math.exp(logValue);
+  }
+
+  // Separate the argument x from the phase correction in the far-oscillatory
+  // region. Reducing sin(x) and cos(x) directly prevents losing the correction
+  // to rounding when n²/x is much smaller than one unit in the last place of x.
+  let cosine: f64;
+  let sine: f64;
+  if (x >= 2 * n) {
+    const ratio = n / x;
+    const corrected =
+      n * (Math.asin(ratio) - ratio / (1 + Math.sqrt(1 - ratio * ratio))) - Math.PI / 4;
+    const quadrant = <i32>n & 3;
+    const c: f64 = quadrant == 0 ? 1.0 : quadrant == 2 ? -1.0 : 0.0;
+    const s: f64 = quadrant == 1 ? 1.0 : quadrant == 3 ? -1.0 : 0.0;
+    const cx = Math.cos(x);
+    const sx = Math.sin(x);
+    const cr = Math.cos(corrected);
+    const sr = Math.sin(corrected);
+    const baseCos = cx * c + sx * s;
+    const baseSin = sx * c - cx * s;
+    cosine = baseCos * cr - baseSin * sr;
+    sine = baseSin * cr + baseCos * sr;
+  } else {
+    const cx = Math.cos(phase);
+    const sx = Math.sin(phase);
+    cosine = (cx + sx) * Math.SQRT1_2;
+    sine = (sx - cx) * Math.SQRT1_2;
+  }
+  let p: f64 = 1.0;
+  let q: f64 = 0.0;
+  let u: f64 = 1.0;
+  let phasePower: f64 = 1.0;
+  let previous: f64 = Infinity;
+  for (let k: i32 = 1; k <= AIRY_U_MAX; k++) {
+    u = _airyU(u, k);
+    phasePower *= phase;
+    const term = u / phasePower;
+    if (term > previous) break;
+    previous = term;
+    const sign: f64 = (k & 2) == 0 ? 1.0 : -1.0;
+    if ((k & 1) == 0) p += sign * term;
+    else q += sign * term;
+  }
+  const amplitude = Math.sqrt(2 / (Math.PI * n * w));
+  return amplitude * (y ? sine * p - cosine * q : cosine * p + sine * q);
+}
+
 function _besselJn(n: i32, x: f64): f64 {
   // -n overflows for the smallest i32, and that order has no i32 absolute value.
   if (n == i32.MIN_VALUE) throw new RangeError('besselJ: order exceeds the supported maximum');
@@ -380,6 +482,10 @@ function _besselJn(n: i32, x: f64): f64 {
   // value rounds to 0. This test comes before the limits, as in the JS scalar
   // (besselJUnderflows, the same expression).
   if (nf * (1.0 + (Math.log(ax) - Math.LN2) - Math.log(nf)) < -745.2) return sign * 0.0;
+  if (ni >= 1000000) {
+    const value = _besselUniformJY(nf, ax, false);
+    return sign * (x < 0.0 && ni % 2 != 0 ? -value : value);
+  }
   // A tiny x: J_n(x) = (x/2)^n / n! (1 - x^2 / (4 (n + 1)) + ...), and the second term is below
   // 1e-31 of the first. The test "|x| < 1e-15 gives 0" returned 0 where J_n(x) is a double
   // (J_2(1e-16) = 1.25e-33). The zero bound leaves n <= 20; the product uses no pow or exp, so
@@ -468,6 +574,7 @@ function _besselYn(n: i32, x: f64): f64 {
       709.79
   )
     return sign * -Infinity;
+  if (ni >= 1000000) return sign * _besselUniformJY(nf, x, true);
   let yPrev: f64 = _besselY0(x);
   let yCurr: f64 = _besselY1(x);
   for (let k: i32 = 1; k < ni; k++) {

@@ -524,14 +524,17 @@ describe('#1334 and #1332: J and Y of a tiny argument', () => {
 });
 
 describe('#1331: the array form is bounded by the same total work (no wall clock)', () => {
-  // assertBesselArrayWork returned at once for a non-integer order, so besselJ(1e9 + 0.5, xs) with
-  // 1000 elements ran 1000 full recurrences. Measured on the dist before the guard: the call with
-  // 8 elements was still running after 20 s and threw no RangeError.
-  it('besselJ(1e9 + 0.5, 8 x 2e9) and besselY(1e9 + 0.5, 8 x 2e9) throw the array-work RangeError', () => {
-    // 8e9 recurrence steps, above the 2.5e9 of one call
-    expect(() => besselJ(1e9 + 0.5, new Float64Array(8).fill(2e9))).toThrow(RangeError);
-    expect(() => besselJ(1e9 + 0.5, new Float64Array(8).fill(2e9))).toThrow(/per call/);
-    expect(() => besselY(1e9 + 0.5, new Float64Array(8).fill(2e9))).toThrow(/per call/);
+  it('evaluates an array of large non-integral orders without recurrence', () => {
+    const n = 1e9 + 0.5;
+    const xs = new Float64Array(8).fill(2e9);
+    for (const [evaluate, expected] of [
+      [besselJ, 9.851904486365147e-6],
+      [besselY, -1.644664952620546e-5],
+    ] as const) {
+      const result = evaluate(n, xs) as Float64Array;
+      expect(result.length).toBe(xs.length);
+      for (const value of result) expectRel(value, expected, 3e-6);
+    }
   });
   it('besselJ(4e9 + 0.5, 4 x 1000) returns four zeros at once: each element is under the zero bound', () => {
     const out = besselJ(4e9 + 0.5, new Float64Array(4).fill(1000)) as Float64Array;

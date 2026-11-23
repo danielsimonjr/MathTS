@@ -91,12 +91,13 @@ describeIfAS('#1113 bridge: the WASM kernel gets only the inputs that match the 
     expect(Array.from(result as Float64Array).every((v) => v === 0)).toBe(true);
   });
 
-  it('besselJ with a downward sweep over the limit throws the RangeError of the JS path', () => {
+  it('besselJ above the downward sweep limit returns the JS uniform expansion', () => {
     const { result, calls } = withStubbedKernel('bessel_jn_f64', () =>
       besselJDispatch(1_250_000_000, filled(1_249_999_999))
     );
     expect(calls).toBe(0);
-    expect(result).toBeInstanceOf(RangeError);
+    expect(result).toBeInstanceOf(Float64Array);
+    expect((result as Float64Array)[0]).toBeCloseTo(0.0004148892710834839, 12);
   });
 
   it('besselJ with a non-integer or non-finite order stays on the JS path', () => {
@@ -209,11 +210,11 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
     expect(Math.abs(r.value! / 3.650293195821219e-249 - 1)).toBeLessThan(1e-9);
   }, 30_000);
 
-  it('bessel_jn_f64 aborts when the downward sweep exceeds the limit', () => {
+  it('bessel_jn_f64 evaluates orders above the downward sweep limit', () => {
     const r = jn(1_250_000_000, 1_249_999_999);
     expect(r.timedOut).toBe(false);
-    expect(r.ok).toBe(false);
-    expect(r.message).toMatch(/sweep/);
+    expect(r.ok).toBe(true);
+    expect(r.value).toBeCloseTo(0.0004148892710834839, 12);
     expect(r.ms).toBeLessThan(5_000);
   }, 30_000);
 
