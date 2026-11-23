@@ -13,15 +13,15 @@ export function isExactZero(x: unknown): boolean {
 }
 
 /**
- * Tells if a stored entry is zero: a number only when it equals 0, any other type by the
- * tolerance of `equalScalar`. The tolerance of `equalScalar` is absolute, so it reads every
- * value of a matrix near 1e-100 as zero (#1169, #1287). A BigNumber, Fraction or Complex keeps
- * the tolerance rule.
- *
+ * Tells if a stored scalar entry is exactly zero. An absolute tolerance can erase
+ * a regular system whose coefficients or right-hand side are uniformly small (#1308).
+ * Other values retain factory conversion through `equalScalar`.
  * @param x - The entry.
  * @param equalScalar - The `equalScalar` function of the factory.
  * @returns `true` when the entry is zero.
  */
 export function isZeroEntry(x: unknown, equalScalar: (a: unknown, b: unknown) => unknown): boolean {
-  return typeof x === 'number' ? x === 0 : Boolean(equalScalar(x, 0));
+  if (typeof x === 'number') return x === 0;
+  const zero = (x as { isZero?: () => boolean } | null)?.isZero;
+  return typeof zero === 'function' ? zero.call(x) : Boolean(equalScalar(x, 0));
 }
