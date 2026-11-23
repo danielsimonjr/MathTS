@@ -2379,7 +2379,8 @@ function extremumWalk(xs: unknown[], isMax: boolean, state: { m: number; nan: bo
 const EXTREMUM_TYPES = ['number', 'Fraction', 'BigNumber', 'bigint'] as const;
 
 function assertNonemptyMatrixReduction(m: unknown, quantity: string): void {
-  if (collectionSize(m).includes(0)) {
+  const size = collectionSize(m);
+  if (size.length >= 2 && size.includes(0)) {
     throw new Error(`Cannot calculate ${quantity} of an empty array`);
   }
 }
