@@ -787,7 +787,7 @@ export const parallelStatHistogram = mathTyped('parallelStatHistogram', {
  * @param arr - Input array (not modified)
  * @param k - Zero-based index of the desired order statistic
  * @returns The k-th smallest element
- * @throws {RangeError} If the input contains a NaN or k is out of range
+ * @throws RangeError If the input contains a NaN or k is out of range
  */
 export function quickSelect(arr: number[], k: i32): f64 {
   if (k < 0 || k >= arr.length) {
@@ -829,7 +829,7 @@ export function medianSelect(arr: number[]): f64 {
  * @param arr - Input array (not modified)
  * @param k - Number of smallest elements to return
  * @returns Array of k smallest elements, sorted ascending
- * @throws {RangeError} If k is positive and the input contains a NaN
+ * @throws RangeError If k is positive and the input contains a NaN
  */
 export function minSelect(arr: number[], k: i32): number[] {
   if (k <= 0) return [];
@@ -849,7 +849,7 @@ export function minSelect(arr: number[], k: i32): number[] {
  * @param arr - Input array (not modified)
  * @param k - Number of largest elements to return
  * @returns Array of k largest elements, sorted descending
- * @throws {RangeError} If k is positive and the input contains a NaN
+ * @throws RangeError If k is positive and the input contains a NaN
  */
 export function maxSelect(arr: number[], k: i32): number[] {
   if (k <= 0) return [];
