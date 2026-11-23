@@ -27,9 +27,9 @@ export interface CompatExpressionLayers {
   mathWithTransform: Record<string, unknown>;
 }
 
-/** mathjs instance API attached by {@link wireMathjsInstanceApi}. */
 type Emitter = ReturnType<typeof factory_mathjsCompat.attachEmitter>;
 
+/** mathjs instance API attached by {@link wireMathjsInstanceApi}. */
 export interface WiredCompatInstance {
   Parser: new (options?: PhysicsEvaluateOptions) => ReturnType<typeof functionsParser>;
   on: Emitter['on'];

@@ -29,6 +29,12 @@ export interface ChainUnwrap {
   toString(): string;
 }
 
+class CompatChain {
+  get isChain(): true {
+    return true;
+  }
+}
+
 /**
  * Build the `chain` factory for one math instance.
  *
@@ -41,12 +47,6 @@ export interface ChainUnwrap {
  * @param math - The math instance that supplies the chain methods.
  * @returns A function that wraps a value in a chain.
  */
-class CompatChain {
-  get isChain(): true {
-    return true;
-  }
-}
-
 export function createChain(math: Record<string, unknown>): (value: unknown) => Chain {
   function chain(value: unknown): Chain {
     const base = Object.assign(new CompatChain(), {
