@@ -1,3 +1,4 @@
+import { NATIVE_MATRIX_BRAND } from '@danielsimonjr/mathts-core/internal';
 /**
  * Tree-walking AST compiler/evaluator for MathTS expressions.
  *
@@ -784,7 +785,12 @@ function compileAccessorNode(
     const index = evalIndex(scope, args, object);
     // Strings are primitive indexing, not host objects. Everything else must
     // be a math value or a plain collection before a numeric index or subset.
-    if (typeof object !== 'string') assertSandboxReceiver(object);
+    const nativeMatrixSubset =
+      typeof math.subset === 'function' &&
+      object !== null &&
+      typeof object === 'object' &&
+      (object as Record<symbol, unknown>)[NATIVE_MATRIX_BRAND] === true;
+    if (typeof object !== 'string' && !nativeMatrixSubset) assertSandboxReceiver(object);
     // Use math.subset if available for matrix indexing
     if (math.subset) {
       return (math.subset as MathFunction)(object, index);
