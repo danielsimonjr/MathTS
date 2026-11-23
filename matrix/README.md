@@ -98,7 +98,7 @@ boxed values such as Fractions, start with the boxed matrix from
 ```typescript node
 import { fraction, map, matrix } from '@danielsimonjr/mathts-functions';
 
-const fractions = map(matrix([[0.5, 0.75]]), (value) => fraction(value));
+const fractions = map(matrix([[0.5, 0.75]]), (value: number) => fraction(value));
 ```
 
 Comparisons between two native CSR matrices preserve CSR storage. Boolean
