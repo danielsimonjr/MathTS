@@ -1031,7 +1031,7 @@ Free functions giving the SciPy-style standalone surface (`chi2.cdf(x, k)` → `
 | `fQuantile(p, d1, d2)`            | F-distribution quantile                                                                                                       | —     |
 | `fSF(x, d1, d2)`                  | F-distribution survival P(X > x), computed directly in the tail                                                               | —     |
 | `gammaCDF(x, shape[, rate])`      | Gamma CDF (shape `k`, `rate` defaults to 1)                                                                                   | —     |
-| `gammaPDF(x, shape, scale)`       | Gamma PDF (shape `k`, scale `θ`)                                                                                              | —     |
+| `gammaPDF(x, shape[, rate])`      | Gamma PDF (shape `k`, `rate` defaults to 1)                                                                                   | —     |
 | `gammaQuantile(p, shape[, rate])` | Gamma quantile                                                                                                                | —     |
 | `betaCDF(x, a, b)`                | Beta CDF, shape parameters `a`, `b`                                                                                           | —     |
 | `betaPDF(x, alpha, beta_)`        | Beta PDF                                                                                                                      | —     |
