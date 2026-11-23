@@ -2,7 +2,7 @@
  * Typed Set Functions
  *
  * Polymorphic set (multiset) operations using typed-function for runtime dispatch.
- * Supports `Array` inputs; Matrix inputs are treated as flat arrays.
+ * Array and Matrix values are flattened. A matrix operand produces a dense Matrix.
  *
  * All operations follow the mathjs convention:
  *   - Multi-dimension arrays are flattened before the operation.
@@ -16,7 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { flatten as flattenArray } from '../utils/array.js';
+import { arraySize, flatten as flattenArray } from '../utils/array.js';
 import { denseOfSize } from '../factories/matrix-bridge.js';
 
 // =============================================================================
@@ -38,6 +38,19 @@ function toFlatArray(a: unknown): unknown[] {
     return flattenArray((a as { toArray: () => unknown[] }).toArray());
   }
   return [a];
+}
+
+/** Use the same multiset operation for all Array and Matrix combinations. */
+function binaryMatrixSet(name: string, calculate: (a: unknown, b: unknown) => unknown[]) {
+  const matrixResult = (a: unknown, b: unknown) => {
+    const result = calculate(a, b);
+    return denseOfSize(result, arraySize(result));
+  };
+  return mathTyped(name, {
+    'Array, Array': calculate,
+    'Array, Matrix': matrixResult,
+    'Matrix, Array | Matrix': matrixResult,
+  });
 }
 
 /**
@@ -115,18 +128,16 @@ function identify(sorted: unknown[]): Identified[] {
  * setUnion([1, 2, 2], [2, 3])            // [1, 2, 2, 3]
  * ```
  */
-export const setUnion = mathTyped('setUnion', {
-  'Array, Array': (a1: unknown[], a2: unknown[]): unknown[] => {
-    const b1 = toFlatArray(a1);
-    const b2 = toFlatArray(a2);
-    if (b1.length === 0) return b2;
-    if (b2.length === 0) return b1;
-    // Union = setSymDifference(b1,b2) concat setIntersect(b1,b2)
-    const diff1 = _difference(b1, b2);
-    const diff2 = _difference(b2, b1);
-    const inter = _intersect(b1, b2);
-    return [...diff1, ...inter, ...diff2];
-  },
+export const setUnion = binaryMatrixSet('setUnion', (a1, a2): unknown[] => {
+  const b1 = toFlatArray(a1);
+  const b2 = toFlatArray(a2);
+  if (b1.length === 0) return b2;
+  if (b2.length === 0) return b1;
+  // Union = setSymDifference(b1,b2) concat setIntersect(b1,b2)
+  const diff1 = _difference(b1, b2);
+  const diff2 = _difference(b2, b1);
+  const inter = _intersect(b1, b2);
+  return [...diff1, ...inter, ...diff2];
 });
 
 // =============================================================================
@@ -143,13 +154,11 @@ export const setUnion = mathTyped('setUnion', {
  * setIntersect([1, 2, 2], [2, 2, 3])         // [2, 2]
  * ```
  */
-export const setIntersect = mathTyped('setIntersect', {
-  'Array, Array': (a1: unknown[], a2: unknown[]): unknown[] => {
-    const b1 = toFlatArray(a1);
-    const b2 = toFlatArray(a2);
-    if (b1.length === 0 || b2.length === 0) return [];
-    return _intersect(b1, b2);
-  },
+export const setIntersect = binaryMatrixSet('setIntersect', (a1, a2): unknown[] => {
+  const b1 = toFlatArray(a1);
+  const b2 = toFlatArray(a2);
+  if (b1.length === 0 || b2.length === 0) return [];
+  return _intersect(b1, b2);
 });
 
 // =============================================================================
@@ -166,14 +175,12 @@ export const setIntersect = mathTyped('setIntersect', {
  * setDifference([1, 2, 2], [2])               // [1, 2]
  * ```
  */
-export const setDifference = mathTyped('setDifference', {
-  'Array, Array': (a1: unknown[], a2: unknown[]): unknown[] => {
-    const b1 = toFlatArray(a1);
-    const b2 = toFlatArray(a2);
-    if (b1.length === 0) return [];
-    if (b2.length === 0) return b1;
-    return _difference(b1, b2);
-  },
+export const setDifference = binaryMatrixSet('setDifference', (a1, a2): unknown[] => {
+  const b1 = toFlatArray(a1);
+  const b2 = toFlatArray(a2);
+  if (b1.length === 0) return [];
+  if (b2.length === 0) return b1;
+  return _difference(b1, b2);
 });
 
 // =============================================================================
@@ -189,14 +196,12 @@ export const setDifference = mathTyped('setDifference', {
  * setSymDifference([1, 2, 3, 4], [3, 4, 5, 6])  // [1, 2, 5, 6]
  * ```
  */
-export const setSymDifference = mathTyped('setSymDifference', {
-  'Array, Array': (a1: unknown[], a2: unknown[]): unknown[] => {
-    const b1 = toFlatArray(a1);
-    const b2 = toFlatArray(a2);
-    if (b1.length === 0) return b2;
-    if (b2.length === 0) return b1;
-    return [..._difference(b1, b2), ..._difference(b2, b1)];
-  },
+export const setSymDifference = binaryMatrixSet('setSymDifference', (a1, a2): unknown[] => {
+  const b1 = toFlatArray(a1);
+  const b2 = toFlatArray(a2);
+  if (b1.length === 0) return b2;
+  if (b2.length === 0) return b1;
+  return [..._difference(b1, b2), ..._difference(b2, b1)];
 });
 
 // =============================================================================
@@ -378,19 +383,17 @@ export const setSize = mathTyped('setSize', {
  * // [[1, 3], [1, 4], [2, 3], [2, 4]]
  * ```
  */
-export const setCartesian = mathTyped('setCartesian', {
-  'Array, Array': (a1: unknown[], a2: unknown[]): unknown[][] => {
-    const b1 = toFlatArray(a1).sort(naturalCompare);
-    const b2 = toFlatArray(a2).sort(naturalCompare);
-    if (b1.length === 0 || b2.length === 0) return [];
-    const result: unknown[][] = [];
-    for (const x of b1) {
-      for (const y of b2) {
-        result.push([x, y]);
-      }
+export const setCartesian = binaryMatrixSet('setCartesian', (a1, a2): unknown[][] => {
+  const b1 = toFlatArray(a1).sort(naturalCompare);
+  const b2 = toFlatArray(a2).sort(naturalCompare);
+  if (b1.length === 0 || b2.length === 0) return [];
+  const result: unknown[][] = [];
+  for (const x of b1) {
+    for (const y of b2) {
+      result.push([x, y]);
     }
-    return result;
-  },
+  }
+  return result;
 });
 
 // =============================================================================
