@@ -67,7 +67,7 @@ function isNativeMatrix(value: object): boolean {
 }
 
 function isMathBrand(value: object): boolean {
-  if (
+  return (
     isComplex(value) ||
     isNativeMatrix(value) ||
     isFraction(value) ||
@@ -75,10 +75,7 @@ function isMathBrand(value: object): boolean {
     isMatrix(value) ||
     isUnit(value) ||
     isResultSet(value)
-  ) {
-    return true;
-  }
-  return (value as { isTensor?: boolean }).isTensor === true;
+  );
 }
 
 function isDataObject(value: object): boolean {

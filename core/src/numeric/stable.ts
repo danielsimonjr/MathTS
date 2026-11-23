@@ -576,9 +576,7 @@ export function sumSquaredDeviationsChecked(xs: ArrayLike<unknown>): number | un
  *
  * Code that squares a list of numbers compares the sum with this value, and computes again for
  * the data divided by an exact power of 2 when the sum is smaller (or not finite). Two other
- * thresholds hold their own derivation: `P_NORM_SUM_MIN` in `functions/src/utils/bignumber-hypot.ts`
- * (p-th powers) and `SUM_SQ_MIN` in `functions/src/geometry/quaternion.ts` (kernels with a
- * `Math.hypot` fallback).
+ * thresholds can share this lower bound when an accurate scaled fallback is available.
  */
 export const SQUARES_SAFE_MIN = 2 ** -800;
 

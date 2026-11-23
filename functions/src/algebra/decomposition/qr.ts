@@ -5,7 +5,7 @@ import { createNumberFieldOps, type NumberFieldOps } from '../../utils/typed-imp
 import type { TypedFunction } from '../../core/function/typed.js';
 import { isBigNumber, isComplex, isFraction } from '../../utils/is.js';
 import { realScale, squaresLeaveRange } from '../../utils/real-scale.js';
-import { P_NORM_SUM_MIN } from '../../utils/bignumber-hypot.js';
+import { SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import {
   UNIT_FLOOR_LO,
   SQUARED,
@@ -87,7 +87,7 @@ interface Dependencies {
 }
 
 /** Below this square of a column norm a double has lost its relative precision (2^-1022 * 2^53). */
-const DOUBLE_NORM_FLOOR = P_NORM_SUM_MIN;
+const DOUBLE_NORM_FLOOR = SQUARES_SAFE_MIN;
 
 const name = 'qr';
 const dependencies = [

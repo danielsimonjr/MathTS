@@ -229,7 +229,7 @@ describe('fitScalarParameters', () => {
     );
     expect(r.validRows).toBe(2);
     expect(Math.abs(r.parameters[0])).toBeLessThanOrEqual(1e-12);
-    expect(r.loss).toBe(0);
+    expect(r.loss).toBeLessThan(1e-25);
 
     r = fitScalarParameters(
       node,

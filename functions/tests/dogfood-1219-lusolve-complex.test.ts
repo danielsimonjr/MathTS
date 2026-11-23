@@ -364,7 +364,7 @@ describe('lusolve Array A: shape checks do not depend on the entry type (#1219)'
       expectThrow(
         () => lusolve([x, 1], [1, 2]),
         TypeError,
-        'Matrix decomposition expected DenseMatrix, SparseMatrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }, got Array'
+        'Matrix decomposition expected DenseMatrix, SparseMatrix, boxed Matrix, number[][], square Float64Array, or { data: Float64Array, rows, cols }, got Array'
       );
     });
   }

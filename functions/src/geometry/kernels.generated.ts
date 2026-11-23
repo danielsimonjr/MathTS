@@ -24,8 +24,7 @@ export type KernelOutput = { [i: number]: number };
 type In = KernelInput;
 type Out = KernelOutput;
 
-/** Lower bound of the sum of squares for the plain square root. */
-const SUM_SQ_MIN = 1e-280;
+import { SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 /** Upper bound of the sum of squares for the plain square root. */
 const SUM_SQ_MAX = 1e280;
 
@@ -175,7 +174,7 @@ export function vec2Length(
   const a0 = a[aOff]!;
   const a1 = a[aOff + 1]!;
   const sumSq = 0 + a0 * a0 + a1 * a1;
-  return sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1);
+  return sumSq > SQUARES_SAFE_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1);
 }
 
 /**
@@ -196,7 +195,7 @@ export function vec2Normalize(
   const a0 = a[aOff]!;
   const a1 = a[aOff + 1]!;
   const sumSq = 0 + a0 * a0 + a1 * a1;
-  const m = sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1);
+  const m = sumSq > SQUARES_SAFE_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1);
   out[outOff] = a0 / m;
   out[outOff + 1] = a1 / m;
   return out;
@@ -362,7 +361,7 @@ export function vec3Length(
   const a1 = a[aOff + 1]!;
   const a2 = a[aOff + 2]!;
   const sumSq = 0 + a0 * a0 + a1 * a1 + a2 * a2;
-  return sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1, a2);
+  return sumSq > SQUARES_SAFE_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1, a2);
 }
 
 /**
@@ -384,7 +383,7 @@ export function vec3Normalize(
   const a1 = a[aOff + 1]!;
   const a2 = a[aOff + 2]!;
   const sumSq = 0 + a0 * a0 + a1 * a1 + a2 * a2;
-  const m = sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1, a2);
+  const m = sumSq > SQUARES_SAFE_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(a0, a1, a2);
   out[outOff] = a0 / m;
   out[outOff + 1] = a1 / m;
   out[outOff + 2] = a2 / m;
@@ -502,7 +501,7 @@ export function quatNormalize(
   const q2 = q[qOff + 2]!;
   const q3 = q[qOff + 3]!;
   const sumSq = 0 + q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3;
-  const m = sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(q0, q1, q2, q3);
+  const m = sumSq > SQUARES_SAFE_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(q0, q1, q2, q3);
   out[outOff] = q0 / m;
   out[outOff + 1] = q1 / m;
   out[outOff + 2] = q2 / m;
@@ -537,7 +536,7 @@ export function quatRotate(
   const v1 = v[vOff + 1]!;
   const v2 = v[vOff + 2]!;
   const sumSq = 0 + q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3;
-  const m = sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(q0, q1, q2, q3);
+  const m = sumSq > SQUARES_SAFE_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(q0, q1, q2, q3);
   const u0 = q0 / m;
   const u1 = q1 / m;
   const u2 = q2 / m;
@@ -592,7 +591,7 @@ export function quatIntegrate(
   const y = w1 * h;
   const z = w2 * h;
   const vSq = 0 + x * x + y * y + z * z;
-  const vNorm = vSq > SUM_SQ_MIN && vSq < SUM_SQ_MAX ? Math.sqrt(vSq) : Math.hypot(x, y, z);
+  const vNorm = vSq > SQUARES_SAFE_MIN && vSq < SUM_SQ_MAX ? Math.sqrt(vSq) : Math.hypot(x, y, z);
   const ew = 1;
   const sn = ew * Math.sin(vNorm);
   const s0 = vNorm === 0 ? ew : ew * Math.cos(vNorm);
@@ -604,7 +603,7 @@ export function quatIntegrate(
   const t2 = s0 * q2 - s1 * q3 + s2 * q0 + s3 * q1;
   const t3 = s0 * q3 + s1 * q2 - s2 * q1 + s3 * q0;
   const tSq = 0 + t0 * t0 + t1 * t1 + t2 * t2 + t3 * t3;
-  const m = tSq > SUM_SQ_MIN && tSq < SUM_SQ_MAX ? Math.sqrt(tSq) : Math.hypot(t0, t1, t2, t3);
+  const m = tSq > SQUARES_SAFE_MIN && tSq < SUM_SQ_MAX ? Math.sqrt(tSq) : Math.hypot(t0, t1, t2, t3);
   out[outOff] = t0 / m;
   out[outOff + 1] = t1 / m;
   out[outOff + 2] = t2 / m;
