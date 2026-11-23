@@ -248,3 +248,9 @@ export { NATIVE_MATRIX_BRAND } from './types/type-marker.js';
 export { notSquareError } from './square-error.js';
 
 export { isUnaryCollectionCallback, unaryCollectionCallback } from './typed/collection-callback.js';
+
+export { nearlyEqualBigNumber } from './arithmetic/nearly-equal-bignumber.js';
+export {
+  ROUND_DECIMALS_NOT_INTEGER,
+  roundBigNumberDecimals,
+} from './arithmetic/round-bignumber.js';

@@ -291,10 +291,8 @@ describe('Typed Bitwise Functions', () => {
       expect(result.valueOf()).toBe(4);
     });
 
-    it('rightLogShift of a BigNumber', () => {
-      // -1 masked to 32 bits then >> 1 === 0x7fffffff
-      const result = rightLogShift(bn(-1), bn(1)) as BigNumber;
-      expect(result.valueOf()).toBe(0x7fffffff);
+    it('rightLogShift rejects BigNumbers as mathjs does', () => {
+      expect(() => rightLogShift(bn(-1), bn(1))).toThrow(TypeError);
     });
 
     it('rejects non-integer BigNumbers', () => {

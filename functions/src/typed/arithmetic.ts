@@ -1826,6 +1826,8 @@ export const expm1 = mathTyped('expm1', {
  * (fraction.js); a Complex rounds each part toward +Infinity (complex.js).
  */
 export const round = mathTyped('round', {
+  bigint: (a: bigint): bigint => a,
+  'bigint, number | BigNumber | bigint': (a: bigint): bigint => a,
   number: (a: f64): f64 => roundNumberLive(a, 0),
   Fraction: (a: Fraction): Fraction => coreRound(a) as Fraction,
   BigNumber: (a: BigNumber): BigNumber => roundBigNumberLive(a, 0),
@@ -1872,8 +1874,8 @@ export const round = mathTyped('round', {
   // (`matAlgo14xDs` and `matAlgo11xS0s` call the scalar function). A zero leaf goes through the
   // scalar row here, so `round([-0], 2)` is `[0]`, as in mathjs.
   'Array | Matrix, number | BigNumber': mapEachLeaf((self, x, n) => self(x, n)),
-  'number | BigNumber | Fraction | Complex, Array | Matrix': mapEachLeafOfSecond((self, x, n) =>
-    self(x, n)
+  'number | bigint | BigNumber | Fraction | Complex, Array | Matrix': mapEachLeafOfSecond(
+    (self, x, n) => self(x, n)
   ),
 });
 
