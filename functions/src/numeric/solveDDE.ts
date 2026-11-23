@@ -41,6 +41,7 @@
  */
 
 import { hermiteCubic } from './hermite.js';
+import { odeRmsNorm } from './ode-norm.js';
 
 /**
  * Forcing function `y'(t) = f(t, y, yDelayed)`.
@@ -228,14 +229,12 @@ export function solveDDE(
   Fs[0] = fEval(t0, y0);
 
   // Initial step: Hairer heuristic h₀ ≈ 0.01·‖y0‖/‖f0‖, capped to min(τ) and the span.
-  const rms = (v: number[]): number =>
-    Math.sqrt(v.reduce((a, x) => a + x * x, 0) / Math.max(1, v.length));
   let h: number;
   if (options.firstStep !== undefined) {
     h = Math.abs(options.firstStep);
   } else {
-    const d0 = rms(y0);
-    const d1 = rms(Fs[0]);
+    const d0 = odeRmsNorm(y0, 0);
+    const d1 = odeRmsNorm(Fs[0], 0);
     h = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
   }
   h = Math.min(h, minTau, maxStep, tf - t0);
