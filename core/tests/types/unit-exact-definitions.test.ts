@@ -184,6 +184,15 @@ const DEFINITIONS: Record<string, Def> = {
   millennium: r(mul(q(1000), julianYear)),
   hertz: r(q(1)),
   Hz: r(q(1)),
+  Bq: r(q(1)),
+  becquerel: r(q(1)),
+  Gy: r(q(1)),
+  gray: r(q(1)),
+  Sv: r(q(1)),
+  sievert: r(q(1)),
+  kat: r(q(1)),
+  katal: r(q(1)),
+  Gal: r(q(1, 100)),
   rad: r(q(1)),
   radian: r(q(1)),
   deg: [q(1, 180), 1],
@@ -258,6 +267,7 @@ const DEFINITIONS: Record<string, Def> = {
   B: r(q(8)),
   bytes: r(q(8)), // bit: its own BIT dimension (storage), not ln 2 nat
   nat: r(q(1)),
+  shannon: r(q(6931471805599453094172321214581765680755n, 10n ** 40n)),
   dB: r(q(1)),
   dBm: r(q(1)),
   dBW: r(q(1)),
@@ -327,6 +337,35 @@ describe('every built-in unit equals its exact definition, rounded once', () => 
     const want = expected(DEFINITIONS[canonical(name)]!);
     expect(UNITS[name]!.value).toBe(want);
     expect(exactScaleToNumber(unitRowExactScale(name)!)).toBe(want);
+  });
+
+  it.each([
+    ['Bq', 's^-1', 'kBq', 1e3],
+    ['Gy', 'J/kg', 'mGy', 1e-3],
+    ['Sv', 'J/kg', 'µSv', 1e-6],
+    ['kat', 'mol/s', 'nkat', 1e-9],
+    ['Gal', 'm/s^2', 'mGal', 1e-5],
+    ['Gal', 'm/s^2', 'µGal', 1e-8],
+  ] as const)('parses %s as %s and recognizes %s', (symbol, base, prefixed, scale) => {
+    expect(Unit.parse(symbol).equalBase(Unit.parse(base))).toBe(true);
+    expect(Unit.parse(prefixed).equalBase(Unit.parse(base))).toBe(true);
+    expect(exactScaleToNumber(Unit.exactScale(prefixed)!)).toBe(scale);
+  });
+
+  it('keeps the gallon spelling and storage bit while adding exact information units', () => {
+    expect(Unit.parse('gal').equalBase(Unit.parse('m^3'))).toBe(true);
+    expect(exactScaleToNumber(Unit.exactScale('gal')!)).toBe(0.003785411784);
+    for (const spelling of ['bit', 'b', 'bits']) {
+      expect(exactScaleToNumber(Unit.exactScale(spelling)!)).toBe(1);
+      expect(Unit.parse(spelling).equalBase(Unit.parse('nat'))).toBe(false);
+    }
+    expect(Unit.parse('shannon').equalBase(Unit.parse('nat'))).toBe(true);
+    expect(Unit.exactScale('shannon')).toEqual({
+      num: 1n,
+      den: 1n,
+      irrationals: { ln2: 1 },
+    });
+    expect(exactScaleToNumber(Unit.exactScale('shannon')!)).toBe(Math.LN2);
   });
 
   it('the values the table used to round or misstate', () => {
