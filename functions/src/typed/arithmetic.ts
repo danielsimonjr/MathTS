@@ -1,3 +1,4 @@
+import type { PublicSinh, PublicCosh, PublicTanh } from './public-type-exports.js';
 /**
  * Typed Arithmetic Functions
  *
@@ -2356,7 +2357,7 @@ export const sinh = mathTyped('sinh', {
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'sinh', (x) => Math.sinh(x)),
   'Array | Matrix': unaryCollection({ real: Math.sinh, wasmKernel: 'sinh' }),
-});
+}) as PublicSinh;
 
 /**
  * Hyperbolic cosine
@@ -2369,7 +2370,7 @@ export const cosh = mathTyped('cosh', {
   // Float64Array cosh (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64Unary(a, (x) => Math.cosh(x)),
   'Array | Matrix': unaryCollection({ real: Math.cosh }),
-});
+}) as PublicCosh;
 
 /**
  * Hyperbolic tangent
@@ -2383,7 +2384,7 @@ export const tanh = mathTyped('tanh', {
   Float64Array: (a: Float64Array): Float64Array =>
     f64UnaryDispatched(a, 'tanh', (x) => Math.tanh(x)),
   'Array | Matrix': unaryCollection({ real: Math.tanh, wasmKernel: 'tanh' }),
-});
+}) as PublicTanh;
 
 // =============================================================================
 // Comparison Operations
@@ -2604,15 +2605,26 @@ function extremumSignatures(name: 'min' | 'max'): Record<string, (...args: never
   return signatures;
 }
 
+type ExtremumScalar = number | bigint | BigNumber | Fraction;
+
+interface ExtremumCall extends Omit<TypedFunction, never> {
+  (data: Float64Array): number;
+  <T extends ExtremumScalar>(first: T, ...rest: T[]): T;
+  <T extends ExtremumScalar>(data: readonly T[] | readonly (readonly T[])[]): T;
+  <T extends ExtremumScalar>(data: readonly (readonly T[])[], axis: number): T[];
+  (...args: unknown[]): unknown;
+  readonly signatures: Readonly<Record<string, (...args: unknown[]) => unknown>>;
+}
+
 /**
  * Minimum of values. The Float64Array signature is synchronous.
  */
-export const min = mathTyped('min', extremumSignatures('min'));
+export const min = mathTyped('min', extremumSignatures('min')) as ExtremumCall;
 
 /**
  * Maximum of values. The Float64Array signature is synchronous.
  */
-export const max = mathTyped('max', extremumSignatures('max'));
+export const max = mathTyped('max', extremumSignatures('max')) as ExtremumCall;
 
 // =============================================================================
 // Statistical Operations
@@ -3403,7 +3415,7 @@ const stdSignatures = {
     std(values) as f64,
 };
 
-export const std = mathTyped('std', withScaledStd(stdSignatures)) as PublicStd;
+export const std = mathTyped('std', withScaledStd(stdSignatures)) as unknown as PublicStd;
 
 type NanReduce = (
   x: NumericVectorInput | number[][],

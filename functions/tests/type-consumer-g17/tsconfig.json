@@ -28,6 +28,7 @@
     "issue-726-gpu.ts",
     "issue-830-unit.ts",
     "issue-g34-containers.ts",
-    "issue-964-stat-overloads.ts"
+    "issue-964-stat-overloads.ts",
+    "issue-1359-inferred-returns.ts"
   ]
 }

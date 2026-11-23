@@ -8,7 +8,8 @@
 import { createHelpClass, embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { evaluate } from './factories/evaluate.js';
 
-type HelpCtor = new (doc: unknown) => unknown;
+type HelpResult = ReturnType<ReturnType<typeof createHelpClass>['fromJSON']>;
+type HelpCtor = new (doc: unknown) => HelpResult;
 
 // `Help.toString()` evaluates each doc example and brackets them with
 // `config()` (get) / `config(newConfig)` (set) to restore state afterwards. The
@@ -39,7 +40,7 @@ export const Help = (createHelpClass as unknown as (deps: { evaluate: unknown })
  * @param search  A function-name string, or a function/constant value.
  * @returns A `Help` object (stringifies to the documentation text).
  */
-export function help(search: unknown): unknown {
+export function help(search: unknown): HelpResult {
   const name =
     typeof search === 'string'
       ? search

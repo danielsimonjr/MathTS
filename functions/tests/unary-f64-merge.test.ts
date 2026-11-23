@@ -25,7 +25,7 @@ import {
 } from '../src/typed/arithmetic.js';
 import { asin, acos, atan, asinh, acosh, atanh, csc, sec, cot } from '../src/typed/trigonometry.js';
 
-type UnaryF64 = (a: Float64Array) => Promise<Float64Array>;
+type UnaryF64 = (a: Float64Array) => Float64Array;
 
 function oracleUnary(xs: number[], fn: (x: number) => number): Float64Array {
   const out = new Float64Array(xs.length);
@@ -69,43 +69,43 @@ const EDGE_SCALARS = [
 ];
 
 const MERGE_UNARIES: Array<{ name: string; fn: UnaryF64; scalar: (x: number) => number }> = [
-  { name: 'sign', fn: (a) => sign(a) as Promise<Float64Array>, scalar: Math.sign },
-  { name: 'cbrt', fn: (a) => cbrt(a) as Promise<Float64Array>, scalar: Math.cbrt },
+  { name: 'sign', fn: (a) => sign(a) as Float64Array, scalar: Math.sign },
+  { name: 'cbrt', fn: (a) => cbrt(a) as Float64Array, scalar: Math.cbrt },
   // #996: a tie rounds away from zero and a value below absTol (1e-15) rounds to 0, as in mathjs.
   {
     name: 'round',
-    fn: (a) => round(a) as Promise<Float64Array>,
+    fn: (a) => round(a) as Float64Array,
     scalar: (x) => (Math.abs(x) <= 1e-15 ? 0 : x < 0 ? -Math.round(-x) : Math.round(x)),
   },
   // #968: a value within absTol (1e-15) of an integer snaps to it, as in mathjs, so
   // floor(-1e-300) and ceil(1e-300) are 0. Zero itself keeps its sign.
   {
     name: 'floor',
-    fn: (a) => floor(a) as Promise<Float64Array>,
+    fn: (a) => floor(a) as Float64Array,
     scalar: (x) => (x !== 0 && Math.abs(x) <= 1e-15 ? 0 : Math.floor(x)),
   },
   {
     name: 'ceil',
-    fn: (a) => ceil(a) as Promise<Float64Array>,
+    fn: (a) => ceil(a) as Float64Array,
     scalar: (x) => (x !== 0 && Math.abs(x) <= 1e-15 ? 0 : Math.ceil(x)),
   },
-  { name: 'fix', fn: (a) => fix(a) as Promise<Float64Array>, scalar: Math.trunc },
-  { name: 'cosh', fn: (a) => cosh(a) as Promise<Float64Array>, scalar: Math.cosh },
-  { name: 'log10', fn: (a) => log10(a) as unknown as Promise<Float64Array>, scalar: Math.log10 },
-  { name: 'log2', fn: (a) => log2(a) as Promise<Float64Array>, scalar: Math.log2 },
-  { name: 'log1p', fn: (a) => log1p(a) as Promise<Float64Array>, scalar: Math.log1p },
-  { name: 'expm1', fn: (a) => expm1(a) as Promise<Float64Array>, scalar: Math.expm1 },
-  { name: 'sinh', fn: (a) => sinh(a) as Promise<Float64Array>, scalar: Math.sinh },
-  { name: 'tanh', fn: (a) => tanh(a) as Promise<Float64Array>, scalar: Math.tanh },
-  { name: 'asin', fn: (a) => asin(a) as Promise<Float64Array>, scalar: Math.asin },
-  { name: 'acos', fn: (a) => acos(a) as Promise<Float64Array>, scalar: Math.acos },
-  { name: 'atan', fn: (a) => atan(a) as Promise<Float64Array>, scalar: Math.atan },
-  { name: 'asinh', fn: (a) => asinh(a) as Promise<Float64Array>, scalar: Math.asinh },
-  { name: 'acosh', fn: (a) => acosh(a) as Promise<Float64Array>, scalar: Math.acosh },
-  { name: 'atanh', fn: (a) => atanh(a) as Promise<Float64Array>, scalar: Math.atanh },
-  { name: 'csc', fn: (a) => csc(a) as Promise<Float64Array>, scalar: (x) => 1 / Math.sin(x) },
-  { name: 'sec', fn: (a) => sec(a) as Promise<Float64Array>, scalar: (x) => 1 / Math.cos(x) },
-  { name: 'cot', fn: (a) => cot(a) as Promise<Float64Array>, scalar: (x) => 1 / Math.tan(x) },
+  { name: 'fix', fn: (a) => fix(a) as Float64Array, scalar: Math.trunc },
+  { name: 'cosh', fn: (a) => cosh(a) as Float64Array, scalar: Math.cosh },
+  { name: 'log10', fn: (a) => log10(a) as unknown as Float64Array, scalar: Math.log10 },
+  { name: 'log2', fn: (a) => log2(a) as Float64Array, scalar: Math.log2 },
+  { name: 'log1p', fn: (a) => log1p(a) as Float64Array, scalar: Math.log1p },
+  { name: 'expm1', fn: (a) => expm1(a) as Float64Array, scalar: Math.expm1 },
+  { name: 'sinh', fn: (a) => sinh(a) as Float64Array, scalar: Math.sinh },
+  { name: 'tanh', fn: (a) => tanh(a) as Float64Array, scalar: Math.tanh },
+  { name: 'asin', fn: (a) => asin(a) as Float64Array, scalar: Math.asin },
+  { name: 'acos', fn: (a) => acos(a) as Float64Array, scalar: Math.acos },
+  { name: 'atan', fn: (a) => atan(a) as Float64Array, scalar: Math.atan },
+  { name: 'asinh', fn: (a) => asinh(a) as Float64Array, scalar: Math.asinh },
+  { name: 'acosh', fn: (a) => acosh(a) as Float64Array, scalar: Math.acosh },
+  { name: 'atanh', fn: (a) => atanh(a) as Float64Array, scalar: Math.atanh },
+  { name: 'csc', fn: (a) => csc(a) as Float64Array, scalar: (x) => 1 / Math.sin(x) },
+  { name: 'sec', fn: (a) => sec(a) as Float64Array, scalar: (x) => 1 / Math.cos(x) },
+  { name: 'cot', fn: (a) => cot(a) as Float64Array, scalar: (x) => 1 / Math.tan(x) },
 ];
 
 describe('unary Float64Array merge pins (independent Math.* oracles)', () => {
@@ -143,7 +143,7 @@ describe('unary Float64Array merge pins (independent Math.* oracles)', () => {
       for (const n of [49_999, 50_001]) {
         const xs = Float64Array.from({ length: n }, (_, i) => Math.sin(i * 0.017));
         const expected = oracleUnary(Array.from(xs), Math.sign);
-        const actual = await (sign(xs) as Promise<Float64Array>);
+        const actual = await (sign(xs) as Float64Array);
         expect(actual.length).toBe(n);
         // Spot-check ends and a few interior indices (full compare is expensive at 50k+).
         for (const i of [0, 1, 2, n - 3, n - 2, n - 1, Math.floor(n / 2)]) {
@@ -159,7 +159,7 @@ describe('unary Float64Array merge pins (independent Math.* oracles)', () => {
       for (const n of [49_999, 50_001]) {
         const xs = Float64Array.from({ length: n }, (_, i) => (i % 7) * 0.333 - 1.1);
         const expected = oracleUnary(Array.from(xs), Math.floor);
-        const actual = await (floor(xs) as Promise<Float64Array>);
+        const actual = await (floor(xs) as Float64Array);
         for (const i of [0, 42, n - 1]) {
           expect(actual[i]).toBe(expected[i]);
         }
@@ -170,26 +170,26 @@ describe('unary Float64Array merge pins (independent Math.* oracles)', () => {
   it('log10 at 0 and 1 matches Math.log10 (wasm-off)', async () => {
     const xs = Float64Array.from([0, 1, 10, -1]);
     const expected = oracleUnary([0, 1, 10, -1], Math.log10);
-    const actual = await (log10(xs) as unknown as Promise<Float64Array>);
+    const actual = await (log10(xs) as unknown as Float64Array);
     expectF64Close(actual, expected);
   });
 
   it('atanh at ±1 and outside domain matches Math.atanh', async () => {
     const xs = Float64Array.from([-1.5, -1, -0.5, 0, 0.5, 1, 1.5]);
     const expected = oracleUnary([-1.5, -1, -0.5, 0, 0.5, 1, 1.5], Math.atanh);
-    const actual = await (atanh(xs) as Promise<Float64Array>);
+    const actual = await (atanh(xs) as Float64Array);
     expectF64Close(actual, expected);
   });
 
   it('csc(π/2)≈1, sec(0)=1, cot pole → ±Infinity', async () => {
     const halfPi = Math.PI / 2;
-    const cscOut = await (csc(Float64Array.from([halfPi])) as Promise<Float64Array>);
+    const cscOut = await (csc(Float64Array.from([halfPi])) as Float64Array);
     expect(cscOut[0]).toBeCloseTo(1, 12);
 
-    const secOut = await (sec(Float64Array.from([0])) as Promise<Float64Array>);
+    const secOut = await (sec(Float64Array.from([0])) as Float64Array);
     expect(secOut[0]).toBeCloseTo(1, 12);
 
-    const cotOut = await (cot(Float64Array.from([0])) as Promise<Float64Array>);
+    const cotOut = await (cot(Float64Array.from([0])) as Float64Array);
     expect(cotOut[0]).toBe(Infinity);
   });
 });

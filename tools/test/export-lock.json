@@ -2422,6 +2422,18 @@
       "AbsCallable": {
         "kind": "type"
       },
+      "AcosCallable": {
+        "kind": "type"
+      },
+      "AcoshCallable": {
+        "kind": "type"
+      },
+      "AcotCallable": {
+        "kind": "type"
+      },
+      "AcscCallable": {
+        "kind": "type"
+      },
       "AddCallable": {
         "kind": "type"
       },
@@ -2438,6 +2450,21 @@
         "kind": "type"
       },
       "AnovaResult": {
+        "kind": "type"
+      },
+      "AsecCallable": {
+        "kind": "type"
+      },
+      "AsinCallable": {
+        "kind": "type"
+      },
+      "AsinhCallable": {
+        "kind": "type"
+      },
+      "AtanCallable": {
+        "kind": "type"
+      },
+      "AtanhCallable": {
         "kind": "type"
       },
       "BSplineFitOptions": {
@@ -2566,7 +2593,16 @@
       "CosCallable": {
         "kind": "type"
       },
+      "CoshCallable": {
+        "kind": "type"
+      },
+      "CotCallable": {
+        "kind": "type"
+      },
       "CoulombFG": {
+        "kind": "type"
+      },
+      "CscCallable": {
         "kind": "type"
       },
       "CsdOptions": {
@@ -3166,10 +3202,46 @@
       "PublicAbs": {
         "kind": "type"
       },
+      "PublicAcos": {
+        "kind": "type"
+      },
+      "PublicAcosh": {
+        "kind": "type"
+      },
+      "PublicAcot": {
+        "kind": "type"
+      },
+      "PublicAcsc": {
+        "kind": "type"
+      },
       "PublicAdd": {
         "kind": "type"
       },
+      "PublicAsec": {
+        "kind": "type"
+      },
+      "PublicAsin": {
+        "kind": "type"
+      },
+      "PublicAsinh": {
+        "kind": "type"
+      },
+      "PublicAtan": {
+        "kind": "type"
+      },
+      "PublicAtanh": {
+        "kind": "type"
+      },
       "PublicCos": {
+        "kind": "type"
+      },
+      "PublicCosh": {
+        "kind": "type"
+      },
+      "PublicCot": {
+        "kind": "type"
+      },
+      "PublicCsc": {
         "kind": "type"
       },
       "PublicDet": {
@@ -3202,7 +3274,13 @@
       "PublicParallelFFT": {
         "kind": "type"
       },
+      "PublicSec": {
+        "kind": "type"
+      },
       "PublicSin": {
+        "kind": "type"
+      },
+      "PublicSinh": {
         "kind": "type"
       },
       "PublicSqrt": {
@@ -3212,6 +3290,9 @@
         "kind": "type"
       },
       "PublicTan": {
+        "kind": "type"
+      },
+      "PublicTanh": {
         "kind": "type"
       },
       "PublicVariance": {
@@ -3331,6 +3412,9 @@
       "SearchProgress": {
         "kind": "type"
       },
+      "SecCallable": {
+        "kind": "type"
+      },
       "SecantOptions": {
         "kind": "type"
       },
@@ -3350,6 +3434,9 @@
         "kind": "type"
       },
       "SinCallable": {
+        "kind": "type"
+      },
+      "SinhCallable": {
         "kind": "type"
       },
       "SolveDAEOptions": {
@@ -3416,6 +3503,9 @@
         "kind": "type"
       },
       "TanCallable": {
+        "kind": "type"
+      },
+      "TanhCallable": {
         "kind": "type"
       },
       "TanhSinhOptions": {

@@ -309,28 +309,28 @@ describe('Typed Bitwise Functions', () => {
   describe('Int32Array (parallel dispatch)', () => {
     it('bitAnd produces element-wise AND', async () => {
       const { a, b } = buildIntPair();
-      const result = await (bitAnd(a, b) as Promise<Int32Array>);
+      const result = await (bitAnd(a, b) as Int32Array);
       const expected = elementwise(a, b, (x, y) => x & y);
       expect(Array.from(result)).toEqual(Array.from(expected));
     });
 
     it('bitOr produces element-wise OR', async () => {
       const { a, b } = buildIntPair();
-      const result = await (bitOr(a, b) as Promise<Int32Array>);
+      const result = await (bitOr(a, b) as Int32Array);
       const expected = elementwise(a, b, (x, y) => x | y);
       expect(Array.from(result)).toEqual(Array.from(expected));
     });
 
     it('bitXor produces element-wise XOR', async () => {
       const { a, b } = buildIntPair();
-      const result = await (bitXor(a, b) as Promise<Int32Array>);
+      const result = await (bitXor(a, b) as Int32Array);
       const expected = elementwise(a, b, (x, y) => x ^ y);
       expect(Array.from(result)).toEqual(Array.from(expected));
     });
 
     it('bitNot produces element-wise NOT', async () => {
       const { a } = buildIntPair();
-      const result = await (bitNot(a) as Promise<Int32Array>);
+      const result = await (bitNot(a) as Int32Array);
       const expected = new Int32Array(a.length);
       for (let i = 0; i < a.length; i++) expected[i] = ~a[i];
       expect(Array.from(result)).toEqual(Array.from(expected));
@@ -338,21 +338,21 @@ describe('Typed Bitwise Functions', () => {
 
     it('leftShift produces element-wise <<', async () => {
       const { a, b } = buildIntPair();
-      const result = await (leftShift(a, b) as Promise<Int32Array>);
+      const result = await (leftShift(a, b) as Int32Array);
       const expected = elementwise(a, b, (x, y) => x << y);
       expect(Array.from(result)).toEqual(Array.from(expected));
     });
 
     it('rightArithShift produces element-wise >>', async () => {
       const { a, b } = buildIntPair();
-      const result = await (rightArithShift(a, b) as Promise<Int32Array>);
+      const result = await (rightArithShift(a, b) as Int32Array);
       const expected = elementwise(a, b, (x, y) => x >> y);
       expect(Array.from(result)).toEqual(Array.from(expected));
     });
 
     it('rightLogShift produces element-wise >>>', async () => {
       const { a, b } = buildIntPair();
-      const result = await (rightLogShift(a, b) as Promise<Int32Array>);
+      const result = await (rightLogShift(a, b) as Int32Array);
       // Note: oracle uses `x >>> y` then Int32Array assignment, which is
       // what the implementation does.
       const expected = new Int32Array(a.length);

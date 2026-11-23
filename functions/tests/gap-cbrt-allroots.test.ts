@@ -51,7 +51,8 @@ describe('cbrt(number, allRoots) — real-number two-arg form (mathjs parity)', 
   it('cbrt(8, false) returns the principal root (value 2)', () => {
     const principal = cbrt(8, false);
     // routes through the complex path → Complex(2, 0)
-    expect(isComplex(principal) ? re(principal) : (principal as number)).toBeCloseTo(2, 10);
+    expect(isComplex(principal)).toBe(true);
+    expect(re(principal)).toBeCloseTo(2, 10);
   });
 
   it('every returned root cubes back to the input (oracle: r^3 = 8)', () => {
