@@ -34,6 +34,10 @@ function xy(layer: Layer2D): Array<[number, number]> {
   for (let i = 0; i < n; i++) {
     if (Number.isFinite(xs[i]) && Number.isFinite(ys[i])) pts.push([xs[i], ys[i]]);
   }
+  if (layer.type === 'scatter' && pts.length < n) {
+    const omitted = n - pts.length;
+    console.warn(`scatter: omitted ${omitted} of ${n} points with non-finite coordinates`);
+  }
   return pts;
 }
 
