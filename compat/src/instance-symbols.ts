@@ -1,0 +1,144 @@
+import { BigNumber, Complex, Fraction, Range, mathTyped } from '@danielsimonjr/mathts-core';
+import {
+  deepMap,
+  DimensionError,
+  IndexError,
+  isObjectWrappingMap,
+} from '@danielsimonjr/mathts-core/internal';
+import { factory_mathjsCompat, Help } from '@danielsimonjr/mathts-functions';
+import { isDenseMatrix, isSparseMatrix, isMatrix } from '@danielsimonjr/mathts-matrix';
+import { complex } from './shims.js';
+import packageMetadata from '../package.json' with { type: 'json' };
+
+const { checks, constructors, factory } = factory_mathjsCompat;
+
+function fractionPart(name: 'num' | 'den', key: 'numerator' | 'denominator') {
+  return mathTyped(name, {
+    Fraction: (value: Fraction) =>
+      typeof value[key] === 'bigint' ? value[key] : new Fraction(String(value))[key],
+    BigNumber: (value: BigNumber) => new Fraction(value)[key],
+    boolean: (value: boolean) => new Fraction(Number(value))[key],
+    'Array | Matrix': mathTyped.referToSelf(
+      (self) => (values: Parameters<typeof deepMap>[0]) => deepMap(values, (value) => self(value))
+    ),
+  });
+}
+
+/** Common base for testing whether a value is any supported matrix representation. */
+class Matrix {
+  static [Symbol.hasInstance](value: unknown): boolean {
+    return (
+      Function.prototype[Symbol.hasInstance].call(this, value) ||
+      isMatrix(value) ||
+      checks.isMatrix(value)
+    );
+  }
+}
+
+type ComplexConstructor = typeof Complex & {
+  new (value?: unknown, imaginary?: number): Complex;
+};
+
+const CompatComplex = new Proxy(Complex, {
+  construct(target, args, newTarget) {
+    const value = (complex as (...args: unknown[]) => Complex)(...args);
+    return Reflect.construct(target, [value.re, value.im], newTarget);
+  },
+}) as ComplexConstructor;
+
+type NativeCompatSymbols = {
+  Help: typeof Help;
+  BigNumber: typeof BigNumber;
+  Complex: ComplexConstructor;
+  Fraction: typeof Fraction;
+  Range: typeof Range;
+  Matrix: typeof Matrix;
+  DimensionError: typeof DimensionError;
+  IndexError: typeof IndexError;
+  factory: typeof factory_mathjsCompat.factory;
+  PI: number;
+  E: number;
+  false: false;
+  true: true;
+  null: null;
+  version: string;
+  num: ReturnType<typeof fractionPart>;
+  den: ReturnType<typeof fractionPart>;
+  isDenseMatrix(value: unknown): boolean;
+  isSparseMatrix(value: unknown): boolean;
+  isCollection(value: unknown): boolean;
+  isObjectWrappingMap: typeof isObjectWrappingMap;
+};
+
+const checkNames = [
+  'isArray',
+  'isString',
+  'isBoolean',
+  'isNull',
+  'isUndefined',
+  'isUnit',
+  'isBigInt',
+  'isFunction',
+  'isObject',
+  'isDate',
+  'isRegExp',
+  'isMap',
+  'isRange',
+  'isChain',
+  'isHelp',
+  'isResultSet',
+  'isIndex',
+  'isPartitionedMap',
+  'isNode',
+  'isAccessorNode',
+  'isArrayNode',
+  'isAssignmentNode',
+  'isBlockNode',
+  'isConditionalNode',
+  'isConstantNode',
+  'isFunctionAssignmentNode',
+  'isFunctionNode',
+  'isIndexNode',
+  'isObjectNode',
+  'isOperatorNode',
+  'isParenthesisNode',
+  'isRangeNode',
+  'isRelationalNode',
+  'isSymbolNode',
+] as const;
+
+type CompatChecks = Pick<typeof factory_mathjsCompat.checks, (typeof checkNames)[number]>;
+
+const compatChecks = Object.fromEntries(
+  checkNames.map((name) => [name, checks[name]])
+) as CompatChecks;
+
+/** Mathjs host API names that are independent of a particular instance. */
+export const instanceSymbols: typeof factory_mathjsCompat.constructors &
+  NativeCompatSymbols &
+  CompatChecks = {
+  ...constructors,
+  Help,
+  // Use the same constructors whose values are returned by the compatibility functions.
+  BigNumber,
+  Complex: CompatComplex,
+  Fraction,
+  Range,
+  Matrix,
+  DimensionError,
+  IndexError,
+  factory,
+  PI: Math.PI,
+  E: Math.E,
+  false: false,
+  true: true,
+  null: null,
+  version: packageMetadata.version,
+  num: fractionPart('num', 'numerator'),
+  den: fractionPart('den', 'denominator'),
+  ...compatChecks,
+  isDenseMatrix: (value: unknown) => isDenseMatrix(value) || checks.isDenseMatrix(value),
+  isSparseMatrix: (value: unknown) => isSparseMatrix(value) || checks.isSparseMatrix(value),
+  isCollection: (value: unknown) => checks.isArray(value) || value instanceof Matrix,
+  isObjectWrappingMap,
+};

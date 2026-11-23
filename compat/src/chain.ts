@@ -41,17 +41,23 @@ export interface ChainUnwrap {
  * @param math - The math instance that supplies the chain methods.
  * @returns A function that wraps a value in a chain.
  */
+class CompatChain {
+  get isChain(): true {
+    return true;
+  }
+}
+
 export function createChain(math: Record<string, unknown>): (value: unknown) => Chain {
   function chain(value: unknown): Chain {
-    const base = {
+    const base = Object.assign(new CompatChain(), {
       done: () => value,
       valueOf: () => value,
       toString: () => String(value),
-    };
+    });
     return new Proxy(base, {
       get(target, prop: string | symbol) {
         if (prop in target || typeof prop === 'symbol') {
-          return (target as Record<string | symbol, unknown>)[prop];
+          return (target as unknown as Record<string | symbol, unknown>)[prop];
         }
         const fn = math[prop as string];
         if (typeof fn === 'function') {

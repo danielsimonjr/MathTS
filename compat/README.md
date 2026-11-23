@@ -30,6 +30,9 @@ math.complex(2, 3); // 2 + 3i
 
 - `create(all)` exposes `math.evaluate`, `math.chain`, `math.config`, and functions
   names such as `math.createUnit` (spread from `@danielsimonjr/mathts-functions`).
+  It also exposes mathjs-compatible constructors, type predicates, constants, fraction
+  numerator and denominator helpers, and import event subscriptions. `math.version`
+  identifies the installed MathTS compatibility package.
   Each instance's `config` is isolated: `create(all, { number: 'BigNumber' })` does not
   change bare `evaluate` from `@danielsimonjr/mathts-functions`.
 - `math.import`, `math.typed`, and `math.compile` (alias of `compileExpr`) match

@@ -2833,6 +2833,9 @@
       "HalleyOptions": {
         "kind": "type"
       },
+      "Help": {
+        "kind": "function"
+      },
       "HessenbergResult": {
         "kind": "type"
       },
@@ -4668,6 +4671,9 @@
       },
       "factory_log2": {
         "kind": "function"
+      },
+      "factory_mathjsCompat": {
+        "kind": "object"
       },
       "factory_max": {
         "kind": "function"
