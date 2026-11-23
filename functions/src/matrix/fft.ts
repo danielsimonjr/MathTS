@@ -198,6 +198,23 @@ export const createFft = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Array: function (arr: ComplexArrayND): unknown {
+        const input = arr as unknown[];
+        if (input.length >= FAST_FFT_THRESHOLD) {
+          const real = new Float64Array(input.length);
+          let i = 0;
+          let containsNaN = false;
+          for (; i < input.length; i++) {
+            const value = input[i];
+            if (typeof value !== 'number') break;
+            real[i] = value;
+            if (Number.isNaN(value)) containsNaN = true;
+          }
+          if (i === input.length) {
+            if (containsNaN) return Array.from({ length: i }, () => complex(NaN, NaN));
+            const out = fftExactFloat64(real, undefined, false);
+            return boxSpectrum(out.real, out.imag, complex);
+          }
+        }
         // `arraySize` reads the first row only, so `validate` rejects a jagged array
         // (a DimensionError) before any transform runs.
         const size = arraySize(arr);
@@ -219,7 +236,7 @@ export const createFft = /* #__PURE__ */ factory(
         for (let i = 0; i < n; i++) {
           if (arr[i] !== arr[i]) return Array.from({ length: n }, () => complex(NaN, NaN));
         }
-        const out = fftExactFloat64(arr, new Float64Array(n), false);
+        const out = fftExactFloat64(arr, undefined, false);
         return boxSpectrum(out.real, out.imag, complex);
       },
     });
