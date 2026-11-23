@@ -12,7 +12,7 @@ import { factoryScope, type TypedBuilder } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
 import { add, multiply } from '../typed/arithmetic.js';
 import { registerDivideInverse } from '../typed/divide-inverse.js';
-import { registerCollectionRelational } from '../typed/collection-relational.js';
+import { registerCollectionBinary } from '../typed/collection-binary.js';
 import { registerExactReductions } from '../typed/exact-reductions.js';
 import type {
   BridgeMatrix,
@@ -570,7 +570,7 @@ export const inv = ((m: unknown) =>
 // typed arithmetic module cannot import the factory layer.
 registerDivideInverse(inv as unknown as (m: unknown) => unknown);
 // The typed comparison functions take collections through the factory ports (#975, #1307).
-registerCollectionRelational(factoryScope);
+registerCollectionBinary(factoryScope);
 
 // arithmetic (conflicting names use factory_ prefix)
 export const factory_cbrt = createCbrt(factoryScope as Parameters<typeof createCbrt>[0]);

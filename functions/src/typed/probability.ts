@@ -29,6 +29,7 @@
  * @packageDocumentation
  */
 
+import { unaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import { mathTyped, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 import type { Fraction } from '@danielsimonjr/mathts-core';
 import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
@@ -520,47 +521,49 @@ function permutationsBigNumber(n: BigNumber, k: BigNumber): BigNumber {
  * permutations(5)     // 120  (= 5!)
  * permutations(5, 3)  // 60   (= 5*4*3)
  */
-export const permutations = mathTyped('permutations', {
-  number: permutationsOfNumber,
-  'bigint | Fraction': (n: bigint | Fraction): number => permutationsOfNumber(scalarToNumber(n)),
-  BigNumber: (n: BigNumber): BigNumber => {
-    if (!n.isInteger()) throw new Error('Integer BigNumber expected');
-    if (n.isNegative()) throw new Error('Value must be non-negative');
-    assertLoopOrder('permutations', 'n', n.toNumber());
-    return roundedRangeProduct(1n, n.toBigInt());
-  },
-  'number, number': permutationsOfNumbers,
-  'bigint | Fraction, number | bigint | Fraction': (
-    n: bigint | Fraction,
-    k: number | bigint | Fraction
-  ): number => permutationsOfNumbers(scalarToNumber(n), scalarToNumber(k)),
-  'number, bigint | Fraction': (n: number, k: bigint | Fraction): number =>
-    permutationsOfNumbers(n, scalarToNumber(k)),
-  'BigNumber, BigNumber': permutationsBigNumber,
-  'BigNumber, number': (n: BigNumber, k: number): BigNumber =>
-    permutationsBigNumber(n, BigNumber.fromNumber(k)),
-  'number, BigNumber': (n: number, k: BigNumber): BigNumber =>
-    permutationsBigNumber(BigNumber.fromNumber(n), k),
-  'Array | Matrix': mathTyped.referToSelf(
-    (self) =>
-      (n: unknown[] | Matrix): unknown[] | Matrix =>
-        deepMap(n as unknown[], (v) => (self as (a: unknown) => unknown)(v)) as unknown[] | Matrix
-  ),
-  'Array | Matrix, number | BigNumber': mathTyped.referToSelf(
-    (self) =>
-      (n: unknown[] | Matrix, k: number | BigNumber): unknown[] | Matrix =>
-        deepMap(n as unknown[], (nVal) =>
-          (self as (a: unknown, b: unknown) => unknown)(nVal, k)
-        ) as unknown[] | Matrix
-  ),
-  'number | BigNumber, Array | Matrix': mathTyped.referToSelf(
-    (self) =>
-      (n: number | BigNumber, k: unknown[] | Matrix): unknown[] | Matrix =>
-        deepMap(k as unknown[], (kVal) =>
-          (self as (a: unknown, b: unknown) => unknown)(n, kVal)
-        ) as unknown[] | Matrix
-  ),
-});
+export const permutations = /* #__PURE__ */ unaryCollectionCallback(
+  mathTyped('permutations', {
+    number: permutationsOfNumber,
+    'bigint | Fraction': (n: bigint | Fraction): number => permutationsOfNumber(scalarToNumber(n)),
+    BigNumber: (n: BigNumber): BigNumber => {
+      if (!n.isInteger()) throw new Error('Integer BigNumber expected');
+      if (n.isNegative()) throw new Error('Value must be non-negative');
+      assertLoopOrder('permutations', 'n', n.toNumber());
+      return roundedRangeProduct(1n, n.toBigInt());
+    },
+    'number, number': permutationsOfNumbers,
+    'bigint | Fraction, number | bigint | Fraction': (
+      n: bigint | Fraction,
+      k: number | bigint | Fraction
+    ): number => permutationsOfNumbers(scalarToNumber(n), scalarToNumber(k)),
+    'number, bigint | Fraction': (n: number, k: bigint | Fraction): number =>
+      permutationsOfNumbers(n, scalarToNumber(k)),
+    'BigNumber, BigNumber': permutationsBigNumber,
+    'BigNumber, number': (n: BigNumber, k: number): BigNumber =>
+      permutationsBigNumber(n, BigNumber.fromNumber(k)),
+    'number, BigNumber': (n: number, k: BigNumber): BigNumber =>
+      permutationsBigNumber(BigNumber.fromNumber(n), k),
+    'Array | Matrix': mathTyped.referToSelf(
+      (self) =>
+        (n: unknown[] | Matrix): unknown[] | Matrix =>
+          deepMap(n as unknown[], (v) => (self as (a: unknown) => unknown)(v)) as unknown[] | Matrix
+    ),
+    'Array | Matrix, number | BigNumber': mathTyped.referToSelf(
+      (self) =>
+        (n: unknown[] | Matrix, k: number | BigNumber): unknown[] | Matrix =>
+          deepMap(n as unknown[], (nVal) =>
+            (self as (a: unknown, b: unknown) => unknown)(nVal, k)
+          ) as unknown[] | Matrix
+    ),
+    'number | BigNumber, Array | Matrix': mathTyped.referToSelf(
+      (self) =>
+        (n: number | BigNumber, k: unknown[] | Matrix): unknown[] | Matrix =>
+          deepMap(k as unknown[], (kVal) =>
+            (self as (a: unknown, b: unknown) => unknown)(n, kVal)
+          ) as unknown[] | Matrix
+    ),
+  })
+);
 
 // =============================================================================
 // Seeded random number generation
