@@ -202,6 +202,8 @@ describe('welchPSD typed function', () => {
       frameLength: frameLen,
       overlap,
       window: 'hann',
+      periodic: false,
+      detrend: false,
     });
 
     for (let i = 0; i < jsResult.length; i++) {
@@ -349,6 +351,8 @@ describe('Threshold fallthrough — JS path below 4096', () => {
       frameLength: 128,
       overlap: 64,
       window: 'hann',
+      periodic: false,
+      detrend: false,
     });
     const jsRef = welchPSDJS(arr, 128, 64, 0);
     for (let i = 0; i < jsRef.length; i++) {
