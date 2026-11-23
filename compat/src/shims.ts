@@ -182,6 +182,10 @@ function isCompatBridgeMatrix(x: unknown): boolean {
   return false;
 }
 
+function isBoxedMatrix(x: unknown): boolean {
+  return isCompatBridgeMatrix(x) && !isDenseMatrix(x) && !isSparseMatrix(x);
+}
+
 /**
  * A native `DenseMatrix` of the nested data `arr`. `DenseMatrix.fromArray` holds no empty axis,
  * and the nested data of a matrix with a zero axis does not show its size (`[]` is 0 x 3 as well
@@ -318,6 +322,13 @@ const applyArithmetic = (
   b: unknown,
   elementwise: boolean
 ): unknown => {
+  // Boxed operands carry the storage format and may hold non-double scalar types.
+  // Keep them in the typed path rather than coercing them to the numeric backend.
+  if (isBoxedMatrix(a) || isBoxedMatrix(b)) {
+    const boxedA = Array.isArray(a) ? _factoryMatrix(a) : a;
+    const boxedB = Array.isArray(b) ? _factoryMatrix(b) : b;
+    return scalarFn(boxedA, boxedB);
+  }
   if (isMatrixLike(a) || isMatrixLike(b)) {
     if (!matrixPackageCanTake(a, b, elementwise)) return unwrap(scalarFn(a, b));
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;

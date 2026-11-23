@@ -29,7 +29,7 @@ const I2 = [
 describe('#1278 compat pow of an empty matrix', () => {
   it('T13 a native 0 x 0 matrix and the expression give a 0 x 0 matrix', () => {
     for (const r of [
-      m.pow(m.zeros(0, 0), 2),
+      m.pow(DenseMatrix.zeros(0, 0), 2),
       m.pow(m.identity(0), 2),
       m.evaluate('zeros(0, 0)^2'),
     ]) {
@@ -60,7 +60,7 @@ describe('#1264 compat expm keeps the class', () => {
     const s = m.expm(m.sparse(I2)) as BridgeMatrix;
     expect(Array.isArray(s)).toBe(false);
     expect(s.storage()).toBe('sparse');
-    const z = m.expm(m.zeros(0, 0));
+    const z = m.expm(DenseMatrix.zeros(0, 0));
     expect(z instanceof DenseMatrix).toBe(true);
     expect((z as DenseMatrix).rows).toBe(0);
   });
@@ -68,7 +68,7 @@ describe('#1264 compat expm keeps the class', () => {
 
 describe('#1278 compat sqrtm, sylvester and kron of a native 0 x 0 matrix', () => {
   it('T14 the result is a matrix of the right size', () => {
-    const z = m.zeros(0, 0);
+    const z = DenseMatrix.zeros(0, 0);
     for (const r of [
       m.sqrtm(z),
       m.sylvester(z, z, z),
@@ -86,16 +86,16 @@ describe('#1278 compat sqrtm, sylvester and kron of a native 0 x 0 matrix', () =
   });
 
   it('T14 an n x 0 result keeps its shape', () => {
-    const r = m.kron(m.zeros(2, 0), m.matrix([[1]]));
+    const r = m.kron(DenseMatrix.zeros(2, 0), m.matrix([[1]]));
     expect(Array.isArray(r)).toBe(false);
     expect(sz(r)).toEqual([2, 0]);
   });
 
   it('T14 the adapter changes every factory with a 0 x 0 result, 1-D results stay Arrays', () => {
-    const inv = m.inv(m.zeros(0, 0));
+    const inv = m.inv(DenseMatrix.zeros(0, 0));
     expect(Array.isArray(inv)).toBe(false);
     expect(sz(inv)).toEqual([0, 0]);
-    expect(m.flatten(m.zeros(0, 0))).toEqual([]);
+    expect(m.flatten(DenseMatrix.zeros(0, 0))).toEqual([]);
   });
 });
 

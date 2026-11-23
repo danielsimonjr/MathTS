@@ -14,15 +14,19 @@ const A = [
 
 describe('compat arithmetic with operands of different sizes (#1007, #1302)', () => {
   it('add(matrix([1,2]), 2x2) broadcasts the row (mathjs [[2,4],[4,6]])', () => {
-    expect(math.add(math.matrix([1, 2]), A)).toEqual([
+    expect((math.add(math.matrix([1, 2]), A) as { toArray(): unknown }).toArray()).toEqual([
       [2, 4],
       [4, 6],
     ]);
-    expect(math.add(math.matrix([1, 2]), math.matrix(A))).toEqual([
+    expect(
+      (math.add(math.matrix([1, 2]), math.matrix(A)) as { toArray(): unknown }).toArray()
+    ).toEqual([
       [2, 4],
       [4, 6],
     ]);
-    expect(math.add(math.matrix(A), math.matrix([1, 2]))).toEqual([
+    expect(
+      (math.add(math.matrix(A), math.matrix([1, 2])) as { toArray(): unknown }).toArray()
+    ).toEqual([
       [2, 4],
       [4, 6],
     ]);
