@@ -104,10 +104,13 @@ describe('transpose: argument checks and the matrix package', () => {
     );
   });
 
-  it('rows without cols throws a clear message', () => {
+  it('rows without cols throws a TypeError that names the function', () => {
+    // transpose is a typed-function (#1160): a call with no signature gives the mathjs TypeError.
     const t = transpose as unknown as (...a: unknown[]) => unknown;
-    expect(() => t([[1, 2]], 1)).toThrow(/pass one matrix, or data, rows and cols/);
-    expect(() => [[[1, 2]]].map(t)).toThrow(/pass one matrix, or data, rows and cols/);
+    expect(() => t([[1, 2]], 1)).toThrow(TypeError);
+    expect(() => t([[1, 2]], 1)).toThrow(/in function transpose/);
+    expect(() => [[[1, 2]]].map(t)).toThrow(TypeError);
+    expect(() => [[[1, 2]]].map(t)).toThrow(/in function transpose/);
   });
 
   it('a matrix of the matrix package keeps its class', () => {

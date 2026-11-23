@@ -15,6 +15,7 @@ import {
   COMPLEX_ZERO,
   isComplex,
   isFraction,
+  mathTyped,
   isBigNumber,
   isNumber,
   LN2 as CORE_LN2,
@@ -74,6 +75,7 @@ import {
   zeros as _factoryZeros,
   ones as _factoryOnes,
   transpose as _transpose,
+  fraction as _fraction,
   bignumber as _bignumber,
   complex as _complex,
 } from '@danielsimonjr/mathts-functions';
@@ -119,28 +121,30 @@ export function complex(re?: number | string | Complex, im?: number, ...rest: un
   return (_complex as (...a: unknown[]) => Complex)(...args);
 }
 
+/** The call forms of the compat {@link fraction}. */
+interface CompatFraction {
+  (numerator?: number | string | Fraction, denominator?: number): Fraction;
+}
+
 /**
  * Create a fraction (mathjs-compatible)
  * @example
  * fraction(1, 2)   // Fraction(1, 2)
  * fraction('1/2')  // Fraction(1, 2)
  * fraction(0.5)    // Fraction(1, 2)
+ * fraction()       // Fraction(0, 1)
+ *
+ * The function is the functions `fraction` with two more signatures: no argument and
+ * `undefined` give 0, as the compat `fraction` always did. The functions `fraction` is a
+ * typed-function, so `map(x, fraction)`, `matrix.map(fraction)` and `evaluate` pass the value
+ * alone and not the index as the denominator (#1160). A Fraction of a second copy of core is
+ * returned unchanged (#1033), and a BigNumber, a bigint, null, an object `{ n, d }`, a Unit, an
+ * Array and a Matrix convert, as in mathjs.
  */
-export function fraction(numerator?: number | string | Fraction, denominator?: number): Fraction {
-  if (numerator === undefined) {
-    return new Fraction(0, 1);
-  }
-  if (isFraction(numerator)) {
-    return numerator as Fraction;
-  }
-  if (typeof numerator === 'string') {
-    return Fraction.parse(numerator);
-  }
-  if (denominator !== undefined) {
-    return new Fraction(numerator, denominator);
-  }
-  return Fraction.fromNumber(numerator);
-}
+export const fraction = mathTyped('fraction', _fraction as never, {
+  '': () => new Fraction(0, 1),
+  undefined: () => new Fraction(0, 1),
+}) as unknown as CompatFraction;
 
 /**
  * Create a BigNumber (mathjs-compatible). An Array or a Matrix converts element by element,

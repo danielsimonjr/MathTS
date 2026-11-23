@@ -441,11 +441,11 @@ export class Complex implements IComplex {
       const numeratorMax = Math.max(Math.abs(this.re), Math.abs(this.im));
       const denominatorMax = Math.max(Math.abs(c), Math.abs(d));
       if (Number.isFinite(numeratorMax) && Number.isFinite(denominatorMax)) {
-        if (d === 0) return new Complex(this.re / c, this.im / c);
-        if (c === 0) return new Complex(this.im / d, -this.re / d);
         const numeratorScale = pow2ScaleExponent(numeratorMax, -450, 450);
         const denominatorScale = pow2ScaleExponent(denominatorMax, -450, 450);
         if (numeratorScale !== 0 || denominatorScale !== 0) {
+          if (d === 0) return new Complex(this.re / c, this.im / c);
+          if (c === 0) return new Complex(this.im / d, -this.re / d);
           // Independently normalize both operands, then restore their ratio.
           const a = ldexp(this.re, numeratorScale);
           const b = ldexp(this.im, numeratorScale);

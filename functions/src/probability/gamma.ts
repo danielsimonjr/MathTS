@@ -160,7 +160,7 @@ export const createGamma = /* #__PURE__ */ factory(
 
       // y = sqrt(2 * pi) * t ** (z + 0.5) * exp(-t) * x
       const twoPiSqrt = Math.sqrt(2 * Math.PI);
-      if (Math.max(Math.abs(n.re), Math.abs(n.im)) > 100) {
+      if (Math.max(Math.abs(n.re), Math.abs(n.im)) > 140) {
         // Combine the Lanczos factors' logarithms before exponentiating.
         return t.log().mul(z.add(0.5)).sub(t).add(x.log()).add(Math.log(twoPiSqrt)).exp();
       }

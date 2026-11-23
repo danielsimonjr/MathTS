@@ -73,10 +73,7 @@ interface ZetaDependencies {
   pow: NumericFn;
   divide: NumericFn;
   factorial: NumericFn;
-  equal: TypedFunction;
   smallerEq: TypedFunction;
-  isBounded: TypedFunction;
-  isNegative: TypedFunction;
   gamma: NumericFn;
   lgamma: NumericFn;
   sin: NumericFn;
@@ -94,10 +91,7 @@ const dependencies = [
   'pow',
   'divide',
   'factorial',
-  'equal',
   'smallerEq',
-  'isBounded',
-  'isNegative',
   'gamma',
   'lgamma',
   'sin',
@@ -117,10 +111,7 @@ export const createZeta = /* #__PURE__ */ factory(
     pow,
     divide,
     factorial,
-    equal,
     smallerEq,
-    isBounded,
-    isNegative,
     gamma,
     lgamma,
     sin,
@@ -162,16 +153,25 @@ export const createZeta = /* #__PURE__ */ factory(
      * @return {number | Complex | BigNumber}    The Riemann Zeta of `s`
      */
     function zetaNumber(s: number): number {
+      if (Number.isNaN(s) || s === 1 || s === -Infinity) return NaN;
+      if (s === Infinity) return 1;
+      if (Math.abs(s) <= 1e-4) {
+        // Taylor series at zero. Reflection through 1 - s rounds away part of a small s.
+        return (
+          -0.5 + s * (-0.9189385332046727 + s * (-1.0031782279542925 - s * 1.0007851944770425))
+        );
+      }
       // A negative even integer is a trivial zero. The reflection gives sin(pi s / 2) = 0 times a
       // gamma that is Infinity above s = -342: 0 * Infinity is NaN. Every even double of size
       // 2^53 or more is an even integer, so zeta(-1e300) is 0 too.
       if (s < 0 && s % 2 === 0) return 0;
-      const value = zetaNumeric(
+      const value = zeta(
         s,
-        (value: number) => value,
+        (value) => value,
         () => 20,
+        (value) => value,
         () => pi as number
-      );
+      ) as number;
       // Below s = -649 the factor pi^(s - 3/2) is 0 and the gamma above is Infinity, so the
       // product is NaN where the value is out of range. Every factor except the sine is positive:
       // the value is the infinity with the sign of sin(pi s / 2), from the exact reduction.
@@ -222,8 +222,7 @@ export const createZeta = /* #__PURE__ */ factory(
         const precision = BigNumber!.precision;
         const digits = Math.ceil((precision + BORWEIN_GUARD_DIGITS) / BORWEIN_DIGITS_PER_TERM);
         if (negative) return reflectedZeta(s, x, precision, digits);
-        // A BigNumber is exact: 0 and 1 are the only special values. zetaNumeric compares with
-        // config.relTol and config.absTol (1e-12), so it gave NaN for 1 + 1e-25 and -0.5 for 1e-40.
+        // Use exact comparison so nearby inputs retain their significant digits.
         if (x.isZero()) return createValue(-0.5);
         if (x.equals(1)) return createValue(NaN);
         // 1 - 2^(1 - s) loses one digit for each digit of |s - 1| below 1.
@@ -300,38 +299,6 @@ export const createZeta = /* #__PURE__ */ factory(
     }
 
     /**
-     * Compute the Riemann zeta function of a real number or BigNumber `s`.
-     *
-     * @param {number | BigNumber} s
-     * @param {(value: number) => number | BigNumber} createValue
-     * @param {(value: number | BigNumber | Complex) => number} determineDigits
-     * @returns {number | BigNumber}
-     */
-    function zetaNumeric<T extends number | BigNumberType>(
-      s: T,
-      createValue: (value: number) => T,
-      determineDigits: (value: T) => number,
-      getPi: () => NumericValue,
-      dTable?: DTable
-    ): T {
-      // NaN is the only value not equal to itself. Without the guard, !isBounded(NaN) gives 1.
-      if (!equal(s, s)) {
-        return createValue(NaN);
-      }
-      if (equal(s, 0)) {
-        return createValue(-0.5);
-      }
-      if (equal(s, 1)) {
-        return createValue(NaN);
-      }
-      if (!isBounded(s)) {
-        return isNegative(s) ? createValue(NaN) : createValue(1);
-      }
-
-      return zeta(s, createValue, determineDigits, (s: T) => s as number, getPi, dTable) as T;
-    }
-
-    /**
      * Compute the Riemann zeta function of a complex number `s`.
      *
      * @param {Complex} s
@@ -355,7 +322,8 @@ export const createZeta = /* #__PURE__ */ factory(
       }
 
       if (s.im === 0) return new Complex!(zetaNumber(s.re), 0);
-      if (Math.abs(s.im) > 100 || s.re < -100) {
+      // The direct symmetric reflection is accurate until its gamma factors get too large.
+      if (Math.abs(s.im) > 100 || s.re < -224) {
         return s.re < 0 ? zetaComplexReflected(s) : zetaComplexEulerMaclaurin(s);
       }
 
@@ -514,7 +482,12 @@ export const createZeta = /* #__PURE__ */ factory(
       dAt: DFn = (k) => d(k, n),
       powAt: DFn = (k) => pow(k, s)
     ): NumericValue {
-      const c = divide(1, multiply(dAt(createValue(0)), subtract(1, pow(2, subtract(1, s)))));
+      // expm1 retains the small difference in Borwein's denominator at the pole.
+      const etaFactor =
+        typeof s === 'number'
+          ? -Math.expm1((1 - s) * Math.LN2)
+          : subtract(1, pow(2, subtract(1, s)));
+      const c = divide(1, multiply(dAt(createValue(0)), etaFactor));
       let S = createValue(0);
       for (let k = createValue(1); smallerEq(k, n); k = add(k, 1)) {
         S = add(S, divide(multiply((-1) ** ((k as number) - 1), dAt(k)), powAt(k)));

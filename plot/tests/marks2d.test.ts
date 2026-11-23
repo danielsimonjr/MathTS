@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { line, scatter, bar, area, step, errorbar, quiver } from '../src/marks2d.js';
 
 describe('line', () => {
@@ -36,6 +36,19 @@ describe('scatter + bar', () => {
   it('scatter emits one circle per finite point', () => {
     const svg = scatter([0, 1, 2], [1, 2, 3]);
     expect((svg.match(/<circle/g) ?? []).length).toBe(3);
+  });
+  it('warns once about omitted coordinate pairs', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const svg = scatter([1, 2, Infinity], [1, -Infinity, 3]);
+      expect((svg.match(/<circle/g) ?? []).length).toBe(1);
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(
+        'scatter: omitted 2 of 3 points with non-finite coordinates'
+      );
+    } finally {
+      warn.mockRestore();
+    }
   });
   it('bar emits one rect per bar', () => {
     const svg = bar([0, 1, 2], [3, 1, 2]);

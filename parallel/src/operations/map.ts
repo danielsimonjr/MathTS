@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { assertArrayData } from '@danielsimonjr/mathts-workerpool';
 import { computePool, ComputePool } from '../ComputePool.js';
 import type { ParallelResult } from '../ComputePool.js';
 
@@ -268,6 +269,8 @@ export async function parallelCount<T>(
   options: MapOptions = {}
 ): Promise<ParallelResult<number>> {
   const pool = options.pool ?? computePool;
+  // Reads only `length`, so check without a copy; a non-array has no length to count.
+  assertArrayData('count', data);
 
   if (!predicate) {
     // No predicate, just return length

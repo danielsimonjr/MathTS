@@ -23,6 +23,10 @@ const CASES = [
     importLine: "import { DenseMatrix } from '@danielsimonjr/mathts-matrix';",
   },
   {
+    label: 'compat-create-all',
+    importLine: "import { create, all } from '@danielsimonjr/mathts-compat';",
+  },
+  {
     label: 'functions-evaluate-subpath',
     importLine: "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
   },
@@ -70,7 +74,7 @@ for (const { label, importLine } of CASES) {
     const bytes = statSync(outfile).size;
     const bundled = readFileSync(outfile, 'utf8');
     const staticNode = bundled.match(
-      /(?:from|import)\s*["'](?:node:|fs|crypto|util|path|os|module|worker_threads)["']/
+      /(?:from|import)\s*["'](?:node:[^"']+|fs|crypto|util|path|os|module|worker_threads|child_process)["']/
     );
     if (staticNode) {
       failed++;

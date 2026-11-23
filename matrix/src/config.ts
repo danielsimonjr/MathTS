@@ -112,8 +112,10 @@ export const DEFAULT_CONFIG: MatrixConfig = {
       preference: 'auto',
       threshold: DEFAULT_BACKEND_HINTS.wasmThreshold,
       operationThresholds: {
-        // Measured SIMD matmul win from ~256 elems (tools/benchmarks/matmul-threshold.mjs).
-        multiply: 256,
+        // Two Node 24 runs of tools/benchmarks/matmul-threshold.mjs (2026-11-23):
+        // JS/WASM was 0.65x/0.62x at 12², 1.07x/1.08x at 16², and 1.52x/1.34x at 24².
+        // BackendManager counts rows(A) × cols(A) × cols(B), so use the first clear win: 24³.
+        multiply: 13_824,
         // Advisory only — no public matrix call passes 'decomposition' to BackendManager.selectBackend.
         decomposition: 100,
         transpose: 2000,

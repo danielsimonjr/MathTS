@@ -55,9 +55,8 @@ describe('DEFAULT_EXTENDED_HINTS', () => {
   it('extends the base hints with operation thresholds', () => {
     expect(DEFAULT_EXTENDED_HINTS.autoSIMD).toBe(true);
     expect(DEFAULT_EXTENDED_HINTS.fallbackOnError).toBe(true);
-    // matmul WASM threshold dropped 500→256 (SIMD kernel wins from ~256 elems — decomp-audit/
     // matmul-threshold benchmarks).
-    expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.wasm).toBe(256);
+    expect(DEFAULT_EXTENDED_HINTS.operationThresholds.multiply?.wasm).toBe(13_824);
   });
 });
 
