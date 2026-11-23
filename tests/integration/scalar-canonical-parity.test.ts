@@ -59,10 +59,15 @@ describe('scalar canonical parity with evaluateScalar', () => {
     },
   ];
 
-  it('quotient rows share one canonical key', () => {
+  it('quotient keys preserve an inner divisor’s singularity', () => {
     const keys = quotientTrees.map((t) => scalarCanonicalKey(t));
-    expect(keys[0]).toBe(keys[1]);
+    expect(keys[0]).not.toBe(keys[1]);
     expect(keys[1]).toBe(keys[2]);
+
+    const zeroDivisor = { ...quotientScope, c: 0 };
+    expect(() => evaluateScalar(quotientTrees[0], zeroDivisor)).toThrow();
+    expect(() => evaluateScalar(scalarCanonical(quotientTrees[0]), zeroDivisor)).toThrow();
+    expect(evaluateScalar(quotientTrees[1], zeroDivisor)).toBe(0);
   });
 
   it('x*x and x^2 share a key; (x^2)^3 and x^6 share a key', () => {
