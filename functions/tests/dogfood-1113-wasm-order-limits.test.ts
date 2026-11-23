@@ -240,11 +240,12 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
     }
   }, 120_000);
 
-  it('hermiteH stops at the first NaN, as the JS scalar does', () => {
-    const r = callKernel('hermiteH', 1_000_000_000, 0.5);
+  it('hermiteH runs the rescaled recurrence and gives +-Infinity, as the JS scalar does (#1332)', () => {
+    // It gave NaN at the first overflow. The sign of H_n oscillates with n, so the kernel runs
+    // the full degree on a copy that is rescaled by 2^600.
+    const r = callKernel('hermiteH', 1_000_000, 0.5);
     expect(r.timedOut).toBe(false);
-    expect(r.value).toBeNaN();
-    expect(r.ms).toBeLessThan(3_000);
+    expect(Math.abs(r.value as number)).toBe(Infinity);
   }, 30_000);
 
   it('a non-finite order gives NaN', () => {
@@ -294,12 +295,14 @@ function jnBatch(cases: [number, number[]][], timeoutMs = 30_000): number[][] | 
 }
 
 describeIfBindings('#1113 kernel: early exits and signs match the JS scalar', () => {
-  it('bessel_yn_f64 and bessel_jn_f64 stop at the first NaN', () => {
-    // Before the fix each call ran the whole recurrence: about 2 s for an order of 1e8.
+  it('bessel_yn_f64 and bessel_jn_f64 of x = Infinity return the limit 0 at once', () => {
+    // Before #1113 each call ran the whole recurrence: about 2 s for an order of 1e8. It then
+    // stopped at the first NaN (J0 and Y0 of Infinity were NaN). Now J_n and Y_n of Infinity
+    // are 0, the limit (the amplitude sqrt(2 / (pi x)) -> 0), before any loop.
     for (const r of [jn(1_000_000_000, Infinity), yn(100_000_000, Infinity)]) {
       expect(r.timedOut).toBe(false);
       expect(r.ok).toBe(true);
-      expect(r.value).toBeNaN();
+      expect(r.value).toBe(0);
       expect(r.ms).toBeLessThan(500);
     }
   }, 60_000);

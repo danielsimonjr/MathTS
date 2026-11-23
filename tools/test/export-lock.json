@@ -2373,6 +2373,9 @@
       "derivative": {
         "kind": "function"
       },
+      "forwardDiagonalGrad": {
+        "kind": "function"
+      },
       "forwardGrad": {
         "kind": "function"
       },

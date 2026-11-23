@@ -10,7 +10,8 @@
  * Tolerances are measured worst errors with margin; each comment gives the measured value.
  */
 import { describe, it, expect } from 'vitest';
-import { solveODE, stiffODESolver, matrix } from '../src/index.js';
+import * as mathjs from 'mathjs';
+import { solveODE, stiffODESolver, matrix, type ODEMatrixSolution } from '../src/index.js';
 import { solveODESystem, solveParabolicPDE } from '../src/typed/numeric.js';
 
 const METHODS = ['RK23', 'RK45', 'Rosenbrock', 'RODAS', 'BDF', 'Radau'] as const;
@@ -82,6 +83,17 @@ for (const method of METHODS) {
       solveODE(f, ts as number[], y0 as number[], { method, ...o });
 
   describe(`solveODE ${method}: entry checks`, () => {
+    it('rejects a nonpositive or nonfinite tolerance before calling the derivative', () => {
+      const derivative = () => {
+        throw new Error('unexpected derivative call');
+      };
+      for (const tol of [-1, 0, NaN, Infinity]) {
+        const err = thrown(S(derivative, [0, 1], [1], { tol }));
+        expect(err).toBeInstanceOf(RangeError);
+        expect(err.message).toBe('"tol" must be finite and positive');
+      }
+    });
+
     it('the #991 call throws the tspan TypeError', () => {
       const e = thrown(S(rob, [1, 0, 0], [0, 40]));
       expect(e).toBeInstanceOf(TypeError);
@@ -317,5 +329,50 @@ describe('solveParabolicPDE finite T', () => {
     expect(thrown(() => solveParabolicPDE({ ...pde, T: Infinity } as never)).message).toMatch(
       /finite T > 0/
     );
+  });
+});
+
+describe('solveODE with Array and Matrix vectors', () => {
+  it.each([
+    [false, true],
+    [true, false],
+    [true, true],
+  ])('matches mathjs matrix output with matrix tspan=%s and y0=%s', (matrixTime, matrixState) => {
+    const times = [0, 1];
+    const initial = [1, 2];
+    const f: Fn = (_t, y) => y.map((value) => -value);
+    const { solveODE: oracle } = mathjs as unknown as {
+      solveODE(
+        fn: Fn,
+        t: number[] | mathjs.Matrix,
+        y: number[] | mathjs.Matrix
+      ): {
+        t: mathjs.Matrix;
+        y: mathjs.Matrix;
+      };
+    };
+    const expected = oracle(
+      f,
+      matrixTime ? mathjs.matrix(times) : times,
+      matrixState ? mathjs.matrix(initial) : initial
+    );
+    const inputTime = matrixTime ? matrix(times) : times;
+    const inputState = matrixState ? matrix(initial) : initial;
+    for (const result of [
+      solveODE(f, inputTime, inputState),
+      solveODE(f, inputTime, inputState, {}),
+    ]) {
+      const { t, y } = result as ODEMatrixSolution;
+      const gotTimes = t.toArray() as number[];
+      const gotStates = y.toArray() as number[][];
+      const expectedTimes = expected.t.toArray() as number[];
+      const expectedStates = expected.y.toArray() as number[][];
+      expect(gotTimes[0]).toBe(expectedTimes[0]);
+      expect(gotTimes.at(-1)).toBe(expectedTimes.at(-1));
+      expect(gotStates[0]).toEqual(expectedStates[0]);
+      for (let i = 0; i < initial.length; i++) {
+        expect(gotStates.at(-1)![i]).toBeCloseTo(expectedStates.at(-1)![i], 3);
+      }
+    }
   });
 });

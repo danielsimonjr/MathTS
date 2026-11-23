@@ -167,3 +167,34 @@ describe('Complex.cbrt and Complex.cbrtRoots equal mathjs cbrt (#1086, M8)', () 
     same(new Complex(a, b).cbrt(), mathjs.cbrt(mathjs.complex(a, b)) as Parts, 'cbrt');
   });
 });
+
+describe('Complex.log and the signed-zero square-root branch', () => {
+  it('matches live mathjs for seeded ordinary inputs', () => {
+    const random = lcg(20261122);
+    for (let i = 0; i < 40000; i++) {
+      const re = (random() - 0.5) * 10 ** (i % 12);
+      const im = (random() - 0.5) * 10 ** (i % 9);
+      same(new Complex(re, im).log(), mathjs.log(mathjs.complex(re, im)), `log(${re}, ${im})`);
+    }
+  });
+
+  it.each([Number.MIN_VALUE, 1e-200, 1e300, Number.MAX_VALUE])(
+    'keeps the log modulus finite at scale %s',
+    (v) => {
+      const z = new Complex(v, v).log();
+      expect(z.re).toBe(Math.log(v) + Math.LN2 / 2);
+      expect(z.im).toBe(Math.PI / 4);
+    }
+  );
+
+  it('retains the IEEE infinite-modulus behavior', () => {
+    expect(new Complex(Infinity, NaN).log().re).toBe(Infinity);
+    expect(new Complex(NaN, Infinity).log().re).toBe(Infinity);
+  });
+
+  it('uses the imaginary zero sign to select the C99 square-root branch', () => {
+    expect(Object.is(new Complex(-7, -0).sqrt().im, -Math.sqrt(7))).toBe(true);
+    expect(Object.is(new Complex(-7, +0).sqrt().im, Math.sqrt(7))).toBe(true);
+    expect(Object.is(new Complex(7, -0).sqrt().im, -0)).toBe(true);
+  });
+});

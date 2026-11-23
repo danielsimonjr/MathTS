@@ -66,7 +66,7 @@ export function isComplex(value: unknown): value is Complex {
  * `Math.hypot` is correctly rounded and safe at the extremes, but it is a function
  * call plus scaling work. For typical magnitudes (well inside (1e-150, 1e150))
  * `sqrt(re²+im²)` is exact enough for every public test and substantially cheaper —
- * this is the path `abs`, `log`, `pow`, `sign`, and `sqrt` all share.
+ * this is the path `abs`, `sign`, and `sqrt` share.
  *
  * Outside that window we fall through to `Math.hypot` so huge values do not overflow
  * to `Infinity` and denormals do not flush to `0`. A non-finite part also takes `Math.hypot`:
@@ -86,25 +86,27 @@ function hypotFast(re: number, im: number): number {
 }
 
 /**
- * `log(sqrt(a² + b²))` as complex.js 2.4.3 computes it, so `Complex.pow` equals mathjs bit for
- * bit. Below 3000 in both parts it is `0.5 · log(a² + b²)` (no square root); above, the parts are
- * halved first so that the squares cannot overflow.
+ * Logarithm of the complex modulus. Match complex.js rounding where the sum
+ * of squares stays in range and scale before squaring at extreme magnitudes.
  */
 function logHypot(a: number, b: number): number {
   const absA = Math.abs(a);
   const absB = Math.abs(b);
   if (a === 0) return Math.log(absB);
   if (b === 0) return Math.log(absA);
-  if (absA < 3000 && absB < 3000) return Math.log(a * a + b * b) * 0.5;
-  const halfA = a * 0.5;
-  const halfB = b * 0.5;
-  const loh = 0.5 * Math.log(halfA * halfA + halfB * halfB) + Math.LN2;
-  // The squares of the halved parts still overflow above about 2.7e154, and complex.js then gives
-  // Infinity, so `(1e300 + 1e300i)^0.5` is NaN + NaN i in mathjs. `Math.hypot` does not overflow
-  // for finite parts. This changes only results that are not finite in complex.js.
-  return loh === Infinity && Number.isFinite(a) && Number.isFinite(b)
-    ? Math.log(Math.hypot(a, b))
-    : loh;
+  if (absA < 3000 && absB < 3000) {
+    const sum = a * a + b * b;
+    if (sum >= 2 ** -1022) return Math.log(sum) * 0.5;
+  } else {
+    const halfA = a * 0.5;
+    const halfB = b * 0.5;
+    const sum = halfA * halfA + halfB * halfB;
+    if (Number.isFinite(sum)) return 0.5 * Math.log(sum) + Math.LN2;
+  }
+  if (absA === Infinity || absB === Infinity) return Infinity;
+  const scale = Math.max(absA, absB);
+  const ratio = Math.min(absA, absB) / scale;
+  return Math.log(scale) + 0.5 * Math.log1p(ratio * ratio);
 }
 
 /**
@@ -557,7 +559,7 @@ export class Complex implements IComplex {
    * Natural logarithm: ln(z) = ln|z| + i·arg(z)
    */
   log(): Complex {
-    return new Complex(Math.log(this.abs()), this.arg());
+    return new Complex(logHypot(this.re, this.im), this.arg());
   }
 
   /**

@@ -4,6 +4,7 @@
  *
  * v0.1.0 ships:
  *   - forwardGrad(fn, x): dual-number AD; returns { value, jacobian }.
+ *   - forwardDiagonalGrad(fn, x): one forward trace for a diagonal Jacobian.
  *   - reverseGrad(fn, x, cotangent?): tape-based reverse-mode AD;
  *     returns { value, gradient }.
  *
@@ -12,7 +13,7 @@
  * @packageDocumentation
  */
 export { DualTensor } from './dual-tensor.js';
-export { forwardGrad } from './forward-grad.js';
+export { forwardDiagonalGrad, forwardGrad } from './forward-grad.js';
 export { Tape, TapedTensor } from './tape.js';
 export { reverseGrad } from './reverse-grad.js';
 export { grad, valueAndGrad, derivative, jacobian } from './grad.js';

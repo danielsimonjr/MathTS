@@ -20,9 +20,14 @@ import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-numbers';
 
 const z = new Complex(3, 4);
 console.log(z.abs()); // 5
-console.log(new Fraction(1, 3).add(new Fraction(1, 6)).toString()); // 1/2
+const half = new Fraction('1/3').add(new Fraction(1, 6));
+console.log(half.toString()); // 0.5
+console.log(half.numerator, half.denominator); // 1n 2n
 console.log(BigNumber.from('0.1').add(BigNumber.from('0.2')).toString()); // 0.3
 ```
+
+`Fraction` accepts strings such as `'1/3'` and `'0.5'`. Its decimal string may repeat.
+The signed numerator and positive denominator are available as bigint properties.
 
 ## What it exports
 

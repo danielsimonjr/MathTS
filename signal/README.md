@@ -29,6 +29,9 @@ console.log(real.length, imag.length);
 
 `fft`, `ifft` (aliases of `parallelFFT` / `parallelIFFT`). A `number[]` input returns `{ real: Float64Array, imag: Float64Array, originalLength: number }` synchronously. A `Float64Array` input returns that object in a `Promise` (`await`). `real` and `imag` are the zero-padded power-of-two spectrum (`real.length === nextPowerOf2(originalLength)`), not a length-n NumPy vector. The length-n `Complex[]` transform is factory `fft` from `@danielsimonjr/mathts-functions`. `ifft` of that object inverts the padded spectrum; the first `originalLength` samples of `.real` recover a real series. Also `parallelFFT`, `parallelIFFT`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelConv`, `parallelXCorr`, `parallelAutoCorr`, `crossCorrelation`, `autoCorrelation`, `groupDelay`, `unwrapPhase`, `dct`, `idct`, `dst`, `idst`, `dwt`, `fourier`, `invFourier`, `hilbertTransform`, `periodogram`, `lowpassFilter`, `highpassFilter`, `bandpassFilter`, `resample` (two-arg SciPy Fourier length resample, or three-arg linear rate change), `medfilt`, `windowFunction` (`(length, type)` or SciPy `(type, length)`; symmetric taps, SciPy `sym=True` / `get_window`, period `n - 1`), `convolve`, `correlate`, `welchPSD`, `bartlettPSD` (a defaulted `frameLength` is 256 clamped to the signal length, as SciPy clamps `nperseg`; an explicit `frameLength` longer than the signal throws `RangeError`, as does a frame shorter than 2 or an overlap of at least `frameLength`; an empty signal returns an empty spectrum; a frame that is not a power of two uses an exact-length DFT, so bin `k` is at `k / frameLength`), `multiTaperPSD`, `goertzel`, `chirpZTransform` (plus the `typedSignal` bundle).
 
+`welchPSD` uses the input frames as provided. It has no detrend option and does
+not subtract each frame’s mean.
+
 ## License
 
 MIT (c) Daniel Simon Jr.
