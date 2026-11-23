@@ -748,11 +748,8 @@ export function fDist(d1: f64, d2: f64): Distribution {
 // gammaDist
 // =============================================================================
 
-/** Options for {@link gammaDist} using SciPy's scale parameterization (`scale = 1/rate`). */
-export interface GammaDistOptions {
-  /** SciPy `stats.gamma(..., scale=)` — the mean is `shape * scale`. */
-  scale: f64;
-}
+/** Explicit gamma rate or SciPy-style scale (scale = 1/rate). */
+export type GammaDistOptions = { rate: f64; scale?: never } | { scale: f64; rate?: never };
 
 /** Named shape + scale (SciPy-style) construction. */
 export interface GammaDistNamedOptions {
@@ -778,7 +775,7 @@ function _gammaPositiveFinite(name: string, value: f64): void {
  * SciPy: `scipy.stats.gamma(shape, scale=1/rate)` for `gammaDist(shape, rate)`, and `scipy.stats.gamma(shape, scale=scale)` for `gammaDist(shape, { scale })`.
  *
  * @param shapeOrOptions - Shape (positive), or `{ shape, scale }` for SciPy-style construction
- * @param rateOrOptions - Rate (positive, default 1) or `{ scale }` when the first argument is a number
+ * @param rateOrOptions - Positive positional rate (default 1), `{ rate }` or `{ scale }`
  * @returns Distribution object
  *
  * @example
@@ -823,16 +820,21 @@ export function gammaDist(
       !isBigNumber(rateOrOptions) &&
       !isFraction(rateOrOptions)
     ) {
-      if ('rate' in rateOrOptions) {
+      if ('rate' in rateOrOptions && 'scale' in rateOrOptions) {
         throw new Error('gammaDist: pass rate or scale, not both');
       }
-      _onlyKeys('gammaDist', rateOrOptions, ['scale']);
-      if (!('scale' in rateOrOptions)) {
-        throw new Error('gammaDist: expected a positive rate or { scale }');
+      _onlyKeys('gammaDist', rateOrOptions, ['rate', 'scale']);
+      if ('rate' in rateOrOptions) {
+        rate = _numberArg('gammaDist', 'rate', rateOrOptions.rate);
+        _gammaPositiveFinite('rate', rate);
+      } else {
+        if (!('scale' in rateOrOptions)) {
+          throw new Error('gammaDist: expected a positive rate, { rate } or { scale }');
+        }
+        const scale = _numberArg('gammaDist', 'scale', rateOrOptions.scale);
+        _gammaPositiveFinite('scale', scale);
+        rate = 1 / scale;
       }
-      const scale = _numberArg('gammaDist', 'scale', rateOrOptions.scale);
-      _gammaPositiveFinite('scale', scale);
-      rate = 1 / scale;
     } else {
       rate = rateOrOptions as f64;
       rate = _numberArg('gammaDist', 'rate', rate);
@@ -840,6 +842,7 @@ export function gammaDist(
     }
   }
   const scale = 1 / rate;
+  let logNormalizer: number | undefined;
   return _withSampleCount({
     pdf: (x: f64) => {
       if (x < 0) return 0;
@@ -848,9 +851,8 @@ export function gammaDist(
         if (shape === 1) return rate;
         return 0;
       }
-      return Math.exp(
-        (shape - 1) * Math.log(x) - x * rate + shape * Math.log(rate) - _lgamma(shape)
-      );
+      logNormalizer ??= shape * Math.log(rate) - _lgamma(shape);
+      return Math.exp((shape - 1) * Math.log(x) - x * rate + logNormalizer);
     },
     cdf: (x: f64) => {
       if (x <= 0) return 0;

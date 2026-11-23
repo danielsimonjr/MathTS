@@ -31,6 +31,9 @@
  * parameter that the glue does not have, a class other than `in` or `out`, and an anchor of the
  * glue that is not found (a change of the `asc` glue shape).
  *
+ * A synchronous adapted call releases temporary allocations after lifting its result. A live
+ * internref or caller-owned raw allocation keeps the heap intact.
+ *
  * The same step adds the abort translation. The binary has no `env.abort` import (#1019), so an
  * AssemblyScript abort traps as a `WebAssembly.RuntimeError`, and the binary keeps the message,
  * the file, the line and the column in globals (`assembly/src/abort.ts`). Each export of the glue
@@ -276,15 +279,30 @@ function abortGlue() {
   }
   function __abortAware(adapted) {
     const guarded = {};
+    let depth = 0;
+    let rawAllocations = false;
     for (const key of new Set([...Object.keys(exports), ...Object.keys(adapted)])) {
       const value = adapted[key];
       guarded[key] =
         typeof value === "function" && !key.startsWith("abort_")
           ? (...args) => {
+              const previous = __out;
+              __out = [];
+              depth++;
+              if (key === "__new" || key === "__pin") rawAllocations = true;
               try {
-                return value(...args);
+                const result = value(...args);
+                if (key === "heap_reset") rawAllocations = false;
+                return result;
               } catch (error) {
                 throw __abortError(error);
+              } finally {
+                __out = previous;
+                if (--depth === 0 && Object.hasOwn(adapted, key)
+                    && !rawAllocations && refcounts.size === 0
+                    && typeof exports.heap_reset === "function") {
+                  exports.heap_reset();
+                }
               }
             }
           : value;
@@ -297,7 +315,7 @@ function abortGlue() {
 
 function helperHead() {
   return `  ${MARKER}
-  const __out = [];
+  let __out = [];
   function __lowerTypedArray(constructor, id, align, values, track, name) {
     if (track & ${TRACK_FIRST}) __out.length = 0;
     if (values == null) return 0;
