@@ -16,7 +16,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { arraySize, flatten as flattenArray } from '../utils/array.js';
+import { flatten as flattenArray } from '../utils/array.js';
 import { denseOfSize } from '../factories/matrix-bridge.js';
 
 // =============================================================================
@@ -41,10 +41,16 @@ function toFlatArray(a: unknown): unknown[] {
 }
 
 /** Use the same multiset operation for all Array and Matrix combinations. */
-function binaryMatrixSet(name: string, calculate: (a: unknown, b: unknown) => unknown[]) {
+function binaryMatrixSet(
+  name: string,
+  calculate: (a: unknown, b: unknown) => unknown[],
+  tupleWidth?: number
+) {
   const matrixResult = (a: unknown, b: unknown) => {
     const result = calculate(a, b);
-    return denseOfSize(result, arraySize(result));
+    const size = [result.length];
+    if (tupleWidth !== undefined && result.length > 0) size.push(tupleWidth);
+    return denseOfSize(result, size);
   };
   return mathTyped(name, {
     'Array, Array': calculate,
@@ -383,18 +389,22 @@ export const setSize = mathTyped('setSize', {
  * // [[1, 3], [1, 4], [2, 3], [2, 4]]
  * ```
  */
-export const setCartesian = binaryMatrixSet('setCartesian', (a1, a2): unknown[][] => {
-  const b1 = toFlatArray(a1).sort(naturalCompare);
-  const b2 = toFlatArray(a2).sort(naturalCompare);
-  if (b1.length === 0 || b2.length === 0) return [];
-  const result: unknown[][] = [];
-  for (const x of b1) {
-    for (const y of b2) {
-      result.push([x, y]);
+export const setCartesian = binaryMatrixSet(
+  'setCartesian',
+  (a1, a2): unknown[][] => {
+    const b1 = toFlatArray(a1).sort(naturalCompare);
+    const b2 = toFlatArray(a2).sort(naturalCompare);
+    if (b1.length === 0 || b2.length === 0) return [];
+    const result: unknown[][] = [];
+    for (const x of b1) {
+      for (const y of b2) {
+        result.push([x, y]);
+      }
     }
-  }
-  return result;
-});
+    return result;
+  },
+  2
+);
 
 // =============================================================================
 // Private implementation helpers (not exported)
