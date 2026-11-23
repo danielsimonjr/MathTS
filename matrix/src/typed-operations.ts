@@ -22,7 +22,7 @@ type Signatures = Record<string, SignatureFunction>;
 // =============================================================================
 
 /**
- * Create a matrix from various input types. A 1-D array gives a 1 x n row matrix.
+ * Create a matrix from various input types. A 1-D array gives a rank-1 vector with row storage.
  */
 export const matrix: TypedFunction = mathTyped('matrix', {
   Array: (arr: number[][] | number[]) => DenseMatrix.fromArray(arr),
