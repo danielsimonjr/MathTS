@@ -279,6 +279,9 @@ export function assertBesselArrayWork(
   n: number,
   xs: Float64Array
 ): void {
+  // Olver's large-order expansion needs a fixed number of operations per element.
+  if (Math.abs(n) >= 1000000) return;
+
   const ni = Math.abs(n);
   if (!Number.isInteger(n)) {
     // A NaN or infinite order gives NaN at once, and an order above the limit throws in the scalar.

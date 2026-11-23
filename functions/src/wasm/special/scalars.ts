@@ -724,6 +724,104 @@ export function besselJYLarge(
 }
 
 /**
+ * Positive-order Olver Airy approximation (DLMF 10.20.4–5). The Airy
+ * argument is determined by the turning-point phase; expanding the phase
+ * near x = n avoids subtracting two nearly equal terms. This path is used
+ * only at orders at least a million, where the first uniform term is accurate.
+ *
+ * @param n - Positive order.
+ * @param x - Positive finite argument.
+ * @param y - Whether to evaluate Y instead of J.
+ * @param yScale - Multiplier of Y when reflecting a negative real order.
+ */
+export function besselUniformJY(n: f64, x: f64, y: boolean, yScale: f64 = 1): f64 {
+  if (y && yScale === 0) return 0;
+  const signedScale = y ? -yScale : 1;
+  if (x > 4 * n * n) return besselHankelReal(n, x, y) * (y ? yScale : 1);
+
+  const below = x <= n;
+  const delta = (x - n) / n;
+  const w = Math.sqrt(Math.abs(delta * (2 + delta)));
+  const nThird = Math.cbrt(n);
+  if (w === 0) {
+    const airy = y ? airyBiScalar(0) : airyAiScalar(0);
+    return signedScale * (Math.cbrt(2) / nThird) * airy;
+  }
+
+  let integral: f64;
+  if (w < 0.25) {
+    // atanh(w)-w and w-atan(w) share this series, with opposite signs.
+    const square = (below ? 1 : -1) * w * w;
+    let term = w * w * w;
+    integral = term / 3;
+    for (let k = 5; k <= 31; k += 2) {
+      term *= square;
+      integral += term / k;
+    }
+  } else {
+    integral = below
+      ? Math.log1p(w) + (Number.isFinite(n / x) ? Math.log(n / x) : Math.log(n) - Math.log(x)) - w
+      : w - Math.atan(w);
+  }
+
+  const phase = n * integral;
+  const root = Math.cbrt(1.5 * phase);
+  const argument = root * root;
+  if (argument <= 5) {
+    const factor = Math.sqrt(Math.sqrt((4 * argument) / (nThird * nThird * w * w))) / nThird;
+    const t = below ? argument : -argument;
+    return signedScale * factor * (y ? airyBiScalar(t) : airyAiScalar(t));
+  }
+
+  if (below) {
+    let series = 0;
+    let term = 1;
+    let previous = Infinity;
+    for (const coefficient of airyUCoeffs()) {
+      const part = coefficient * term;
+      if (Math.abs(part) > previous) break;
+      series += part;
+      previous = Math.abs(part);
+      term *= (y ? 1 : -1) / phase;
+    }
+    const denominator = Math.sqrt(Math.PI * n * w) * (y ? Math.SQRT1_2 : Math.SQRT2);
+    // Apply the reflection multiplier and the finite prefactor in the exponent.
+    const logValue =
+      (y ? phase : -phase) + Math.log((Math.abs(signedScale) * series) / denominator);
+    return Math.sign(signedScale) * Math.exp(logValue);
+  }
+
+  // Separate the argument x from the phase correction in the far-oscillatory
+  // region. Reducing sin(x) and cos(x) directly prevents losing the correction
+  // to rounding when n²/x is much smaller than one unit in the last place of x.
+  let cosine: f64;
+  let sine: f64;
+  if (x >= 2 * n) {
+    const ratio = n / x;
+    const corrected =
+      n * (Math.asin(ratio) - ratio / (1 + Math.sqrt(1 - ratio * ratio))) - Math.PI / 4;
+    const c = cosPiScalar(n / 2);
+    const s = sinPiScalar(n / 2);
+    const cx = Math.cos(x);
+    const sx = Math.sin(x);
+    const cr = Math.cos(corrected);
+    const sr = Math.sin(corrected);
+    const baseCos = cx * c + sx * s;
+    const baseSin = sx * c - cx * s;
+    cosine = baseCos * cr - baseSin * sr;
+    sine = baseSin * cr + baseCos * sr;
+  } else {
+    const cx = Math.cos(phase);
+    const sx = Math.sin(phase);
+    cosine = (cx + sx) * Math.SQRT1_2;
+    sine = (sx - cx) * Math.SQRT1_2;
+  }
+  const { p, q } = airyAsymPQ(phase);
+  const amplitude = Math.sqrt(2 / (Math.PI * n * w));
+  return amplitude * (y ? yScale * (sine * p - cosine * q) : cosine * p + sine * q);
+}
+
+/**
  * J_nu(x) for NON-integer real order nu. The order of the checks is the same as for an integer
  * order: a NaN or negative x, x = 0, the zero bound (positive order), the overflow bound of a
  * negative order, the O(1) Hankel shortcut, the order limit, and then the path by x: the power
@@ -753,6 +851,10 @@ export function besselJRealOrder(nu: f64, x: f64): f64 {
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
   if (an > 2500000000) {
     throw new RangeError(`besselJ: n = ${an} exceeds the supported maximum of 2500000000`);
+  }
+  if (an >= 1000000) {
+    const j = besselUniformJY(an, x, false);
+    return nu > 0 ? j : cosPiScalar(an) * j + besselUniformJY(an, x, true, -sinPiScalar(an));
   }
   if (x < 1e-5) return besselJSeriesReal(nu, x);
   if (x < 25) {
@@ -788,6 +890,11 @@ export function besselYRealOrder(nu: f64, x: f64): f64 {
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, true);
   if (an > 2500000000) {
     throw new RangeError(`besselY: n = ${an} exceeds the supported maximum of 2500000000`);
+  }
+  if (an >= 1000000) {
+    if (nu > 0) return besselUniformJY(an, x, true);
+    const j = besselUniformJY(an, x, false);
+    return sinPiScalar(an) * j + besselUniformJY(an, x, true, cosPiScalar(an));
   }
   if (x < 1e-5) {
     if (nu > 0) return besselYTemmeSmall(an, x, 1);
@@ -838,6 +945,11 @@ export function besselJScalar(n: f64, x: f64): f64 {
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
   if (ni > 2500000000) {
     throw new RangeError(`besselJ: n = ${ni} exceeds the supported maximum of 2500000000`);
+  }
+
+  if (ni >= 1000000) {
+    const value = besselUniformJY(ni, ax, false);
+    return x < 0 && ni % 2 === 1 ? -value : value;
   }
 
   // Upward recurrence is stable only when x > n; otherwise it amplifies
@@ -919,6 +1031,7 @@ export function besselYScalar(n: f64, x: f64): f64 {
   if (ni > 2500000000) {
     throw new RangeError(`besselY: n = ${ni} exceeds the supported maximum of 2500000000`);
   }
+  if (ni >= 1000000) return besselUniformJY(ni, x, true);
   let yPrev: f64 = besselY0Scalar(x);
   let yCurr: f64 = besselY1Scalar(x);
   for (let k = 1; k < ni; k++) {
