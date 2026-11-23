@@ -14,19 +14,30 @@
  * scalar derivative of an ordinary numeric function at a point, with no finite
  * differences and no manual tape.
  */
-import { Dual } from '@danielsimonjr/mathts-core';
+import { Dual, isDual } from '@danielsimonjr/mathts-core';
 
 /** Function of one dual number, as the forward-mode derivative helpers take it. */
 export type DualFn = (x: Dual) => Dual;
 
+function evaluateDual<T>(name: string, fn: (x: T) => Dual, x: T): Dual {
+  if (typeof fn !== 'function') throw new TypeError(`${name}: expected a function`);
+  const result = fn(x);
+  if (!isDual(result)) {
+    throw new TypeError(
+      `${name}: the function must return a Dual; use the typed arithmetic functions`
+    );
+  }
+  return result;
+}
+
 /** Exact derivative of `fn: ℝ → ℝ` at `x0` (forward-mode AD). */
 export function derivativeAt(fn: DualFn, x0: number): number {
-  return fn(Dual.variable(x0)).deriv;
+  return evaluateDual('derivativeAt', fn, Dual.variable(x0)).deriv;
 }
 
 /** Both the value and the exact derivative of `fn` at `x0`. */
 export function valueAndDerivativeAt(fn: DualFn, x0: number): { value: number; deriv: number } {
-  const r = fn(Dual.variable(x0));
+  const r = evaluateDual('valueAndDerivativeAt', fn, Dual.variable(x0));
   return { value: r.value, deriv: r.deriv };
 }
 
@@ -38,7 +49,7 @@ export function gradientAt(fn: (x: Dual[]) => Dual, x: readonly number[]): numbe
   const grad = new Array<number>(x.length);
   for (let k = 0; k < x.length; k++) {
     const duals = x.map((xi, i) => (i === k ? Dual.variable(xi) : Dual.constant(xi)));
-    grad[k] = fn(duals).deriv;
+    grad[k] = evaluateDual('gradientAt', fn, duals).deriv;
   }
   return grad;
 }

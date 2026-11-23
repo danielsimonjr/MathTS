@@ -63,7 +63,7 @@ describe('lusolve on nested input reads the packed U factor without a nested cop
         ],
         [1, 1]
       )
-    ).toThrow(/singular/i);
+    ).toThrow(/coefficient matrix must have finite entries/);
     expect(() =>
       lusolve(
         [

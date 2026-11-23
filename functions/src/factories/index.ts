@@ -10,6 +10,11 @@
 
 import { factoryScope, type TypedBuilder } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
+import * as checks from '../utils/is.js';
+import { factory } from '../utils/factory.js';
+import { mixin as attachEmitter } from '../utils/emitter.js';
+import { ArgumentsError } from '../error/ArgumentsError.js';
+import { MathJSDenseMatrix, MathJSSparseMatrix } from './matrix-bridge.js';
 import { add, multiply } from '../typed/arithmetic.js';
 import { registerDivideInverse } from '../typed/divide-inverse.js';
 import { registerCollectionBinary } from '../typed/collection-binary.js';
@@ -1983,3 +1988,65 @@ import {
     _mathWithTransform[create.fn] = create(factoryScope as Record<string, unknown>);
   }
 }
+
+const compatConstructors: {
+  AccessorNode: ReturnType<typeof createAccessorNode>;
+  ArgumentsError: typeof ArgumentsError;
+  ArrayNode: ReturnType<typeof createArrayNode>;
+  AssignmentNode: ReturnType<typeof createAssignmentNode>;
+  BlockNode: ReturnType<typeof createBlockNode>;
+  ConditionalNode: ReturnType<typeof createConditionalNode>;
+  ConstantNode: ReturnType<typeof createConstantNode>;
+  DenseMatrix: typeof MathJSDenseMatrix;
+  FibonacciHeap: ReturnType<typeof createFibonacciHeapClass>;
+  FunctionAssignmentNode: ReturnType<typeof createFunctionAssignmentNode>;
+  FunctionNode: ReturnType<typeof createFunctionNode>;
+  ImmutableDenseMatrix: ReturnType<typeof createImmutableDenseMatrixClass>;
+  Index: ReturnType<typeof createIndexClass>;
+  IndexNode: ReturnType<typeof createIndexNode>;
+  Node: ReturnType<typeof createNode>;
+  ObjectNode: ReturnType<typeof createObjectNode>;
+  OperatorNode: ReturnType<typeof createOperatorNode>;
+  ParenthesisNode: ReturnType<typeof createParenthesisNode>;
+  RangeNode: ReturnType<typeof createRangeNode>;
+  RelationalNode: ReturnType<typeof createRelationalNode>;
+  ResultSet: ReturnType<typeof createResultSet>;
+  Spa: ReturnType<typeof createSpaClass>;
+  SparseMatrix: typeof MathJSSparseMatrix;
+  SymbolNode: ReturnType<typeof createSymbolNode>;
+  Unit: ReturnType<typeof createUnitClass>;
+} = {
+  AccessorNode: _AccessorNode,
+  ArgumentsError,
+  ArrayNode: _ArrayNode,
+  AssignmentNode: _AssignmentNode,
+  BlockNode: _BlockNode,
+  ConditionalNode: _ConditionalNode,
+  ConstantNode: _ConstantNode,
+  DenseMatrix: MathJSDenseMatrix,
+  FibonacciHeap: _FibonacciHeap,
+  FunctionAssignmentNode: _FunctionAssignmentNode,
+  FunctionNode: _FunctionNode,
+  ImmutableDenseMatrix: _ImmutableDenseMatrix,
+  Index: _Index,
+  IndexNode: _IndexNode,
+  Node: _Node,
+  ObjectNode: _ObjectNode,
+  OperatorNode: _OperatorNode,
+  ParenthesisNode: _ParenthesisNode,
+  RangeNode: _RangeNode,
+  RelationalNode: _RelationalNode,
+  ResultSet: _ResultSet,
+  Spa: _Spa,
+  SparseMatrix: MathJSSparseMatrix,
+  SymbolNode: _SymbolNode,
+  Unit: _Unit,
+};
+
+/** Internal host bindings for the mathjs compatibility package. */
+export const factory_mathjsCompat = {
+  constructors: compatConstructors,
+  checks,
+  factory,
+  attachEmitter,
+};

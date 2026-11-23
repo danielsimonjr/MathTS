@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1385 exports).
+> `@danielsimonjr/mathts-functions` (1387 exports).
 
 ### Functions by category
 
@@ -712,15 +712,15 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `DEFAULT_MUTATION_WEIGHTS`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `EVALUATE_SCOPE_OMIT`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `MASS_PROPERTY_SHAPES`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
 
-### Classes & types (2)
+### Classes & types (3)
 
-`Chain`, `Interval`
+`Chain`, `Help`, `Interval`
 
-### Factory-shadowed (`factory_*`, 64)
+### Factory-shadowed (`factory_*`, 65)
 
 These duplicate a typed export under a `factory_` prefix.
 
-`factory_abs`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atan2`, `factory_atanh`, `factory_cbrt`, `factory_ceil`, `factory_compare`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_createUnit`, `factory_csc`, `factory_ctranspose`, `factory_cube`, `factory_cumsum`, `factory_divide`, `factory_dot`, `factory_equal`, `factory_exp`, `factory_expm1`, `factory_fix`, `factory_floor`, `factory_gcd`, `factory_hypot`, `factory_larger`, `factory_largerEq`, `factory_lcm`, `factory_log`, `factory_log10`, `factory_log1p`, `factory_log2`, `factory_max`, `factory_mean`, `factory_min`, `factory_mod`, `factory_norm`, `factory_nthRoot`, `factory_pow`, `factory_round`, `factory_sec`, `factory_sign`, `factory_sin`, `factory_sinh`, `factory_smaller`, `factory_smallerEq`, `factory_sqrt`, `factory_square`, `factory_std`, `factory_subtract`, `factory_sum`, `factory_tan`, `factory_tanh`, `factory_transpose`, `factory_unaryMinus`, `factory_unaryPlus`, `factory_variance`, `factory_xgcd`
+`factory_abs`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atan2`, `factory_atanh`, `factory_cbrt`, `factory_ceil`, `factory_compare`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_createUnit`, `factory_csc`, `factory_ctranspose`, `factory_cube`, `factory_cumsum`, `factory_divide`, `factory_dot`, `factory_equal`, `factory_exp`, `factory_expm1`, `factory_fix`, `factory_floor`, `factory_gcd`, `factory_hypot`, `factory_larger`, `factory_largerEq`, `factory_lcm`, `factory_log`, `factory_log10`, `factory_log1p`, `factory_log2`, `factory_mathjsCompat`, `factory_max`, `factory_mean`, `factory_min`, `factory_mod`, `factory_norm`, `factory_nthRoot`, `factory_pow`, `factory_round`, `factory_sec`, `factory_sign`, `factory_sin`, `factory_sinh`, `factory_smaller`, `factory_smallerEq`, `factory_sqrt`, `factory_square`, `factory_std`, `factory_subtract`, `factory_sum`, `factory_tan`, `factory_tanh`, `factory_transpose`, `factory_unaryMinus`, `factory_unaryPlus`, `factory_variance`, `factory_xgcd`
 
 ### Namespace aggregates (16)
 

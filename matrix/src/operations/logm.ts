@@ -318,13 +318,8 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
   for (let i = 1; i < T.length; i++)
     if (negligibleSubdiagonal(T, i) && Math.abs(T[i][i - 1]) > 1e-12) residue = true;
 
-  // Check that all 1×1 diagonal entries are strictly positive
-  // A positive eigenvalue at or below 1e-14 is accepted only when it is 1e8 times above the
-  // backward error of the Schur form, so its logarithm has a relative error of at most
-  // 1e-8 (#1125). The rounding noise of a zero eigenvalue is of the size of that error.
-  // An eigenvalue at most 1e-8 of the largest diagonal entry is also confirmed on a second
-  // Schur form (#1174): the noise of a zero eigenvalue is 1e-16 · max|A|, above 1e-14 from a
-  // scale of 2^10 up, so the absolute test alone passes it.
+  // A non-positive real eigenvalue is outside the domain. Compare small positive
+  // eigenvalues to the Schur backward error and confirm them independently (#1174).
   const n = T.length;
   let backwardError = -1;
   let dmax = 0;
@@ -338,16 +333,7 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
       // A 2×2 block holds a complex pair of modulus m. It is checked like a 1×1 entry of
       // that size: noise of a zero eigenvalue cluster forms such a block (#1174).
       const m = blockModulus(T, i);
-      if (!(m > 1e-14)) {
-        if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
-        if (!(m > 0)) throw nonPositiveEigenvalue(m, ', a complex pair');
-        if (!(m >= 1e8 * backwardError))
-          throw numericallySingular(
-            m,
-            backwardError,
-            ', a complex pair that is not above the floor 1e-14'
-          );
-      }
+      if (!(m > 0)) throw nonPositiveEigenvalue(m, ', a complex pair');
       if (!(m > 1e-8 * dmax)) {
         if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
         if (m < NOISE_FACTOR * backwardError)
@@ -368,12 +354,7 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
       continue;
     }
     const d = T[i][i];
-    if (d <= 1e-14) {
-      if (d <= 0) throw nonPositiveEigenvalue(d);
-      if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
-      if (d < 1e8 * backwardError)
-        throw numericallySingular(d, backwardError, ', which is not above the floor 1e-14');
-    }
+    if (d <= 0) throw nonPositiveEigenvalue(d);
     if (d <= 1e-8 * dmax) {
       if (backwardError < 0) backwardError = schurBackwardError(A, T, Q);
       if (d < NOISE_FACTOR * backwardError)
@@ -451,21 +432,13 @@ function logmSchur(A: number[][], tol: number): { logm: number[][]; residue: boo
 function validateEigenvalues(A: number[][]): void {
   const { values } = eig(A, { computeVectors: false });
   for (const v of values) {
-    if (Math.abs(v.im) > 1e-8) {
+    if (Math.abs(v.im) > 1e-8 * Math.abs(v.re)) {
       throw new Error(
         'matrixLogm: complex eigenvalues detected — matrix logarithm not supported for this matrix ' +
           '(Slice 5.9a; full Schur-based logm deferred to Slice 5.9b)'
       );
     }
-    if (v.re <= 1e-14) {
-      // A positive value at or below the floor is not told from 0.
-      throw new Error(
-        'matrixLogm: non-positive eigenvalue detected — principal logarithm is undefined ' +
-          '(eigenvalue ≈ ' +
-          v.re +
-          (v.re > 0 ? ', which is not above the floor 1e-14)' : ')')
-      );
-    }
+    if (v.re <= 0) throw nonPositiveEigenvalue(v.re);
   }
 }
 

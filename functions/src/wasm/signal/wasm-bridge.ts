@@ -22,6 +22,7 @@
  * is an optimisation, not a correctness requirement.
  */
 
+import { segmentOffset } from '../../signal/spectral-segments.js';
 import {
   getWasm,
   isAsWasm,
@@ -182,7 +183,8 @@ export function welchPSDJS(
   samples: Float64Array,
   frameLength: number,
   overlap: number,
-  windowType: number
+  windowType: number,
+  options?: { coefficients: number[]; detrend: 'constant' | false }
 ): Float64Array {
   const n = samples.length;
   if (n < frameLength || frameLength < 2 || overlap >= frameLength) return new Float64Array(0);
@@ -193,11 +195,13 @@ export function welchPSDJS(
   const fftLen = _nextPow2(frameLength);
 
   // Window coefficients
-  const win = new Float64Array(frameLength);
-  win.fill(1.0);
-  applyWindowJS(win, windowType);
+  const win = options?.coefficients ?? new Float64Array(frameLength).fill(1);
+  if (win instanceof Float64Array) applyWindowJS(win, windowType);
   let winPower = 0;
   for (let i = 0; i < frameLength; i++) winPower += win[i] * win[i];
+  if (!(winPower > 0) && options !== undefined) {
+    throw new RangeError('welchPSD: window must have nonzero power');
+  }
   winPower /= frameLength;
 
   // A power-of-two frame uses the radix-2 FFT. Any other frame needs the DFT of exactly
@@ -212,8 +216,9 @@ export function welchPSDJS(
   const fftData = new Float64Array(fftLen * 2);
 
   while (start + frameLength <= n) {
+    const offset = segmentOffset(samples, start, frameLength, options?.detrend ?? false);
     if (exact) {
-      for (let i = 0; i < frameLength; i++) frameRe[i] = samples[start + i] * win[i];
+      for (let i = 0; i < frameLength; i++) frameRe[i] = (samples[start + i] - offset) * win[i];
       const spectrum = fftExactFloat64(frameRe, frameIm, false);
       for (let k = 0; k < psdLen; k++) {
         const re = spectrum.real[k];
@@ -223,7 +228,7 @@ export function welchPSDJS(
     } else {
       fftData.fill(0);
       for (let i = 0; i < frameLength; i++) {
-        fftData[i * 2] = samples[start + i] * win[i];
+        fftData[i * 2] = (samples[start + i] - offset) * win[i];
       }
       _fftInterleavedJS(fftData, fftLen, false);
       for (let k = 0; k < psdLen; k++) {

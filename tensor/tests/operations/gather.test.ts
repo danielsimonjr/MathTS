@@ -7,7 +7,7 @@
  *  3.  Take multiple indices including duplicates.
  *  4.  Gather all indices in order → identical to input.
  *  5.  Out-of-bounds index throws RangeError.
- *  6.  Negative index throws RangeError (indices must be non-negative).
+ *  6.  Negative indices count from the end.
  *  7.  Axis label is primed (primeLevel incremented by 1).
  *  8.  Other axis labels are preserved unchanged.
  *  9.  Gather on axis 1 of a 2-D matrix.
@@ -82,9 +82,10 @@ describe('gather', () => {
     expect(() => gather(t, 0, [0, 3])).toThrow(RangeError);
   });
 
-  it('6. Negative index throws RangeError', () => {
+  it('6. Negative indices count from the end', () => {
     const t = new Tensor([3], arr([1, 2, 3]));
-    expect(() => gather(t, 0, [-1])).toThrow(RangeError);
+    expect([...gather(t, 0, [-1, -3]).data]).toEqual([3, 1]);
+    expect(() => gather(t, 0, [-4])).toThrow(RangeError);
   });
 
   it('7. Axis label is primed (primeLevel incremented by 1)', () => {

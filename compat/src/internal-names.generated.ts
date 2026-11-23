@@ -64,6 +64,7 @@ export const COMPAT_INTERNAL_NAMES = [
   "factory_log10",
   "factory_log1p",
   "factory_log2",
+  "factory_mathjsCompat",
   "factory_max",
   "factory_mean",
   "factory_min",

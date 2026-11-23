@@ -51,6 +51,31 @@ export function chebyshevT(n: f64, x: f64): f64 {
   return curr;
 }
 
+// See the phase and magnitude bounds in the JavaScript Hermite kernel.
+function hermiteOverflow(n: f64, x: f64): f64 {
+  if (n < 1024 || isNaN(x)) return NaN;
+  const ax = Math.abs(x);
+  const odd = n % 2.0 == 1.0;
+  const k2 = 2 * n + 1;
+  const k = Math.sqrt(k2);
+  if (ax >= k) {
+    // The Jacobi matrix bounds every Hermite root by sqrt(2(n-1)).
+    // Pairing opposite roots gives factors x² - root² >= 3 here.
+    return odd && x < 0 ? -Infinity : Infinity;
+  }
+  if (odd && ax == 0.0) return 0;
+  const fraction = ax / k;
+  const error = -0.25 * Math.log1p(-fraction * fraction);
+  if (error >= 1) return NaN;
+  const q = Math.sqrt((k - ax) * (k + ax));
+  const phase = (k2 * Math.asin(fraction) + ax * q) / 2;
+  const wave = odd ? Math.sin(phase) : Math.cos(phase);
+  const roundoff = 1.7763568394002505e-15 * phase;
+  if (Math.abs(wave) <= error + roundoff + 5e-324) return NaN;
+  const sign = Math.floor(n / 2.0) % 2.0 == 0.0 ? wave : -wave;
+  return sign < 0 !== (odd && x < 0) ? -Infinity : Infinity;
+}
+
 /** Hermite polynomial H_n(x) (physicists' convention). */
 export function hermiteH(n: f64, x: f64): f64 {
   if (!isFinite(n) || n < 0) return NaN;
@@ -59,6 +84,12 @@ export function hermiteH(n: f64, x: f64): f64 {
   const ni: i32 = <i32>nr;
   if (ni == 0) return 1.0;
   if (ni == 1) return 2.0 * x;
+  const certified: f64 = hermiteOverflow(nr, x);
+  if (!isNaN(certified)) return certified;
+  if (isNaN(x)) return NaN;
+  if (ni > 10000000) {
+    throw new RangeError('hermiteH: uncertified overflow requires degree at most 10000000');
+  }
   // The scaled recurrence keeps |curr| at or below 2^600, so a step leaves the range only for
   // |x| above about 2^422 (or infinite): the value is then the leading term (2 x)^n.
   let prev: f64 = 1.0;

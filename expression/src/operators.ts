@@ -336,13 +336,16 @@ function unwrapParen(_node: PrecedenceNode, parenthesis: string | undefined): Pr
  */
 export function getPrecedence(
   _node: unknown,
-  parenthesis: string | undefined,
-  implicit: string | undefined,
-  parent: unknown
+  parenthesis?: string,
+  implicit?: string,
+  parent?: unknown
 ): number | null {
   // The various AST node classes in this package don't share a single declared
   // base type, but all expose the structural members captured by PrecedenceNode.
   let node = _node as PrecedenceNode;
+  if (!node || typeof node.getIdentifier !== 'function' || typeof node.getContent !== 'function') {
+    throw new TypeError('getPrecedence: expected an expression Node');
+  }
   const parentNode = parent as PrecedenceNode | undefined;
   if (parenthesis !== 'keep') {
     // ParenthesisNodes are only ignored when not in 'keep' mode

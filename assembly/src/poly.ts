@@ -1,3 +1,5 @@
+import { scaledDiagonalProduct } from './algebra/diagonal-product';
+
 /**
  * Polynomial hot-loop kernels — AssemblyScript parity port.
  *
@@ -62,7 +64,7 @@ function detSquare(flat: Float64Array, n: i32): f64 {
   const m = new Float64Array(n * n);
   for (let i: i32 = 0; i < n * n; i++) m[i] = flat[i];
 
-  let det: f64 = 1.0;
+  let sign: f64 = 1.0;
   for (let col: i32 = 0; col < n; col++) {
     // Partial pivoting.
     let maxRow: i32 = col;
@@ -74,16 +76,15 @@ function detSquare(flat: Float64Array, n: i32): f64 {
         maxRow = row;
       }
     }
-    if (maxVal < 1e-15) return 0.0;
+    if (maxVal == 0.0) return 0.0;
     if (maxRow != col) {
       for (let k: i32 = 0; k < n; k++) {
         const tmp: f64 = m[col * n + k];
         m[col * n + k] = m[maxRow * n + k];
         m[maxRow * n + k] = tmp;
       }
-      det = -det;
+      sign = -sign;
     }
-    det *= m[col * n + col];
     for (let row: i32 = col + 1; row < n; row++) {
       const factor: f64 = m[row * n + col] / m[col * n + col];
       for (let k: i32 = col; k < n; k++) {
@@ -91,7 +92,7 @@ function detSquare(flat: Float64Array, n: i32): f64 {
       }
     }
   }
-  return det;
+  return scaledDiagonalProduct(m, n, sign);
 }
 
 /** Build the (m+n) × (m+n) Sylvester matrix and return its determinant. */
