@@ -231,7 +231,7 @@ export function fftRealCoreFloat64(input: Float64Array): {
   imag: Float64Array;
 } {
   const n = input.length;
-  if (n < 2) return fftCoreFloat64(input, undefined);
+  if (n < 64) return fftCoreFloat64(input, undefined);
   const half = n / 2;
   const limit = Number.MAX_VALUE / n;
   const even = new Float64Array(half);
