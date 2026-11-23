@@ -551,11 +551,17 @@ export function arg(c: Complex): number {
 // Matrix-specific Shims
 // =============================================================================
 
+type TransposeScalar = number | bigint | BigNumber | Complex | Fraction;
+
 /**
- * Transpose matrix (mathjs-compatible). Array in → array out (mathjs returns a
- * plain nested array for array input, a Matrix for Matrix input).
+ * Transpose a matrix or numeric scalar (mathjs-compatible). Nested arrays
+ * return arrays, matrices retain their representation, and scalars retain their value.
  */
-export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue | number[][] {
+export function transpose<T extends TransposeScalar>(m: T): T;
+export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue | number[][];
+export function transpose(
+  m: CompatMatrixValue | number[][] | TransposeScalar
+): CompatMatrixValue | number[][] | TransposeScalar {
   if (Array.isArray(m)) {
     return DenseMatrix.fromArray(m).transpose().toArray();
   }
@@ -566,7 +572,16 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
     // The factory transpose takes the dense and the sparse matrix of the factory layer.
     return _transpose(m as unknown) as CompatMatrixValue;
   }
-  throw new TypeError('Expected matrix or 2D array');
+  if (
+    typeof m === 'number' ||
+    typeof m === 'bigint' ||
+    isBigNumber(m) ||
+    isComplex(m) ||
+    isFraction(m)
+  ) {
+    return _transpose(m) as TransposeScalar;
+  }
+  throw new TypeError('Expected matrix, 2D array, or numeric scalar');
 }
 
 /**
