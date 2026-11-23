@@ -22,7 +22,7 @@ import { toArrayData, toFloat64Data, toInt32Data } from './data-guards.js';
 import { chunkPairTyped, chunkTyped } from './chunk-typed.js';
 import { fftFrameInPlace } from './fft-core.js';
 import { assertMatmulBuffers, matmulSequential } from './matmul-sequential.js';
-import { applyUnary, type UnaryFn } from './unary-kernels.js';
+import { applyUnary, UNARY_KERNELS, type UnaryFn } from './unary-kernels.js';
 import {
   _workerPairwiseSum,
   _workerPairwiseDot,
@@ -1621,6 +1621,9 @@ export class MathWorkerPool {
     fn: UnaryFn,
     options?: TaskOptions
   ): Promise<ParallelResult<Float64Array>> {
+    if (typeof fn !== 'string' || !Object.hasOwn(UNARY_KERNELS, fn)) {
+      throw new TypeError('unary: expected a supported kernel name');
+    }
     data = toFloat64Data('unary', data);
     const start = performance.now();
 

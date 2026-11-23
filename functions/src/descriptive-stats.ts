@@ -444,10 +444,12 @@ export interface LinRegressResult {
  * `t.sf`). Unlike `linearRegression`, a zero-variance predictor does not throw.
  */
 export function linregress(x: Vec, y: Vec): LinRegressResult {
-  const n = x.length;
-  if (n !== y.length) throw new Error('linregress: x and y must have equal length');
+  const xs = numberVector('linregress x', x);
+  const ys = numberVector('linregress y', y);
+  const n = xs.length;
+  if (n !== ys.length) throw new Error('linregress: x and y must have equal length');
   if (n < 3) throw new Error('linregress: need at least 3 points for inference');
-  const scaled = fitLineScaled(numberVector('linregress', x), numberVector('linregress', y));
+  const scaled = fitLineScaled(xs, ys);
   const fit = scaled.fit;
   if (fit.sxx === 0) {
     const nan = Number.NaN;

@@ -2382,10 +2382,12 @@ function simplifiesToZero(expr: string): boolean {
 }
 
 /** Throw a `SyntaxError` when `expr` is not an expression, so that no other message hides that. */
-function requireExpression(expr: string, equation: string, caller: string): void {
-  if (parseTree(expr) === null) {
+function requireExpression(expr: string, equation: string, caller: string) {
+  const tree = parseTree(expr);
+  if (tree === null) {
     throw new SyntaxError(`${caller}: cannot read "${equation}" as an expression`);
   }
+  return tree;
 }
 
 /**
@@ -2454,7 +2456,7 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
   }
   const scanRange = readScanRange(options);
   const expr = normalizeEquation(equation, 'solve');
-  requireExpression(expr, equation, 'solve');
+  const tree = requireExpression(expr, equation, 'solve');
 
   if (scanRange !== null) return numericRealRoots(expr, varName, scanRange);
 
@@ -2483,6 +2485,9 @@ export function solve(equation: unknown, varName: string, options?: SolveOptions
     // A difference that the simplifier reduces to 0 (`sin(x) - sin(x)`) is an identity, not a
     // form that has no solution.
     if (simplifiesToZero(expr)) throw identityError('solve', varName, equation);
+    if (!containsSymbol(tree, varName)) {
+      throw new Error(`solve: the equation does not contain the requested variable "${varName}"`);
+    }
     throw new Error(
       `solve: no closed-form solution found for "${equation}". ` +
         'Pass { numeric: true, range: [a, b] } to scan that range for real roots.'

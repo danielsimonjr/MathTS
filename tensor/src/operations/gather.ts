@@ -21,7 +21,7 @@ import { Index } from '../named-index.js';
  *
  * @param t       - Input tensor of any rank.
  * @param axis    - The axis along which to gather. Supports negative indexing.
- * @param indices - The indices to gather. Duplicates are allowed.
+ * @param indices - The indices to gather. Negative indices count from the end. Duplicates are allowed.
  * @returns A new `Tensor` with `shape[axis] === indices.length` and all other
  *          dimensions unchanged. The gathered-axis label is primed.
  *
@@ -33,6 +33,9 @@ import { Index } from '../named-index.js';
  * const rows = gather(matrix, 0, [0, 2]);   // shape [2, 4]
  */
 export function gather(t: Tensor, axis: number, indices: readonly number[]): Tensor {
+  if (!(t instanceof Tensor)) throw new TypeError('gather: expected a Tensor');
+  if (!Number.isInteger(axis)) throw new TypeError('gather: axis must be an integer');
+  if (!Array.isArray(indices)) throw new TypeError('gather: indices must be an array');
   const rank = t.shape.length;
 
   // Normalise negative axis.
@@ -43,14 +46,15 @@ export function gather(t: Tensor, axis: number, indices: readonly number[]): Ten
 
   const dimAx = t.shape[ax];
 
-  // Validate indices.
-  for (let i = 0; i < indices.length; i++) {
-    if (!Number.isInteger(indices[i]) || indices[i] < 0 || indices[i] >= dimAx) {
+  const selected = Array.from(indices, (index, i) => {
+    const normalized = index < 0 ? dimAx + index : index;
+    if (!Number.isInteger(index) || normalized < 0 || normalized >= dimAx) {
       throw new RangeError(
-        `gather: index ${indices[i]} at position ${i} is out of range [0, ${dimAx}) for axis ${ax}`
+        `gather: index ${index} at position ${i} is out of range [-${dimAx}, ${dimAx}) for axis ${ax}`
       );
     }
-  }
+    return normalized;
+  });
 
   // Output shape.
   const outShape = [...t.shape];
@@ -73,10 +77,10 @@ export function gather(t: Tensor, axis: number, indices: readonly number[]): Ten
         rem -= outIdx[k] * outStrides[k];
       }
 
-      // Map gathered axis: outIdx[ax] → indices[outIdx[ax]].
+      // Map gathered axis: outIdx[ax] → selected[outIdx[ax]].
       let flatIn = 0;
       for (let k = 0; k < rank; k++) {
-        const inK = k === ax ? indices[outIdx[k]] : outIdx[k];
+        const inK = k === ax ? selected[outIdx[k]] : outIdx[k];
         flatIn += inK * inStrides[k];
       }
 

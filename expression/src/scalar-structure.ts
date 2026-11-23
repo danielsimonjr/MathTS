@@ -104,6 +104,12 @@ export function forEachScalar(
   visit: (n: ScalarNode, depth: number) => void
 ): void {
   function walk(n: ScalarNode, depth: number): void {
+    if (
+      !n ||
+      (n.kind !== 'number' && n.kind !== 'symbol' && n.kind !== 'call' && n.kind !== 'op')
+    ) {
+      throw new TypeError('forEachScalar: expected a ScalarNode');
+    }
     visit(n, depth);
     if (n.kind === 'call') {
       walk(n.arg, depth + 1);
