@@ -21,7 +21,7 @@
     "autograd/dist/index.js": 74174,
     "autograd/package.json": 2250,
     "functions/dist/index.js": 2232823,
-    "functions/dist/subpath-evaluate.js": 1445001,
+    "functions/dist/subpath-evaluate.js": 1458533,
     "functions/package.json": 3740,
     "functions/dist/wasm/mathts-as.wasm": 66864,
     "expression/dist/index.js": 366761,
@@ -208,13 +208,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1939149
+      "bytes": 1940034
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1948468
+      "bytes": 1949353
     }
   ]
 }

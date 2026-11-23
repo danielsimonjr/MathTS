@@ -114,7 +114,7 @@ describe('eig balances a huge coupling entry (#1240, balance)', () => {
 });
 
 describe('eig scales by the active block, not by an isolated eigenvalue (#1240)', () => {
-  for (const s of [1e200, 1e300, 1e308]) {
+  for (const s of [1e200, 1e250, 1e280, 1e300, 1e308]) {
     it(`[[${s},0,0],[0,0,1],[0,-1,0]] has the values ${s} and +-i`, () => {
       const A = [
         [s, 0, 0],

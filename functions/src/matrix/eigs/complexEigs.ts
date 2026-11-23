@@ -179,6 +179,7 @@ export function createComplexEigs({
     // beside a huge entry keeps its own eigenvalues.
     const rel: Scalar = type === 'BigNumber' ? bignumber(prec as number) : (prec as number);
     const scale = matrixScale(arr, N, type);
+    const original = findVectors ? arr.map((row) => row.slice()) : undefined;
 
     // make sure corresponding rows and columns have similar magnitude
     // important because of numerical stability
@@ -210,7 +211,7 @@ export function createComplexEigs({
     // and original A is unchanged.)
 
     if (findVectors) {
-      const eigenvectors = findEigenvectors(arr, N, C!, R, values, rel, scale, type);
+      const eigenvectors = findEigenvectors(arr, original!, N, C!, R, values, rel, scale, type);
       return { values, eigenvectors };
     }
 
@@ -686,6 +687,7 @@ export function createComplexEigs({
    */
   function findEigenvectors(
     A: Scalar[][],
+    original: Scalar[][],
     N: number,
     C: Scalar[][],
     R: Scalar[][] | null,
@@ -696,6 +698,8 @@ export function createComplexEigs({
   ): EigenvectorResult[] {
     const Cinv = inv(C);
     const U = multiply(multiply(Cinv, A) as Scalar[][], C) as Scalar[][];
+    const correction = multiply(inv(R!), C) as Scalar[][];
+    const scaledOriginal = original.map((row) => row.map((x) => divideScalar(x, scale)));
 
     const big = type === 'BigNumber';
     const cplx = type === 'Complex';
@@ -766,13 +770,97 @@ export function createComplexEigs({
       // Transform back into original array coordinates. A vector of the null space is flat,
       // and a vector of the inverse iteration is a column (`usolve` returns a column), so the
       // product is a matrix times a vector or a matrix times a column; `flatten` makes both flat.
-      const correction = multiply(inv(R!), C) as Scalar[][];
-      solutions = solutions.map((v) => flatten(multiply(correction, v) as Scalar[] | Scalar[][]));
+      const scaledLambda = divideScalar(lambda, scale);
+      const shifted = scaledOriginal.map((row, j) =>
+        row.map((x, k) => (j === k ? (subtract(x, scaledLambda) as Scalar) : x))
+      );
+      // Allow a small multiple of roundoff in the reconstructed basis, with a hard
+      // bound on the backward error even if the caller requests loose QR convergence.
+      const limit = cplx && multiplicities[i] === 1 ? prec : multiplyScalar(prec, 32);
+      const tolerance = lt(limit, 1e-6) ? limit : 1e-6;
+      const valid = (v: Scalar[]) => {
+        const magnitude = vectorMagnitude(v);
+        if (
+          isExactZero(magnitude) ||
+          (typeof magnitude === 'number'
+            ? !Number.isFinite(magnitude)
+            : !toBig(magnitude).isFinite())
+        )
+          return false;
+        const unit = v.map((x) => divideScalar(x, magnitude));
+        const product = flatten(multiply(shifted, unit) as Scalar[] | Scalar[][]);
+        return product.every((x) => le(abs(x), tolerance));
+      };
+
+      solutions = solutions
+        .map((v) => flatten(multiply(correction, v) as Scalar[] | Scalar[][]))
+        .filter(valid);
+      if (solutions.length === 0 && multiplicities[i] === 1) {
+        const refined = approximateNullVector(shifted, zero, one);
+        if (refined && valid(refined)) solutions.push(refined);
+      }
 
       vectors.push(...solutions.map((v) => ({ value: lambda, vector: v })));
     }
 
     return vectors;
+  }
+
+  function vectorMagnitude(vector: Scalar[]): Scalar {
+    return vector.reduce((max, x) => {
+      const magnitude = abs(x);
+      return lt(max, magnitude) ? magnitude : max;
+    }, 0 as Scalar);
+  }
+
+  // Solve the best-conditioned n-1 equations of (A - lambda I)v = 0.
+  // Complete pivoting leaves the weakest column free. The caller checks the
+  // discarded equation against the original system, since lambda is approximate.
+  function approximateNullVector(A: Scalar[][], zero: Scalar, one: Scalar): Scalar[] | null {
+    const n = A.length;
+    const rows = A.map((row) => row.slice());
+    const columns = Array.from({ length: n }, (_, i) => i);
+
+    for (let k = 0; k < n - 1; k++) {
+      let pivotRow = k;
+      let pivotColumn = k;
+      let magnitude = abs(rows[k][columns[k]]);
+      for (let i = k; i < n; i++) {
+        for (let j = k; j < n; j++) {
+          const candidate = abs(rows[i][columns[j]]);
+          if (lt(magnitude, candidate)) {
+            magnitude = candidate;
+            pivotRow = i;
+            pivotColumn = j;
+          }
+        }
+      }
+      if (isExactZero(magnitude)) return null;
+
+      [rows[k], rows[pivotRow]] = [rows[pivotRow], rows[k]];
+      [columns[k], columns[pivotColumn]] = [columns[pivotColumn], columns[k]];
+      const pivot = columns[k];
+      for (let i = k + 1; i < n; i++) {
+        const factor = divideScalar(rows[i][pivot], rows[k][pivot]);
+        for (let j = k + 1; j < n; j++) {
+          const col = columns[j];
+          rows[i][col] = subtract(rows[i][col], multiplyScalar(factor, rows[k][col])) as Scalar;
+        }
+      }
+    }
+
+    const vector: Scalar[] = Array(n).fill(zero);
+    vector[columns[n - 1]] = one;
+    for (let k = n - 2; k >= 0; k--) {
+      let rhs = zero;
+      for (let j = k + 1; j < n; j++) {
+        const col = columns[j];
+        rhs = subtract(rhs, multiplyScalar(rows[k][col], vector[col])) as Scalar;
+      }
+      const pivot = columns[k];
+      vector[pivot] = divideScalar(rhs, rows[k][pivot]);
+    }
+    return vector;
   }
 
   /**
@@ -932,9 +1020,22 @@ export function createComplexEigs({
     // matrix is diagonalizable
     // return its eigenvectors as columns
     if (gt(abs(subtract(l1, l2) as Scalar), prec)) {
+      const eigenvector = (lambda: Scalar): [Scalar, Scalar] => {
+        // Take the perpendicular to the larger row of A - lambda I.
+        // The other row may be almost zero and lose most of its significant digits.
+        const la = subtract(lambda, a) as Scalar;
+        const ld = subtract(lambda, d) as Scalar;
+        const top = lt(abs(b), abs(la)) ? abs(la) : abs(b);
+        const bottom = lt(abs(c), abs(ld)) ? abs(ld) : abs(c);
+        const [x, y] = lt(top, bottom) ? [ld, c] : [b, la];
+        const magnitude = lt(abs(x), abs(y)) ? abs(y) : abs(x);
+        return [divideScalar(x, magnitude), divideScalar(y, magnitude)];
+      };
+      const first = eigenvector(l1);
+      const second = eigenvector(l2);
       return [
-        [subtract(l1, d) as Scalar, subtract(l2, d) as Scalar],
-        [c, c],
+        [first[0], second[0]],
+        [first[1], second[1]],
       ];
     }
 
