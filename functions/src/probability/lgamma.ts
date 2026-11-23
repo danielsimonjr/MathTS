@@ -7,7 +7,7 @@
 
 import { lgammaNumber, lnSqrt2PI } from '../plain/number/index.js';
 import { factory } from '../utils/factory.js';
-import { copysign } from '../utils/number.js';
+import { logSinPiForReflection } from './log-sin-pi.js';
 import type { TypedFunction } from '../core/function/typed.js';
 
 // Type definitions for lgamma
@@ -102,23 +102,21 @@ export const createLgamma = /* #__PURE__ */ factory(
     });
 
     function lgammaComplex(n: ComplexType): ComplexType {
-      const TWOPI = 6.2831853071795864769252842; // 2*pi
       const LOGPI = 1.1447298858494001741434262; // log(pi)
 
       const REFLECTION = 0.1;
 
       if (n.isNaN()) {
         return new Complex(NaN, NaN);
-      } else if (n.im === 0) {
+      } else if (n.im === 0 && (n.re >= 0 || Number.isInteger(n.re))) {
         return new Complex(lgammaNumber(n.re), 0);
       } else if (n.re >= SMALL_RE || Math.abs(n.im) >= SMALL_IM) {
         return lgammaStirling(n);
       } else if (n.re <= REFLECTION) {
         // Reflection formula. see Proposition 3.1 in [1]
-        const tmp = copysign(TWOPI, n.im) * Math.floor(0.5 * n.re + 0.25);
-        const a = n.mul(Math.PI).sin().log();
+        const a = logSinPiForReflection(n.re, n.im);
         const b: ComplexType = lgammaComplex(new Complex(1 - n.re, -n.im));
-        return new Complex(LOGPI, tmp).sub(a).sub(b);
+        return new Complex(LOGPI - a.re, -a.im).sub(b);
       } else if (n.im >= 0) {
         return lgammaRecurrence(n);
       } else {

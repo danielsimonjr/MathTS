@@ -6,7 +6,7 @@ export function line(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): stri
   return draw2D([{ type: 'line', x, y }], opts);
 }
 
-/** Public: scatter plot of one or many series. */
+/** Scatter plot of one or many series. Warns when non-finite coordinate pairs are omitted. */
 export function scatter(x: Layer2D['x'], y: Layer2D['y'], opts?: PlotOptions): string {
   return draw2D([{ type: 'scatter', x, y }], opts);
 }

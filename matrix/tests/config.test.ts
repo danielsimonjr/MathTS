@@ -38,8 +38,8 @@ describe('matrix config', () => {
       expect(DEFAULT_CONFIG.backends.gpu.enabled).toBe(false);
     });
 
-    it('should have WASM multiply threshold 256 (measured matmul crossover)', () => {
-      expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.multiply).toBe(256);
+    it('should have WASM multiply threshold 24³ (measured matmul crossover)', () => {
+      expect(DEFAULT_CONFIG.backends.wasm.operationThresholds?.multiply).toBe(13_824);
     });
 
     it('should default to double precision', () => {
@@ -137,9 +137,8 @@ describe('matrix config', () => {
     });
 
     it('should use operation-specific thresholds', () => {
-      // multiply WASM threshold is 256 (measured), not the retired 500.
-      expect(getRecommendedBackend(600, 'multiply')).toBe('wasm');
-      expect(getRecommendedBackend(300, 'multiply')).toBe('wasm');
+      expect(getRecommendedBackend(13_824, 'multiply')).toBe('wasm');
+      expect(getRecommendedBackend(13_823, 'multiply')).toBe('js');
     });
   });
 

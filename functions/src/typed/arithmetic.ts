@@ -647,8 +647,15 @@ function toNested(m: unknown): unknown {
 // Leaf operations for the element-wise walks above — deferred closures so they
 // resolve the binary `add` / `subtract` / `multiply` at call time (after all are defined).
 const addOp: ScalarOp = (x, y) => (add as unknown as ScalarOp)(x, y);
+const addCollectionOp: ScalarOp = (x, y) =>
+  typeof x === 'string' || typeof y === 'string'
+    ? (factoryScope.addScalar as ScalarOp)(x, y)
+    : addOp(x, y);
 const subOp: ScalarOp = (x, y) => (subtract as unknown as ScalarOp)(x, y);
-const mulOp: ScalarOp = (x, y) => (multiply as unknown as ScalarOp)(x, y);
+const mulOp: ScalarOp = (x, y) =>
+  typeof x === 'string' || typeof y === 'string'
+    ? (factoryScope.multiplyScalar as ScalarOp)(x, y)
+    : (multiply as unknown as ScalarOp)(x, y);
 
 const addForNumberPath: { fn?: object } = {};
 const subtractForNumberPath: { fn?: object } = {};
@@ -723,7 +730,7 @@ function scalarCollectionSignatures(
   return rows;
 }
 
-const addKernels = elementwiseKernels(addForNumberPath, addOp);
+const addKernels = elementwiseKernels(addForNumberPath, addCollectionOp);
 const subtractKernels = elementwiseKernels(subtractForNumberPath, subOp);
 const multiplyKernels = elementwiseKernels(multiplyForNumberPath, mulOp, true);
 const divideKernels = elementwiseKernels(divideForNumberPath, divOp, true);
@@ -836,7 +843,8 @@ const unitDiv = (a: unknown, b: unknown): unknown => asUnit(a).divide(b);
  *
  * `null`, `undefined`, strings, symbols, functions, and objects that are not a
  * numeric type, Unit, matrix, array, or typed array throw
- * `TypeError: add: unexpected type …`. A numeric string is not coerced to Complex.
+ * `TypeError: add: unexpected type …` when passed as scalar arguments.
+ * Numeric strings inside collections use the scalar factory conversions.
  * `bigint` mixed with `number` returns a `number`, not a Fraction.
  */
 export const add = withBinaryScalarGuards(
@@ -882,26 +890,26 @@ export const add = withBinaryScalarGuards(
     // broadcast. Leaves fold through the binary `add`, so number / Complex /
     // Fraction / BigNumber elements all work.
     'Array, Array': (a: unknown[], b: unknown[]): unknown =>
-      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'Array, number': (a: unknown[], b: f64): unknown =>
-      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'number, Array': (a: f64, b: unknown[]): unknown =>
-      elementwiseNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseNumber(addForNumberPath.fn!, addCollectionOp, a, b),
 
     // Element-wise matrix addition (mathjs parity). Sparse⊕sparse stays sparse so
     // the CSparse algebra factories (csAmd's C = A + A', etc.) get CSC output.
     'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'DenseMatrix, number': (a: unknown, b: f64): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'number, DenseMatrix': (a: f64, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'SparseMatrix, number': (a: unknown, b: f64): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'number, SparseMatrix': (a: f64, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
 
     // An Array with a matrix, and a dense with a sparse matrix (mathjs parity): a dense matrix.
     // Without these rows typed-function converts the matrix to an Array, and the sum loses its
@@ -3487,14 +3495,17 @@ export function matmul(
  * Transpose. With `rows` and `cols`, `data` is a row-major `rows x cols` Float64Array and the
  * result is a new `cols x rows` Float64Array. With one argument, `data` is a matrix or a nested
  * array, and the result has the same storage, as in mathjs.
+ *
+ * The function is a typed-function, as in mathjs. A callback adapter (`map`, `forEach`,
+ * `filter`, the Matrix methods and `evaluate`) reads its signatures, so it passes the value alone
+ * and not the index as `rows`.
+ * @throws TypeError when a typed array has no rows and cols, or when the arguments have no signature
  * @throws Error when a Float64Array does not hold rows*cols elements
  */
-export function transpose(data: Float64Array, rows: i32, cols: i32): Float64Array;
-export function transpose<T>(data: readonly (readonly T[])[]): T[][];
-export function transpose<T>(data: readonly T[]): T[];
-export function transpose(data: unknown): unknown;
-export function transpose(data: unknown, rows?: i32, cols?: i32): unknown {
-  if (rows === undefined && cols === undefined) {
+export const transpose = mathTyped('transpose', {
+  'any, number, number': (data: Float64Array, rows: i32, cols: i32): Float64Array =>
+    transposeFlat(data, rows, cols),
+  any: (data: unknown): unknown => {
     if (ArrayBuffer.isView(data)) {
       throw new TypeError(
         'transpose: a typed array needs rows and cols: transpose(data, rows, cols)'
@@ -3503,12 +3514,13 @@ export function transpose(data: unknown, rows?: i32, cols?: i32): unknown {
     // A matrix of the matrix package has its own transpose, which keeps its class.
     if (isDenseMatrix(data) || isSparseMatrix(data)) return data.transpose();
     return exactReductions('transpose').transpose(data);
-  }
-  if (typeof rows !== 'number' || typeof cols !== 'number') {
-    throw new TypeError('transpose: pass one matrix, or data, rows and cols');
-  }
-  return transposeFlat(data as Float64Array, rows, cols);
-}
+  },
+}) as {
+  (data: Float64Array, rows: i32, cols: i32): Float64Array;
+  <T>(data: readonly (readonly T[])[]): T[][];
+  <T>(data: readonly T[]): T[];
+  (data: unknown): unknown;
+};
 
 function transposeFlat(data: Float64Array, rows: i32, cols: i32): Float64Array {
   if (data.length !== rows * cols) {

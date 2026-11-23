@@ -7,6 +7,8 @@
  * edge cases, and the typedSet barrel.
  */
 import { describe, it, expect } from 'vitest';
+import * as mathjs from 'mathjs';
+import { matrix, sparse } from '../src/index.js';
 import {
   setUnion,
   setIntersect,
@@ -371,4 +373,53 @@ describe('typedSet barrel', () => {
   it('typedSet.setUnion is the same as named export', () => {
     expect(typedSet.setUnion).toBe(setUnion);
   });
+});
+
+describe('set operations with matrix inputs', () => {
+  const operations = { setUnion, setIntersect, setDifference, setSymDifference, setCartesian };
+  type Operation = keyof typeof operations;
+  type MatrixResult = {
+    size(): number[];
+    toArray(): unknown[];
+    storage(): string;
+  };
+  const oracle = mathjs as unknown as Record<Operation, (a: unknown, b: unknown) => MatrixResult>;
+
+  it.each(Object.keys(operations) as Operation[])(
+    '%s returns the mathjs matrix shape and values',
+    (name) => {
+      const a = [
+        [1, 2],
+        [3, 4],
+      ];
+      const b = [
+        [2, 0],
+        [1, 4],
+      ];
+      const inputs = [
+        [matrix(a), matrix(b), mathjs.matrix(a), mathjs.matrix(b)],
+        [matrix(a), b, mathjs.matrix(a), b],
+        [a, matrix(b), a, mathjs.matrix(b)],
+        [sparse(a), b, mathjs.sparse(a), b],
+        [matrix([]), b, mathjs.matrix([]), b],
+        [a, matrix([]), a, mathjs.matrix([])],
+        [matrix([]), matrix([]), mathjs.matrix([]), mathjs.matrix([])],
+      ];
+      for (const [left, right, expectedLeft, expectedRight] of inputs) {
+        const got = operations[name](left, right) as MatrixResult;
+        const oracleLeft = Array.isArray(expectedLeft) ? mathjs.matrix(expectedLeft) : expectedLeft;
+        const oracleRight = Array.isArray(expectedRight)
+          ? mathjs.matrix(expectedRight)
+          : expectedRight;
+        const want = oracle[name](oracleLeft, oracleRight);
+        expect(got.storage()).toBe('dense');
+        const oracleValues = Array.isArray(want) ? want : want.toArray();
+        const expected = name === 'setCartesian' ? oracleValues : oracleValues.flat(Infinity);
+        const shape =
+          name === 'setCartesian' && expected.length > 0 ? [expected.length, 2] : [expected.length];
+        expect(got.size()).toEqual(shape);
+        expect(got.toArray().sort()).toEqual(expected.slice().sort());
+      }
+    }
+  );
 });

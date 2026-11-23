@@ -22,15 +22,20 @@
  * **Closure-stringification contract:**
  * Only closures that are self-contained (no free variables referencing
  * outer scope) survive worker dispatch.  The heuristic in
- * `validateClosureSource` tokenizes the function source and rejects any
- * identifier that is not:
- *   - the declared parameter name(s),
+ * `validateClosureSource` reads the parameter list of the function source and
+ * tokenizes the source. It rejects any identifier that is not:
+ *   - a declared parameter name (a plain name, a name with a default value,
+ *     or a rest parameter),
+ *   - the own name of a function expression (`function f(x){ return f(x - 1); }`),
  *   - a `Math` property access (`Math.*`),
  *   - a standard numeric literal keyword (`Infinity`, `NaN`), or
  *   - a keyword / punctuation.
+ * An identifier is read with the Unicode rule (`ID_Start`, `ID_Continue`, `$`, `_`).
+ * A non-ASCII name is accepted when an ASCII name in the same position is accepted.
+ * `this`, `super` and `import` are not allowed: they have another binding in the worker.
  * Arrow functions (`x => x*x`, `(x) => x*x`) and classic function expressions
  * (`function(x){ return x*x; }`) both stringify cleanly.
- * Async closures are rejected unconditionally.
+ * Async closures, generators, methods and destructured parameters are rejected.
  *
  * These use plain exports (not mathTyped) because they accept function
  * arguments, which typed-function does not handle well.
@@ -42,6 +47,7 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 import { isDeterministic, pairwiseSum } from '@danielsimonjr/mathts-core';
 import { numberVector } from './number-matrix.js';
 import { assertLoopOrder } from '../utils/limits.js';
+import { parameterName, readParameterList } from '../utils/function-source.js';
 
 /** Largest sub-interval count that `gaussQuad` runs (n = 1e9 of a trivial `f` took 26.1 s). */
 const MAX_GAUSS_QUAD_INTERVALS = 800_000_000;
@@ -122,7 +128,11 @@ const ALLOWED_GLOBALS = new Set([
   'PI',
   'SQRT1_2',
   'SQRT2',
-  // JS keywords / control-flow tokens that appear in stringified functions
+  // JS keywords / control-flow tokens that appear in stringified functions.
+  // `this`, `super`, `import` and `export` are absent: a closure that reads them has another
+  // binding in the worker. `from` and `as` are absent too: a function body uses them as
+  // ordinary names, never as keywords. `of` and `let` stay: a body can use them as keywords
+  // (`for (x of [1, 2])`, a block-scoped `let x`), and removing them would add false rejections.
   'function',
   'return',
   'var',
@@ -153,12 +163,6 @@ const ALLOWED_GLOBALS = new Set([
   'case',
   'default',
   'class',
-  'this',
-  'super',
-  'import',
-  'export',
-  'from',
-  'as',
 ]);
 
 /**
@@ -166,14 +170,21 @@ const ALLOWED_GLOBALS = new Set([
  *
  * The heuristic:
  * 1. Rejects async closures outright (they cannot be reconstructed portably).
- * 2. Extracts the parameter name(s) from the function source.
- * 3. Tokenizes the body by extracting all bare identifiers (word characters
- *    not preceded or followed by a dot — i.e. not `Math.sin` method parts).
- * 4. Rejects any identifier that is not the parameter name, not in the
- *    ALLOWED_GLOBALS set, and not a numeric literal.
+ * 2. Reads the parameter list with `readParameterList`. It rejects a source whose list
+ *    cannot be read, a method, a getter and a generator (the worker compiles the source as an
+ *    expression, and a generator returns an iterator, not a number), and a destructured parameter.
+ * 3. Takes the parameter names, a default value and a rest parameter included, and the own name
+ *    of a function expression.
+ * 4. Tokenizes the whole source (the defaults included) by extracting all bare identifiers
+ *    (the Unicode rule), not preceded by a single dot: a property name is skipped, a spread is not.
+ * 5. Rejects any identifier that is not one of those names, not in the ALLOWED_GLOBALS set,
+ *    and not part of a numeric literal.
+ *
+ * It is a correctness guard, not a security boundary: the closure is the caller's own code and
+ * runs with the caller's privileges.
  *
  * @param fnSource - Result of `f.toString()`
- * @throws Error when the closure references outer-scope identifiers or is async
+ * @throws Error when the closure references outer-scope identifiers, has a parameter pattern, or is async
  */
 export function validateClosureSource(fnSource: string): void {
   // Reject async closures
@@ -184,29 +195,46 @@ export function validateClosureSource(fnSource: string): void {
     );
   }
 
-  // Extract parameter name(s).
-  // Handles: (x) => ..., x => ..., function(x){...}, function f(x){...}
-  const paramMatch = fnSource.match(/^(?:async\s+)?(?:function\s*\w*\s*)?\(([^)]*)\)|^(\w+)\s*=>/);
-  const paramList = paramMatch
-    ? (paramMatch[1] ?? paramMatch[2] ?? '')
-        .split(',')
-        .map((p) => p.trim().replace(/\s*=.*$/, '')) // strip defaults
-        .filter(Boolean)
-    : [];
+  const list = readParameterList(fnSource);
+  if (list === undefined) {
+    throw new Error(
+      'parallelGaussQuad/parallelRomberg workerCount fan-out: the closure parameter list cannot be read. ' +
+        'Use an arrow function or a function expression with a closed parameter list.'
+    );
+  }
+  if (list.kind === 'method' || list.generator) {
+    throw new Error(
+      'parallelGaussQuad/parallelRomberg workerCount fan-out: only an arrow function or a function expression can be dispatched, ' +
+        'not a method, a getter or a generator.'
+    );
+  }
 
-  const paramSet = new Set(paramList);
+  // The names that the closure binds: its parameters and, for a function expression, its own name.
+  const paramSet = new Set<string>();
+  if (list.name !== undefined) paramSet.add(list.name);
+  for (const entry of list.params) {
+    const name = parameterName(entry);
+    if (name === undefined) {
+      throw new Error(
+        `parallelGaussQuad/parallelRomberg workerCount fan-out: destructured parameters are not supported (${entry}). ` +
+          'Use plain parameter names.'
+      );
+    }
+    paramSet.add(name);
+  }
 
-  // Extract all bare identifiers: word chars NOT preceded by a dot.
-  // This strips `sin` out of `Math.sin` via the negative lookbehind.
-  const identifiers = fnSource.matchAll(/(?<!\.)(?<![0-9])\b([A-Za-z_$][A-Za-z0-9_$]*)\b/g);
+  // Extract all bare identifiers (the Unicode rule), not preceded by a single dot. A property
+  // name (`sin` of `Math.sin`, `x?.y`) is skipped. The identifier after `...` is kept: a spread
+  // reads a name. The first look-behind keeps the scan out of a name, a number (`1e5`, `0xFF`,
+  // `10n`, `1_000`) and a joiner.
+  const identifiers = fnSource.matchAll(
+    /(?<![\p{ID_Continue}$\u200C\u200D])(?<!(?<!\.)\.)[\p{ID_Start}$_][\p{ID_Continue}$\u200C\u200D]*/gu
+  );
 
   for (const match of identifiers) {
-    const id = match[1];
-    if (!id) continue;
-    // Skip if it is the parameter, an allowed global, or a pure numeric literal
+    const id = match[0];
+    // Skip if it is a bound name or an allowed global
     if (paramSet.has(id) || ALLOWED_GLOBALS.has(id)) continue;
-    // Numeric-looking suffixes (e.g. e in `1e5`) are caught by the regex start
-    // anchor — skip them as they won't appear here in practice.
     throw new Error(
       `parallelGaussQuad/parallelRomberg workerCount fan-out: closure references outer-scope identifier ` +
         `"${id}", which is not available inside the isolated worker context. ` +
@@ -395,7 +423,7 @@ export interface GaussQuadOptions {
    * - `1` (default): no fan-out. The result is `gaussQuad(f, a, b, n, order)`.
    * - `> 1`: `parallelGaussQuad` divides `[a, b]` into `workerCount` equal
    *   sub-domains and sends one `integrateChunk` worker task for each sub-domain.
-   *   The worker makes `f` again from `f.toString()` with `new Function`.
+   *   The worker makes `f` again from `f.toString()` with an indirect `eval`.
    *
    * **Closure constraint:** The integrand must be a self-contained expression
    * (no references to outer-scope variables). Use `Math.*` methods and
