@@ -501,7 +501,14 @@ export const variance = _variance as PublicVariance;
  * The standard deviation of the values in the data. This is the functions implementation, with
  * the same arguments as {@link variance}.
  */
-export const std = _std as PublicStd;
+export const std = withTypedSurface(function (...args: unknown[]): unknown {
+  const result = (_std as (...values: unknown[]) => unknown)(...args);
+  const source = args[0];
+  if (!Array.isArray(result) || !isCompatBridgeMatrix(source)) return result;
+  const boxed = source as { storage?: () => string };
+  const sparse = isSparseMatrix(source) || boxed.storage?.() === 'sparse';
+  return _factoryMatrix(result, sparse ? 'sparse' : 'dense');
+}, _std) as PublicStd;
 export const min: TypedFunction = _min;
 export const max: TypedFunction = _max;
 
