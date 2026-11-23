@@ -613,6 +613,36 @@ export const createSimplify = /* #__PURE__ */ factory(
       { l: 'n1/(-n2)', r: '-n1/n2' },
     ];
 
+    const defaultRules = simplify.rules.slice();
+    const defaultRulesJson = JSON.stringify(defaultRules);
+
+    /** A sum of distinct free symbols has no term the built-in rules can rewrite. */
+    function distinctSymbolSum(node: MathNode): MathNode | undefined {
+      if (!isOperatorNode(node) || (node as OperatorNode).fn !== 'add') return undefined;
+      const pending: MathNode[] = [node];
+      const names = new Set<string>();
+      const operands: MathNode[] = [];
+      while (pending.length > 0) {
+        const term = pending.pop()!;
+        if (isSymbolNode(term)) {
+          const name = (term as SymbolNode).name;
+          if (SUPPORTED_CONSTANTS[name] || names.has(name)) return undefined;
+          names.add(name);
+          operands.push(term);
+        } else if (isOperatorNode(term) && (term as OperatorNode).fn === 'add') {
+          const args = (term as OperatorNode).args;
+          for (let i = args.length - 1; i >= 0; i--) pending.push(args[i]);
+        } else {
+          return undefined;
+        }
+      }
+      if (operands.length < 2) return undefined;
+      const add = createMakeNodeFunction(node as OperatorNode);
+      let result = operands[0];
+      for (let i = 1; i < operands.length; i++) result = add([result, operands[i]]);
+      return result;
+    }
+
     /**
      * Takes any rule object as allowed by the specification in simplify
      * and puts it in a standard form used by applyRule
@@ -778,12 +808,21 @@ export const createSimplify = /* #__PURE__ */ factory(
         }
         scope = native;
       }
-      const builtRules: ParsedRule[] = _buildRules(
-        (rules as SimplifyRule[]) || simplify.rules,
-        options.context
-      );
-      let res = resolve(expr, scope);
-      res = removeParens(res);
+      const selectedRules = rules || simplify.rules!;
+      let res = removeParens(resolve(expr, scope));
+      if (!debug && options.context === undefined && selectedRules === simplify.rules) {
+        const sum = distinctSymbolSum(res);
+        // simplify.rules is public and mutable. Keep custom and edited rules on the general path.
+        if (
+          sum &&
+          selectedRules.length === defaultRules.length &&
+          selectedRules.every((rule, i) => rule === defaultRules[i]) &&
+          JSON.stringify(selectedRules) === defaultRulesJson
+        ) {
+          return sum;
+        }
+      }
+      const builtRules: ParsedRule[] = _buildRules(selectedRules, options.context);
       const visited: Record<string, boolean> = {};
       let str = res.toString({ parenthesis: 'all' });
       while (!visited[str]) {
