@@ -89,6 +89,23 @@ slower than JS (2026-07).
   `A.scale(2)`; matrix product is `A.multiply(B)` with another matrix.
 - `SparseMatrix` - CSR format for sparse data
 
+Native `DenseMatrix.map` and `SparseMatrix.map` call the callback with
+`(value, row, col)` and store numeric results. Wrap a unary numeric callback
+as `value => fn(value)` when it has optional positional arguments. To store
+boxed values such as Fractions, start with the boxed matrix from
+`@danielsimonjr/mathts-functions`.
+
+```typescript node
+import { fraction, map, matrix } from '@danielsimonjr/mathts-functions';
+
+const fractions = map(matrix([[0.5, 0.75]]), (value) => fraction(value));
+```
+
+Comparisons between two native CSR matrices preserve CSR storage. Boolean
+entries use numeric `1` for true and `0` for false. To preserve the
+functions package's boxed sparse result types, construct both inputs with
+its `sparse()` factory.
+
 ## Status
 
 This package is under active development. Currently implemented:
