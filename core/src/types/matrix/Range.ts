@@ -87,7 +87,9 @@ export const createRangeClass = /* #__PURE__ */ factory(
       /**
        * Range type flag
        */
-      readonly isRange: boolean = true;
+      get isRange(): true {
+        return true;
+      }
 
       /**
        * Start value of the range (inclusive)

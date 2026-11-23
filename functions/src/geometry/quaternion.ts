@@ -1,3 +1,4 @@
+import { SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 /**
  * Quaternion algebra and rotation conversions. This module is the one
  * definition of the quaternion conventions of the package:
@@ -36,7 +37,6 @@ function dot4(a: readonly number[], b: readonly number[]): number {
  * Limits of the sum of squares for the fast magnitude. Outside these limits
  * the sum loses digits, underflows to zero or overflows.
  */
-const SUM_SQ_MIN = 1e-280;
 const SUM_SQ_MAX = 1e280;
 
 /**
@@ -47,7 +47,7 @@ const SUM_SQ_MAX = 1e280;
 function length(v: readonly number[]): number {
   let sumSq = 0;
   for (const c of v) sumSq += c * c;
-  return sumSq > SUM_SQ_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(...v);
+  return sumSq > SQUARES_SAFE_MIN && sumSq < SUM_SQ_MAX ? Math.sqrt(sumSq) : Math.hypot(...v);
 }
 
 /**

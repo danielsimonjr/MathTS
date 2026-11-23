@@ -1050,6 +1050,9 @@
       "PrefixTable": {
         "kind": "type"
       },
+      "ROUND_DECIMALS_NOT_INTEGER": {
+        "kind": "string"
+      },
       "Range": {
         "kind": "type"
       },
@@ -1443,6 +1446,9 @@
       "nearlyEqual": {
         "kind": "function"
       },
+      "nearlyEqualBigNumber": {
+        "kind": "function"
+      },
       "normalizeFormatOptions": {
         "kind": "function"
       },
@@ -1471,6 +1477,9 @@
         "kind": "function"
       },
       "resolvePackagedWasm": {
+        "kind": "function"
+      },
+      "roundBigNumberDecimals": {
         "kind": "function"
       },
       "roundDigits": {
@@ -2832,6 +2841,9 @@
       },
       "HalleyOptions": {
         "kind": "type"
+      },
+      "Help": {
+        "kind": "function"
       },
       "HessenbergResult": {
         "kind": "type"
@@ -4668,6 +4680,9 @@
       },
       "factory_log2": {
         "kind": "function"
+      },
+      "factory_mathjsCompat": {
+        "kind": "object"
       },
       "factory_max": {
         "kind": "function"

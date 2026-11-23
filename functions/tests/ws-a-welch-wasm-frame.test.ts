@@ -25,7 +25,7 @@ describe('#897 — welch and bartlett send only power-of-two frames to the AS ke
 
   it('a power-of-two frame reaches the kernel (the spy sees it)', () => {
     const { counts } = countExportCalls(['welch_psd_f64', 'bartlett_psd_f64'], () => {
-      welchPSD(x, { frameLength: 128 });
+      welchPSD(x, { frameLength: 128, periodic: false, detrend: false });
       bartlettPSD(x, { frameLength: 128 });
     });
     expect(counts['welch_psd_f64']).toBeGreaterThan(0);

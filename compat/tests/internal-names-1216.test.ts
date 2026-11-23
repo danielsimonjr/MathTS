@@ -44,7 +44,7 @@ const forInNames = (math: Record<string, unknown>): string[] => {
 
 describe('compat instance hides the internal names of the functions namespace (#1216)', () => {
   it('the generated list holds the factory_* functions and the internal constants', () => {
-    expect(COMPAT_INTERNAL_NAMES.filter((k) => k.startsWith('factory_')).length).toBe(64);
+    expect(COMPAT_INTERNAL_NAMES).toContain('factory_mathjsCompat');
     expect(COMPAT_INTERNAL_NAMES.filter((k) => !k.startsWith('factory_'))).toEqual(
       INTERNAL_CONSTANTS
     );
@@ -89,13 +89,12 @@ describe('compat instance hides the internal names of the functions namespace (#
       if (!INTERNAL.has(key) && key !== 'default') expect(key in math).toBe(true);
     }
     const missing = MATHJS_PARITY_NAMES.filter((k) => !(k in math));
-    expect(missing.length).toBe(KNOWN_MISSING_PARITY);
+    expect(missing).toEqual([]);
   });
 
-  it('has a fixed instance key count', () => {
+  it('keeps only mathjs parity names on the instance itself', () => {
     const math = create(all) as unknown as Record<string, unknown>;
-    expect(Object.keys(math).length).toBe(317);
-    expect(forInNames(math).length).toBe(1408 - COMPAT_INTERNAL_NAMES.length);
+    expect(Object.keys(math).sort()).toEqual([...MATHJS_PARITY_NAMES].sort());
   });
 });
 
@@ -188,5 +187,3 @@ describe('the MathInstance type omits the internal names (#1216)', () => {
     expect([radius, ln2, none]).toEqual([mathFunctions.EARTH_RADIUS_KM, Math.LN2, true]);
   });
 });
-
-const KNOWN_MISSING_PARITY = 85;

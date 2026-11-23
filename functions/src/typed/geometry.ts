@@ -9,7 +9,14 @@
  * @packageDocumentation
  */
 
-import { scaledDistance, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
+import {
+  divideByScale,
+  norm2,
+  pairwiseDot,
+  powerOfTwoScaleOf,
+  scaledDistance,
+  SQUARES_SAFE_MIN,
+} from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
@@ -270,6 +277,20 @@ export function rotateVector3D(v: number[], axis: number[], angle: f64): number[
   ];
 }
 
+function scaledVectorProjection(v: number[], direction: number[]) {
+  const scaledDirection = divideByScale(direction, powerOfTwoScaleOf(direction));
+  const length = norm2(scaledDirection);
+  if (length === 0) return null;
+  const unit = scaledDirection.map((x) => x / length);
+  const unscaled = pairwiseDot(v, unit);
+  if (Number.isFinite(unscaled) && unscaled !== 0) {
+    return { unit, scale: 1, vector: v, dot: unscaled };
+  }
+  const scale = powerOfTwoScaleOf(v);
+  const vector = divideByScale(v, scale);
+  return { unit, scale, vector, dot: pairwiseDot(vector, unit) };
+}
+
 /**
  * Reflect a vector across a plane defined by its normal.
  *
@@ -278,11 +299,13 @@ export function rotateVector3D(v: number[], axis: number[], angle: f64): number[
  * @returns Reflected vector
  */
 export function reflectVector(v: number[], normal: number[]): number[] {
-  const mag: f64 = Math.sqrt(normal.reduce((s, c) => s + c * c, 0));
-  if (mag === 0) return v.slice();
-  const n = normal.map((c) => c / mag);
-  const dot: f64 = v.reduce((s, c, i) => s + c * n[i], 0);
-  return v.map((c, i) => c - 2 * dot * n[i]);
+  const projection = scaledVectorProjection(v, normal);
+  if (projection === null) return v.slice();
+  const { unit, scale, vector, dot } = projection;
+  return vector.map((c, i) => {
+    const projected = dot * unit[i];
+    return scale * (c - projected - projected);
+  });
 }
 
 /**
@@ -293,11 +316,10 @@ export function reflectVector(v: number[], normal: number[]): number[] {
  * @returns Projected vector
  */
 export function projectVector(v: number[], onto: number[]): number[] {
-  const dot: f64 = v.reduce((s, c, i) => s + c * onto[i], 0);
-  const magSq: f64 = onto.reduce((s, c) => s + c * c, 0);
-  if (magSq === 0) return onto.map(() => 0);
-  const scale: f64 = dot / magSq;
-  return onto.map((c) => c * scale);
+  const projection = scaledVectorProjection(v, onto);
+  if (projection === null) return onto.map(() => 0);
+  const { unit, scale, dot } = projection;
+  return unit.map((component) => scale * (dot * component));
 }
 
 // =============================================================================

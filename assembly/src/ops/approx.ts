@@ -95,7 +95,7 @@ function linsolveAS(a: Float64Array, n: i32, b: Float64Array): Float64Array {
         maxRow = row;
       }
     }
-    if (maxVal < 1e-15) return new Float64Array(n); // singular -> zeros
+    if (maxVal == 0.0 || !isFinite(maxVal)) return new Float64Array(n); // singular -> zeros
     if (maxRow != col) {
       for (let j = 0; j < w; j++) {
         const t: f64 = m[col * w + j];

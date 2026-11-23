@@ -15,6 +15,7 @@
  * @packageDocumentation
  */
 
+import { windowFunctionCore, type SpectralSegmentOptions } from '../signal/spectral-segments.js';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { assertAllocSize } from '../utils/limits.js';
 import { toSamples } from '../utils/samples.js';
@@ -1413,51 +1414,6 @@ export function windowFunction(n: i32 | string, type?: string | i32): number[] {
   return windowFunctionCore(length, winType);
 }
 
-function windowFunctionCore(n: i32, type: string): number[] {
-  assertAllocSize('windowFunction', [n]);
-  const w: number[] = new Array(n);
-  const N1: f64 = n - 1;
-  if (n === 1) {
-    if (type === 'bartlett') return [0];
-    if (
-      type === 'hamming' ||
-      type === 'hann' ||
-      type === 'hanning' ||
-      type === 'blackman' ||
-      type === 'rectangular' ||
-      type === 'rect'
-    ) {
-      return [1];
-    }
-  }
-
-  switch (type) {
-    case 'hamming':
-      for (let i: i32 = 0; i < n; i++) w[i] = 0.54 - 0.46 * Math.cos((2 * Math.PI * i) / N1);
-      break;
-    case 'hann':
-    case 'hanning':
-      for (let i: i32 = 0; i < n; i++) w[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / N1));
-      break;
-    case 'blackman':
-      for (let i: i32 = 0; i < n; i++)
-        w[i] =
-          0.42 - 0.5 * Math.cos((2 * Math.PI * i) / N1) + 0.08 * Math.cos((4 * Math.PI * i) / N1);
-      break;
-    case 'bartlett':
-      for (let i: i32 = 0; i < n; i++) w[i] = 1 - Math.abs((2 * i - N1) / N1);
-      break;
-    case 'rectangular':
-    case 'rect':
-      for (let i: i32 = 0; i < n; i++) w[i] = 1;
-      break;
-    default:
-      throw new Error(`windowFunction: unknown window type '${type}'`);
-  }
-
-  return w;
-}
-
 // =============================================================================
 // Convolution / Correlation Aliases (if not already exported as plain functions)
 // =============================================================================
@@ -1555,18 +1511,17 @@ function packPsd(
  * Welch PSD measures slower on WASM than JS (`functions/src/wasm/policy.ts` header);
  * bridges may be consulted but `wasmPolicyAllows` keeps welch/bartlett on JS.
  *
- * The window is symmetric, so a Hann window of length 2 is `[0, 0]`: it has no power, and the
- * PSD would be NaN. That case throws.
+ * Uses a periodic window and subtracts the mean from each segment by default, as SciPy does.
+ * Pass `{ periodic: false, detrend: false }` for the previous convention.
  *
  * @param signal - Input signal samples
- * @param opts - { frameLength, overlap, window }
+ * @param opts - Segment length, overlap, window, periodicity and detrending
  * @returns `{ psd: number[], frequencies: number[], frameLength: number }`
- * @throws RangeError if the frame is shorter than 2, longer than the signal, or a Hann window of
- *   length 2
+ * @throws RangeError if the frame is shorter than 2, longer than the signal, or the window has zero power
  */
 export function welchPSD(
   signal: number[] | Float64Array,
-  opts?: { frameLength?: i32; overlap?: i32; window?: string }
+  opts?: { frameLength?: i32; overlap?: i32; window?: string } & SpectralSegmentOptions
 ): { psd: number[]; frequencies: number[]; frameLength: number } {
   const samples = toSamples('welchPSD', signal);
   const frameLength: i32 = resolvePsdFrameLength(samples.length, opts?.frameLength);
@@ -1579,12 +1534,20 @@ export function welchPSD(
       `welchPSD: overlap (${overlap}) must be less than frameLength (${frameLength})`
     );
   }
-  if (samples.length > 0 && frameLength === 2 && windowTypeCode(window) === 0) {
+  const periodic = opts?.periodic ?? true;
+  const detrend = opts?.detrend ?? 'constant';
+  if (samples.length > 0 && !periodic && frameLength === 2 && windowTypeCode(window) === 0) {
     throw new RangeError(
-      "welchPSD: a 'hann' window of length 2 is all zeros; use frameLength >= 3 or another window"
+      "welchPSD: a 'hann' window of length 2 is all zeros; use another window, a periodic window or a longer frame"
     );
   }
-  return packPsd(samples, frameLength, (s, fl) => welchPSDDispatch(s, fl, overlap, window));
+  if (!periodic && detrend === false) {
+    return packPsd(samples, frameLength, (s, fl) => welchPSDDispatch(s, fl, overlap, window));
+  }
+  const coefficients = windowFunctionCore(frameLength, window, periodic);
+  return packPsd(samples, frameLength, (s, fl) =>
+    welchPSDJS(s, fl, overlap, windowTypeCode(window), { coefficients, detrend })
+  );
 }
 
 /**

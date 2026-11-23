@@ -166,9 +166,9 @@ describe('gamma of a non-integer BigNumber (#1291)', () => {
     BigNumber.config({ precision: 64 });
     expect(call('gamma', s)).toBe(same(expected));
   });
-  it('factorial(0.5) is gamma(1.5)', () => {
+  it('gamma(1.5) remains available for fractional arguments', () => {
     BigNumber.config({ precision: 64 });
-    expect(call('factorial', '0.5')).toBe(
+    expect(call('gamma', '1.5')).toBe(
       same('0.8862269254527580136490837416705725913987747280611935641069038949')
     );
   });

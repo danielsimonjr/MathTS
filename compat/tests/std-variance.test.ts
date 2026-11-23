@@ -70,7 +70,12 @@ describe('#1280 compat std and variance are the functions implementations', () =
       [3, 5],
     ];
     const ref = mathjs.std(mathjs.matrix(m), 1) as unknown as { toArray(): number[] };
-    expect(stdOf(math.matrix(m), 1)).toEqual(ref.toArray());
+    const dense = stdOf(math.matrix(m), 1) as { toArray(): number[] };
+    expect(dense.toArray()).toEqual(ref.toArray());
+    const sparse = stdOf(math.sparse(m), 1) as { toArray(): number[]; storage(): string };
+    const sparseRef = mathjs.std(mathjs.sparse(m), 1) as unknown as { toArray(): number[][] };
+    expect(sparse.toArray()).toEqual(sparseRef.toArray());
+    expect(sparse.storage()).toBe('sparse');
     expect(varianceOf(math.matrix(m), 0)).toEqual([2, 4.5]);
   });
   it('the variadic form std(1, 2, 4) (0 before)', () => {

@@ -271,6 +271,9 @@ export function getMaxMatrixSize(
   capabilities: GPUCapabilities,
   bytesPerElement: number = 4
 ): number {
+  if (!capabilities || typeof capabilities.supported !== 'boolean') {
+    throw new TypeError('getMaxMatrixSize: expected a GPU capabilities record from detectGPU');
+  }
   if (!capabilities.supported) {
     return 0;
   }

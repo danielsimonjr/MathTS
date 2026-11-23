@@ -594,7 +594,7 @@ describe('#968 item 8b: csd and coherence take a segment of exactly nperseg poin
   }
 
   it('13: nperseg 6 (not a power of two) gives the SciPy bins', () => {
-    const options = { nperseg: 6, window: 'rectangular' };
+    const options = { nperseg: 6, window: 'rectangular', detrend: false as const };
     const p = csd(x, y, options);
     expectClose(p.frequencies, [0, 1 / 6, 1 / 3, 0.5], 'frequencies');
     expectClose(
@@ -610,7 +610,7 @@ describe('#968 item 8b: csd and coherence take a segment of exactly nperseg poin
   });
 
   it('13: nperseg 8 (a power of two) gives the one-sided density', () => {
-    const options = { nperseg: 8, window: 'rectangular' };
+    const options = { nperseg: 8, window: 'rectangular', detrend: false as const };
     const p = csd(x, y, options);
     expectClose(p.frequencies, [0, 0.125, 0.25, 0.375, 0.5], 'frequencies');
     expectClose(
@@ -632,7 +632,7 @@ describe('#968 item 8b: csd and coherence take a segment of exactly nperseg poin
   });
 
   it('13: an odd nperseg doubles the last bin as well (nperseg 5)', () => {
-    const options = { nperseg: 5, window: 'rectangular' };
+    const options = { nperseg: 5, window: 'rectangular', detrend: false as const };
     const p = csd(x, y, options);
     expectClose(p.frequencies, [0, 0.2, 0.4], 'frequencies');
     expectClose(p.power, [2.704166666666666, 2.1265661607474744, 1.946705115935177], 'csd');
@@ -644,13 +644,22 @@ describe('#968 item 8b: csd and coherence take a segment of exactly nperseg poin
   });
 
   it('13: the 5-sample case of the issue has 3 bins at 0, 0.2 and 0.4', () => {
-    const p = csd([1, 2, 3, 4, 5], [1, 0, 1, 0, 1], { window: 'rectangular' });
+    const p = csd([1, 2, 3, 4, 5], [1, 0, 1, 0, 1], {
+      window: 'rectangular',
+      detrend: false as const,
+    });
     expectClose(p.frequencies, [0, 0.2, 0.4], 'frequencies');
     expectClose(p.power, [9.0, 1.0514622242382674, 1.7013016167040798], 'csd');
   });
 
   it('13: the sample rate scales the frequencies and the density', () => {
-    const p = csd(x, y, { nperseg: 6, noverlap: 0, window: 'rectangular', fs: 100 });
+    const p = csd(x, y, {
+      nperseg: 6,
+      noverlap: 0,
+      window: 'rectangular',
+      detrend: false as const,
+      fs: 100,
+    });
     expectClose(p.frequencies, [0, 16.666666666666668, 33.333333333333336, 50], 'frequencies');
     expectClose(
       p.power,
@@ -660,8 +669,13 @@ describe('#968 item 8b: csd and coherence take a segment of exactly nperseg poin
   });
 
   it('13: csd(x, x) is the Welch power spectral density of x', () => {
-    const own = csd(x, x, { nperseg: 8, window: 'rectangular' }).power;
-    const welch = math.welchPSD(x, { frameLength: 8, overlap: 4, window: 'rectangular' }).psd;
+    const own = csd(x, x, { nperseg: 8, window: 'rectangular', detrend: false as const }).power;
+    const welch = math.welchPSD(x, {
+      frameLength: 8,
+      overlap: 4,
+      window: 'rectangular',
+      detrend: false as const,
+    }).psd;
     expectClose(own, welch, 'csd(x, x) against welchPSD');
   });
 });
@@ -928,6 +942,6 @@ describe('#968 pins for the items that are already fixed', () => {
   });
 
   it('16 (item 8a): welchPSD of two samples throws instead of returning NaN', () => {
-    expect(() => math.welchPSD([1, 2])).toThrow(/all zeros/);
+    expect(() => math.welchPSD([1, 2], { periodic: false })).toThrow(/all zeros/);
   });
 });

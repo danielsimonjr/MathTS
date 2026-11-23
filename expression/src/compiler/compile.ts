@@ -1,3 +1,4 @@
+import { NATIVE_MATRIX_BRAND } from '@danielsimonjr/mathts-core/internal';
 /**
  * Tree-walking AST compiler/evaluator for MathTS expressions.
  *
@@ -93,6 +94,16 @@ interface ObjectPropertyIndex {
  * ```
  */
 export function compile(node: MathNode, mathScope: Record<string, unknown>): CompiledExpression {
+  if (!node || typeof node !== 'object') {
+    throw new TypeError(
+      'compile: expected a parsed Node; use compileExpression for expression text'
+    );
+  }
+  if (!mathScope || typeof mathScope !== 'object') {
+    throw new TypeError(
+      'compile: expected a math scope; use compileExpression for the default scope'
+    );
+  }
   // Pre-compile the node tree into a closure
   const evalFn = compileNode(node, mathScope, {}, 0);
 
@@ -194,6 +205,17 @@ function compileConstantNode(node: MathNode): EvalFunction {
   };
 }
 
+function undefinedSymbol(name: string): Error {
+  const display = name.length > 100 ? name.slice(0, 100) + '…' : name;
+  return new Error(`Undefined symbol "${display}"`);
+}
+
+function readScopedSymbol(scope: Scope, name: string): unknown {
+  const value = scope.get(name);
+  if (value === undefined) throw undefinedSymbol(name);
+  return value;
+}
+
 function compileSymbolNode(
   node: MathNode,
   math: Record<string, unknown>,
@@ -214,7 +236,7 @@ function compileSymbolNode(
   if (Object.prototype.hasOwnProperty.call(math, name)) {
     return function evalSymbolNode(scope: Scope) {
       if (scope.has(name)) {
-        return scope.get(name);
+        return readScopedSymbol(scope, name);
       }
       // math namespace lookup — direct read is safe because we already
       // verified `name` is an own property of the trusted math object.
@@ -239,7 +261,7 @@ function compileSymbolNode(
   ) {
     return function evalUnitSymbol(scope: Scope) {
       if (scope.has(name)) {
-        return scope.get(name);
+        return readScopedSymbol(scope, name);
       }
       return new unitCtor(null, name);
     };
@@ -248,9 +270,9 @@ function compileSymbolNode(
   // Unknown symbol - check scope at runtime
   return function evalSymbolNode(scope: Scope) {
     if (scope.has(name)) {
-      return scope.get(name);
+      return readScopedSymbol(scope, name);
     }
-    throw new Error(`Undefined symbol "${name}"`);
+    throw undefinedSymbol(name);
   };
 }
 
@@ -763,7 +785,12 @@ function compileAccessorNode(
     const index = evalIndex(scope, args, object);
     // Strings are primitive indexing, not host objects. Everything else must
     // be a math value or a plain collection before a numeric index or subset.
-    if (typeof object !== 'string') assertSandboxReceiver(object);
+    const nativeMatrixSubset =
+      typeof math.subset === 'function' &&
+      object !== null &&
+      typeof object === 'object' &&
+      (object as Record<symbol, unknown>)[NATIVE_MATRIX_BRAND] === true;
+    if (typeof object !== 'string' && !nativeMatrixSubset) assertSandboxReceiver(object);
     // Use math.subset if available for matrix indexing
     if (math.subset) {
       return (math.subset as MathFunction)(object, index);

@@ -1,5 +1,9 @@
 /** Resolve a single `-1` placeholder in a reshape target shape (NumPy rules). */
-export function resolveReshapeShape(currentSize: number, shape: ReadonlyArray<number>): number[] {
+export function resolveReshapeShape(
+  currentShape: readonly number[],
+  shape: readonly number[]
+): number[] {
+  const currentSize = currentShape.reduce((size, dim) => size * dim, 1);
   const out = [...shape];
   const minusOnes: number[] = [];
   for (let i = 0; i < out.length; i++) {
@@ -23,7 +27,7 @@ export function resolveReshapeShape(currentSize: number, shape: ReadonlyArray<nu
   const newSize = out.reduce((a, b) => a * b, 1);
   if (newSize !== currentSize) {
     throw new Error(
-      `Tensor.reshape: size mismatch [${shape}] -> [${out}] (size ${currentSize} vs ${newSize})`
+      `Tensor.reshape: size mismatch [${currentShape}] -> [${out}] (size ${currentSize} vs ${newSize})`
     );
   }
   return out;

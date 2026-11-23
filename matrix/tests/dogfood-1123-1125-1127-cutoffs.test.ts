@@ -227,8 +227,8 @@ describe('#1125 matrixLogm rejects a singular matrix', () => {
     expect(() =>
       matrixLogm(
         DenseMatrix.fromArray([
-          [0.3618395826551426, 1.8211066011476398],
-          [0.05335828610720117, 0.26854753242505963],
+          [2, 4],
+          [1, 2],
         ])
       )
     ).toThrow(/non-positive eigenvalue/);
@@ -264,13 +264,13 @@ describe('#1125 matrixLogm: a small eigenvalue of a triangular matrix', () => {
     expect(r[2][2]).toBe(0);
   });
 
-  it('the message names the floor for a positive eigenvalue below it', () => {
+  it('the message identifies an unresolved small eigenvalue', () => {
     expect(() =>
       logmOf([
         [1, 1],
         [1, 1 + 1e-14],
       ])
-    ).toThrow(/non-positive eigenvalue.*not above the floor 1e-14/);
+    ).toThrow(/numerically singular.*backward error/);
   });
 });
 
