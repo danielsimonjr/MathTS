@@ -12,6 +12,11 @@
  */
 import { fftExactFloat64 } from './fft-core-f64.js';
 import { windowFunction } from '../typed/signal.js';
+import {
+  segmentOffset,
+  windowFunctionCore,
+  type SpectralSegmentOptions,
+} from './spectral-segments.js';
 import { toSamples } from '../utils/samples.js';
 import { butter, filtfilt } from '../signal-filter-extra.js';
 
@@ -190,7 +195,7 @@ export function peakWidths(
 // =============================================================================
 
 /** Options shared by {@link csd} and {@link coherence}. */
-export interface CsdOptions {
+export interface CsdOptions extends SpectralSegmentOptions {
   /** Segment length (default `min(256, x.length, y.length)`). */
   nperseg?: number;
   /** Samples of overlap between segments (default `floor(nperseg/2)`). */
@@ -212,13 +217,15 @@ function segmentSpectra(
   sig: readonly number[],
   nperseg: number,
   noverlap: number,
-  winType: string
+  winType: string,
+  periodic: boolean,
+  detrend: 'constant' | false
 ): { segments: SegmentSpectrum[]; winSum2: number } {
   const step = nperseg - noverlap;
   if (step <= 0) throw new Error('csd/coherence: noverlap must be less than nperseg');
-  const win = windowFunction(nperseg, winType);
+  const win = windowFunctionCore(nperseg, winType, periodic);
   const winSum2 = win.reduce((s, w) => s + w * w, 0);
-  // A Hann window of length 2 is [0, 0]: no power, so the scale 1 / winSum2 would be Infinity (NaN).
+  // A symmetric Hann window of length 2 has no power.
   if (!(winSum2 > 0)) {
     throw new RangeError(
       `csd/coherence: the '${winType}' window of length ${nperseg} is all zeros; use another window or a longer nperseg`
@@ -230,7 +237,8 @@ function segmentSpectra(
   const segRe = new Float64Array(nperseg);
   const segIm = new Float64Array(nperseg);
   for (let start = 0; start + nperseg <= sig.length; start += step) {
-    for (let i = 0; i < nperseg; i++) segRe[i] = sig[start + i] * win[i];
+    const offset = segmentOffset(sig, start, nperseg, detrend);
+    for (let i = 0; i < nperseg; i++) segRe[i] = (sig[start + i] - offset) * win[i];
     segments.push(fftExactFloat64(segRe, segIm, false));
   }
   if (segments.length === 0) {
@@ -253,8 +261,17 @@ function crossPower(
   const winType = opts?.window ?? 'hann';
   const fs = opts?.fs ?? 1;
 
-  const { segments: Xs, winSum2 } = segmentSpectra(x, nperseg, noverlap, winType);
-  const { segments: Ys } = segmentSpectra(y, nperseg, noverlap, winType);
+  const periodic = opts?.periodic ?? true;
+  const detrend = opts?.detrend ?? 'constant';
+  const { segments: Xs, winSum2 } = segmentSpectra(
+    x,
+    nperseg,
+    noverlap,
+    winType,
+    periodic,
+    detrend
+  );
+  const { segments: Ys } = segmentSpectra(y, nperseg, noverlap, winType, periodic, detrend);
   const nSeg = Math.min(Xs.length, Ys.length);
   const nfft = Xs[0].real.length;
   const half = Math.floor(nfft / 2) + 1;
@@ -288,7 +305,7 @@ function crossPower(
  *
  * @param x - First signal
  * @param y - Second signal
- * @param opts - `{ nperseg?, noverlap?, window?, fs? }`
+ * @param opts - `{ nperseg?, noverlap?, window?, fs?, periodic?, detrend? }`
  * @returns `{ frequencies, power }` — `power` is the magnitude of the averaged one-sided
  *   cross spectral density at each frequency bin. Each segment takes an exact `nperseg`-point DFT.
  *   The bins between DC and the Nyquist frequency are doubled (the Nyquist bin is not doubled
@@ -316,7 +333,7 @@ export function csd(
  *
  * @param x - First signal
  * @param y - Second signal
- * @param opts - `{ nperseg?, noverlap?, window?, fs? }`
+ * @param opts - `{ nperseg?, noverlap?, window?, fs?, periodic?, detrend? }`
  * @returns `{ frequencies, coherence }`
  */
 export function coherence(
