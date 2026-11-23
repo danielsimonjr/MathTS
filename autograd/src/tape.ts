@@ -31,7 +31,9 @@ export function assertSameTape(
   b: { readonly tape: Tape; readonly epoch?: number }
 ): void {
   if (a.tape !== b.tape) {
-    throw new Error('TapedTensor: operands belong to different Tapes');
+    throw new Error(
+      'TapedTensor: operands belong to different Tapes. Create both operands in the same tracked computation.'
+    );
   }
   if (a.epoch !== undefined) a.tape.assertCurrentEpoch(a.epoch, 'TapedTensor');
   if (b.epoch !== undefined) b.tape.assertCurrentEpoch(b.epoch, 'TapedTensor');

@@ -86,10 +86,12 @@ describe('managed-ABI calls keep WASM memory bounded', () => {
   it('welchPSD (a kernel that allocates its own result)', { timeout: 30_000 }, async () => {
     const signal = Float64Array.from({ length: 65536 }, (_, i) => Math.sin(i / 10));
     const { counts } = countExportCalls(['welch_psd_f64'], () =>
-      welchPSD(signal, { frameLength: 256 })
+      welchPSD(signal, { frameLength: 256, periodic: false, detrend: false })
     );
     expect(counts.welch_psd_f64).toBeGreaterThan(0);
-    await assertBounded('welchPSD', () => welchPSD(signal, { frameLength: 256 }));
+    await assertBounded('welchPSD', () =>
+      welchPSD(signal, { frameLength: 256, periodic: false, detrend: false })
+    );
   });
 
   it('results stay correct after many resets', () => {

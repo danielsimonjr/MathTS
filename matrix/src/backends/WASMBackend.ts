@@ -121,6 +121,33 @@ function pivotIsZero(
   return pivot !== Infinity && pivot <= PIVOT_REL_TOL * cancellationSum(data, n, row, k);
 }
 
+/** Diagonal product with its binary exponent kept out of the floating-point multiplication. */
+function scaledPivotProduct(lu: Float64Array, n: number): number {
+  let mantissa = 1;
+  let exponent = 0;
+  for (let i = 0; i < n; i++) {
+    const pivot = lu[i * (n + 1)];
+    if (pivot === 0 || !Number.isFinite(pivot)) {
+      mantissa *= pivot;
+      continue;
+    }
+    const power = Math.min(1023, Math.floor(Math.log2(Math.abs(pivot))));
+    mantissa *= pivot / 2 ** power;
+    exponent += power;
+    if (Math.abs(mantissa) >= 2) {
+      mantissa *= 0.5;
+      exponent++;
+    } else if (Math.abs(mantissa) < 1 && mantissa !== 0) {
+      mantissa *= 2;
+      exponent--;
+    }
+  }
+  if (mantissa === 0 || !Number.isFinite(mantissa)) return mantissa;
+  if (exponent < -1075) return mantissa < 0 ? -0 : 0;
+  if (exponent < -1022) return mantissa * 2 ** (exponent + 1022) * 2 ** -1022;
+  return mantissa * 2 ** exponent;
+}
+
 /**
  * Subset of the AssemblyScript module surface this backend uses.
  *
@@ -1033,9 +1060,7 @@ export class WASMBackend implements MatrixBackend {
 
     if (singular) return 0.0;
 
-    const luData = lu.toFloat64Array();
-    let det = 1.0;
-    for (let i = 0; i < n; i++) det *= luData[i * n + i];
+    const det = scaledPivotProduct(lu.toFloat64Array(), n);
 
     // Permutation parity via cycle decomposition: sign(P) = (-1)^(n - cycles).
     // Counting positions where perm[i] !== i is only correct when every cycle

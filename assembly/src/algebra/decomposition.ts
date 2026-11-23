@@ -1,3 +1,5 @@
+import { scaledDiagonalProduct } from './diagonal-product';
+
 /**
  * Dense matrix decompositions: LU, QR, Cholesky, inverse, determinant.
  *
@@ -437,9 +439,8 @@ export function matrix_inverse(
  * Returns `det(A)`. Returns 0.0 when a pivot of steps 0 to n-2 is zero by the pivot rule
  * of the file header. The last pivot is multiplied in without a test, as in LAPACK, so the
  * determinant of a rank-deficient matrix is a rounding residue (about 1e-17 of the scale),
- * not 0. A caller that needs a singularity flag uses `matrix_lu_decompose`. The pivots are
- * multiplied in order, so a matrix with pivots of very different size can overflow in a
- * partial product before a later pivot brings it back.
+ * not 0. A caller that needs a singularity flag uses `matrix_lu_decompose`.
+ * The exponent of the product is tracked separately so differently scaled pivots can cancel.
  *
  * `work` is a scratch Float64Array of length >= n*n.
  */
@@ -481,7 +482,5 @@ export function matrix_determinant(a: Float64Array, n: i32, work: Float64Array):
   }
 
   // det(A) = (-1)^swaps * product(diag(U)).
-  let det: f64 = swaps % 2 == 0 ? 1.0 : -1.0;
-  for (let i = 0; i < n; i++) det *= work[i * n + i];
-  return det;
+  return scaledDiagonalProduct(work, n, swaps % 2 == 0 ? 1.0 : -1.0);
 }

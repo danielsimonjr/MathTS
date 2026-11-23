@@ -17,6 +17,7 @@
  * @packageDocumentation
  */
 
+import { instanceSymbols } from './instance-symbols.js';
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
@@ -91,6 +92,11 @@ function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig
 interface MathInstanceOverrides {
   /** Fluent chain: `math.chain(x).add(3).done()`. */
   chain: (value: unknown) => Chain;
+  create: typeof create;
+  Parser: WiredCompatInstance['Parser'];
+  on: WiredCompatInstance['on'];
+  off: WiredCompatInstance['off'];
+  once: WiredCompatInstance['once'];
 
   // Configuration
   config: (newConfig?: Partial<MathJSConfig>) => MathJSConfig;
@@ -207,9 +213,10 @@ interface MathInstanceOverrides {
  */
 export type MathInstance = Omit<
   typeof mathFunctions,
-  keyof MathInstanceOverrides | CompatInternalName
+  keyof MathInstanceOverrides | keyof typeof instanceSymbols | CompatInternalName
 > &
-  MathInstanceOverrides;
+  MathInstanceOverrides &
+  typeof instanceSymbols;
 
 /** The internal names of the functions namespace (#1216). */
 const INTERNAL_NAMES: ReadonlySet<string> = new Set(COMPAT_INTERNAL_NAMES);
@@ -378,6 +385,7 @@ export function create(
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...surfaceOf(factories),
+    create,
 
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
@@ -588,6 +596,7 @@ export function create(
  */
 export const all: Record<string, unknown> = {
   ...(mathFunctions as unknown as Record<string, unknown>),
+  ...instanceSymbols,
 };
 
 // =============================================================================

@@ -241,12 +241,14 @@ describeIfBindings('#1113 kernel: the AS kernels have the limits of the JS scala
     }
   }, 120_000);
 
-  it('hermiteH runs the rescaled recurrence and gives +-Infinity, as the JS scalar does (#1332)', () => {
-    // It gave NaN at the first overflow. The sign of H_n oscillates with n, so the kernel runs
-    // the full degree on a copy that is rescaled by 2^600.
-    const r = callKernel('hermiteH', 1_000_000, 0.5);
+  it('hermiteH certifies signed overflow at high degree (#1381)', () => {
+    const n = 100_000_001;
+    const r = callKernel('hermiteH', n, -0.3);
     expect(r.timedOut).toBe(false);
-    expect(Math.abs(r.value as number)).toBe(Infinity);
+    expect(r.value).toBe(-Infinity);
+    const uncertain = callKernel('hermiteH', n, 0.995 * Math.sqrt(2 * n + 1));
+    expect(uncertain.timedOut).toBe(false);
+    expect(uncertain.message).toMatch(/uncertified overflow/);
   }, 30_000);
 
   it('a non-finite order gives NaN', () => {

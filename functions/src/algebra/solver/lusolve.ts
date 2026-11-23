@@ -306,6 +306,25 @@ export const createLusolve = /* #__PURE__ */ factory(
       return max;
     }
 
+    function validateRightHandSide(
+      rhs: unknown[][] | DenseMatrix | SparseMatrix
+    ): unknown[][] | DenseMatrix | SparseMatrix {
+      const b = denseRightHandSide(rhs) as typeof rhs;
+      const raw = isDenseMatrix(b) || isSparseMatrix(b) ? b.valueOf() : b;
+      function validate(entry: unknown): void {
+        if (typeof entry === 'number' && !Number.isFinite(entry)) {
+          throw new TypeError('lusolve: right-hand side must have finite entries');
+        }
+      }
+      if (Array.isArray(raw)) {
+        for (const entry of raw) {
+          if (Array.isArray(entry)) entry.forEach(validate);
+          else validate(entry);
+        }
+      }
+      return b;
+    }
+
     function scaleRows(rows: unknown[][], scale: number): number[][] {
       return rows.map((row) => (row as number[]).map((v) => v / scale));
     }
@@ -349,7 +368,9 @@ export const createLusolve = /* #__PURE__ */ factory(
     ): { a: unknown[][]; b: unknown[][] | DenseMatrix | SparseMatrix | unknown[] } {
       const scale = maxAbsFinite(rows);
       if (scale === null) return { a: rows, b };
-      if (!Number.isFinite(scale) || scale === 0) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+      if (!Number.isFinite(scale))
+        throw new TypeError('lusolve: coefficient matrix must have finite entries');
+      if (scale === 0) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
       if (scale >= 1) return { a: rows, b };
       const sb = scaleRhs(b, scale);
       if (sb === null) return { a: rows, b };
@@ -366,7 +387,8 @@ export const createLusolve = /* #__PURE__ */ factory(
       for (let k = 0; k < values.length; k++) {
         const v = values[k];
         if (typeof v !== 'number') return { a, b };
-        if (!Number.isFinite(v)) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+        if (!Number.isFinite(v))
+          throw new TypeError('lusolve: coefficient matrix must have finite entries');
         const av = Math.abs(v);
         if (av > scale) scale = av;
       }
@@ -456,7 +478,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: unknown[][],
         rhs: unknown[][] | DenseMatrix | SparseMatrix
       ): unknown[][] {
-        const b = denseRightHandSide(rhs) as typeof rhs;
+        const b = validateRightHandSide(rhs);
         return lusolveFromNested(a as number[][], b);
       },
 
@@ -464,7 +486,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: Float64Array,
         rhs: unknown[][] | DenseMatrix | SparseMatrix
       ): unknown[][] {
-        const b = denseRightHandSide(rhs) as typeof rhs;
+        const b = validateRightHandSide(rhs);
         return lusolveFromNested(decompositionInputToNestedArray(a), b);
       },
 
@@ -472,7 +494,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: DenseMatrix,
         rhs: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        const b = denseRightHandSide(rhs) as typeof rhs;
+        const b = validateRightHandSide(rhs);
         return _lusolveDense(a, b);
       },
 
@@ -480,7 +502,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: SparseMatrix,
         rhs: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix {
-        const b = denseRightHandSide(rhs) as typeof rhs;
+        const b = validateRightHandSide(rhs);
         // A matrix-package SparseMatrix (CSR) has no _values/_index/_ptr: densify it and
         // use the dense factorization.
         if (isEmptyMatrix(a)) return solveEmpty(a, b);
@@ -497,7 +519,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         order: number,
         threshold: number
       ): DenseMatrix {
-        const b = denseRightHandSide(rhs) as typeof rhs;
+        const b = validateRightHandSide(rhs);
         if (isEmptyMatrix(a)) return solveEmpty(a, b);
         // A rectangular system gets the solver error (with the lstsq hint) before slu,
         // which throws its own factorization error (with the lup hint).
@@ -512,7 +534,7 @@ export const createLusolve = /* #__PURE__ */ factory(
         a: LUPDecomposition | PackedMatrixDescriptor | unknown,
         rhs: unknown[][] | DenseMatrix | SparseMatrix
       ): DenseMatrix | unknown[][] {
-        const b = denseRightHandSide(rhs) as typeof rhs;
+        const b = validateRightHandSide(rhs);
         if (isLUPDecomposition(a)) {
           return _lusolve(a.L, a.U, a.p, a.q, b);
         }

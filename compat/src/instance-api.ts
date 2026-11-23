@@ -6,6 +6,7 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import {
   createInstanceEvaluator,
+  factory_mathjsCompat,
   EVALUATE_SCOPE_OMIT,
   parser as functionsParser,
   reviver,
@@ -26,8 +27,14 @@ export interface CompatExpressionLayers {
   mathWithTransform: Record<string, unknown>;
 }
 
+type Emitter = ReturnType<typeof factory_mathjsCompat.attachEmitter>;
+
 /** mathjs instance API attached by {@link wireMathjsInstanceApi}. */
 export interface WiredCompatInstance {
+  Parser: new (options?: PhysicsEvaluateOptions) => ReturnType<typeof functionsParser>;
+  on: Emitter['on'];
+  off: Emitter['off'];
+  once: Emitter['once'];
   import: (functions: unknown, options?: ImportOptions) => void;
   typed: typeof mathTyped & { isTypedFunction: (value: unknown) => boolean };
   compile: (
@@ -104,7 +111,7 @@ export function wireMathjsInstanceApi(
   });
   const expressionLayers: CompatExpressionLayers = {
     transform: {},
-    mathWithTransform: {},
+    mathWithTransform: { num: instance.num, den: instance.den },
   };
 
   // The call builds through the shared typed instance. Every other member
@@ -115,12 +122,16 @@ export function wireMathjsInstanceApi(
     mathTyped
   ) as WiredCompatInstance['typed'];
 
+  if (typeof instance.num !== 'function') delete expressionLayers.mathWithTransform.num;
+  if (typeof instance.den !== 'function') delete expressionLayers.mathWithTransform.den;
   const mathNs = instance as MathNamespace;
   mathNs.typed = instanceTyped;
   mathNs.expression = expressionLayers;
-  mathNs.emit = () => {
-    /* importFactory notifies listeners; compat does not subscribe */
-  };
+  const emitter = factory_mathjsCompat.attachEmitter({});
+  mathNs.emit = emitter.emit;
+  instance.on = emitter.on;
+  instance.off = emitter.off;
+  instance.once = emitter.once;
 
   const UnitCtor = instance.Unit as { isValuelessUnit: (name: string) => boolean } | undefined;
   if (UnitCtor?.isValuelessUnit) {
@@ -173,13 +184,19 @@ export function wireMathjsInstanceApi(
   // parser keeps its retained scope and evaluates with the current instance evaluator,
   // so it resolves imported names, uses the instance config and hides the internal
   // names (#1216).
+  function Parser(
+    this: object,
+    options?: PhysicsEvaluateOptions
+  ): ReturnType<typeof functionsParser> {
+    const made = functionsParser(options);
+    made.evaluate = (expr: string): unknown =>
+      (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
+    return Object.assign(this, made);
+  }
+  const ParserClass = Parser as unknown as WiredCompatInstance['Parser'];
+  instance.Parser = ParserClass;
   if (bindParser) {
-    const instanceParser: typeof functionsParser = (options) => {
-      const made = functionsParser(options);
-      made.evaluate = (expr: string): unknown =>
-        (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
-      return made;
-    };
+    const instanceParser: typeof functionsParser = (options) => new ParserClass(options);
     instance.parser = instanceParser;
   }
 
@@ -191,6 +208,10 @@ export function wireMathjsInstanceApi(
   rebindEvaluator();
 
   return {
+    Parser: ParserClass,
+    on: emitter.on,
+    off: emitter.off,
+    once: emitter.once,
     import: mathImport,
     typed: instanceTyped,
     compile: instance.compile as WiredCompatInstance['compile'],

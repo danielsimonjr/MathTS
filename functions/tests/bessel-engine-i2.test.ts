@@ -130,9 +130,8 @@ describe('#1332 and D4: the recurrence polynomials overflow to a signed Infinity
       expect(() => hermiteH(3e9, 1)).toThrow(RangeError);
       expect(() => hermiteH(3e9, 1)).toThrow(/exceeds the supported maximum of 2500000000/);
     });
-    it('an array call is bounded by the same total work', () => {
-      expect(() => hermiteH(2e9, new Float64Array(2))).toThrow(RangeError);
-      expect(() => hermiteH(2e9, new Float64Array(2))).toThrow(/per call/);
+    it('certifies high even orders for a batch of zero arguments', () => {
+      expect(hermiteH(2e9, new Float64Array(2))).toEqual(Float64Array.of(Infinity, Infinity));
     });
   });
 

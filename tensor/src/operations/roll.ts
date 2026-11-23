@@ -46,7 +46,7 @@ import { Index } from '../named-index.js';
 export function roll(
   t: Tensor,
   shifts: number | readonly number[],
-  axes?: readonly number[]
+  axes?: number | readonly number[]
 ): Tensor {
   const rank = t.shape.length;
   const totalSize = t.shape.reduce((a, b) => a * b, 1);
@@ -71,6 +71,9 @@ export function roll(
   }
 
   // ---- Per-axis mode ----
+  if (typeof axes === 'number') axes = [axes];
+  if (!Array.isArray(axes))
+    throw new TypeError('roll: axes must be an integer or an array of integers');
   // Normalise shifts to an array.
   const shiftArr: number[] = Array.isArray(shifts)
     ? [...(shifts as readonly number[])]
@@ -83,7 +86,8 @@ export function roll(
   }
 
   // Normalise axes (allow negatives, deduplicate modulo).
-  const normAxes: number[] = axes.map((ax) => {
+  const normAxes: number[] = axes.map((ax: number) => {
+    if (!Number.isInteger(ax)) throw new TypeError('roll: axes must be integers');
     const a = ax < 0 ? rank + ax : ax;
     if (a < 0 || a >= rank) {
       throw new Error(`roll: axis ${ax} is out of range for rank ${rank}`);

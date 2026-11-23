@@ -26,7 +26,7 @@ function helpEvaluate(expr: unknown, scope?: Record<string, unknown>): unknown {
   return evaluate(text, scope);
 }
 
-const Help = (createHelpClass as unknown as (deps: { evaluate: unknown }) => HelpCtor)({
+export const Help = (createHelpClass as unknown as (deps: { evaluate: unknown }) => HelpCtor)({
   evaluate: helpEvaluate,
 });
 

@@ -124,15 +124,19 @@ describe('#1145 fftshift and ifftshift of a 2-D input shift every axis (numpy 2.
 
 describe('#1145 welchPSD with a Hann window of length 2', () => {
   it.each(['hann', 'hanning'])('throws a RangeError for the "%s" window', (window) => {
-    expect(() => F.welchPSD([5, 6], { window })).toThrow(RangeError);
-    expect(() => F.welchPSD([5, 6], { window })).toThrow(/welchPSD: a 'hann' window of length 2/);
-    expect(() => F.welchPSD([5, 6, 7, 8], { frameLength: 2, window })).toThrow(
+    expect(() => F.welchPSD([5, 6], { window, periodic: false })).toThrow(RangeError);
+    expect(() => F.welchPSD([5, 6], { window, periodic: false })).toThrow(
+      /welchPSD: a 'hann' window of length 2/
+    );
+    expect(() => F.welchPSD([5, 6, 7, 8], { frameLength: 2, window, periodic: false })).toThrow(
       /welchPSD: a 'hann' window of length 2/
     );
   });
-  it('the default window throws for welchPSD([5,6]) and welchPSD([5,6,7,8],{frameLength:2})', () => {
-    expect(() => F.welchPSD([5, 6])).toThrow(/welchPSD: a 'hann' window of length 2/);
-    expect(() => F.welchPSD([5, 6, 7, 8], { frameLength: 2 })).toThrow(
+  it('a symmetric Hann window throws in every two-sample frame', () => {
+    expect(() => F.welchPSD([5, 6], { periodic: false })).toThrow(
+      /welchPSD: a 'hann' window of length 2/
+    );
+    expect(() => F.welchPSD([5, 6, 7, 8], { frameLength: 2, periodic: false })).toThrow(
       /welchPSD: a 'hann' window of length 2/
     );
   });
@@ -144,7 +148,7 @@ describe('#1145 welchPSD with a Hann window of length 2', () => {
         window
       ).toBe(true);
     }
-    expect(F.welchPSD([5, 6], { window: 'rect' }).psd).toEqual([60.5, 0.5]);
+    expect(F.welchPSD([5, 6], { window: 'rect', detrend: false }).psd).toEqual([60.5, 0.5]);
   });
   it('pin: an empty signal still returns an empty PSD', () => {
     expect(F.welchPSD([]).psd).toEqual([]);
@@ -158,9 +162,13 @@ describe('#1145 a Hann window of length 2 in periodogram, csd and coherence', ()
     expect(() => F.periodogram([5, 6], { nfft: 8 })).toThrow(/^periodogram: the 'hann' window/);
   });
   it('csd and coherence with nperseg 2 throw a RangeError instead of returning NaN', () => {
-    expect(() => F.csd([5, 6], [5, 6])).toThrow(/^csd\/coherence: the 'hann' window of length 2/);
-    expect(() => F.coherence([5, 6], [5, 6])).toThrow(RangeError);
-    expect(() => F.csd([5, 6, 7, 8], [5, 6, 7, 8], { nperseg: 2 })).toThrow(RangeError);
+    expect(() => F.csd([5, 6], [5, 6], { periodic: false })).toThrow(
+      /^csd\/coherence: the 'hann' window of length 2/
+    );
+    expect(() => F.coherence([5, 6], [5, 6], { periodic: false })).toThrow(RangeError);
+    expect(() => F.csd([5, 6, 7, 8], [5, 6, 7, 8], { nperseg: 2, periodic: false })).toThrow(
+      RangeError
+    );
   });
   it('pin: other windows of length 2 and a Hann window of length 3 stay finite', () => {
     expect(F.periodogram([5, 6], { window: 'hamming' }).psd.every(Number.isFinite)).toBe(true);
@@ -278,19 +286,22 @@ describe('#1145 welchPSD and bartlettPSD with an odd frame length', () => {
   const x = [1, 5, 2, 8, 3, 9, 4, 7, 6, 10];
   it('the last bin is a one-sided bin, so it is doubled (rect, frame 5)', () => {
     closeTo(
-      F.welchPSD(x, { frameLength: 5, overlap: 2, window: 'rect' }).psd,
+      F.welchPSD(x, { frameLength: 5, overlap: 2, window: 'rect', periodic: false, detrend: false })
+        .psd,
       [132.2, 5.008514494500885, 23.791485505499118]
     );
   });
   it('the last bin is doubled (hann, frame 5)', () => {
     closeTo(
-      F.welchPSD(x, { frameLength: 5, overlap: 2, window: 'hann' }).psd,
+      F.welchPSD(x, { frameLength: 5, overlap: 2, window: 'hann', periodic: false, detrend: false })
+        .psd,
       [76.16666666666667, 79.9787137637478, 33.021286236252216]
     );
   });
   it('the last bin is doubled (rect, frame 7)', () => {
     closeTo(
-      F.welchPSD(x, { frameLength: 7, overlap: 3, window: 'rect' }).psd,
+      F.welchPSD(x, { frameLength: 7, overlap: 3, window: 'rect', periodic: false, detrend: false })
+        .psd,
       [146.28571428571428, 13.72280085736389, 4.70093872275245, 35.290546134169375]
     );
   });
@@ -302,7 +313,8 @@ describe('#1145 welchPSD and bartlettPSD with an odd frame length', () => {
   });
   it('pin: an even frame keeps its Nyquist bin undoubled', () => {
     closeTo(
-      F.welchPSD(x, { frameLength: 4, overlap: 2, window: 'rect' }).psd,
+      F.welchPSD(x, { frameLength: 4, overlap: 2, window: 'rect', periodic: false, detrend: false })
+        .psd,
       [124.875, 3.750000000000001, 23.375]
     );
   });

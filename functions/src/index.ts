@@ -141,7 +141,7 @@ export {
 } from './numeric/propagate-uncertainty.js';
 
 // GC4 — mathjs canonical `help(search)` export (Help class + embedded docs).
-export { help } from './help.js';
+export { help, Help } from './help.js';
 
 // Number-theory fills (Task 4): continued fractions, Euler numbers, signed
 // Stirling 1st kind, discrete log (BSGS), primitive roots, multiplicative
