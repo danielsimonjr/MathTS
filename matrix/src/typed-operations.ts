@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { rectangularArraySize } from './operations/array-shape.js';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
 import type { SignatureFunction } from '@danielsimonjr/mathts-core';
@@ -281,12 +282,7 @@ export const pow: TypedFunction = mathTyped('pow', {
  */
 export const size: TypedFunction = mathTyped('size', {
   DenseMatrix: (a: DenseMatrix) => [a.rows, a.cols],
-  Array: (arr: unknown[]) => {
-    if (Array.isArray(arr[0])) {
-      return [arr.length, (arr[0] as unknown[]).length];
-    }
-    return [arr.length];
-  },
+  Array: rectangularArraySize,
 } as Signatures);
 
 /**

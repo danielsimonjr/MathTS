@@ -1,5 +1,6 @@
 import { factory } from '../utils/factory.js';
 import { gammaG, gammaNumber, gammaP } from '../plain/number/index.js';
+import { cosPiScalar, sinPiScalar } from '../wasm/special/scalars.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import { atWorkPrecision, type PrecisionClass } from '../utils/bignumber/work-precision.js';
 
@@ -129,10 +130,16 @@ export const createGamma = /* #__PURE__ */ factory(
         // thanks to imperfect sin implementation sin(PI * n) != 0
         // we can safely use it anyway
         const t = new Complex(1 - n.re, -n.im);
-        const r = new Complex(Math.PI * n.re, Math.PI * n.im);
+        // sin(pi (a + bi)) = sin(pi a) cosh(pi b) + i cos(pi a) sinh(pi b). The real part is
+        // reduced exactly (sinPiScalar, cosPiScalar): `r.sin()` of the rounded product pi * a
+        // kept only a few digits next to a negative integer.
+        const sinPiZ = new Complex(
+          sinPiScalar(n.re) * Math.cosh(Math.PI * n.im),
+          cosPiScalar(n.re) * Math.sinh(Math.PI * n.im)
+        );
 
         const gammaT = gammaComplex(t);
-        return new Complex(Math.PI).div(r.sin()).div(gammaT as ComplexType);
+        return new Complex(Math.PI).div(sinPiZ).div(gammaT as ComplexType);
       }
 
       // Lanczos approximation

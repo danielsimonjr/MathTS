@@ -85,6 +85,7 @@ interface NormalizedEvent {
  */
 export interface ODEOptions {
   method?: 'RK23' | 'RK45' | 'Rosenbrock' | 'RODAS' | 'BDF' | 'Radau';
+  /** Finite, strictly positive error tolerance. */
   tol?: number;
   firstStep?: number | Unit;
   minStep?: number | Unit;
@@ -1503,7 +1504,7 @@ export function radauSolve(
   return { t: tOut, y: yOut };
 }
 
-/** Solution when the time span and state are `Matrix` values: `t` and `y` come back as matrices. */
+/** Solution when the time span or state is a `Matrix`: both outputs are matrices. */
 export interface ODEMatrixSolution {
   t: Matrix;
   y: Matrix;
@@ -1522,7 +1523,13 @@ interface SolveODEOverloads {
   (
     f: ForcingFunction,
     tspan: Matrix,
-    y0: Matrix | number | BigNumber | Unit,
+    y0: unknown[] | Matrix | number | BigNumber | Unit,
+    options?: ODEOptions
+  ): ODEMatrixSolution;
+  (
+    f: ForcingFunction,
+    tspan: unknown[] | Matrix,
+    y0: Matrix,
     options?: ODEOptions
   ): ODEMatrixSolution;
 }
@@ -1584,7 +1591,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
      *   - `method` ('RK45'): ['RK23', 'RK45', 'Rosenbrock', 'RODAS', 'BDF', 'Radau']
      *   - `jac`: analytic Jacobian `(t, y) => number[][]` for the stiff methods ('Rosenbrock',
      *     'RODAS', 'BDF', 'Radau'); when omitted they finite-difference it (backward compatible)
-     *   - `tol` (1e-3): Numeric tolerance of the method, the solver keeps the error estimates less than this value
+     *   - `tol` (1e-4): Finite, strictly positive error tolerance.
      *   - `firstStep`: Initial step size
      *   - `minStep`: minimum step size of the method
      *   - `maxStep`: maximum step size of the method
@@ -1937,6 +1944,12 @@ export const createSolveODE = /* #__PURE__ */ factory(
       };
       if (method.toUpperCase() in methods) {
         _checkTspan(tspan);
+        if (opt.tol !== undefined) {
+          if (typeof opt.tol !== 'number') throw new TypeError('"tol" must be a number');
+          if (!Number.isFinite(opt.tol) || opt.tol <= 0) {
+            throw new RangeError('"tol" must be finite and positive');
+          }
+        }
         if (opt.events !== undefined) _normalizeEvents(opt.events);
         const y0NonFinite = y0.some((v) =>
           isNumber(v)
@@ -1994,12 +2007,14 @@ export const createSolveODE = /* #__PURE__ */ factory(
 
     function _matrixSolveODE(
       f: ForcingFunction,
-      T: Matrix,
-      y0: Matrix,
-      options: ODEOptions
-    ): { t: Matrix; y: Matrix; tEvents?: number[][]; yEvents?: unknown[][] } {
-      // receives matrices and returns matrices; event lists (ragged, one per event fn) stay plain.
-      const sol = _solveODE(f, T.toArray(), y0.toArray(), options);
+      T: unknown[] | Matrix,
+      y0: unknown[] | Matrix,
+      options: ODEOptions = {}
+    ): ODEMatrixSolution {
+      // A matrix in either position selects matrix outputs. Event lists remain arrays.
+      const tspan = Array.isArray(T) ? T : T.toArray();
+      const state = Array.isArray(y0) ? y0 : y0.toArray();
+      const sol = _solveODE(f, tspan, state, options);
       const out: { t: Matrix; y: Matrix; tEvents?: number[][]; yEvents?: unknown[][] } = {
         t: matrix(sol.t),
         y: matrix(sol.y),
@@ -2023,11 +2038,12 @@ export const createSolveODE = /* #__PURE__ */ factory(
 
     const solveODE = typed('solveODE', {
       'function, Array, Array, Object': _solveODE,
-      'function, Matrix, Matrix, Object': _matrixSolveODE,
+      'function, Matrix, Array | Matrix, Object': _matrixSolveODE,
+      'function, Array, Matrix, Object': _matrixSolveODE,
       'function, Array, Array': (f: ForcingFunction, T: unknown[], y0: unknown[]) =>
         _solveODE(f, T, y0, {}),
-      'function, Matrix, Matrix': (f: ForcingFunction, T: Matrix, y0: Matrix) =>
-        _matrixSolveODE(f, T, y0, {}),
+      'function, Matrix, Array | Matrix': _matrixSolveODE,
+      'function, Array, Matrix': _matrixSolveODE,
       'function, Array, number | BigNumber | Unit': (
         f: ForcingFunction,
         T: unknown[],

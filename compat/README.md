@@ -36,6 +36,9 @@ math.complex(2, 3); // 2 + 3i
   mathjs semantics on each `create(all)` instance, including `{ override, silent, wrap }`
   on `import`. Safe `evaluate` keeps G22 denylisted symbols out of expressions even when
   `import` overrides them on the instance.
+- `math.matrix([[1, 2]])` returns a dense mathjs-style Matrix with `.size()` and `.toArray()`.
+  Passing an existing native MathTS matrix through `math.matrix` preserves its class when
+  no storage conversion is requested.
 - Direct named imports (`add`, `matrix`, …) come from `compat/src/shims.ts`. There is
   no package-level named `import` / `createUnit` / `config` export (use the instance).
 - Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions`
