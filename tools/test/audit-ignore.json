@@ -1,11 +1,3 @@
 {
-  "ignores": [
-    {
-      "id": "GHSA-fc5q-39xc-vjpf",
-      "package": "picomatch",
-      "reason": "No fixed release: the advisory covers picomatch <= 4.0.7, the latest version. picomatch reaches only development tools (tsdown, vitest, vite, @changesets/cli, lint-staged). The production audit has no ignore and reports no vulnerability.",
-      "remove": "Remove this entry when a picomatch release above 4.0.7 fixes the advisory, then refresh bun.lock.",
-      "issue": 1139
-    }
-  ]
+  "ignores": []
 }
