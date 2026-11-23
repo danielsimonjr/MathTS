@@ -15,6 +15,7 @@
  * @packageDocumentation
  */
 
+import { rectangularArraySize } from './operations/array-shape.js';
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
 import { computePool as importedPool, type ParallelResult } from '@danielsimonjr/mathts-parallel';
@@ -889,12 +890,7 @@ export const parallelMatrixSize: TypedFunction = mathTyped('parallelMatrixSize',
 
   Float64Array: (a: Float64Array) => [a.length],
 
-  Array: (arr: unknown[]) => {
-    if (Array.isArray(arr[0])) {
-      return [arr.length, (arr[0] as unknown[]).length];
-    }
-    return [arr.length];
-  },
+  Array: rectangularArraySize,
 } as Signatures);
 
 /**
