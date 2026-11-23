@@ -758,11 +758,26 @@ function eigGeneral(
   // for a tiny matrix and overflows for a huge one.
   let report: RepeatedEigenvalue[] | undefined;
   const scaledReport = (): RepeatedEigenvalue[] => {
-    if (scE === 0) return repeatedEigenvalueReport(A, values, symmetric);
+    let balancedScale: number | undefined;
+    if (blockLow > 0 || blockHigh < nn - 1) {
+      // Couplings to a block isolated by balancing do not perturb its eigenvalues.
+      balancedScale = 0;
+      for (let i = 0; i < nn; i++) {
+        if (i < blockLow || i > blockHigh) {
+          balancedScale = Math.hypot(balancedScale, ldexp(B[i][i], scE));
+          continue;
+        }
+        for (let j = blockLow; j <= blockHigh; j++) {
+          balancedScale = Math.hypot(balancedScale, ldexp(B[i][j], scE));
+        }
+      }
+    }
+    if (scE === 0) return repeatedEigenvalueReport(A, values, symmetric, balancedScale);
     const scaled = repeatedEigenvalueReport(
       A.map((row) => row.map((x) => ldexp(x, scE))),
       values.map((v) => ({ re: ldexp(v.re, scE), im: ldexp(v.im, scE) })),
-      symmetric
+      symmetric,
+      balancedScale
     );
     // The mean of the copies is a power-of-2 scaling of the unscaled mean: scale it back.
     return scaled.map((r) => ({
