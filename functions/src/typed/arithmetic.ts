@@ -2153,9 +2153,19 @@ function exactNorm(arr: unknown[], p?: number | string): unknown {
 /** The norm of a 1-D or 2-D array; see {@link norm}. */
 function arrayNorm(arr: unknown[], p?: f64 | string): unknown {
   if (!isNumberArrayDeep(arr)) return exactNorm(arr, p);
-  if (is2DArray(arr)) return matrixNorm(arr as f64[][], p);
+  if (is2DArray(arr)) {
+    const rows = arr as f64[][];
+    if (rows[0].length === 0) throw new RangeError('Invalid matrix dimensions');
+    return matrixNorm(rows, p);
+  }
   if (typeof p === 'string') return matrixNorm([arr as f64[]], p);
   return vectorNorm(arr as f64[], p);
+}
+
+function boxedNorm(m: { toArray(): unknown }, p?: number | string): unknown {
+  const size = collectionSize(m);
+  if (size.length === 2 && size.includes(0)) throw new RangeError('Invalid matrix dimensions');
+  return arrayNorm(m.toArray() as unknown[], p);
 }
 
 export const norm = mathTyped('norm', {
@@ -2169,12 +2179,8 @@ export const norm = mathTyped('norm', {
   Array: (arr: unknown[]): unknown => arrayNorm(arr),
   'Array, number': (arr: unknown[], p: f64): unknown => arrayNorm(arr, p),
   'Array, string': (arr: unknown[], p: string): unknown => arrayNorm(arr, p),
-  'DenseMatrix | SparseMatrix': (m: { toArray(): unknown }): unknown =>
-    arrayNorm(m.toArray() as unknown[]),
-  'DenseMatrix | SparseMatrix, number | string': (
-    m: { toArray(): unknown },
-    p: f64 | string
-  ): unknown => arrayNorm(m.toArray() as unknown[], p),
+  'DenseMatrix | SparseMatrix': (m: { toArray(): unknown }): unknown => boxedNorm(m),
+  'DenseMatrix | SparseMatrix, number | string': boxedNorm,
 
   // Float64Array norm (Euclidean), synchronous. The worker version is computePool.norm.
   Float64Array: (a: Float64Array): f64 => {
@@ -2388,6 +2394,13 @@ function extremumWalk(xs: unknown[], isMax: boolean, state: { m: number; nan: bo
 /** The numeric types that `min` and `max` compare exactly when their types differ. */
 const EXTREMUM_TYPES = ['number', 'Fraction', 'BigNumber', 'bigint'] as const;
 
+function assertNonemptyMatrixReduction(m: unknown, quantity: string): void {
+  const size = collectionSize(m);
+  if (size.length >= 2 && size.includes(0)) {
+    throw new Error(`Cannot calculate ${quantity} of an empty array`);
+  }
+}
+
 /**
  * The signatures that `min` and `max` share. Two arguments of different types go to the exact
  * function, which returns the winning argument itself. A conversion to one common type would
@@ -2410,6 +2423,7 @@ function extremumSignatures(name: 'min' | 'max'): Record<string, (...args: never
     'number, number': pick,
     Array: (arr: unknown[]): unknown => numberExtremum(arr, isMax) ?? exact(arr),
     Matrix: (m: unknown): unknown => {
+      assertNonemptyMatrixReduction(m, name);
       const v = (m as { valueOf(): unknown }).valueOf();
       return (Array.isArray(v) ? numberExtremum(v, isMax) : undefined) ?? exact(m);
     },
@@ -2774,9 +2788,14 @@ export const mean = mathTyped('mean', {
     return meanOfNumeric(skipNaN ? finiteNumbers(a, true) : a);
   },
 
-  Matrix: (m: unknown): f64 => (meanOfInput(m, false) ?? exactMean(m)) as f64,
-  'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 =>
-    meanWithOptions(m, undefined, opts) as f64,
+  Matrix: (m: unknown): f64 => {
+    assertNonemptyMatrixReduction(m, 'the mean');
+    return (meanOfInput(m, false) ?? exactMean(m)) as f64;
+  },
+  'Matrix, Object': (m: unknown, opts: StatReduceOptions): f64 => {
+    assertNonemptyMatrixReduction(m, 'the mean');
+    return meanWithOptions(m, undefined, opts) as f64;
+  },
   'Matrix, number | BigNumber': (
     m: unknown,
     dim: number | { valueOf(): number }
@@ -3191,12 +3210,17 @@ const stdSignatures = {
     return Math.sqrt(varianceOf(skipNaN ? finiteNumbers(a, true) : a, request));
   },
 
-  Matrix: (m: unknown): f64 => (sqrtNumber(varianceWith(m, UNBIASED, false)) ?? exactStd(m)) as f64,
+  Matrix: (m: unknown): f64 => {
+    assertNonemptyMatrixReduction(m, 'variance');
+    return (sqrtNumber(varianceWith(m, UNBIASED, false)) ?? exactStd(m)) as f64;
+  },
   'Matrix, string': (m: unknown, norm: string): f64 => {
+    assertNonemptyMatrixReduction(m, 'variance');
     const { request, skipNaN } = normalizationFromSecondArg(norm);
     return (sqrtNumber(varianceWith(m, request, skipNaN)) ?? exactStd(m, norm)) as f64;
   },
   'Matrix, Object': (m: unknown, arg: StatReduceOptions): f64 => {
+    assertNonemptyMatrixReduction(m, 'variance');
     const { request, skipNaN } = normalizationFromSecondArg(arg);
     return (sqrtNumber(varianceWith(m, request, skipNaN)) ??
       exactVarianceWith('std', m, undefined, request, skipNaN)) as f64;
