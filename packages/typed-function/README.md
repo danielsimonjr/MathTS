@@ -16,6 +16,16 @@ npm install @danielsimonjr/mathts-typed-function
 
 For application code, prefer `mathTyped` from `@danielsimonjr/mathts-core` unless you need the helpers below directly.
 
+## Example
+
+```ts node
+import { buildSignature, parseSignature } from '@danielsimonjr/mathts-typed-function';
+
+const signature = buildSignature('number', 'string');
+console.log(signature); // number, string
+console.log(parseSignature(signature)); // ['number', 'string']
+```
+
 ## Exports
 
 | Category            | Names                                                                                                                                                                      |

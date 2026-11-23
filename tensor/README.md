@@ -27,7 +27,8 @@ console.log(t.shape, t.sum().toNested()); // [2, 2] 10
 ## Reading the package version
 
 `./package.json` is an exported subpath. Node requires an import attribute to load JSON as a
-module, so a bare `import()` of it fails with `ERR_IMPORT_ATTRIBUTE_MISSING`:
+module, so a bare `import()` of it fails with `ERR_IMPORT_ATTRIBUTE_MISSING`.
+Enable `resolveJsonModule` in your TypeScript configuration to type-check the JSON import.
 
 ```ts node
 import pkg from '@danielsimonjr/mathts-tensor/package.json' with { type: 'json' };
