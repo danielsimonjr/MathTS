@@ -27,7 +27,6 @@ const dependencies = [
   'multiply',
   'divide',
   'max',
-  'map',
   'abs',
   'isPositive',
   'isNegative',
@@ -279,25 +278,11 @@ function _isNonFinite(v: unknown): boolean {
   return isBigNumber(v) && !(v as unknown as BigNumber).isFinite();
 }
 
-/**
- * The error of a step size that does not advance the independent variable. `lastTE` is the error
- * estimate of the last rejected trial of an explicit Runge-Kutta run. When it is finite, the
- * message ends with the cause: the error test is absolute (mathjs parity), and the rounding floor
- * of the estimate of a very large state can be above `tol` for every step size. When the last
- * trial was not finite, the cause is not the tolerance and the message has no suffix.
- */
-function _underflowError(
-  method: string,
-  t: unknown,
-  h: unknown,
-  lastTE?: unknown,
-  tol?: unknown
-): Error {
+/** A step is too small to advance the independent variable. */
+function _underflowError(method: string, t: unknown, h: unknown, errorRatio?: number): Error {
   const base = `solveODE ${method}: step size underflow at t=${t} (h=${h}); the step does not advance the independent variable`;
-  if (lastTE === undefined || _isNonFinite(lastTE)) return new Error(`${base}.`);
-  return new Error(
-    `${base}; the last error estimate ${lastTE} is above tol=${tol}, and the error test is absolute. Raise options.tol or rescale the state.`
-  );
+  if (errorRatio === undefined || !Number.isFinite(errorRatio)) return new Error(`${base}.`);
+  return new Error(`${base}; the last error estimate is ${errorRatio} times its tolerance.`);
 }
 
 /** `f` at a point the solver accepts. A non-finite value there cannot be stepped around. */
@@ -1574,7 +1559,6 @@ export const createSolveODE = /* #__PURE__ */ factory(
     multiply,
     divide,
     max,
-    map,
     abs,
     isPositive,
     isNegative,
@@ -1616,7 +1600,9 @@ export const createSolveODE = /* #__PURE__ */ factory(
      *   - `method` ('RK45'): ['RK23', 'RK45', 'Rosenbrock', 'RODAS', 'BDF', 'Radau']
      *   - `jac`: analytic Jacobian `(t, y) => number[][]` for the stiff methods ('Rosenbrock',
      *     'RODAS', 'BDF', 'Radau'); when omitted they finite-difference it (backward compatible)
-     *   - `tol` (1e-4): Finite, strictly positive error tolerance.
+     *   - `tol` (1e-4): Finite, strictly positive error tolerance. RK23 and RK45 use it
+     *     as a relative tolerance, with absolute tolerance `tol * 0.001`. Unit-valued RK
+     *     problems retain the absolute derivative tolerance.
      *   - `firstStep`: Initial step size
      *   - `minStep`: minimum step size of the method
      *   - `maxStep`: maximum step size of the method
@@ -1703,9 +1689,15 @@ export const createSolveODE = /* #__PURE__ */ factory(
           throw new Error('Inconsistent type of "t" dependant variables');
         }
 
-        const hasBigNumbers = [t0, tf, ...y0, maxStep, minStep].some(isBigNumber);
-        const steps = 1; // divide time in this number of steps
-        const tol = options.tol ? options.tol : 1e-4; // define a tolerance (must be an option)
+        const hasBigNumbers = [...timeVars, ...y0].some(isBigNumber);
+        const tol = options.tol ?? 1e-4;
+        const unitState = timeVars.some(isUnit) || y0.some(isUnit);
+        const bigTol = hasBigNumbers ? (bignumber(tol) as BigNumber) : undefined;
+        const bigAtol = bigTol?.times(bignumber('0.001'));
+        const atol = tol * 1e-3;
+        const thirdOrder = !unitState && rkMethod === 'RK23';
+        const safety = thirdOrder ? 0.45 : 0.84;
+        const errorExponent = thirdOrder ? 1 / 3 : 1 / 5;
         const minDelta = options.minDelta ? options.minDelta : 0.2;
         const maxDelta = options.maxDelta ? options.maxDelta : 5;
         const maxIter = odeAcceptedBudget(options.maxIter as number | undefined);
@@ -1732,7 +1724,10 @@ export const createSolveODE = /* #__PURE__ */ factory(
           h = hasBigNumbers ? bignumber(firstStepGuess) : firstStepGuess;
           if (!isForwards) h = unaryMinus(h);
         } else {
-          h = divide(subtract(tf, t0), steps); // fallback first step size
+          // A BigNumber state can be outside the double range used by the initial estimate.
+          // Start with a fraction of the span to avoid an accidental zero embedded difference.
+          const span = subtract(tf, t0);
+          h = unitState ? span : divide(span, 100);
         }
         const t: unknown[] = [t0]; // start the time array
         const y: unknown[] = [y0]; // start the solution array
@@ -1754,10 +1749,57 @@ export const createSolveODE = /* #__PURE__ */ factory(
           return acc;
         }
 
+        function normalizedError(
+          error: unknown[],
+          before: unknown,
+          after: unknown,
+          step: unknown
+        ): number {
+          const current = Array.isArray(before) ? before : [before];
+          const candidate = Array.isArray(after) ? after : [after];
+          let worst = 0;
+          for (let i = 0; i < error.length; i++) {
+            if (bigTol && bigAtol) {
+              const e = bignumber(error[i]) as BigNumber;
+              const a = (bignumber(current[i]) as BigNumber).abs();
+              const b = (bignumber(candidate[i]) as BigNumber).abs();
+              if (!e.isFinite() || !b.isFinite()) return Infinity;
+              const magnitude = a.gt(b) ? a : b;
+              const scale = bigAtol.plus(bigTol.times(magnitude));
+              const ratio = e
+                .abs()
+                .times((bignumber(step) as BigNumber).abs())
+                .div(scale);
+              worst = Math.max(worst, ratio.toNumber());
+            } else {
+              const e = Math.abs(Number(error[i]));
+              const a = Math.abs(Number(current[i]));
+              const b = Math.abs(Number(candidate[i]));
+              if (!Number.isFinite(e) || !Number.isFinite(b)) return Infinity;
+              if (e === 0) continue;
+              const h = Math.abs(Number(step));
+              const magnitude = Math.max(a, b);
+              const scale = atol + tol * magnitude;
+              const localError = e * h;
+              const ratio =
+                Number.isFinite(localError) &&
+                localError !== 0 &&
+                scale > 0 &&
+                Number.isFinite(scale)
+                  ? localError / scale
+                  : Math.exp(
+                      Math.log(e) + Math.log(h) - Math.log(tol) - Math.log(1e-3 + magnitude)
+                    );
+              worst = Math.max(worst, ratio);
+            }
+          }
+          return worst;
+        }
+
         let n = 0;
         let attempts = 0;
         // The error estimate of the last rejected trial; undefined after an accepted step.
-        let lastRejectedTE: unknown;
+        let lastRejectedRatio: number | undefined;
         const ongoing = _createOngoing(isForwards);
         const trimStep = _createTrimStep(isForwards);
         const tfNum = tf as number;
@@ -1798,14 +1840,14 @@ export const createSolveODE = /* #__PURE__ */ factory(
             // A rejected step that shrinks h to 0 (or below one ulp of t) would
             // otherwise spin until the attempt cap. Underflow is still an error.
             if (h === 0 || !Number.isFinite(h) || tNow + h === tNow) {
-              throw _underflowError(rkMethod, tNow, h, lastRejectedTE, tol);
+              throw _underflowError(rkMethod, tNow, h, lastRejectedRatio);
             }
           } else if (
             isBigNumber(h) &&
             isNumOrBig(t[n]) &&
             _bigStepUnderflows(h as unknown as BigNumber, t[n], t0, tf)
           ) {
-            throw _underflowError(rkMethod, t[n], h, lastRejectedTE, tol);
+            throw _underflowError(rkMethod, t[n], h, lastRejectedRatio);
           }
 
           // calculate the rest of the values of k
@@ -1816,39 +1858,31 @@ export const createSolveODE = /* #__PURE__ */ factory(
           // estimate the error by comparing solutions of different orders
           const errComb = stageCombo(deltaB, k);
           const errArr = Array.isArray(errComb) ? errComb : [errComb];
-          // A non-finite trial is rejected (TE = Infinity) and the step shrinks (#991).
-          const trialBad = errArr.some(_isNonFinite);
-          if (trialBad && minStep && !larger(abs(h), minStep)) {
-            throw _underflowError(rkMethod, t[n], h);
+          const yNext = add(y[n], multiply(h, stageCombo(b, k)));
+          let error: number;
+          if (unitState) {
+            // Unit-valued problems keep the existing absolute derivative tolerance.
+            const magnitudes = errArr.map((x) => (isUnit(x) ? (x as Unit).value : x));
+            error = Number(max(abs(magnitudes))) / tol;
+          } else {
+            // The embedded derivative difference times h estimates the local error in y.
+            error = normalizedError(errArr, y[n], yNext, h);
           }
-          const TE = trialBad
-            ? Infinity
-            : max(abs(map(errArr, (X: unknown) => (isUnit(X) ? (X as Unit).value : X))));
+          if (!Number.isFinite(error)) error = Infinity;
+          if (error >= 1 && minStep && !larger(abs(h), minStep)) {
+            throw _underflowError(rkMethod, t[n], h, error);
+          }
 
-          // A BigNumber estimate is compared as a decimal: the JS `<` would turn it into a double,
-          // and an estimate above 1.8e308 (a state of 1e160 squared, or 1e400) would become Infinity.
-          // A JS `Infinity` tol becomes a decimal Infinity and accepts every finite estimate.
-          const accepted = isBigNumber(TE)
-            ? (TE as unknown as BigNumber).lt(bignumber(tol))
-            : TE < tol && tol / TE > 1 / 4;
-          if (accepted) {
-            // push solution if within tol
+          if (error < 1) {
             t.push(hasBigNumbers ? _roundBig(add(t[n], h)) : add(t[n], h));
-            const yNext = add(y[n], multiply(h, stageCombo(b, k)));
             y.push(hasBigNumbers ? _roundBig(yNext) : yNext);
             n++;
-            lastRejectedTE = undefined;
+            lastRejectedRatio = undefined;
           } else {
-            lastRejectedTE = TE;
+            lastRejectedRatio = error;
           }
 
-          // estimate the delta value that will affect the step size. The ratio stays in double
-          // arithmetic: a decimal ratio changes the last bits of delta, and so the trajectory.
-          const teNumber = isBigNumber(TE) ? (TE as unknown as BigNumber).toNumber() : TE;
-          let delta = 0.84 * (tol / teNumber) ** (1 / 5);
-          // NaN comes from Infinity / Infinity (an infinite tol with a non-finite trial) or from a
-          // negative base (tol < 0). No comparison below clamps a NaN, so it would reach h and t.
-          if (Number.isNaN(delta)) delta = accepted ? maxDelta : minDelta;
+          let delta = safety * (1 / error) ** errorExponent;
 
           if (smaller(delta, minDelta)) {
             delta = minDelta;

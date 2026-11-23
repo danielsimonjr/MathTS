@@ -32,13 +32,15 @@ describe('BigNumber solveODE budget error', () => {
     });
   }
 
-  it('the number path is unchanged', () => {
+  it('the number path also reports the time reached', () => {
     const message = messageOf(() =>
       mt.solveODE((_t: number, y: number[]) => [-1000 * y[0]], [0, 10], [1], {
         method: 'RK45',
         maxIter: 5,
       })
     );
-    expect(message).toMatch(/last t=0\.000\d+, target t=10/);
+    const t = Number(message.match(/last t=([^,]+), target t=10/)?.[1]);
+    expect(t).toBeGreaterThan(0);
+    expect(t).toBeLessThan(10);
   });
 });
