@@ -1,5 +1,28 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.2
+
+### Patch Changes
+
+- 291a3e9: `fraction`, `number` and `transpose` are typed-functions, as in mathjs. As a callback of `map`, `forEach`, `filter`, the `map` and `forEach` methods of a Matrix and of a SparseMatrix, `mapSlices`, `chain` and `evaluate`, each one now reads the value alone. Before, a callback adapter passed the index as the second argument: `map([1, 4], fraction)` threw `Fraction denominator cannot be zero`, and `map(['1', '4'], number)` threw about a unit. The compat `fraction` is the same function, with the no-argument and `undefined` calls that give 0. A call with a type that mathjs rejects now throws a TypeError: `number(undefined)`, `number({})`, `number(complex)`, `fraction(complex)`, `fraction(1, 2, 3)`, `fraction(1, null)` and a `Date` or a typed array as the argument. `transpose()` throws a TypeError too. (Refs #1160)
+- Updated dependencies [90ff360]
+- Updated dependencies [576726b]
+- Updated dependencies [04df2cc]
+- Updated dependencies [576726b]
+- Updated dependencies [884eada]
+- Updated dependencies [576726b]
+- Updated dependencies [576726b]
+- Updated dependencies [0c124c0]
+- Updated dependencies [576726b]
+- Updated dependencies [67c9b6f]
+- Updated dependencies [291a3e9]
+- Updated dependencies [291a3e9]
+- Updated dependencies [291a3e9]
+- Updated dependencies [90ff360]
+- Updated dependencies [576726b]
+  - @danielsimonjr/mathts-functions@0.89.0
+  - @danielsimonjr/mathts-parallel@0.12.2
+
 ## 0.7.1
 
 ### Patch Changes

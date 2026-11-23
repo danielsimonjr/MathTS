@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.7.0
+
+### Minor Changes
+
+- f7e787a: Add a single-trace Jacobian diagonal API for same-shape elementwise maps.
+
 ## 0.6.2
 
 ### Patch Changes
