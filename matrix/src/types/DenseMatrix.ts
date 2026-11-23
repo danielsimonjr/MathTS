@@ -256,6 +256,14 @@ export class DenseMatrix extends Matrix<number> {
    * Create a matrix from a nested array. A 1-D array gives a 1 x n row matrix.
    */
   static fromArray(arr: number[][] | number[]): DenseMatrix {
+    if (arr.length === 0) {
+      return new DenseMatrix(1, 0, new Float64Array(0), {
+        isView: false,
+        offset: 0,
+        rowStride: 0,
+        rank: 1,
+      });
+    }
     return new DenseMatrix(arr);
   }
 

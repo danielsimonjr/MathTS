@@ -4,12 +4,11 @@ import { createMatAlgo14xDs } from '../type/matrix/utils/matAlgo14xDs.js';
 import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
 import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
 import { createMatAlgo08xS0Sid } from '../type/matrix/utils/matAlgo08xS0Sid.js';
+import { isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import { rightLogShiftNumber } from '../plain/number/index.js';
-import { rightLogShiftBigNumber } from '../utils/bignumber/bitwise.js';
 import { createUseMatrixForArrayScalar } from './useMatrixForArrayScalar.js';
-import type { BigNumber } from '../type/bignumber/BigNumber.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { AlgorithmFunction } from '../type/matrix/types.js';
 
@@ -31,6 +30,17 @@ interface RightLogShiftDependencies {
 
 const name = 'rightLogShift';
 const dependencies = ['typed', 'matrix', 'equalScalar', 'zeros', 'DenseMatrix', 'concat'];
+
+/** Keep the dispatcher's implicit BigNumber-to-number conversion out of logical shifts. */
+export function rejectBigNumberShift<T extends (...args: never[]) => unknown>(fn: T): T {
+  const checked = (...args: never[]) => {
+    if (args.some(isBigNumber)) {
+      throw new TypeError('rightLogShift: BigNumber operands are not supported');
+    }
+    return fn(...args);
+  };
+  return Object.assign(checked, fn);
+}
 
 export const createRightLogShift = /* #__PURE__ */ factory(
   name,
@@ -76,16 +86,14 @@ export const createRightLogShift = /* #__PURE__ */ factory(
      * @return {number | Array | Matrix} `x` zero-filled shifted right `y` times
      */
 
-    return typed(
+    const shift = typed(
       name,
       {
         'number, number': rightLogShiftNumber,
 
-        'BigNumber, BigNumber': rightLogShiftBigNumber,
-
-        'SparseMatrix, number | BigNumber': typed.referToSelf(
+        'SparseMatrix, number': typed.referToSelf(
           (self: TypedFunction) =>
-            (x: Matrix, y: number | BigNumber): Matrix => {
+            (x: Matrix, y: number): Matrix => {
               // check scalar
               if (equalScalar(y, 0)) {
                 return x.clone();
@@ -99,9 +107,9 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             }
         ),
 
-        'DenseMatrix, number | BigNumber': typed.referToSelf(
+        'DenseMatrix, number': typed.referToSelf(
           (self: TypedFunction) =>
-            (x: Matrix, y: number | BigNumber): Matrix => {
+            (x: Matrix, y: number): Matrix => {
               // check scalar
               if (equalScalar(y, 0)) {
                 return x.clone();
@@ -115,9 +123,9 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             }
         ),
 
-        'number | BigNumber, SparseMatrix': typed.referToSelf(
+        'number, SparseMatrix': typed.referToSelf(
           (self: TypedFunction) =>
-            (x: number | BigNumber, y: Matrix): Matrix => {
+            (x: number, y: Matrix): Matrix => {
               // check scalar
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage());
@@ -131,9 +139,9 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             }
         ),
 
-        'number | BigNumber, DenseMatrix': typed.referToSelf(
+        'number, DenseMatrix': typed.referToSelf(
           (self: TypedFunction) =>
-            (x: number | BigNumber, y: Matrix): Matrix => {
+            (x: number, y: Matrix): Matrix => {
               // check scalar
               if (equalScalar(x, 0)) {
                 return zeros(y.size(), y.storage());
@@ -147,12 +155,16 @@ export const createRightLogShift = /* #__PURE__ */ factory(
             }
         ),
       },
-      useMatrixForArrayScalar,
+      {
+        'Array, number': useMatrixForArrayScalar['Array, number'],
+        'number, Array': useMatrixForArrayScalar['number, Array'],
+      },
       matrixAlgorithmSuite({
         SS: matAlgo08xS0Sid as unknown as AlgorithmFunction,
         DS: matAlgo01xDSid as unknown as AlgorithmFunction,
         SD: matAlgo02xDS0 as unknown as AlgorithmFunction,
       })
     );
+    return rejectBigNumberShift(shift);
   }
 );

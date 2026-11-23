@@ -376,7 +376,7 @@ function collectMultinomialParts(value: unknown, parts: (number | BigNumber)[]):
     collectMultinomialParts((value as { toArray(): unknown }).toArray(), parts);
     return;
   }
-  const entry = typeof value === 'boolean' ? (value ? 1 : 0) : value;
+  const entry = typeof value === 'boolean' || typeof value === 'string' ? Number(value) : value;
   const valid = isBigNumber(entry)
     ? entry.isInteger() && entry.greaterThanOrEqual(1)
     : typeof entry === 'number' && Number.isInteger(entry) && entry >= 1;
@@ -437,7 +437,7 @@ function roundedMultinomial(parts: readonly bigint[]): BigNumber {
  * Compute the multinomial coefficient n! / (a1! * a2! * … * am!) where
  * n = a1 + a2 + … + am.
  *
- * An entry is a number, a boolean or a BigNumber. With a BigNumber entry the result is a BigNumber:
+ * An entry is a number, a numeric string, a boolean or a BigNumber. With a BigNumber entry the result is a BigNumber:
  * the exact value, rounded one time to the precision. With numbers only the result is a number,
  * and it is Infinity when it overflows.
  *

@@ -121,11 +121,11 @@ describe('the result is finite or the call throws (#910)', () => {
   });
 
   it('throws a RangeError when the sigma overflows', () => {
-    // (1e10 * 1e150)^2 overflows a double, so the variance is Infinity.
-    expect(() => propagateUncertainty((v: Values) => 1e10 * v.x, { x: 1 }, { x: 1e150 })).toThrow(
+    // The standard deviation itself exceeds the largest finite double.
+    expect(() => propagateUncertainty((v: Values) => 1e160 * v.x, { x: 1 }, { x: 1e150 })).toThrow(
       RangeError
     );
-    expect(() => propagateUncertainty((v: Values) => 1e10 * v.x, { x: 1 }, { x: 1e150 })).toThrow(
+    expect(() => propagateUncertainty((v: Values) => 1e160 * v.x, { x: 1 }, { x: 1e150 })).toThrow(
       /not finite/
     );
   });

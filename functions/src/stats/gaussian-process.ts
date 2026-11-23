@@ -59,14 +59,22 @@ export interface GPModel {
 const SQRT3 = Math.sqrt(3);
 const SQRT5 = Math.sqrt(5);
 
-/** Euclidean distance between two feature vectors. */
-function euclidean(a: readonly number[], b: readonly number[]): number {
-  let s = 0;
+/** Euclidean distance measured in kernel length-scales. */
+function lengthScaledDistance(a: readonly number[], b: readonly number[], length: number): number {
+  let norm = 0;
   for (let i = 0; i < a.length; i++) {
-    const d = a[i] - b[i];
-    s += d * d;
+    const diff = a[i] - b[i];
+    const scaled = Number.isFinite(diff) ? diff / length : a[i] / length - b[i] / length;
+    norm = Math.hypot(norm, scaled);
   }
-  return Math.sqrt(s);
+  return norm;
+}
+
+function maternKernel(u: number, variance: number, quadratic: boolean): number {
+  if (u > 1500) return 0;
+  const correction = quadratic ? u + (u * u) / 3 : u;
+  if (u < 600) return variance * ((1 + correction) * Math.exp(-u));
+  return Math.exp(Math.log(variance) + Math.log1p(correction) - u);
 }
 
 /** Build the kernel function k(a,b) for the chosen family (amplitude σ_f²). */
@@ -75,23 +83,17 @@ function makeKernel(
   ell: number,
   sf2: number
 ): (a: readonly number[], b: readonly number[]) => number {
+  const distance = (a: readonly number[], b: readonly number[]) => lengthScaledDistance(a, b, ell);
   switch (kernel) {
     case 'rbf':
       return (a, b) => {
-        const r = euclidean(a, b);
-        return sf2 * Math.exp(-(r * r) / (2 * ell * ell));
+        const r = distance(a, b);
+        return sf2 * Math.exp(-0.5 * r * r);
       };
     case 'matern32':
-      return (a, b) => {
-        const u = (SQRT3 * euclidean(a, b)) / ell;
-        return sf2 * (1 + u) * Math.exp(-u);
-      };
+      return (a, b) => maternKernel(SQRT3 * distance(a, b), sf2, false);
     case 'matern52':
-      return (a, b) => {
-        const r = euclidean(a, b);
-        const u = (SQRT5 * r) / ell;
-        return sf2 * (1 + u + (5 * r * r) / (3 * ell * ell)) * Math.exp(-u);
-      };
+      return (a, b) => maternKernel(SQRT5 * distance(a, b), sf2, true);
     default:
       throw new Error(`gaussianProcessRegression: unknown kernel '${String(kernel)}'`);
   }

@@ -308,19 +308,13 @@ describe('the new rows do not capture a call that another row took (#996)', () =
   });
 });
 
-describe('typed round of a bigint follows the global conversion order (#996)', () => {
-  // mathjs 15.2.0 returns the bigint for round(5n, n). MathTS converts a bigint to a Fraction before
-  // it tries a BigNumber (core/src/typed/mathts-typed.ts), so round(5n) was a Fraction already, and
-  // round(5n, 2), a BigNumber before the 'Fraction, number' row, is a Fraction now. A per-function
-  // bigint row is not the fix; the conversion order is a separate decision (filed in the report).
+describe('typed round preserves bigint inputs (#1339)', () => {
   it.each([
     ['round(5n)', () => round(5n)],
     ['round(5n, 2)', () => round(5n, 2)],
     ['round(5n, bignumber(2))', () => round(5n, bignumber(2))],
-  ])('%s is the Fraction 5', (_label, call) => {
-    const got = call();
-    expect(got).toBeInstanceOf(Fraction);
-    expect(fractionParts(got)).toEqual([5n, 1n]);
+  ])('%s returns 5n', (_label, call) => {
+    expect(call()).toBe(5n);
   });
 });
 

@@ -7,6 +7,7 @@ interface BigNumberType {
   add(n: number): BigNumberType;
   isNegative(): boolean;
   isInteger(): boolean;
+  isFinite(): boolean;
   toNumber(): number;
 }
 
@@ -63,14 +64,16 @@ export const createFactorial = /* #__PURE__ */ factory(
           throw new Error('Value must be non-negative');
         }
 
+        if (n.isFinite() && !n.isInteger()) {
+          throw new Error('Integer BigNumber expected');
+        }
+
         // `add` rounds to the precision, so an n with more digits than the precision gave the
         // factorial of the rounded n + 1: at precision 5, factorial(100000) was 99999!. The
         // BigNumber constructor is an optional dependency, so a scope without it keeps `add`.
         const value = n.toNumber();
         return gamma(
-          BigNumber && n.isInteger() && Number.isSafeInteger(value)
-            ? BigNumber.fromNumber(value + 1)
-            : n.add(1)
+          BigNumber && Number.isSafeInteger(value) ? BigNumber.fromNumber(value + 1) : n.add(1)
         );
       },
 

@@ -12,6 +12,7 @@
  * coordinate-descent lasso algorithm (Friedman, Hastie & Tibshirani 2010,
  * "Regularization Paths for Generalized Linear Models via Coordinate Descent").
  */
+import { divideByScale, norm2, powerOfTwoScaleOf } from '@danielsimonjr/mathts-core';
 import { linsolve } from '../typed/numeric.js';
 
 /** Options for `ridge`. */
@@ -138,10 +139,10 @@ export function ridge(
 function standardize(Xc: number[][], n: number, p: number): { Xs: number[][]; scale: number[] } {
   const scale = new Array<number>(p);
   for (let j = 0; j < p; j++) {
-    let ss = 0;
-    for (let i = 0; i < n; i++) ss += Xc[i][j] * Xc[i][j];
-    const meanSq = ss / n;
-    scale[j] = meanSq > 1e-15 ? Math.sqrt(meanSq) : 1;
+    const column = Xc.map((row) => row[j]);
+    const unit = powerOfTwoScaleOf(column);
+    const rms = norm2(divideByScale(column, unit)) / Math.sqrt(n);
+    scale[j] = rms === 0 ? 1 : rms * unit || unit;
   }
   const Xs = Xc.map((row) => row.map((v, j) => v / scale[j]));
   return { Xs, scale };

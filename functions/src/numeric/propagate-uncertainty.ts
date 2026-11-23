@@ -118,6 +118,10 @@ interface EvaluableDerivative {
   evaluate(scope?: Record<string, number>): unknown;
 }
 
+function binaryExponent(value: number): number {
+  return Math.min(1023, Math.floor(Math.log2(Math.abs(value))));
+}
+
 function asFiniteNumber(label: string, value: unknown): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new TypeError(`${label} is not a finite number`);
@@ -389,27 +393,42 @@ export function propagateUncertainty(
 
   const value = asFiniteNumber('value', call ? fAtPoint : evaluate(expr as string, point));
 
-  let variance: number;
+  let sigma: number;
   if (covariance !== undefined) {
     const n = names.length;
     if (covariance.length !== n) {
       throw new TypeError(`covariance must be ${n}×${n} to match values`);
     }
-    variance = 0;
-    // The sum of the absolute terms of the quadratic form: the scale of its rounding error.
+    // Accumulate the quadratic form at its own power-of-two scale. Splitting each
+    // product before multiplying also handles a large partial with a tiny covariance
+    // and avoids discarding a small partial merely because another one is large.
+    let exponent = -Infinity;
+    let variance = 0;
     let varianceScale = 0;
+    const partialExponents = gradient.map(binaryExponent);
+    const partialMantissas = gradient.map((g, i) => (g === 0 ? 0 : g / 2 ** partialExponents[i]));
     for (let i = 0; i < n; i++) {
       const row = covariance[i];
       if (row === undefined || row.length !== n) {
         throw new TypeError(`covariance must be ${n}×${n} to match values`);
       }
-      let acc = 0;
       for (let j = 0; j < n; j++) {
         const sij = asFiniteNumber(`covariance[${i}][${j}]`, row[j]);
-        acc += sij * gradient[j];
-        varianceScale += Math.abs(gradient[i] * sij * gradient[j]);
+        if (sij === 0 || gradient[i] === 0 || gradient[j] === 0) continue;
+        const covarianceExponent = binaryExponent(sij);
+        const power = partialExponents[i] + covarianceExponent + partialExponents[j];
+        const mantissa =
+          partialMantissas[i] * (sij / 2 ** covarianceExponent) * partialMantissas[j];
+        if (power > exponent) {
+          const rescale = 2 ** (exponent - power);
+          variance *= rescale;
+          varianceScale *= rescale;
+          exponent = power;
+        }
+        const contribution = mantissa * 2 ** (power - exponent);
+        variance += contribution;
+        varianceScale += Math.abs(contribution);
       }
-      variance += gradient[i] * acc;
     }
     // A constant has its own uncertainty, and the covariance replaces it. A zero variance for
     // it is a left-out entry, not a statement that the constant is exact (that is a number).
@@ -425,9 +444,18 @@ export function propagateUncertainty(
     }
     // Rounding makes the exact-zero variance of a singular covariance slightly negative; it is
     // rounding when the size is small against the terms that were summed.
-    if (variance < 0 && variance >= -NEGATIVE_VARIANCE_ROUNDING * varianceScale) variance = 0;
+    if (variance < -NEGATIVE_VARIANCE_ROUNDING * varianceScale) {
+      throw new RangeError('covariance produced a negative variance');
+    }
+    if (variance <= 0) {
+      sigma = 0;
+    } else {
+      const power = Math.floor(exponent / 2);
+      const part = Math.max(-1022, Math.min(1023, power));
+      sigma = Math.sqrt(variance * 2 ** (exponent - 2 * power)) * 2 ** (power - part) * 2 ** part;
+    }
   } else {
-    variance = 0;
+    sigma = 0;
     if (sigmas !== undefined) {
       for (const key of Object.keys(sigmas)) {
         if (!Object.prototype.hasOwnProperty.call(point, key)) {
@@ -437,27 +465,21 @@ export function propagateUncertainty(
     }
     for (let i = 0; i < names.length; i++) {
       const name = names[i];
-      let sigma: number;
+      let inputSigma: number;
       if (sigmas !== undefined && Object.prototype.hasOwnProperty.call(sigmas, name)) {
-        sigma = asFiniteNumber(`sigmas.${name}`, sigmas[name]);
-        if (sigma < 0) {
+        inputSigma = asFiniteNumber(`sigmas.${name}`, sigmas[name]);
+        if (inputSigma < 0) {
           throw new RangeError(`sigmas.${name} must be >= 0`);
         }
       } else if (Object.prototype.hasOwnProperty.call(ownSigma, name)) {
-        sigma = ownSigma[name];
+        inputSigma = ownSigma[name];
       } else {
         continue;
       }
-      variance += (gradient[i] * sigma) ** 2;
+      sigma = Math.hypot(sigma, gradient[i] * inputSigma);
     }
   }
 
-  if (variance < 0) {
-    // A non-PSD covariance makes the quadratic form negative.
-    throw new RangeError('covariance produced a negative variance');
-  }
-
-  const sigma = Math.sqrt(variance);
   if (!Number.isFinite(sigma)) {
     throw new RangeError(
       'the propagated sigma is not finite: a partial times its sigma overflows a double'
