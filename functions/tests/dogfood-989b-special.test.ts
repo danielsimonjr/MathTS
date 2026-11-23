@@ -80,11 +80,16 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   });
   it.each([
     ['besselJ', () => besselJ(MAX, MAX)],
-    ['besselY', () => besselY(MAX, 2)],
+    // x = MAX: Y_MAX(2) is below -1e308, so the overflow bound returns -Infinity at once, before
+    // the limit (#1331); an x above the order lets the limit decide.
+    ['besselY', () => besselY(MAX, MAX)],
     ['legendreP', () => legendreP(MAX, 0.5)],
   ])('%s(MAX, x) throws a RangeError (hang before the fix)', (_name, call) => {
     expect(call).toThrow(RangeError);
     expect(call).toThrow(RECURRENCE);
+  });
+  it('besselY(MAX, 2) is -Infinity at once: the true value is outside the double range (#1331)', () => {
+    expect(besselY(MAX, 2)).toBe(-Infinity);
   });
   it('chebyshevT has its own limit of 4e9 (hang before the fix)', () => {
     expect(() => chebyshevT(MAX, 0.5)).toThrow(CHEBYSHEV);
@@ -112,7 +117,7 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   it('sphericalBesselI refuses max(n, |x|) one step above the limit', () => {
     expect(() => sphericalBesselI(5, MAX_SPHERICAL_BESSEL_ORDER + 1)).toThrow(RangeError);
   });
-  it.each(['besselJ', 'besselY', 'legendreP'])(
+  it.each(['besselJ', 'besselY', 'legendreP', 'hermiteH'])(
     'the %s worker kernel holds the shared limit',
     (name) => {
       expect(workerKernel(name, 5)).toContain(String(MAX_RECURRENCE_ORDER));
@@ -136,11 +141,17 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   it('besselK(MAX, 2) is Infinity at the first overflow (no order limit)', () => {
     expect(besselK(MAX, 2)).toBe(Infinity);
   });
-  it('besselK(MAX, 1e4) is 0 at two zeros in a row (no order limit)', () => {
-    expect(besselK(MAX, 1e4)).toBe(0);
+  it('besselK(MAX, 1e4) is Infinity at once (the gate of #1362; no order limit)', () => {
+    // K_nu(x) grows with nu: ln K_MAX(1e4) is about MAX ln(2 MAX / 1e4). The old pin 0 came from
+    // the underflowed start values (exp(-1e4) is 0) and the stop at two zeros in a row.
+    expect(besselK(MAX, 1e4)).toBe(Infinity);
   });
-  it('hermiteH(MAX, MAX) is NaN at the first NaN (no order limit)', () => {
-    expect(hermiteH(MAX, MAX)).toBeNaN();
+  // hermiteH had no order limit and gave NaN at the first overflow (a few hundred steps). The sign
+  // of H_n(x) oscillates with n, so since #1332 it runs the full degree on a rescaled recurrence
+  // and has the limit of the other three-term recurrences.
+  it('hermiteH(MAX, MAX) throws a RangeError (the limit of #1332)', () => {
+    expect(() => hermiteH(MAX, MAX)).toThrow(RangeError);
+    expect(() => hermiteH(MAX, MAX)).toThrow(RECURRENCE);
   });
   it('besselJ(-1e9 - 5, 3) is -0 at once (NaN after 9.6 s before the fix)', () => {
     expect(besselJ(-1e9 - 5, 3)).toBe(-0);
@@ -159,8 +170,9 @@ describe('three-term recurrences refuse an order above the limit (#989)', () => 
   it('legendreP(1e7, 0.5) matches SciPy', () => {
     expect(Math.abs((legendreP(1e7, 0.5) as number) - -0.00019171660957659144)).toBeLessThan(1e-12);
   });
-  it('hermiteH(1e9, 0.5) stops at the first NaN (hang before the fix)', () => {
-    expect(hermiteH(1e9, 0.5)).toBeNaN();
+  it('hermiteH one step above its limit throws; below it the value is +-Infinity, not NaN', () => {
+    expect(() => hermiteH(MAX_RECURRENCE_ORDER + 1, 0.5)).toThrow(RECURRENCE);
+    expect(Math.abs(hermiteH(1e6, 0.5) as number)).toBe(Infinity);
   });
   it('besselJ(1e9, 5) is 0 once the downward sweep overflows (hang before the fix)', () => {
     expect(besselJ(1e9, 5)).toBe(0);

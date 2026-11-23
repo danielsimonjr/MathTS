@@ -16,7 +16,7 @@
  * @packageDocumentation
  */
 
-import { _lgamma } from '../wasm/special/scalars.js';
+import { _lgamma, rgammaScalar } from '../wasm/special/scalars.js';
 import { hyp1f1 } from './hypergeometric.js';
 import { MAX_SIEGEL_Z_T, assertLoopOrder } from '../utils/limits.js';
 
@@ -383,14 +383,6 @@ export function lerchPhi(z: f64, s: f64, a: f64): f64 {
 // Parabolic cylinder function D_nu(x)
 // =============================================================================
 
-/** Reciprocal gamma 1/Γ(y) (finite/zero at the poles y = 0, -1, -2, …). */
-function recipGamma(y: f64): f64 {
-  if (y > 0) return Math.exp(-_lgamma(y));
-  if (y === Math.floor(y)) return 0; // 1/Γ = 0 at nonpositive-integer poles
-  // Reflection: 1/Γ(y) = sin(π y) Γ(1 − y) / π.
-  return (Math.sin(Math.PI * y) * Math.exp(_lgamma(1 - y))) / Math.PI;
-}
-
 /**
  * Parabolic cylinder function D_ν(x) (Whittaker's form), via the confluent
  * hypergeometric representation (Abramowitz & Stegun 19.3.1 / DLMF 12.4.1):
@@ -415,8 +407,8 @@ function recipGamma(y: f64): f64 {
  */
 export function parabolicCylinderD(nu: f64, x: f64): f64 {
   const z = (x * x) / 2;
-  const even = recipGamma((1 - nu) / 2) * hyp1f1(-nu / 2, 0.5, z);
-  const odd = recipGamma(-nu / 2) * hyp1f1((1 - nu) / 2, 1.5, z);
+  const even = rgammaScalar((1 - nu) / 2) * hyp1f1(-nu / 2, 0.5, z);
+  const odd = rgammaScalar(-nu / 2) * hyp1f1((1 - nu) / 2, 1.5, z);
   return (
     Math.pow(2, nu / 2) *
     Math.exp(-(x * x) / 4) *
