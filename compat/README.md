@@ -61,6 +61,12 @@ mathjs 15.2.0 rejects them or reads them as undefined symbols.
 
 Code that must reject these symbols has to check the input before it calls the parser.
 
+### Complex square root at signed zero
+
+For a negative real part and a zero imaginary part, the sign of the imaginary zero selects
+the C99 square-root branch. `sqrt(complex(-7, -0))` gives a negative imaginary result in MathTS.
+mathjs 15.2.0 gives a positive imaginary result for either sign of zero.
+
 ### Unit readings and their printed digits
 
 `unit(v, name)` and `evaluate('v name')` store one value, and that value is the exact SI quantity
