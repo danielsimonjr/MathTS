@@ -741,6 +741,9 @@ export const createRationalize = /* #__PURE__ */ factory(
           } else if (Math.abs(coefficients[i]) === 1) {
             n1 = n2;
           } else {
+            if (first && coefficients[i] < 0) {
+              n1 = new OperatorNode('-', 'unaryMinus', [new ConstantNode(-coefficients[i])]);
+            }
             n1 = new OperatorNode('*', 'multiply', [n1, n2]);
           }
         }
