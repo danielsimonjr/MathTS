@@ -17,7 +17,11 @@ npm install @danielsimonjr/mathts-functions
   `Complex` object for each bin. It returns `{ real, imag, originalLength }`, zero-padded to n rounded up
   to a power of two. Use `fft` for a spectrum of exactly n bins when n is not a power of two. The measured table
   is in [the performance guide](https://github.com/danielsimonjr/mathts/blob/main/docs/performance.md#fft-pick-the-entry-point).
-- A wired `parse` / `evaluate` against the full activated math scope. `evaluate` resolves any function name, so its scope holds the whole function table. The `@danielsimonjr/mathts-functions/evaluate` subpath is not a size saving: a minified esbuild bundle is about 1.19 MB for the subpath and for the main barrel (under 1 percent apart), and an import of `evaluate`, `parse` and `compileExpr` together adds under 1 KB. For a small browser bundle that needs only basic expressions, use `evaluate` from `@danielsimonjr/mathts-expression` (about 256 KB minified). Its default scope is smaller and lacks functions such as `det`, `mean` and `gamma`; pass them in the scope when you need them. The `mathts-compat` package bundles the full table, so a `create(all)` bundle is about 1.7 MB minified. `tools/test/bundle-budget.json` records these sizes, and `check-bundle-budget.mjs` fails when one moves by more than its tolerance.
+- A wired `parse` / `evaluate` against the full activated math scope. Both functions entry
+  points include the complete function table because expressions can resolve names at runtime.
+  Use `@danielsimonjr/mathts-expression` for a smaller bundle with basic expression evaluation.
+  Its default scope omits functions such as `det`, `mean`, and `gamma`. Pass extra functions
+  in the evaluation scope when needed.
   In the default scope, `G`, `c` and `hbar` read as units (gauss, speed of light, hectobar), so
   `5 G to T` works. To read them as the CODATA constants, call
   `evaluate('G * m / r^2', scope, { physics: true })` or pass `physicsScope()` as the scope.
@@ -116,6 +120,20 @@ quadResult.stopReason; // 'max-evaluations' — runScalarSearch consumes the gen
 ```
 
 - Per-domain focused entry points are also published: `@danielsimonjr/mathts-{arithmetic,trigonometry,statistics,signal}`.
+
+## Evaluator bundle sizes
+
+Measured with esbuild 0.28.2 on 2026-11-23, using one named `evaluate` import,
+`bundle: true`, `minify: true`, ESM output, and the Node platform.
+
+| Import path                                | Minified bytes |
+| ------------------------------------------ | -------------: |
+| `@danielsimonjr/mathts-functions`          |      1,321,422 |
+| `@danielsimonjr/mathts-functions/evaluate` |      1,311,455 |
+| `@danielsimonjr/mathts-expression`         |        272,585 |
+| `mathjs` 15.2.0                            |        671,231 |
+
+CI tracks the [bundle budget](../tools/test/bundle-budget.json).
 
 ## License
 
