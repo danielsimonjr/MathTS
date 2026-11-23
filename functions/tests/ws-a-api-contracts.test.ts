@@ -498,21 +498,16 @@ describe('#923 — the public mod applies the rule to each element of an array o
   });
 
   it('gives the factory result for every pair of a grid of integers and halves', () => {
-    // The scalar kernels differ in the sign of a zero (`mod(0, -4)` is -0 here and 0 in the
-    // factory), so the values are compared as numbers: `x + 0` turns -0 into 0.
-    const plain = (r: unknown): unknown => (r as number[]).map((x) => x + 0);
+    // The typed kernel and the factory kernel are one function (`modWithFloor`), so the results
+    // are equal, the sign of a zero included (`toEqual` tells -0 from 0).
     const values = [-9, -7.5, -3, -1, 0, 1, 2, 3, 7.5, 10, 25];
     const divisors = [-4, -2, -0.5, 0, 0.5, 3, 7];
     for (const d of divisors) {
-      expect(plain(publicMod(values, d)), `array mod ${d}`).toEqual(
-        plain(factoryModulo(values, d))
-      );
-      expect(plain(publicMod(d, values)), `${d} mod array`).toEqual(
-        plain(factoryModulo(d, values))
-      );
+      expect(publicMod(values, d), `array mod ${d}`).toEqual(factoryModulo(values, d));
+      expect(publicMod(d, values), `${d} mod array`).toEqual(factoryModulo(d, values));
     }
     const sameShape = values.map((_, i) => divisors[i % divisors.length]);
-    expect(plain(publicMod(values, sameShape))).toEqual(plain(factoryModulo(values, sameShape)));
+    expect(publicMod(values, sameShape)).toEqual(factoryModulo(values, sameShape));
   });
 
   it('keeps the matrix type and the storage, and gives the factory values', () => {

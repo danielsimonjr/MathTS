@@ -1,6 +1,12 @@
-import { numericJacobian } from './numeric-jacobian.js';
 import { hermiteCubic } from './hermite.js';
-import { odeAcceptedBudget, odeMaxAttempts, odeMaxStepsError } from './ode-step-limit.js';
+import { odeRmsNorm } from './ode-norm.js';
+import {
+  odeAcceptedBudget,
+  odeFastestDecayRate,
+  odeForwardJacobian,
+  odeMaxAttempts,
+  odeMaxStepsError,
+} from './ode-step-limit.js';
 import { isUnit, isNumber, isBigNumber } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { DenseMatrix, lu, luSolve, matMul as _matMul } from '@danielsimonjr/mathts-matrix';
@@ -131,25 +137,6 @@ export type ForcingFunction = (
 ) => MathNumericType | MathArray;
 
 /**
- * Root-mean-square norm of a plain-number state vector, used for initial-step selection. When the
- * squares overflow (a state near 1e160), the sum runs on the vector divided by its largest
- * magnitude; an Infinity norm made the first step NaN. Every other vector takes the plain sum, so
- * its result keeps the same bits.
- */
-function _rmsNorm(v: number[]): number {
-  let s = 0;
-  for (let i = 0; i < v.length; i++) s += v[i] * v[i];
-  const plain = Math.sqrt(s / v.length);
-  if (Number.isFinite(plain)) return plain;
-  let m = 0;
-  for (let i = 0; i < v.length; i++) m = Math.max(m, Math.abs(v[i]));
-  if (!Number.isFinite(m)) return m;
-  s = 0;
-  for (let i = 0; i < v.length; i++) s += (v[i] / m) * (v[i] / m);
-  return m * Math.sqrt(s / v.length);
-}
-
-/**
  * A BigNumber (or each BigNumber of an array) rounded to the precision of its own class. BigNumber
  * `add` and `multiply` round to that precision (#1118), so an add result is already rounded and this
  * step leaves it unchanged. The step stays as a guard: it costs one comparison per value.
@@ -190,8 +177,8 @@ function _firstStepGuess(
   const f0 = f(t0 as MathNumericType, y0 as MathNumericType | MathArray);
   const f0n = (Array.isArray(f0) ? f0 : [f0]).map(_plainNumber);
   if (!f0n.every(Number.isFinite)) return undefined;
-  const d0 = _rmsNorm(y0n);
-  const d1 = _rmsNorm(f0n);
+  const d0 = odeRmsNorm(y0n);
+  const d1 = odeRmsNorm(f0n);
   const h0 = d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1);
   return Number.isFinite(h0) ? Math.min(h0, span) : undefined;
 }
@@ -282,9 +269,34 @@ function _notFiniteError(method: string, t: unknown): Error {
   return new Error(`solveODE ${method}: the derivative is not finite at t=${t}`);
 }
 
-function _underflowError(method: string, t: unknown, h: unknown): Error {
+/**
+ * True for a number that is not finite, and for a BigNumber that is not finite. Any other value
+ * (a Unit, an Array) is not tested here. A BigNumber `NaN` or `Infinity` is not a JS number, so a
+ * plain `Number.isFinite` test lets it pass.
+ */
+function _isNonFinite(v: unknown): boolean {
+  if (typeof v === 'number') return !Number.isFinite(v);
+  return isBigNumber(v) && !(v as unknown as BigNumber).isFinite();
+}
+
+/**
+ * The error of a step size that does not advance the independent variable. `lastTE` is the error
+ * estimate of the last rejected trial of an explicit Runge-Kutta run. When it is finite, the
+ * message ends with the cause: the error test is absolute (mathjs parity), and the rounding floor
+ * of the estimate of a very large state can be above `tol` for every step size. When the last
+ * trial was not finite, the cause is not the tolerance and the message has no suffix.
+ */
+function _underflowError(
+  method: string,
+  t: unknown,
+  h: unknown,
+  lastTE?: unknown,
+  tol?: unknown
+): Error {
+  const base = `solveODE ${method}: step size underflow at t=${t} (h=${h}); the step does not advance the independent variable`;
+  if (lastTE === undefined || _isNonFinite(lastTE)) return new Error(`${base}.`);
   return new Error(
-    `solveODE ${method}: step size underflow at t=${t} (h=${h}); the step does not advance the independent variable.`
+    `${base}; the last error estimate ${lastTE} is above tol=${tol}, and the error test is absolute. Raise options.tol or rescale the state.`
   );
 }
 
@@ -297,11 +309,24 @@ function _fAccepted(method: string, f: ForcingFunction, t: number, y: number[]):
 
 /** Finite-difference Jacobian ∂fᵢ/∂yⱼ of the forcing function at (t, y), for the stiff method. */
 function _fdJacobian(f: ForcingFunction, t: number, y: number[], f0: number[]): number[][] {
-  return numericJacobian((yj) => _fArr(f, t, yj), y, {
-    scheme: 'forward',
-    step: { rel: 1e-7, floor: 1e-8 },
-    f0,
-  });
+  return odeForwardJacobian((yj) => _fArr(f, t, yj), y, f0);
+}
+
+/**
+ * The decay rate for the budget error of an explicit Runge-Kutta run: the fastest decay rate of
+ * the problem at the last accepted point (`odeFastestDecayRate`). It runs on plain numbers only. A
+ * time or a state of another type (a BigNumber, a Unit) gives 0, so the message has no hint.
+ */
+function _rkDecayRate(f: ForcingFunction, t: unknown, y: unknown, tf: unknown): number {
+  if (
+    typeof t !== 'number' ||
+    typeof tf !== 'number' ||
+    !Array.isArray(y) ||
+    !y.every((v) => typeof v === 'number')
+  ) {
+    return 0;
+  }
+  return odeFastestDecayRate((yj) => _fArr(f, t, yj), y as number[], tf - t);
 }
 
 /**
@@ -577,8 +602,8 @@ function _linearlyImplicitDriver(
     h = dir * Math.abs(options.firstStep as number);
   } else {
     const f0 = _fAccepted(name, f, t, y);
-    const d0 = _rmsNorm(y);
-    const d1 = _rmsNorm(f0);
+    const d0 = odeRmsNorm(y);
+    const d1 = odeRmsNorm(f0);
     h = dir * Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-6 : 0.01 * (d0 / d1), span);
   }
 
@@ -1643,7 +1668,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
      * @return {Object} Return an object with t and y values as arrays
      */
 
-    // _rmsNorm, _luSolve, _fArr, _fdJacobian, and the Rosenbrock engine itself now live at module
+    // odeRmsNorm, _luSolve, _fArr, _fdJacobian, and the Rosenbrock engine itself now live at module
     // scope as `rosenbrockSolve` (below) — they are pure numeric helpers with no factory-scope
     // dependency, and `stiffODESolver` (functions/src/typed/numeric.ts) needs to call the same
     // engine directly without depending on this factory instance.
@@ -1731,9 +1756,17 @@ export const createSolveODE = /* #__PURE__ */ factory(
 
         let n = 0;
         let attempts = 0;
+        // The error estimate of the last rejected trial; undefined after an accepted step.
+        let lastRejectedTE: unknown;
         const ongoing = _createOngoing(isForwards);
         const trimStep = _createTrimStep(isForwards);
         const tfNum = tf as number;
+        // The time of a budget error as a plain number: a BigNumber time is converted, not
+        // replaced by the final time (the message said `last t = target` for a BigNumber run).
+        const tPlain = (v: unknown): number => {
+          const x = _plainNumber(v);
+          return Number.isFinite(x) ? x : tfNum;
+        };
         let lastStepMag = 0;
         // iterate until the final time or the accepted-step cap
         while (ongoing(t[n], tf)) {
@@ -1743,21 +1776,18 @@ export const createSolveODE = /* #__PURE__ */ factory(
               maxIter,
               acceptedSteps: n,
               attempts,
-              tStart: isNumber(t0) ? (t0 as number) : tfNum,
-              tCurrent: isNumber(t[n]) ? (t[n] as number) : tfNum,
-              tFinal: isNumber(tf) ? tfNum : tfNum,
+              tStart: tPlain(t0),
+              tCurrent: tPlain(t[n]),
+              tFinal: tPlain(tf),
               lastStepMag,
+              fastestDecayRate: _rkDecayRate(f, t[n], y[n], tf),
             });
           }
           const k: unknown[] = [];
 
           // calculate the first value of k; a non-finite derivative at an accepted point fails
           k.push(f(t[n] as MathNumericType, y[n] as MathNumericType | MathArray));
-          if (
-            (Array.isArray(k[0]) ? k[0] : [k[0]]).some(
-              (v) => typeof v === 'number' && !Number.isFinite(v)
-            )
-          ) {
+          if ((Array.isArray(k[0]) ? k[0] : [k[0]]).some(_isNonFinite)) {
             throw _notFiniteError(rkMethod, t[n]);
           }
 
@@ -1767,11 +1797,15 @@ export const createSolveODE = /* #__PURE__ */ factory(
             const tNow = t[n] as number;
             // A rejected step that shrinks h to 0 (or below one ulp of t) would
             // otherwise spin until the attempt cap. Underflow is still an error.
-            if (h === 0 || tNow + h === tNow) {
-              throw new Error(
-                `solveODE ${rkMethod}: step size underflow at t=${tNow} (h=${h}); the step does not advance the independent variable.`
-              );
+            if (h === 0 || !Number.isFinite(h) || tNow + h === tNow) {
+              throw _underflowError(rkMethod, tNow, h, lastRejectedTE, tol);
             }
+          } else if (
+            isBigNumber(h) &&
+            isNumOrBig(t[n]) &&
+            _bigStepUnderflows(h as unknown as BigNumber, t[n], t0, tf)
+          ) {
+            throw _underflowError(rkMethod, t[n], h, lastRejectedTE, tol);
           }
 
           // calculate the rest of the values of k
@@ -1783,7 +1817,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
           const errComb = stageCombo(deltaB, k);
           const errArr = Array.isArray(errComb) ? errComb : [errComb];
           // A non-finite trial is rejected (TE = Infinity) and the step shrinks (#991).
-          const trialBad = errArr.some((v) => typeof v === 'number' && !Number.isFinite(v));
+          const trialBad = errArr.some(_isNonFinite);
           if (trialBad && minStep && !larger(abs(h), minStep)) {
             throw _underflowError(rkMethod, t[n], h);
           }
@@ -1791,16 +1825,30 @@ export const createSolveODE = /* #__PURE__ */ factory(
             ? Infinity
             : max(abs(map(errArr, (X: unknown) => (isUnit(X) ? (X as Unit).value : X))));
 
-          if (TE < tol && tol / TE > 1 / 4) {
+          // A BigNumber estimate is compared as a decimal: the JS `<` would turn it into a double,
+          // and an estimate above 1.8e308 (a state of 1e160 squared, or 1e400) would become Infinity.
+          // A JS `Infinity` tol becomes a decimal Infinity and accepts every finite estimate.
+          const accepted = isBigNumber(TE)
+            ? (TE as unknown as BigNumber).lt(bignumber(tol))
+            : TE < tol && tol / TE > 1 / 4;
+          if (accepted) {
             // push solution if within tol
             t.push(hasBigNumbers ? _roundBig(add(t[n], h)) : add(t[n], h));
             const yNext = add(y[n], multiply(h, stageCombo(b, k)));
             y.push(hasBigNumbers ? _roundBig(yNext) : yNext);
             n++;
+            lastRejectedTE = undefined;
+          } else {
+            lastRejectedTE = TE;
           }
 
-          // estimate the delta value that will affect the step size
-          let delta = 0.84 * (tol / TE) ** (1 / 5);
+          // estimate the delta value that will affect the step size. The ratio stays in double
+          // arithmetic: a decimal ratio changes the last bits of delta, and so the trajectory.
+          const teNumber = isBigNumber(TE) ? (TE as unknown as BigNumber).toNumber() : TE;
+          let delta = 0.84 * (tol / teNumber) ** (1 / 5);
+          // NaN comes from Infinity / Infinity (an infinite tol with a non-finite trial) or from a
+          // negative base (tol < 0). No comparison below clamps a NaN, so it would reach h and t.
+          if (Number.isNaN(delta)) delta = accepted ? maxDelta : minDelta;
 
           if (smaller(delta, minDelta)) {
             delta = minDelta;
@@ -1821,16 +1869,16 @@ export const createSolveODE = /* #__PURE__ */ factory(
           }
           attempts++;
           if (attempts >= attemptCap && ongoing(t[n], tf)) {
-            const tCur = isNumber(t[n]) ? (t[n] as number) : tfNum;
             throw odeMaxStepsError({
               method: rkMethod,
               maxIter,
               acceptedSteps: n,
               attempts,
-              tStart: isNumber(t0) ? (t0 as number) : tfNum,
-              tCurrent: tCur,
-              tFinal: tfNum,
+              tStart: tPlain(t0),
+              tCurrent: tPlain(t[n]),
+              tFinal: tPlain(tf),
               lastStepMag,
+              fastestDecayRate: _rkDecayRate(f, t[n], y[n], tf),
             });
           }
         }
@@ -1907,11 +1955,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
           '"tspan" must be an Array of two numeric values or two units [tStart, tEnd]'
         );
       }
-      const nonFinite = tspan.some((v) =>
-        isNumber(v)
-          ? !Number.isFinite(v)
-          : isBigNumber(v) && !(v as unknown as BigNumber).isFinite()
-      );
+      const nonFinite = tspan.some(_isNonFinite);
       if (nonFinite) {
         throw new RangeError(
           '"tspan" must contain finite numbers (NaN and Infinity are not allowed)'
@@ -1951,11 +1995,7 @@ export const createSolveODE = /* #__PURE__ */ factory(
           }
         }
         if (opt.events !== undefined) _normalizeEvents(opt.events);
-        const y0NonFinite = y0.some((v) =>
-          isNumber(v)
-            ? !Number.isFinite(v)
-            : isBigNumber(v) && !(v as unknown as BigNumber).isFinite()
-        );
+        const y0NonFinite = y0.some(_isNonFinite);
         if (y0NonFinite) {
           throw new RangeError(
             '"y0" must contain finite numbers (NaN and Infinity are not allowed)'
@@ -2003,6 +2043,26 @@ export const createSolveODE = /* #__PURE__ */ factory(
     function isNumOrBig(x: unknown): boolean {
       // checks if it's a number or bignumber
       return isBigNumber(x) || isNumber(x);
+    }
+
+    /**
+     * True when a BigNumber step `h` cannot advance a BigNumber run: it is not finite, or it is not
+     * above u * max(|t|, |tf - t0|). Here u = 10^(1 - p), and p is the precision of the class of `h`
+     * (64 by default, so u = 1e-63). A decimal has no minimum exponent for this size, so the exact
+     * test `t + h === t` of the number path never fires for it, and a rejected step would shrink
+     * until the attempt cap. A valid run cannot need a step below u times the span, because it would
+     * need more than 1/u steps to cross the span. The comparison is exact (`gt`): the typed
+     * `larger` applies relTol.
+     */
+    function _bigStepUnderflows(h: BigNumber, tNow: unknown, t0: unknown, tf: unknown): boolean {
+      if (!h.isFinite()) return true;
+      const precision = (h as unknown as { constructor: { precision: number } }).constructor
+        .precision;
+      const u = bignumber(`1e${1 - precision}`);
+      const span = abs(subtract(bignumber(tf as never), bignumber(t0 as never))) as BigNumber;
+      const here = abs(bignumber(tNow as never)) as BigNumber;
+      const scale = here.gt(span) ? here : span;
+      return !h.abs().gt(multiply(u, scale) as never);
     }
 
     function _matrixSolveODE(

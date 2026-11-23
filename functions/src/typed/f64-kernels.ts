@@ -18,6 +18,12 @@ import {
 /** Real kernel used when every leaf is a number inside the real domain. */
 export interface UnaryRealSpec {
   real: (x: number) => number;
+  /**
+   * A function that returns the `real` of one call. A collection call takes it once, so a
+   * function that reads the live config does it once per call and not once per element. When it
+   * is set, `real` is the form for one scalar.
+   */
+  realOfCall?: () => (x: number) => number;
   wasmKernel?: WasmElementwiseOp;
   /**
    * False when the scalar typed function would not return `real(x)`
@@ -177,8 +183,9 @@ function unaryOnMatrix(matrix: NumericMatrix, apply: Apply, spec: UnaryRealSpec)
  */
 export function unaryCollection(spec: UnaryRealSpec) {
   return mathTyped.referToSelf((self) => (value: unknown[] | NumericMatrix) => {
-    if (Array.isArray(value)) return unaryOnArray(value, self as Apply, spec);
-    return unaryOnMatrix(value, self as Apply, spec);
+    const call = spec.realOfCall ? { ...spec, real: spec.realOfCall() } : spec;
+    if (Array.isArray(value)) return unaryOnArray(value, self as Apply, call);
+    return unaryOnMatrix(value, self as Apply, call);
   });
 }
 

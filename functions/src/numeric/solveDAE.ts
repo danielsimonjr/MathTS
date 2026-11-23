@@ -55,6 +55,7 @@
 
 import { _factorSolver } from './solveODE.js';
 import { numericJacobian } from './numeric-jacobian.js';
+import { odeRmsNorm } from './ode-norm.js';
 
 /** Differential forcing `y' = f(t, y, z)`. Returns the `y'` vector (a scalar is accepted for 1-D y). */
 export type DAEDifferential = (t: number, y: number[], z: number[]) => number[] | number;
@@ -349,10 +350,8 @@ export function solveDAE(
     h = Math.abs(options.firstStep);
   } else {
     const f0 = _evalArr(f, t0, y0v, z0consistent);
-    const nrm = (v: number[]) =>
-      Math.sqrt(v.reduce((a, x) => a + x * x, 0) / Math.max(1, v.length));
-    const d0 = nrm(y0v);
-    const d1 = nrm(f0);
+    const d0 = odeRmsNorm(y0v, 0);
+    const d1 = odeRmsNorm(f0, 0);
     h = Math.min(d0 < 1e-5 || d1 < 1e-5 ? 1e-3 : 0.01 * (d0 / d1), span);
   }
   h = Math.min(h, maxStep);

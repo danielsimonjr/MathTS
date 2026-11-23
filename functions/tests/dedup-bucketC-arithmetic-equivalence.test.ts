@@ -26,6 +26,7 @@ import fc from 'fast-check';
 import {
   pow,
   round,
+  factory_fix,
   factory_round,
   fix,
   equal,
@@ -158,12 +159,18 @@ describe('Bucket C — typed dispatcher ≡ core scalar primitive', () => {
     );
   });
 
-  it('fix(BigNumber) matches core', () => {
+  // The typed row snaps to an integer within the live relTol and absTol (#968), and core has no
+  // config for it, so the oracle is the factory fix, which carries the same snap. The edge
+  // corpus holds the values where the two differ.
+  it('fix(BigNumber) matches the factory fix', () => {
     fc.assert(
       fc.property(fc.double({ min: -1e6, max: 1e6, noNaN: true }), (x) => {
-        expect(eqNum(fix(bn(x)), coreFix(bn(x)))).toBe(true);
+        expect(eqNum(fix(bn(x)), factory_fix(bn(x)))).toBe(true);
       })
     );
+    for (const x of [-2.5, 2.5, -0.5, 0.5, 0, -0, 999999.999999, -999999.999999]) {
+      expect(eqNum(fix(bn(x)), factory_fix(bn(x)))).toBe(true);
+    }
   });
 
   it('fix(Fraction) matches core', () => {
