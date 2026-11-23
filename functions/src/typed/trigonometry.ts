@@ -13,6 +13,7 @@
  * @packageDocumentation
  */
 
+import { collectionBinaryRows } from './collection-binary.js';
 import { mathTyped, Complex, BigNumber, Dual } from '@danielsimonjr/mathts-core';
 import type { UnitInstance } from '@danielsimonjr/mathts-core';
 
@@ -193,6 +194,7 @@ export const atan = mathTyped('atan', {
  * Arc tangent with two arguments (atan2)
  */
 export const atan2 = mathTyped('atan2', {
+  ...collectionBinaryRows('atan2'),
   'number, number': (y: number, x: number) => Math.atan2(y, x),
   'BigNumber, BigNumber': (y: BigNumber, x: BigNumber): BigNumber => y.atan2(x),
 });
