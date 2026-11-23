@@ -906,7 +906,7 @@ Each constructor lists its parameters in this order. The last column gives the S
 
 A constructor throws a `TypeError` for an argument that it would ignore: an options object after its last parameter (`gammaDist(2, 2, { scale: 2 })`, `exponentialDist(2, { scale: 2 })`), an unknown key of an options object (`gammaDist(2, { scale: 2, loc: 1 })`, `sampleN(n, { sead: 1 })`), or an object in a number position. An argument that is `undefined`, a number or an array after the parameters does not throw, so `[1, 2, 3].map(poissonDist)` works.
 
-The free functions do not use one convention for the gamma distribution: `gammaPDF(x, k, theta)` reads `theta` as a scale, and `gammaCDF(x, k, rate)` and `gammaQuantile(p, k, rate)` read the third argument as a rate (#1286).
+The gamma helpers use a positional rate. Pass `{ rate }` to name it explicitly or `{ scale }` for the SciPy convention, where scale is the reciprocal of rate. Migrate previous positional-scale calls from `gammaPDF(x, shape, theta)` to `gammaPDF(x, shape, { scale: theta })`. Math.js 15.2.0 provides the special functions `gamma` and `lgamma` and has no gamma distribution helpers.
 
 ## Hypothesis Tests
 
