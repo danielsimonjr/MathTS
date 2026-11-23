@@ -70,7 +70,11 @@ describe('#1041 public functions accept a matrix of the second copy', () => {
       [2, 0],
       [0, 3],
     ]);
-    expect(subtract(sparse2() as never, dense2() as never)).toEqual([
+    // A sparse and a dense matrix give a dense matrix (mathjs parity, #968), not an Array.
+    const diff = subtract(sparse2() as never, dense2() as never);
+    expect(Array.isArray(diff)).toBe(false);
+    expect(m1.isSparseMatrix(diff)).toBe(false);
+    expect(rows(diff)).toEqual([
       [1, -1],
       [-1, 2],
     ]);

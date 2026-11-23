@@ -224,6 +224,25 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
     }
 
     function _eval(fnname: string, args: unknown[], options: Options): unknown {
+      // A mixed fold would promote a rounded double (such as the reciprocal of 3)
+      // or an exact Fraction to BigNumber. Retry with doubles as mathjs does, and
+      // let the caller retain the symbolic operation if that promotion is lossy.
+      if (
+        args.some(isBigNumber) &&
+        args.every((arg) => isBigNumber(arg) || isFraction(arg) || typeof arg === 'number')
+      ) {
+        args = args.map(_removeFractions);
+        if (
+          args.some(
+            (arg) =>
+              typeof arg === 'number' && Number(arg.toPrecision(15)) !== arg && !Number.isNaN(arg)
+          )
+        ) {
+          throw new TypeError(
+            'Cannot fold an implicit conversion to BigNumber with more than 15 significant digits'
+          );
+        }
+      }
       let result: unknown;
       // A number that no exact Fraction represents (a folded 2^(1/2), say) must not meet a
       // Fraction here. The typed conversion would approximate it with a Fraction of

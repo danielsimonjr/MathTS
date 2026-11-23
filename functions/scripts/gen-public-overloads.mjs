@@ -300,8 +300,9 @@ function overloadsForKey(key, body, exportName, aliases, nextKey, overrides) {
     const hasDense = parts.includes('DenseMatrix') || parts.includes('Matrix');
     const hasSparse = parts.includes('SparseMatrix');
     let ret = containers.array;
-    if (hasDense && !hasArray) ret = containers.dense;
-    else if (hasSparse && !hasArray && !hasDense) ret = containers.sparse;
+    // An Array with a matrix gives a matrix, and the add rows give a dense one (mathjs parity).
+    if (hasDense || (hasSparse && hasArray)) ret = containers.dense;
+    else if (hasSparse) ret = containers.sparse;
     return [overload(params, ret)];
   }
 
