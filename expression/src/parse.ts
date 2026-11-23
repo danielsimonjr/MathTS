@@ -14,7 +14,8 @@ import type { NumberTypeConfig } from './utils/number.js';
 import { hasOwnProperty } from './utils/object.js';
 import { isSafeProperty, setSafeProperty } from './utils/customs.js';
 import { MAX_EXPRESSION_LENGTH, MAX_PARSE_NESTING, MAX_PARSE_RECURSION } from './limits.js';
-import type { MathNode } from './node/Node.js';
+import { bindParsedNodeScope, type MathNode } from './node/Node.js';
+import { expressionView } from './default-math-scope.js';
 import { parseDefaults } from './parse-defaults.js';
 import { currentConfig } from './utils/current-config.js';
 import {
@@ -176,26 +177,33 @@ const POSTFIX_OPERATORS: Readonly<Record<string, string>> = Object.freeze({
 export const createParse = /* #__PURE__ */ factory(
   name,
   dependencies as unknown as string[],
-  ({
-    typed,
-    numeric,
-    config,
-    AccessorNode,
-    ArrayNode,
-    AssignmentNode,
-    BlockNode,
-    ConditionalNode,
-    ConstantNode,
-    FunctionAssignmentNode,
-    FunctionNode,
-    IndexNode,
-    ObjectNode,
-    OperatorNode,
-    ParenthesisNode,
-    RangeNode,
-    RelationalNode,
-    SymbolNode,
-  }: ParseDependencies) => {
+  (
+    {
+      typed,
+      numeric,
+      config,
+      AccessorNode,
+      ArrayNode,
+      AssignmentNode,
+      BlockNode,
+      ConditionalNode,
+      ConstantNode,
+      FunctionAssignmentNode,
+      FunctionNode,
+      IndexNode,
+      ObjectNode,
+      OperatorNode,
+      ParenthesisNode,
+      RangeNode,
+      RelationalNode,
+      SymbolNode,
+    }: ParseDependencies,
+    supplied
+  ) => {
+    const runtimeMath =
+      supplied && typeof supplied.config === 'function' && typeof supplied.matrix === 'function'
+        ? expressionView(supplied)
+        : undefined;
     /**
      * Parse an expression. Returns a node tree, which can be evaluated by
      * invoking node.evaluate() or transformed into a functional object via node.compile().
@@ -814,6 +822,7 @@ export const createParse = /* #__PURE__ */ factory(
         }
       }
 
+      if (runtimeMath) bindParsedNodeScope(node, runtimeMath);
       return node;
     }
 

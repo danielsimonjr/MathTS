@@ -29,6 +29,12 @@ export interface ChainUnwrap {
   toString(): string;
 }
 
+class CompatChain {
+  get isChain(): true {
+    return true;
+  }
+}
+
 /**
  * Build the `chain` factory for one math instance.
  *
@@ -43,15 +49,15 @@ export interface ChainUnwrap {
  */
 export function createChain(math: Record<string, unknown>): (value: unknown) => Chain {
   function chain(value: unknown): Chain {
-    const base = {
+    const base = Object.assign(new CompatChain(), {
       done: () => value,
       valueOf: () => value,
       toString: () => String(value),
-    };
+    });
     return new Proxy(base, {
       get(target, prop: string | symbol) {
         if (prop in target || typeof prop === 'symbol') {
-          return (target as Record<string | symbol, unknown>)[prop];
+          return (target as unknown as Record<string | symbol, unknown>)[prop];
         }
         const fn = math[prop as string];
         if (typeof fn === 'function') {
