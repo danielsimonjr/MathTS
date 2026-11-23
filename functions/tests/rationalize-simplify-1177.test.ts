@@ -149,3 +149,23 @@ describe('#1177: the factored canonical form belongs to the default rule set onl
     expect(simp('(x+1)^2-1')).toBe(String(withRules('(x+1)^2-1', rules)));
   });
 });
+
+describe('#1319: mixed precision constant folding', () => {
+  it.each([
+    ['bignumber(1)/3', '1 / 3'],
+    ['bignumber(2)/6', '2 / 6'],
+    ['bignumber(1.1)/3', '1.1 / 3'],
+    ['bignumber(3)/2', '1.5'],
+    ['bignumber(1)/3.7', '10 / 37'],
+    ['bignumber(2)/(1/3)', '6'],
+    ['inv([1,2;3,4])', '[[-2, 1], [3 / 2, -1 / 2]]'],
+  ])('simplifies %s to %s', (input, expected) => {
+    expect(simp(input)).toBe(expected);
+  });
+
+  it('evaluates an explicitly BigNumber division at full precision', () => {
+    expect(simp('bignumber(1)/bignumber(3)')).toBe(
+      '0.3333333333333333333333333333333333333333333333333333333333333333'
+    );
+  });
+});
