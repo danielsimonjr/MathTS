@@ -17,7 +17,7 @@ import { computePool } from '@danielsimonjr/mathts-parallel';
 import { sortF64Dispatch } from '../wasm/sort/wasm-bridge.js';
 import { medianInPlace, minFrom, quickSelectInPlace } from '../utils/median-numbers.js';
 import { assertAllocSize } from '../utils/limits.js';
-import { hasNaN } from './number-matrix.js';
+import { assertNumberScalar, hasNaN } from './number-matrix.js';
 import { normalizationFromSecondArg } from '../statistics/numeric-data.js';
 
 // =============================================================================
@@ -808,11 +808,18 @@ export function quickSelect(arr: number[], k: i32): f64 {
 export function medianSelect(arr: number[]): f64 {
   const n: i32 = arr.length;
   if (n === 0) return NaN;
-  if (hasNaN(arr)) return NaN;
-  if (n === 1) return arr[0];
+  const a = new Float64Array(n);
+  let containsNaN = false;
+  for (let i = 0; i < n; i++) {
+    const value = arr[i];
+    assertNumberScalar('medianSelect', value);
+    containsNaN ||= Number.isNaN(value);
+    a[i] = value;
+  }
+  if (containsNaN) return NaN;
+  if (n === 1) return a[0];
 
   const mid: i32 = Math.floor(n / 2);
-  const a = new Float64Array(arr);
   if (n % 2 === 1) {
     return quickSelectInPlace(a, 0, n - 1, mid);
   }

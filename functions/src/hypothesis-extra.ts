@@ -12,7 +12,7 @@ import { skewness, kurtosis, rankdata } from './descriptive-stats.js';
 import { chiSquaredSF, fCDF, fSF } from './distribution-functions.js';
 import { normalCDF as _normalCDF, normalPDF as _normalPDF } from './typed/distributions.js';
 import { lgamma as _lgamma } from './typed/special.js';
-import { hasNaN, numberVector } from './typed/number-matrix.js';
+import { assertNumberScalar, hasNaN, numberVector } from './typed/number-matrix.js';
 import { assertLoopOrder } from './utils/limits.js';
 
 type Vec = readonly number[] | Float64Array;
@@ -363,6 +363,7 @@ export function fisherExact(
   const [[a, b], [c, d]] = table;
   // SciPy raises for a negative entry. A NaN or an infinite entry made the old loop run forever.
   for (const v of [a, b, c, d]) {
+    assertNumberScalar('fisherExact', v);
     if (!(Number.isInteger(v) && v >= 0)) {
       throw new RangeError('fisherExact: every table entry must be a non-negative integer');
     }
