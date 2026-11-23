@@ -71,6 +71,7 @@ export function valueAndGrad(fn: ScalarFn, x: NumericInput): { value: number; gr
  * Gradient function of a scalar-valued function: `grad(f)(x)` returns ∇f(x).
  */
 export function grad(fn: ScalarFn): (x: NumericInput) => Float64Array {
+  if (typeof fn !== 'function') throw new TypeError('grad: expected a function');
   return (x) => valueAndGrad(fn, x).grad;
 }
 

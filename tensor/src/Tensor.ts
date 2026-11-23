@@ -1038,8 +1038,7 @@ export class Tensor {
   }
 
   reshape(shape: ReadonlyArray<number>): Tensor {
-    const currentSize = Tensor.sizeOf(this.shape);
-    const resolved = resolveReshapeShape(currentSize, shape);
+    const resolved = resolveReshapeShape(this.shape, shape);
     if (!this.isContiguous()) {
       return this.contiguous().reshape(resolved);
     }

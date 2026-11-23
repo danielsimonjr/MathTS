@@ -14,6 +14,14 @@ function trim(p: readonly number[]): number[] {
 }
 
 function assertNonZero(coeffs: readonly number[]): number[] {
+  if (!Array.isArray(coeffs) || coeffs.length === 0) {
+    throw new TypeError('expected a non-empty array of polynomial coefficients');
+  }
+  for (let i = 0; i < coeffs.length; i++) {
+    if (!Number.isFinite(coeffs[i])) {
+      throw new TypeError(`polynomial coefficient at index ${i} must be a finite number`);
+    }
+  }
   const p = trim(coeffs);
   if (p.length === 0) throw new RangeError('the zero polynomial has no isolated roots');
   return p;

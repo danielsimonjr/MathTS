@@ -57,7 +57,12 @@ export function runWorkbookWithTimeout(
   source: string,
   options: RunWorkbookWithTimeoutOptions
 ): Promise<SerializedRunResult> {
-  const { timeoutMs } = options;
+  const timeoutMs = options?.timeoutMs;
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 2_147_483_647) {
+    return Promise.reject(
+      new RangeError('runWorkbookWithTimeout: timeoutMs must be an integer from 1 to 2147483647')
+    );
+  }
   const workerUrl = new URL('./run-worker.js', import.meta.url);
 
   return new Promise<SerializedRunResult>((resolve, reject) => {

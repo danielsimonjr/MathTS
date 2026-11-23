@@ -46,7 +46,7 @@ describe('#688 lusolve singular / non-finite', () => {
         ],
         [1, 1]
       )
-    ).toThrow(LUSOLVE_SINGULAR_MESSAGE);
+    ).toThrow(/coefficient matrix must have finite entries/);
   });
 
   it('Infinity coefficients throw', () => {
@@ -58,7 +58,7 @@ describe('#688 lusolve singular / non-finite', () => {
         ],
         [1, 1]
       )
-    ).toThrow(LUSOLVE_SINGULAR_MESSAGE);
+    ).toThrow(/coefficient matrix must have finite entries/);
   });
 
   it('well-conditioned 2×2 still solves', () => {
@@ -233,6 +233,6 @@ describe('#688 lusolve singular / non-finite', () => {
         ],
         [1, 1]
       )
-    ).toThrow(LUSOLVE_SINGULAR_MESSAGE);
+    ).toThrow(/coefficient matrix must have finite entries/);
   });
 });
