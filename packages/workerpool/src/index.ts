@@ -30,7 +30,49 @@ import {
   _workerCombineScaledSsq,
   _workerExtrema,
   _workerCombineExtrema,
+  _WORKER_SQUARES_SAFE_MIN,
+  _workerPowerOfTwoBelow,
 } from './worker-numerics.js';
+
+/**
+ * Welford's one-pass mean and sum of squared deviations of `data / scale` (the exact power of 2
+ * `scale`; 1 is the plain data). The sequential path of `variance` and the fallback of
+ * {@link stdOfSquaredDeviations} share this loop.
+ */
+function welford(data: Float64Array, scale: number): { mean: number; m2: number } {
+  let mean = 0;
+  let m2 = 0;
+  for (let i = 0; i < data.length; i++) {
+    const x = data[i] / scale;
+    const delta = x - mean;
+    mean += delta / (i + 1);
+    const delta2 = x - mean;
+    m2 += delta * delta2;
+  }
+  return { mean, m2 };
+}
+
+/**
+ * The population std `sqrt(m2 / n)` of `data` with every digit kept (#1280). `m2` is the sum of
+ * squared deviations. A sum that is finite and at least `SQUARES_SAFE_MIN` has all its digits,
+ * and the plain root is returned. A smaller sum (subnormal squares that lost digits, or 0) and
+ * an overflowed sum take Welford's loop again on the data divided by an exact power of 2. A
+ * NaN, an infinite value or all-zero data has no scale and gives the plain root. The pool cannot
+ * import core, so this is the worker copy of core's `stdFromSquaredDeviations`.
+ */
+function stdOfSquaredDeviations(data: Float64Array, m2: number, n: number): number {
+  if (m2 >= _WORKER_SQUARES_SAFE_MIN && m2 < Infinity) return Math.sqrt(m2 / n);
+  let max = 0;
+  for (let i = 0; i < data.length; i++) {
+    const a = Math.abs(data[i]);
+    if (!Number.isFinite(a)) return Math.sqrt(m2 / n);
+    if (a > max) max = a;
+  }
+  if (max === 0) return Math.sqrt(m2 / n);
+  const scale = _workerPowerOfTwoBelow(max);
+  if (scale === 1) return Math.sqrt(m2 / n);
+  return scale * Math.sqrt(welford(data, scale).m2 / n);
+}
 
 /**
  * Length-mismatch error shared by every binary operation:
@@ -1442,17 +1484,10 @@ export class MathWorkerPool {
     const start = performance.now();
 
     if (!this.shouldParallelize(data.length, options)) {
-      let mean = 0;
-      let m2 = 0;
-      for (let i = 0; i < data.length; i++) {
-        const delta = data[i] - mean;
-        mean += delta / (i + 1);
-        const delta2 = data[i] - mean;
-        m2 += delta * delta2;
-      }
+      const { mean, m2 } = welford(data, 1);
       const variance = m2 / data.length;
       return {
-        result: { mean, variance, std: Math.sqrt(variance) },
+        result: { mean, variance, std: stdOfSquaredDeviations(data, m2, data.length) },
         duration: performance.now() - start,
         chunks: 1,
         parallelized: false,
@@ -1489,7 +1524,11 @@ export class MathWorkerPool {
     const variance = totalM2 / totalCount;
 
     return {
-      result: { mean: totalMean, variance, std: Math.sqrt(variance) },
+      result: {
+        mean: totalMean,
+        variance,
+        std: stdOfSquaredDeviations(data, totalM2, totalCount),
+      },
       duration: performance.now() - start,
       chunks: chunks.length,
       parallelized: true,

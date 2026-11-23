@@ -8,8 +8,9 @@
  * bounds memory by the largest single call.
  *
  * Safe only because nothing persistent lives on the heap: every module-level binding in
- * this source is a scalar constant, and the bridges are synchronous and never hold an AS
- * pointer across calls. A heap-allocated global (`let cache = new Float64Array(n)`) would
+ * this source is a scalar (a constant, or the abort record of `abort.ts`, whose two pointers
+ * name static strings and are read before the next call), and the bridges are synchronous and
+ * never hold an AS pointer across calls. A heap-allocated global (`let cache = new Float64Array(n)`) would
  * be overwritten after a reset; keep module state out of the heap, or drop this reset.
  */
 export function heap_reset(): void {

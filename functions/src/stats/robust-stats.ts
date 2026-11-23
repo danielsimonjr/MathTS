@@ -2,6 +2,7 @@
  * Generalized means, geometric standard deviation, robust regression slopes
  * and partial correlation (gap-analysis 2026-11-04, Batch A).
  */
+import { divideByScale, powerOfTwoScaleOf, squareSumsKeepDigits } from '@danielsimonjr/mathts-core';
 import { hasNaN, numberVector } from '../typed/number-matrix.js';
 type Vec = readonly number[] | Float64Array;
 
@@ -124,7 +125,8 @@ export function siegelSlopes(x: Vec, y: Vec): { slope: number; intercept: number
   return { slope, intercept: medianOf(ys.map((v, i) => v - slope * xs[i])) };
 }
 
-function pearson(a: number[], b: number[]): number {
+/** The sums of the cross products and of the squares of the deviations of `a` and `b`. */
+function deviationProducts(a: number[], b: number[]): { sab: number; saa: number; sbb: number } {
   const ma = meanOf(a);
   const mb = meanOf(b);
   let sab = 0;
@@ -135,7 +137,24 @@ function pearson(a: number[], b: number[]): number {
     saa += (a[i] - ma) ** 2;
     sbb += (b[i] - mb) ** 2;
   }
-  return sab / Math.sqrt(saa * sbb);
+  return { sab, saa, sbb };
+}
+
+/**
+ * Pearson correlation. The correlation does not change when each variable is divided by its own
+ * positive constant. When a sum of squares has subnormal squares (it is below `SQUARES_SAFE_MIN`),
+ * or the product of the two sums is outside the normal range, each variable is divided by its
+ * own exact power of 2 and the sums are formed again (#1280). Data of order 1 keeps its plain
+ * path, bit for bit.
+ */
+function pearson(a: number[], b: number[]): number {
+  let s = deviationProducts(a, b);
+  if (!squareSumsKeepDigits(s.saa, s.sbb)) {
+    const sa = powerOfTwoScaleOf(a);
+    const sb = powerOfTwoScaleOf(b);
+    if (sa !== 1 || sb !== 1) s = deviationProducts(divideByScale(a, sa), divideByScale(b, sb));
+  }
+  return s.sab / Math.sqrt(s.saa * s.sbb);
 }
 
 /** Partial correlation of x and y controlling for z (first-order formula). */

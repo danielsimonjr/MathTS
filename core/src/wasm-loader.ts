@@ -229,6 +229,176 @@ export async function defaultWasmLocation(
   return join(dirname(fileURLToPath(metaUrl)), 'wasm', wasmFile);
 }
 
+/** A function export of a loaded binary. */
+type WasmFunction = (...args: unknown[]) => unknown;
+
+/**
+ * The abort record of the binary (`assembly/src/abort.ts`). The binary has no `env.abort`
+ * import (#1019), so an AssemblyScript abort traps as a `WebAssembly.RuntimeError` after it has
+ * stored its message, file, line and column in globals.
+ */
+interface WasmAbortExports {
+  memory: { readonly buffer: ArrayBufferLike };
+  abort_take(): number | boolean;
+  abort_message(): number;
+  abort_file(): number;
+  abort_line(): number;
+  abort_column(): number;
+}
+
+/** Read the AssemblyScript string at `pointer` (UTF-16, byte length at `pointer - 4`). */
+function readAsString(memory: WasmAbortExports['memory'], pointer: number): string {
+  if (!pointer) return '';
+  const end = (pointer + new Uint32Array(memory.buffer)[(pointer - 4) >>> 2]!) >>> 1;
+  const units = new Uint16Array(memory.buffer);
+  let text = '';
+  for (let start = pointer >>> 1; start < end; start += 1024) {
+    text += String.fromCharCode(...units.subarray(start, Math.min(start + 1024, end)));
+  }
+  return text;
+}
+
+/**
+ * The message of the `Error` that the `env.abort` import of {@link WasmModuleLoader} threw before
+ * the binary lost its import (#1019). The loaders of `functions` and `matrix` keep this text.
+ */
+export const WASM_ABORT_TEXT = 'WASM abort';
+
+/**
+ * Turn the trap of an AssemblyScript abort into an `Error`. Any other value, and any trap that is
+ * not an abort (a division by zero, a memory access out of bounds), is returned as it is. Call it
+ * first in the `catch` of a call into the binary, before the next call into it.
+ *
+ * The record of the abort gives the detail `<message> in <file>:<line>:<column>`, the text that the
+ * `env.abort` of the AssemblyScript glue threw. Without `text`, the result is an `Error` with that
+ * detail as its message and the trap as its `cause`. With `text`, the result is an `Error` with
+ * `text` as its message and the detail `Error` as its `cause`: a loader passes the fixed text that
+ * its own `env.abort` threw, so its callers see the same message as before and the detail is not
+ * lost.
+ *
+ * @param error The value that the call threw.
+ * @param exports The exports of the binary that made the call.
+ * @param text The fixed message of the result; without it, the detail is the message.
+ * @returns The `Error` of the abort, or `error` itself.
+ */
+export function translateWasmAbort(error: unknown, exports: object, text?: string): unknown {
+  if (!(error instanceof Error) || error.name !== 'RuntimeError') return error;
+  const wasm = exports as Partial<WasmAbortExports>;
+  if (typeof wasm.abort_take !== 'function' || !wasm.abort_take()) return error;
+  const memory = wasm.memory as WasmAbortExports['memory'];
+  const message = readAsString(memory, wasm.abort_message!());
+  const file = readAsString(memory, wasm.abort_file!());
+  const detail = new Error(
+    `${message} in ${file}:${wasm.abort_line!() >>> 0}:${wasm.abort_column!() >>> 0}`,
+    { cause: error }
+  );
+  return text === undefined ? detail : new Error(text, { cause: detail });
+}
+
+/**
+ * Wrap one function export of a binary. The `length` of an exported WebAssembly function is its
+ * exact parameter count, and an argument that a call does not pass reads as `undefined`, which the
+ * call converts as it converts a missing one. So a wrapper with the same number of parameters
+ * calls the export in the same way. It costs 1-7 ns on `add_f64` (6.5 to 12 ns raw), where a
+ * wrapper that takes the rest of the arguments costs 12-25 ns more. An export of more than six
+ * parameters takes the rest form.
+ */
+function guardFunction(fn: WasmFunction, exports: object, text?: string): WasmFunction {
+  const fail = (error: unknown): never => {
+    throw translateWasmAbort(error, exports, text);
+  };
+  switch (fn.length) {
+    case 0:
+      return () => {
+        try {
+          return fn();
+        } catch (error) {
+          return fail(error);
+        }
+      };
+    case 1:
+      return (a) => {
+        try {
+          return fn(a);
+        } catch (error) {
+          return fail(error);
+        }
+      };
+    case 2:
+      return (a, b) => {
+        try {
+          return fn(a, b);
+        } catch (error) {
+          return fail(error);
+        }
+      };
+    case 3:
+      return (a, b, c) => {
+        try {
+          return fn(a, b, c);
+        } catch (error) {
+          return fail(error);
+        }
+      };
+    case 4:
+      return (a, b, c, d) => {
+        try {
+          return fn(a, b, c, d);
+        } catch (error) {
+          return fail(error);
+        }
+      };
+    case 5:
+      return (a, b, c, d, e) => {
+        try {
+          return fn(a, b, c, d, e);
+        } catch (error) {
+          return fail(error);
+        }
+      };
+    case 6:
+      return (a, b, c, d, e, f) => {
+        try {
+          return fn(a, b, c, d, e, f);
+        } catch (error) {
+          return fail(error);
+        }
+      };
+    default:
+      return (...args) => {
+        try {
+          return fn(...args);
+        } catch (error) {
+          return fail(error);
+        }
+      };
+  }
+}
+
+/**
+ * Wrap each function export of a loaded binary so that an abort reaches the caller as the `Error`
+ * of {@link translateWasmAbort}. The runtime helpers (`__new`, ...) are wrapped too: `__new`
+ * aborts for a size above the limit of the runtime, and an abort that no wrapper reads stays
+ * pending, so the next trap of another kind would get its record. Only the abort accessors stay as
+ * they are. A binary without the abort accessors is returned unchanged. A wrapper adds a few ns to
+ * a call (`guardFunction`).
+ *
+ * @param exports The `exports` of a `WebAssembly.Instance`.
+ * @param text The fixed message of the abort `Error` (see {@link translateWasmAbort}).
+ * @returns A copy with guarded functions; every other export is the same object.
+ */
+export function guardWasmAborts<T extends object>(exports: T, text?: string): T {
+  if (typeof (exports as Partial<WasmAbortExports>).abort_take !== 'function') return exports;
+  const guarded: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(exports)) {
+    guarded[key] =
+      typeof value === 'function' && !key.startsWith('abort_')
+        ? guardFunction(value as WasmFunction, exports, text)
+        : value;
+  }
+  return guarded as T;
+}
+
 /**
  * Shared load / instantiate orchestration for the two package-local
  * `WasmLoader` singletons (`functions` and `matrix`). Subclasses keep their own
@@ -294,7 +464,7 @@ export abstract class WasmModuleLoader<TModule> {
         totalMs: performance.now() - totalStart,
         fromCache: true,
       };
-      return instance.exports as unknown as TModule;
+      return guardWasmAborts(instance.exports, WASM_ABORT_TEXT) as unknown as TModule;
     }
 
     if (this.isNode) {
@@ -380,7 +550,7 @@ export abstract class WasmModuleLoader<TModule> {
       fromCache: false,
     };
 
-    return instance.exports as unknown as TModule;
+    return guardWasmAborts(instance.exports, WASM_ABORT_TEXT) as unknown as TModule;
   }
 
   protected async loadBrowserWasm(path: string, totalStart: number): Promise<TModule> {
@@ -405,7 +575,7 @@ export abstract class WasmModuleLoader<TModule> {
         totalMs: performance.now() - totalStart,
         fromCache: false,
       };
-      return result.instance.exports as unknown as TModule;
+      return guardWasmAborts(result.instance.exports, WASM_ABORT_TEXT) as unknown as TModule;
     }
 
     // Manifest-present (or older browser): fetch buffer, verify, compile.
@@ -435,20 +605,15 @@ export abstract class WasmModuleLoader<TModule> {
       fromCache: false,
     };
 
-    return instance.exports as unknown as TModule;
+    return guardWasmAborts(instance.exports, WASM_ABORT_TEXT) as unknown as TModule;
   }
 
+  /**
+   * The import object of the binary. The binary has no import (#1019): its abort is a trap that
+   * {@link guardWasmAborts} turns into the `Error` of {@link WASM_ABORT_TEXT}, so the object is
+   * empty.
+   */
   protected getImports(): Record<string, object> {
-    return {
-      env: {
-        abort: (msg: number, file: number, line: number, column: number) => {
-          console.error('WASM abort', { msg, file, line, column });
-          throw new Error('WASM abort');
-        },
-        seed: () => Date.now(),
-      },
-      Math: Math as unknown as WebAssembly.ModuleImports,
-      Date: Date as unknown as WebAssembly.ModuleImports,
-    };
+    return {};
   }
 }

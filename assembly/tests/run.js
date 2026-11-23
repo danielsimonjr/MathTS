@@ -235,6 +235,41 @@ async function runTests() {
     assertEqual(exports.round_f64(3.2), 3);
   });
 
+  // #1028: a tie rounds away from zero on the exact double (the `nearest` instruction rounds
+  // it to even), -0 and 0 give +0, and NaN and the infinities pass through. `Object.is` tells
+  // -0 from +0 and compares NaN; `assertEqual` does neither.
+  test('round_f64 rounds a tie away from zero (#1028)', () => {
+    const same = (actual, expected) => {
+      if (!Object.is(actual, expected)) {
+        throw new Error(
+          `Expected ${Object.is(expected, -0) ? '-0' : expected}, got ${Object.is(actual, -0) ? '-0' : actual}`
+        );
+      }
+    };
+    same(exports.round_f64(0.5), 1);
+    same(exports.round_f64(1.5), 2);
+    same(exports.round_f64(2.5), 3);
+    same(exports.round_f64(-0.5), -1);
+    same(exports.round_f64(-1.5), -2);
+    same(exports.round_f64(-2.5), -3);
+    same(exports.round_f64(3.5), 4);
+    same(exports.round_f64(-3.5), -4);
+    same(exports.round_f64(3.2), 3);
+    same(exports.round_f64(-3.7), -4);
+    // The exact double just under a tie is not a tie (no tolerance step in this kernel).
+    same(exports.round_f64(0.49999999999999994), 0);
+    same(exports.round_f64(4503599627370495.5), 4503599627370496);
+    same(exports.round_f64(-4503599627370495.5), -4503599627370496);
+    // Zero: the sign of a zero result is +0, also for an input that rounds to zero.
+    same(exports.round_f64(0), 0);
+    same(exports.round_f64(-0), 0);
+    same(exports.round_f64(-0.4), -0);
+    same(exports.round_f64(0.4), 0);
+    same(exports.round_f64(NaN), NaN);
+    same(exports.round_f64(Infinity), Infinity);
+    same(exports.round_f64(-Infinity), -Infinity);
+  });
+
   test('trunc_f64', () => {
     assertEqual(exports.trunc_f64(3.7), 3);
     assertEqual(exports.trunc_f64(-3.7), -3);

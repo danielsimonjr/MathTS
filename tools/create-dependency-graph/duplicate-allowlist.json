@@ -7,7 +7,20 @@
       "reason": "the published workerpool package cannot import functions; functions/tests/fft-twiddle-table.test.ts pins both copies to the same bits, the same cache order and the same byte cap"
     },
     {
-      "names": ["abs", "add", "cos", "det", "exp", "log", "mean", "sin", "sqrt", "tan", "variance"],
+      "names": [
+        "abs",
+        "add",
+        "cos",
+        "det",
+        "exp",
+        "log",
+        "mean",
+        "sin",
+        "sqrt",
+        "std",
+        "tan",
+        "variance"
+      ],
       "filesGlob": ["compat/src/shims.ts"],
       "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"
     },
@@ -251,21 +264,9 @@
       "reason": "no valid import path exists: core depends on the external typed-function fork (npm alias of @danielsimonjr/typed-function), NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
     },
     {
-      "names": [
-        "variance",
-        "std",
-        "det",
-        "conj",
-        "re",
-        "im",
-        "arg",
-        "acos",
-        "asin",
-        "atan",
-        "atan2"
-      ],
+      "names": ["det", "conj", "re", "im", "arg", "acos", "asin", "atan", "atan2"],
       "filesGlob": ["compat/src/shims.ts"],
-      "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (std/variance default 'unbiased'; self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). 2026-07 dedup campaign, compat-parity slice."
+      "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). The std and variance twins are gone: compat delegates to the functions implementations (#1280), because a copy without the subnormal and overflow rescue is exactly how the std of data of order 1e-170 came back 0. 2026-07 dedup campaign, compat-parity slice."
     },
     {
       "names": [

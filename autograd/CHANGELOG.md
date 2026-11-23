@@ -1,5 +1,31 @@
 # @danielsimonjr/mathts-autograd
 
+## 0.6.2
+
+### Patch Changes
+
+- a5bc409: `Tensor.matmul` and `TapedTensor.matmul` follow the NumPy `matmul` rules. A rank-1 operand gets an added axis that the result drops (`ones(3).matmul(ones(3))` is a rank-0 tensor of value 3). The batch axes are right-aligned and broadcast, so `ones(4, 3, 5) @ ones(5, 2)` has shape `[4, 3, 2]` and `ones(1, 2, 2) @ ones(3, 2, 2)` has shape `[3, 2, 2]`. The gradient of a broadcast operand is the sum of the full-batch gradient over the repeated axes. `TapedTensor.matmul` of a batched left operand and a rank-2 right operand (`[...batch, m, k] @ [k, n]`) is one matrix product of the folded rows, so the right operand is not copied for each batch entry. (Refs #992)
+- 789a41a: `expm` of a matrix returns a matrix of the same class and storage. Before, `expm(matrix(A))` returned a native `DenseMatrix` with no `size` method, and `expm(sparse(A))` returned an Array. Now a dense matrix gives a dense matrix, a sparse matrix gives a sparse matrix of its own kind, and an Array gives an Array. A matrix with one or three dimensions now throws the square error with its real size. A matrix that is not square throws a `RangeError` at every site, as in mathjs; before, the same rule threw a plain `Error` at some sites. Each message stays the same, except `eigsh`: an empty input throws `eigsh: dense matrix input must be non-empty`, and a ragged input throws `eigsh: dense matrix input must be square`. A `catch` of `Error` still catches the error. `pinv`, `re`, `im`, `arg` and `setDistinct` of a matrix give a matrix (they gave an Array); `pinv([])` is `[]`, and a 1-D matrix gives a 1-D result. (Refs #1264)
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [33acba1]
+- Updated dependencies [789a41a]
+- Updated dependencies [a5bc409]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [789a41a]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [b866b34]
+- Updated dependencies [89f1ec7]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [3b2ffe6]
+- Updated dependencies [a7c47d4]
+- Updated dependencies [ba1fdea]
+- Updated dependencies [b866b34]
+  - @danielsimonjr/mathts-core@0.30.0
+  - @danielsimonjr/mathts-tensor@0.5.2
+
 ## 0.6.1
 
 ### Patch Changes

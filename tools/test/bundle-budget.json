@@ -7,24 +7,24 @@
   "files": {
     "packages/typed-function/dist/index.js": 4566,
     "packages/typed-function/package.json": 2215,
-    "packages/workerpool/dist/index.js": 55218,
-    "packages/workerpool/dist/worker.js": 25655,
+    "packages/workerpool/dist/index.js": 56393,
+    "packages/workerpool/dist/worker.js": 26149,
     "packages/workerpool/package.json": 2745,
-    "core/dist/index.js": 257162,
-    "core/dist/internal.js": 258671,
+    "core/dist/index.js": 258754,
+    "core/dist/internal.js": 262198,
     "core/package.json": 2024,
-    "matrix/dist/index.js": 237296,
+    "matrix/dist/index.js": 238758,
     "matrix/package.json": 2569,
-    "matrix/dist/wasm/mathts-as.wasm": 66447,
-    "tensor/dist/index.js": 87222,
+    "matrix/dist/wasm/mathts-as.wasm": 66864,
+    "tensor/dist/index.js": 87932,
     "tensor/package.json": 2215,
-    "autograd/dist/index.js": 73674,
+    "autograd/dist/index.js": 73749,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2174747,
-    "functions/dist/subpath-evaluate.js": 1417491,
-    "functions/package.json": 3607,
-    "functions/dist/wasm/mathts-as.wasm": 66447,
-    "expression/dist/index.js": 365157,
+    "functions/dist/index.js": 2203952,
+    "functions/dist/subpath-evaluate.js": 1429140,
+    "functions/package.json": 3740,
+    "functions/dist/wasm/mathts-as.wasm": 66864,
+    "expression/dist/index.js": 366761,
     "expression/package.json": 2208,
     "parser/dist/index.js": 541,
     "parser/package.json": 2382,
@@ -46,15 +46,16 @@
     "statistics/package.json": 2468,
     "signal/dist/index.js": 560,
     "signal/package.json": 2156,
-    "parallel/dist/index.js": 50286,
+    "parallel/dist/index.js": 50387,
     "parallel/package.json": 2283,
     "workbook/dist/index.js": 49720,
     "workbook/package.json": 2123,
-    "assembly/build/mathts.js": 93147,
-    "assembly/build/mathts.wasm": 66447,
-    "assembly/build/mathts-debug.wasm": 127683,
-    "assembly/package.json": 2432,
-    "compat/dist/index.js": 31985,
+    "assembly/build/mathts.js": 95953,
+    "assembly/build/mathts.wasm": 66864,
+    "assembly/build/mathts-debug.wasm": 128838,
+    "assembly/build/mathts-debug.js": 102906,
+    "assembly/package.json": 2903,
+    "compat/dist/index.js": 31391,
     "compat/package.json": 2274,
     "gpu/dist/index.js": 18116,
     "gpu/package.json": 2189,
@@ -157,6 +158,10 @@
       "export": "__collect",
       "treeShake": false
     },
+    "assembly/build/mathts-debug.js": {
+      "export": "__collect",
+      "treeShake": false
+    },
     "compat/dist/index.js": {
       "export": "BigNumber",
       "treeShake": true
@@ -179,37 +184,37 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1308714
+      "bytes": 1315896
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1309081
+      "bytes": 1316263
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1318681
+      "bytes": 1325863
     },
     {
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "bytes": 271312
+      "bytes": 271804
     },
     {
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1893828
+      "bytes": 1917225
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1903149
+      "bytes": 1926543
     }
   ]
 }

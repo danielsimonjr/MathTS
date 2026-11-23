@@ -15,6 +15,7 @@ import { registerDivideInverse } from '../typed/divide-inverse.js';
 import { registerCollectionRelational } from '../typed/collection-relational.js';
 import { registerExactReductions } from '../typed/exact-reductions.js';
 import type {
+  BridgeMatrix,
   PublicDet,
   PublicMad,
   PublicMedian,
@@ -1726,11 +1727,14 @@ export const fraction = factoryScope.fraction as (n: number, d?: number) => unkn
  * Convert a value to BigNumber. An Array or a Matrix converts element by element, a Unit
  * converts its value, a Fraction and a bigint convert without loss, and null gives 0.
  */
-export const bignumber = factoryScope.bignumber as (
-  x: number | string | bigint | boolean | null | object
-) => unknown;
-export const matrix = factoryScope.matrix as (data?: unknown, format?: string) => unknown;
-export const sparse = factoryScope.createSparseMatrix as (data?: unknown) => unknown;
+export const bignumber = factoryScope.bignumber as {
+  (x?: number | string | bigint | boolean | null | CoreBigNumber | CoreFraction): CoreBigNumber;
+  /** A collection (an array, a matrix, a unit) converts element by element. */
+  (x: object): unknown;
+};
+/** A dense matrix, or a sparse matrix when `format` is `'sparse'`. */
+export const matrix = factoryScope.matrix as (data?: unknown, format?: string) => BridgeMatrix;
+export const sparse = factoryScope.createSparseMatrix as (data?: unknown) => BridgeMatrix;
 /**
  * Map a conversion over an array or a matrix, element-wise. The function returns `undefined`
  * when `x` is not an array and not a matrix. The caller then converts the scalar itself.

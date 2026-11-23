@@ -32,6 +32,7 @@ import {
   gammaincScalar,
 } from '../wasm/special/scalars.js';
 import { erfcScalar } from './special.js';
+import { isBigNumber, isFraction } from '../utils/is.js';
 import { gammaSampleRng, normalSampleRng } from '../probability/util/gammaSample.js';
 
 // =============================================================================
@@ -92,6 +93,8 @@ export interface Distribution {
    *   the worker kernel, fans out across workers asynchronously.
    * - For distributions without a dedicated worker kernel (binomialDist,
    *   chiSquaredDist, etc.) always uses the JS loop regardless of `n`.
+   *
+   * The options are `seed` and `workerCount`. An unknown key rejects the returned promise.
    */
   sampleN: (n: number, opts?: SampleNOptions) => Promise<Float64Array>;
 }
@@ -136,6 +139,75 @@ function _withSampleCount(d: Omit<Distribution, 'sample'> & { sample: () => f64 
     return values;
   };
   return { ...d, sample: sample as Distribution['sample'] };
+}
+
+/**
+ * Throws a `TypeError` when the argument right after the declared parameters is an options object.
+ * JavaScript drops such an argument, so `gammaDist(2, 2, { scale: 2 })` gave the rate distribution
+ * with no error (#940). Only `args[max]` is read. A value that is not an object, `undefined`, `null`,
+ * an Array or a typed array is not an option and does not throw: an iteration helper such as
+ * `Array.prototype.map` passes `(value, index, array)`, and `[1, 2, 3].map(poissonDist)` is valid.
+ *
+ * @param name - The factory name for the message.
+ * @param args - The `arguments` object of the factory.
+ * @param max - The number of declared parameters.
+ */
+function _noIgnoredOptions(name: string, args: IArguments, max: number): void {
+  const extra: unknown = args[max];
+  if (extra === null || typeof extra !== 'object') return;
+  if (Array.isArray(extra) || ArrayBuffer.isView(extra)) return;
+  throw new TypeError(
+    `${name}: takes at most ${max} arguments; argument ${max + 1} would be ignored`
+  );
+}
+
+/** A short name of the type of `v` for an error message. */
+function _typeName(v: unknown): string {
+  if (v === null) return 'null';
+  if (Array.isArray(v)) return 'array';
+  return typeof v;
+}
+
+/**
+ * Returns the number that a number parameter reads as, and throws a `TypeError` when the
+ * parameter has no numeric reading: an options object, `'x'`. An array or a typed array throws
+ * as well (`[2]` reads as 2). `undefined` is returned as it is (the factory has its default, or
+ * its present result). A number (also NaN) is returned as it is. `null`, a numeric string, a
+ * BigNumber and a Fraction are returned as `Number(v)`: the factories are in the expression
+ * scope, where a parameter can be a BigNumber, and the factory stores the parameter, so a
+ * value that is not converted shows in the result (`normalDist('2', 1).mean` was `'2'`, #1384).
+ *
+ * @param name - The factory name for the message.
+ * @param param - The parameter name for the message.
+ * @param v - The value of the parameter binding (after its default).
+ * @returns The number that the factory uses in place of `v`.
+ */
+function _numberArg(name: string, param: string, v: unknown): f64 {
+  if (v === undefined || typeof v === 'number') return v as f64;
+  // `Number([2])` is 2, so an array (and a typed array) would read as its only entry.
+  if (!Array.isArray(v) && !ArrayBuffer.isView(v)) {
+    const n = Number(v);
+    if (!Number.isNaN(n)) return n;
+  }
+  throw new TypeError(`${name}: ${param} must be a number, got ${_typeName(v)}`);
+}
+
+/**
+ * Throws a `TypeError` for each own key of `obj` that is not in `allowed`. An unknown key was
+ * ignored (#940).
+ *
+ * @param name - The function name for the message.
+ * @param obj - The options object.
+ * @param allowed - The keys that the function reads.
+ */
+function _onlyKeys(name: string, obj: object, allowed: readonly string[]): void {
+  for (const key of Object.keys(obj)) {
+    if (!allowed.includes(key)) {
+      throw new TypeError(
+        `${name}: unknown option "${key}"; the options are ${allowed.join(', ')}`
+      );
+    }
+  }
 }
 
 /**
@@ -231,6 +303,8 @@ async function _sampleNDispatch(
   opts: SampleNOptions | undefined,
   jsFallback: (n: number, rng: () => number) => Float64Array
 ): Promise<Float64Array> {
+  // The function is async, so an unknown key rejects the returned promise.
+  if (opts !== undefined && opts !== null) _onlyKeys('sampleN', opts, ['seed', 'workerCount']);
   const seed = opts?.seed !== undefined ? opts.seed >>> 0 : (Math.random() * 0xffffffff) >>> 0;
 
   if (
@@ -256,6 +330,8 @@ async function _sampleNDispatch(
 /**
  * Create a normal (Gaussian) distribution object.
  *
+ * SciPy: `scipy.stats.norm(loc=mu, scale=sigma)`.
+ *
  * @param mu - Mean (default 0)
  * @param sigma - Standard deviation (default 1, must be positive)
  * @returns Distribution object
@@ -267,6 +343,9 @@ async function _sampleNDispatch(
  * d.quantile(0.975) // ~1.96
  */
 export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
+  _noIgnoredOptions('normalDist', arguments, 2);
+  mu = _numberArg('normalDist', 'mu', mu);
+  sigma = _numberArg('normalDist', 'sigma', sigma);
   if (sigma <= 0) throw new Error('normalDist: sigma must be positive');
   return _withSampleCount({
     pdf: (x: f64) => Math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * SQRT_2PI),
@@ -308,6 +387,8 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
 /**
  * Create a Beta distribution object.
  *
+ * SciPy: `scipy.stats.beta(alpha, beta)`.
+ *
  * @param alpha - Shape parameter alpha > 0
  * @param beta_ - Shape parameter beta > 0
  * @returns Distribution object
@@ -317,6 +398,9 @@ export function normalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
  * d.mean // 2/7
  */
 export function betaDist(alpha: f64, beta_: f64): Distribution {
+  _noIgnoredOptions('betaDist', arguments, 2);
+  alpha = _numberArg('betaDist', 'alpha', alpha);
+  beta_ = _numberArg('betaDist', 'beta_', beta_);
   if (alpha <= 0 || beta_ <= 0) throw new Error('betaDist: alpha and beta must be positive');
   const B = (_gamma(alpha) * _gamma(beta_)) / _gamma(alpha + beta_);
   return _withSampleCount({
@@ -395,6 +479,8 @@ function _gammaRandomRng(alpha: f64, rng: () => number): f64 {
 /**
  * Create a Binomial distribution object.
  *
+ * SciPy: `scipy.stats.binom(n, p)`.
+ *
  * @param n - Number of trials (positive integer)
  * @param p - Success probability (0 <= p <= 1)
  * @returns Distribution object
@@ -404,6 +490,9 @@ function _gammaRandomRng(alpha: f64, rng: () => number): f64 {
  * d.mean // 5
  */
 export function binomialDist(n: number, p: f64): Distribution {
+  _noIgnoredOptions('binomialDist', arguments, 2);
+  n = _numberArg('binomialDist', 'n', n);
+  p = _numberArg('binomialDist', 'p', p);
   if (!Number.isInteger(n) || n < 0)
     throw new Error('binomialDist: n must be a non-negative integer');
   if (p < 0 || p > 1) throw new Error('binomialDist: p must be in [0, 1]');
@@ -467,6 +556,8 @@ export function binomialDist(n: number, p: f64): Distribution {
 /**
  * Create a Chi-squared distribution object.
  *
+ * SciPy: `scipy.stats.chi2(k)`.
+ *
  * @param k - Degrees of freedom (positive integer)
  * @returns Distribution object
  *
@@ -475,6 +566,8 @@ export function binomialDist(n: number, p: f64): Distribution {
  * d.mean // 3
  */
 export function chiSquaredDist(k: number): Distribution {
+  _noIgnoredOptions('chiSquaredDist', arguments, 1);
+  k = _numberArg('chiSquaredDist', 'k', k);
   if (k <= 0) throw new Error('chiSquaredDist: k must be positive');
   const halfK = k / 2;
   return _withSampleCount({
@@ -535,6 +628,8 @@ export function chiSquaredDist(k: number): Distribution {
 /**
  * Create an Exponential distribution object.
  *
+ * SciPy: `scipy.stats.expon(scale=1/lambda)`. The argument is the RATE (`mean = 1/lambda`), so `scale = 1/rate`.
+ *
  * @param lambda - Rate parameter (positive)
  * @returns Distribution object
  *
@@ -543,6 +638,8 @@ export function chiSquaredDist(k: number): Distribution {
  * d.mean // 0.5
  */
 export function exponentialDist(lambda: f64 = 1): Distribution {
+  _noIgnoredOptions('exponentialDist', arguments, 1);
+  lambda = _numberArg('exponentialDist', 'lambda', lambda);
   if (lambda <= 0) throw new Error('exponentialDist: lambda must be positive');
   return _withSampleCount({
     pdf: (x: f64) => (x < 0 ? 0 : lambda * Math.exp(-lambda * x)),
@@ -575,6 +672,8 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
 /**
  * Create an F-distribution object.
  *
+ * SciPy: `scipy.stats.f(d1, d2)`.
+ *
  * @param d1 - Numerator degrees of freedom (positive)
  * @param d2 - Denominator degrees of freedom (positive)
  * @returns Distribution object
@@ -584,6 +683,9 @@ export function exponentialDist(lambda: f64 = 1): Distribution {
  * d.mean // 10 / (10 - 2) = 1.25
  */
 export function fDist(d1: f64, d2: f64): Distribution {
+  _noIgnoredOptions('fDist', arguments, 2);
+  d1 = _numberArg('fDist', 'd1', d1);
+  d2 = _numberArg('fDist', 'd2', d2);
   if (d1 <= 0 || d2 <= 0) throw new Error('fDist: d1 and d2 must be positive');
   return _withSampleCount({
     pdf: (x: f64) => {
@@ -673,6 +775,8 @@ function _gammaPositiveFinite(name: string, value: f64): void {
  * Passing `rate` and `scale` together throws. Shape, rate, and scale must be
  * finite and strictly positive (`NaN`, `±Infinity`, and non-positive values throw).
  *
+ * SciPy: `scipy.stats.gamma(shape, scale=1/rate)` for `gammaDist(shape, rate)`, and `scipy.stats.gamma(shape, scale=scale)` for `gammaDist(shape, { scale })`.
+ *
  * @param shapeOrOptions - Shape (positive), or `{ shape, scale }` for SciPy-style construction
  * @param rateOrOptions - Rate (positive, default 1) or `{ scale }` when the first argument is a number
  * @returns Distribution object
@@ -695,30 +799,43 @@ export function gammaDist(
 ): Distribution {
   let shape: f64;
   let rate: f64;
+  _noIgnoredOptions('gammaDist', arguments, 2);
   if (typeof shapeOrOptions === 'object' && shapeOrOptions !== null && 'shape' in shapeOrOptions) {
-    if (arguments.length > 1 || 'rate' in shapeOrOptions) {
+    // An explicit `undefined` second argument is not a second argument (a forwarding wrapper).
+    if (arguments[1] !== undefined || 'rate' in shapeOrOptions) {
       throw new Error('gammaDist: pass rate or scale, not both');
     }
-    shape = shapeOrOptions.shape;
-    const scale = shapeOrOptions.scale;
+    _onlyKeys('gammaDist', shapeOrOptions, ['shape', 'scale']);
+    shape = _numberArg('gammaDist', 'shape', shapeOrOptions.shape);
+    const scale = _numberArg('gammaDist', 'scale', shapeOrOptions.scale);
     _gammaPositiveFinite('shape', shape);
     _gammaPositiveFinite('scale', scale);
     rate = 1 / scale;
   } else {
     shape = shapeOrOptions as f64;
+    shape = _numberArg('gammaDist', 'shape', shape);
     _gammaPositiveFinite('shape', shape);
-    if (typeof rateOrOptions === 'object' && rateOrOptions !== null) {
+    // A BigNumber or a Fraction is an object too, but it is a rate, not an options object
+    // (#1360): `evaluate('gammaDist(2, 2)')` in a BigNumber scope passes one.
+    if (
+      typeof rateOrOptions === 'object' &&
+      rateOrOptions !== null &&
+      !isBigNumber(rateOrOptions) &&
+      !isFraction(rateOrOptions)
+    ) {
       if ('rate' in rateOrOptions) {
         throw new Error('gammaDist: pass rate or scale, not both');
       }
+      _onlyKeys('gammaDist', rateOrOptions, ['scale']);
       if (!('scale' in rateOrOptions)) {
         throw new Error('gammaDist: expected a positive rate or { scale }');
       }
-      const scale = rateOrOptions.scale;
+      const scale = _numberArg('gammaDist', 'scale', rateOrOptions.scale);
       _gammaPositiveFinite('scale', scale);
       rate = 1 / scale;
     } else {
       rate = rateOrOptions as f64;
+      rate = _numberArg('gammaDist', 'rate', rate);
       _gammaPositiveFinite('rate', rate);
     }
   }
@@ -776,6 +893,8 @@ export function gammaDist(
 /**
  * Create a Log-Normal distribution object.
  *
+ * SciPy: `scipy.stats.lognorm(s=sigma, scale=exp(mu))`.
+ *
  * @param mu - Mean of the log (default 0)
  * @param sigma - Standard deviation of the log (default 1, positive)
  * @returns Distribution object
@@ -785,6 +904,9 @@ export function gammaDist(
  * d.mean // e^0.5
  */
 export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
+  _noIgnoredOptions('logNormalDist', arguments, 2);
+  mu = _numberArg('logNormalDist', 'mu', mu);
+  sigma = _numberArg('logNormalDist', 'sigma', sigma);
   if (sigma <= 0) throw new Error('logNormalDist: sigma must be positive');
   return _withSampleCount({
     pdf: (x: f64) => {
@@ -823,6 +945,8 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
 /**
  * Create a Poisson distribution object.
  *
+ * SciPy: `scipy.stats.poisson(lambda)`.
+ *
  * @param lambda - Rate parameter (positive)
  * @returns Distribution object
  *
@@ -831,6 +955,8 @@ export function logNormalDist(mu: f64 = 0, sigma: f64 = 1): Distribution {
  * d.mean // 5
  */
 export function poissonDist(lambda: f64): Distribution {
+  _noIgnoredOptions('poissonDist', arguments, 1);
+  lambda = _numberArg('poissonDist', 'lambda', lambda);
   if (lambda <= 0) throw new Error('poissonDist: lambda must be positive');
   return _withSampleCount({
     pdf: (k: f64) => {
@@ -892,6 +1018,8 @@ export function poissonDist(lambda: f64): Distribution {
 /**
  * Create a Student's t-distribution object.
  *
+ * SciPy: `scipy.stats.t(nu)`.
+ *
  * @param nu - Degrees of freedom (positive)
  * @returns Distribution object
  *
@@ -900,6 +1028,8 @@ export function poissonDist(lambda: f64): Distribution {
  * d.mean // 0
  */
 export function tDist(nu: f64): Distribution {
+  _noIgnoredOptions('tDist', arguments, 1);
+  nu = _numberArg('tDist', 'nu', nu);
   if (nu <= 0) throw new Error('tDist: nu must be positive');
   const coeff = Math.exp(_lgamma((nu + 1) / 2) - _lgamma(nu / 2)) / Math.sqrt(nu * Math.PI);
   return _withSampleCount({
@@ -957,6 +1087,8 @@ export function tDist(nu: f64): Distribution {
 /**
  * Create a Uniform distribution object.
  *
+ * SciPy: `scipy.stats.uniform(loc=a, scale=b-a)`.
+ *
  * @param a - Lower bound (default 0)
  * @param b - Upper bound (default 1, must be > a)
  * @returns Distribution object
@@ -966,6 +1098,9 @@ export function tDist(nu: f64): Distribution {
  * d.mean // 5
  */
 export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
+  _noIgnoredOptions('uniformDist', arguments, 2);
+  a = _numberArg('uniformDist', 'a', a);
+  b = _numberArg('uniformDist', 'b', b);
   if (b <= a) throw new Error('uniformDist: b must be greater than a');
   const range = b - a;
   return _withSampleCount({
@@ -1002,6 +1137,8 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
 /**
  * Create a Weibull distribution object.
  *
+ * SciPy: `scipy.stats.weibull_min(k, scale=lambda)`.
+ *
  * @param k - Shape parameter (positive)
  * @param lambda - Scale parameter (positive, default 1)
  * @returns Distribution object
@@ -1011,6 +1148,9 @@ export function uniformDist(a: f64 = 0, b: f64 = 1): Distribution {
  * d.mean // sqrt(pi) / 2
  */
 export function weibullDist(k: f64, lambda: f64 = 1): Distribution {
+  _noIgnoredOptions('weibullDist', arguments, 2);
+  k = _numberArg('weibullDist', 'k', k);
+  lambda = _numberArg('weibullDist', 'lambda', lambda);
   if (k <= 0 || lambda <= 0) throw new Error('weibullDist: k and lambda must be positive');
   return _withSampleCount({
     pdf: (x: f64) => {
@@ -1075,6 +1215,10 @@ export function hypergeometricDist(
   successes: number,
   draws: number
 ): Distribution {
+  _noIgnoredOptions('hypergeometricDist', arguments, 3);
+  population = _numberArg('hypergeometricDist', 'population', population);
+  successes = _numberArg('hypergeometricDist', 'successes', successes);
+  draws = _numberArg('hypergeometricDist', 'draws', draws);
   if (![population, successes, draws].every((v) => Number.isInteger(v) && v >= 0)) {
     throw new Error(
       'hypergeometricDist: population, successes, draws must be non-negative integers'
@@ -1136,6 +1280,9 @@ export function hypergeometricDist(
  * @example negativeBinomialDist(5, 0.4).pmf(3) // 0.0774144
  */
 export function negativeBinomialDist(r: number, p: f64): Distribution {
+  _noIgnoredOptions('negativeBinomialDist', arguments, 2);
+  r = _numberArg('negativeBinomialDist', 'r', r);
+  p = _numberArg('negativeBinomialDist', 'p', p);
   if (!Number.isInteger(r) || r < 1)
     throw new Error('negativeBinomialDist: r must be a positive integer');
   if (p <= 0 || p > 1) throw new Error('negativeBinomialDist: p must be in (0, 1]');
@@ -1195,6 +1342,9 @@ function _contSample(quantile: (p: f64) => f64, rng: () => number): f64 {
  * @example paretoDist(3, 2).cdf(4) // 0.875
  */
 export function paretoDist(b: number, xm: number): Distribution {
+  _noIgnoredOptions('paretoDist', arguments, 2);
+  b = _numberArg('paretoDist', 'b', b);
+  xm = _numberArg('paretoDist', 'xm', xm);
   if (b <= 0 || xm <= 0) throw new Error('paretoDist: shape b and scale xm must be positive');
   const quantile = (p: f64): f64 => (p <= 0 ? xm : p >= 1 ? Infinity : xm / Math.pow(1 - p, 1 / b));
   return _withSampleCount({
@@ -1218,6 +1368,8 @@ export function paretoDist(b: number, xm: number): Distribution {
  * @example rayleighDist(2).mean // 2.5066282746
  */
 export function rayleighDist(sigma: number): Distribution {
+  _noIgnoredOptions('rayleighDist', arguments, 1);
+  sigma = _numberArg('rayleighDist', 'sigma', sigma);
   if (sigma <= 0) throw new Error('rayleighDist: sigma must be positive');
   const s2 = sigma * sigma;
   const quantile = (p: f64): f64 =>
@@ -1244,6 +1396,10 @@ export function rayleighDist(sigma: number): Distribution {
  * @example triangularDist(0, 4, 6).mean // 3.3333333333
  */
 export function triangularDist(a: number, c: number, b: number): Distribution {
+  _noIgnoredOptions('triangularDist', arguments, 3);
+  a = _numberArg('triangularDist', 'a', a);
+  c = _numberArg('triangularDist', 'c', c);
+  b = _numberArg('triangularDist', 'b', b);
   if (!(a <= c && c <= b && a < b))
     throw new Error('triangularDist: require a <= mode <= b, a < b');
   const quantile = (p: f64): f64 => {
@@ -1288,6 +1444,9 @@ export function triangularDist(a: number, c: number, b: number): Distribution {
  * @example discreteUniformDist(1, 6).pmf(3) // 0.1666666667
  */
 export function discreteUniformDist(lo: number, hi: number): Distribution {
+  _noIgnoredOptions('discreteUniformDist', arguments, 2);
+  lo = _numberArg('discreteUniformDist', 'lo', lo);
+  hi = _numberArg('discreteUniformDist', 'hi', hi);
   if (!Number.isInteger(lo) || !Number.isInteger(hi) || hi < lo) {
     throw new Error('discreteUniformDist: require integer lo <= hi');
   }
@@ -1324,6 +1483,9 @@ export function discreteUniformDist(lo: number, hi: number): Distribution {
  * @example gumbelDist(1, 2).cdf(3) // 0.6922006276
  */
 export function gumbelDist(mu: number, beta: number): Distribution {
+  _noIgnoredOptions('gumbelDist', arguments, 2);
+  mu = _numberArg('gumbelDist', 'mu', mu);
+  beta = _numberArg('gumbelDist', 'beta', beta);
   if (beta <= 0) throw new Error('gumbelDist: scale beta must be positive');
   const quantile = (p: f64): f64 =>
     p <= 0 ? -Infinity : p >= 1 ? Infinity : mu - beta * Math.log(-Math.log(p));
@@ -1348,11 +1510,14 @@ export function gumbelDist(mu: number, beta: number): Distribution {
 
 /**
  * Inverse-Gaussian (Wald) distribution — mean `mu` > 0, shape `lambda` > 0.
- * Matches `scipy.stats.invgauss(mu, scale=lambda)` where the scipy mean is
- * `mu*scale`; here `mu` is the actual mean directly.
+ * SciPy: `scipy.stats.invgauss(mu/lambda, scale=lambda)`. The SciPy mean is `mu_scipy * scale`;
+ * here `mu` is the actual mean directly.
  * @example invGaussDist(1, 1).pdf(1) // 0.3989422804
  */
 export function invGaussDist(mu: number, lambda: number): Distribution {
+  _noIgnoredOptions('invGaussDist', arguments, 2);
+  mu = _numberArg('invGaussDist', 'mu', mu);
+  lambda = _numberArg('invGaussDist', 'lambda', lambda);
   if (mu <= 0 || lambda <= 0) throw new Error('invGaussDist: mu and lambda must be positive');
   const quantile = (p: f64): f64 => {
     if (p !== p) return NaN;
@@ -1435,10 +1600,17 @@ export interface MultivariateDistribution {
  * @example multivariateNormal([0, 0], [[1, 0.5],[0.5, 2]]).pdf([0, 0]) // 0.1203098284
  */
 export function multivariateNormal(mean: number[], cov: number[][]): MultivariateDistribution {
+  _noIgnoredOptions('multivariateNormal', arguments, 2);
   const k = mean.length;
   if (cov.length !== k || cov.some((row) => row.length !== k)) {
     throw new Error('multivariateNormal: cov must be a k×k matrix matching mean');
   }
+  // Each entry is stored as the number that it reads as (#1384): a numeric string was stored as
+  // it was, and `+` on it joins strings.
+  mean = Array.from(mean, (v, i) => _numberArg('multivariateNormal', `mean[${i}]`, v));
+  cov = cov.map((row, i) =>
+    Array.from(row, (v, j) => _numberArg('multivariateNormal', `cov[${i}][${j}]`, v))
+  );
   const L = _cholesky(cov);
   let logDet = 0;
   for (let i = 0; i < k; i++) logDet += 2 * Math.log(L[i][i]);
