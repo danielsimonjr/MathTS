@@ -119,6 +119,9 @@
       "oxlint --fix --deny-warnings --no-error-on-unmatched-pattern",
       "prettier --write"
     ],
+    "*.{mts,cts,mjs}": [
+      "oxlint --fix --deny-warnings --no-error-on-unmatched-pattern"
+    ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]

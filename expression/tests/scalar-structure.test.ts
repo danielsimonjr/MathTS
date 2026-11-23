@@ -175,7 +175,6 @@ describe('scalar-structure', () => {
         const b = scalar.symbol('b');
         const c = scalar.symbol('c');
         return [
-          scalar.op('/', [a, scalar.op('/', [b, c])]),
           scalar.op('/', [scalar.op('*', [a, c]), b]),
           scalar.op('*', [scalar.op('*', [c, a]), scalar.op('^', [b, scalar.number(-1)])]),
         ];
@@ -390,6 +389,24 @@ describe('scalar-structure', () => {
         scalar.op('^', [scalar.symbol('x'), scalar.number(Infinity)])
       )
     ).toBe(false);
+  });
+
+  it('preserves real domain and sign when collecting powers', () => {
+    const x = scalar.symbol('x');
+    const pow = (base: ScalarNode, exp: number) => scalar.op('^', [base, scalar.number(exp)]);
+    const product = (left: ScalarNode, right: ScalarNode) => scalar.op('*', [left, right]);
+    const minusOne = scalar.number(-1);
+
+    const distinct: [ScalarNode, ScalarNode][] = [
+      [pow(pow(x, 2), 0.5), x],
+      [pow(pow(x, 0.5), 2), x],
+      [pow(product(minusOne, x), 0.5), product(pow(minusOne, 0.5), pow(x, 0.5))],
+      [pow(pow(x, -1), -1), x],
+    ];
+    for (const [left, right] of distinct) {
+      expect(scalarCanonicalKey(left)).not.toBe(scalarCanonicalKey(right));
+      expect(scalarCanonical(scalarCanonical(left))).toEqual(scalarCanonical(left));
+    }
   });
 
   it('canonicalization is idempotent for equivalence and non-equivalence trees', () => {

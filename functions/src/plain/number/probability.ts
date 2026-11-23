@@ -2,6 +2,7 @@
 
 import { isInteger } from '../../utils/number.js';
 import { product } from '../../utils/product.js';
+import { sinPiScalar } from '../../wasm/special/scalars.js';
 
 /**
  * Return the gamma function of `n`.
@@ -27,7 +28,9 @@ export function gammaNumber(n: number): number {
   }
 
   if (n < 0.5) {
-    return Math.PI / (Math.sin(Math.PI * n) * gammaNumber(1 - n));
+    // sinPiScalar reduces n exactly: Math.sin(Math.PI * n) kept only a few digits next to a
+    // negative integer (gamma(-1.0000001) was wrong from the tenth digit).
+    return Math.PI / (sinPiScalar(n) * gammaNumber(1 - n));
   }
 
   if (n >= 171.35) {

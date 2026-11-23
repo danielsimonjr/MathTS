@@ -28,6 +28,39 @@
 type f64 = number;
 
 // =============================================================================
+// sin(pi x), cos(pi x) and 1/Gamma(x)
+// =============================================================================
+
+/**
+ * sin(pi x) with the argument reduced EXACTLY before it meets pi.
+ *
+ * `Math.sin(Math.PI * x)` rounds the product by ulp(pi * x), and next to a nonzero integer m the
+ * sine is about pi * (x - m), so the result keeps only log10(|dist| / ulp(pi * x)) digits
+ * (`sin(pi * -1.0000001)` is wrong from the tenth digit). Here `x - 2 * round(x / 2)` is exact
+ * (a double of at most 53 bits, as the difference of two doubles that share their leading bits),
+ * and so is `1 - a` for `a` in [0.5, 1]. The argument of `Math.sin` is then in [0, pi / 2] and
+ * computed from an exact difference. The result is exactly 0 at an integer and exactly +-1 at a
+ * half-integer. A non-finite x gives NaN. Standalone: `Math` only (see the serialization invariant).
+ */
+export function sinPiScalar(x: f64): f64 {
+  const r = x - 2 * Math.round(x / 2);
+  const a = Math.abs(r);
+  const s = a > 0.5 ? Math.sin(Math.PI * (1 - a)) : Math.sin(Math.PI * a);
+  return s === 0 ? 0 : r < 0 ? -s : s;
+}
+
+/**
+ * cos(pi x) with the same exact reduction as `sinPiScalar`. The result is exactly 0 at a
+ * half-integer and exactly +-1 at an integer. A non-finite x gives NaN. Standalone.
+ */
+export function cosPiScalar(x: f64): f64 {
+  const a = Math.abs(x - 2 * Math.round(x / 2));
+  if (a < 0.25) return Math.cos(Math.PI * a);
+  if (a <= 0.75) return Math.sin(Math.PI * (0.5 - a));
+  return -Math.cos(Math.PI * (1 - a));
+}
+
+// =============================================================================
 // Log-gamma
 // =============================================================================
 
@@ -43,7 +76,8 @@ export function _lgamma(x: f64): f64 {
     // negative for negative non-integer x and would yield NaN. (The earlier
     // typed/special.ts copy used bare sin and returned NaN for e.g. -0.5; the
     // WASM-bridge copy used abs and was correct. Reconciled to the correct form.)
-    const sinPiX = Math.abs(Math.sin(Math.PI * x));
+    // sinPiScalar reduces x exactly: Math.sin(Math.PI * x) lost digits next to an integer.
+    const sinPiX = Math.abs(sinPiScalar(x));
     if (sinPiX === 0) return Infinity;
     return Math.log(Math.PI / sinPiX) - _lgamma(1 - x);
   }
@@ -60,6 +94,19 @@ export function _lgamma(x: f64): f64 {
   }
   const t = x + g + 0.5;
   return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(sum);
+}
+
+/**
+ * Reciprocal gamma 1 / Gamma(z), with the sign of Gamma. It is 0 at a non-positive integer
+ * (where Gamma has a pole) and exact in sign everywhere: for z < 0 the reflection
+ * 1 / Gamma(z) = sin(pi z) Gamma(1 - z) / pi uses `sinPiScalar`. Overflows to +-Infinity when
+ * Gamma(1 - z) does (1 - z above 171.6). A NaN z gives NaN.
+ */
+export function rgammaScalar(z: f64): f64 {
+  if (z !== z) return NaN;
+  if (z > 0) return Math.exp(-_lgamma(z));
+  if (z === Math.floor(z)) return 0;
+  return (sinPiScalar(z) * Math.exp(_lgamma(1 - z))) / Math.PI;
 }
 
 /**
@@ -112,50 +159,12 @@ export function normalCDFScalar(x: f64, mu: f64, sigma: f64): f64 {
 }
 
 // =============================================================================
-// Bessel J0/J1/Y0/Y1: ascending series (|x| <= 13) + Hankel asymptotic (above),
-// both with in-loop-generated coefficients. Validated to <1e-9 vs mpmath
-// (tests/diff-special.test.mjs). Mirrors assembly/src/special.ts.
+// Bessel J0/J1/Y0/Y1: ascending series (x <= 4), Temme and Steed (4 < x < 17), and the Hankel
+// expansion with the exactly reduced phase (x >= 17: the smallest term is below 1e-15 there).
+// The ascending series cancels from about x = 6 (5e-12 relative at x = 13), so it stops at 4.
+// The AssemblyScript mirror (assembly/src/special.ts) keeps the series to 13 and the Hankel
+// expansion above.
 // =============================================================================
-
-// Hankel asymptotic shared by J_nu/Y_nu (nu = 0 or 1):
-//   J_nu ~ sqrt(2/(pi x)) [P cos(chi) - Q sin(chi)],
-//   Y_nu ~ sqrt(2/(pi x)) [P sin(chi) + Q cos(chi)], chi = x - (nu/2+1/4)pi.
-/**
- * Return the Hankel asymptotic value of the Bessel function J or Y of order `nu`.
- *
- * The series stops after 40 terms, or earlier when the terms start to grow. The scalar
- * Bessel functions use this value for arguments above 13, and the ascending series otherwise.
- *
- * @param nu - The order, 0 or 1.
- * @param x - The argument.
- * @param wantY - If true, return Y; if false, return J.
- */
-export function besselHankel(nu: f64, x: f64, wantY: boolean): f64 {
-  const mu = 4 * nu * nu;
-  let P = 1.0;
-  let Q = 0.0;
-  let a = 1.0;
-  let xk = 1.0;
-  let prevMag = Infinity;
-  for (let k = 1; k <= 40; k++) {
-    const twokm1 = 2 * k - 1;
-    a = (a * (mu - twokm1 * twokm1)) / (8 * k);
-    xk *= x;
-    const t = a / xk;
-    const mag = Math.abs(t);
-    if (mag > prevMag) break;
-    prevMag = mag;
-    const m4 = k & 3;
-    const s = m4 === 1 || m4 === 0 ? 1.0 : -1.0;
-    if ((k & 1) === 1) Q += s * t;
-    else P += s * t;
-  }
-  const chi = x - (nu * 0.5 + 0.25) * Math.PI;
-  const amp = Math.sqrt(2.0 / (Math.PI * x));
-  return wantY
-    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
-    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
-}
 
 /**
  * Return the Bessel function J0(x) from its ascending power series.
@@ -239,27 +248,49 @@ export function besselY1Series(x: f64): f64 {
 /** Bessel function of the first kind, order 0: J0(x). */
 export function besselJ0Scalar(x: f64): f64 {
   const ax = Math.abs(x);
-  return ax <= 13.0 ? besselJ0Series(ax) : besselHankel(0, ax, false);
+  // J_nu(x) -> 0 as x -> Infinity (the amplitude sqrt(2 / (pi x)) -> 0); sin(Infinity) is NaN.
+  if (ax === Infinity) return 0;
+  return ax <= 4.0
+    ? besselJ0Series(ax)
+    : ax < 17.0
+      ? besselJYTemme(0, ax)[0]
+      : besselHankelReal(0, ax, false);
 }
 
 /** Bessel function of the first kind, order 1: J1(x). */
 export function besselJ1Scalar(x: f64): f64 {
   const ax = Math.abs(x);
   const sign = x < 0 ? -1 : 1; // J1 is odd
-  const val = ax <= 13.0 ? besselJ1Series(ax) : besselHankel(1, ax, false);
+  if (ax === Infinity) return x < 0 ? -0 : 0;
+  const val =
+    ax <= 4.0
+      ? besselJ1Series(ax)
+      : ax < 17.0
+        ? besselJYTemme(1, ax)[0]
+        : besselHankelReal(1, ax, false);
   return sign * val;
 }
 
 /** Bessel function of the second kind, order 0: Y0(x). */
 export function besselY0Scalar(x: f64): f64 {
   if (x <= 0) return NaN;
-  return x <= 13.0 ? besselY0Series(x) : besselHankel(0, x, true);
+  if (x === Infinity) return 0;
+  return x <= 4.0
+    ? besselY0Series(x)
+    : x < 17.0
+      ? besselJYTemme(0, x)[1]
+      : besselHankelReal(0, x, true);
 }
 
 /** Bessel function of the second kind, order 1: Y1(x). */
 export function besselY1Scalar(x: f64): f64 {
   if (x <= 0) return NaN;
-  return x <= 13.0 ? besselY1Series(x) : besselHankel(1, x, true);
+  if (x === Infinity) return 0;
+  return x <= 4.0
+    ? besselY1Series(x)
+    : x < 17.0
+      ? besselJYTemme(1, x)[1]
+      : besselHankelReal(1, x, true);
 }
 
 /**
@@ -294,28 +325,48 @@ export function besselGammaAux(xmu: f64): [f64, f64, f64, f64] {
 }
 
 /**
- * J_ν(x) and Y_ν(x) for real order ν >= 0 and x > 0 (Temme 1976 / Steed, as in
- * Numerical Recipes `bessjy`): CF1 (Lentz) for J'_ν/J_ν, then either Temme's
- * series (x < 2) or Steed's CF2 (x >= 2) at the reduced order μ ∈ [−1/2, 1/2],
- * and stable recurrences back to ν. Returns [J_ν, yScale · Y_ν]. Accurate to ~1e-15
- * for all x > 0, with no loss near integer orders.
- *
- * `yScale` multiplies Y at the reduced order, before the upward recurrence (which is linear).
- * A caller that needs `c · Y_ν` with a small `c` passes `c`: the product can be a double
- * where Y_ν alone is outside the double range.
+ * True when J_an(x) rounds to 0, for an order an >= 1 and an argument x > 0. |J_nu(x)| <=
+ * (x/2)^nu / Gamma(nu + 1) (DLMF 10.14.4) and Gamma(nu + 1) >= (nu/e)^nu give
+ * ln|J_nu(x)| <= nu (1 + ln(x/2) - ln nu), and below -745.2 the value rounds to 0. The bound
+ * holds for every x. It costs no loop, so the scalars test it before the order limit: a huge
+ * order with a small x returns at once, and the array guard uses the same test.
  */
-export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
+export function besselJUnderflows(an: f64, x: f64): boolean {
+  return an >= 1 && an * (1 + (Math.log(x) - Math.LN2) - Math.log(an)) < -745.2;
+}
+
+/**
+ * A lower bound of ln|Y_an(x)| for an order an >= 2 and 0 < x <= an - 1, and -Infinity when the
+ * bound does not apply. d/dx[x^nu Y_nu] = x^nu Y_(nu-1) < 0 on (0, y_(nu-1,1)) with
+ * y_(nu-1,1) > nu - 1 (DLMF 10.6.6 and 10.21.3), and x^nu Y_nu -> -2^nu Gamma(nu) / pi as x -> 0
+ * (DLMF 10.7.4). So |Y_nu(x)| >= 2^nu Gamma(nu) / (pi x^nu) there, and
+ * ln Gamma(nu) >= (nu - 1/2) ln nu - nu + ln(2 pi) / 2. Y_an(x) is negative in this range: above
+ * 709.79 it is -Infinity. The sum is grouped so that an huge order gives +-Infinity, not NaN.
+ */
+export function besselYLogBound(an: f64, x: f64): f64 {
+  if (!(an >= 2) || !(x <= an - 1)) return -Infinity;
+  return (
+    an * (Math.log(an) - 1 + Math.LN2 - Math.log(x)) -
+    0.5 * Math.log(an) +
+    0.5 * Math.log(2 * Math.PI) -
+    Math.log(Math.PI)
+  );
+}
+
+/**
+ * Continued fraction CF1 (Lentz) for h = J'_xnu(x) / J_xnu(x), x > 0 and xnu >= 0, with the sign
+ * of J_xnu relative to its seed (the count of negative denominators, as in Numerical Recipes
+ * `bessjy`). It needs about x steps for x > xnu and a few steps for x < xnu. A fraction that has
+ * not converged after 100000 steps gives h = NaN, never its partial value.
+ * Returns [h, sign].
+ */
+export function besselCF1(xnu: f64, x: f64): [f64, f64] {
   const EPS = 1e-16;
   const FPMIN = 1e-300;
   const MAXIT = 100000;
-  const XMIN = 2;
-  const nl = x < XMIN ? Math.floor(xnu + 0.5) : Math.max(0, Math.floor(xnu - x + 1.5));
-  const xmu = xnu - nl;
-  const xmu2 = xmu * xmu;
   const xi = 1 / x;
   const xi2 = 2 * xi;
-  const w = xi2 / Math.PI;
-  let isign = 1;
+  let isign: f64 = 1;
   let h = xnu * xi;
   if (h < FPMIN) h = FPMIN;
   let b = xi2 * xnu;
@@ -331,17 +382,154 @@ export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
     const del = c * d;
     h = del * h;
     if (d < 0) isign = -isign;
-    if (Math.abs(del - 1) < EPS) break;
+    if (Math.abs(del - 1) < EPS) return [h, isign];
   }
-  let rjl = isign * FPMIN;
+  return [NaN, isign];
+}
+
+/**
+ * Y_mu(x) and Y_(mu+1)(x) for |mu| <= 1/2 and 0 < x < 2 (Temme's series, as in Numerical Recipes
+ * `bessjy`). It works down to x = 5e-324: ln(x/2) is Math.log(x) - Math.LN2, and every division
+ * is by x (1 / x and 2 / x are Infinity below 5.6e-309). Returns [Y_mu, Y_(mu+1)].
+ */
+export function besselYTemmeStart(xmu: f64, x: f64): [f64, f64] {
+  const EPS = 1e-16;
+  const MAXIT = 100000;
+  const xmu2 = xmu * xmu;
+  const x2 = 0.5 * x;
+  const pimu = Math.PI * xmu;
+  const fact1 = Math.abs(pimu) < EPS ? 1 : pimu / Math.sin(pimu);
+  let dd = -(Math.log(x) - Math.LN2);
+  let e = xmu * dd;
+  const fact2 = Math.abs(e) < EPS ? 1 : Math.sinh(e) / e;
+  const g = besselGammaAux(xmu);
+  let ff = ((2 / Math.PI) * fact1 * (g[0] * Math.cosh(e) + g[1] * fact2 * dd)) as f64;
+  e = Math.exp(e);
+  let p = e / (g[2] * Math.PI);
+  let q = 1 / (e * Math.PI * g[3]);
+  const pimu2 = 0.5 * pimu;
+  const fact3 = Math.abs(pimu2) < EPS ? 1 : Math.sin(pimu2) / pimu2;
+  const r = Math.PI * pimu2 * fact3 * fact3;
+  let cc: f64 = 1;
+  dd = -x2 * x2;
+  let sum = ff + r * q;
+  let sum1 = p;
+  for (let i = 1; i <= MAXIT; i++) {
+    ff = (i * ff + p + q) / (i * i - xmu2);
+    cc *= dd / i;
+    p /= i - xmu;
+    q /= i + xmu;
+    const del = cc * (ff + r * q);
+    sum += del;
+    const del1 = cc * p - i * del;
+    sum1 += del1;
+    if (Math.abs(del) < (1 + Math.abs(sum)) * EPS) return [-sum, (-sum1 * 2) / x];
+  }
+  return [NaN, NaN];
+}
+
+/**
+ * Y_(mu+nl)(x) from Y_mu = rymu and Y_(mu+1) = ry1 by the upward recurrence, which is stable for
+ * Y. The step divides by x after the product: 2 (mu + i) / x would overflow for the smallest x.
+ * Y_(mu+i+1) left the double range (or is NaN): every later order is farther out, so the target
+ * is that value (the next step would give -Infinity - -Infinity = NaN). At the last step the
+ * target is rymu, which is finite.
+ */
+export function besselYUpward(xmu: f64, x: f64, rymu0: f64, ry10: f64, nl: f64): f64 {
+  let rymu = rymu0;
+  let ry1 = ry10;
+  for (let i = 1; i <= nl; i++) {
+    const rytemp = (2 * (xmu + i) * ry1) / x - rymu;
+    rymu = ry1;
+    ry1 = rytemp;
+    if (!Number.isFinite(ry1)) {
+      if (i < nl) rymu = ry1;
+      break;
+    }
+  }
+  return rymu;
+}
+
+/**
+ * yScale * Y_an(x) for 0 < x < 2 and an >= 0, with no CF1 and no J: the Temme series at the
+ * reduced order and the upward recurrence. It is the Y half of besselJYTemme, and it is the only
+ * Y path for x below 1e-5, where the continued fraction overflows (it divides by x).
+ */
+export function besselYTemmeSmall(an: f64, x: f64, yScale: f64): f64 {
+  const nl = Math.floor(an + 0.5);
+  const xmu = an - nl;
+  const ys = besselYTemmeStart(xmu, x);
+  return besselYUpward(xmu, x, ys[0] * yScale, ys[1] * yScale, nl);
+}
+
+/**
+ * J_nu(x) for a non-integer or positive real order nu of any sign and 0 < x < 1e-5, from the power
+ * series J_nu(x) = (x/2)^nu sum_k (-x^2/4)^k / (k! Gamma(nu + k + 1)). The terms fall by x^2/4
+ * per step, so the sum ends after a few terms, except next to a negative integer order, where
+ * the term at k = -nu is not small: the loop does not stop before k > -nu.
+ *
+ * The first term is (a * 1/Gamma(nu + 1)) * a with the half power a = x^(nu/2) 2^(-nu/2): the
+ * power (x/2)^nu leaves the double range for the smallest x and the largest |nu|, where the two
+ * half powers do not, and 1/Gamma(nu + 1) has the sign of Gamma for nu + 1 < 0. An infinite or
+ * underflowing first term is the result (the later terms are below it for nu > 0).
+ * A loop that does not converge gives NaN.
+ */
+export function besselJSeriesReal(nu: f64, x: f64): f64 {
+  const a = Math.pow(x, nu / 2) * Math.pow(2, -nu / 2);
+  let term = a * rgammaScalar(nu + 1) * a;
+  if (!Number.isFinite(term) || term === 0) return term;
+  // x / 2 is inexact for a subnormal x, and (x / 2)^2 can be 0: every later term is then below
+  // the last bit of the first.
+  const h = x / 2;
+  const q = -(h * h);
+  let sum = term;
+  const kmax = 200 + Math.ceil(Math.abs(nu));
+  for (let k = 0; k < kmax; k++) {
+    term *= q / ((k + 1) * (nu + k + 1));
+    sum += term;
+    if (k > -nu && Math.abs(term) <= 1e-17 * Math.abs(sum)) return sum;
+  }
+  return NaN;
+}
+
+/**
+ * J_xnu(x) and yScale * Y_xnu(x) for a real order xnu >= 0 and 1e-5 <= x < 25 (Temme 1976 and
+ * Steed, as in Numerical Recipes `bessjy`): CF1 (Lentz) for J'_xnu/J_xnu, then either Temme's
+ * series (x < 2) or Steed's CF2 (x >= 2) at the reduced order mu in [-1/2, 1/2], and stable
+ * recurrences back to xnu. Returns [J_xnu, yScale * Y_xnu]. Bound B4 of the tests is 1e-13
+ * relative; the worst checked point is 3 units of 2^-52 (6.7e-16), with no loss near integer
+ * orders. (For x >= 25 CF1 needs about x steps: besselJYLarge runs
+ * there.)
+ *
+ * `yScale` multiplies Y at the reduced order, before the upward recurrence (which is linear).
+ * A caller that needs `c * Y_xnu` with a small `c` passes `c`: the product can be a double
+ * where Y_xnu alone is outside the double range.
+ */
+export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
+  const EPS = 1e-16;
+  const FPMIN = 1e-300;
+  const XMIN = 2;
+  const nl = x < XMIN ? Math.floor(xnu + 0.5) : Math.max(0, Math.floor(xnu - x + 1.5));
+  const xmu = xnu - nl;
+  const xmu2 = xmu * xmu;
+  const xi = 1 / x;
+  const xi2 = 2 * xi;
+  const w = xi2 / Math.PI;
+  const cf = besselCF1(xnu, x);
+  const h = cf[0];
+  if (Number.isNaN(h)) return [NaN, NaN];
+  let rjl = cf[1] * FPMIN;
   let rjpl = h * rjl;
   let rjl1 = rjl;
-  const rjp1 = rjpl;
-  let fact = xnu * xi;
+  // J_(mu+1) / J_mu after the last step (the ratio is free of the scale below).
+  let ratio: f64 = 0;
   for (let l = nl; l >= 1; l--) {
-    const rjtemp = fact * rjl + rjpl;
-    fact -= xi;
-    rjpl = fact * rjtemp - rjl;
+    // The factor (xmu + l) / x of each step has one rounding of its own. A running
+    // `fact -= 1 / x` added nl roundings of ulp(xnu / x) and lost up to 5 digits of J for
+    // x < 2 (besselJ(37.53325087047588, 7.237015760887747e-5) was 1.1e-11 off).
+    const rjtemp = ((xmu + l) / x) * rjl + rjpl;
+    rjpl = ((xmu + l - 1) / x) * rjtemp - rjl;
+    ratio = rjl / rjtemp;
     rjl = rjtemp;
     // The downward recurrence grows by about 2 nu / x per step, so from the seed 1e-300 it
     // leaves the double range for nu / x above about 150, and the ratio f = rjpl / rjl was NaN
@@ -360,39 +548,19 @@ export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
   let rymu: f64;
   let ry1: f64;
   if (x < XMIN) {
-    const x2 = 0.5 * x;
-    const pimu = Math.PI * xmu;
-    const fact1 = Math.abs(pimu) < EPS ? 1 : pimu / Math.sin(pimu);
-    let dd = -Math.log(x2);
-    let e = xmu * dd;
-    const fact2 = Math.abs(e) < EPS ? 1 : Math.sinh(e) / e;
-    const g = besselGammaAux(xmu);
-    let ff = ((2 / Math.PI) * fact1 * (g[0] * Math.cosh(e) + g[1] * fact2 * dd)) as f64;
-    e = Math.exp(e);
-    let p = e / (g[2] * Math.PI);
-    let q = 1 / (e * Math.PI * g[3]);
-    const pimu2 = 0.5 * pimu;
-    const fact3 = Math.abs(pimu2) < EPS ? 1 : Math.sin(pimu2) / pimu2;
-    const r = Math.PI * pimu2 * fact3 * fact3;
-    let cc: f64 = 1;
-    dd = -x2 * x2;
-    let sum = ff + r * q;
-    let sum1 = p;
-    for (let i = 1; i <= MAXIT; i++) {
-      ff = (i * ff + p + q) / (i * i - xmu2);
-      cc *= dd / i;
-      p /= i - xmu;
-      q /= i + xmu;
-      const del = cc * (ff + r * q);
-      sum += del;
-      const del1 = cc * p - i * del;
-      sum1 += del1;
-      if (Math.abs(del) < (1 + Math.abs(sum)) * EPS) break;
+    const ys = besselYTemmeStart(xmu, x);
+    rymu = ys[0];
+    ry1 = ys[1];
+    // With J'_mu = (mu / x) J_mu - J_(mu+1), the form w / (Y'_mu - f Y_mu) subtracts two values
+    // close to mu / x when mu < 0 and cancels. After a downward step the ratio
+    // J_(mu+1) / J_mu is known, and the Wronskian J_mu Y_(mu+1) - J_(mu+1) Y_mu = -2 / (pi x)
+    // gives J_mu with no such cancellation.
+    if (nl >= 1) {
+      rjmu = w / (ratio * rymu - ry1);
+    } else {
+      const rymup = xmu * xi * rymu - ry1;
+      rjmu = w / (rymup - f * rymu);
     }
-    rymu = -sum;
-    ry1 = -sum1 * xi2;
-    const rymup = xmu * xi * rymu - ry1;
-    rjmu = w / (rymup - f * rymu);
   } else {
     let a = 0.25 - xmu2;
     let p = -0.5 * xi;
@@ -410,7 +578,8 @@ export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
     let temp = p * dlr - q * dli;
     q = p * dli + q * dlr;
     p = temp;
-    for (let i = 2; i <= MAXIT; i++) {
+    let converged = false;
+    for (let i = 2; i <= 100000; i++) {
       a += 2 * (i - 1);
       bi += 2;
       dr = a * dr + br;
@@ -428,8 +597,12 @@ export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
       temp = p * dlr - q * dli;
       q = p * dli + q * dlr;
       p = temp;
-      if (Math.abs(dlr - 1) + Math.abs(dli) < EPS) break;
+      if (Math.abs(dlr - 1) + Math.abs(dli) < EPS) {
+        converged = true;
+        break;
+      }
     }
+    if (!converged) return [NaN, NaN];
     const gam = (p - f) / q;
     rjmu = Math.sqrt(w / ((p - f) * gam + q));
     if (rjl < 0) rjmu = -rjmu;
@@ -439,25 +612,17 @@ export function besselJYTemme(xnu: f64, x: f64, yScale: f64 = 1): [f64, f64] {
   }
   const scale = rjmu / rjl;
   const rj = rjl1 * scale;
-  void rjp1;
-  rymu *= yScale;
-  ry1 *= yScale;
-  for (let i = 1; i <= nl; i++) {
-    const rytemp = (xmu + i) * xi2 * ry1 - rymu;
-    rymu = ry1;
-    ry1 = rytemp;
-    // Y_{mu+i+1} left the double range (or is NaN). Every later order is farther out, so the
-    // target order is that value, and the next step would give -Infinity - -Infinity = NaN.
-    // At the last step the target is rymu, which is finite.
-    if (!Number.isFinite(ry1)) {
-      if (i < nl) rymu = ry1;
-      break;
-    }
-  }
-  return [rj, rymu];
+  return [rj, besselYUpward(xmu, x, rymu * yScale, ry1 * yScale, nl)];
 }
 
-/** Hankel asymptotic expansion for real order (x very large). Y when `y` is true. */
+/**
+ * Hankel asymptotic expansion for real order (x large). Y when `y` is true.
+ *
+ * The phase chi = x - (nu/2 + 1/4) pi is never formed: it would round to ulp(x), an absolute phase
+ * error of ulp(x) / 2 (J_400.3(1.5e5) was 4.7e-12 off the amplitude). sin(x - A) and cos(x - A)
+ * with A = pi nu / 2 + pi / 4 come from sin(x) and cos(x), which reduce the exact x, and from
+ * the exactly reduced sin(pi nu / 2) and cos(pi nu / 2) (nu / 2 is exact).
+ */
 export function besselHankelReal(nu: f64, x: f64, y: boolean): f64 {
   const mu = 4 * nu * nu;
   let P: f64 = 1;
@@ -474,66 +639,173 @@ export function besselHankelReal(nu: f64, x: f64, y: boolean): f64 {
     if (k % 2 === 0) P += sgn * t;
     else Q += sgn * t;
   }
-  const chi = x - (nu / 2 + 0.25) * Math.PI;
-  const amp = Math.sqrt(2 / (Math.PI * x));
-  return y
-    ? amp * (P * Math.sin(chi) + Q * Math.cos(chi))
-    : amp * (P * Math.cos(chi) - Q * Math.sin(chi));
+  const sb = sinPiScalar(nu / 2);
+  const cb = cosPiScalar(nu / 2);
+  const ca = (cb - sb) * Math.SQRT1_2;
+  const sa = (sb + cb) * Math.SQRT1_2;
+  const sx = Math.sin(x);
+  const cx = Math.cos(x);
+  const sinChi = sx * ca - cx * sa;
+  const cosChi = cx * ca + sx * sa;
+  // (2 / pi) / x: the product pi * x is Infinity for x above 5.7e307, and the amplitude was 0.
+  const amp = Math.sqrt(2 / Math.PI / x);
+  return y ? amp * (P * sinChi + Q * cosChi) : amp * (P * cosChi - Q * sinChi);
 }
 
 /**
- * J_ν(x) for NON-integer real order ν. Temme/Steed for x > 0 (negative orders
- * through J_{−ν} = cos(νπ)J_ν − sin(νπ)Y_ν); the Hankel expansion only when x
- * is so large that the continued fractions would need O(x) steps.
+ * J_an(x) and yScale * Y_an(x) for a real order an >= 0 and x >= 25, with no continued fraction
+ * for J and no CF2: the Hankel expansion at the reduced order mu = an - floor(an) in [0, 1) (its
+ * smallest term is about e^(-2x), below 1e-17 from x = 25) and the stable recurrences from there.
+ * Y_an comes from the upward recurrence. J_an comes from the upward recurrence when an <= x
+ * (stable below x), and for an > x from CF1 at order an and the Wronskian
+ * J_an Y_(an+1) - J_(an+1) Y_an = -2 / (pi x). The cost is about an steps (CF1 about x).
+ * `needJ` and `needY` select what the caller needs; the other value is 0.
+ *
+ * The Y recurrence runs at the scale S = 2^-600 (a power of 2: every value keeps its bits). Y_an
+ * is outside the double range for an > x when J_an is still a double (J_an Y_an is about
+ * -1 / (pi sqrt(an^2 - x^2))), and the Wronskian would give Infinity - Infinity there
+ * (besselJ(322.5, 25) was NaN). The result Y is (S Y_an * yScale) * 2^600: it is the correct
+ * signed Infinity by itself, and yScale * Y_an is a double where Y_an alone is not. When the
+ * scaled recurrence leaves the range, J_an is below 2^-1600: J is 0.
+ */
+export function besselJYLarge(
+  an: f64,
+  x: f64,
+  yScale: f64,
+  needJ: boolean,
+  needY: boolean
+): [f64, f64] {
+  const n = Math.floor(an);
+  const mu = an - n;
+  const xi2 = 2 / x;
+  let rj: f64 = 0;
+  let ry: f64 = 0;
+  const wantYRecurrence = needY || (needJ && an > x);
+  if (needJ && an <= x) {
+    let jp = besselHankelReal(mu, x, false);
+    if (n === 0) {
+      rj = jp;
+    } else {
+      let jc = besselHankelReal(mu + 1, x, false);
+      for (let i = 1; i < n; i++) {
+        const jn = (mu + i) * xi2 * jc - jp;
+        jp = jc;
+        jc = jn;
+      }
+      rj = jc;
+    }
+  }
+  if (wantYRecurrence) {
+    const S = Math.pow(2, -600);
+    let y0 = S * besselHankelReal(mu, x, true);
+    let y1 = S * besselHankelReal(mu + 1, x, true);
+    // Before step i, y0 = S Y_(mu+i-1) and y1 = S Y_(mu+i). After the loop y0 = S Y_an and
+    // y1 = S Y_(an+1). A step i < n that leaves the range makes S Y_(mu+i+1), with i + 1 <= n,
+    // infinite, and Y grows with the order from there: Y_an is out of range and J_an is 0.
+    for (let i = 1; i <= n; i++) {
+      const next = (mu + i) * xi2 * y1 - y0;
+      if (Number.isNaN(next)) return [NaN, NaN];
+      if (!Number.isFinite(next) && i < n) {
+        const inf = yScale === 0 ? 0 : (y1 < 0 ? -1 : 1) * (yScale < 0 ? -1 : 1) * Infinity;
+        return [0, needY ? inf : 0];
+      }
+      y0 = y1;
+      y1 = next;
+    }
+    ry = needY ? y0 * yScale * Math.pow(2, 600) : 0;
+    // A last step that leaves the range (y1 infinite) puts J_an below 2^-1600: J stays 0.
+    if (needJ && an > x && Number.isFinite(y1)) {
+      const cf = besselCF1(an, x);
+      const r = an / x - cf[0];
+      rj = ((2 / (Math.PI * x)) * S) / (r * y0 - y1);
+    }
+  }
+  return [rj, ry];
+}
+
+/**
+ * J_nu(x) for NON-integer real order nu. The order of the checks is the same as for an integer
+ * order: a NaN or negative x, x = 0, the zero bound (positive order), the overflow bound of a
+ * negative order, the O(1) Hankel shortcut, the order limit, and then the path by x: the power
+ * series below 1e-5, Temme and Steed up to 25 (the continued fractions need about x steps),
+ * and the Hankel start with the stable recurrences from 25. A negative order is
+ * J_(-nu) = cos(nu pi) J_nu - sin(nu pi) Y_nu.
  */
 export function besselJRealOrder(nu: f64, x: f64): f64 {
   if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
-  if (x === 0) return nu > 0 ? 0 : nu < 0 ? Infinity : 1;
-  // A tiny x overflows the continued fraction of besselJYTemme (it divides by x), so use the
-  // power series J_nu(x) = (x/2)^nu / Gamma(nu + 1) * sum_k (-x^2/4)^k / (k! (nu + 1)_k).
-  // The terms fall by x^2/4 per step, so the sum ends after a few terms. A power that
-  // underflows is the correct result: the value is then below the smallest double.
-  if (nu > 0 && x < 1e-5) {
-    const q = (-x * x) / 4;
-    let term = 1;
-    let sum = 1;
-    for (let k = 1; k < 20; k++) {
-      term *= q / (k * (nu + k));
-      sum += term;
-      if (Math.abs(term) < 1e-17 * Math.abs(sum)) break;
-    }
-    return (Math.pow(x / 2, nu) / Math.exp(_lgamma(nu + 1))) * sum;
-  }
+  // As x -> 0+ the leading term is (x/2)^(-an) / Gamma(1 - an) for a negative order: Infinity with
+  // the sign of Gamma(1 - an) (besselJ(-1.5, 0) is -Infinity).
+  if (x === 0) return nu > 0 ? 0 : nu < 0 ? (rgammaScalar(1 + nu) > 0 ? Infinity : -Infinity) : 1;
+  // J_nu(x) -> 0 as x -> Infinity for every order (the amplitude sqrt(2 / (pi x)) -> 0).
+  if (x === Infinity) return 0;
   const an = Math.abs(nu);
+  if (nu > 0 && besselJUnderflows(an, x)) return 0;
+  // For a negative order -sin(nu pi) Y_an dominates when it is above the double range: the sign of
+  // the result is the sign of sin(nu pi) (Y_an < 0 there). A small factor can bring the product
+  // back into the range, so the factor is part of the test (besselY(-151.5001, 1) is finite).
+  if (nu < 0) {
+    const s = sinPiScalar(an);
+    if (Math.log(Math.abs(s)) + besselYLogBound(an, x) > 709.79)
+      return s > 0 ? Infinity : -Infinity;
+  }
+  // The Hankel expansion at the order itself: O(1), for x far above nu^2.
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, false);
-  if (nu >= 0) return besselJYTemme(an, x)[0];
-  // J_{-nu} = cos(nu pi) J_nu - sin(nu pi) Y_nu, with nu reduced to [0, 2) before the product
-  // with pi (see besselYRealOrder). The factor -sin(nu pi) goes into the Y recurrence, so the
-  // product is right also where Y_nu alone is outside the double range.
-  const f = an - 2 * Math.floor(an / 2);
-  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
-  const jy = besselJYTemme(an, x, -Math.sin(f * Math.PI));
-  return c * jy[0] + jy[1];
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  if (an > 2500000000) {
+    throw new RangeError(`besselJ: n = ${an} exceeds the supported maximum of 2500000000`);
+  }
+  if (x < 1e-5) return besselJSeriesReal(nu, x);
+  if (x < 25) {
+    if (nu > 0) return besselJYTemme(an, x)[0];
+    // The factor -sin(nu pi) goes into the Y recurrence, so the product is right also where Y_an
+    // alone is outside the double range. sinPiScalar and cosPiScalar reduce nu exactly: cos is
+    // exactly 0 at a half-integer, and sin keeps its digits next to an integer.
+    const jy = besselJYTemme(an, x, -sinPiScalar(an));
+    return cosPiScalar(an) * jy[0] + jy[1];
+  }
+  if (nu > 0) return besselJYLarge(an, x, 1, true, false)[0];
+  const jy = besselJYLarge(an, x, -sinPiScalar(an), true, true);
+  return cosPiScalar(an) * jy[0] + jy[1];
 }
 
-/** Y_ν(x) for non-integer real order ν and x > 0 (see besselJRealOrder). */
+/**
+ * Y_nu(x) for non-integer real order nu and x > 0 (see besselJRealOrder). The caller
+ * (besselYScalar) returns NaN for x <= 0 before the call.
+ */
 export function besselYRealOrder(nu: f64, x: f64): f64 {
   if (isNaN(nu) || isNaN(x) || x < 0) return NaN;
-  if (x === 0) return -Infinity;
+  if (x === Infinity) return 0;
   const an = Math.abs(nu);
+  const bound = besselYLogBound(an, x);
+  if (nu > 0) {
+    if (bound > 709.79) return -Infinity;
+  } else {
+    // Y_(-nu) = sin(nu pi) J_nu + cos(nu pi) Y_nu. At a half-integer cos is exactly 0 and the
+    // value is sin(nu pi) J_an (finite, often 0): no overflow test then.
+    const c = cosPiScalar(an);
+    if (c !== 0 && Math.log(Math.abs(c)) + bound > 709.79) return c > 0 ? -Infinity : Infinity;
+  }
   if (x > 1e5 && x > 4 * an * an) return besselHankelReal(nu, x, true);
-  if (nu >= 0) return besselJYTemme(an, x)[1];
-  // Y_{-nu} = sin(nu pi) J_nu + cos(nu pi) Y_nu. Reduce nu to [0, 2) before the product with pi:
-  // the product loses log2(nu) bits, and at a half-integer cos(nu pi) is exactly 0, not 1e-14,
-  // which times the huge Y_nu (besselY(-100.5, 1) = 6e-190, not -2e172) gave a wrong value. The
-  // function repeats the reduction inline because the worker kernels serialize it alone.
-  const f = an - 2 * Math.floor(an / 2);
-  const c = f === 0.5 || f === 1.5 ? 0 : Math.cos(f * Math.PI);
-  const s = Math.sin(f * Math.PI);
-  // The factor c goes into the Y recurrence: c Y_nu can be a double where Y_nu alone is not
-  // (besselY(-151.5001, 1) = -2.8e305 with Y_nu = -9e308), and at a half-integer the term is 0.
-  const jy = besselJYTemme(an, x, c);
-  return s * jy[0] + jy[1];
+  if (an > 2500000000) {
+    throw new RangeError(`besselY: n = ${an} exceeds the supported maximum of 2500000000`);
+  }
+  if (x < 1e-5) {
+    if (nu > 0) return besselYTemmeSmall(an, x, 1);
+    return sinPiScalar(an) * besselJSeriesReal(an, x) + besselYTemmeSmall(an, x, cosPiScalar(an));
+  }
+  if (x < 25) {
+    if (nu > 0) return besselJYTemme(an, x)[1];
+    // Reduce nu exactly before the product with pi (sinPiScalar, cosPiScalar): at a half-integer
+    // cos(nu pi) is exactly 0, not 1e-14, which times the huge Y_nu (besselY(-100.5, 1) = 6e-190,
+    // not -2e172) gave a wrong value, and next to an integer sin(nu pi) kept only a few digits.
+    // The factor c goes into the Y recurrence: c Y_nu can be a double where Y_nu alone is not
+    // (besselY(-151.5001, 1) = -2.8e305 with Y_nu = -9e308), and at a half-integer the term is 0.
+    const jy = besselJYTemme(an, x, cosPiScalar(an));
+    return sinPiScalar(an) * jy[0] + jy[1];
+  }
+  if (nu > 0) return besselJYLarge(an, x, 1, false, true)[1];
+  const jy = besselJYLarge(an, x, cosPiScalar(an), true, true);
+  return sinPiScalar(an) * jy[0] + jy[1];
 }
 
 /** Bessel function of the first kind, general integer order n: J_n(x). */
@@ -546,13 +818,23 @@ export function besselJScalar(n: f64, x: f64): f64 {
   if (ni === 0) return besselJ0Scalar(x);
   if (ni === 1) return besselJ1Scalar(x);
 
-  if (Math.abs(x) < 1e-15) return 0;
   if (Number.isNaN(x)) return NaN;
-  // |J_n(x)| <= (|x|/2)^n / n! and ln n! >= n ln n - n, so
-  // ln|J_n(x)| <= n * (1 + ln(|x| / 2) - ln n). Below ln(2^-1075) = -745.14 the value rounds to 0.
-  // The two logarithms stay separate: 2 * n overflows for n near the largest double.
-  // This test comes before the limit, so a huge order with a small x returns 0 at once.
-  if (Math.abs(x) <= ni && ni * (1 + Math.log(Math.abs(x) / 2) - Math.log(ni)) < -745.2) return 0;
+  const ax = Math.abs(x);
+  if (ax === 0 || ax === Infinity) return 0;
+  // The zero bound (besselJUnderflows) comes before the limit, so a huge order with a small x
+  // returns 0 at once.
+  if (besselJUnderflows(ni, ax)) return 0;
+  // A tiny x: J_n(x) = (x/2)^n / n! (1 - x^2 / (4 (n + 1)) + ...), and the second term is below
+  // 1e-31 of the first. The test "|x| < 1e-15 gives 0" returned 0 where J_n(x) is a double
+  // (J_2(1e-16) = 1.25e-33, J_5(1e-20) = 2.6e-105). The zero bound above leaves n <= 20, so the
+  // product has at most 19 factors, each below 1: it only falls, and it uses no pow or exp, so
+  // the AssemblyScript kernel (_besselJn) gives the same bits.
+  if (ax < 1e-15) {
+    const h = ax / 2;
+    let t = h;
+    for (let k = 2; k <= ni; k++) t *= h / k;
+    return x < 0 && ni % 2 === 1 ? -t : t;
+  }
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
   if (ni > 2500000000) {
     throw new RangeError(`besselJ: n = ${ni} exceeds the supported maximum of 2500000000`);
@@ -627,7 +909,12 @@ export function besselYScalar(n: f64, x: f64): f64 {
   if (ni < 0) return (ni % 2 === 0 ? 1 : -1) * besselYScalar(-ni, x);
   if (ni === 0) return besselY0Scalar(x);
   if (ni === 1) return besselY1Scalar(x);
+  if (x === Infinity) return 0;
 
+  // Y_n(x) < 0 and |Y_n(x)| >= 2^n Gamma(n) / (pi x^n) for 0 < x <= n - 1 (besselYLogBound): the
+  // value is -Infinity above the double range, at once and before the limit
+  // (besselY(4e9, 1e8) and besselY(2, 5e-324), which was NaN).
+  if (besselYLogBound(ni, x) > 709.79) return -Infinity;
   // The scalar is serialized into worker kernels, so it cannot import the shared limit.
   if (ni > 2500000000) {
     throw new RangeError(`besselY: n = ${ni} exceeds the supported maximum of 2500000000`);
@@ -1006,17 +1293,344 @@ export function betaincScalar(a: f64, b: f64, x: f64): f64 {
   return incompleteBetaFraction(a, b, x);
 }
 
-/** Modified Bessel function of the first kind, I_n(x). */
-export function besselIScalar(n: f64, x: f64): f64 {
-  const ni = Math.round(Math.abs(n));
-  if (Math.abs(x) < 1e-15) return ni === 0 ? 1 : 0;
+/**
+ * The gate of `besselKReal`: -1 when kScale * K_an(x) is 0, 1 when it is +-Infinity, 0 otherwise
+ * (an >= 0, x > 0, kScale != 0). It reads the uniform (Debye) exponent
+ * -hypot(an, x) + an asinh(an / x) + ln(pi / (2 hypot(an, x))) / 2 + ln|kScale| with a margin of
+ * 1 past -745.2 and 709.79. No loop runs; the array guard uses the same test.
+ */
+export function besselKGate(an: f64, x: f64, kScale: f64): f64 {
+  // Each log is taken apart: pi / (2 hyp) is 0 for an order above 9e307 and Infinity for
+  // hyp below 8.7e-309 (besselK(0, 5e-324) is 744.6).
+  const l =
+    -besselUniformExponent(an, x) +
+    0.5 * (Math.log(Math.PI / 2) - Math.log(Math.hypot(an, x))) +
+    Math.log(Math.abs(kScale));
+  return l < -746.2 ? -1 : l > 710.79 ? 1 : 0;
+}
 
-  let sum: f64 = 0;
-  const halfX = Math.abs(x) / 2;
-  for (let m = 0; m < 100; m++) {
-    const term = Math.pow(halfX, ni + 2 * m) / (factorial(m) * Math.exp(_lgamma(ni + m + 1)));
+/**
+ * hypot(nu, x) - nu asinh(nu / x) for nu >= 0 and x > 0: the uniform (Debye) exponent of
+ * I_nu(x), and minus that of K_nu(x) (DLMF 10.41.3, 10.41.4). No step overflows where the result
+ * is finite: asinh(nu / x) is ln(2 nu / x) when nu / x is Infinity (x below 1e-300 with
+ * nu >= 1e8, or any nu > 0 at x = 5e-324), and 0 * asinh(0) is 0.
+ */
+export function besselUniformExponent(nu: f64, x: f64): f64 {
+  if (nu === 0) return x;
+  const t = nu / x;
+  const ash = Number.isFinite(t) ? Math.asinh(t) : Math.log(nu) + Math.LN2 - Math.log(x);
+  return Math.hypot(nu, x) - nu * ash;
+}
+
+/**
+ * kScale * K_an(x) for an order an >= 0 and x > 0 (modified Bessel function of the second kind,
+ * K_(-nu) = K_nu). K_mu and K_(mu+1) at the reduced order mu = an - round(an), |mu| <= 1/2, come
+ * from Temme's series (x < 2) or Steed's continued fraction CF2 (x >= 2), as in Numerical Recipes
+ * `bessik`, and the upward recurrence, which is stable for K, runs to an. Accurate to about 2e-15
+ * for a short recurrence and 5e-15 after 2000 steps (besselK(2100.5, 1300) is 20 units of 2^-52
+ * off); the exponent mu ln(x/2) is rounded, so 2e-14 below x = 1e-100.
+ *
+ * `kScale` multiplies K_mu and K_(mu+1) before the recurrence (which is linear): a caller that
+ * needs `c * K_an` with a small `c` passes `c`, and the product can be a double where K_an alone
+ * is not (I_(-nu) = I_nu + (2 / pi) sin(nu pi) K_nu). K is positive, so every term has the sign of
+ * kScale. A loop that does not converge gives NaN.
+ *
+ * A gate runs before any loop. The uniform (Debye) exponent of K_an(x),
+ * L = -hypot(an, x) + an asinh(an / x) + ln(pi / (2 hypot(an, x))) / 2 + ln|kScale|, decides a
+ * result that is far outside the double range: below -746.2 it is 0 and above 710.79 it is
+ * +-Infinity (a margin of 1 on each side). So a huge order returns at once
+ * (besselK(1e15, 701) is Infinity) and a huge x needs no CF2 (besselK(0, 1e308) is 0, where
+ * 2 (1 + x) is Infinity). Then the order limit 2500000000, as for J, Y and I.
+ *
+ * For x >= 2 the recurrence carries e^x K, not K: exp(-x) loses bits from x = 708.4 and is 0 from
+ * 745.2, so K_mu and K_(mu+1) underflowed and the recurrence started from 0 (#1362:
+ * besselK(2000.5, 1200) was 0, true 6.98e100). The recurrence rescales by 2^-600 when a value
+ * passes 1e280 and counts the rescales. It returns +-Infinity as soon as the value with its
+ * count and exp(-x) is above e^711 (K grows with the order). At the end exp(-x) is applied in
+ * steps of at most 700, and before each step the value takes back a 2^600 while it is below
+ * 1e120. This costs about x / 700 roundings: 2 for x = 1300.
+ */
+export function besselKReal(an: f64, x: f64, kScale: f64 = 1): f64 {
+  const EPS = 1e-16;
+  const MAXIT = 100000;
+  if (kScale === 0) return 0;
+  const gate = besselKGate(an, x, kScale);
+  if (gate < 0) return kScale < 0 ? -0 : 0;
+  if (gate > 0) return kScale < 0 ? -Infinity : Infinity;
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  if (an > 2500000000) {
+    throw new RangeError(`besselK: n = ${an} exceeds the supported maximum of 2500000000`);
+  }
+  const nl = Math.floor(an + 0.5);
+  const xmu = an - nl;
+  const xmu2 = xmu * xmu;
+  let rkmu: f64;
+  let rk1: f64;
+  // The exponent of exp(-x) that the start values do not carry yet: x for x >= 2, 0 below.
+  let expo: f64 = 0;
+  if (x < 2) {
+    // Temme's series. ln(x/2) is Math.log(x) - Math.LN2 and every division is by x, so it works
+    // down to x = 5e-324.
+    const x2 = 0.5 * x;
+    const pimu = Math.PI * xmu;
+    const fact = Math.abs(pimu) < EPS ? 1 : pimu / Math.sin(pimu);
+    const d = -(Math.log(x) - Math.LN2);
+    let e = xmu * d;
+    const fact2 = Math.abs(e) < EPS ? 1 : Math.sinh(e) / e;
+    const g = besselGammaAux(xmu);
+    let ff = fact * (g[0] * Math.cosh(e) + g[1] * fact2 * d);
+    let sum = ff;
+    e = Math.exp(e);
+    let p = (0.5 * e) / g[2];
+    let q = 0.5 / (e * g[3]);
+    let c: f64 = 1;
+    const dd = x2 * x2;
+    let sum1 = p;
+    let converged = false;
+    for (let i = 1; i <= MAXIT; i++) {
+      ff = (i * ff + p + q) / (i * i - xmu2);
+      c *= dd / i;
+      p /= i - xmu;
+      q /= i + xmu;
+      const del = c * ff;
+      sum += del;
+      sum1 += c * (p - i * ff);
+      if (Math.abs(del) < Math.abs(sum) * EPS) {
+        converged = true;
+        break;
+      }
+    }
+    if (!converged) return NaN;
+    rkmu = sum * kScale;
+    rk1 = (sum1 * 2 * kScale) / x;
+  } else {
+    // Steed's CF2 and the normalization by sqrt(pi / (2 x)). exp(-x) is applied at the end.
+    const a1 = 0.25 - xmu2;
+    let b = 2 * (1 + x);
+    let d = 1 / b;
+    let h = d;
+    let delh = d;
+    let q1: f64 = 0;
+    let q2: f64 = 1;
+    let q = a1;
+    let c = a1;
+    let a = -a1;
+    let s = 1 + q * delh;
+    let converged = false;
+    for (let i = 2; i <= MAXIT; i++) {
+      a -= 2 * (i - 1);
+      c = (-a * c) / i;
+      const qnew = (q1 - b * q2) / a;
+      q1 = q2;
+      q2 = qnew;
+      q += c * qnew;
+      b += 2;
+      d = 1 / (b + a * d);
+      delh = (b * d - 1) * delh;
+      h += delh;
+      const dels = q * delh;
+      s += dels;
+      if (Math.abs(dels / s) < EPS) {
+        converged = true;
+        break;
+      }
+    }
+    if (!converged) return NaN;
+    h = a1 * h;
+    const k0 = Math.sqrt(Math.PI / (2 * x)) / s;
+    rkmu = k0 * kScale;
+    rk1 = (rkmu * (xmu + x + 0.5 - h)) / x;
+    expo = x;
+  }
+  const down = Math.pow(2, -600);
+  let shifts = 0;
+  let v = rkmu;
+  if (nl > 0) {
+    for (let i = 1; i < nl; i++) {
+      const rktemp = (2 * (xmu + i) * rk1) / x + rkmu;
+      rkmu = rk1;
+      rk1 = rktemp;
+      if (Math.abs(rk1) > 1e280) {
+        rk1 *= down;
+        rkmu *= down;
+        shifts++;
+        if (Math.log(Math.abs(rk1)) + 600 * shifts * Math.LN2 - expo > 711) {
+          return kScale < 0 ? -Infinity : Infinity;
+        }
+      }
+      if (!Number.isFinite(rk1)) return rk1;
+    }
+    v = rk1;
+  }
+  // v * 2^(600 shifts) * exp(-expo), in steps that keep v inside the double range.
+  const up = Math.pow(2, 600);
+  while (expo > 0 && v !== 0) {
+    // Below 1e120 one 2^600 (4e180) cannot overflow, and after exp(-700) the value stays above
+    // 1e-184 while a rescale is left: no bit is lost to a subnormal.
+    while (shifts > 0 && Math.abs(v) < 1e120) {
+      v *= up;
+      shifts--;
+    }
+    const step = Math.min(expo, 700);
+    v *= Math.exp(-step);
+    expo -= step;
+  }
+  while (shifts > 0 && Number.isFinite(v)) {
+    v *= up;
+    shifts--;
+  }
+  return v;
+}
+
+/**
+ * Modified Bessel function of the second kind, K_nu(x), for a real order (K_(-nu) = K_nu). Main
+ * rounded a real order to an integer. A NaN or infinite order or a NaN x has no defined value,
+ * x <= 0 is outside the domain, and K_nu(Infinity) is 0.
+ */
+export function besselKScalar(n: f64, x: f64): f64 {
+  if (!Number.isFinite(n) || x !== x || x <= 0) return NaN;
+  if (x === Infinity) return 0;
+  return besselKReal(Math.abs(n), x, 1);
+}
+
+/**
+ * The plan of the power series of I_nu(x) for nu >= 0 and 0 < x < Infinity:
+ * [m, steps, verdict]. I_nu(x) = sum T(m) with T(m) = (x/2)^(nu + 2m) / (m! Gamma(nu + m + 1)),
+ * all terms positive and the largest one at m = (sqrt(nu^2 + x^2) - nu) / 2 (rounded). The sum
+ * is at least that term and at most (2 m + 50) times it, so ln T above 709.79 means Infinity
+ * (verdict 1) and ln T + ln(2 m + 50) below -745.2 means 0 (verdict -1). Otherwise verdict 0 and
+ * `steps` = nu + 2 m is the work of the product and of the series. No loop runs here.
+ */
+export function besselIPlan(nu: f64, x: f64): [f64, f64, f64] {
+  const t = nu / x;
+  const m = Math.round(x / (2 * (Math.sqrt(1 + t * t) + t)));
+  let lt = (nu + 2 * m) * (Math.log(x) - Math.LN2) - _lgamma(m + 1) - _lgamma(nu + m + 1);
+  // From m of about 2.5e305 both the power and _lgamma are Infinity, and lt was NaN: no gate
+  // fired and the work count threw a RangeError (besselI(0, 1e306)). The uniform (Debye) exponent
+  // of I_nu(x) (besselUniformExponent) decides there; it is within a few units of ln T.
+  if (!Number.isFinite(lt)) lt = besselUniformExponent(nu, x);
+  if (lt > 709.79) return [m, 0, 1];
+  if (lt + Math.log(2 * m + 50) < -745.2) return [m, 0, -1];
+  return [m, nu + 2 * m, 0];
+}
+
+/**
+ * Modified Bessel function of the first kind I_nu(x) for a real order nu >= 0 and 0 < x < Infinity,
+ * from the power series in log scale. The first term (x/2)^nu / Gamma(nu + 1) is built by a
+ * running product with one power-of-2 exponent for the whole sum (2^600 per step), so an order
+ * of 200 at x = 700 does not underflow in the first term; the sum is rescaled the same way when
+ * it passes 2^600, and the result is sum * 2^(600 e). The gates of `besselIPlan` run first; a
+ * RangeError when the work nu + 2 m is above 2500000000. A series that does not converge in
+ * 2 m + 100 + 10 sqrt(m + 1) terms gives NaN, never its partial sum.
+ */
+export function besselIPositive(nu: f64, x: f64): f64 {
+  const plan = besselIPlan(nu, x);
+  if (plan[2] > 0) return Infinity;
+  if (plan[2] < 0) return 0;
+  // The scalar is serialized into worker kernels, so it cannot import the shared limit.
+  if (plan[1] > 2500000000) {
+    throw new RangeError(
+      `besselI: n = ${nu} at x = ${x} needs about ${plan[1]} steps, above the supported maximum of 2500000000`
+    );
+  }
+  const mstar = plan[0];
+  const up = Math.pow(2, 600);
+  const down = Math.pow(2, -600);
+  const h = x / 2;
+  const n = Math.floor(nu);
+  const f = nu - n;
+  let t: f64 = 1;
+  if (f !== 0) t = (Math.pow(x, f) * Math.pow(2, -f)) / Math.exp(_lgamma(f + 1));
+  let e = 0;
+  // Three roundings repeat at every step with the same error and add up over the steps: the sum
+  // f + j and the sum m + 1 + nu (the fraction f rounds to the grid of the binade) and the product
+  // h h (I_50.1(300.5) was 8.7e-15 off after 127 steps). Each error is exact (Fast2Sum,
+  // Veltkamp split). `err` is their sum as a relative error of t and of every term: a term is
+  // term (1 + err), and the sum of term * err is added at the end. A factor 1 + err cannot be
+  // applied to a term, because 1e-17 is below half an ulp of it.
+  let err = 0;
+  for (let j = 1; j <= n; j++) {
+    const fj = f + j;
+    t *= h / fj;
+    err -= (f - (fj - j)) / fj;
+    if (t < down) {
+      t *= up;
+      e--;
+    } else if (t > up) {
+      t *= down;
+      e++;
+    }
+  }
+  const hs = h * 134217729;
+  const hh = hs - (hs - h);
+  const hl = h - hh;
+  const q = h * h;
+  const qErr = q > 1e-290 && q < 1e290 ? (hh * hh - q + 2 * hh * hl + hl * hl) / q : 0;
+  let sum = t;
+  let sumErr = t * err;
+  let term = t;
+  const cap = 2 * mstar + 100 + Math.ceil(10 * Math.sqrt(mstar + 1));
+  let converged = false;
+  for (let m = 0; m < cap; m++) {
+    const a = m + 1 + n;
+    const den = a + f;
+    term *= q / ((m + 1) * den);
+    err += qErr - (f - (den - a)) / den;
     sum += term;
-    if (Math.abs(term) < Math.abs(sum) * 1e-15) break;
+    sumErr += term * err;
+    if (sum > up) {
+      sum *= down;
+      sumErr *= down;
+      term *= down;
+      e++;
+    }
+    if (m >= mstar && term <= 1e-17 * sum) {
+      converged = true;
+      break;
+    }
+  }
+  if (!converged) return NaN;
+  sum += sumErr;
+  while (e > 0 && sum !== Infinity) {
+    sum *= up;
+    e--;
+  }
+  while (e < 0 && sum !== 0) {
+    sum *= down;
+    e++;
   }
   return sum;
+}
+
+/**
+ * Modified Bessel function of the first kind, I_nu(x), for a real order nu. An integer order has
+ * I_(-n) = I_n and I_n(-x) = (-1)^n I_n(x); a non-integer order with x < 0 is complex, so NaN.
+ * A non-integer order below 0 is I_nu = I_an + (2 / pi) sin(an pi) K_an (DLMF 10.27.2, with
+ * sinPiScalar for the exact reduction): the K term goes into `besselKReal` as its scale, so the
+ * sum is right next to an integer order, where K_an alone is outside the double range
+ * (besselI(-150.000000001, 0.9) = 3.97e303). Positive order: `besselIPositive`.
+ */
+export function besselIScalar(n: f64, x: f64): f64 {
+  // A non-finite order has no defined value, and the series would never end.
+  if (!Number.isFinite(n) || x !== x) return NaN;
+  const an = Math.abs(n);
+  const integer = n === Math.round(n);
+  if (x < 0) {
+    if (!integer) return NaN;
+    const v = besselIScalar(an, -x);
+    return an % 2 === 1 ? -v : v;
+  }
+  if (x === 0) {
+    if (integer) return an === 0 ? 1 : 0;
+    // As x -> 0+ the leading term is (x/2)^(-an) / Gamma(1 - an), with the sign of Gamma.
+    if (n > 0) return 0;
+    return rgammaScalar(1 - an) > 0 ? Infinity : -Infinity;
+  }
+  if (x === Infinity) return Infinity;
+  if (integer || n > 0) return besselIPositive(an, x);
+  // The scale 2 sin(an pi) / pi times K_an is a recurrence of about an steps.
+  if (an > 2500000000) {
+    throw new RangeError(`besselI: n = ${an} exceeds the supported maximum of 2500000000`);
+  }
+  return besselIPositive(an, x) + besselKReal(an, x, (2 / Math.PI) * sinPiScalar(an));
 }
