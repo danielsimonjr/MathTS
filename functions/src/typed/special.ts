@@ -245,6 +245,39 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
   return curr;
 }
 
+/**
+ * Certify a signed overflow, or return NaN to leave the answer to the recurrence.
+ * For u = exp(-x²/2) H_n(x), u'' + q²u = 0 with q² = 2n + 1 - x².
+ * In phase coordinates (u, u'/q), the radius is nondecreasing for x >= 0 and
+ * the phase derivative differs from q by at most |q'/q|/2. Its integrated
+ * error is log(q(0)/q(x))/2. At this order the initial radius exceeds 2^4000,
+ * so any certified nonzero normalized component above the smallest double
+ * is larger than the overflow threshold after restoring the radius.
+ */
+function hermiteOverflow(n: f64, x: f64): f64 {
+  if (n < 1024 || Number.isNaN(x)) return NaN;
+  const ax = Math.abs(x);
+  const odd = n % 2 === 1;
+  const k2 = 2 * n + 1;
+  const k = Math.sqrt(k2);
+  if (ax >= k) {
+    // The Jacobi matrix bounds every Hermite root by sqrt(2(n-1)).
+    // Pairing opposite roots gives factors x² - root² >= 3 here.
+    return odd && x < 0 ? -Infinity : Infinity;
+  }
+  if (odd && ax === 0) return 0;
+  const fraction = ax / k;
+  const error = -0.25 * Math.log1p(-fraction * fraction);
+  if (error >= 1) return NaN;
+  const q = Math.sqrt((k - ax) * (k + ax));
+  const phase = (k2 * Math.asin(fraction) + ax * q) / 2;
+  const wave = odd ? Math.sin(phase) : Math.cos(phase);
+  const roundoff = 1.7763568394002505e-15 * phase;
+  if (Math.abs(wave) <= error + roundoff + 5e-324) return NaN;
+  const sign = Math.floor(n / 2) % 2 === 0 ? wave : -wave;
+  return sign < 0 !== (odd && x < 0) ? -Infinity : Infinity;
+}
+
 /** Hermite polynomial H_n(x) (physicist's convention). */
 function hermiteHScalar(n: f64, x: f64): f64 {
   // A non-finite order has no defined value, and the recurrence below would never end.
@@ -258,6 +291,13 @@ function hermiteHScalar(n: f64, x: f64): f64 {
   // H_1001(1.5) < 0 with H_300(10) > 0), so the recurrence runs to the end on a rescaled copy.
   if (ni > 2500000000) {
     throw new RangeError(`hermiteH: n = ${ni} exceeds the supported maximum of 2500000000`);
+  }
+  const certified = hermiteOverflow(ni, x);
+  if (!Number.isNaN(certified)) return certified;
+  if (Number.isNaN(x)) return NaN;
+  // Close to a zero or turning point the phase bound can be inconclusive.
+  if (ni > 10000000) {
+    throw new RangeError('hermiteH: uncertified overflow requires degree at most 10000000');
   }
   // Scaling by a power of 2 is exact. `curr` stays at or below 2^600 after each step, so a step
   // leaves the range only when |x| is above about 2^422 (or infinite); the true value is then the
@@ -965,7 +1005,7 @@ export const ellipticE = mathTyped('ellipticE', {
 /** The per-call budget of each polynomial family: the order limit of its scalar (#1290). */
 const POLYNOMIAL_CALL_BUDGET = {
   chebyshevT: MAX_CHEBYSHEV_ORDER,
-  hermiteH: MAX_RECURRENCE_ORDER,
+  hermiteH: 10_000_000,
   laguerreL: MAX_LAGUERRE_ORDER,
   legendreP: MAX_RECURRENCE_ORDER,
 } as const;
@@ -1007,13 +1047,15 @@ function assertPolynomialArrayWork(
   if (ni < 2 || ni > max || ni * xs.length <= max) return;
   let steps = 0;
   for (let i = 0; i < xs.length; i++) {
-    // laguerreL and hermiteH run the full degree for every element that is not NaN.
+    if (Number.isNaN(xs[i])) continue;
     steps +=
-      kind === 'laguerreL' || kind === 'hermiteH'
-        ? Number.isNaN(xs[i])
-          ? 0
-          : ni
-        : overflowSteps(kind, ni, xs[i]);
+      kind === 'laguerreL'
+        ? ni
+        : kind === 'hermiteH'
+          ? Number.isNaN(hermiteOverflow(ni, xs[i]))
+            ? ni
+            : 0
+          : overflowSteps(kind, ni, xs[i]);
   }
   assertArrayWork(kind, n, xs.length, Math.ceil(steps), max);
 }
@@ -1653,7 +1695,11 @@ registerWorkerKernels({
   hermiteH: [
     1,
     1,
-    (n: number) => kernelSource([hermiteHScalar], `(x) => hermiteHScalar(${numberLiteral(n)}, x)`),
+    (n: number) =>
+      kernelSource(
+        [hermiteOverflow, hermiteHScalar],
+        `(x) => hermiteHScalar(${numberLiteral(n)}, x)`
+      ),
   ],
   laguerreL: [
     1,
