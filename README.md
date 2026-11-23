@@ -389,7 +389,7 @@ cd functions && bunx vitest run
 
 ## Status
 
-MathTS is an actively developed monorepo of 24 workspace packages (22 published for application use).
+MathTS is an actively developed monorepo of 24 published workspace packages.
 The dependency graph has **2 runtime circular dependencies** (verified by
 `tools/create-dependency-graph` and `repo-tools check`; see
 `docs/Architecture/DEPENDENCY_GRAPH.md`, which `bun run docs:deps` generates and the

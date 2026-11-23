@@ -72,6 +72,9 @@ npm install @danielsimonjr/mathts-statistics
   `dagostinoTest`, `friedmanTest`, `multipleComparison`, `principalComponentAnalysis`.
   `chiSquareTest`, `kolmogorovSmirnovTest`, `mannWhitneyTest` and `shapiroWilkTest` return a
   Promise, so call them with `await`. The other tests in this list return their result directly.
+  `wilcoxon` uses the exact signed-rank distribution through 50 differences when there are
+  no zeros or ties. With zeros or ties it enumerates sign assignments through 13 differences.
+  The remaining cases use the normal approximation.
 - **Probability & combinatorics** — `combinations`, `combinationsWithRep`, `permutations`,
   `multinomial`, `factorial`, `doubleFactorial`, `risingFactorial`, `fallingFactorial`,
   `subfactorial`, `bernoulli`, `gamma`, `lgamma`, `kldivergence`, and seedable RNG (`random`,

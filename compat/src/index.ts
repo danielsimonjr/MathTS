@@ -336,7 +336,7 @@ function surfaceOf(factories: Record<string, unknown>): Record<string, unknown> 
  *
  * math.add(1, 2);             // 3
  * math.complex(3, 4);         // Complex(3, 4)
- * math.matrix([[1,2],[3,4]]); // DenseMatrix
+ * math.matrix([[1,2],[3,4]]); // dense Matrix
  * math.det([[1,2],[3,4]]);    // -2  (full functions surface)
  * ```
  */
