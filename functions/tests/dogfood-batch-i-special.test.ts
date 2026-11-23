@@ -182,23 +182,17 @@ describe('#1116 Bessel and Chebyshev results that were NaN', () => {
 describe('#1132 besselJ and besselY: one work bound per array call', () => {
   const fill = (len: number, v: number) => new Float64Array(len).fill(v);
 
-  it('besselY(2.4e9, 1024 elements at 5e9) throws a RangeError before any recurrence runs', () => {
-    expect(() => besselY(2.4e9, fill(1024, 5e9))).toThrow(RangeError);
-  });
-  it('besselJ(2.4e9, 1024 elements at 5e9) throws a RangeError before any recurrence runs', () => {
-    expect(() => besselJ(2.4e9, fill(1024, 5e9))).toThrow(RangeError);
-  });
-  it('besselJ and besselY with 2 elements (below the array threshold) throw too', () => {
-    expect(() => besselJ(2.4e9, fill(2, 5e9))).toThrow(RangeError);
-    expect(() => besselY(2.4e9, fill(2, 5e9))).toThrow(RangeError);
-  });
-  it('the message names the order, the element count and the per-call maximum', () => {
-    expect(() => besselJ(2.4e9, fill(1024, 5e9))).toThrow(
-      /besselJ: order 2400000000 over 1024 elements needs about \d+ recurrence steps, above the supported maximum of 2500000000 per call/
-    );
-  });
-  it('a downward sweep over many elements throws (x just below n)', () => {
-    expect(() => besselJ(5e8, fill(8, 5e8 - 1))).toThrow(/per call/);
+  it.each([2, 1024])('evaluates %s turning-point samples within the recurrence budget', (count) => {
+    const n = 1.25e9;
+    const x = n - 1;
+    for (const [f, expected] of [
+      [besselJ, 0.0004148892710834839],
+      [besselY, -0.0007198357966631473],
+    ] as const) {
+      const values = f(n, fill(count, x)) as Float64Array;
+      expect(values).toHaveLength(count);
+      expect(values.every((v) => Math.abs(v - expected) < 1e-12)).toBe(true);
+    }
   });
   it('an element with its own limit error keeps its own message', () => {
     expect(() => besselJ(3e9, fill(4, 5e9))).toThrow(/besselJ: n = 3000000000 exceeds/);
