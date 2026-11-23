@@ -41,6 +41,21 @@ describe('create(all, config) instance isolation (#425)', () => {
     expect(aAgain).toBeInstanceOf(BigNumber);
   });
 
+  it('resolves constants at the active precision in evaluated and compiled expressions', () => {
+    const math = create(all, { number: 'BigNumber', precision: 32 });
+    expect(String(math.evaluate('pi'))).toBe('3.1415926535897932384626433832795');
+    const compiled = math.compile('pi');
+    expect(String(compiled.evaluate())).toBe('3.1415926535897932384626433832795');
+    math.config({ precision: 20 });
+    expect(String(math.evaluate('pi'))).toBe('3.1415926535897932385');
+    expect(String(compiled.evaluate())).toBe('3.1415926535897932385');
+    math.config({ precision: 80 });
+    expect(String(compiled.evaluate())).toBe(BigNumber.piAt(80).toString());
+    expect(math.evaluate('pi', { pi: 3 })).toBe(3);
+    math.import({ pi: 3 }, { override: true });
+    expect(math.evaluate('pi')).toBe(3);
+  });
+
   it('create(all) and create(all, {}) do not change barrel number', () => {
     const before = barrelConfig().number;
     create(all);

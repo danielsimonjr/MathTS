@@ -29,12 +29,12 @@ type f64 = number;
  * Bit reverse for FFT
  */
 export function bitReverse(x: i32, bits: i32): i32 {
-  let result: i32 = 0;
-  for (let i: i32 = 0; i < bits; i++) {
-    result = (result << 1) | (x & 1);
-    x >>= 1;
-  }
-  return result;
+  if (bits === 0) return 0;
+  x = ((x >>> 1) & 0x55555555) | ((x & 0x55555555) << 1);
+  x = ((x >>> 2) & 0x33333333) | ((x & 0x33333333) << 2);
+  x = ((x >>> 4) & 0x0f0f0f0f) | ((x & 0x0f0f0f0f) << 4);
+  x = ((x >>> 8) & 0x00ff00ff) | ((x & 0x00ff00ff) << 8);
+  return ((x >>> 16) | (x << 16)) >>> (32 - bits);
 }
 
 /**
@@ -164,7 +164,7 @@ function forwardTwiddles(n: i32): { cos: Float64Array; sin: Float64Array } {
  */
 export function fftCoreFloat64(
   realIn: Float64Array,
-  imagIn: Float64Array,
+  imagIn: Float64Array | undefined,
   inverse: boolean = false
 ): { real: Float64Array; imag: Float64Array } {
   const n: i32 = realIn.length;
@@ -176,7 +176,7 @@ export function fftCoreFloat64(
   for (let i: i32 = 0; i < n; i++) {
     const j: i32 = bitReverse(i, bits);
     real[j] = realIn[i];
-    imag[j] = imagIn[i];
+    if (imagIn !== undefined) imag[j] = imagIn[i];
   }
 
   // Direction factor: the inverse conjugates the forward twiddles
@@ -219,6 +219,51 @@ export function fftCoreFloat64(
     }
   }
 
+  return { real, imag };
+}
+
+/**
+ * FFT of a real power-of-two buffer. Pack its even and odd samples into one
+ * half-length complex transform, then recover the two spectra by conjugation.
+ */
+export function fftRealCoreFloat64(input: Float64Array): {
+  real: Float64Array;
+  imag: Float64Array;
+} {
+  const n = input.length;
+  if (n < 64) return fftCoreFloat64(input, undefined);
+  const half = n / 2;
+  const limit = Number.MAX_VALUE / n;
+  const even = new Float64Array(half);
+  const odd = new Float64Array(half);
+  for (let k = 0; k < half; k++) {
+    const a = input[2 * k];
+    const b = input[2 * k + 1];
+    if (!(Math.abs(a) <= limit && Math.abs(b) <= limit)) return fftCoreFloat64(input, undefined);
+    even[k] = a;
+    odd[k] = b;
+  }
+  const packed = fftCoreFloat64(even, odd);
+  const real = new Float64Array(n);
+  const imag = new Float64Array(n);
+  const twiddles = forwardTwiddles(n);
+  real[0] = packed.real[0] + packed.imag[0];
+  real[half] = packed.real[0] - packed.imag[0];
+  for (let k = 1; k < half; k++) {
+    const mirror = half - k;
+    const evenRe = (packed.real[k] + packed.real[mirror]) * 0.5;
+    const evenIm = (packed.imag[k] - packed.imag[mirror]) * 0.5;
+    const oddRe = (packed.imag[k] + packed.imag[mirror]) * 0.5;
+    const oddIm = (packed.real[mirror] - packed.real[k]) * 0.5;
+    const cos = twiddles.cos[k];
+    const sin = twiddles.sin[k];
+    const re = evenRe + (cos * oddRe - sin * oddIm);
+    const im = evenIm + (cos * oddIm + sin * oddRe);
+    real[k] = re;
+    imag[k] = im;
+    real[n - k] = re;
+    imag[n - k] = -im;
+  }
   return { real, imag };
 }
 
@@ -310,17 +355,20 @@ function bluesteinPlan(n: i32, inverse: boolean): BluesteinPlan {
  */
 export function fftExactFloat64(
   realIn: Float64Array,
-  imagIn: Float64Array,
+  imagIn: Float64Array | undefined,
   inverse: boolean = false
 ): { real: Float64Array; imag: Float64Array } {
   const n: i32 = realIn.length;
   if (n === 0) return { real: new Float64Array(0), imag: new Float64Array(0) };
   if (n === 1) {
     const real = new Float64Array([realIn[0] ?? 0]);
-    const imag = new Float64Array([imagIn[0] ?? 0]);
+    const imag = new Float64Array([imagIn?.[0] ?? 0]);
     return { real, imag };
   }
-  if (n > 0 && (n & (n - 1)) === 0) return fftCoreFloat64(realIn, imagIn, inverse);
+  if ((n & (n - 1)) === 0) {
+    if (imagIn === undefined && !inverse) return fftRealCoreFloat64(realIn);
+    return fftCoreFloat64(realIn, imagIn, inverse);
+  }
 
   const { chirpRe, chirpIm, filterRe: Hre, filterIm: Him, convLen } = bluesteinPlan(n, inverse);
   const yRe = new Float64Array(convLen);
@@ -330,7 +378,7 @@ export function fftExactFloat64(
     const cRe: f64 = chirpRe[k]!;
     const cIm: f64 = chirpIm[k]!;
     const xRe: f64 = realIn[k] ?? 0;
-    const xIm: f64 = imagIn[k] ?? 0;
+    const xIm: f64 = imagIn?.[k] ?? 0;
     // y = x * chirp. kn = (k² + n² - (k-n)²) / 2.
     yRe[k] = xRe * cRe - xIm * cIm;
     yIm[k] = xRe * cIm + xIm * cRe;

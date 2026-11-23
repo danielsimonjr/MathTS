@@ -165,7 +165,11 @@ export function wireMathjsInstanceApi(
       true
     );
     instance.evaluate = runBound(evaluator.evaluate);
-    instance.compile = runBound(evaluator.compile);
+    const compile = runBound(evaluator.compile);
+    instance.compile = (...args: Parameters<WiredCompatInstance['compile']>) => {
+      const compiled = compile(...args);
+      return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
+    };
     instance.compileExpr = instance.compile;
   }
 

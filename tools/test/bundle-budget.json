@@ -20,7 +20,7 @@
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 74174,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2232823,
+    "functions/dist/index.js": 2255537,
     "functions/dist/subpath-evaluate.js": 1474213,
     "functions/package.json": 3740,
     "functions/dist/wasm/mathts-as.wasm": 67694,
