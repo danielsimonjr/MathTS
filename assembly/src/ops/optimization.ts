@@ -139,7 +139,13 @@ export function linprog(
 export function nullspace(a: Float64Array, m: i32, n: i32): Float64Array {
   if (m <= 0 || n <= 0) return new Float64Array(0);
   const mm = new Float64Array(m * n);
-  for (let i = 0; i < m * n; i++) mm[i] = a[i];
+  // Row rescaling leaves the nullspace unchanged and makes the rank test dimensionless.
+  for (let row = 0; row < m; row++) {
+    let largest: f64 = 0.0;
+    for (let col = 0; col < n; col++) largest = Math.max(largest, Math.abs(a[row * n + col]));
+    const scale = largest > 0.0 && isFinite(largest) ? largest : 1.0;
+    for (let col = 0; col < n; col++) mm[row * n + col] = a[row * n + col] / scale;
+  }
   const pcols = new Int32Array(n);
   let npiv: i32 = 0;
   let r: i32 = 0;
@@ -166,7 +172,7 @@ export function nullspace(a: Float64Array, m: i32, n: i32): Float64Array {
     const pivot: f64 = mm[r * n + col];
     for (let j = 0; j < n; j++) mm[r * n + j] /= pivot;
     for (let row = 0; row < m; row++) {
-      if (row != r && Math.abs(mm[row * n + col]) > 1e-15) {
+      if (row != r && mm[row * n + col] != 0.0) {
         const factor: f64 = mm[row * n + col];
         for (let j = 0; j < n; j++) mm[row * n + j] -= factor * mm[r * n + j];
       }

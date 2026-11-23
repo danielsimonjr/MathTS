@@ -1,3 +1,5 @@
+import { scaledDiagonalProduct } from '../algebra/diagonal-product';
+
 /**
  * Polynomial algebra — AssemblyScript fallback.
  *
@@ -85,7 +87,7 @@ function polyDerivative(c: Array<f64>): Array<f64> {
 }
 
 function determinant(m: Array<f64>, n: i32): f64 {
-  let det: f64 = 1.0;
+  let sign: f64 = 1.0;
   for (let col = 0; col < n; col++) {
     let maxRow = col;
     let maxVal = Math.abs(m[col * n + col]);
@@ -96,16 +98,15 @@ function determinant(m: Array<f64>, n: i32): f64 {
         maxRow = row;
       }
     }
-    if (maxVal < 1e-15) return 0.0;
+    if (maxVal == 0.0) return 0.0;
     if (maxRow != col) {
       for (let k = 0; k < n; k++) {
         const t = m[col * n + k];
         m[col * n + k] = m[maxRow * n + k];
         m[maxRow * n + k] = t;
       }
-      det = -det;
+      sign = -sign;
     }
-    det *= m[col * n + col];
     for (let row = col + 1; row < n; row++) {
       const factor = m[row * n + col] / m[col * n + col];
       for (let k = col; k < n; k++) {
@@ -113,7 +114,7 @@ function determinant(m: Array<f64>, n: i32): f64 {
       }
     }
   }
-  return det;
+  return scaledDiagonalProduct(m, n, sign);
 }
 
 function makeMonic(p: Array<f64>): Array<f64> {

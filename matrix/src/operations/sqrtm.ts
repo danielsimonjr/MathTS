@@ -65,6 +65,8 @@ function gramSchmidt(A: number[][]): number[][] {
   for (let j = 0; j < n; j++) {
     // Copy column j
     const v: number[] = A.map((row) => row[j]);
+    let columnNorm = 0;
+    for (const value of v) columnNorm = Math.hypot(columnNorm, value);
 
     // Subtract projections onto previous columns
     for (let k = 0; k < j; k++) {
@@ -75,10 +77,9 @@ function gramSchmidt(A: number[][]): number[][] {
 
     // Normalize
     let norm = 0;
-    for (let i = 0; i < m; i++) norm += v[i] * v[i];
-    norm = Math.sqrt(norm);
+    for (const value of v) norm = Math.hypot(norm, value);
 
-    if (norm < 1e-14) {
+    if (norm === 0 || norm / columnNorm <= m * Number.EPSILON) {
       // Near-zero column — use unit vector as fallback
       for (let i = 0; i < m; i++) Q[i][j] = i === j ? 1 : 0;
     } else {
@@ -265,7 +266,11 @@ function sqrtmGeneral(A: number[][]): number[][] {
   const Dsqrt = eye(n);
   for (let i = 0; i < n; i++) Dsqrt[i][i] = Math.sqrt(Math.max(values[i].re, 0));
 
-  return matMul(matMul(Q, Dsqrt), Qinv);
+  const root = matMul(matMul(Q, Dsqrt), Qinv);
+  if (!(relativeDifference(matMul(root, root), A) <= 1e-8)) {
+    throw new Error('matrixSqrtm: no numerically valid real square root was found');
+  }
+  return root;
 }
 
 // ---------------------------------------------------------------------------
@@ -443,7 +448,7 @@ export function sqrtmQuasiTriangular(T: number[][]): number[][] | null {
 }
 
 /**
- * One-column Gauss–Jordan solve. Same 1e-15 singular cutoff and zero-factor
+ * One-column Gauss–Jordan solve. Same zero-pivot rule and zero-factor
  * skip as {@link matInv}; both call {@link gaussJordanSolve}.
  */
 function solveLinearSystem(A: number[][], b: number[]): number[] | null {
