@@ -34,6 +34,21 @@ describe('#1178 symbolicEqual is true for an exact identity', () => {
   });
 });
 
+describe('#1320 identical polynomial syntax', () => {
+  it('is equal even when expansion would exceed the coefficient budget', () => {
+    const source = '(1e300*x+1e-300)^5';
+    expect(symbolicEqual(source, source)).toBe(true);
+    expect(symbolicEqual(parse(source), parse(source))).toBe(true);
+    expect(symbolicEqual(source, '(1e300*x+2e-300)^5')).toBe(false);
+  });
+
+  it('proves identity above the expansion degree limit and leaves impure calls alone', () => {
+    const source = '(x + 1)^1000000';
+    expect(symbolicEqual(source, source)).toBe(true);
+    expect(symbolicEqual('random()', 'random()')).toBe(false);
+  });
+});
+
 describe('#1178 symbolicEqual keeps its other answers', () => {
   it('sqrt(2) and its double stay equal (the simplify path)', () => {
     expect(symbolicEqual('sqrt(2)', '1.4142135623730951')).toBe(true);

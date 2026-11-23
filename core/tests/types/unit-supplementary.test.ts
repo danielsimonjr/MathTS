@@ -1,7 +1,7 @@
 /**
  * Supplementary units, ISO 80000 solidus parsing, unicode spellings, and cycle
  * conversion. Storage `bit` stays a BIT (1 byte = 8 bit); an information bit is
- * `ln2` nat, registered with `createUnit`'s exact scale.
+ * a shannon, equal to exactly `ln2` nat.
  */
 import { describe, it, expect } from 'vitest';
 import { Unit } from '../../src/types/unit';
@@ -183,17 +183,21 @@ describe('refused unit spellings', () => {
 describe('createUnit exact scales', () => {
   it('registers an information bit as ln 2 nat and leaves a float definition inexact', () => {
     Unit.createUnit({
-      shannon: { definition: '1 nat', exact: 'ln2', aliases: ['shannons'] },
+      custominfobit: { definition: '1 nat', exact: 'ln2', aliases: ['custominfobits'] },
       floater: '0.2 m',
     });
     try {
-      expect(new Unit(1, 'shannon').toNumeric('nat')).toBe(exactScaleToNumber(LN2_EXACT_SCALE));
-      expect(new Unit(1, 'shannons').toNumeric('nat')).toBe(exactScaleToNumber(LN2_EXACT_SCALE));
-      expect(Unit.exactScale('shannon')).toEqual(LN2_EXACT_SCALE);
+      expect(new Unit(1, 'custominfobit').toNumeric('nat')).toBe(
+        exactScaleToNumber(LN2_EXACT_SCALE)
+      );
+      expect(new Unit(1, 'custominfobits').toNumeric('nat')).toBe(
+        exactScaleToNumber(LN2_EXACT_SCALE)
+      );
+      expect(Unit.exactScale('custominfobit')).toEqual(LN2_EXACT_SCALE);
       expect(Unit.exactScale('floater')).toBeNull();
     } finally {
-      Unit.deleteUnit('shannon');
-      Unit.deleteUnit('shannons');
+      Unit.deleteUnit('custominfobit');
+      Unit.deleteUnit('custominfobits');
       Unit.deleteUnit('floater');
     }
   });

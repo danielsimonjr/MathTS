@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Tensor } from '@danielsimonjr/mathts-tensor';
 import { forwardGrad } from '../src/forward-grad';
+import { DualTensor, forwardDiagonalGrad } from '../src/index.js';
 
 describe('forwardGrad (forward-mode AD via dual numbers)', () => {
   it('fn(x) = x · x returns Jacobian diag(2x)', () => {
@@ -68,5 +69,31 @@ describe('forwardGrad (forward-mode AD via dual numbers)', () => {
     expect(J[0][0][0][0]).toBeCloseTo(2, 12);
     expect(J[1][1][1][1]).toBeCloseTo(2, 12);
     expect(J[0][0][1][1]).toBeCloseTo(0, 12);
+  });
+});
+
+describe('forwardDiagonalGrad', () => {
+  it('computes a 100×100 elementwise square with one trace and compact output', () => {
+    const values = Float64Array.from({ length: 10000 }, (_, i) => i / 1000 - 5);
+    const input = new Tensor([100, 100], values);
+    let traces = 0;
+    const { value, diagonal } = forwardDiagonalGrad((x) => {
+      traces += 1;
+      return x.mul(x);
+    }, input);
+
+    expect(traces).toBe(1);
+    expect(value.shape).toEqual([100, 100]);
+    expect(diagonal.shape).toEqual([100, 100]);
+    expect(value.data).toEqual(values.map((x) => x * x));
+    expect(diagonal.data).toEqual(values.map((x) => 2 * x));
+  });
+
+  it('rejects a broadcast output whose shape differs from the input', () => {
+    const input = Tensor.fromNested([3], [1]);
+    const offset = DualTensor.fromTensor(Tensor.fromNested([1, 2], [2]));
+    expect(() => forwardDiagonalGrad((x) => x.add(offset), input)).toThrow(
+      /forwardDiagonalGrad: shape mismatch/
+    );
   });
 });
