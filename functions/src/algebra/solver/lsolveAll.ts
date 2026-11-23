@@ -185,7 +185,9 @@ export const createLsolveAll = /* #__PURE__ */ factory(
               // b[j] -= b[i] * M[j,i]
               b[j] = subtractScalar(b[j], multiplyScalar(b[i], M[j][i]));
             }
-          } else if (!equalScalar(b[i], 0)) {
+          } else if (
+            !(typeof b[i] === 'number' ? equalScalar(b[i], 0) : isZeroEntry(b[i], equalScalar))
+          ) {
             // singular row, nonzero RHS
 
             if (k === 0) {
@@ -276,7 +278,9 @@ export const createLsolveAll = /* #__PURE__ */ factory(
               const J = iIndices[j];
               b[J] = subtractScalar(b[J], multiplyScalar(b[i], iValues[j]));
             }
-          } else if (!equalScalar(b[i], 0)) {
+          } else if (
+            !(typeof b[i] === 'number' ? equalScalar(b[i], 0) : isZeroEntry(b[i], equalScalar))
+          ) {
             // singular row, nonzero RHS
 
             if (k === 0) {

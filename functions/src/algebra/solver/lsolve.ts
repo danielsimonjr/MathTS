@@ -259,7 +259,7 @@ export const createLsolve = /* #__PURE__ */ factory(
           const vjj = mdata[j][j];
 
           if (isZeroEntry(vjj, equalScalar)) {
-            if (equalScalar(bj, 0)) {
+            if (typeof bj === 'number' && equalScalar(bj, 0)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];
               continue;
@@ -338,7 +338,7 @@ export const createLsolve = /* #__PURE__ */ factory(
 
           // at this point we must have a value in vjj
           if (isZeroEntry(vjj, equalScalar)) {
-            if (equalScalar(bj, 0)) {
+            if (typeof bj === 'number' && equalScalar(bj, 0)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];
               continue;

@@ -1,3 +1,4 @@
+import { logSinPiForReflection } from '../probability/log-sin-pi.js';
 /* eslint-disable no-loss-of-precision -- special-function math constants (Airy, etc.)
    are written at full precision and round to the nearest IEEE-754 double. */
 /**
@@ -247,7 +248,7 @@ function chebyshevTScalar(n: f64, x: f64): f64 {
 /** Hermite polynomial H_n(x) (physicist's convention). */
 function hermiteHScalar(n: f64, x: f64): f64 {
   // A non-finite order has no defined value, and the recurrence below would never end.
-  if (!Number.isFinite(n)) return NaN;
+  if (!Number.isFinite(n) || n < 0) return NaN;
   const ni = Math.round(n);
   if (ni === 0) return 1;
   if (ni === 1) return 2 * x;
@@ -621,10 +622,10 @@ export const erfi = mathTyped('erfi', {
  */
 function lgammaComplex(z: Complex): Complex {
   if (z.re < 0.5) {
-    // Reflection: lgamma(z) = log(π) − log(sin(πz)) − lgamma(1 − z)
-    const piZ = new Complex(Math.PI * z.re, Math.PI * z.im);
+    if (z.im === 0 && Number.isInteger(z.re)) return new Complex(Infinity, 0);
+    const logSin = logSinPiForReflection(z.re, z.im);
     const refl = lgammaComplex(new Complex(1 - z.re, -z.im));
-    return new Complex(Math.log(Math.PI), 0).sub(piZ.sin().log()).sub(refl);
+    return new Complex(Math.log(Math.PI) - logSin.re, -logSin.im).sub(refl);
   }
   const zc = new Complex(z.re - 1, z.im);
   let x: Complex = new Complex(gammaP[0], 0);

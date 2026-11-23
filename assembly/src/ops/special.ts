@@ -53,9 +53,8 @@ export function chebyshevT(n: f64, x: f64): f64 {
 
 /** Hermite polynomial H_n(x) (physicists' convention). */
 export function hermiteH(n: f64, x: f64): f64 {
-  if (!isFinite(n)) return NaN;
+  if (!isFinite(n) || n < 0) return NaN;
   const nr: f64 = Math.round(n);
-  if (nr < 0.0) return NaN;
   if (nr > _ORDER_MAX_I32) throw new RangeError('hermiteH: order exceeds the supported maximum');
   const ni: i32 = <i32>nr;
   if (ni == 0) return 1.0;

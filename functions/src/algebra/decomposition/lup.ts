@@ -1,3 +1,4 @@
+import { BigNumber } from '@danielsimonjr/mathts-core';
 import { clone } from '../../utils/object.js';
 import { format } from '../../utils/string.js';
 import { factory } from '../../utils/factory.js';
@@ -150,13 +151,15 @@ export const createLup = /* #__PURE__ */ factory(
       abs
     );
 
-    /**
-     * Pivot comparison for the sparse path. Two numbers compare with `>`: the tolerance of
-     * `larger` is absolute, so it ties every entry of a matrix near 1e-100 (#1169). Other
-     * value types keep the `larger` rule.
-     */
-    const absLarger = (x: unknown, y: unknown): boolean =>
-      typeof x === 'number' && typeof y === 'number' ? x > y : Boolean(larger(x, y));
+    // Compare magnitudes without an absolute floor so pivot selection is scale invariant.
+    const absLarger = (x: unknown, y: unknown): boolean => {
+      if (typeof x === 'number' && typeof y === 'number') return x > y;
+      if (x instanceof BigNumber && (y instanceof BigNumber || typeof y === 'number')) {
+        return x.gt(y);
+      }
+      if (typeof x === 'number' && y instanceof BigNumber) return y.lt(x);
+      return Boolean(larger(x, y));
+    };
 
     function matrixAllNumbers(data: unknown[][]): boolean {
       for (let r = 0; r < data.length; r++) {
@@ -337,7 +340,7 @@ export const createLup = /* #__PURE__ */ factory(
             // absolute value
             const absv = abs(v);
             // value is greater than pivote value
-            if (larger(absv, pabsv)) {
+            if (absLarger(absv, pabsv)) {
               // store row
               pi = i;
               // update max value
@@ -359,7 +362,7 @@ export const createLup = /* #__PURE__ */ factory(
             for (i = j + 1; i < rows; i++) {
               // value @ i, j
               const vij = data[i][j];
-              if (!equalScalar(vij, 0)) {
+              if (!isZeroEntry(vij, equalScalar)) {
                 // update data
                 data[i][j] = divideScalar(data[i][j], vjj);
               }

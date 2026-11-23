@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { lgamma, gamma } from '@danielsimonjr/mathts-functions';
+import { lgamma, gamma } from '../src/index.js';
 import { Complex } from '@danielsimonjr/mathts-core';
 
 /**
@@ -33,4 +33,20 @@ describe('GC6: lgamma(Complex)', () => {
       expect(direct.im).toBeCloseTo(viaGamma.im, 8);
     }
   });
+});
+
+// mpmath.loggamma, 60 decimal digits, rounded here to binary64.
+it.each([
+  [-2.3, 0.2, 0.11519970679426499, -8.833177370956799],
+  [-2.3, -0.2, 0.11519970679426499, 8.833177370956799],
+  [-10.9, 1, -18.51690596800722, -33.37784633942664],
+  [-10.9, -1, -18.51690596800722, 33.37784633942664],
+  [-2.5, 0, -0.056243716497674054, -9.42477796076938],
+  [-3.5, 0, -1.309006684993042, -12.566370614359172],
+  [-2, 1e-12, 26.937873935368604, -7.85398163397356],
+  [-4.25, 300, -497.41312251286473, 1403.635996103122],
+])('keeps the analytic phase of lgamma(%s + %si)', (re, im, expectedRe, expectedIm) => {
+  const result = lgamma(new Complex(re, im)) as Complex;
+  expect(result.re).toBeCloseTo(expectedRe, 9);
+  expect(result.im).toBeCloseTo(expectedIm, 9);
 });
