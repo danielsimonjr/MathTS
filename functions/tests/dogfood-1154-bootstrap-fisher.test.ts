@@ -339,9 +339,14 @@ describe('the resampling tests bound bootstrap * sample size (#1154)', () => {
   // Without the bound each call below runs for about 5 to 23 s before it returns.
   const sample = Array.from({ length: 1000 }, (_, i) => Math.sin(i) * 3 + i / 500);
 
-  it('kolmogorovSmirnovTest rejects bootstrap * sample size above 20,000,000', async () => {
+  it('bounds KS bootstrap work for the built-in and custom CDFs', async () => {
     await expect(
-      kolmogorovSmirnovTest(sample, undefined, { bootstrap: 20001, bootstrapSeed: 1 })
+      kolmogorovSmirnovTest(sample, undefined, { bootstrap: 100001, bootstrapSeed: 1 })
+    ).rejects.toThrow(
+      /^kolmogorovSmirnovTest: bootstrap \* sample size = 100001000 exceeds the supported maximum of 100000000$/
+    );
+    await expect(
+      kolmogorovSmirnovTest(sample, () => 0.5, { bootstrap: 20001, bootstrapSeed: 1 })
     ).rejects.toThrow(
       /^kolmogorovSmirnovTest: bootstrap \* sample size = 20001000 exceeds the supported maximum of 20000000$/
     );
