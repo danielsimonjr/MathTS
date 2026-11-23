@@ -12,7 +12,7 @@
       "fallback": [
         "<T extends Fraction | BigNumber | Complex>(a: ExactData<T>): T;",
         "(a: ExactData<bigint>): number;",
-        "(a: readonly unknown[] | Matrix, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;"
+        "(a: readonly unknown[] | Matrix | MatrixValue, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;"
       ]
     },
     {
@@ -21,7 +21,7 @@
       "fallback": [
         "<T extends Fraction | BigNumber>(a: ExactData<T>): T;",
         "(a: ExactData<Complex | bigint>): number;",
-        "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
+        "(a: readonly unknown[] | Matrix | MatrixValue, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
       ]
     },
     {
@@ -31,45 +31,63 @@
       "fallback": [
         "(a: ExactData<BigNumber>): BigNumber;",
         "(a: ExactData<Fraction | Complex | bigint>): number;",
-        "(a: readonly unknown[] | Matrix, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
+        "(a: readonly unknown[] | Matrix | MatrixValue, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;"
       ]
     },
     { "name": "sin", "source": "src/typed/trigonometry.ts" },
     { "name": "cos", "source": "src/typed/trigonometry.ts" },
     { "name": "tan", "source": "src/typed/trigonometry.ts" },
-    { "name": "det", "source": "src/matrix/det.ts", "mathTypedPattern": "return typed(name," },
+    {
+      "name": "det",
+      "source": "src/matrix/det.ts",
+      "mathTypedPattern": "return typed(name,",
+      "leadingOverloads": {
+        "Array | Matrix": ["(A: number[][]): number;", "(A: readonly number[][]): number;"]
+      }
+    },
     {
       "name": "median",
       "source": "src/statistics/median.ts",
       "mathTypedPattern": "return typed(name,",
-      "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
+      "sigTypes": {
+        "Array | Matrix": "readonly number[] | readonly (readonly number[])[] | Matrix"
+      },
       "fallback": [
         "<T extends Fraction | BigNumber>(a: ExactData<T>): T;",
         "(a: ExactData<bigint>): Fraction;",
-        "(...rest: number[]): number;",
-        "(...rest: unknown[]): unknown;"
+        "(first: number, ...rest: number[]): number;",
+        "<T extends Fraction | BigNumber>(first: T, ...rest: T[]): T;",
+        "(a: readonly unknown[] | NumberTypedArray | Matrix | MatrixValue, b?: number | BigNumber | StatReduceOptions, c?: StatReduceOptions): unknown;"
       ]
     },
     {
       "name": "mode",
       "source": "src/statistics/mode.ts",
       "mathTypedPattern": "return typed(name,",
-      "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
+      "sigTypes": {
+        "Array | Matrix": "readonly number[] | readonly (readonly number[])[] | Matrix"
+      },
       "fallback": [
         "<T extends Fraction | BigNumber | Complex | bigint>(a: ExactData<T>): T[];",
-        "(...rest: number[]): number[];",
-        "(...rest: unknown[]): unknown;"
+        "(first: number, ...rest: number[]): number[];",
+        "(first: number | string, ...rest: (number | string)[]): (number | string)[];",
+        "<T extends Fraction | BigNumber | Complex | bigint>(first: T, ...rest: T[]): T[];",
+        "(a: readonly unknown[] | Matrix | MatrixValue): unknown;"
       ]
     },
     {
       "name": "mad",
       "source": "src/statistics/mad.ts",
       "mathTypedPattern": "return typed(name,",
-      "sigTypes": { "Array | Matrix": "number[] | number[][] | Matrix" },
+      "sigTypes": {
+        "Array | Matrix": "readonly number[] | readonly (readonly number[])[] | Matrix"
+      },
       "fallback": [
         "<T extends Fraction | BigNumber>(a: ExactData<T>): T;",
         "(a: ExactData<bigint>): Fraction;",
-        "(...rest: unknown[]): unknown;"
+        "(first: number, ...rest: number[]): number;",
+        "<T extends Fraction | BigNumber>(first: T, ...rest: T[]): T;",
+        "(a: readonly unknown[] | Matrix | MatrixValue): unknown;"
       ]
     },
     {

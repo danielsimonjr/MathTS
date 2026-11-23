@@ -27,6 +27,7 @@ import {
 } from '@danielsimonjr/mathts-core';
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
 import type {
+  BridgeMatrix,
   PublicAbs,
   PublicAdd,
   PublicCos,
@@ -35,7 +36,9 @@ import type {
   PublicMean,
   PublicSin,
   PublicSqrt,
+  PublicStd,
   PublicTan,
+  PublicVariance,
 } from '@danielsimonjr/mathts-functions';
 
 import {
@@ -58,6 +61,8 @@ import {
   atan2 as _atan2,
   sum as _sum,
   mean as _mean,
+  std as _std,
+  variance as _variance,
   min as _min,
   max as _max,
   gcd as _gcd,
@@ -162,19 +167,8 @@ export function bignumber(value?: unknown): unknown {
   return _bignumber(value as object);
 }
 
-/** Matrix values returned from the compat `matrix` shim (native or mathjs bridge). */
-export type CompatMatrixValue =
-  | DenseMatrix
-  | SparseMatrix
-  | {
-      isMatrix: boolean;
-      toArray(): unknown;
-      subset(...args: unknown[]): unknown;
-      get(...args: unknown[]): unknown;
-      transpose(): CompatMatrixValue;
-      rows: number;
-      cols: number;
-    };
+/** Matrix values returned from the compat `matrix` shim (native, or the bridge matrix of `functions`). */
+export type CompatMatrixValue = DenseMatrix | SparseMatrix | BridgeMatrix;
 
 /** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
 function isCompatBridgeMatrix(x: unknown): boolean {
@@ -234,7 +228,7 @@ export function matrix(
   format?: 'dense' | 'sparse' | string
 ): CompatMatrixValue {
   if (arguments.length === 0) {
-    return _factoryMatrix() as CompatMatrixValue;
+    return _factoryMatrix();
   }
   if (isDenseMatrix(data) || isSparseMatrix(data)) {
     // A native matrix of the format that is asked for, or of no format, is returned as it is.
@@ -244,7 +238,10 @@ export function matrix(
     // The nested data of a matrix with a zero axis does not show its size, so the size of the
     // source goes with the data (#1337).
     if (format === 'sparse' && isDenseMatrix(data)) {
-      return _factorySparse({ data: data.toArray(), size: matrixSize(data) }) as CompatMatrixValue;
+      return _factorySparse({
+        data: data.toArray(),
+        size: matrixSize(data),
+      });
     }
     if (format !== 'sparse' && isSparseMatrix(data)) {
       return denseOfNested(data.toArray(), data);
@@ -252,7 +249,7 @@ export function matrix(
     return data;
   }
   // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
-  return _factoryMatrix(data as number[][], format) as CompatMatrixValue;
+  return _factoryMatrix(data as number[][], format);
 }
 
 /**
@@ -260,9 +257,9 @@ export function matrix(
  */
 export function sparse(data?: number[][]): CompatMatrixValue {
   if (data === undefined) {
-    return _factorySparse() as CompatMatrixValue;
+    return _factorySparse();
   }
-  return _factorySparse(data) as CompatMatrixValue;
+  return _factorySparse(data);
 }
 
 // =============================================================================
@@ -482,57 +479,18 @@ export const atan2: TypedFunction = _atan2;
 export const sum: TypedFunction = _sum;
 export const mean = _mean as PublicMean;
 
-// std/variance must match mathjs defaults — 'unbiased' (sample, ÷(N-1)). The
-// functions-package versions now also default to unbiased and accept a
-// normalization argument (GC1), but compat keeps a self-contained override so it
-// can flatten DenseMatrix / nested-array inputs that the typed Array/Float64Array
-// signatures don't cover.
-type Normalization = 'unbiased' | 'uncorrected' | 'biased';
-
-function toNumericArray(data: unknown): number[] {
-  if (isCompatBridgeMatrix(data)) {
-    const flat = (data as { toArray(): unknown }).toArray();
-    return (Array.isArray(flat) ? flat : [flat]).flat(Infinity) as number[];
-  }
-  if (Array.isArray(data)) return (data as unknown[]).flat(Infinity) as number[];
-  return [data as number];
-}
+/**
+ * The variance of the values in the data. This is the functions implementation: it defaults to
+ * the unbiased divisor (N - 1), as mathjs does, and it takes the dimension, the variadic form
+ * and BigNumber data. Subnormal squares and squares that overflow keep every digit (#1280).
+ */
+export const variance = _variance as PublicVariance;
 
 /**
- * Return the variance of all values in `data`.
- *
- * This function flattens a DenseMatrix or a nested array to one list.
- * It uses any other input as a list of one value.
- * An empty list gives `NaN`.
- * The divisor is N - 1 for `'unbiased'` (N for one value), N for `'uncorrected'` and N + 1 for `'biased'`.
- *
- * @param data - A number, a DenseMatrix or a nested array of numbers.
- * @param normalization - The divisor rule. The default is `'unbiased'`, as in mathjs.
- * @returns The variance.
+ * The standard deviation of the values in the data. This is the functions implementation, with
+ * the same arguments as {@link variance}.
  */
-export function variance(data: unknown, normalization: Normalization = 'unbiased'): number {
-  const arr = toNumericArray(data);
-  const n = arr.length;
-  if (n === 0) return NaN;
-  const mu = arr.reduce((s, x) => s + x, 0) / n;
-  const ss = arr.reduce((s, x) => s + (x - mu) * (x - mu), 0);
-  const denom =
-    normalization === 'uncorrected' ? n : normalization === 'biased' ? n + 1 : n > 1 ? n - 1 : n;
-  return ss / denom;
-}
-
-/**
- * Return the standard deviation of all values in `data`.
- *
- * The result is the square root of `variance(data, normalization)`.
- *
- * @param data - A number, a DenseMatrix or a nested array of numbers.
- * @param normalization - The divisor rule. The default is `'unbiased'`, as in mathjs.
- * @returns The standard deviation.
- */
-export function std(data: unknown, normalization: Normalization = 'unbiased'): number {
-  return Math.sqrt(variance(data, normalization));
-}
+export const std = _std as PublicStd;
 export const min: TypedFunction = _min;
 export const max: TypedFunction = _max;
 
@@ -597,11 +555,17 @@ export function arg(c: Complex): number {
 // Matrix-specific Shims
 // =============================================================================
 
+type TransposeScalar = number | bigint | BigNumber | Complex | Fraction;
+
 /**
- * Transpose matrix (mathjs-compatible). Array in → array out (mathjs returns a
- * plain nested array for array input, a Matrix for Matrix input).
+ * Transpose a matrix or numeric scalar (mathjs-compatible). Nested arrays
+ * return arrays, matrices retain their representation, and scalars retain their value.
  */
-export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue | number[][] {
+export function transpose<T extends TransposeScalar>(m: T): T;
+export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue | number[][];
+export function transpose(
+  m: CompatMatrixValue | number[][] | TransposeScalar
+): CompatMatrixValue | number[][] | TransposeScalar {
   if (Array.isArray(m)) {
     return DenseMatrix.fromArray(m).transpose().toArray();
   }
@@ -612,7 +576,16 @@ export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue 
     // The factory transpose takes the dense and the sparse matrix of the factory layer.
     return _transpose(m as unknown) as CompatMatrixValue;
   }
-  throw new TypeError('Expected matrix or 2D array');
+  if (
+    typeof m === 'number' ||
+    typeof m === 'bigint' ||
+    isBigNumber(m) ||
+    isComplex(m) ||
+    isFraction(m)
+  ) {
+    return _transpose(m) as TransposeScalar;
+  }
+  throw new TypeError('Expected matrix, 2D array, or numeric scalar');
 }
 
 /**

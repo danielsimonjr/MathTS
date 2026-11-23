@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { all, create } from '../src/index.js';
+import { transpose } from '../src/shims.js';
 
 describe('compat transpose of a sparse matrix', () => {
   it('returns the transposed sparse matrix', () => {
@@ -23,5 +24,24 @@ describe('compat transpose of a sparse matrix', () => {
       [0, 2],
       [3, 0],
     ]);
+  });
+});
+
+describe('compat transpose of a numeric scalar', () => {
+  it('preserves a number through the shim and a compat instance', () => {
+    const math = create(all);
+    expect(transpose(1)).toBe(1);
+    expect(math.transpose(-0)).toBe(-0);
+    expect(math.transpose(2n)).toBe(2n);
+  });
+
+  it('preserves the value and type of numeric objects', () => {
+    const math = create(all);
+    const values = [math.bignumber('2.5'), math.fraction(1, 3), math.complex(2, 3)];
+    for (const value of values) {
+      const result = math.transpose(value);
+      expect(result).toEqual(value);
+      expect(result).not.toBe(value);
+    }
   });
 });

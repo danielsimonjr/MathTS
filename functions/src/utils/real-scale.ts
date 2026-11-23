@@ -1,4 +1,4 @@
-import { BigNumber } from '@danielsimonjr/mathts-core';
+import { BigNumber, ROOT_SAFE_MIN, powerOfTwoBelow } from '@danielsimonjr/mathts-core';
 
 /**
  * An exact scale for a list of real values, so that the squares of the scaled values cannot
@@ -59,16 +59,12 @@ export function realScale(values: readonly unknown[]): RealScale | undefined {
   let max = 0;
   for (const v of values as number[]) if (Math.abs(v) > max) max = Math.abs(v);
   if (max === 0) return undefined;
-  // Math.log2 can round up to the next integer (for a value just below a power of 2, and to 1024
-  // for the largest doubles), so k is corrected: 2^k <= max < 2^(k+1), and max / 2^k is in [1, 2).
-  let k = Math.floor(Math.log2(max));
-  if (2 ** k > max) k--;
-  else if (2 ** (k + 1) <= max) k++;
-  // 2^k is exact. For k below -1022 it is a subnormal, which is still a power of 2.
-  const s = 2 ** k;
+  // 2^k <= max < 2^(k+1), so max / s is in [1, 2). s is exact. For k below -1022 it is a
+  // subnormal, which is still a power of 2.
+  const s = powerOfTwoBelow(max);
   return {
     big: false,
-    unit: k === 0,
+    unit: s === 1,
     order: Math.floor(Math.log10(max)),
     down: (v) => (v as number) / s,
     up: (r) => (r as number) * s,
@@ -82,6 +78,16 @@ export function realScale(values: readonly unknown[]): RealScale | undefined {
 export function isDegenerate(r: unknown): boolean {
   if (r instanceof BigNumber) return !r.isFinite() || r.isZero();
   return typeof r === 'number' && (!Number.isFinite(r) || r === 0);
+}
+
+/**
+ * The root `r` of a sum of squares is degenerate (see {@link isDegenerate}) or below
+ * `ROOT_SAFE_MIN` (2^-400): the sum of squares can have lost digits to subnormal squares (#1280).
+ * A root of at least 2^-400 has a sum of squares of at least 2^-800, which keeps all its digits.
+ * Only a number can lose digits this way: a BigNumber has no subnormal range.
+ */
+export function rootOfSquaresLostDigits(r: unknown): boolean {
+  return isDegenerate(r) || (typeof r === 'number' && Math.abs(r) < ROOT_SAFE_MIN);
 }
 
 /**

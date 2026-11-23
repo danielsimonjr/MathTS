@@ -7,6 +7,7 @@
 
 import { DenseMatrix, assertNestedEntry, isDenseMatrix } from '../types/DenseMatrix.js';
 import type { SparseMatrix } from '../types/SparseMatrix.js';
+import { arraySize } from '@danielsimonjr/mathts-core/internal';
 import { densifyForSolver } from './densify.js';
 import { implicitNumber } from './entry-rule.js';
 import { denseReader } from '../types/dense/storage.js';
@@ -98,9 +99,43 @@ function nestedFromPacked(data: Float64Array, rows: number, cols: number): numbe
 }
 
 /**
+ * Throw when an entry of a rectangular nested array is an Array. Entry `[0][0]` sets the depth that
+ * `arraySize` reads. When every entry is an Array, the input is a tensor: a `RangeError` that names
+ * its size (the message of the `qr` of `@danielsimonjr/mathts-functions`). Otherwise the depth
+ * changes inside the input: the jagged `TypeError` names the first row with an entry of the other
+ * depth.
+ */
+function rejectArrayEntries(
+  input: readonly (readonly unknown[])[],
+  rows: number,
+  cols: number
+): void {
+  if (rows === 0 || cols === 0) return;
+  const deep = Array.isArray(input[0][0]);
+  let anyArray = deep;
+  let mixedRow = -1;
+  for (let i = 0; i < rows; i++) {
+    const row = input[i];
+    for (let j = 0; j < cols; j++) {
+      const isArray = Array.isArray(row[j]);
+      if (isArray) anyArray = true;
+      if (isArray !== deep && mixedRow < 0) mixedRow = i;
+    }
+  }
+  if (!anyArray) return;
+  if (mixedRow >= 0) {
+    throw new TypeError(`Matrix decomposition: jagged nested array at row ${mixedRow}`);
+  }
+  const size = arraySize(input as unknown[]);
+  throw new RangeError(`Matrix must be two dimensional (size: [${size.join(', ')}])`);
+}
+
+/**
  * Row and column count of a nested matrix. Throws the decomposition input error for a 1-D array,
- * and a TypeError for a row that is not an array or that has another length than row 0. Reads no entry: a caller with entries of another type (the
- * typed path of `lusolve`) uses it for the shape only.
+ * and a TypeError for a row that is not an array or that has another length than row 0. An entry
+ * that is an Array is a further dimension, so the shape check rejects it (#1260, see
+ * `rejectArrayEntries`). It converts no entry: a caller with entries of another type (the typed
+ * path of `lusolve`) uses it for the shape only.
  */
 export function nestedMatrixShape(input: readonly unknown[]): { rows: number; cols: number } {
   const rows = input.length;
@@ -114,6 +149,7 @@ export function nestedMatrixShape(input: readonly unknown[]): { rows: number; co
       throw new TypeError(`Matrix decomposition: jagged nested array at row ${i}`);
     }
   }
+  rejectArrayEntries(input as readonly (readonly unknown[])[], rows, cols);
   return { rows, cols };
 }
 

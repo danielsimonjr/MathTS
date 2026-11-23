@@ -1,16 +1,16 @@
 import type { Matrix } from '../Matrix.js';
-import { norm2 } from '@danielsimonjr/mathts-core';
+import { norm2, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { contiguousDenseData } from './storage.js';
 import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
 /**
  * `sqrt` of a sum of squares, safe against overflow and underflow (#1104). A sum that
- * is finite and at least 2^-800 keeps all its digits, so its square root is returned.
+ * is finite and at least `SQUARES_SAFE_MIN` (2^-800) keeps all its digits, so its square root is returned.
  * Any other sum overflowed or lost digits: the norm of `values()` is then recomputed
  * with a running scale. `values` is called only in that case.
  */
 export function sqrtOfSumSquares(sumSquared: number, values: () => ArrayLike<number>): number {
-  if (sumSquared >= 2 ** -800 && sumSquared < Infinity) return Math.sqrt(sumSquared);
+  if (sumSquared >= SQUARES_SAFE_MIN && sumSquared < Infinity) return Math.sqrt(sumSquared);
   const v = values();
   // A NaN or infinite entry keeps the plain result (NaN or Infinity).
   for (let i = 0; i < v.length; i++) if (!Number.isFinite(v[i])) return Math.sqrt(sumSquared);

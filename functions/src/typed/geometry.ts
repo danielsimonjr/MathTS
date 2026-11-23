@@ -9,7 +9,7 @@
  * @packageDocumentation
  */
 
-import { scaledDistance } from '@danielsimonjr/mathts-core';
+import { scaledDistance, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { computePool } from '@danielsimonjr/mathts-parallel';
 import { argsortF64Dispatch, WASM_SORT_THRESHOLD } from '../wasm/sort/wasm-bridge.js';
 
@@ -311,9 +311,12 @@ export function distance2D(a: number[], b: number[]): f64 {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
   const s = dx ** 2 + dy ** 2;
-  // A sum that overflowed or is NaN takes `Math.hypot`: no overflow, and an infinite difference
-  // gives Infinity, also with a NaN (the IEEE rule of `hypot`, #1259).
-  return s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy);
+  // A sum below SQUARES_SAFE_MIN holds subnormal squares (or underflowed to 0), and a sum that
+  // overflowed or is NaN has no digits: both take `Math.hypot`, which scales (#1280). An infinite
+  // difference gives Infinity, also with a NaN (the IEEE rule of `hypot`, #1259). Coincident
+  // points (every difference 0) have the exact distance 0 and keep the fast path.
+  if (s >= SQUARES_SAFE_MIN && s < Infinity) return Math.sqrt(s);
+  return dx === 0 && dy === 0 ? 0 : Math.hypot(dx, dy);
 }
 
 /**
@@ -325,7 +328,8 @@ export function distance3D(a: number[], b: number[]): f64 {
   const dz = b[2] - a[2];
   const s = dx ** 2 + dy ** 2 + dz ** 2;
   // See `distance2D`.
-  return s < Infinity ? Math.sqrt(s) : Math.hypot(dx, dy, dz);
+  if (s >= SQUARES_SAFE_MIN && s < Infinity) return Math.sqrt(s);
+  return dx === 0 && dy === 0 && dz === 0 ? 0 : Math.hypot(dx, dy, dz);
 }
 
 /**
@@ -337,8 +341,20 @@ export function distanceND(a: number[], b: number[]): f64 {
   for (let i: i32 = 0; i < n; i++) {
     sum += (b[i] - a[i]) ** 2;
   }
-  // See `distance2D`. `scaledDistance` does not overflow and applies the IEEE rule (#1259).
-  return sum < Infinity ? Math.sqrt(sum) : scaledDistance(a.slice(0, n), b.slice(0, n));
+  // See `distance2D`. `scaledDistance` does not lose digits, does not overflow and applies the
+  // IEEE rule (#1259, #1280). A sum of 0 from points that coincide is the exact distance 0 (and
+  // an input that is no array has no `n`, so the loop did not run: it keeps the result 0).
+  if (sum >= SQUARES_SAFE_MIN && sum < Infinity) return Math.sqrt(sum);
+  if (sum === 0 && coincide(a, b, n)) return 0;
+  return scaledDistance(a.slice(0, n), b.slice(0, n));
+}
+
+/** Tells if the first `n` coordinates of `a` and `b` are equal. */
+function coincide(a: number[], b: number[], n: i32): boolean {
+  for (let i: i32 = 0; i < n; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
 /**

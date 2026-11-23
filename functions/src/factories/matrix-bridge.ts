@@ -139,6 +139,8 @@ function diagonalIndex(k: unknown): number {
  * to convert to and from the MathTS `DenseMatrix`.
  */
 export class MathJSDenseMatrix {
+  /** The matrix flag. The prototype holds the value (see `Object.defineProperty` below). */
+  declare readonly isMatrix: boolean;
   _data: number[][];
   _size: number[];
   _datatype: string | undefined;
@@ -764,6 +766,8 @@ function isZeroScalar(value: unknown): boolean {
  * etc.) to operate directly on CSC data without conversion.
  */
 export class MathJSSparseMatrix {
+  /** The matrix flag. The prototype holds the value (see `Object.defineProperty` below). */
+  declare readonly isMatrix: boolean;
   _values: unknown[] | null;
   _index: number[];
   _ptr: number[];

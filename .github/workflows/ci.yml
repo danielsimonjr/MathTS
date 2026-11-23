@@ -57,9 +57,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # `typecheck` reads `dist/` of the package it checks and of the packages its tests
-      # compile. A missing Turbo edge lets that package's `build` clean `dist/` mid-run.
-      # The check reads the resolved task graph, so it needs no build.
+      # `typecheck`, `test` and `test:coverage` read `dist/` of the package they check and of the
+      # packages that its tests import or compile. A missing Turbo edge lets the `build` of such a
+      # package clean `dist/` mid-run. The check reads the resolved task graph, so it needs no build.
       - name: Typecheck task graph
         run: |
           node --test tools/test/check-typecheck-graph.test.mjs
@@ -280,6 +280,13 @@ jobs:
           node tools/sync-package-packaging.mjs --check
           node tools/test/consumer-typecheck-no-node.mjs --skip-build
           node --test tools/test/packed-consumer.test.mjs
+
+      # npm pack of every public package, the evaluate bundle sizes and the README stats check.
+      # They start heavy children, so they run here and not in the vitest pool (#1185).
+      - name: Packaging checks (G27, G29)
+        run: |
+          node --test tools/test/ci-step.test.mjs
+          node --test tools/test/packaging-gates.test.mjs
 
   # This job also runs the wall-clock perf gates (tools/test/wall-clock-gates.json) and the
   # self-test of the gates. A wall-clock verdict does not belong in the Test or Coverage jobs:

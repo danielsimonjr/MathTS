@@ -2,7 +2,8 @@
  * Worker-bundle copies of core numeric helpers.
  *
  * Canonical implementations: `mulberry32`, `rowMajorStrides`, `pairwiseSum`,
- * `pairwiseDot`, `norm2` and `scaledDistance` in `@danielsimonjr/mathts-core`. This file is a copy because the worker entry
+ * `pairwiseDot`, `norm2`, `scaledDistance`, `SQUARES_SAFE_MIN` and `powerOfTwoBelow` in
+ * `@danielsimonjr/mathts-core`. This file is a copy because the worker entry
  * (`dist/worker.js`) cannot import core:
  *
  * - tsdown externalizes package deps, so a bare `@danielsimonjr/mathts-core`
@@ -60,6 +61,24 @@ export function _workerMulberry32(seed: number): () => number {
 // the bodies identical to core (only the names carry the `_worker` prefix);
 // `tests/worker-numerics.test.ts` pins bit-for-bit parity.
 // -----------------------------------------------------------------------------
+
+/**
+ * The smallest finite sum of squares that keeps all its digits, 2^-800 (worker copy of core's
+ * `SQUARES_SAFE_MIN`; the derivation is in its JSDoc). `tests/subnormal-std-1280.test.ts` pins the
+ * copy equal to core.
+ */
+export const _WORKER_SQUARES_SAFE_MIN = 2 ** -800;
+
+/**
+ * The power of 2 `p` with `p <= max < 2 * p` (worker copy of core's `powerOfTwoBelow`). `max` is a
+ * finite number above 0.
+ */
+export function _workerPowerOfTwoBelow(max: number): number {
+  let k = Math.floor(Math.log2(max));
+  if (2 ** k > max) k--;
+  else if (2 ** (k + 1) <= max) k++;
+  return 2 ** k;
+}
 
 /** Block size of the pairwise leaves (worker copy of core's `PAIRWISE_BLOCK`). */
 const PAIRWISE_BLOCK = 128;

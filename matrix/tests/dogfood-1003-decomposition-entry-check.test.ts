@@ -58,8 +58,10 @@ describe('issue #1003: the decomposition reader applies the mathjs entry rule', 
         ])
       )
     ).toThrow(/must contain numbers; row 1 column 1 is Object/);
+    // An Array entry is a further dimension: the shape check rejects it before the entry rule
+    // (#1260), with the jagged TypeError of the row.
     expect(() => decompositionInputToNestedArray(bad([[1, [2]]]))).toThrow(
-      /row 0 column 1 is Array/
+      new TypeError('Matrix decomposition: jagged nested array at row 0')
     );
   });
 

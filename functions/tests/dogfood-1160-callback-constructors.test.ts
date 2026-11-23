@@ -14,6 +14,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import * as mathjs from 'mathjs';
 import {
   chain,
   complex,
@@ -274,4 +275,16 @@ describe('#1160 transpose: direct calls', () => {
     expect(() => tr()).toThrow(TypeError);
     expect(() => tr()).toThrow(/in function transpose/);
   });
+});
+
+it('fraction converts each boxed Matrix entry and preserves dimensions (#1345)', () => {
+  const values = [
+    [0.5, 2],
+    [0.25, 4],
+  ];
+  const got = (fraction as (value: unknown) => unknown)(mat(values)) as Mat;
+  const want = mathjs.fraction(mathjs.matrix(values)) as unknown as Mat;
+  expect(got.toArray().map((row) => (row as unknown[]).map(String))).toEqual(
+    want.toArray().map((row) => (row as unknown[]).map(String))
+  );
 });

@@ -566,6 +566,163 @@ export function sumSquaredDeviationsChecked(xs: ArrayLike<unknown>): number | un
   return squaredDeviationsFrom(xs as ArrayLike<number>, allFinite);
 }
 
+/**
+ * The smallest finite sum of squares that keeps all its digits: 2^-800 (#1104, #1280).
+ *
+ * A square below 2^-1022 is a subnormal double, which is rounded to a multiple of 2^-1074: an
+ * absolute error of at most 2^-1075. A sum S of n squares with S >= 2^-800 therefore has a
+ * relative error of at most n * 2^-275 from that rounding (n < 2^53). A sum below this value can
+ * have lost digits, and a sum of 0 can stand for squares that underflowed.
+ *
+ * Code that squares a list of numbers compares the sum with this value, and computes again for
+ * the data divided by an exact power of 2 when the sum is smaller (or not finite). Two other
+ * thresholds hold their own derivation: `P_NORM_SUM_MIN` in `functions/src/utils/bignumber-hypot.ts`
+ * (p-th powers) and `SUM_SQ_MIN` in `functions/src/geometry/quaternion.ts` (kernels with a
+ * `Math.hypot` fallback).
+ */
+export const SQUARES_SAFE_MIN = 2 ** -800;
+
+/**
+ * The smallest number whose square is still at least {@link SQUARES_SAFE_MIN}: 2^-400.
+ *
+ * - A root `r = sqrt(S / d)` with `d >= 1` and `r >= ROOT_SAFE_MIN` implies `S >= SQUARES_SAFE_MIN`.
+ *   So a root below this value is the root of a sum that can have lost digits. A divisor above 1
+ *   only makes the test fire more often, which costs one exact pass and changes no digit.
+ * - A (population) variance `v` of n values in `[ROOT_SAFE_MIN, 1 / ROOT_SAFE_MIN]` keeps the
+ *   sum of the fourth powers of the deviations in range. By the power-mean inequality that sum is
+ *   at least `n * v * v` (so at least 2^-800), and it is at most `n^3 * v * v` (so below 2^1023
+ *   for n below 2^74). So no power of the deviations up to the fourth loses a digit or overflows.
+ */
+export const ROOT_SAFE_MIN = Math.sqrt(SQUARES_SAFE_MIN);
+
+/** The smallest normal double, 2^-1022: a smaller product has lost digits. */
+const MIN_NORMAL = 2 ** -1022;
+
+/**
+ * Whether two sums of squares give a correlation with every digit: each sum is at least
+ * {@link SQUARES_SAFE_MIN} (no square lost digits), and their product is a normal finite double
+ * (the square root of the product neither underflowed nor overflowed). When the result is false,
+ * the caller divides each variable by its own exact power of 2 and forms the sums again (#1280).
+ *
+ * @param saa - The sum of the squared deviations of the first variable.
+ * @param sbb - The sum of the squared deviations of the second variable.
+ * @returns True when `saa * sbb` can be used as it is.
+ */
+export function squareSumsKeepDigits(saa: number, sbb: number): boolean {
+  const product = saa * sbb;
+  return (
+    saa >= SQUARES_SAFE_MIN &&
+    sbb >= SQUARES_SAFE_MIN &&
+    product >= MIN_NORMAL &&
+    product <= Number.MAX_VALUE
+  );
+}
+
+/**
+ * The power of 2 `p` with `p <= max < 2 * p`.
+ *
+ * `Math.log2` can round up to the next integer (for a value just below a power of 2, and to 1024
+ * for the largest doubles), so the exponent is corrected. The result is exact, also for the
+ * powers of 2 in the subnormal range, so a division by it changes only the exponent of a value.
+ *
+ * @param max - A finite number above 0.
+ * @returns The power of 2 that is at most `max` and above `max / 2`.
+ */
+export function powerOfTwoBelow(max: number): number {
+  let k = Math.floor(Math.log2(max));
+  if (2 ** k > max) k--;
+  else if (2 ** (k + 1) <= max) k++;
+  return 2 ** k;
+}
+
+/**
+ * The exact scale of data: the power of 2 below the largest absolute value of all `arrays`, so
+ * that the data divided by it has its largest value in `[1, 2)`.
+ *
+ * Returns 1 when a value is not finite (a NaN or an infinite value has no scale and keeps its
+ * plain result) or when every value is 0.
+ *
+ * After the division, two different values differ by at least 2^-53, so a sum of squared
+ * deviations is 0 (equal values) or at least about 2^-108, and below 16 per value: it cannot leave
+ * the range for any length of data.
+ *
+ * @param arrays - One or more number arrays. The statistics of one unit share one scale.
+ * @returns The scale, a power of 2, or 1.
+ */
+export function powerOfTwoScaleOf(...arrays: ArrayLike<number>[]): number {
+  let max = 0;
+  for (const xs of arrays) {
+    assertArrayLike('powerOfTwoScaleOf', xs);
+    for (let i = 0; i < xs.length; i++) {
+      const v = xs[i];
+      if (!Number.isFinite(v)) return 1;
+      const a = v < 0 ? -v : v;
+      if (a > max) max = a;
+    }
+  }
+  return max === 0 ? 1 : powerOfTwoBelow(max);
+}
+
+/**
+ * The scale for a statistic that squares its variance (a test statistic with a variance in a
+ * denominator, a standardized moment): 1 when `variance` is in `[ROOT_SAFE_MIN, 1 / ROOT_SAFE_MIN]`
+ * (the plain path loses no digit), else {@link powerOfTwoScaleOf} of `arrays`.
+ *
+ * A variance of 0 is outside the window: it can stand for squares that underflowed, so the data
+ * gets its scale. For constant data the scaled variance is 0 again, and the result is the same.
+ * A NaN or an infinite variance is outside the window, so the data of a variance that overflowed
+ * gets its scale.
+ *
+ * @param variance - The variance (or the mean square) that the caller computed on the plain data.
+ * @param arrays - The data that the variance came from.
+ * @returns The scale, a power of 2, or 1 when the plain path is exact or no scale applies.
+ */
+export function scaleForVariance(variance: number, ...arrays: ArrayLike<number>[]): number {
+  if (variance >= ROOT_SAFE_MIN && variance <= 1 / ROOT_SAFE_MIN) return 1;
+  return powerOfTwoScaleOf(...arrays);
+}
+
+/**
+ * A new array with each element of `xs` divided by `scale`.
+ *
+ * @param xs - A number array or a typed array.
+ * @param scale - A power of 2 from {@link powerOfTwoScaleOf}. The division is exact.
+ * @returns The scaled values as a plain array. `xs` is not changed.
+ */
+export function divideByScale(xs: ArrayLike<number>, scale: number): number[] {
+  assertArrayLike('divideByScale', xs);
+  const out = new Array<number>(xs.length);
+  for (let i = 0; i < xs.length; i++) out[i] = xs[i] / scale;
+  return out;
+}
+
+/**
+ * The root of a sum of squared deviations divided by `divisor`: `sqrt(m2 / divisor)` with every
+ * digit kept (#1280).
+ *
+ * The plain root is returned (same bits) when `m2`, the sum that the caller already has from
+ * {@link sumSquaredDeviations}, is finite and at least {@link SQUARES_SAFE_MIN}. Else the root
+ * is computed again for the data divided by an exact power of 2 and multiplied back. That covers
+ * squares that were subnormal (lost digits), a sum that underflowed to 0 and a sum that
+ * overflowed. Constant data gives an exact 0. A NaN or an infinite value in `xs` has no scale and
+ * gives the plain result.
+ *
+ * @param xs - The data.
+ * @param m2 - `sumSquaredDeviations(xs)`.
+ * @param divisor - `n` (uncorrected), `n - 1` (unbiased) or `n + 1` (biased).
+ * @returns The root.
+ */
+export function stdFromSquaredDeviations(
+  xs: ArrayLike<number>,
+  m2: number,
+  divisor: number
+): number {
+  if (m2 >= SQUARES_SAFE_MIN && m2 < Infinity) return Math.sqrt(m2 / divisor);
+  const scale = powerOfTwoScaleOf(xs);
+  if (scale === 1) return Math.sqrt(m2 / divisor);
+  return scale * Math.sqrt(sumSquaredDeviations(divideByScale(xs, scale)) / divisor);
+}
+
 /** The shifted two-pass sum of squared deviations of `xs`, which has at least two numbers. */
 function squaredDeviationsFrom(xs: ArrayLike<number>, allFinite: boolean): number {
   const n = xs.length;

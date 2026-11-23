@@ -127,7 +127,7 @@ describe('#1226 slu of a non-square sparse matrix', () => {
     [0, 3],
   ])('an empty %ix%i matrix still returns the empty factorization (#1209)', (m, n) => {
     const a = sparse(m === 0 ? [] : Array.from({ length: m }, () => [] as number[]));
-    if (n > 0) (a as { resize(size: number[]): void }).resize([m, n]);
+    if (n > 0) (a as unknown as { resize(size: number[]): void }).resize([m, n]);
     const r = slu(a, 1, 1);
     const k = Math.min(m, n);
     expect((r.L as unknown as { size(): number[] }).size()).toEqual([m, k]);

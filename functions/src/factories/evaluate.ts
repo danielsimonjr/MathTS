@@ -72,6 +72,12 @@ const fullMathScope: Record<string, unknown> = {
   // Typed functions (add, subtract, multiply, divide, pow, sin, cos, etc.)
   ...(typedFns as Record<string, unknown>),
 
+  // Use the rounding factories that also back parsed callbacks and support
+  // decimal counts. The numeric typed versions only accept one argument.
+  ceil: factoryScope.ceil,
+  floor: factoryScope.floor,
+  fix: factoryScope.fix,
+
   // Math constants (Unicode aliases for notebook input)
   pi: Math.PI,
   π: Math.PI,

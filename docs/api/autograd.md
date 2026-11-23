@@ -73,8 +73,19 @@ Elementary functions (each following the dual-number chain rule, ~24 ops):
 forwardGrad(fn: (x: Tensor) => Tensor, x: Tensor): { value: Tensor; jacobian: ... }
 ```
 
-Full Jacobian via one `DualTensor` trace per input flat-index. `fn` must be
-traceable (only add/sub/mul/scale-composed ops).
+Dense Jacobian via one `DualTensor` trace per input flat index.
+Its shape is `[...value.shape, ...x.shape]`.
+
+### forwardDiagonalGrad
+
+```typescript
+forwardDiagonalGrad(fn: (x: DualTensor) => DualTensor, x: Tensor): { value: Tensor; diagonal: Tensor }
+```
+
+One `DualTensor` trace yields the value and Jacobian diagonal of a same-shape
+elementwise map such as `x => x.mul(x)`. Each output must depend only on the
+input at its matching flat index. Both returned tensors have the input shape.
+Use `forwardGrad` for maps that mix input indices.
 
 ## Reverse Mode
 

@@ -14,6 +14,7 @@ import {
   pairwiseDot,
   scaledDistance,
   sumSquaredDeviations,
+  stdFromSquaredDeviations,
   extrema,
 } from '@danielsimonjr/mathts-core';
 import {
@@ -1034,8 +1035,11 @@ export class ComputePool {
       const sum = pairwiseSum(data);
       const n = data.length;
       const mean = n > 0 ? sum / n : 0;
-      const variance = n > 0 ? sumSquaredDeviations(data) / n : 0; // population (matches the worker)
-      return this.seqResult({ mean, variance, std: Math.sqrt(variance) });
+      const m2 = n > 0 ? sumSquaredDeviations(data) : 0;
+      const variance = n > 0 ? m2 / n : 0; // population (matches the worker)
+      // The std keeps every digit when the squares are subnormal or overflow (#1280).
+      const std = n > 0 ? stdFromSquaredDeviations(data, m2, n) : 0;
+      return this.seqResult({ mean, variance, std });
     }
     await this.ensureInitializedForParallel(data.length, 'variance', force);
     return toParallelResult(
