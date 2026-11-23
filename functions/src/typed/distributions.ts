@@ -440,6 +440,16 @@ export const betaPDF = mathTyped('betaPDF', {
 // Gamma Distribution
 // =============================================================================
 
+function gammaDensity(shape: f64, rateOrOptions: f64 | GammaDistOptions = 1): (x: f64) => f64 {
+  if (
+    !Number.isFinite(shape) ||
+    (typeof rateOrOptions === 'number' && !Number.isFinite(rateOrOptions))
+  ) {
+    return () => NaN;
+  }
+  return gammaDist(shape, rateOrOptions).pdf;
+}
+
 /**
  * Gamma probability density. The positional parameter is the rate, with default 1.
  *
@@ -449,27 +459,19 @@ export const betaPDF = mathTyped('betaPDF', {
  * @returns PDF value(s)
  */
 export const gammaPDF = mathTyped('gammaPDF', {
-  'number, number': (x: f64, shape: f64): f64 => gammaDist(shape).pdf(x),
+  'number, number': (x: f64, shape: f64): f64 => gammaDensity(shape)(x),
   'number, number, number | Object': (
     x: f64,
     shape: f64,
     rateOrOptions: f64 | GammaDistOptions
-  ): f64 => {
-    if (
-      !Number.isFinite(shape) ||
-      (typeof rateOrOptions === 'number' && !Number.isFinite(rateOrOptions))
-    ) {
-      return NaN;
-    }
-    return gammaDist(shape, rateOrOptions).pdf(x);
-  },
+  ): f64 => gammaDensity(shape, rateOrOptions)(x),
   'Float64Array, number': (x: Float64Array, shape: f64): Float64Array =>
-    f64Unary(x, gammaDist(shape).pdf),
+    f64Unary(x, gammaDensity(shape)),
   'Float64Array, number, number | Object': (
     x: Float64Array,
     shape: f64,
     rateOrOptions: f64 | GammaDistOptions
-  ): Float64Array => f64Unary(x, gammaDist(shape, rateOrOptions).pdf),
+  ): Float64Array => f64Unary(x, gammaDensity(shape, rateOrOptions)),
 });
 
 // =============================================================================
