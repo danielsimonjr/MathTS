@@ -147,13 +147,13 @@ describe('P7-3 factory max/min number path', () => {
       });
 
       it('a Fraction in the middle of numbers', () => {
-        const a: unknown[] = seeded(300, 0x7003b02);
+        const a: unknown[] = seeded(300, 0x7003b02).map((v) => Number(v.toPrecision(14)));
         a[150] = new Fraction(1, 3);
         expect(same(run(a), reference(a, pick))).toBe(true);
       });
 
       it('a Fraction first keeps the whole array generic', () => {
-        const a: unknown[] = seeded(50, 0x7003c03);
+        const a: unknown[] = seeded(50, 0x7003c03).map((v) => Number(v.toPrecision(14)));
         a.unshift(new Fraction(1, 2));
         expect(same(run(a), reference(a, pick))).toBe(true);
       });

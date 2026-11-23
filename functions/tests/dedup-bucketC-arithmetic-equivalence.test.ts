@@ -189,7 +189,7 @@ describe('Bucket C — typed dispatcher ≡ core scalar primitive', () => {
     fc.assert(
       fc.property(
         fc.double({ min: 0.1, max: 50, noNaN: true }),
-        fc.double({ min: -4, max: 4, noNaN: true }),
+        fc.double({ min: -4, max: 4, noNaN: true }).map((v) => Number(v.toPrecision(14))),
         (base, exp) => {
           expect(eqNum(pow(bn(base), exp), corePow(bn(base), exp))).toBe(true);
         }
@@ -411,13 +411,17 @@ describe('Bucket C — add/subtract/multiply/divide/abs: typed dispatcher ≡ co
 
   it('add(BigNumber, BigNumber) and mixed number/BigNumber match core', () => {
     fc.assert(
-      fc.property(numDomain, numDomain, (x, y) => {
-        const a = bn(x);
-        const b = bn(y);
-        expect(resultsMatch(add(a, b), coreAdd(a, b))).toBe(true);
-        expect(resultsMatch(add(x, b), coreAdd(x, b))).toBe(true);
-        expect(resultsMatch(add(a, x), coreAdd(a, x))).toBe(true);
-      })
+      fc.property(
+        numDomain.map((v) => Number(v.toPrecision(14))),
+        numDomain,
+        (x, y) => {
+          const a = bn(x);
+          const b = bn(y);
+          expect(resultsMatch(add(a, b), coreAdd(a, b))).toBe(true);
+          expect(resultsMatch(add(x, b), coreAdd(x, b))).toBe(true);
+          expect(resultsMatch(add(a, x), coreAdd(a, x))).toBe(true);
+        }
+      )
     );
   });
 
@@ -479,13 +483,17 @@ describe('Bucket C — add/subtract/multiply/divide/abs: typed dispatcher ≡ co
 
   it('subtract(BigNumber, BigNumber) and mixed number/BigNumber preserve order like core', () => {
     fc.assert(
-      fc.property(numDomain, numDomain, (x, y) => {
-        const a = bn(x);
-        const b = bn(y);
-        expect(resultsMatch(subtract(a, b), coreSubtract(a, b))).toBe(true);
-        expect(resultsMatch(subtract(x, b), coreSubtract(x, b))).toBe(true);
-        expect(resultsMatch(subtract(a, x), coreSubtract(a, x))).toBe(true);
-      })
+      fc.property(
+        numDomain.map((v) => Number(v.toPrecision(14))),
+        numDomain,
+        (x, y) => {
+          const a = bn(x);
+          const b = bn(y);
+          expect(resultsMatch(subtract(a, b), coreSubtract(a, b))).toBe(true);
+          expect(resultsMatch(subtract(x, b), coreSubtract(x, b))).toBe(true);
+          expect(resultsMatch(subtract(a, x), coreSubtract(a, x))).toBe(true);
+        }
+      )
     );
   });
 
@@ -546,13 +554,17 @@ describe('Bucket C — add/subtract/multiply/divide/abs: typed dispatcher ≡ co
 
   it('multiply(BigNumber, BigNumber) and mixed number/BigNumber match core', () => {
     fc.assert(
-      fc.property(numDomain, numDomain, (x, y) => {
-        const a = bn(x);
-        const b = bn(y);
-        expect(resultsMatch(multiply(a, b), coreMultiply(a, b))).toBe(true);
-        expect(resultsMatch(multiply(x, b), coreMultiply(x, b))).toBe(true);
-        expect(resultsMatch(multiply(a, x), coreMultiply(a, x))).toBe(true);
-      })
+      fc.property(
+        numDomain.map((v) => Number(v.toPrecision(14))),
+        numDomain,
+        (x, y) => {
+          const a = bn(x);
+          const b = bn(y);
+          expect(resultsMatch(multiply(a, b), coreMultiply(a, b))).toBe(true);
+          expect(resultsMatch(multiply(x, b), coreMultiply(x, b))).toBe(true);
+          expect(resultsMatch(multiply(a, x), coreMultiply(a, x))).toBe(true);
+        }
+      )
     );
   });
 
@@ -630,13 +642,17 @@ describe('Bucket C — add/subtract/multiply/divide/abs: typed dispatcher ≡ co
 
   it('divide(BigNumber, BigNumber) and mixed number/BigNumber preserve order like core', () => {
     fc.assert(
-      fc.property(numDomain, numDomainNonZero, (x, y) => {
-        const a = bn(x);
-        const b = bn(y);
-        expect(resultsMatch(divide(a, b), coreDivide(a, b))).toBe(true);
-        expect(resultsMatch(divide(x, b), coreDivide(x, b))).toBe(true);
-        if (x !== 0) expect(resultsMatch(divide(a, x), coreDivide(a, x))).toBe(true);
-      })
+      fc.property(
+        numDomain.map((v) => Number(v.toPrecision(14))),
+        numDomainNonZero,
+        (x, y) => {
+          const a = bn(x);
+          const b = bn(y);
+          expect(resultsMatch(divide(a, b), coreDivide(a, b))).toBe(true);
+          expect(resultsMatch(divide(x, b), coreDivide(x, b))).toBe(true);
+          if (x !== 0) expect(resultsMatch(divide(a, x), coreDivide(a, x))).toBe(true);
+        }
+      )
     );
   });
 

@@ -4,7 +4,7 @@ import { arraySize as size } from '../utils/array.js';
 import { powNumber } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
-import type { BigNumber } from '@danielsimonjr/mathts-core';
+import { Fraction, type BigNumber } from '@danielsimonjr/mathts-core';
 import { powBigNumberWith } from '../typed/complex-promotion.js';
 import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
@@ -145,8 +145,13 @@ export const createPow = /* #__PURE__ */ factory(
       'Fraction, Fraction': function (
         x: FractionType,
         y: FractionType
-      ): FractionType | number | ComplexType {
-        const result = x.pow(y);
+      ): Fraction | FractionType | number | ComplexType {
+        const result =
+          x instanceof Fraction && y instanceof Fraction
+            ? y.denominator === 1n
+              ? x.pow(y.numerator)
+              : null
+            : x.pow(y);
 
         if (result != null) {
           return result;

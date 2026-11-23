@@ -121,6 +121,8 @@ export interface LogCallable {
   (a: Dual): Dual;
   (a: number, b: number): number | Complex;
   (a: BigNumber, b: BigNumber): BigNumber | Complex;
+  (a: BigNumber, b: number): BigNumber | Complex;
+  (a: number, b: BigNumber): BigNumber | Complex;
   (a: NumberTypedArray): Float64Array;
   (a: number[]): (number | Complex)[];
   (a: number[][]): (number | Complex)[][];

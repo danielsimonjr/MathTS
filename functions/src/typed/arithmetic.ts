@@ -885,11 +885,15 @@ export const add = withBinaryScalarGuards(
     'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).add(b),
     'Complex, number': (a: Complex, b: f64): Complex => a.add(Complex.fromNumber(b)),
 
-    'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).add(b),
-    'Fraction, number': (a: Fraction, b: f64): Fraction => a.add(Fraction.fromNumber(b)),
+    'number, Fraction': (a: f64, b: Fraction): Fraction =>
+      (mathTyped.convert(a, 'Fraction') as Fraction).add(b),
+    'Fraction, number': (a: Fraction, b: f64): Fraction =>
+      a.add(mathTyped.convert(b, 'Fraction') as Fraction),
 
-    'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).add(b),
-    'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.add(BigNumber.fromNumber(b)),
+    'number, BigNumber': (a: f64, b: BigNumber): BigNumber =>
+      (mathTyped.convert(a, 'BigNumber') as BigNumber).add(b),
+    'BigNumber, number': (a: BigNumber, b: f64): BigNumber =>
+      a.add(mathTyped.convert(b, 'BigNumber') as BigNumber),
 
     // Float64Array addition (synchronous)
     'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
@@ -986,11 +990,15 @@ export const subtract = mathTyped('subtract', {
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).subtract(b),
   'Complex, number': (a: Complex, b: f64): Complex => a.subtract(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).subtract(b),
-  'Fraction, number': (a: Fraction, b: f64): Fraction => a.subtract(Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction =>
+    (mathTyped.convert(a, 'Fraction') as Fraction).subtract(b),
+  'Fraction, number': (a: Fraction, b: f64): Fraction =>
+    a.subtract(mathTyped.convert(b, 'Fraction') as Fraction),
 
-  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).subtract(b),
-  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.subtract(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: f64, b: BigNumber): BigNumber =>
+    (mathTyped.convert(a, 'BigNumber') as BigNumber).subtract(b),
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber =>
+    a.subtract(mathTyped.convert(b, 'BigNumber') as BigNumber),
 
   // Float64Array subtraction (synchronous)
   'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
@@ -1154,11 +1162,15 @@ export const multiply = withBinaryScalarGuards(
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
 
-    'number, Fraction': (a: f64, b: Fraction): Fraction => b.multiply(Fraction.fromNumber(a)),
-    'Fraction, number': (a: Fraction, b: f64): Fraction => a.multiply(Fraction.fromNumber(b)),
+    'number, Fraction': (a: f64, b: Fraction): Fraction =>
+      b.multiply(mathTyped.convert(a, 'Fraction') as Fraction),
+    'Fraction, number': (a: Fraction, b: f64): Fraction =>
+      a.multiply(mathTyped.convert(b, 'Fraction') as Fraction),
 
-    'number, BigNumber': (a: f64, b: BigNumber): BigNumber => b.multiply(BigNumber.fromNumber(a)),
-    'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.multiply(BigNumber.fromNumber(b)),
+    'number, BigNumber': (a: f64, b: BigNumber): BigNumber =>
+      b.multiply(mathTyped.convert(a, 'BigNumber') as BigNumber),
+    'BigNumber, number': (a: BigNumber, b: f64): BigNumber =>
+      a.multiply(mathTyped.convert(b, 'BigNumber') as BigNumber),
 
     // Float64Array element-wise multiplication (synchronous)
     'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
@@ -1248,11 +1260,15 @@ export const divide = mathTyped('divide', {
   'number, Complex': (a: f64, b: Complex): Complex => Complex.fromNumber(a).divide(b),
   'Complex, number': (a: Complex, b: f64): Complex => a.divide(Complex.fromNumber(b)),
 
-  'number, Fraction': (a: f64, b: Fraction): Fraction => Fraction.fromNumber(a).divide(b),
-  'Fraction, number': (a: Fraction, b: f64): Fraction => a.divide(Fraction.fromNumber(b)),
+  'number, Fraction': (a: f64, b: Fraction): Fraction =>
+    (mathTyped.convert(a, 'Fraction') as Fraction).divide(b),
+  'Fraction, number': (a: Fraction, b: f64): Fraction =>
+    a.divide(mathTyped.convert(b, 'Fraction') as Fraction),
 
-  'number, BigNumber': (a: f64, b: BigNumber): BigNumber => BigNumber.fromNumber(a).divide(b),
-  'BigNumber, number': (a: BigNumber, b: f64): BigNumber => a.divide(BigNumber.fromNumber(b)),
+  'number, BigNumber': (a: f64, b: BigNumber): BigNumber =>
+    (mathTyped.convert(a, 'BigNumber') as BigNumber).divide(b),
+  'BigNumber, number': (a: BigNumber, b: f64): BigNumber =>
+    a.divide(mathTyped.convert(b, 'BigNumber') as BigNumber),
 
   // Float64Array element-wise division (synchronous)
   'Float64Array, Float64Array': (a: Float64Array, b: Float64Array): Float64Array =>
@@ -1430,7 +1446,7 @@ export const pow = mathTyped('pow', {
   'Fraction, number': (a: Fraction, b: f64): Fraction | f64 => corePow(a, b) as Fraction | f64,
   // A BigNumber base takes the BigNumber kernel shared with the factory `pow` (mathjs rules).
   'BigNumber, number': (a: BigNumber, b: f64): BigNumber | Complex =>
-    powBigNumberWith(a, BigNumber.fromNumber(b), isPredictableMode()),
+    powBigNumberWith(a, mathTyped.convert(b, 'BigNumber') as BigNumber, isPredictableMode()),
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber | Complex =>
     powBigNumberWith(a, b, isPredictableMode()),
   // Dual numbers (forward-mode AD): constant or variable exponent.
@@ -1730,7 +1746,36 @@ function assertIntegerDecimals(decimals: f64): void {
   if (!Number.isInteger(decimals)) throw new TypeError(ROUND_DECIMALS_NOT_INTEGER);
 }
 
+/** Preserve the complex branch of log when the mixed real arguments leave its domain. */
+function logMixedReal(a: BigNumber | number, base: BigNumber | number): BigNumber | Complex {
+  const negative = (x: BigNumber | number) => (typeof x === 'number' ? x < 0 : x.isNegative());
+  if (!isPredictableMode() && (negative(a) || negative(base))) {
+    return Complex.fromNumber(Number(a))
+      .log()
+      .divide(Complex.fromNumber(Number(base)).log());
+  }
+  return logBigNumberBase(
+    mathTyped.convert(a, 'BigNumber') as BigNumber,
+    mathTyped.convert(base, 'BigNumber') as BigNumber
+  );
+}
+
+/** A mixed real log with Fractions cannot choose the BigNumber signature. */
+function rejectFractionLog(): never {
+  throw new TypeError(
+    'Cannot implicitly convert a Fraction to BigNumber or vice versa. ' +
+      'Use function bignumber(x) to convert to BigNumber or fraction(x) to convert to Fraction.'
+  );
+}
+
+const mixedFractionLogGuards = {
+  'number | BigNumber, Fraction': rejectFractionLog,
+  'Fraction, number | BigNumber': rejectFractionLog,
+  'Fraction, Fraction': rejectFractionLog,
+};
+
 export const log = mathTyped('log', {
+  ...mixedFractionLogGuards,
   number: (a: f64): f64 | Complex => logReal(a),
   Complex: (a: Complex): Complex => a.log(),
   BigNumber: (a: BigNumber): BigNumber | Complex => logBigNumberWith(a, isPredictableMode()),
@@ -1738,7 +1783,8 @@ export const log = mathTyped('log', {
   'number, number': (a: f64, base: f64): f64 | Complex => logRealBase(a, base),
   'BigNumber, BigNumber': (a: BigNumber, base: BigNumber): BigNumber | Complex =>
     logBigNumberBase(a, base),
-
+  'BigNumber, number': (a: BigNumber, base: number): BigNumber | Complex => logMixedReal(a, base),
+  'number, BigNumber': (a: number, base: BigNumber): BigNumber | Complex => logMixedReal(a, base),
   // Float64Array log (synchronous)
   Float64Array: (a: Float64Array): Float64Array => f64UnaryDispatched(a, 'log', (x) => Math.log(x)),
   'Array | Matrix': unaryCollection({
@@ -2423,6 +2469,10 @@ export const smaller = mathTyped('smaller', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) < 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) < 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) < 0,
+  'number, Fraction': (a: number, b: Fraction): boolean =>
+    (mathTyped.convert(a, 'BigNumber') as BigNumber).compare(BigNumber.fromFraction(b)) < 0,
+  'Fraction, number': (a: Fraction, b: number): boolean =>
+    BigNumber.fromFraction(a).compare(mathTyped.convert(b, 'BigNumber') as BigNumber) < 0,
   ...collectionBinaryRows('smaller'),
 });
 
@@ -2435,6 +2485,10 @@ export const larger = mathTyped('larger', {
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) > 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) > 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) > 0,
+  'number, Fraction': (a: number, b: Fraction): boolean =>
+    (mathTyped.convert(a, 'BigNumber') as BigNumber).compare(BigNumber.fromFraction(b)) > 0,
+  'Fraction, number': (a: Fraction, b: number): boolean =>
+    BigNumber.fromFraction(a).compare(mathTyped.convert(b, 'BigNumber') as BigNumber) > 0,
   ...collectionBinaryRows('larger'),
 });
 
