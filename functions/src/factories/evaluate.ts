@@ -62,16 +62,7 @@ function omitEvaluateInternals(scope: Record<string, unknown>): Record<string, u
 // Step 1: Build the full math scope
 // ---------------------------------------------------------------------------
 
-const fullMathScope: Record<string, unknown> = {
-  // Core scope (typed, config, Complex, BigNumber, etc.)
-  ...factoryScope,
-
-  // Activated factory functions (abs, addScalar, equalScalar, etc.)
-  ...(activatedFactories as Record<string, unknown>),
-
-  // Typed functions (add, subtract, multiply, divide, pow, sin, cos, etc.)
-  ...(typedFns as Record<string, unknown>),
-
+const evaluateConstantsAndOverrides: Record<string, unknown> = {
   // Use the rounding factories that also back parsed callbacks and support
   // decimal counts. The numeric typed versions only accept one argument.
   ceil: factoryScope.ceil,
@@ -98,7 +89,7 @@ const fullMathScope: Record<string, unknown> = {
   false: false,
 };
 
-const mathScope: Record<string, unknown> = omitEvaluateInternals(fullMathScope);
+const transforms: Record<string, unknown> = {};
 
 // ---------------------------------------------------------------------------
 // Step 1b: Expression-language transforms (wired 2026-07-05)
@@ -139,11 +130,32 @@ const mathScope: Record<string, unknown> = omitEvaluateInternals(fullMathScope);
     'variance',
   ]) {
     if (typeof mwt[key] === 'function' && !EVALUATE_SCOPE_OMIT.has(key)) {
-      mathScope[key] = mwt[key];
+      transforms[key] = mwt[key];
     }
   }
   // Same object Node.compile and inline map/filter callbacks close over.
   for (const key of EVALUATE_SCOPE_OMIT) delete mwt[key];
+}
+
+const scopeLayers: ReadonlyArray<Record<string, unknown>> = [
+  factoryScope,
+  activatedFactories,
+  typedFns,
+  evaluateConstantsAndOverrides,
+  transforms,
+];
+const scopeNames = new Set(scopeLayers.flatMap((layer) => Object.keys(layer)));
+const mathScope: Record<string, unknown> = {};
+const unsafeMathScope: Record<string, unknown> = {};
+for (const key of scopeNames) {
+  for (let i = scopeLayers.length - 1; i >= 0; i--) {
+    const layer = scopeLayers[i];
+    if (!Object.hasOwn(layer, key)) continue;
+    const binding = layer[key];
+    unsafeMathScope[key] = binding;
+    if (!EVALUATE_SCOPE_OMIT.has(key)) mathScope[key] = binding;
+    break;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -173,18 +185,6 @@ function configFingerprint(): string {
   let key = '';
   for (const k in liveConfig) key += k + '=' + String(liveConfig[k]) + ';';
   return key;
-}
-
-/**
- * Trusted-input scope: the safe scope plus the compiler/dispatch symbols
- * `{ unsafe: true }` is allowed to call by name. Callback re-entry still uses
- * the stripped `mathWithTransform`, so a safe `map` callback cannot load them.
- */
-const unsafeMathScope: Record<string, unknown> = { ...mathScope };
-for (const key of EVALUATE_SCOPE_OMIT) {
-  if (Object.prototype.hasOwnProperty.call(fullMathScope, key)) {
-    unsafeMathScope[key] = fullMathScope[key];
-  }
 }
 
 const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
@@ -590,8 +590,8 @@ function buildUnsafeScopedMathNamespace(
 ): Record<string, unknown> {
   const scoped = buildScopedMathNamespace(imported, hidden);
   for (const key of EVALUATE_SCOPE_OMIT) {
-    if (!hidden.has(key) && Object.prototype.hasOwnProperty.call(fullMathScope, key)) {
-      scoped[key] = fullMathScope[key];
+    if (!hidden.has(key) && Object.hasOwn(unsafeMathScope, key)) {
+      scoped[key] = unsafeMathScope[key];
     }
   }
   return scoped;
