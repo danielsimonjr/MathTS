@@ -35,8 +35,19 @@ export * from './complex.js';
 export { typedComplex } from './complex.js';
 
 // Set functions
-export * from './set.js';
-export { typedSet } from './set.js';
+export {
+  setCartesian,
+  setDifference,
+  setDistinct,
+  setIntersect,
+  setIsSubset,
+  setMultiplicity,
+  setPowerset,
+  setSize,
+  setSymDifference,
+  setUnion,
+  typedSet,
+} from './set.js';
 
 // Special functions (erf, beta, bessel, etc.)
 export * from './special.js';
