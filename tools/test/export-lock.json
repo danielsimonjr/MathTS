@@ -12431,6 +12431,18 @@
   },
   "@danielsimonjr/mathts-compat": {
     ".": {
+      "AccessorNode": {
+        "kind": "function"
+      },
+      "ArgumentsError": {
+        "kind": "function"
+      },
+      "ArrayNode": {
+        "kind": "function"
+      },
+      "AssignmentNode": {
+        "kind": "function"
+      },
       "BIGNUMBER_E": {
         "kind": "object"
       },
@@ -12446,6 +12458,9 @@
       "BigNumber": {
         "kind": "function"
       },
+      "BlockNode": {
+        "kind": "function"
+      },
       "COMPLEX_ONE": {
         "kind": "object"
       },
@@ -12458,7 +12473,16 @@
       "Complex": {
         "kind": "function"
       },
+      "ConditionalNode": {
+        "kind": "function"
+      },
+      "ConstantNode": {
+        "kind": "function"
+      },
       "DenseMatrix": {
+        "kind": "function"
+      },
+      "DimensionError": {
         "kind": "function"
       },
       "FRACTION_ONE": {
@@ -12467,11 +12491,32 @@
       "FRACTION_ZERO": {
         "kind": "object"
       },
+      "FibonacciHeap": {
+        "kind": "function"
+      },
       "Fraction": {
+        "kind": "function"
+      },
+      "FunctionAssignmentNode": {
+        "kind": "function"
+      },
+      "FunctionNode": {
         "kind": "function"
       },
       "I": {
         "kind": "object"
+      },
+      "ImmutableDenseMatrix": {
+        "kind": "function"
+      },
+      "Index": {
+        "kind": "function"
+      },
+      "IndexError": {
+        "kind": "function"
+      },
+      "IndexNode": {
+        "kind": "function"
       },
       "Infinity_": {
         "kind": "number"
@@ -12494,10 +12539,37 @@
       "MathJSConfig": {
         "kind": "type"
       },
+      "Matrix": {
+        "kind": "function"
+      },
       "NaN_": {
         "kind": "number"
       },
+      "Node": {
+        "kind": "function"
+      },
+      "ObjectNode": {
+        "kind": "function"
+      },
+      "OperatorNode": {
+        "kind": "function"
+      },
+      "ParenthesisNode": {
+        "kind": "function"
+      },
       "Parser": {
+        "kind": "function"
+      },
+      "Range": {
+        "kind": "function"
+      },
+      "RangeNode": {
+        "kind": "function"
+      },
+      "RelationalNode": {
+        "kind": "function"
+      },
+      "ResultSet": {
         "kind": "function"
       },
       "SQRT1_2": {
@@ -12506,7 +12578,16 @@
       "SQRT2": {
         "kind": "number"
       },
+      "Spa": {
+        "kind": "function"
+      },
       "SparseMatrix": {
+        "kind": "function"
+      },
+      "SymbolNode": {
+        "kind": "function"
+      },
+      "Unit": {
         "kind": "function"
       },
       "abs": {
@@ -12560,6 +12641,9 @@
       "create": {
         "kind": "function"
       },
+      "den": {
+        "kind": "function"
+      },
       "det": {
         "kind": "function"
       },
@@ -12573,6 +12657,9 @@
         "kind": "function"
       },
       "exp": {
+        "kind": "function"
+      },
+      "factory": {
         "kind": "function"
       },
       "floor": {
@@ -12593,19 +12680,133 @@
       "im": {
         "kind": "function"
       },
+      "isAccessorNode": {
+        "kind": "function"
+      },
+      "isArray": {
+        "kind": "function"
+      },
+      "isArrayNode": {
+        "kind": "function"
+      },
+      "isAssignmentNode": {
+        "kind": "function"
+      },
+      "isBigInt": {
+        "kind": "function"
+      },
       "isBigNumber_": {
+        "kind": "function"
+      },
+      "isBlockNode": {
+        "kind": "function"
+      },
+      "isBoolean": {
+        "kind": "function"
+      },
+      "isChain": {
+        "kind": "function"
+      },
+      "isCollection": {
         "kind": "function"
       },
       "isComplex_": {
         "kind": "function"
       },
+      "isConditionalNode": {
+        "kind": "function"
+      },
+      "isConstantNode": {
+        "kind": "function"
+      },
+      "isDate": {
+        "kind": "function"
+      },
+      "isDenseMatrix": {
+        "kind": "function"
+      },
       "isFraction_": {
+        "kind": "function"
+      },
+      "isFunction": {
+        "kind": "function"
+      },
+      "isFunctionAssignmentNode": {
+        "kind": "function"
+      },
+      "isFunctionNode": {
+        "kind": "function"
+      },
+      "isHelp": {
+        "kind": "function"
+      },
+      "isIndex": {
+        "kind": "function"
+      },
+      "isIndexNode": {
+        "kind": "function"
+      },
+      "isMap": {
         "kind": "function"
       },
       "isMatrix": {
         "kind": "function"
       },
+      "isNode": {
+        "kind": "function"
+      },
+      "isNull": {
+        "kind": "function"
+      },
       "isNumber_": {
+        "kind": "function"
+      },
+      "isObject": {
+        "kind": "function"
+      },
+      "isObjectNode": {
+        "kind": "function"
+      },
+      "isObjectWrappingMap": {
+        "kind": "function"
+      },
+      "isOperatorNode": {
+        "kind": "function"
+      },
+      "isParenthesisNode": {
+        "kind": "function"
+      },
+      "isPartitionedMap": {
+        "kind": "function"
+      },
+      "isRange": {
+        "kind": "function"
+      },
+      "isRangeNode": {
+        "kind": "function"
+      },
+      "isRegExp": {
+        "kind": "function"
+      },
+      "isRelationalNode": {
+        "kind": "function"
+      },
+      "isResultSet": {
+        "kind": "function"
+      },
+      "isSparseMatrix": {
+        "kind": "function"
+      },
+      "isString": {
+        "kind": "function"
+      },
+      "isSymbolNode": {
+        "kind": "function"
+      },
+      "isUndefined": {
+        "kind": "function"
+      },
+      "isUnit": {
         "kind": "function"
       },
       "lcm": {
@@ -12627,6 +12828,9 @@
         "kind": "function"
       },
       "multiply": {
+        "kind": "function"
+      },
+      "num": {
         "kind": "function"
       },
       "ones": {
@@ -12688,6 +12892,9 @@
       },
       "variance": {
         "kind": "function"
+      },
+      "version": {
+        "kind": "string"
       },
       "zeros": {
         "kind": "function"
