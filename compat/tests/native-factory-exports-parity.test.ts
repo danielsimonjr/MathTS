@@ -5,6 +5,23 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('loads all supported MathJS dependency bundles together', () => {
+    const names = Object.keys(oracle).filter(
+      (name) => name.endsWith('Dependencies') && Object.hasOwn(compat, name)
+    );
+    const actual = create(
+      Object.fromEntries(names.map((name) => [name, Reflect.get(compat, name)]))
+    );
+    const expected = oracle.create(
+      Object.fromEntries(names.map((name) => [name, Reflect.get(oracle, name)]))
+    );
+    const keys = Object.keys(expected).sort();
+    expect(Object.keys(actual).sort()).toEqual(keys);
+    for (const name of keys) {
+      expect(typeof Reflect.get(actual, name), name).toBe(typeof Reflect.get(expected, name));
+    }
+  });
+
   it.each(['qr', 'lup'] as const)('creates the selected %s decomposition', (name) => {
     const bundleName = name + 'Dependencies';
     const bundle = Reflect.get(compat, bundleName);
