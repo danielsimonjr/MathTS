@@ -559,6 +559,7 @@ export function create(
   );
   const expressionConstants: Record<string, () => unknown> = {};
   for (const name of overriddenNames) expressionConstants[name] = () => instance[name];
+  if (originalSurface.add === mathFunctions.add) expressionConstants.add = () => instance.add;
   if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
 

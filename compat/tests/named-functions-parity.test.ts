@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as oracle from 'mathjs';
 import {
+  add,
   all,
   cbrt,
   combinations,
@@ -160,5 +161,13 @@ describe('named compatibility function imports', () => {
       oracle.evaluate(expression).valueOf()
     );
     expect(() => compareText(1, '1')).toThrow(TypeError);
+  });
+
+  it('converts numeric strings for scalar and expression addition', () => {
+    const math = create(all);
+    expect(add('2.3', '4')).toBe(6.3);
+    expect(math.add('2', 3, '4')).toBe(9);
+    expect(math.evaluate('"2.3" + "4"')).toBe(6.3);
+    expect(() => add('abc', '4')).toThrow(/Cannot convert "abc" to a number/);
   });
 });

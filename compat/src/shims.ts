@@ -43,6 +43,7 @@ import type {
 
 import {
   add as _add,
+  addScalar as _addScalar,
   subtract as _subtract,
   multiply as _multiply,
   divide as _divide,
@@ -406,11 +407,17 @@ function withTypedSurface<T extends object>(shim: T, typedFn: object): T {
 
 type OneArg = <T>(value: T) => T;
 export const add = makeArithmetic(
-  _add as (a: unknown, b: unknown) => unknown,
+  (a, b) =>
+    typeof a === 'string' || typeof b === 'string'
+      ? _addScalar(a, b)
+      : (_add as (left: unknown, right: unknown) => unknown)(a, b),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b
-) as PublicAdd & OneArg;
+) as PublicAdd &
+  OneArg & {
+    (left: string | number, right: string | number, ...rest: (string | number)[]): number;
+  };
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
