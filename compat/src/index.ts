@@ -58,6 +58,18 @@ export interface MathJSConfig extends Partial<RuntimeConfig> {
   randomSeed?: string | null;
 }
 
+const moduleDefaults = {
+  relTol: 1e-12,
+  absTol: 1e-15,
+  matrix: 'Matrix',
+  number: 'number',
+  numberFallback: 'number',
+  precision: 64,
+  predictable: false,
+  randomSeed: null,
+  legacySubset: false,
+} as const satisfies MathJSConfig;
+
 /**
  * Default configuration
  */
@@ -93,7 +105,9 @@ function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig
  */
 interface MathInstanceOverrides {
   /** Fluent chain: `math.chain(x).add(3).done()`. */
-  chain: (value: unknown) => Chain;
+  chain: (value?: unknown) => Chain;
+  /** Chain constructor bound to this instance. */
+  Chain: ReturnType<typeof createChain>['Chain'];
   create: typeof create;
   Parser: WiredCompatInstance['Parser'];
   on: WiredCompatInstance['on'];
@@ -499,6 +513,8 @@ export function create(
   // Internal names of the functions namespace (#1216) are not surfaced: not own, not
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const useCompatSetUnion = originalSurface.setUnion === mathFunctions.setUnion;
+  if (useCompatSetUnion) flat.setUnion = namedSetUnion;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
   );
@@ -511,6 +527,7 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
+  if (useCompatSetUnion) expressionConstants.setUnion = () => instance.setUnion;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
@@ -604,7 +621,9 @@ export function create(
   // so its assignment goes to the setter of its prototype level.
 
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
-  instance.chain = createChain(instance as Record<string, unknown>);
+  const chainApi = createChain(instance);
+  instance.chain = chainApi.chain;
+  if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
 
   // Only the parser of the functions namespace is bound to the instance: a parser that
   // the caller supplies stays as given (#1250).
@@ -640,7 +659,7 @@ export const all: Record<string, unknown> = {
 let defaultInstance: MathInstance | undefined;
 
 function getDefaultInstance(): MathInstance {
-  return (defaultInstance ??= create(all));
+  return (defaultInstance ??= create(all, moduleDefaults));
 }
 
 /** Evaluate an expression or a collection in the default compatibility instance. */
@@ -667,16 +686,277 @@ export const Parser = function Parser(options?: Parameters<MathInstance['parser'
 /** Create a compatibility parser with its own retained scope. */
 const defaultParser: MathInstance['parser'] = (options) => new Parser(options);
 
+const defaultChainApi = /* #__PURE__ */ createChain(
+  /* #__PURE__ */ new Proxy<Record<string, unknown>>(
+    {},
+    {
+      get(_target, property) {
+        return Reflect.get(getDefaultInstance(), property);
+      },
+    }
+  )
+);
+
 /** Start a fluent chain using the default compatibility instance. */
-const defaultChain: MathInstance['chain'] = (value) => getDefaultInstance().chain(value);
+const defaultChain: MathInstance['chain'] = /* #__PURE__ */ (() => defaultChainApi.chain)();
+
+/** Chain constructor that uses the default compatibility instance. */
+const defaultChainConstructor: MathInstance['Chain'] = /* #__PURE__ */ (() =>
+  defaultChainApi.Chain)();
 
 export {
+  defaultChainConstructor as Chain,
   defaultChain as chain,
   defaultCompile as compile,
   defaultEvaluate as evaluate,
   defaultParse as parse,
   defaultParser as parser,
 };
+
+/** Read the configuration for MathJS-compatible named imports. */
+const defaultConfigReader = /* #__PURE__ */ Object.assign(
+  (settings?: Partial<MathJSConfig>) => {
+    if (settings !== undefined) {
+      throw new Error('The global config is readonly. Create an instance to change its settings.');
+    }
+    return { ...moduleDefaults };
+  },
+  moduleDefaults,
+  {
+    MATRIX_OPTIONS: ['Matrix', 'Array'],
+    NUMBER_OPTIONS: ['number', 'BigNumber', 'bigint', 'Fraction'],
+  }
+);
+
+const namedRandomSources =
+  /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatRandomSources(
+    moduleDefaults,
+    undefined
+  );
+type NamedRandomSources = ReturnType<
+  typeof mathFunctions.factory_mathjsCompat.createCompatRandomSources
+>;
+
+const defaultRandom: ReturnType<NamedRandomSources['random']> =
+  /* #__PURE__ */ namedRandomSources.random();
+const defaultRandomInt: ReturnType<NamedRandomSources['randomInt']> =
+  /* #__PURE__ */ namedRandomSources.randomInt();
+const defaultPickRandom: ReturnType<NamedRandomSources['pickRandom']> =
+  /* #__PURE__ */ namedRandomSources.pickRandom();
+
+export {
+  defaultConfigReader as config,
+  defaultPickRandom as pickRandom,
+  defaultRandom as random,
+  defaultRandomInt as randomInt,
+};
+
+/** Union of two multisets in MathJS result order. */
+const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
+export { namedSetUnion as setUnion };
+
+export * from './named-symbols.js';
+export * from './named-physical-constants.generated.js';
+
+const defaultTyped: MathInstance['typed'] =
+  /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatTyped();
+export { defaultTyped as typed };
+
+// Mathematical functions shared with the functions package.
+export {
+  Help,
+  acosh,
+  acot,
+  acoth,
+  acsc,
+  acsch,
+  addScalar,
+  and,
+  apply,
+  asec,
+  asech,
+  asinh,
+  atanh,
+  bellNumbers,
+  bernoulli,
+  bigint,
+  bin,
+  bitAnd,
+  bitNot,
+  bitOr,
+  bitXor,
+  boolean,
+  catalan,
+  cbrt,
+  clone,
+  column,
+  combinations,
+  combinationsWithRep,
+  compare,
+  compareNatural,
+  compareText,
+  composition,
+  concat,
+  corr,
+  cosh,
+  cot,
+  coth,
+  count,
+  createUnit,
+  cross,
+  csc,
+  csch,
+  ctranspose,
+  cube,
+  cumsum,
+  deepEqual,
+  derivative,
+  diag,
+  diff,
+  distance,
+  divideScalar,
+  dot,
+  dotDivide,
+  dotMultiply,
+  dotPow,
+  eigs,
+  equal,
+  equalScalar,
+  equalText,
+  erf,
+  expm,
+  expm1,
+  factorial,
+  fft,
+  filter,
+  fix,
+  flatten,
+  forEach,
+  format,
+  freqz,
+  gamma,
+  getMatrixDataType,
+  hasNumericValue,
+  help,
+  hex,
+  hypot,
+  ifft,
+  index,
+  intersect,
+  inv,
+  invmod,
+  isBounded,
+  isFinite,
+  isInteger,
+  isNaN,
+  isNegative,
+  isNumeric,
+  isPositive,
+  isPrime,
+  isZero,
+  kldivergence,
+  kron,
+  larger,
+  largerEq,
+  leafCount,
+  leftShift,
+  lgamma,
+  log10,
+  log1p,
+  log2,
+  lsolve,
+  lsolveAll,
+  lup,
+  lusolve,
+  lyap,
+  mad,
+  map,
+  mapSlices,
+  matrixFromColumns,
+  matrixFromFunction,
+  matrixFromRows,
+  median,
+  mod,
+  mode,
+  multinomial,
+  multiplyScalar,
+  norm,
+  not,
+  nthRoot,
+  nthRoots,
+  nullish,
+  number,
+  numeric,
+  oct,
+  or,
+  partitionSelect,
+  permutations,
+  pinv,
+  polynomialRoot,
+  print,
+  prod,
+  qr,
+  quantileSeq,
+  range,
+  rationalize,
+  replacer,
+  reshape,
+  resize,
+  resolve,
+  reviver,
+  rightArithShift,
+  rightLogShift,
+  rotate,
+  rotationMatrix,
+  row,
+  schur,
+  sec,
+  sech,
+  setCartesian,
+  setDifference,
+  setDistinct,
+  setIntersect,
+  setIsSubset,
+  setMultiplicity,
+  setPowerset,
+  setSize,
+  setSymDifference,
+  sign,
+  simplify,
+  simplifyConstant,
+  simplifyCore,
+  sinh,
+  slu,
+  smaller,
+  smallerEq,
+  solveODE,
+  sort,
+  splitUnit,
+  sqrtm,
+  square,
+  squeeze,
+  stirlingS2,
+  string,
+  subset,
+  subtractScalar,
+  sylvester,
+  symbolicEqual,
+  tanh,
+  to,
+  toBest,
+  trace,
+  typeOf,
+  unaryMinus,
+  unaryPlus,
+  unequal,
+  unit,
+  usolve,
+  usolveAll,
+  xgcd,
+  xor,
+  zeta,
+  zpk2tf,
+} from '@danielsimonjr/mathts-functions';
 
 // Re-export all shims for direct import
 export * from './shims.js';
@@ -686,6 +966,10 @@ export {
   Complex,
   Fraction,
   BigNumber,
+  isBigNumber,
+  isComplex,
+  isFraction,
+  isNumber,
   I,
   COMPLEX_ZERO,
   COMPLEX_ONE,
