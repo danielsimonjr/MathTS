@@ -22,6 +22,7 @@ import {
   type TypedBuilder,
 } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
+import { deepForEach } from '../utils/collection.js';
 import { format as formatNumber } from '../utils/number.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
@@ -2705,6 +2706,93 @@ const createSelectedSolveODE: typeof createSolveODE = /* #__PURE__ */ factory(
   (deps: Record<string, unknown>) => createSolveODE(deps)
 );
 
+type CountingOperation = (...values: unknown[]) => unknown;
+
+const createSelectedPermutations = /* #__PURE__ */ factory(
+  'permutations',
+  ['typed', 'factorial'],
+  ({ typed, factorial }: { typed: TypedBuilder; factorial: CountingOperation }) =>
+    typed('permutations', {
+      'number | BigNumber': factorial,
+      'number, number': typedPermutations.signatures['number,number'],
+      'BigNumber, BigNumber': typedPermutations.signatures['BigNumber,BigNumber'],
+    })
+);
+
+const createSelectedCatalan = /* #__PURE__ */ factory(
+  'catalan',
+  [
+    'typed',
+    'addScalar',
+    'combinations',
+    'divideScalar',
+    'isInteger',
+    'isNegative',
+    'multiplyScalar',
+  ],
+  ({
+    typed,
+    addScalar,
+    combinations,
+    divideScalar,
+    isInteger,
+    isNegative,
+    multiplyScalar,
+  }: {
+    typed: TypedBuilder;
+    addScalar: CountingOperation;
+    combinations: CountingOperation;
+    divideScalar: CountingOperation;
+    isInteger: CountingOperation;
+    isNegative: CountingOperation;
+    multiplyScalar: CountingOperation;
+  }) =>
+    typed('catalan', {
+      'number | BigNumber': (value: unknown) => {
+        if (!isInteger(value) || isNegative(value)) {
+          throw new TypeError('Non-negative integer value expected in function catalan');
+        }
+        return divideScalar(combinations(multiplyScalar(value, 2), value), addScalar(value, 1));
+      },
+    })
+);
+
+const createSelectedMultinomial = /* #__PURE__ */ factory(
+  'multinomial',
+  ['typed', 'add', 'divide', 'factorial', 'isInteger', 'isPositive', 'multiply'],
+  ({
+    typed,
+    add,
+    divide,
+    factorial,
+    isInteger,
+    isPositive,
+    multiply,
+  }: {
+    typed: TypedBuilder;
+    add: CountingOperation;
+    divide: CountingOperation;
+    factorial: CountingOperation;
+    isInteger: CountingOperation;
+    isPositive: CountingOperation;
+    multiply: CountingOperation;
+  }) =>
+    typed('multinomial', {
+      'Array | Matrix': (values: Parameters<typeof deepForEach>[0]) => {
+        let total: unknown = 0;
+        let divisor: unknown = 1;
+        deepForEach(values, (value) => {
+          if (!isInteger(value) || !isPositive(value)) {
+            throw new TypeError('Positive integer value expected in function multinomial');
+          }
+          total = add(total, value);
+          divisor = multiply(divisor, factorial(value));
+        });
+        return divide(factorial(total), divisor);
+      },
+    })
+);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -2999,6 +3087,11 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createBellNumbers: typeof createBellNumbers;
+  createStirlingS2: typeof createStirlingS2;
+  createMultinomial: typeof createSelectedMultinomial;
+  createCatalan: typeof createSelectedCatalan;
+  createPermutations: typeof createSelectedPermutations;
   createSolveODE: typeof createSelectedSolveODE;
   createLusolve: typeof createSelectedLusolve;
   createFactorial: typeof createSelectedFactorial;
@@ -3313,6 +3406,11 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createBellNumbers,
+    createStirlingS2,
+    createMultinomial: createSelectedMultinomial,
+    createCatalan: createSelectedCatalan,
+    createPermutations: createSelectedPermutations,
     createSolveODE: createSelectedSolveODE,
     createLusolve: createSelectedLusolve,
     createFactorial: createSelectedFactorial,

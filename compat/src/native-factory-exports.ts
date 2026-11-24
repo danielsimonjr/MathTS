@@ -3758,6 +3758,102 @@ const solveODEDependencies: UnaryBundle<'createSolveODE'> & {
   createSolveODE: mathjsCreateSolveODE,
 };
 
+const mathjsCreatePermutations: CompatFactoryExports['createPermutations'] =
+  factories.createPermutations;
+const permutationsDependencies: UnaryBundle<'createPermutations'> & {
+  factorialDependencies: typeof factorialDependencies;
+} = {
+  factorialDependencies,
+  typedDependencies,
+  createPermutations: mathjsCreatePermutations,
+};
+
+const mathjsCreateCatalan: CompatFactoryExports['createCatalan'] = factories.createCatalan;
+const catalanDependencies: UnaryBundle<'createCatalan'> & {
+  addScalarDependencies: typeof addScalarDependencies;
+  combinationsDependencies: typeof combinationsDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+} = {
+  addScalarDependencies,
+  combinationsDependencies,
+  divideScalarDependencies,
+  isIntegerDependencies,
+  isNegativeDependencies,
+  multiplyScalarDependencies,
+  typedDependencies,
+  createCatalan: mathjsCreateCatalan,
+};
+
+const mathjsCreateMultinomial: CompatFactoryExports['createMultinomial'] =
+  factories.createMultinomial;
+const multinomialDependencies: UnaryBundle<'createMultinomial'> & {
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+  factorialDependencies: typeof factorialDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  isPositiveDependencies: typeof isPositiveDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+} = {
+  addDependencies,
+  divideDependencies,
+  factorialDependencies,
+  isIntegerDependencies,
+  isPositiveDependencies,
+  multiplyDependencies,
+  typedDependencies,
+  createMultinomial: mathjsCreateMultinomial,
+};
+
+const mathjsCreateStirlingS2: CompatFactoryExports['createStirlingS2'] = factories.createStirlingS2;
+const stirlingS2Dependencies: UnaryBundle<'createStirlingS2'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  combinationsDependencies: typeof combinationsDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  factorialDependencies: typeof factorialDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  largerDependencies: typeof largerDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  numberDependencies: typeof numberDependencies;
+  powDependencies: typeof powDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+} = {
+  bignumberDependencies,
+  addScalarDependencies,
+  combinationsDependencies,
+  divideScalarDependencies,
+  factorialDependencies,
+  isIntegerDependencies,
+  isNegativeDependencies,
+  largerDependencies,
+  multiplyScalarDependencies,
+  numberDependencies,
+  powDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  createStirlingS2: mathjsCreateStirlingS2,
+};
+
+const mathjsCreateBellNumbers: CompatFactoryExports['createBellNumbers'] =
+  factories.createBellNumbers;
+const bellNumbersDependencies: UnaryBundle<'createBellNumbers'> & {
+  addScalarDependencies: typeof addScalarDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  stirlingS2Dependencies: typeof stirlingS2Dependencies;
+} = {
+  addScalarDependencies,
+  isIntegerDependencies,
+  isNegativeDependencies,
+  stirlingS2Dependencies,
+  typedDependencies,
+  createBellNumbers: mathjsCreateBellNumbers,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4352,6 +4448,16 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateBellNumbers as createBellNumbers,
+  bellNumbersDependencies,
+  mathjsCreateStirlingS2 as createStirlingS2,
+  stirlingS2Dependencies,
+  mathjsCreateMultinomial as createMultinomial,
+  multinomialDependencies,
+  mathjsCreateCatalan as createCatalan,
+  catalanDependencies,
+  mathjsCreatePermutations as createPermutations,
+  permutationsDependencies,
   mathjsCreateSolveODE as createSolveODE,
   solveODEDependencies,
   mathjsCreateLusolve as createLusolve,
