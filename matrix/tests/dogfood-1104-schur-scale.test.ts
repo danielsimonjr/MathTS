@@ -602,15 +602,15 @@ describe('#1104 top of the window', () => {
     expect(T[1][1]).toBe(1e-170);
   });
 
-  it('svd(diag(1e200, 1, 1e-200)).S = [1e200, 1, 0]', () => {
-    // NumPy gives [1e200, 1, 1e-200]. The scaled matrix keeps the entry 1e-200 only
-    // as a value below 2^-1074, so the last singular value is lost to underflow.
+  it('svd(diag(1e200, 1, 1e-200)) preserves all representable singular values', () => {
+    // Use the NumPy result. The unscaled Jacobi fallback preserves the small
+    // column even when globally scaling the matrix would lose the entry.
     const S = svd([
       [1e200, 0, 0],
       [0, 1, 0],
       [0, 0, 1e-200],
     ]).S;
-    expect(S).toEqual([1e200, 1, 0]);
+    expect(S).toEqual([1e200, 1, 1e-200]);
   });
 });
 
@@ -635,15 +635,15 @@ describe('#1104 lossy scale: the unscaled result is kept when it is finite', () 
     ).toBe(1e-300);
   });
 
-  it('svd of [[1e130, 1e110, 0], [0, 1e110, 0], [0, 0, 1e-250]] keeps S[1] = 1.414e110', () => {
-    // NumPy gives S[1] = 1e110. The scale would push 1e-250 below 2^-1022, so the
-    // unscaled result (finite) is kept, with its loss of digits in S[1].
+  it('svd with a lossy global scale retains the orthogonal part of the middle column', () => {
+    // NumPy gives S[1] = 1e110. The fallback must project away the parallel
+    // component even when squaring the ratio of column norms would overflow.
     const S = svd([
       [1e130, 1e110, 0],
       [0, 1e110, 0],
       [0, 0, 1e-250],
     ]).S;
-    expect(S[1] / 1e110).toBeCloseTo(Math.SQRT2, 12);
+    expect(S[1] / 1e110).toBeCloseTo(1, 12);
   });
 });
 

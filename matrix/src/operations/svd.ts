@@ -265,6 +265,11 @@ function jacobiSVD(A: number[][]): { d: number[]; U: number[][]; V: number[][] }
         const pn = sqrtOfSumSquares(alpha, () => W.map((row) => row[p]));
         const qn = sqrtOfSumSquares(gamma, () => W.map((row) => row[q]));
         if (pn === 0 || qn === 0) continue;
+        if (
+          (!Number.isFinite(pn) || !Number.isFinite(qn)) &&
+          Math.abs(beta) <= EPS * Math.sqrt(alpha * gamma)
+        )
+          continue;
         const product = pn * qn;
         let correlation = beta / product;
         if (product < SQUARES_SAFE_MIN || !Number.isFinite(product) || !Number.isFinite(beta)) {
