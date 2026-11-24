@@ -210,7 +210,10 @@ describe('named compatibility function imports', () => {
 
   it('converts numeric strings in multiplication and alongside collections', () => {
     const math = create(all);
-    expect(multiply('5', '2')).toBe(10);
+    const product: number = multiply('5', '2');
+    const sum: number = add('2', 3, '4');
+    expect(product).toBe(10);
+    expect(sum).toBe(9);
     expect(multiply('5', 2, '3')).toBe(30);
     expect(math.multiply('5', 2)).toBe(10);
     expect(math.evaluate('"5" * "2"')).toBe(10);

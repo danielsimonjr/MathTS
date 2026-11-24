@@ -438,7 +438,7 @@ export const add = makeArithmetic(
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b
-) as PublicAdd & OneArg & NumericStringArithmetic;
+) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
@@ -449,7 +449,7 @@ export const multiply = makeArithmetic(
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
   (a, b) => a * b
-) as typeof _multiply & NumericStringArithmetic;
+) as NumericStringArithmetic & typeof _multiply;
 /**
  * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
  * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed
