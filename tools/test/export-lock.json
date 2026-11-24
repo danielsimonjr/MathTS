@@ -13886,6 +13886,9 @@
       "createResultSet": {
         "kind": "function"
       },
+      "createReviver": {
+        "kind": "function"
+      },
       "createRightArithShift": {
         "kind": "function"
       },
@@ -14094,6 +14097,9 @@
         "kind": "function"
       },
       "createVacuumImpedance": {
+        "kind": "function"
+      },
+      "createVersion": {
         "kind": "function"
       },
       "createWeakMixingAngle": {
@@ -15233,6 +15239,9 @@
       "reviver": {
         "kind": "function"
       },
+      "reviverDependencies": {
+        "kind": "object"
+      },
       "rightArithShift": {
         "kind": "function"
       },
@@ -15625,6 +15634,9 @@
       },
       "version": {
         "kind": "string"
+      },
+      "versionDependencies": {
+        "kind": "object"
       },
       "weakMixingAngle": {
         "kind": "number"
