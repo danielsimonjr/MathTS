@@ -2570,6 +2570,36 @@ const createSelectedMeanTransform: FactoryFunction<
   ReturnType<typeof createMeanTransform>
 > = /* #__PURE__ */ selectedTransform(createMeanTransform, createSelectedMean);
 
+const createSelectedOrTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createOrTransform>
+> = /* #__PURE__ */ selectedTransform(createOrTransform, createOr);
+
+const createSelectedBitOrTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createBitOrTransform>
+> = /* #__PURE__ */ selectedTransform(createBitOrTransform, createBitOr);
+
+const createSelectedNullishTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createNullishTransform>
+> = /* #__PURE__ */ selectedTransform(createNullishTransform, createNullish);
+
+const createSelectedColumnTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createColumnTransform>
+> = /* #__PURE__ */ selectedTransform(createColumnTransform, createColumn);
+
+const createSelectedRowTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createRowTransform>
+> = /* #__PURE__ */ selectedTransform(createRowTransform, createRow);
+
+const createSelectedConcatTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createConcatTransform>
+> = /* #__PURE__ */ selectedTransform(createConcatTransform, createConcat);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -2634,6 +2664,12 @@ function compatFactoryExports(): {
   createFilterTransform: typeof createSelectedFilterTransform;
   createForEach: typeof createForEach;
   createForEachTransform: typeof createSelectedForEachTransform;
+  createConcatTransform: typeof createSelectedConcatTransform;
+  createRowTransform: typeof createSelectedRowTransform;
+  createColumnTransform: typeof createSelectedColumnTransform;
+  createNullishTransform: typeof createSelectedNullishTransform;
+  createBitOrTransform: typeof createSelectedBitOrTransform;
+  createOrTransform: typeof createSelectedOrTransform;
   createMeanTransform: typeof createSelectedMeanTransform;
   createMapSlicesTransform: typeof createSelectedMapSlicesTransform;
   createCumSumTransform: typeof createSelectedCumSumTransform;
@@ -2916,6 +2952,12 @@ function compatFactoryExports(): {
     createFilterTransform: createSelectedFilterTransform,
     createForEach,
     createForEachTransform: createSelectedForEachTransform,
+    createConcatTransform: createSelectedConcatTransform,
+    createRowTransform: createSelectedRowTransform,
+    createColumnTransform: createSelectedColumnTransform,
+    createNullishTransform: createSelectedNullishTransform,
+    createBitOrTransform: createSelectedBitOrTransform,
+    createOrTransform: createSelectedOrTransform,
     createMeanTransform: createSelectedMeanTransform,
     createMapSlicesTransform: createSelectedMapSlicesTransform,
     createCumSumTransform: createSelectedCumSumTransform,

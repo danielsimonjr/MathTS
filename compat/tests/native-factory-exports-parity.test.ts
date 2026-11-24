@@ -5,8 +5,14 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
-  it('evaluates selected statistical transforms along one-based dimensions', () => {
+  it('evaluates selected transforms with MathJS expression semantics', () => {
     const cases = [
+      ['or', 'Or', 'true or missing'],
+      ['bitOr', 'BitOr', '1 | 2'],
+      ['nullish', 'Nullish', '4 ?? missing'],
+      ['column', 'Column', 'column([[1, 2], [3, 4]], 2)'],
+      ['row', 'Row', 'row([[1, 2], [3, 4]], 2)'],
+      ['concat', 'Concat', 'concat([[1, 2]], [[3, 4]], 1)'],
       ['min', 'Min', 'min([[4, 1], [3, 9]], 1)'],
       ['max', 'Max', 'max([[4, 1], [3, 9]], 2)'],
       ['sum', 'Sum', 'sum([[4, 1], [3, 9]], 1)'],

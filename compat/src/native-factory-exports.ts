@@ -3094,6 +3094,94 @@ const meanTransformDependencies: UnaryBundle<'createMeanTransform'> & {
   createMeanTransform: mathjsCreateMeanTransform,
 };
 
+const mathjsCreateOrTransform: CompatFactoryExports['createOrTransform'] =
+  factories.createOrTransform;
+const orTransformDependencies: UnaryBundle<'createOrTransform'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createOrTransform: mathjsCreateOrTransform,
+};
+
+const mathjsCreateBitOrTransform: CompatFactoryExports['createBitOrTransform'] =
+  factories.createBitOrTransform;
+const bitOrTransformDependencies: UnaryBundle<'createBitOrTransform'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createBitOrTransform: mathjsCreateBitOrTransform,
+};
+
+const mathjsCreateNullishTransform: CompatFactoryExports['createNullishTransform'] =
+  factories.createNullishTransform;
+const nullishTransformDependencies: UnaryBundle<'createNullishTransform'> & {
+  deepEqualDependencies: typeof deepEqualDependencies;
+  flattenDependencies: typeof flattenDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  deepEqualDependencies,
+  flattenDependencies,
+  matrixDependencies,
+  sizeDependencies,
+  typedDependencies,
+  createNullishTransform: mathjsCreateNullishTransform,
+};
+
+const mathjsCreateColumnTransform: CompatFactoryExports['createColumnTransform'] =
+  factories.createColumnTransform;
+const columnTransformDependencies: UnaryBundle<'createColumnTransform'> & {
+  IndexDependencies: typeof IndexDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  rangeDependencies: typeof rangeDependencies;
+} = {
+  IndexDependencies,
+  matrixDependencies,
+  rangeDependencies,
+  typedDependencies,
+  createColumnTransform: mathjsCreateColumnTransform,
+};
+
+const mathjsCreateRowTransform: CompatFactoryExports['createRowTransform'] =
+  factories.createRowTransform;
+const rowTransformDependencies: UnaryBundle<'createRowTransform'> & {
+  IndexDependencies: typeof IndexDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  rangeDependencies: typeof rangeDependencies;
+} = {
+  IndexDependencies,
+  matrixDependencies,
+  rangeDependencies,
+  typedDependencies,
+  createRowTransform: mathjsCreateRowTransform,
+};
+
+const mathjsCreateConcatTransform: CompatFactoryExports['createConcatTransform'] =
+  factories.createConcatTransform;
+const concatTransformDependencies: UnaryBundle<'createConcatTransform'> & {
+  isIntegerDependencies: typeof isIntegerDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  isIntegerDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createConcatTransform: mathjsCreateConcatTransform,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3256,6 +3344,8 @@ export {
   mathjsCreateEqual as createEqual,
   mathjsCreateIsInteger as createIsInteger,
   mathjsCreateConcat as createConcat,
+  mathjsCreateConcatTransform as createConcatTransform,
+  concatTransformDependencies,
   mathjsCreateAtan2 as createAtan2,
   createSparseMatrixClass,
   SparseMatrixDependencies,
@@ -3267,6 +3357,8 @@ export {
   mathjsCreateBitAnd as createBitAnd,
   bitAndDependencies,
   mathjsCreateBitOr as createBitOr,
+  mathjsCreateBitOrTransform as createBitOrTransform,
+  bitOrTransformDependencies,
   bitOrDependencies,
   mathjsCreateBitXor as createBitXor,
   bitXorDependencies,
@@ -3295,6 +3387,8 @@ export {
   mathjsCreateUnequal as createUnequal,
   unequalDependencies,
   mathjsCreateOr as createOr,
+  mathjsCreateOrTransform as createOrTransform,
+  orTransformDependencies,
   orDependencies,
   mathjsCreateXor as createXor,
   xorDependencies,
@@ -3343,6 +3437,8 @@ export {
   mathjsCreateNthRoot as createNthRoot,
   nthRootDependencies,
   mathjsCreateNullish as createNullish,
+  mathjsCreateNullishTransform as createNullishTransform,
+  nullishTransformDependencies,
   nullishDependencies,
   mathjsCreatePartitionSelect as createPartitionSelect,
   partitionSelectDependencies,
@@ -3477,8 +3573,12 @@ export {
   mathjsCreateSetPowerset as createSetPowerset,
   setPowersetDependencies,
   mathjsCreateColumn as createColumn,
+  mathjsCreateColumnTransform as createColumnTransform,
+  columnTransformDependencies,
   columnDependencies,
   mathjsCreateRow as createRow,
+  mathjsCreateRowTransform as createRowTransform,
+  rowTransformDependencies,
   rowDependencies,
   mathjsCreateFibonacciHeapClass as createFibonacciHeapClass,
   FibonacciHeapDependencies,
