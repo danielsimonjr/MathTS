@@ -943,5 +943,7 @@ const _shims = {
   NaN: NaN_,
 };
 
-export const shims: Omit<typeof _shims, 'add' | 'sin'> & { add: PublicAdd; sin: PublicSin } =
-  _shims;
+export const shims: Omit<typeof _shims, 'add' | 'sin'> & {
+  add: NumericStringArithmetic & PublicAdd;
+  sin: PublicSin;
+} = _shims;

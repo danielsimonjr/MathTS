@@ -212,8 +212,10 @@ describe('named compatibility function imports', () => {
     const math = create(all);
     const product: number = multiply('5', '2');
     const sum: number = add('2', 3, '4');
+    const instanceSum: number = math.add('2', 3, '4');
     expect(product).toBe(10);
     expect(sum).toBe(9);
+    expect(instanceSum).toBe(sum);
     expect(multiply('5', 2, '3')).toBe(30);
     expect(math.multiply('5', 2)).toBe(10);
     expect(math.evaluate('"5" * "2"')).toBe(10);
