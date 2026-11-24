@@ -13247,6 +13247,9 @@
       "createNullish": {
         "kind": "function"
       },
+      "createNumber": {
+        "kind": "function"
+      },
       "createOct": {
         "kind": "function"
       },
@@ -14068,6 +14071,9 @@
       },
       "number": {
         "kind": "function"
+      },
+      "numberDependencies": {
+        "kind": "object"
       },
       "numeric": {
         "kind": "function"

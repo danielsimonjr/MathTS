@@ -1074,6 +1074,12 @@ const modeDependencies: UnaryBundle<'createMode'> & {
   isNumericDependencies: typeof isNumericDependencies;
 } = { isNaNDependencies, isNumericDependencies, typedDependencies, createMode: mathjsCreateMode };
 
+const mathjsCreateNumber: CompatFactoryExports['createNumber'] = factories.createNumber;
+const numberDependencies: UnaryBundle<'createNumber'> = {
+  typedDependencies,
+  createNumber: mathjsCreateNumber,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1324,5 +1330,7 @@ export {
   mapSlicesDependencies,
   mathjsCreateMode as createMode,
   modeDependencies,
+  mathjsCreateNumber as createNumber,
+  numberDependencies,
   typedDependencies,
 };
