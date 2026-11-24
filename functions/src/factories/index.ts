@@ -2799,6 +2799,120 @@ const createSelectedSqrtm: typeof createSqrtm = /* #__PURE__ */ factory(
   (deps: Record<string, unknown>) => createSqrtm({ ...deps, matrix: factoryScope.matrix })
 );
 
+function selectedStatisticsDispatcher(
+  typed: typeof coreTyped,
+  name: string,
+  overrides: Record<string, unknown> = {}
+): typeof coreTyped {
+  return new Proxy(typed, {
+    apply(target, receiver, args) {
+      if (args[0] !== name) return Reflect.apply(target, receiver, args);
+      const signatures = Object.fromEntries(
+        Object.entries(args[1] as Record<string, unknown>).filter(
+          ([signature]) => !/(?:Float32Array|Float64Array|Object|string)/.test(signature)
+        )
+      );
+      return Reflect.apply(target, receiver, [
+        name,
+        { ...signatures, ...overrides },
+        ...args.slice(2),
+      ]);
+    },
+  });
+}
+
+function statisticsMapSlices(deps: Record<string, unknown>) {
+  return createMathjsMapSlices({
+    ...deps,
+    isInteger: (value: unknown) => Number.isInteger(Number(value)),
+  });
+}
+
+function unsupportedMedianDimension(): never {
+  throw new Error('median(A, dim) is not yet supported');
+}
+
+const createSelectedMedian: typeof createMedian = /* #__PURE__ */ factory(
+  'median',
+  createMedian.dependencies.filter((dependency) => dependency !== 'mapSlices'),
+  (deps: Record<string, unknown>) =>
+    createMedian({
+      ...deps,
+      mapSlices: unsupportedMedianDimension,
+      typed: selectedStatisticsDispatcher(deps.typed as typeof coreTyped, 'median', {
+        'Array | Matrix, number | BigNumber': unsupportedMedianDimension,
+      }),
+    })
+);
+
+const createSelectedMad: typeof createMad = /* #__PURE__ */ factory(
+  'mad',
+  createMad.dependencies,
+  (deps: Record<string, unknown>) =>
+    createMad({
+      ...deps,
+      typed: selectedStatisticsDispatcher(deps.typed as typeof coreTyped, 'mad'),
+    })
+);
+
+const createSelectedVariance: typeof createVariance = /* #__PURE__ */ factory(
+  'variance',
+  createVariance.dependencies.filter(
+    (dependency) => !['conj', 're', 'parseNumberWithConfig'].includes(dependency)
+  ),
+  (deps: Record<string, unknown>) => {
+    const identity = (value: unknown) => value;
+    return createVariance({
+      ...deps,
+      conj: identity,
+      re: identity,
+      parseNumberWithConfig: identity,
+    });
+  }
+);
+
+const createSelectedStd: typeof createStd = /* #__PURE__ */ factory(
+  'std',
+  createStd.dependencies.filter((dependency) => dependency !== 'mapSlices'),
+  (deps: Record<string, unknown>) => createStd({ ...deps, mapSlices: statisticsMapSlices(deps) })
+);
+
+const createSelectedQuantileSeq: typeof createQuantileSeq = /* #__PURE__ */ factory(
+  'quantileSeq',
+  createQuantileSeq.dependencies,
+  (deps: Record<string, unknown>) =>
+    createQuantileSeq({
+      ...deps,
+      typed: selectedStatisticsDispatcher(deps.typed as typeof coreTyped, 'quantileSeq'),
+    })
+);
+
+const createSelectedVarianceTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createVarianceTransform>
+> = /* #__PURE__ */ selectedTransform(createVarianceTransform, createSelectedVariance);
+
+const createSelectedStdTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createStdTransform>
+> = /* #__PURE__ */ selectedTransform(createStdTransform, createSelectedStd);
+
+const createSelectedQuantileSeqTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createQuantileSeqTransform>
+> = /* #__PURE__ */ factory(
+  'quantileSeq',
+  createSelectedQuantileSeq.dependencies.map((dependency) =>
+    dependency === '?bignumber' ? 'bignumber' : dependency
+  ),
+  (deps: Record<string, unknown>) =>
+    createQuantileSeqTransform({
+      ...deps,
+      quantileSeq: createSelectedQuantileSeq(deps),
+    }),
+  { isTransformFunction: true }
+);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -3093,6 +3207,14 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createStdTransform: typeof createSelectedStdTransform;
+  createVarianceTransform: typeof createSelectedVarianceTransform;
+  createQuantileSeqTransform: typeof createSelectedQuantileSeqTransform;
+  createQuantileSeq: typeof createSelectedQuantileSeq;
+  createStd: typeof createSelectedStd;
+  createVariance: typeof createSelectedVariance;
+  createMad: typeof createSelectedMad;
+  createMedian: typeof createSelectedMedian;
   createSqrtm: typeof createSelectedSqrtm;
   createIfft: typeof createSelectedIfft;
   createFft: typeof createSelectedFft;
@@ -3415,6 +3537,14 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createStdTransform: createSelectedStdTransform,
+    createVarianceTransform: createSelectedVarianceTransform,
+    createQuantileSeqTransform: createSelectedQuantileSeqTransform,
+    createQuantileSeq: createSelectedQuantileSeq,
+    createStd: createSelectedStd,
+    createVariance: createSelectedVariance,
+    createMad: createSelectedMad,
+    createMedian: createSelectedMedian,
     createSqrtm: createSelectedSqrtm,
     createIfft: createSelectedIfft,
     createFft: createSelectedFft,

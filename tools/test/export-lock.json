@@ -13673,6 +13673,9 @@
       "createLusolve": {
         "kind": "function"
       },
+      "createMad": {
+        "kind": "function"
+      },
       "createMagneticConstant": {
         "kind": "function"
       },
@@ -13716,6 +13719,9 @@
         "kind": "function"
       },
       "createMeanTransform": {
+        "kind": "function"
+      },
+      "createMedian": {
         "kind": "function"
       },
       "createMin": {
@@ -13875,6 +13881,12 @@
         "kind": "function"
       },
       "createQr": {
+        "kind": "function"
+      },
+      "createQuantileSeq": {
+        "kind": "function"
+      },
+      "createQuantileSeqTransform": {
         "kind": "function"
       },
       "createQuantumOfCirculation": {
@@ -14057,6 +14069,12 @@
       "createSqueeze": {
         "kind": "function"
       },
+      "createStd": {
+        "kind": "function"
+      },
+      "createStdTransform": {
+        "kind": "function"
+      },
       "createStefanBoltzmann": {
         "kind": "function"
       },
@@ -14157,6 +14175,12 @@
         "kind": "function"
       },
       "createVacuumImpedance": {
+        "kind": "function"
+      },
+      "createVariance": {
+        "kind": "function"
+      },
+      "createVarianceTransform": {
         "kind": "function"
       },
       "createVersion": {
@@ -14906,6 +14930,9 @@
       "mad": {
         "kind": "function"
       },
+      "madDependencies": {
+        "kind": "object"
+      },
       "magneticConstant": {
         "kind": "object"
       },
@@ -14980,6 +15007,9 @@
       },
       "median": {
         "kind": "function"
+      },
+      "medianDependencies": {
+        "kind": "object"
       },
       "min": {
         "kind": "function"
@@ -15253,6 +15283,12 @@
       },
       "quantileSeq": {
         "kind": "function"
+      },
+      "quantileSeqDependencies": {
+        "kind": "object"
+      },
+      "quantileSeqTransformDependencies": {
+        "kind": "object"
       },
       "quantumOfCirculation": {
         "kind": "object"
@@ -15575,6 +15611,12 @@
       "std": {
         "kind": "function"
       },
+      "stdDependencies": {
+        "kind": "object"
+      },
+      "stdTransformDependencies": {
+        "kind": "object"
+      },
       "stefanBoltzmann": {
         "kind": "object"
       },
@@ -15739,6 +15781,12 @@
       },
       "variance": {
         "kind": "function"
+      },
+      "varianceDependencies": {
+        "kind": "object"
+      },
+      "varianceTransformDependencies": {
+        "kind": "object"
       },
       "version": {
         "kind": "string"

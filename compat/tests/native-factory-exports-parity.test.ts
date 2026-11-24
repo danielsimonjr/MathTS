@@ -5,6 +5,24 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('reports the same unsupported median dimension as MathJS', () => {
+    const actual = create({ medianDependencies: compat.medianDependencies });
+    const expected = oracle.create({
+      medianDependencies: Reflect.get(oracle, 'medianDependencies'),
+    });
+    for (const instance of [actual, expected]) {
+      expect(() =>
+        Reflect.apply(Reflect.get(instance, 'median'), instance, [
+          [
+            [3, 8],
+            [1, 4],
+          ],
+          0,
+        ])
+      ).toThrow('median(A, dim) is not yet supported');
+    }
+  });
+
   it('transforms and reconstructs selected Fourier spectra', () => {
     const actual = create({ ifftDependencies: compat.ifftDependencies });
     const expected = oracle.create({ ifftDependencies: Reflect.get(oracle, 'ifftDependencies') });
@@ -179,6 +197,9 @@ describe('native compatibility dependency bundles', () => {
       ['column', 'Column', 'column([[1, 2], [3, 4]], 2)'],
       ['row', 'Row', 'row([[1, 2], [3, 4]], 2)'],
       ['concat', 'Concat', 'concat([[1, 2]], [[3, 4]], 1)'],
+      ['variance', 'Variance', 'variance([[2, 4], [6, 8]], 1)'],
+      ['std', 'Std', 'std([[2, 4], [6, 8]], 2)'],
+      ['quantileSeq', 'QuantileSeq', 'quantileSeq([[2, 4], [6, 8]], 0.5, 2)'],
       ['min', 'Min', 'min([[4, 1], [3, 9]], 1)'],
       ['max', 'Max', 'max([[4, 1], [3, 9]], 2)'],
       ['sum', 'Sum', 'sum([[4, 1], [3, 9]], 1)'],
@@ -1231,6 +1252,11 @@ describe('native compatibility dependency bundles', () => {
     ['multinomial', [[2, 3, 4]]],
     ['stirlingS2', [8, 3]],
     ['bellNumbers', [7]],
+    ['median', [[3, 8, 1, 4]]],
+    ['mad', [[1, 3, 9]]],
+    ['variance', [[1, 2, 3], 'unbiased']],
+    ['std', [[1, 2, 3], 'unbiased']],
+    ['quantileSeq', [[1, 2, 3, 4, 5], 0.25]],
     ['composition', [5, 3]],
     [
       'kldivergence',
