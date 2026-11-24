@@ -98,11 +98,15 @@ function scrubDenylist(scope: Record<string, unknown>): void {
  * @param currentConfig - The live config object of the instance.
  * @param bindParser - When `true`, `instance.parser` becomes a parser that evaluates
  *   with the instance evaluator. Default: `false`.
+ * @param constants - Live reads of the instance's configured expression bindings.
+ * @param defaultRandom - Random functions supplied by the built-in namespace.
  */
 export function wireMathjsInstanceApi(
   instance: Record<string, unknown>,
   currentConfig: MathJSConfig,
-  bindParser = false
+  bindParser = false,
+  constants: Record<string, () => unknown> = {},
+  defaultRandom: ReadonlySet<string> = new Set()
 ): WiredCompatInstance {
   wiredInstances.add(instance);
   const brandHolder: object = Object.getPrototypeOf(instance) ?? instance;
@@ -133,6 +137,21 @@ export function wireMathjsInstanceApi(
   instance.off = emitter.off;
   instance.once = emitter.once;
 
+  if (defaultRandom.size > 0) {
+    const factories = factory_mathjsCompat.createCompatRandomSources(
+      currentConfig as Parameters<typeof factory_mathjsCompat.createCompatRandomSources>[0],
+      (event: string, callback: (current: MathJSConfig, previous: MathJSConfig) => void) =>
+        emitter.on(event, (...args) => {
+          callback(...(args as Parameters<typeof callback>));
+        })
+    );
+    for (const [name, build] of Object.entries(factories)) {
+      if (!defaultRandom.has(name)) continue;
+      instance[name] = build();
+      constants[name] = () => instance[name];
+    }
+  }
+
   const UnitCtor = instance.Unit as { isValuelessUnit: (name: string) => boolean } | undefined;
   if (UnitCtor?.isValuelessUnit) {
     mathNs.Unit = UnitCtor;
@@ -151,7 +170,8 @@ export function wireMathjsInstanceApi(
   let evaluator = createInstanceEvaluator(
     expressionLayers.mathWithTransform,
     COMPAT_INTERNAL_NAMES,
-    true
+    true,
+    constants
   );
 
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
@@ -162,7 +182,8 @@ export function wireMathjsInstanceApi(
     evaluator = createInstanceEvaluator(
       expressionLayers.mathWithTransform,
       COMPAT_INTERNAL_NAMES,
-      true
+      true,
+      constants
     );
     instance.evaluate = runBound(evaluator.evaluate);
     const compile = runBound(evaluator.compile);

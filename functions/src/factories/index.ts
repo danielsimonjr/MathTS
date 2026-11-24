@@ -1,3 +1,4 @@
+import { configFactory } from '../core/function/config.js';
 import type { MathNode } from '@danielsimonjr/mathts-expression';
 import type { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 /**
@@ -2163,10 +2164,26 @@ const compatConstructors: {
   Unit: _Unit,
 };
 
+/** Construct the mathjs RNG functions with instance-local configuration and events. */
+function createCompatRandomSources(
+  config: Parameters<typeof createRandom>[0]['config'],
+  on: Parameters<typeof createRandom>[0]['on']
+) {
+  const typed = factoryScope.typed as Parameters<typeof createRandom>[0]['typed'];
+  const dependencies = { typed, config, on };
+  return {
+    random: () => createRandom(dependencies),
+    randomInt: () => createRandomInt({ ...dependencies, log2: factory_log2 }),
+    pickRandom: () => createPickRandom(dependencies),
+  };
+}
+
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
   constructors: compatConstructors,
   checks,
   factory,
   attachEmitter,
+  configFactory,
+  createCompatRandomSources,
 };
