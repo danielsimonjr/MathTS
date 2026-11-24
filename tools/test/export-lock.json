@@ -12791,6 +12791,9 @@
       "bin": {
         "kind": "function"
       },
+      "binDependencies": {
+        "kind": "object"
+      },
       "bitAnd": {
         "kind": "function"
       },
@@ -12832,6 +12835,9 @@
       },
       "cbrt": {
         "kind": "function"
+      },
+      "cbrtDependencies": {
+        "kind": "object"
       },
       "ceil": {
         "kind": "function"
@@ -12995,6 +13001,9 @@
       "createBigNumberClass": {
         "kind": "function"
       },
+      "createBin": {
+        "kind": "function"
+      },
       "createBitAnd": {
         "kind": "function"
       },
@@ -13005,6 +13014,9 @@
         "kind": "function"
       },
       "createBitXor": {
+        "kind": "function"
+      },
+      "createCbrt": {
         "kind": "function"
       },
       "createClone": {
@@ -13103,6 +13115,9 @@
       "createHasNumericValue": {
         "kind": "function"
       },
+      "createHex": {
+        "kind": "function"
+      },
       "createI": {
         "kind": "function"
       },
@@ -13194,6 +13209,9 @@
         "kind": "function"
       },
       "createNull": {
+        "kind": "function"
+      },
+      "createOct": {
         "kind": "function"
       },
       "createOnes": {
@@ -13546,6 +13564,9 @@
       },
       "hex": {
         "kind": "function"
+      },
+      "hexDependencies": {
+        "kind": "object"
       },
       "hypot": {
         "kind": "function"
@@ -13972,6 +13993,9 @@
       },
       "oct": {
         "kind": "function"
+      },
+      "octDependencies": {
+        "kind": "object"
       },
       "ones": {
         "kind": "function"

@@ -2328,6 +2328,10 @@ function compatFactoryExports(): {
   createResize: typeof createMathjsResize;
   createTranspose: typeof createTranspose;
   createZeros: typeof createZeros;
+  createBin: typeof createBin;
+  createHex: typeof createHex;
+  createOct: typeof createOct;
+  createCbrt: typeof createCbrt;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2428,6 +2432,10 @@ function compatFactoryExports(): {
     createResize: createMathjsResize,
     createTranspose,
     createZeros,
+    createBin,
+    createHex,
+    createOct,
+    createCbrt,
     createTyped,
   };
 }
