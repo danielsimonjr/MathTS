@@ -25,12 +25,15 @@ export function mathjsParityNames() {
   const mathjs = require('mathjs');
   const version = require('mathjs/package.json').version;
   const instance = mathjs.create(mathjs.all);
+  const precise = mathjs.create(mathjs.all, { number: 'BigNumber', precision: 128 });
   const names = Object.keys(instance).sort();
   const unitConstants = names.flatMap((name) => {
     const value = instance[name];
     if (!instance.isUnit(value)) return [];
     const units = value.formatUnits();
-    return [[name, value.toNumeric(units), units]];
+    const magnitude = value.toNumeric(units);
+    const decimal = precise[name].toNumeric(units).toString();
+    return [[name, magnitude, units, decimal === String(magnitude) ? null : decimal]];
   });
   const scalarConstants = SCALAR_PHYSICAL_NAMES.map((name) => [name, mathjs[name]]);
   return { names, version, unitConstants, scalarConstants };
