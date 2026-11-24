@@ -227,9 +227,14 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
  * matrix([[1,2],[3,4]], 'sparse')
  * matrix(sparseMatrix, 'dense')
  */
+export function matrix(data?: readonly unknown[], format?: string): BridgeMatrix;
 export function matrix(
-  data?: number[] | number[][] | DenseMatrix | SparseMatrix,
-  format?: 'dense' | 'sparse' | string
+  data?: readonly unknown[] | DenseMatrix | SparseMatrix,
+  format?: string
+): CompatMatrixValue;
+export function matrix(
+  data?: readonly unknown[] | DenseMatrix | SparseMatrix,
+  format?: string
 ): CompatMatrixValue {
   if (arguments.length === 0) {
     return _factoryMatrix();
@@ -253,7 +258,7 @@ export function matrix(
     return data;
   }
   // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
-  return _factoryMatrix(data as number[][], format);
+  return _factoryMatrix(data, format);
 }
 
 /**

@@ -4,6 +4,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
+import { deepMap, isMatrix } from '@danielsimonjr/mathts-core/internal';
 import {
   createInstanceEvaluator,
   factory_mathjsCompat,
@@ -12,6 +13,7 @@ import {
   reviver,
   replacer,
   runWithConfig,
+  type BridgeMatrix,
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
@@ -28,6 +30,43 @@ export interface CompatExpressionLayers {
 }
 
 type Emitter = ReturnType<typeof factory_mathjsCompat.attachEmitter>;
+type InstanceEvaluator = ReturnType<typeof createInstanceEvaluator>;
+type CompiledExpression = ReturnType<InstanceEvaluator['compile']>;
+type ExpressionScope = Parameters<CompiledExpression['evaluate']>[0];
+type ExpressionArray = readonly (string | ExpressionArray)[];
+type CompiledArray = (CompiledExpression | CompiledArray)[];
+
+interface CompatCompile {
+  (expression: string, options?: PhysicsEvaluateOptions): CompiledExpression;
+  (expression: readonly string[], options?: PhysicsEvaluateOptions): CompiledExpression[];
+  (expression: ExpressionArray, options?: PhysicsEvaluateOptions): CompiledArray;
+  (expression: BridgeMatrix, options?: PhysicsEvaluateOptions): BridgeMatrix;
+}
+
+interface CompatEvaluate {
+  (expression: string, scope?: ExpressionScope, options?: PhysicsEvaluateOptions): unknown;
+  (
+    expression: ExpressionArray,
+    scope?: ExpressionScope,
+    options?: PhysicsEvaluateOptions
+  ): unknown[];
+  (
+    expression: BridgeMatrix,
+    scope?: ExpressionScope,
+    options?: PhysicsEvaluateOptions
+  ): BridgeMatrix;
+}
+
+function mapExpressions(expression: unknown, operation: (expression: string) => unknown): unknown {
+  function run(value: unknown): unknown {
+    if (typeof value !== 'string') throw new TypeError('Expression must be a string');
+    return operation(value);
+  }
+
+  if (Array.isArray(expression)) return deepMap(expression as unknown[], run);
+  if (isMatrix(expression)) return (expression as unknown as BridgeMatrix).map(run);
+  return run(expression);
+}
 
 /** mathjs instance API attached by {@link wireMathjsInstanceApi}. */
 export interface WiredCompatInstance {
@@ -37,11 +76,8 @@ export interface WiredCompatInstance {
   once: Emitter['once'];
   import: (functions: unknown, options?: ImportOptions) => void;
   typed: typeof mathTyped & { isTypedFunction: (value: unknown) => boolean };
-  compile: (
-    expr: string,
-    options?: PhysicsEvaluateOptions
-  ) => ReturnType<typeof createInstanceEvaluator>['compile'];
-  evaluate: ReturnType<typeof createInstanceEvaluator>['evaluate'];
+  compile: CompatCompile;
+  evaluate: CompatEvaluate;
   reviver: typeof reviver;
   replacer: typeof replacer;
   expression: CompatExpressionLayers;
@@ -185,12 +221,16 @@ export function wireMathjsInstanceApi(
       true,
       constants
     );
-    instance.evaluate = runBound(evaluator.evaluate);
-    const compile = runBound(evaluator.compile);
-    instance.compile = (...args: Parameters<WiredCompatInstance['compile']>) => {
-      const compiled = compile(...args);
-      return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
-    };
+    instance.evaluate = runBound(
+      (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
+        mapExpressions(expression, (text) => evaluator.evaluate(text, scope, options))
+    );
+    instance.compile = runBound((expression: unknown, options?: PhysicsEvaluateOptions) =>
+      mapExpressions(expression, (text) => {
+        const compiled = evaluator.compile(text, options);
+        return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
+      })
+    );
     instance.compileExpr = instance.compile;
   }
 

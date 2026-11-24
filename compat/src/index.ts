@@ -111,18 +111,11 @@ interface MathInstanceOverrides {
   ) => void;
   /** mathjs typed-function dispatcher for custom overloads, with the whole `mathTyped` registry surface. */
   typed: WiredCompatInstance['typed'];
-  /** Alias of `compileExpr` (mathjs naming). */
-  compile: (
-    expr: string,
-    options?: { unsafe?: boolean; physics?: boolean; charge?: 'unit' | 'scalar' }
-  ) => {
-    evaluate(scope?: Record<string, unknown>): unknown;
-  };
-  evaluate: (
-    expr: string,
-    scope?: Record<string, unknown>,
-    options?: { unsafe?: boolean; physics?: boolean; charge?: 'unit' | 'scalar' }
-  ) => unknown;
+  /** Compile an expression or a collection of expressions in this instance. */
+  compile: WiredCompatInstance['compile'];
+  compileExpr: WiredCompatInstance['compile'];
+  /** Evaluate an expression or a collection of expressions in this instance. */
+  evaluate: WiredCompatInstance['evaluate'];
   reviver: (key: string, value: unknown) => unknown;
   replacer: (key: string, value: unknown) => unknown;
   subset: (...args: unknown[]) => unknown;
