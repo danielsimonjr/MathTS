@@ -3885,6 +3885,166 @@ const sqrtmDependencies: UnaryBundle<'createSqrtm'> & {
   createSqrtm: mathjsCreateSqrtm,
 };
 
+const mathjsCreateMedian: CompatFactoryExports['createMedian'] = factories.createMedian;
+const medianDependencies: UnaryBundle<'createMedian'> & {
+  addDependencies: typeof addDependencies;
+  compareDependencies: typeof compareDependencies;
+  divideDependencies: typeof divideDependencies;
+  partitionSelectDependencies: typeof partitionSelectDependencies;
+} = {
+  addDependencies,
+  compareDependencies,
+  divideDependencies,
+  partitionSelectDependencies,
+  typedDependencies,
+  createMedian: mathjsCreateMedian,
+};
+
+const mathjsCreateMad: CompatFactoryExports['createMad'] = factories.createMad;
+const madDependencies: UnaryBundle<'createMad'> & {
+  absDependencies: typeof absDependencies;
+  mapDependencies: typeof mapDependencies;
+  medianDependencies: typeof medianDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  absDependencies,
+  mapDependencies,
+  medianDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createMad: mathjsCreateMad,
+};
+
+const mathjsCreateVariance: CompatFactoryExports['createVariance'] = factories.createVariance;
+const varianceDependencies: UnaryBundle<'createVariance'> & {
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+  isNaNDependencies: typeof isNaNDependencies;
+  mapSlicesDependencies: typeof mapSlicesDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  addDependencies,
+  divideDependencies,
+  isNaNDependencies,
+  mapSlicesDependencies,
+  multiplyDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createVariance: mathjsCreateVariance,
+};
+
+const mathjsCreateStd: CompatFactoryExports['createStd'] = factories.createStd;
+const stdDependencies: UnaryBundle<'createStd'> & {
+  mapDependencies: typeof mapDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+  varianceDependencies: typeof varianceDependencies;
+} = {
+  mapDependencies,
+  sqrtDependencies,
+  typedDependencies,
+  varianceDependencies,
+  createStd: mathjsCreateStd,
+};
+
+const mathjsCreateQuantileSeq: CompatFactoryExports['createQuantileSeq'] =
+  factories.createQuantileSeq;
+const quantileSeqDependencies: UnaryBundle<'createQuantileSeq'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  addDependencies: typeof addDependencies;
+  compareDependencies: typeof compareDependencies;
+  divideDependencies: typeof divideDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  largerDependencies: typeof largerDependencies;
+  mapSlicesDependencies: typeof mapSlicesDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  partitionSelectDependencies: typeof partitionSelectDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  smallerEqDependencies: typeof smallerEqDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  bignumberDependencies,
+  addDependencies,
+  compareDependencies,
+  divideDependencies,
+  isIntegerDependencies,
+  largerDependencies,
+  mapSlicesDependencies,
+  multiplyDependencies,
+  partitionSelectDependencies,
+  smallerDependencies,
+  smallerEqDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createQuantileSeq: mathjsCreateQuantileSeq,
+};
+
+const mathjsCreateQuantileSeqTransform: CompatFactoryExports['createQuantileSeqTransform'] =
+  factories.createQuantileSeqTransform;
+const quantileSeqTransformDependencies: UnaryBundle<'createQuantileSeqTransform'> & {
+  addDependencies: typeof addDependencies;
+  bignumberDependencies: typeof bignumberDependencies;
+  compareDependencies: typeof compareDependencies;
+  divideDependencies: typeof divideDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  largerDependencies: typeof largerDependencies;
+  mapSlicesDependencies: typeof mapSlicesDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  partitionSelectDependencies: typeof partitionSelectDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  smallerEqDependencies: typeof smallerEqDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  addDependencies,
+  bignumberDependencies,
+  compareDependencies,
+  divideDependencies,
+  isIntegerDependencies,
+  largerDependencies,
+  mapSlicesDependencies,
+  multiplyDependencies,
+  partitionSelectDependencies,
+  smallerDependencies,
+  smallerEqDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createQuantileSeqTransform: mathjsCreateQuantileSeqTransform,
+};
+
+const mathjsCreateVarianceTransform: CompatFactoryExports['createVarianceTransform'] =
+  factories.createVarianceTransform;
+const varianceTransformDependencies: UnaryBundle<'createVarianceTransform'> & {
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+  isNaNDependencies: typeof isNaNDependencies;
+  mapSlicesDependencies: typeof mapSlicesDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  addDependencies,
+  divideDependencies,
+  isNaNDependencies,
+  mapSlicesDependencies,
+  multiplyDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createVarianceTransform: mathjsCreateVarianceTransform,
+};
+
+const mathjsCreateStdTransform: CompatFactoryExports['createStdTransform'] =
+  factories.createStdTransform;
+const stdTransformDependencies: UnaryBundle<'createStdTransform'> & {
+  mapDependencies: typeof mapDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+  varianceDependencies: typeof varianceDependencies;
+} = {
+  mapDependencies,
+  sqrtDependencies,
+  typedDependencies,
+  varianceDependencies,
+  createStdTransform: mathjsCreateStdTransform,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4479,6 +4639,22 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateStdTransform as createStdTransform,
+  stdTransformDependencies,
+  mathjsCreateVarianceTransform as createVarianceTransform,
+  varianceTransformDependencies,
+  mathjsCreateQuantileSeqTransform as createQuantileSeqTransform,
+  quantileSeqTransformDependencies,
+  mathjsCreateQuantileSeq as createQuantileSeq,
+  quantileSeqDependencies,
+  mathjsCreateStd as createStd,
+  stdDependencies,
+  mathjsCreateVariance as createVariance,
+  varianceDependencies,
+  mathjsCreateMad as createMad,
+  madDependencies,
+  mathjsCreateMedian as createMedian,
+  medianDependencies,
   mathjsCreateSqrtm as createSqrtm,
   sqrtmDependencies,
   mathjsCreateIfft as createIfft,
