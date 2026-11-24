@@ -2299,6 +2299,23 @@ function compatFactoryExports(): {
   createIsInteger: typeof createIsInteger;
   createConcat: typeof createConcat;
   createAtan2: typeof createAtan2;
+  createBitAnd: typeof createBitAnd;
+  createBitOr: typeof createBitOr;
+  createBitXor: typeof createBitXor;
+  createCompare: typeof createCompare;
+  createCompareText: typeof createCompareText;
+  createDeepEqual: typeof createDeepEqual;
+  createDot: typeof createDot;
+  createDotMultiply: typeof createDotMultiply;
+  createHasNumericValue: typeof createHasNumericValue;
+  createIsFinite: typeof createIsFinite;
+  createIsZero: typeof createIsZero;
+  createLcm: typeof createLcm;
+  createLargerEq: typeof createLargerEq;
+  createSmallerEq: typeof createSmallerEq;
+  createUnequal: typeof createUnequal;
+  createOr: typeof createOr;
+  createXor: typeof createXor;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2371,6 +2388,23 @@ function compatFactoryExports(): {
     createIsInteger,
     createConcat,
     createAtan2,
+    createBitAnd,
+    createBitOr,
+    createBitXor,
+    createCompare,
+    createCompareText,
+    createDeepEqual,
+    createDot,
+    createDotMultiply,
+    createHasNumericValue,
+    createIsFinite,
+    createIsZero,
+    createLcm,
+    createLargerEq,
+    createSmallerEq,
+    createUnequal,
+    createOr,
+    createXor,
     createTyped,
   };
 }

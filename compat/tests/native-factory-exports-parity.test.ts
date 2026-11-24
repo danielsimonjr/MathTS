@@ -142,6 +142,41 @@ describe('native compatibility dependency bundles', () => {
     ['squeeze', [[[1], [2]]]],
     ['getMatrixDataType', [[[1, 2]]]],
     ['typeOf', [[1, 2]]],
+    ['bitAnd', [6, 3]],
+    ['bitOr', [6, 3]],
+    ['bitXor', [6, 3]],
+    ['compare', [6, 3]],
+    ['compareText', ['a', 'b']],
+    [
+      'deepEqual',
+      [
+        [1, 2],
+        [1, 2],
+      ],
+    ],
+    [
+      'dot',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    [
+      'dotMultiply',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    ['hasNumericValue', ['3']],
+    ['isFinite', [3]],
+    ['isZero', [0]],
+    ['lcm', [6, 3]],
+    ['largerEq', [6, 3]],
+    ['smallerEq', [6, 3]],
+    ['unequal', [6, 3]],
+    ['or', [false, true]],
+    ['xor', [true, true]],
   ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
     const factoryName = 'create' + name[0].toUpperCase() + name.slice(1);
