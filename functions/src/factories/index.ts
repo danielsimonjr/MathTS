@@ -2550,6 +2550,19 @@ function compatFactoryExports(): {
   createLog1p: typeof createLog1p;
   createRange: typeof createRange;
   createBernoulli: typeof createBernoulli;
+  createNode: typeof createNode;
+  createConstantNode: typeof createConstantNode;
+  createParenthesisNode: typeof createParenthesisNode;
+  createArrayNode: typeof createArrayNode;
+  createBlockNode: typeof createBlockNode;
+  createOperatorNode: typeof createOperatorNode;
+  createRangeNode: typeof createRangeNode;
+  createAccessorNode: typeof createAccessorNode;
+  createConditionalNode: typeof createConditionalNode;
+  createFunctionAssignmentNode: typeof createFunctionAssignmentNode;
+  createObjectNode: typeof createObjectNode;
+  createIndexNode: typeof createIndexNode;
+  createRelationalNode: typeof createRelationalNode;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2705,6 +2718,19 @@ function compatFactoryExports(): {
     createLog1p,
     createRange,
     createBernoulli,
+    createNode,
+    createConstantNode,
+    createParenthesisNode,
+    createArrayNode,
+    createBlockNode,
+    createOperatorNode,
+    createRangeNode,
+    createAccessorNode,
+    createConditionalNode,
+    createFunctionAssignmentNode,
+    createObjectNode,
+    createIndexNode,
+    createRelationalNode,
     createTyped,
   };
 }

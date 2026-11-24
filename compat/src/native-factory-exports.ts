@@ -1561,6 +1561,127 @@ const bernoulliDependencies: UnaryBundle<'createBernoulli'> & {
   createBernoulli: mathjsCreateBernoulli,
 };
 
+const mathjsCreateNode: CompatFactoryExports['createNode'] = factories.createNode;
+const NodeDependencies: Pick<CompatFactoryExports, 'createNode'> = {
+  createNode: mathjsCreateNode,
+};
+
+const mathjsCreateConstantNode: CompatFactoryExports['createConstantNode'] =
+  factories.createConstantNode;
+const ConstantNodeDependencies: Pick<CompatFactoryExports, 'createConstantNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+  isBoundedDependencies: typeof isBoundedDependencies;
+} = {
+  NodeDependencies,
+  isBoundedDependencies,
+  createConstantNode: mathjsCreateConstantNode,
+};
+
+const mathjsCreateParenthesisNode: CompatFactoryExports['createParenthesisNode'] =
+  factories.createParenthesisNode;
+const ParenthesisNodeDependencies: Pick<CompatFactoryExports, 'createParenthesisNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  NodeDependencies,
+  createParenthesisNode: mathjsCreateParenthesisNode,
+};
+
+const mathjsCreateArrayNode: CompatFactoryExports['createArrayNode'] = factories.createArrayNode;
+const ArrayNodeDependencies: Pick<CompatFactoryExports, 'createArrayNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  NodeDependencies,
+  createArrayNode: mathjsCreateArrayNode,
+};
+
+const mathjsCreateBlockNode: CompatFactoryExports['createBlockNode'] = factories.createBlockNode;
+const BlockNodeDependencies: Pick<CompatFactoryExports, 'createBlockNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+  ResultSetDependencies: typeof ResultSetDependencies;
+} = {
+  NodeDependencies,
+  ResultSetDependencies,
+  createBlockNode: mathjsCreateBlockNode,
+};
+
+const mathjsCreateOperatorNode: CompatFactoryExports['createOperatorNode'] =
+  factories.createOperatorNode;
+const OperatorNodeDependencies: Pick<CompatFactoryExports, 'createOperatorNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  NodeDependencies,
+  createOperatorNode: mathjsCreateOperatorNode,
+};
+
+const mathjsCreateRangeNode: CompatFactoryExports['createRangeNode'] = factories.createRangeNode;
+const RangeNodeDependencies: Pick<CompatFactoryExports, 'createRangeNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  NodeDependencies,
+  createRangeNode: mathjsCreateRangeNode,
+};
+
+const mathjsCreateAccessorNode: CompatFactoryExports['createAccessorNode'] =
+  factories.createAccessorNode;
+const AccessorNodeDependencies: Pick<CompatFactoryExports, 'createAccessorNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+} = {
+  NodeDependencies,
+  subsetDependencies,
+  createAccessorNode: mathjsCreateAccessorNode,
+};
+
+const mathjsCreateConditionalNode: CompatFactoryExports['createConditionalNode'] =
+  factories.createConditionalNode;
+const ConditionalNodeDependencies: Pick<CompatFactoryExports, 'createConditionalNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  NodeDependencies,
+  createConditionalNode: mathjsCreateConditionalNode,
+};
+
+const mathjsCreateFunctionAssignmentNode: CompatFactoryExports['createFunctionAssignmentNode'] =
+  factories.createFunctionAssignmentNode;
+const FunctionAssignmentNodeDependencies: Pick<
+  CompatFactoryExports,
+  'createFunctionAssignmentNode'
+> & {
+  NodeDependencies: typeof NodeDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  NodeDependencies,
+  typedDependencies,
+  createFunctionAssignmentNode: mathjsCreateFunctionAssignmentNode,
+};
+
+const mathjsCreateObjectNode: CompatFactoryExports['createObjectNode'] = factories.createObjectNode;
+const ObjectNodeDependencies: Pick<CompatFactoryExports, 'createObjectNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  NodeDependencies,
+  createObjectNode: mathjsCreateObjectNode,
+};
+
+const mathjsCreateIndexNode: CompatFactoryExports['createIndexNode'] = factories.createIndexNode;
+const IndexNodeDependencies: Pick<CompatFactoryExports, 'createIndexNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  NodeDependencies,
+  sizeDependencies,
+  createIndexNode: mathjsCreateIndexNode,
+};
+
+const mathjsCreateRelationalNode: CompatFactoryExports['createRelationalNode'] =
+  factories.createRelationalNode;
+const RelationalNodeDependencies: Pick<CompatFactoryExports, 'createRelationalNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  NodeDependencies,
+  createRelationalNode: mathjsCreateRelationalNode,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1879,5 +2000,31 @@ export {
   rangeDependencies,
   mathjsCreateBernoulli as createBernoulli,
   bernoulliDependencies,
+  mathjsCreateNode as createNode,
+  NodeDependencies,
+  mathjsCreateConstantNode as createConstantNode,
+  ConstantNodeDependencies,
+  mathjsCreateParenthesisNode as createParenthesisNode,
+  ParenthesisNodeDependencies,
+  mathjsCreateArrayNode as createArrayNode,
+  ArrayNodeDependencies,
+  mathjsCreateBlockNode as createBlockNode,
+  BlockNodeDependencies,
+  mathjsCreateOperatorNode as createOperatorNode,
+  OperatorNodeDependencies,
+  mathjsCreateRangeNode as createRangeNode,
+  RangeNodeDependencies,
+  mathjsCreateAccessorNode as createAccessorNode,
+  AccessorNodeDependencies,
+  mathjsCreateConditionalNode as createConditionalNode,
+  ConditionalNodeDependencies,
+  mathjsCreateFunctionAssignmentNode as createFunctionAssignmentNode,
+  FunctionAssignmentNodeDependencies,
+  mathjsCreateObjectNode as createObjectNode,
+  ObjectNodeDependencies,
+  mathjsCreateIndexNode as createIndexNode,
+  IndexNodeDependencies,
+  mathjsCreateRelationalNode as createRelationalNode,
+  RelationalNodeDependencies,
   typedDependencies,
 };
