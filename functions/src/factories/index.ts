@@ -15,6 +15,7 @@ import { factoryScope, registerMathjsFactoryTypes, type TypedBuilder } from './s
 import { replacer } from '../utils/json-replacer.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
+import { compatSetUnion } from '../typed/set.js';
 import { factory, isFactory } from '../utils/factory.js';
 import { create as createFactoryInstance, type FactoriesInput } from '../core/create.js';
 import { mixin as attachEmitter } from '../utils/emitter.js';
@@ -2235,4 +2236,5 @@ export const factory_mathjsCompat = {
   createCompatRandomSources,
   createCompatTyped,
   tryCreateFactoryBundle,
+  setUnion: compatSetUnion,
 };

@@ -4066,6 +4066,9 @@
       "compareUnits": {
         "kind": "function"
       },
+      "compatSetUnion": {
+        "kind": "function"
+      },
       "compileExpr": {
         "kind": "function"
       },
@@ -13323,6 +13326,9 @@
         "kind": "function"
       },
       "setSymDifference": {
+        "kind": "function"
+      },
+      "setUnion": {
         "kind": "function"
       },
       "shims": {
