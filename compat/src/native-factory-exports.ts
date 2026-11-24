@@ -2724,6 +2724,59 @@ const wienDisplacementDependencies: PhysicalConstantBundle<'createWienDisplaceme
   createWienDisplacement: selectedCreateWienDisplacement,
 };
 
+const mathjsCreateLeafCount: CompatFactoryExports['createLeafCount'] = factories.createLeafCount;
+const leafCountDependencies: UnaryBundle<'createLeafCount'> & {
+  parseDependencies: typeof parseDependencies;
+} = {
+  parseDependencies,
+  typedDependencies,
+  createLeafCount: mathjsCreateLeafCount,
+};
+
+const mathjsCreatePinv: CompatFactoryExports['createPinv'] = factories.createPinv;
+const pinvDependencies: UnaryBundle<'createPinv'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  addDependencies: typeof addDependencies;
+  ctransposeDependencies: typeof ctransposeDependencies;
+  deepEqualDependencies: typeof deepEqualDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  dotDependencies: typeof dotDependencies;
+  dotDivideDependencies: typeof dotDivideDependencies;
+  equalDependencies: typeof equalDependencies;
+  invDependencies: typeof invDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+} = {
+  ComplexDependencies,
+  addDependencies,
+  ctransposeDependencies,
+  deepEqualDependencies,
+  divideScalarDependencies,
+  dotDependencies,
+  dotDivideDependencies,
+  equalDependencies,
+  invDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  typedDependencies,
+  createPinv: mathjsCreatePinv,
+};
+
+const mathjsCreateZpk2tf: CompatFactoryExports['createZpk2tf'] = factories.createZpk2tf;
+const zpk2tfDependencies: UnaryBundle<'createZpk2tf'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  addDependencies: typeof addDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  numberDependencies: typeof numberDependencies;
+} = {
+  ComplexDependencies,
+  addDependencies,
+  multiplyDependencies,
+  numberDependencies,
+  typedDependencies,
+  createZpk2tf: mathjsCreateZpk2tf,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3246,5 +3299,11 @@ export {
   selectedCreateVacuumImpedance as createVacuumImpedance,
   selectedCreateWeakMixingAngle as createWeakMixingAngle,
   selectedCreateWienDisplacement as createWienDisplacement,
+  mathjsCreateLeafCount as createLeafCount,
+  leafCountDependencies,
+  mathjsCreatePinv as createPinv,
+  pinvDependencies,
+  mathjsCreateZpk2tf as createZpk2tf,
+  zpk2tfDependencies,
   typedDependencies,
 };

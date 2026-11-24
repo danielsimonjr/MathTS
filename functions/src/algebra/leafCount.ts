@@ -14,7 +14,7 @@ const dependencies = ['parse', 'typed'];
 export const createLeafCount = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ parse: _parse, typed }: LeafCountDependencies) => {
+  ({ parse, typed }: LeafCountDependencies) => {
     // This does the real work, but we don't have to recurse through
     // a typed call if we separate it out
     function countLeaves(node: MathNode): number {
@@ -56,6 +56,7 @@ export const createLeafCount = /* #__PURE__ */ factory(
      *
      */
     return typed(name, {
+      string: (expr: string): number => countLeaves(parse(expr)),
       Node: function (expr: MathNode): number {
         return countLeaves(expr);
       },

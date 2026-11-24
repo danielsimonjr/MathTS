@@ -2726,6 +2726,9 @@ function compatFactoryExports(): {
   createVacuumImpedance: typeof mathjsCreateVacuumImpedance;
   createWeakMixingAngle: typeof mathjsCreateWeakMixingAngle;
   createWienDisplacement: typeof mathjsCreateWienDisplacement;
+  createLeafCount: typeof createLeafCount;
+  createPinv: typeof createPinv;
+  createZpk2tf: typeof createZpk2tf;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2983,6 +2986,9 @@ function compatFactoryExports(): {
     createVacuumImpedance: mathjsCreateVacuumImpedance,
     createWeakMixingAngle: mathjsCreateWeakMixingAngle,
     createWienDisplacement: mathjsCreateWienDisplacement,
+    createLeafCount,
+    createPinv,
+    createZpk2tf,
     createTyped,
   };
 }
