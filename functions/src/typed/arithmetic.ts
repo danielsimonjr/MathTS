@@ -2293,7 +2293,7 @@ function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
     }
     return max;
   }
-  if (p === Infinity) {
+  if (p === Infinity || p === 'inf') {
     let max = 0;
     for (let i = 0; i < rows; i++) {
       let s = 0;
@@ -2346,6 +2346,8 @@ function arrayNorm(arr: unknown[], p?: f64 | string): unknown {
     if (rows[0].length === 0) throw new RangeError('Invalid matrix dimensions');
     return matrixNorm(rows, p);
   }
+  if (p === 'inf' || p === '-inf')
+    return vectorNorm(arr as f64[], p === 'inf' ? Infinity : -Infinity);
   if (typeof p === 'string') return matrixNorm([arr as f64[]], p);
   return vectorNorm(arr as f64[], p);
 }
