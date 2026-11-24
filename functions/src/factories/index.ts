@@ -2228,8 +2228,60 @@ function tryCreateFactoryBundle(
 }
 
 /** Return the dependency factories that have compat named exports. */
-function compatFactoryExports(): { createSin: typeof createSin; createTyped: typeof createTyped } {
-  return { createSin, createTyped };
+function compatFactoryExports(): {
+  createAcos: typeof createAcos;
+  createAcosh: typeof createAcosh;
+  createAcot: typeof createAcot;
+  createAcoth: typeof createAcoth;
+  createAcsc: typeof createAcsc;
+  createAcsch: typeof createAcsch;
+  createAsec: typeof createAsec;
+  createAsech: typeof createAsech;
+  createAsin: typeof createAsin;
+  createAsinh: typeof createAsinh;
+  createAtan: typeof createAtan;
+  createAtanh: typeof createAtanh;
+  createCos: typeof createCos;
+  createCosh: typeof createCosh;
+  createCot: typeof createCot;
+  createCoth: typeof createCoth;
+  createCsc: typeof createCsc;
+  createCsch: typeof createCsch;
+  createSec: typeof createSec;
+  createSech: typeof createSech;
+  createSin: typeof createSin;
+  createSinh: typeof createSinh;
+  createTan: typeof createTan;
+  createTanh: typeof createTanh;
+  createTyped: typeof createTyped;
+} {
+  return {
+    createAcos,
+    createAcosh,
+    createAcot,
+    createAcoth,
+    createAcsc,
+    createAcsch,
+    createAsec,
+    createAsech,
+    createAsin,
+    createAsinh,
+    createAtan,
+    createAtanh,
+    createCos,
+    createCosh,
+    createCot,
+    createCoth,
+    createCsc,
+    createCsch,
+    createSec,
+    createSech,
+    createSin,
+    createSinh,
+    createTan,
+    createTanh,
+    createTyped,
+  };
 }
 
 /** Internal host bindings for the mathjs compatibility package. */

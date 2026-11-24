@@ -6,8 +6,30 @@ const factories = /* #__PURE__ */ factory_mathjsCompat.compatFactoryExports();
 type ConstructorFactory<T> = ReturnType<typeof factory<Record<string, unknown>, T>>;
 type CompatFactoryExports = ReturnType<typeof factory_mathjsCompat.compatFactoryExports>;
 
-/** Factory for the MathJS-compatible sine function. */
+const mathjsCreateAcos: CompatFactoryExports['createAcos'] = factories.createAcos;
+const mathjsCreateAcosh: CompatFactoryExports['createAcosh'] = factories.createAcosh;
+const mathjsCreateAcot: CompatFactoryExports['createAcot'] = factories.createAcot;
+const mathjsCreateAcoth: CompatFactoryExports['createAcoth'] = factories.createAcoth;
+const mathjsCreateAcsc: CompatFactoryExports['createAcsc'] = factories.createAcsc;
+const mathjsCreateAcsch: CompatFactoryExports['createAcsch'] = factories.createAcsch;
+const mathjsCreateAsec: CompatFactoryExports['createAsec'] = factories.createAsec;
+const mathjsCreateAsech: CompatFactoryExports['createAsech'] = factories.createAsech;
+const mathjsCreateAsin: CompatFactoryExports['createAsin'] = factories.createAsin;
+const mathjsCreateAsinh: CompatFactoryExports['createAsinh'] = factories.createAsinh;
+const mathjsCreateAtan: CompatFactoryExports['createAtan'] = factories.createAtan;
+const mathjsCreateAtanh: CompatFactoryExports['createAtanh'] = factories.createAtanh;
+const mathjsCreateCos: CompatFactoryExports['createCos'] = factories.createCos;
+const mathjsCreateCosh: CompatFactoryExports['createCosh'] = factories.createCosh;
+const mathjsCreateCot: CompatFactoryExports['createCot'] = factories.createCot;
+const mathjsCreateCoth: CompatFactoryExports['createCoth'] = factories.createCoth;
+const mathjsCreateCsc: CompatFactoryExports['createCsc'] = factories.createCsc;
+const mathjsCreateCsch: CompatFactoryExports['createCsch'] = factories.createCsch;
+const mathjsCreateSec: CompatFactoryExports['createSec'] = factories.createSec;
+const mathjsCreateSech: CompatFactoryExports['createSech'] = factories.createSech;
 const mathjsCreateSin: CompatFactoryExports['createSin'] = factories.createSin;
+const mathjsCreateSinh: CompatFactoryExports['createSinh'] = factories.createSinh;
+const mathjsCreateTan: CompatFactoryExports['createTan'] = factories.createTan;
+const mathjsCreateTanh: CompatFactoryExports['createTanh'] = factories.createTanh;
 
 /** Factory for the MathJS-compatible typed dispatcher. */
 const mathjsCreateTyped: CompatFactoryExports['createTyped'] = factories.createTyped;
@@ -72,11 +94,119 @@ const typedDependencies: {
   createTyped: mathjsCreateTyped,
 };
 
-/** Factory bundle for a minimal MathJS-compatible sine instance. */
-const sinDependencies: {
+type UnaryBundle<Key extends keyof CompatFactoryExports> = Pick<CompatFactoryExports, Key> & {
   typedDependencies: typeof typedDependencies;
-  createSin: typeof mathjsCreateSin;
-} = { typedDependencies, createSin: mathjsCreateSin };
+};
+type WithBigNumber = { BigNumberDependencies: typeof BigNumberDependencies };
+type WithComplex = { ComplexDependencies: typeof ComplexDependencies };
+
+const acosDependencies: UnaryBundle<'createAcos'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createAcos: mathjsCreateAcos,
+};
+const acoshDependencies: UnaryBundle<'createAcosh'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createAcosh: mathjsCreateAcosh,
+};
+const acotDependencies: UnaryBundle<'createAcot'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createAcot: mathjsCreateAcot,
+};
+const acothDependencies: UnaryBundle<'createAcoth'> & WithBigNumber & WithComplex = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  typedDependencies,
+  createAcoth: mathjsCreateAcoth,
+};
+const acscDependencies: UnaryBundle<'createAcsc'> & WithBigNumber & WithComplex = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  typedDependencies,
+  createAcsc: mathjsCreateAcsc,
+};
+const acschDependencies: UnaryBundle<'createAcsch'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createAcsch: mathjsCreateAcsch,
+};
+const asecDependencies: UnaryBundle<'createAsec'> & WithBigNumber & WithComplex = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  typedDependencies,
+  createAsec: mathjsCreateAsec,
+};
+const asechDependencies: UnaryBundle<'createAsech'> & WithBigNumber & WithComplex = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  typedDependencies,
+  createAsech: mathjsCreateAsech,
+};
+const asinDependencies: UnaryBundle<'createAsin'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createAsin: mathjsCreateAsin,
+};
+const asinhDependencies: UnaryBundle<'createAsinh'> = {
+  typedDependencies,
+  createAsinh: mathjsCreateAsinh,
+};
+const atanDependencies: UnaryBundle<'createAtan'> = {
+  typedDependencies,
+  createAtan: mathjsCreateAtan,
+};
+const atanhDependencies: UnaryBundle<'createAtanh'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createAtanh: mathjsCreateAtanh,
+};
+const cosDependencies: UnaryBundle<'createCos'> = { typedDependencies, createCos: mathjsCreateCos };
+const coshDependencies: UnaryBundle<'createCosh'> = {
+  typedDependencies,
+  createCosh: mathjsCreateCosh,
+};
+const cotDependencies: UnaryBundle<'createCot'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createCot: mathjsCreateCot,
+};
+const cothDependencies: UnaryBundle<'createCoth'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createCoth: mathjsCreateCoth,
+};
+const cscDependencies: UnaryBundle<'createCsc'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createCsc: mathjsCreateCsc,
+};
+const cschDependencies: UnaryBundle<'createCsch'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createCsch: mathjsCreateCsch,
+};
+const secDependencies: UnaryBundle<'createSec'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createSec: mathjsCreateSec,
+};
+const sechDependencies: UnaryBundle<'createSech'> & WithBigNumber = {
+  BigNumberDependencies,
+  typedDependencies,
+  createSech: mathjsCreateSech,
+};
+const sinDependencies: UnaryBundle<'createSin'> = { typedDependencies, createSin: mathjsCreateSin };
+const sinhDependencies: UnaryBundle<'createSinh'> = {
+  typedDependencies,
+  createSinh: mathjsCreateSinh,
+};
+const tanDependencies: UnaryBundle<'createTan'> = { typedDependencies, createTan: mathjsCreateTan };
+const tanhDependencies: UnaryBundle<'createTanh'> = {
+  typedDependencies,
+  createTanh: mathjsCreateTanh,
+};
 
 export {
   BigNumberDependencies,
@@ -89,8 +219,54 @@ export {
   createDenseMatrixClass,
   createFractionClass,
   createMatrixClass,
+  mathjsCreateAcos as createAcos,
+  mathjsCreateAcosh as createAcosh,
+  mathjsCreateAcot as createAcot,
+  mathjsCreateAcoth as createAcoth,
+  mathjsCreateAcsc as createAcsc,
+  mathjsCreateAcsch as createAcsch,
+  mathjsCreateAsec as createAsec,
+  mathjsCreateAsech as createAsech,
+  mathjsCreateAsin as createAsin,
+  mathjsCreateAsinh as createAsinh,
+  mathjsCreateAtan as createAtan,
+  mathjsCreateAtanh as createAtanh,
+  mathjsCreateCos as createCos,
+  mathjsCreateCosh as createCosh,
+  mathjsCreateCot as createCot,
+  mathjsCreateCoth as createCoth,
+  mathjsCreateCsc as createCsc,
+  mathjsCreateCsch as createCsch,
+  mathjsCreateSec as createSec,
+  mathjsCreateSech as createSech,
   mathjsCreateSin as createSin,
+  mathjsCreateSinh as createSinh,
+  mathjsCreateTan as createTan,
+  mathjsCreateTanh as createTanh,
   mathjsCreateTyped as createTyped,
+  acosDependencies,
+  acoshDependencies,
+  acotDependencies,
+  acothDependencies,
+  acscDependencies,
+  acschDependencies,
+  asecDependencies,
+  asechDependencies,
+  asinDependencies,
+  asinhDependencies,
+  atanDependencies,
+  atanhDependencies,
+  cosDependencies,
+  coshDependencies,
+  cotDependencies,
+  cothDependencies,
+  cscDependencies,
+  cschDependencies,
+  secDependencies,
+  sechDependencies,
   sinDependencies,
+  sinhDependencies,
+  tanDependencies,
+  tanhDependencies,
   typedDependencies,
 };

@@ -12617,20 +12617,38 @@
       "acos": {
         "kind": "function"
       },
+      "acosDependencies": {
+        "kind": "object"
+      },
       "acosh": {
         "kind": "function"
+      },
+      "acoshDependencies": {
+        "kind": "object"
       },
       "acot": {
         "kind": "function"
       },
+      "acotDependencies": {
+        "kind": "object"
+      },
       "acoth": {
         "kind": "function"
+      },
+      "acothDependencies": {
+        "kind": "object"
       },
       "acsc": {
         "kind": "function"
       },
+      "acscDependencies": {
+        "kind": "object"
+      },
       "acsch": {
         "kind": "function"
+      },
+      "acschDependencies": {
+        "kind": "object"
       },
       "add": {
         "kind": "function"
@@ -12653,14 +12671,26 @@
       "asec": {
         "kind": "function"
       },
+      "asecDependencies": {
+        "kind": "object"
+      },
       "asech": {
         "kind": "function"
+      },
+      "asechDependencies": {
+        "kind": "object"
       },
       "asin": {
         "kind": "function"
       },
+      "asinDependencies": {
+        "kind": "object"
+      },
       "asinh": {
         "kind": "function"
+      },
+      "asinhDependencies": {
+        "kind": "object"
       },
       "atan": {
         "kind": "function"
@@ -12668,8 +12698,14 @@
       "atan2": {
         "kind": "function"
       },
+      "atanDependencies": {
+        "kind": "object"
+      },
       "atanh": {
         "kind": "function"
+      },
+      "atanhDependencies": {
+        "kind": "object"
       },
       "atomicMass": {
         "kind": "object"
@@ -12782,14 +12818,26 @@
       "cos": {
         "kind": "function"
       },
+      "cosDependencies": {
+        "kind": "object"
+      },
       "cosh": {
         "kind": "function"
+      },
+      "coshDependencies": {
+        "kind": "object"
       },
       "cot": {
         "kind": "function"
       },
+      "cotDependencies": {
+        "kind": "object"
+      },
       "coth": {
         "kind": "function"
+      },
+      "cothDependencies": {
+        "kind": "object"
       },
       "coulomb": {
         "kind": "object"
@@ -12803,10 +12851,64 @@
       "create": {
         "kind": "function"
       },
+      "createAcos": {
+        "kind": "function"
+      },
+      "createAcosh": {
+        "kind": "function"
+      },
+      "createAcot": {
+        "kind": "function"
+      },
+      "createAcoth": {
+        "kind": "function"
+      },
+      "createAcsc": {
+        "kind": "function"
+      },
+      "createAcsch": {
+        "kind": "function"
+      },
+      "createAsec": {
+        "kind": "function"
+      },
+      "createAsech": {
+        "kind": "function"
+      },
+      "createAsin": {
+        "kind": "function"
+      },
+      "createAsinh": {
+        "kind": "function"
+      },
+      "createAtan": {
+        "kind": "function"
+      },
+      "createAtanh": {
+        "kind": "function"
+      },
       "createBigNumberClass": {
         "kind": "function"
       },
       "createComplexClass": {
+        "kind": "function"
+      },
+      "createCos": {
+        "kind": "function"
+      },
+      "createCosh": {
+        "kind": "function"
+      },
+      "createCot": {
+        "kind": "function"
+      },
+      "createCoth": {
+        "kind": "function"
+      },
+      "createCsc": {
+        "kind": "function"
+      },
+      "createCsch": {
         "kind": "function"
       },
       "createDenseMatrixClass": {
@@ -12818,7 +12920,22 @@
       "createMatrixClass": {
         "kind": "function"
       },
+      "createSec": {
+        "kind": "function"
+      },
+      "createSech": {
+        "kind": "function"
+      },
       "createSin": {
+        "kind": "function"
+      },
+      "createSinh": {
+        "kind": "function"
+      },
+      "createTan": {
+        "kind": "function"
+      },
+      "createTanh": {
         "kind": "function"
       },
       "createTyped": {
@@ -12833,8 +12950,14 @@
       "csc": {
         "kind": "function"
       },
+      "cscDependencies": {
+        "kind": "object"
+      },
       "csch": {
         "kind": "function"
+      },
+      "cschDependencies": {
+        "kind": "object"
       },
       "ctranspose": {
         "kind": "function"
@@ -13493,8 +13616,14 @@
       "sec": {
         "kind": "function"
       },
+      "secDependencies": {
+        "kind": "object"
+      },
       "sech": {
         "kind": "function"
+      },
+      "sechDependencies": {
+        "kind": "object"
       },
       "secondRadiation": {
         "kind": "object"
@@ -13552,6 +13681,9 @@
       },
       "sinh": {
         "kind": "function"
+      },
+      "sinhDependencies": {
+        "kind": "object"
       },
       "size": {
         "kind": "function"
@@ -13625,8 +13757,14 @@
       "tan": {
         "kind": "function"
       },
+      "tanDependencies": {
+        "kind": "object"
+      },
       "tanh": {
         "kind": "function"
+      },
+      "tanhDependencies": {
+        "kind": "object"
       },
       "tau": {
         "kind": "number"
