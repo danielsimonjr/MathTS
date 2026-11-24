@@ -1,7 +1,6 @@
 import { BigNumber, Unit } from '@danielsimonjr/mathts-core';
 import { evaluate, runWithConfig } from '@danielsimonjr/mathts-functions';
 import { MATHJS_UNIT_CONSTANTS } from './parity-names.generated.js';
-import type { MathJSConfig } from './index.js';
 
 const mathConstants = {
   E: 'e',
@@ -27,6 +26,7 @@ const scalarConstants = {
   weakMixingAngle: 0.2229,
 } as const;
 
+/** Constant names whose values are configured by a compat instance. */
 export type CompatConstantName =
   keyof typeof mathConstants | keyof typeof scalarConstants | 'Infinity' | 'NaN';
 
@@ -44,7 +44,7 @@ function cloneUnit(name: string, value: number, units: string): InstanceType<typ
 /** Prepare live reads before the instance defines its property layout. */
 export function compatConstantReaders(
   surface: Record<string, unknown>,
-  config: MathJSConfig,
+  config: Parameters<typeof runWithConfig>[0],
   isDefault: (name: string) => boolean
 ): Record<string, () => unknown> {
   const reads: Record<string, () => unknown> = {};
