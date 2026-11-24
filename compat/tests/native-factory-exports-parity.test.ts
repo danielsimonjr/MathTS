@@ -5,6 +5,61 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it.each([
+    ['dense', 'sparse'],
+    ['sparse', 'dense'],
+    ['sparse', 'sparse'],
+  ] as const)('multiplies %s and %s storage like MathJS', (leftStorage, rightStorage) => {
+    const selected = create({ multiplyDependencies: compat.multiplyDependencies });
+    const expected = oracle.create({
+      multiplyDependencies: Reflect.get(oracle, 'multiplyDependencies'),
+    });
+    const a = [
+      [1, 0],
+      [2, 3],
+    ];
+    const b = [
+      [0, 4],
+      [5, 0],
+    ];
+    const product = Reflect.get(selected, 'multiply')(
+      selected.matrix(a, leftStorage),
+      selected.matrix(b, rightStorage)
+    );
+    const reference = expected.multiply(
+      expected.matrix(a, leftStorage),
+      expected.matrix(b, rightStorage)
+    );
+    if (!compat.isMatrix(product) || !oracle.isMatrix(reference)) {
+      throw new TypeError('Expected matrix multiplication to return matrices');
+    }
+    expect(compat.isSparseMatrix(product)).toBe(oracle.isSparseMatrix(reference));
+    expect(product.valueOf()).toEqual(reference.valueOf());
+  });
+
+  it('uses injected scalar operations for dense and sparse multiplication', () => {
+    const selected = create({ multiplyDependencies: compat.multiplyDependencies });
+    const multiply = compat.createMultiply({
+      typed: selected.typed,
+      matrix: Reflect.get(selected, 'matrix'),
+      addScalar: selected.typed('addScalar', {
+        'number, number': (a: number, b: number) => a + b + 1,
+      }),
+      multiplyScalar: selected.typed('multiplyScalar', {
+        'number, number': (a: number, b: number) => 2 * a * b,
+      }),
+      equalScalar: Reflect.get(selected, 'equalScalar'),
+      dot: Reflect.get(selected, 'dot'),
+    } as Parameters<typeof compat.createMultiply>[0]);
+    expect(multiply([[1, 2]], [[3], [4]])).toEqual([[23]]);
+    const sparse = multiply(
+      selected.matrix([[1, 2]], 'sparse'),
+      selected.matrix([[3], [4]], 'sparse')
+    );
+    if (!compat.isMatrix(sparse)) throw new TypeError('Expected a sparse product');
+    expect(sparse.valueOf()).toEqual([[23]]);
+  });
+
   it('uses the selected numeric configuration when reducing text', () => {
     const math = create(
       { sumDependencies: compat.sumDependencies, prodDependencies: compat.prodDependencies },
@@ -386,6 +441,47 @@ describe('native compatibility dependency bundles', () => {
     ['lgamma', [2.5]],
     ['log10', [1000]],
     ['log2', [128]],
+    ['multiply', [2, 3, 4]],
+    [
+      'multiply',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        [
+          [2, 0],
+          [1, 2],
+        ],
+      ],
+    ],
+    [
+      'multiply',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    [
+      'multiply',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        [2, 3],
+      ],
+    ],
+    [
+      'multiply',
+      [
+        [2, 3],
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
     ['multiplyScalar', [3, 4]],
     ['not', [true]],
     ['re', [7]],

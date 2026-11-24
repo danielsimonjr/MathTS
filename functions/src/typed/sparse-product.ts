@@ -119,6 +119,8 @@ const TALL_ROW_FLOOR = 1 << 16;
  * @param b - Right operand (`inner x cols`).
  * @param add - Scalar sum (used when an entry is not a number).
  * @param mul - Scalar product (used when an entry is not a number).
+ * @param useNumericFastPath - Use direct number operators. Selected factories disable this to
+ *                            honor their injected scalar operations for numbers as well.
  * @returns The product, as a new CSC matrix.
  * @throws Error when the inner dimensions differ.
  */
@@ -126,7 +128,8 @@ export function cscProduct(
   a: MathJSSparseMatrix,
   b: MathJSSparseMatrix,
   add: SparseScalarOp,
-  mul: SparseScalarOp
+  mul: SparseScalarOp,
+  useNumericFastPath = true
 ): MathJSSparseMatrix {
   assertInnerDimensions(a._size, b._size);
   const rows = a._size[0];
@@ -139,7 +142,11 @@ export function cscProduct(
   const bIndex = b._index;
   const bValues = b._values;
   const pattern = aValues === null || bValues === null;
-  const numeric = !pattern && allNumbers(aValues, aPtr[inner]) && allNumbers(bValues, bPtr[cols]);
+  const numeric =
+    useNumericFastPath &&
+    !pattern &&
+    allNumbers(aValues, aPtr[inner]) &&
+    allNumbers(bValues, bPtr[cols]);
 
   const storedA = aPtr[inner];
   const tall = rows > TALL_ROW_FLOOR && rows > TALL_ROW_FACTOR * (storedA + cols);
