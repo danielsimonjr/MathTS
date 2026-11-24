@@ -12449,6 +12449,9 @@
       "AssignmentNode": {
         "kind": "function"
       },
+      "AssignmentNodeDependencies": {
+        "kind": "object"
+      },
       "BIGNUMBER_E": {
         "kind": "object"
       },
@@ -12544,6 +12547,9 @@
       },
       "FunctionNode": {
         "kind": "function"
+      },
+      "FunctionNodeDependencies": {
+        "kind": "object"
       },
       "Help": {
         "kind": "function"
@@ -12698,8 +12704,14 @@
       "SymbolNode": {
         "kind": "function"
       },
+      "SymbolNodeDependencies": {
+        "kind": "object"
+      },
       "Unit": {
         "kind": "function"
+      },
+      "UnitDependencies": {
+        "kind": "object"
       },
       "_Infinity": {
         "kind": "number"
@@ -13082,6 +13094,9 @@
       "createAsinh": {
         "kind": "function"
       },
+      "createAssignmentNode": {
+        "kind": "function"
+      },
       "createAtan": {
         "kind": "function"
       },
@@ -13178,6 +13193,12 @@
       "createCount": {
         "kind": "function"
       },
+      "createCreateUnit": {
+        "kind": "function"
+      },
+      "createCross": {
+        "kind": "function"
+      },
       "createCsc": {
         "kind": "function"
       },
@@ -13197,6 +13218,9 @@
         "kind": "function"
       },
       "createDenseMatrixClass": {
+        "kind": "function"
+      },
+      "createDet": {
         "kind": "function"
       },
       "createDiag": {
@@ -13220,6 +13244,9 @@
       "createDotMultiply": {
         "kind": "function"
       },
+      "createDotPow": {
+        "kind": "function"
+      },
       "createE": {
         "kind": "function"
       },
@@ -13233,6 +13260,9 @@
         "kind": "function"
       },
       "createErf": {
+        "kind": "function"
+      },
+      "createEvaluate": {
         "kind": "function"
       },
       "createExp": {
@@ -13274,6 +13304,9 @@
       "createFunctionAssignmentNode": {
         "kind": "function"
       },
+      "createFunctionNode": {
+        "kind": "function"
+      },
       "createGcd": {
         "kind": "function"
       },
@@ -13311,6 +13344,9 @@
         "kind": "function"
       },
       "createInfinity": {
+        "kind": "function"
+      },
+      "createInv": {
         "kind": "function"
       },
       "createIsBounded": {
@@ -13475,6 +13511,9 @@
       "createParenthesisNode": {
         "kind": "function"
       },
+      "createParse": {
+        "kind": "function"
+      },
       "createPartitionSelect": {
         "kind": "function"
       },
@@ -13485,6 +13524,9 @@
         "kind": "function"
       },
       "createPickRandom": {
+        "kind": "function"
+      },
+      "createPow": {
         "kind": "function"
       },
       "createPrint": {
@@ -13586,6 +13628,9 @@
       "createSize": {
         "kind": "function"
       },
+      "createSlu": {
+        "kind": "function"
+      },
       "createSmaller": {
         "kind": "function"
       },
@@ -13620,6 +13665,9 @@
         "kind": "function"
       },
       "createSum": {
+        "kind": "function"
+      },
+      "createSymbolNode": {
         "kind": "function"
       },
       "createTan": {
@@ -13658,6 +13706,15 @@
       "createUnit": {
         "kind": "function"
       },
+      "createUnitClass": {
+        "kind": "function"
+      },
+      "createUnitDependencies": {
+        "kind": "object"
+      },
+      "createUnitFunction": {
+        "kind": "function"
+      },
       "createUppercaseE": {
         "kind": "function"
       },
@@ -13678,6 +13735,9 @@
       },
       "cross": {
         "kind": "function"
+      },
+      "crossDependencies": {
+        "kind": "object"
       },
       "csc": {
         "kind": "function"
@@ -13723,6 +13783,9 @@
       },
       "det": {
         "kind": "function"
+      },
+      "detDependencies": {
+        "kind": "object"
       },
       "deuteronMass": {
         "kind": "object"
@@ -13775,6 +13838,9 @@
       "dotPow": {
         "kind": "function"
       },
+      "dotPowDependencies": {
+        "kind": "object"
+      },
       "e": {
         "kind": "number"
       },
@@ -13822,6 +13888,9 @@
       },
       "evaluate": {
         "kind": "function"
+      },
+      "evaluateDependencies": {
+        "kind": "object"
       },
       "exp": {
         "kind": "function"
@@ -13987,6 +14056,9 @@
       },
       "inv": {
         "kind": "function"
+      },
+      "invDependencies": {
+        "kind": "object"
       },
       "inverseConductanceQuantum": {
         "kind": "object"
@@ -14459,6 +14531,9 @@
       "parse": {
         "kind": "function"
       },
+      "parseDependencies": {
+        "kind": "object"
+      },
       "parser": {
         "kind": "function"
       },
@@ -14515,6 +14590,9 @@
       },
       "pow": {
         "kind": "function"
+      },
+      "powDependencies": {
+        "kind": "object"
       },
       "print": {
         "kind": "function"
@@ -14744,6 +14822,9 @@
       "slu": {
         "kind": "function"
       },
+      "sluDependencies": {
+        "kind": "object"
+      },
       "smaller": {
         "kind": "function"
       },
@@ -14911,6 +14992,9 @@
       },
       "unit": {
         "kind": "function"
+      },
+      "unitDependencies": {
+        "kind": "object"
       },
       "usolve": {
         "kind": "function"

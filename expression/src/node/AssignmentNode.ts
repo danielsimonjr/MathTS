@@ -10,7 +10,7 @@ import type { MathNode, StringOptions } from './Node.js';
 import type { IndexLike } from './utils/stringSubset.js';
 
 const name = 'AssignmentNode';
-const dependencies = ['subset', 'Node'];
+const dependencies = ['subset', '?matrix', 'Node'];
 
 // An IndexNode child node, as accepted/stored by AssignmentNode.
 interface IndexNodeChild extends MathNode {
@@ -37,13 +37,17 @@ export const createAssignmentNode = /* #__PURE__ */ factory(
   dependencies,
   ({
     subset,
+    matrix,
     Node,
   }: {
     subset: (...args: unknown[]) => unknown;
+    matrix?: (data: unknown[]) => {
+      subset(index: unknown, value: unknown): { valueOf(): unknown[] };
+    };
     Node: new (...args: unknown[]) => MathNode;
   }) => {
     const access = accessFactory({ subset });
-    const assign = assignFactory({ subset });
+    const assign = assignFactory({ subset, matrix });
 
     /*
      * Is parenthesis needed?

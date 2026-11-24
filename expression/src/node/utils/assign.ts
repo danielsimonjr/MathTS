@@ -12,7 +12,15 @@ import type { IndexLike } from './stringSubset.js';
  * It throws a TypeError for a numeric index on an object and for other value types.
  * Before it throws an IndexError again, it changes the indices to one-based.
  */
-export function assignFactory({ subset }: { subset: (...args: unknown[]) => unknown }) {
+export function assignFactory({
+  subset,
+  matrix,
+}: {
+  subset: (...args: unknown[]) => unknown;
+  matrix?: (data: unknown[]) => {
+    subset(index: unknown, value: unknown): { valueOf(): unknown[] };
+  };
+}) {
   /**
    * Replace part of an object:
    *
@@ -38,7 +46,9 @@ export function assignFactory({ subset }: { subset: (...args: unknown[]) => unkn
   ) {
     try {
       if (Array.isArray(object)) {
-        const result = subset(object, index, value) as unknown[];
+        const result = matrix
+          ? matrix(object).subset(index, value).valueOf()
+          : (subset(object, index, value) as unknown[]);
 
         // shallow copy all (updated) items into the original array
         result.forEach((item: unknown, i: number) => {

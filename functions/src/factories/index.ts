@@ -1886,6 +1886,25 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+const createSelectedEvaluate = /* #__PURE__ */ factory(
+  'evaluate',
+  ['typed', 'parse'],
+  ({ typed, parse }: { typed: TypedBuilder; parse: (text: string) => MathNode }) => {
+    type Scope = Parameters<ReturnType<MathNode['compile']>['evaluate']>[0];
+    const evaluate = (text: string, scope: Scope) => parse(text).compile().evaluate(scope);
+    const evaluateCollection = (input: unknown, scope: Scope): unknown =>
+      Array.isArray(input) || coreIsMatrix(input)
+        ? mapCollection(input, (value) => evaluateCollection(value, scope))
+        : evaluate(input as string, scope);
+    return typed('evaluate', {
+      string: (text: string) => evaluate(text, {}),
+      'string, Map | Object': evaluate,
+      'Array | Matrix': (value: unknown) => evaluateCollection(value, {}),
+      'Array | Matrix, Map | Object': evaluateCollection,
+    });
+  }
+);
+
 /** The call forms of {@link number}. */
 interface NumberFunction {
   (x?: number | string | boolean | bigint | null | CoreBigNumber | CoreFraction): number;
@@ -2588,6 +2607,20 @@ function compatFactoryExports(): {
   createProd: typeof createMathjsProd;
   createCount: typeof createCount;
   createMultiply: typeof createSelectedMultiply;
+  createDet: typeof createDet;
+  createInv: typeof createInv;
+  createPow: typeof createPow;
+  createCross: typeof createCross;
+  createDotPow: typeof createDotPow;
+  createSlu: typeof createSlu;
+  createUnitClass: typeof createUnitClass;
+  createUnitFunction: typeof createUnitFunction;
+  createCreateUnit: typeof createCreateUnit;
+  createSymbolNode: typeof createSymbolNode;
+  createFunctionNode: typeof createFunctionNode;
+  createAssignmentNode: typeof createAssignmentNode;
+  createParse: typeof createParse;
+  createEvaluate: typeof createSelectedEvaluate;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2780,6 +2813,20 @@ function compatFactoryExports(): {
     createProd: createMathjsProd,
     createCount,
     createMultiply: createSelectedMultiply,
+    createDet,
+    createInv,
+    createPow,
+    createCross,
+    createDotPow,
+    createSlu,
+    createUnitClass,
+    createUnitFunction,
+    createCreateUnit,
+    createSymbolNode,
+    createFunctionNode,
+    createAssignmentNode,
+    createParse,
+    createEvaluate: createSelectedEvaluate,
     createTyped,
   };
 }
