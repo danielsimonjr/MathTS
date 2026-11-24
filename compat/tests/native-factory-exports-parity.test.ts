@@ -6,6 +6,55 @@ const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
   it.each([
+    'Node',
+    'ConstantNode',
+    'ParenthesisNode',
+    'ArrayNode',
+    'BlockNode',
+    'OperatorNode',
+    'RangeNode',
+    'AccessorNode',
+    'ConditionalNode',
+    'FunctionAssignmentNode',
+    'ObjectNode',
+    'IndexNode',
+    'RelationalNode',
+  ] as const)('creates the selected %s constructor with MathJS dependencies', (name) => {
+    const bundleName = name + 'Dependencies';
+    const factoryName = 'create' + name;
+    const bundle = Reflect.get(compat, bundleName);
+    const referenceBundle = Reflect.get(oracle, bundleName);
+    expect(Object.keys(bundle)).toEqual(Object.keys(referenceBundle));
+    expect(Reflect.get(compat, factoryName).dependencies).toEqual(
+      Reflect.get(oracle, factoryName).dependencies
+    );
+    const selected = create({ [bundleName]: bundle });
+    const expected = oracle.create({ [bundleName]: referenceBundle });
+    expect(Object.keys(selected).sort()).toEqual(Object.keys(expected).sort());
+    expect(typeof Reflect.get(selected, name)).toBe('function');
+  });
+
+  it('compiles a selected AST using the functions in the same instance', () => {
+    const bundles = ['ConstantNodeDependencies', 'OperatorNodeDependencies', 'addDependencies'];
+    const selected = create(
+      Object.fromEntries(bundles.map((name) => [name, Reflect.get(compat, name)]))
+    );
+    const expected = oracle.create(
+      Object.fromEntries(bundles.map((name) => [name, Reflect.get(oracle, name)]))
+    );
+    const result = new selected.OperatorNode('+', 'add', [
+      new selected.ConstantNode(3),
+      new selected.ConstantNode(4),
+    ]);
+    const reference = new expected.OperatorNode('+', 'add', [
+      new expected.ConstantNode(3),
+      new expected.ConstantNode(4),
+    ]);
+    expect(result.evaluate()).toBe(reference.evaluate());
+    expect(result.toString()).toBe(reference.toString());
+  });
+
+  it.each([
     ['bignumber', ['0xff']],
     ['bignumber', [123456789012345678901234567890n]],
     ['fraction', [{ n: 3, d: 7, s: -1 }]],
