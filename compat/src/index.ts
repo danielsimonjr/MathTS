@@ -499,6 +499,8 @@ export function create(
   // Internal names of the functions namespace (#1216) are not surfaced: not own, not
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const useCompatSetUnion = originalSurface.setUnion === mathFunctions.setUnion;
+  if (useCompatSetUnion) flat.setUnion = namedSetUnion;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
   );
@@ -511,6 +513,7 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
+  if (useCompatSetUnion) expressionConstants.setUnion = () => instance.setUnion;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
@@ -677,6 +680,10 @@ export {
   defaultParse as parse,
   defaultParser as parser,
 };
+
+/** Union of two multisets in MathJS result order. */
+const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
+export { namedSetUnion as setUnion };
 
 export * from './named-symbols.js';
 

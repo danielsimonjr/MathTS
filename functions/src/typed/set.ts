@@ -134,17 +134,25 @@ function identify(sorted: unknown[]): Identified[] {
  * setUnion([1, 2, 2], [2, 3])            // [1, 2, 2, 3]
  * ```
  */
-export const setUnion = binaryMatrixSet('setUnion', (a1, a2): unknown[] => {
-  const b1 = toFlatArray(a1);
-  const b2 = toFlatArray(a2);
-  if (b1.length === 0) return b2;
-  if (b2.length === 0) return b1;
-  // Union = setSymDifference(b1,b2) concat setIntersect(b1,b2)
-  const diff1 = _difference(b1, b2);
-  const diff2 = _difference(b2, b1);
-  const inter = _intersect(b1, b2);
-  return [...diff1, ...inter, ...diff2];
-});
+export const setUnion = setUnionWithOrder(false);
+
+/** Build the compatibility variant, which places the intersection last. */
+export const compatSetUnion = setUnionWithOrder(true);
+
+function setUnionWithOrder(intersectionLast: boolean) {
+  return binaryMatrixSet('setUnion', (a1, a2): unknown[] => {
+    const b1 = toFlatArray(a1);
+    const b2 = toFlatArray(a2);
+    if (b1.length === 0) return b2;
+    if (b2.length === 0) return b1;
+    const left = _difference(b1, b2);
+    const right = _difference(b2, b1);
+    const intersection = _intersect(b1, b2);
+    return intersectionLast
+      ? [...left, ...right, ...intersection]
+      : [...left, ...intersection, ...right];
+  });
+}
 
 // =============================================================================
 // setIntersect — intersection of two multisets
