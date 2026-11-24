@@ -1,4 +1,4 @@
-import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
+import { factory_mathjsCompat, replacer } from '@danielsimonjr/mathts-functions';
 import { fractionPart, instanceSymbols } from './instance-symbols.js';
 
 const factory: typeof factory_mathjsCompat.factory = factory_mathjsCompat.factory;
@@ -2988,6 +2988,17 @@ const denDependencies: FractionPartBundle & { createDen: typeof createDen } = {
   createDen,
 };
 
+const createRangeClass: ConstructorFactory<(typeof instanceSymbols)['Range']> =
+  /* #__PURE__ */ factory('Range', [], () => instanceSymbols.Range);
+const RangeDependencies: { createRangeClass: typeof createRangeClass } = { createRangeClass };
+
+const createReplacer: ConstructorFactory<typeof replacer> = /* #__PURE__ */ factory(
+  'replacer',
+  [],
+  () => replacer
+);
+const replacerDependencies: { createReplacer: typeof createReplacer } = { createReplacer };
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3546,5 +3557,9 @@ export {
   numDependencies,
   createDen,
   denDependencies,
+  createRangeClass,
+  RangeDependencies,
+  createReplacer,
+  replacerDependencies,
   typedDependencies,
 };
