@@ -3704,6 +3704,60 @@ const factorialDependencies: UnaryBundle<'createFactorial'> & {
   createFactorial: mathjsCreateFactorial,
 };
 
+const mathjsCreateLusolve: CompatFactoryExports['createLusolve'] = factories.createLusolve;
+const lusolveDependencies: UnaryBundle<'createLusolve'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  lsolveDependencies: typeof lsolveDependencies;
+  lupDependencies: typeof lupDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  sluDependencies: typeof sluDependencies;
+  usolveDependencies: typeof usolveDependencies;
+} = {
+  DenseMatrixDependencies,
+  lsolveDependencies,
+  lupDependencies,
+  matrixDependencies,
+  sluDependencies,
+  typedDependencies,
+  usolveDependencies,
+  createLusolve: mathjsCreateLusolve,
+};
+
+const mathjsCreateSolveODE: CompatFactoryExports['createSolveODE'] = factories.createSolveODE;
+const solveODEDependencies: UnaryBundle<'createSolveODE'> & {
+  absDependencies: typeof absDependencies;
+  addDependencies: typeof addDependencies;
+  bignumberDependencies: typeof bignumberDependencies;
+  divideDependencies: typeof divideDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  isPositiveDependencies: typeof isPositiveDependencies;
+  largerDependencies: typeof largerDependencies;
+  mapDependencies: typeof mapDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  maxDependencies: typeof maxDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  subtractDependencies: typeof subtractDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  absDependencies,
+  addDependencies,
+  bignumberDependencies,
+  divideDependencies,
+  isNegativeDependencies,
+  isPositiveDependencies,
+  largerDependencies,
+  mapDependencies,
+  matrixDependencies,
+  maxDependencies,
+  multiplyDependencies,
+  smallerDependencies,
+  subtractDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createSolveODE: mathjsCreateSolveODE,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4298,6 +4352,10 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateSolveODE as createSolveODE,
+  solveODEDependencies,
+  mathjsCreateLusolve as createLusolve,
+  lusolveDependencies,
   mathjsCreateFactorial as createFactorial,
   factorialDependencies,
   mathjsCreateGamma as createGamma,
