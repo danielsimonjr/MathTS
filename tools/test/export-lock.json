@@ -13289,6 +13289,9 @@
       "createDeepEqual": {
         "kind": "function"
       },
+      "createDen": {
+        "kind": "function"
+      },
       "createDenseMatrixClass": {
         "kind": "function"
       },
@@ -13641,6 +13644,9 @@
         "kind": "function"
       },
       "createNullish": {
+        "kind": "function"
+      },
+      "createNum": {
         "kind": "function"
       },
       "createNumber": {
@@ -14014,6 +14020,9 @@
       },
       "den": {
         "kind": "function"
+      },
+      "denDependencies": {
+        "kind": "object"
       },
       "derivative": {
         "kind": "function"
@@ -14818,6 +14827,9 @@
       },
       "num": {
         "kind": "function"
+      },
+      "numDependencies": {
+        "kind": "object"
       },
       "number": {
         "kind": "function"

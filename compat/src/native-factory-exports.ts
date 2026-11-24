@@ -1,5 +1,5 @@
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
-import { instanceSymbols } from './instance-symbols.js';
+import { fractionPart, instanceSymbols } from './instance-symbols.js';
 
 const factory: typeof factory_mathjsCompat.factory = factory_mathjsCompat.factory;
 const factories = /* #__PURE__ */ factory_mathjsCompat.compatFactoryExports();
@@ -2953,6 +2953,41 @@ const combinationsWithRepDependencies: UnaryBundle<'createCombinationsWithRep'> 
   createCombinationsWithRep: mathjsCreateCombinationsWithRep,
 };
 
+type FractionPartFactoryDependencies = {
+  typed: NonNullable<Parameters<typeof fractionPart>[2]>;
+  fraction: NonNullable<Parameters<typeof fractionPart>[3]>;
+};
+
+const createNum: ConstructorFactory<ReturnType<typeof fractionPart>> = /* #__PURE__ */ factory(
+  'num',
+  ['typed', 'fraction'],
+  ({ typed, fraction }: FractionPartFactoryDependencies) =>
+    fractionPart('num', 'numerator', typed, fraction)
+);
+
+const createDen: ConstructorFactory<ReturnType<typeof fractionPart>> = /* #__PURE__ */ factory(
+  'den',
+  ['typed', 'fraction'],
+  ({ typed, fraction }: FractionPartFactoryDependencies) =>
+    fractionPart('den', 'denominator', typed, fraction)
+);
+
+type FractionPartBundle = {
+  fractionDependencies: typeof fractionDependencies;
+  typedDependencies: typeof typedDependencies;
+};
+
+const numDependencies: FractionPartBundle & { createNum: typeof createNum } = {
+  fractionDependencies,
+  typedDependencies,
+  createNum,
+};
+const denDependencies: FractionPartBundle & { createDen: typeof createDen } = {
+  fractionDependencies,
+  typedDependencies,
+  createDen,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3507,5 +3542,9 @@ export {
   combinationsDependencies,
   mathjsCreateCombinationsWithRep as createCombinationsWithRep,
   combinationsWithRepDependencies,
+  createNum,
+  numDependencies,
+  createDen,
+  denDependencies,
   typedDependencies,
 };
