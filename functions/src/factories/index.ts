@@ -2145,15 +2145,25 @@ const createSelectedBignumber = /* #__PURE__ */ factory(
 const createSelectedFraction = /* #__PURE__ */ factory(
   'fraction',
   ['typed', 'Fraction'],
-  ({ typed, Fraction }: { typed: TypedBuilder; Fraction: typeof CoreFraction }) =>
-    typed('fraction', {
+  ({ typed, Fraction }: { typed: TypedBuilder; Fraction: typeof CoreFraction }) => {
+    const fromMathJSNotation = (value: string | number): CoreFraction => {
+      const { s, n, d } = new FractionJS(value);
+      return new Fraction(s * n, d);
+    };
+
+    return typed('fraction', {
       number: (value: number) => {
         if (!Number.isFinite(value))
           throw new Error(`${value} cannot be represented as a fraction`);
-        const { s, n, d } = new FractionJS(value);
-        return new Fraction(s * n, d);
+        return fromMathJSNotation(value);
       },
-      string: (value: string) => new Fraction(value),
+      string: (value: string) => {
+        try {
+          return new Fraction(value);
+        } catch {
+          return fromMathJSNotation(value);
+        }
+      },
       'number, number': (numerator: number, denominator: number) =>
         new Fraction(numerator, denominator),
       'bigint, bigint': (numerator: bigint, denominator: bigint) =>
@@ -2184,7 +2194,8 @@ const createSelectedFraction = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self) => (value: unknown) => mapCollection(value, (entry) => self(entry))
       ),
-    })
+    });
+  }
 );
 
 const createSelectedComplex = /* #__PURE__ */ factory(

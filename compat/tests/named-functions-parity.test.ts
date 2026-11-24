@@ -212,4 +212,18 @@ describe('named compatibility function imports', () => {
     expect(multiply([1, 2], '3')).toEqual([3, 6]);
     expect(() => multiply('abc', '2')).toThrow(/Cannot convert "abc" to a number/);
   });
+
+  it('accepts MathJS mixed, repeating, and colon fraction notation', () => {
+    const math = create(all);
+    const selected = create({ fractionDependencies });
+    for (const text of ['2 1/3', '-2 1/3', "1.2'34'", '2:3']) {
+      const expected = oracle.fraction(text);
+      const evaluated = math.evaluate(`fraction("${text}")`) as ReturnType<typeof fraction>;
+      for (const actual of [fraction(text), selected.fraction(text), evaluated]) {
+        expect(actual.numerator).toBe(expected.s * expected.n);
+        expect(actual.denominator).toBe(expected.d);
+      }
+    }
+    expect(fraction('1e4').numerator).toBe(10000n);
+  });
 });
