@@ -822,6 +822,17 @@ export const createSimplify = /* #__PURE__ */ factory(
           return sum;
         }
       }
+      const usesDefaultRules = !rules || rules === simplify.rules;
+      let retainedRadical = false;
+      const exactFolding =
+        usesDefaultRules && options.exactFractions !== false
+          ? {
+              ...options,
+              onRetainedRadical: () => {
+                retainedRadical = true;
+              },
+            }
+          : options;
       const builtRules: ParsedRule[] = _buildRules(selectedRules, options.context);
       const visited: Record<string, boolean> = {};
       let str = res.toString({ parenthesis: 'all' });
@@ -833,9 +844,10 @@ export const createSimplify = /* #__PURE__ */ factory(
         for (let i = 0; i < builtRules.length; i++) {
           let rulestr = '';
           if (typeof builtRules[i] === 'function') {
-            res = (builtRules[i] as (node: MathNode, options?: SimplifyOptions) => MathNode)(
+            const rule = builtRules[i] as (node: MathNode, options?: SimplifyOptions) => MathNode;
+            res = rule(
               res,
-              options
+              rule === simplifyConstant || rule === simplifyCore ? exactFolding : options
             );
             if (debug)
               rulestr = (builtRules[i] as (node: MathNode, options?: SimplifyOptions) => MathNode)
@@ -864,7 +876,10 @@ export const createSimplify = /* #__PURE__ */ factory(
       // A caller that passes its own rules (rationalize does) asks for exactly those rules. The
       // canonical (factored) form belongs to the default rule set: applied to a custom rule set it
       // factors the polynomial that rationalize has just expanded ((x+1)*(x+2) never reaches x^2+3*x+2).
-      const usesDefaultRules = !rules || rules === simplify.rules;
+      if (retainedRadical) {
+        res = simplifyConstant(res, options);
+        str = res.toString({ parenthesis: 'all' });
+      }
       if (usesDefaultRules && /\^\s*2\b/.test(str) && /[+-]/.test(str)) {
         const canonical = tryPolynomialCanonicalForm(str);
         if (canonical && canonical !== str) {

@@ -30,6 +30,11 @@ export function assertSameTape(
   a: { readonly tape: Tape; readonly epoch?: number },
   b: { readonly tape: Tape; readonly epoch?: number }
 ): void {
+  if (b?.tape === undefined) {
+    throw new TypeError(
+      'TapedTensor: expected a tracked TapedTensor operand. Track the operand in the same computation before combining them.'
+    );
+  }
   if (a.tape !== b.tape) {
     throw new Error(
       'TapedTensor: operands belong to different Tapes. Create both operands in the same tracked computation.'

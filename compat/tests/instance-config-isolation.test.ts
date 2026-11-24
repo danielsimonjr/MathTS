@@ -87,8 +87,14 @@ describe('create(all, config) instance isolation (#425)', () => {
     expect(a.config().precision).toBe(128);
     expect(b.config().precision).not.toBe(128);
     expect(barrelConfig().precision).toBe(barrelBefore);
-    // Overlay does not call BigNumber.config; process-wide decimal precision
-    // stays on the BigNumber singleton (plan risk, I-9).
+    const short = create(all, { number: 'BigNumber', precision: 7 });
+    a.config({ precision: 20 });
+    const saved = BigNumber.precision;
+    expect(String(a.evaluate('1/3'))).toBe('0.33333333333333333333');
+    expect(String(short.compile('1/3').evaluate())).toBe('0.3333333');
+    expect(String(a.compile('e^2').evaluate())).toBe('7.3890560989306502274');
+    expect(() => short.evaluate('missingVariable')).toThrow();
+    expect(BigNumber.precision).toBe(saved);
   });
 
   it('wrapped methods keep typed-function metadata and constructability', () => {

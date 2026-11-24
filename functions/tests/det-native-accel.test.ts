@@ -9,6 +9,35 @@ import { det } from '@danielsimonjr/mathts-functions';
  * singular matrices as det 0.
  */
 describe('det: native-accelerated path', () => {
+  it('retains range for reordered diagonal entries on both paths', () => {
+    for (const entries of [
+      [1e-200, 1e200, 1e200],
+      [1e200, 1e200, 1e-200],
+    ]) {
+      for (const size of [3, 8]) {
+        const values = [...entries, ...Array<number>(size - entries.length).fill(1)];
+        const matrix = values.map((x, i) => values.map((_, j) => (i === j ? x : 0)));
+        expect(det(matrix) / 1e200).toBeCloseTo(1, 14);
+      }
+    }
+  });
+
+  it('handles a zero row without multiplying overflowing cofactors', () => {
+    expect(
+      det([
+        [0, 0, 0],
+        [0, 1e308, 0],
+        [0, 0, 1e308],
+      ])
+    ).toBe(0);
+    expect(
+      det([
+        [1e308, 1e-308],
+        [1e308, 2e-308],
+      ])
+    ).toBeCloseTo(1, 14);
+  });
+
   it('small matrices keep exact factory values (below threshold)', () => {
     expect(
       det([

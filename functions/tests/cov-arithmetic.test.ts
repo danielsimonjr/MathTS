@@ -9,6 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
+import { cov } from '../src/descriptive-stats.js';
 import { ComputePool } from '@danielsimonjr/mathts-parallel';
 import {
   add,
@@ -402,4 +403,20 @@ describe('arithmetic — matrix helpers + pool lifecycle', () => {
     expect(getComputePool()).toBeInstanceOf(ComputePool);
     await terminatePool();
   });
+});
+
+it('computes finite means and covariances when intermediates overflow', () => {
+  expect(mean([1e308, 1e308])).toBe(1e308);
+  expect(mean(new Float64Array([1e308, -1e308, 1e308, 1e308]))).toBe(5e307);
+  expect(cov([1e308, 1e308])).toBe(0);
+  expect(cov([1e308, -1e308], [1e-308, -1e-308])).toBeCloseTo(2, 14);
+  expect(
+    cov([
+      [1e308, 0],
+      [1e308, 1],
+    ])
+  ).toEqual([
+    [0, 0],
+    [0, 0.5],
+  ]);
 });

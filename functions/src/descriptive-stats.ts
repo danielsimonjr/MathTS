@@ -16,7 +16,12 @@
  *   - `zscore` uses population std (`ddof=0`); `sem` uses sample std (`ddof=1`).
  */
 import { nativeMatrixRows, type NativeMatrixInput } from './matrix/native-matrix-rows.js';
-import { divideByScale, scaleForVariance, SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
+import {
+  divideByScale,
+  powerOfTwoScaleOf,
+  scaleForVariance,
+  SQUARES_SAFE_MIN,
+} from '@danielsimonjr/mathts-core';
 import { mean as _mean, std as _std, sum as _sum } from './typed/arithmetic.js';
 import { deviationSums, scaledDeviationSums } from './utils/deviation-sums.js';
 import { quantileSeq as _quantileSeqRaw } from './factories/index.js';
@@ -282,6 +287,34 @@ function assertRectangular(M: number[][], fn: string): void {
   }
 }
 
+function covarianceProduct(
+  a: number[],
+  b: number[],
+  ma: number,
+  mb: number,
+  scale: number
+): number {
+  let acc = 0;
+  for (let i = 0; i < a.length; i++) acc += (a[i] - ma) * (b[i] - mb);
+  return acc * scale;
+}
+
+function stableCovariance(a: number[], b: number[], ma: number, mb: number, scale: number): number {
+  const plain = covarianceProduct(a, b, ma, mb, scale);
+  if (Number.isFinite(plain) && Math.abs(plain) >= SQUARES_SAFE_MIN) return plain;
+
+  const sa = powerOfTwoScaleOf(a);
+  const sb = powerOfTwoScaleOf(b);
+  if (sa === 1 && sb === 1) return plain;
+  const x = divideByScale(a, sa);
+  const y = divideByScale(b, sb);
+  const normalized = covarianceProduct(x, y, mean(x), mean(y), scale);
+  const larger = Math.max(sa, sb);
+  const smaller = Math.min(sa, sb);
+  const first = normalized * larger;
+  return Number.isFinite(first) ? first * smaller : normalized * smaller * larger;
+}
+
 /**
  * Covariance.
  *   - `cov(x, y)` → scalar sample covariance of two equal-length vectors.
@@ -309,12 +342,8 @@ export function cov(
     if (a.length !== b.length) throw new Error(`cov: length mismatch ${a.length} vs ${b.length}`);
     if (a.length <= ddof)
       throw new Error(`cov: need more than ddof=${ddof} observations (got n=${a.length})`);
-    const ma = mean(a);
-    const mb = mean(b);
-    let acc = 0;
-    for (let i = 0; i < a.length; i++) acc += (a[i] - ma) * (b[i] - mb);
     // NumPy np.cov scales by the reciprocal (c *= true_divide(1, fact)), so this does too.
-    return acc * (1 / (a.length - ddof));
+    return stableCovariance(a, b, mean(a), mean(b), 1 / (a.length - ddof));
   }
   // A 1-D array is one variable (NumPy np.cov): its covariance with itself is the
   // sample variance. Only the first element decides the form, so a flat array of
@@ -335,9 +364,7 @@ export function cov(
   const out: number[][] = Array.from({ length: nVar }, () => new Array<number>(nVar).fill(0));
   for (let i = 0; i < nVar; i++) {
     for (let j = i; j < nVar; j++) {
-      let acc = 0;
-      for (let k = 0; k < nObs; k++) acc += (cols[i][k] - means[i]) * (cols[j][k] - means[j]);
-      const c = acc * scale;
+      const c = stableCovariance(cols[i], cols[j], means[i], means[j], scale);
       out[i][j] = c;
       out[j][i] = c;
     }

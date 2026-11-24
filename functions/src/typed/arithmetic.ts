@@ -2757,10 +2757,21 @@ export const sum = mathTyped('sum', {
  * Synchronous pairwise mean. Returns a number for `number[]`, `Float32Array` and `Float64Array`.
  * The worker-pool mean is `parallelStatMean` and returns a Promise.
  */
-function meanOfNumeric(xs: ArrayLike<number>): f64 {
+function meanOfNumeric(xs: ArrayLike<number>, total = pairwiseSum(xs)): f64 {
   const n = xs.length;
   if (n === 0) return NaN;
-  return pairwiseSum(xs) / n;
+  if (Number.isFinite(total)) return total / n;
+
+  // A sum can overflow even though the mean lies between the finite inputs.
+  // Divide by the largest magnitude first, then rescale after dividing by n.
+  let scale = 0;
+  for (let i = 0; i < n; i++) {
+    const magnitude = Math.abs(xs[i]);
+    if (!Number.isFinite(magnitude)) return total / n;
+    scale = Math.max(scale, magnitude);
+  }
+  const normalized = Float64Array.from(xs, (x) => x / scale);
+  return (pairwiseSum(normalized) / n) * scale;
 }
 
 /**
@@ -2802,7 +2813,7 @@ function numberLeaves(xs: ArrayLike<unknown>, skipNaN: boolean): number[] | unde
 /** Mean of number data at any depth, or `undefined` for exact data. */
 function meanOfData(xs: ArrayLike<unknown>): f64 | undefined {
   const flat = pairwiseSumChecked(xs);
-  if (flat !== undefined) return xs.length === 0 ? NaN : flat / xs.length;
+  if (flat !== undefined) return meanOfNumeric(xs as ArrayLike<number>, flat);
   const leaves = numberLeaves(xs, false);
   return leaves === undefined ? undefined : meanOfNumeric(leaves);
 }
