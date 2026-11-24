@@ -12719,6 +12719,9 @@
       "and": {
         "kind": "function"
       },
+      "andDependencies": {
+        "kind": "object"
+      },
       "apply": {
         "kind": "function"
       },
@@ -12872,6 +12875,9 @@
       "compareNatural": {
         "kind": "function"
       },
+      "compareNaturalDependencies": {
+        "kind": "object"
+      },
       "compareText": {
         "kind": "function"
       },
@@ -12974,6 +12980,9 @@
       "createAddScalar": {
         "kind": "function"
       },
+      "createAnd": {
+        "kind": "function"
+      },
       "createArg": {
         "kind": "function"
       },
@@ -13025,6 +13034,9 @@
       "createCompare": {
         "kind": "function"
       },
+      "createCompareNatural": {
+        "kind": "function"
+      },
       "createCompareText": {
         "kind": "function"
       },
@@ -13055,6 +13067,9 @@
       "createCsch": {
         "kind": "function"
       },
+      "createCtranspose": {
+        "kind": "function"
+      },
       "createCube": {
         "kind": "function"
       },
@@ -13080,6 +13095,9 @@
         "kind": "function"
       },
       "createEqualScalar": {
+        "kind": "function"
+      },
+      "createEqualText": {
         "kind": "function"
       },
       "createErf": {
@@ -13157,6 +13175,9 @@
       "createIsZero": {
         "kind": "function"
       },
+      "createKron": {
+        "kind": "function"
+      },
       "createLN10": {
         "kind": "function"
       },
@@ -13173,6 +13194,9 @@
         "kind": "function"
       },
       "createLcm": {
+        "kind": "function"
+      },
+      "createLeftShift": {
         "kind": "function"
       },
       "createLgamma": {
@@ -13208,7 +13232,13 @@
       "createNot": {
         "kind": "function"
       },
+      "createNthRoot": {
+        "kind": "function"
+      },
       "createNull": {
+        "kind": "function"
+      },
+      "createNullish": {
         "kind": "function"
       },
       "createOct": {
@@ -13218,6 +13248,9 @@
         "kind": "function"
       },
       "createOr": {
+        "kind": "function"
+      },
+      "createPartitionSelect": {
         "kind": "function"
       },
       "createPhi": {
@@ -13235,6 +13268,9 @@
       "createRandom": {
         "kind": "function"
       },
+      "createRandomInt": {
+        "kind": "function"
+      },
       "createRe": {
         "kind": "function"
       },
@@ -13242,6 +13278,15 @@
         "kind": "function"
       },
       "createResize": {
+        "kind": "function"
+      },
+      "createRightArithShift": {
+        "kind": "function"
+      },
+      "createRightLogShift": {
+        "kind": "function"
+      },
+      "createRound": {
         "kind": "function"
       },
       "createSQRT1_2": {
@@ -13280,6 +13325,9 @@
       "createSqueeze": {
         "kind": "function"
       },
+      "createSubset": {
+        "kind": "function"
+      },
       "createSubtract": {
         "kind": "function"
       },
@@ -13293,6 +13341,9 @@
         "kind": "function"
       },
       "createTau": {
+        "kind": "function"
+      },
+      "createTrace": {
         "kind": "function"
       },
       "createTranspose": {
@@ -13345,6 +13396,9 @@
       },
       "ctranspose": {
         "kind": "function"
+      },
+      "ctransposeDependencies": {
+        "kind": "object"
       },
       "cube": {
         "kind": "function"
@@ -13444,6 +13498,9 @@
       },
       "equalText": {
         "kind": "function"
+      },
+      "equalTextDependencies": {
+        "kind": "object"
       },
       "erf": {
         "kind": "function"
@@ -13811,6 +13868,9 @@
       "kron": {
         "kind": "function"
       },
+      "kronDependencies": {
+        "kind": "object"
+      },
       "larger": {
         "kind": "function"
       },
@@ -13831,6 +13891,9 @@
       },
       "leftShift": {
         "kind": "function"
+      },
+      "leftShiftDependencies": {
+        "kind": "object"
       },
       "lgamma": {
         "kind": "function"
@@ -13970,6 +14033,9 @@
       "nthRoot": {
         "kind": "function"
       },
+      "nthRootDependencies": {
+        "kind": "object"
+      },
       "nthRoots": {
         "kind": "function"
       },
@@ -13981,6 +14047,9 @@
       },
       "nullish": {
         "kind": "function"
+      },
+      "nullishDependencies": {
+        "kind": "object"
       },
       "num": {
         "kind": "function"
@@ -14017,6 +14086,9 @@
       },
       "partitionSelect": {
         "kind": "function"
+      },
+      "partitionSelectDependencies": {
+        "kind": "object"
       },
       "permutations": {
         "kind": "function"
@@ -14096,6 +14168,9 @@
       "randomInt": {
         "kind": "function"
       },
+      "randomIntDependencies": {
+        "kind": "object"
+      },
       "range": {
         "kind": "function"
       },
@@ -14135,8 +14210,14 @@
       "rightArithShift": {
         "kind": "function"
       },
+      "rightArithShiftDependencies": {
+        "kind": "object"
+      },
       "rightLogShift": {
         "kind": "function"
+      },
+      "rightLogShiftDependencies": {
+        "kind": "object"
       },
       "rotate": {
         "kind": "function"
@@ -14146,6 +14227,9 @@
       },
       "round": {
         "kind": "function"
+      },
+      "roundDependencies": {
+        "kind": "object"
       },
       "row": {
         "kind": "function"
@@ -14300,6 +14384,9 @@
       "subset": {
         "kind": "function"
       },
+      "subsetDependencies": {
+        "kind": "object"
+      },
       "subtract": {
         "kind": "function"
       },
@@ -14350,6 +14437,9 @@
       },
       "trace": {
         "kind": "function"
+      },
+      "traceDependencies": {
+        "kind": "object"
       },
       "transpose": {
         "kind": "function"

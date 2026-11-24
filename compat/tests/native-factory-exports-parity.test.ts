@@ -5,6 +5,22 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('reads an indexed subset like MathJS', () => {
+    const upstreamBundle = Reflect.get(oracle, 'subsetDependencies') as Parameters<
+      typeof oracle.create
+    >[0];
+    const actual = create({ subsetDependencies: compat.subsetDependencies });
+    const expected = oracle.create({ subsetDependencies: upstreamBundle } as typeof upstreamBundle);
+    expect(Object.keys(compat.subsetDependencies)).toEqual(Object.keys(upstreamBundle));
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    expect(compat.createSubset.dependencies).toEqual(
+      Reflect.get(oracle, 'createSubset').dependencies
+    );
+    expect(Reflect.get(actual, 'subset')([3, 4], compat.index(1))).toEqual(
+      expected.subset([3, 4], oracle.index(1))
+    );
+  });
+
   it('can create a minimal sine instance using only compat imports', () => {
     const upstreamBundle = Reflect.get(oracle, 'sinDependencies') as Parameters<
       typeof oracle.create
@@ -156,6 +172,36 @@ describe('native compatibility dependency bundles', () => {
     ['hex', [255]],
     ['oct', [64]],
     ['cbrt', [-27]],
+    ['and', [true, false]],
+    ['compareNatural', ['file2', 'file10']],
+    [
+      'ctranspose',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
+    ['equalText', ['file', 'file']],
+    ['kron', [[[1, 2]], [[3], [4]]]],
+    ['leftShift', [3, 2]],
+    ['nthRoot', [16, 2]],
+    ['nullish', [null, 42]],
+    ['partitionSelect', [[3, 1, 2], 1]],
+    ['randomInt', [1]],
+    ['rightArithShift', [-12, 2]],
+    ['rightLogShift', [12, 2]],
+    ['round', [1.235, 2]],
+    [
+      'trace',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
     ['print', ['answer=$x', { x: 42 }]],
     ['pickRandom', [[42]]],
     ['random', [[0]]],
