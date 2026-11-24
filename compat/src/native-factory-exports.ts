@@ -1962,6 +1962,88 @@ const lupDependencies: Pick<CompatFactoryExports, 'createLup'> & {
   createLup: mathjsCreateLup,
 };
 
+const mathjsCreateMax: CompatFactoryExports['createMax'] = factories.createMax;
+const maxDependencies: Pick<CompatFactoryExports, 'createMax'> & {
+  isNaNDependencies: typeof isNaNDependencies;
+  largerDependencies: typeof largerDependencies;
+  numericDependencies: typeof numericDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  isNaNDependencies,
+  largerDependencies,
+  numericDependencies,
+  typedDependencies,
+  createMax: mathjsCreateMax,
+};
+
+const mathjsCreateMin: CompatFactoryExports['createMin'] = factories.createMin;
+const minDependencies: Pick<CompatFactoryExports, 'createMin'> & {
+  isNaNDependencies: typeof isNaNDependencies;
+  numericDependencies: typeof numericDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  isNaNDependencies,
+  numericDependencies,
+  smallerDependencies,
+  typedDependencies,
+  createMin: mathjsCreateMin,
+};
+
+const mathjsCreateCumSum: CompatFactoryExports['createCumSum'] = factories.createCumSum;
+const cumsumDependencies: Pick<CompatFactoryExports, 'createCumSum'> & {
+  addDependencies: typeof addDependencies;
+  typedDependencies: typeof typedDependencies;
+  unaryPlusDependencies: typeof unaryPlusDependencies;
+} = {
+  addDependencies,
+  typedDependencies,
+  unaryPlusDependencies,
+  createCumSum: mathjsCreateCumSum,
+};
+
+const mathjsCreateSetSymDifference: CompatFactoryExports['createSetSymDifference'] =
+  factories.createSetSymDifference;
+const setSymDifferenceDependencies: Pick<CompatFactoryExports, 'createSetSymDifference'> & {
+  IndexDependencies: typeof IndexDependencies;
+  concatDependencies: typeof concatDependencies;
+  setDifferenceDependencies: typeof setDifferenceDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  IndexDependencies,
+  concatDependencies,
+  setDifferenceDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetSymDifference: mathjsCreateSetSymDifference,
+};
+
+const mathjsCreateSum: CompatFactoryExports['createSum'] = factories.createSum;
+const sumDependencies: UnaryBundle<'createSum'> & {
+  addDependencies: typeof addDependencies;
+  numericDependencies: typeof numericDependencies;
+} = { addDependencies, numericDependencies, typedDependencies, createSum: mathjsCreateSum };
+
+const mathjsCreateProd: CompatFactoryExports['createProd'] = factories.createProd;
+const prodDependencies: UnaryBundle<'createProd'> & {
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  numericDependencies: typeof numericDependencies;
+} = {
+  multiplyScalarDependencies,
+  numericDependencies,
+  typedDependencies,
+  createProd: mathjsCreateProd,
+};
+
+const mathjsCreateCount: CompatFactoryExports['createCount'] = factories.createCount;
+const countDependencies: UnaryBundle<'createCount'> & {
+  prodDependencies: typeof prodDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = { prodDependencies, sizeDependencies, typedDependencies, createCount: mathjsCreateCount };
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -2338,5 +2420,19 @@ export {
   qrDependencies,
   mathjsCreateLup as createLup,
   lupDependencies,
+  mathjsCreateMax as createMax,
+  maxDependencies,
+  mathjsCreateMin as createMin,
+  minDependencies,
+  mathjsCreateCumSum as createCumSum,
+  cumsumDependencies,
+  mathjsCreateSetSymDifference as createSetSymDifference,
+  setSymDifferenceDependencies,
+  mathjsCreateSum as createSum,
+  sumDependencies,
+  mathjsCreateProd as createProd,
+  prodDependencies,
+  mathjsCreateCount as createCount,
+  countDependencies,
   typedDependencies,
 };

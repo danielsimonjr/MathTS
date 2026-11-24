@@ -5,6 +5,27 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('uses the selected numeric configuration when reducing text', () => {
+    const math = create(
+      { sumDependencies: compat.sumDependencies, prodDependencies: compat.prodDependencies },
+      { number: 'BigNumber', precision: 21 }
+    );
+    const expected = oracle.create(
+      {
+        sumDependencies: Reflect.get(oracle, 'sumDependencies'),
+        prodDependencies: Reflect.get(oracle, 'prodDependencies'),
+      },
+      { number: 'BigNumber', precision: 21 }
+    );
+    for (const name of ['sum', 'prod'] as const) {
+      const result = Reflect.get(math, name)(['1.25', '2.5']);
+      expect(compat.isBigNumber(result)).toBe(true);
+      expect(String(result)).toBe(
+        String(Reflect.apply(Reflect.get(expected, name), expected, [['1.25', '2.5']]))
+      );
+    }
+  });
+
   it('loads all supported MathJS dependency bundles together', () => {
     const names = Object.keys(oracle).filter(
       (name) => name.endsWith('Dependencies') && Object.hasOwn(compat, name)
@@ -464,6 +485,45 @@ describe('native compatibility dependency bundles', () => {
     ],
     ['log1p', [0.5]],
     ['range', [1, 6, 2]],
+    [
+      'setSymDifference',
+      [
+        [1, 2],
+        [2, 3],
+      ],
+    ],
+    [
+      'min',
+      [
+        [
+          [1, 5],
+          [3, 2],
+        ],
+        0,
+      ],
+    ],
+    [
+      'max',
+      [
+        [
+          [1, 5],
+          [3, 2],
+        ],
+        1,
+      ],
+    ],
+    ['cumsum', [[1, 4, 9]]],
+    ['sum', [['1.25', '2.5']]],
+    ['prod', [['1.25', '2.5']]],
+    [
+      'count',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
     ['bernoulli', [4]],
     [
       'setDifference',
@@ -634,13 +694,14 @@ describe('native compatibility dependency bundles', () => {
     ['zeros', [2, 2]],
   ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
-    const factoryName = 'create' + name[0].toUpperCase() + name.slice(1);
     const bundle = Reflect.get(compat, bundleName) as Record<string, unknown>;
     const upstreamBundle = Reflect.get(oracle, bundleName) as Parameters<typeof oracle.create>[0];
     const math = create({ [bundleName]: bundle });
     const upstream = oracle.create({ [bundleName]: upstreamBundle } as typeof upstreamBundle);
     expect(Object.keys(bundle)).toEqual(Object.keys(upstreamBundle));
     expect(Object.keys(math).sort()).toEqual(Object.keys(upstream).sort());
+    const factoryName = Object.keys(upstreamBundle).find((key) => key.startsWith('create'));
+    if (!factoryName) throw new Error(`No factory exported for ${bundleName}`);
     expect(Reflect.get(compat, factoryName).dependencies).toEqual(
       Reflect.get(oracle, factoryName).dependencies
     );

@@ -183,7 +183,7 @@ import { createRandomInt } from '../probability/randomInt.js';
 
 // statistics
 import { createMathjsMode, createMode } from '../statistics/mode.js';
-import { createProd } from '../statistics/prod.js';
+import { createMathjsProd, createProd } from '../statistics/prod.js';
 
 // string
 import { createBin } from '../string/bin.js';
@@ -588,7 +588,7 @@ import { createZpk2tf } from '../signal/zpk2tf.js';
 
 // statistics
 import { createCumSum } from '../statistics/cumsum.js';
-import { createSum } from '../statistics/sum.js';
+import { createMathjsSum, createSum } from '../statistics/sum.js';
 
 // --- Activate tier 4 ---
 
@@ -2579,6 +2579,13 @@ function compatFactoryExports(): {
   createSpaClass: typeof createSpaClass;
   createQr: typeof createQr;
   createLup: typeof createLup;
+  createMax: typeof createMax;
+  createMin: typeof createMin;
+  createCumSum: typeof createCumSum;
+  createSetSymDifference: typeof createSetSymDifference;
+  createSum: typeof createMathjsSum;
+  createProd: typeof createMathjsProd;
+  createCount: typeof createCount;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2763,6 +2770,13 @@ function compatFactoryExports(): {
     createSpaClass,
     createQr,
     createLup,
+    createMax,
+    createMin,
+    createCumSum,
+    createSetSymDifference,
+    createSum: createMathjsSum,
+    createProd: createMathjsProd,
+    createCount,
     createTyped,
   };
 }

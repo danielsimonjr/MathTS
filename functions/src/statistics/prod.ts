@@ -1,5 +1,6 @@
 import { deepForEach, reduce } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
+import { selectedReductionNumberParser } from '../utils/parseNumber.js';
 import { findTypedImpl } from '../utils/typed-impl.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -159,4 +160,14 @@ export const createProd = /* #__PURE__ */ factory(
       }
     }
   }
+);
+
+export const createMathjsProd = /* #__PURE__ */ factory(
+  name,
+  ['typed', 'config', 'multiplyScalar', 'numeric'],
+  (deps: Omit<ProdDependencies, 'parseNumberWithConfig'>) =>
+    createProd({
+      ...deps,
+      parseNumberWithConfig: selectedReductionNumberParser(deps.config, deps.numeric),
+    })
 );
