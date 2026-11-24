@@ -1,3 +1,4 @@
+import { createSelectedMatrix } from './selected-matrix.js';
 import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
 import type { MathNode } from '@danielsimonjr/mathts-expression';
@@ -2293,6 +2294,11 @@ function compatFactoryExports(): {
   createSqueeze: typeof createSqueeze;
   createGetMatrixDataType: typeof createGetMatrixDataType;
   createTypeOf: typeof createTypeOf;
+  createMatrix: typeof createSelectedMatrix;
+  createEqual: typeof createEqual;
+  createIsInteger: typeof createIsInteger;
+  createConcat: typeof createConcat;
+  createAtan2: typeof createAtan2;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2360,6 +2366,11 @@ function compatFactoryExports(): {
     createSqueeze,
     createGetMatrixDataType,
     createTypeOf,
+    createMatrix: createSelectedMatrix,
+    createEqual,
+    createIsInteger,
+    createConcat,
+    createAtan2,
     createTyped,
   };
 }

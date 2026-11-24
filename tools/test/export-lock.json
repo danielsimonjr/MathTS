@@ -12605,6 +12605,9 @@
       "SparseMatrix": {
         "kind": "function"
       },
+      "SparseMatrixDependencies": {
+        "kind": "object"
+      },
       "SymbolNode": {
         "kind": "function"
       },
@@ -12706,6 +12709,9 @@
       },
       "atan2": {
         "kind": "function"
+      },
+      "atan2Dependencies": {
+        "kind": "object"
       },
       "atanDependencies": {
         "kind": "object"
@@ -12818,6 +12824,9 @@
       "concat": {
         "kind": "function"
       },
+      "concatDependencies": {
+        "kind": "object"
+      },
       "conductanceQuantum": {
         "kind": "object"
       },
@@ -12911,6 +12920,9 @@
       "createAtan": {
         "kind": "function"
       },
+      "createAtan2": {
+        "kind": "function"
+      },
       "createAtanh": {
         "kind": "function"
       },
@@ -12924,6 +12936,9 @@
         "kind": "function"
       },
       "createComplexClass": {
+        "kind": "function"
+      },
+      "createConcat": {
         "kind": "function"
       },
       "createConj": {
@@ -12951,6 +12966,9 @@
         "kind": "function"
       },
       "createDenseMatrixClass": {
+        "kind": "function"
+      },
+      "createEqual": {
         "kind": "function"
       },
       "createEqualScalar": {
@@ -12989,6 +13007,9 @@
       "createIsBounded": {
         "kind": "function"
       },
+      "createIsInteger": {
+        "kind": "function"
+      },
       "createIsNaN": {
         "kind": "function"
       },
@@ -13014,6 +13035,9 @@
         "kind": "function"
       },
       "createMap": {
+        "kind": "function"
+      },
+      "createMatrix": {
         "kind": "function"
       },
       "createMatrixClass": {
@@ -13050,6 +13074,9 @@
         "kind": "function"
       },
       "createSize": {
+        "kind": "function"
+      },
+      "createSparseMatrixClass": {
         "kind": "function"
       },
       "createSqrt": {
@@ -13171,6 +13198,9 @@
       },
       "equal": {
         "kind": "function"
+      },
+      "equalDependencies": {
+        "kind": "object"
       },
       "equalScalar": {
         "kind": "function"
@@ -13415,6 +13445,9 @@
       "isInteger": {
         "kind": "function"
       },
+      "isIntegerDependencies": {
+        "kind": "object"
+      },
       "isMap": {
         "kind": "function"
       },
@@ -13600,6 +13633,9 @@
       },
       "matrix": {
         "kind": "function"
+      },
+      "matrixDependencies": {
+        "kind": "object"
       },
       "matrixFromColumns": {
         "kind": "function"

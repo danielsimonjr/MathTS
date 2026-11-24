@@ -78,6 +78,12 @@ const mathjsCreateGetMatrixDataType: CompatFactoryExports['createGetMatrixDataTy
   factories.createGetMatrixDataType;
 const mathjsCreateTypeOf: CompatFactoryExports['createTypeOf'] = factories.createTypeOf;
 
+const mathjsCreateMatrix: CompatFactoryExports['createMatrix'] = factories.createMatrix;
+const mathjsCreateEqual: CompatFactoryExports['createEqual'] = factories.createEqual;
+const mathjsCreateIsInteger: CompatFactoryExports['createIsInteger'] = factories.createIsInteger;
+const mathjsCreateConcat: CompatFactoryExports['createConcat'] = factories.createConcat;
+const mathjsCreateAtan2: CompatFactoryExports['createAtan2'] = factories.createAtan2;
+
 /** Factory for the MathJS-compatible typed dispatcher. */
 const mathjsCreateTyped: CompatFactoryExports['createTyped'] = factories.createTyped;
 
@@ -399,6 +405,77 @@ const typeOfDependencies: UnaryBundle<'createTypeOf'> = {
   createTypeOf: mathjsCreateTypeOf,
 };
 
+const createSparseMatrixClass: ConstructorFactory<
+  (typeof factory_mathjsCompat.constructors)['SparseMatrix']
+> = /* #__PURE__ */ factory(
+  'SparseMatrix',
+  ['Matrix', 'equalScalar', 'typed'],
+  () => factory_mathjsCompat.constructors.SparseMatrix
+);
+
+const SparseMatrixDependencies: {
+  MatrixDependencies: typeof MatrixDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  typedDependencies: typeof typedDependencies;
+  createSparseMatrixClass: typeof createSparseMatrixClass;
+} = { MatrixDependencies, equalScalarDependencies, typedDependencies, createSparseMatrixClass };
+
+const matrixDependencies: UnaryBundle<'createMatrix'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  MatrixDependencies: typeof MatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  MatrixDependencies,
+  SparseMatrixDependencies,
+  typedDependencies,
+  createMatrix: mathjsCreateMatrix,
+};
+
+const equalDependencies: UnaryBundle<'createEqual'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createEqual: mathjsCreateEqual,
+};
+
+const isIntegerDependencies: UnaryBundle<'createIsInteger'> & {
+  equalDependencies: typeof equalDependencies;
+} = { equalDependencies, typedDependencies, createIsInteger: mathjsCreateIsInteger };
+
+const concatDependencies: UnaryBundle<'createConcat'> & {
+  isIntegerDependencies: typeof isIntegerDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  isIntegerDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createConcat: mathjsCreateConcat,
+};
+
+const atan2Dependencies: UnaryBundle<'createAtan2'> &
+  WithBigNumber & {
+    DenseMatrixDependencies: typeof DenseMatrixDependencies;
+    concatDependencies: typeof concatDependencies;
+    equalScalarDependencies: typeof equalScalarDependencies;
+    matrixDependencies: typeof matrixDependencies;
+  } = {
+  BigNumberDependencies,
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createAtan2: mathjsCreateAtan2,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -539,5 +616,17 @@ export {
   squeezeDependencies,
   getMatrixDataTypeDependencies,
   typeOfDependencies,
+  mathjsCreateMatrix as createMatrix,
+  mathjsCreateEqual as createEqual,
+  mathjsCreateIsInteger as createIsInteger,
+  mathjsCreateConcat as createConcat,
+  mathjsCreateAtan2 as createAtan2,
+  createSparseMatrixClass,
+  SparseMatrixDependencies,
+  matrixDependencies,
+  equalDependencies,
+  isIntegerDependencies,
+  concatDependencies,
+  atan2Dependencies,
   typedDependencies,
 };
