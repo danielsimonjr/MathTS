@@ -1,3 +1,4 @@
+import { createSelectedMatrix } from './selected-matrix.js';
 import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
 import type { MathNode } from '@danielsimonjr/mathts-expression';
@@ -74,7 +75,7 @@ import { createSign } from '../arithmetic/sign.js';
 import { createSqrt } from '../arithmetic/sqrt.js';
 import { createSquare } from '../arithmetic/square.js';
 import { createSubtractScalar } from '../arithmetic/subtractScalar.js';
-import { createUnaryMinus } from '../arithmetic/unaryMinus.js';
+import { createMathjsUnaryMinus, createUnaryMinus } from '../arithmetic/unaryMinus.js';
 
 // bitwise
 import { createBitNot } from '../bitwise/bitNot.js';
@@ -2279,6 +2280,25 @@ function compatFactoryExports(): {
   createRe: typeof createRe;
   createSquare: typeof createSquare;
   createSubtractScalar: typeof createSubtractScalar;
+  createSqrt: typeof createSqrt;
+  createUnaryMinus: typeof createMathjsUnaryMinus;
+  createFormat: typeof createFormat;
+  createPrint: typeof createPrint;
+  createPickRandom: typeof createPickRandom;
+  createRandom: typeof createRandom;
+  createMap: typeof createMap;
+  createFilter: typeof createFilter;
+  createForEach: typeof createForEach;
+  createFlatten: typeof createFlatten;
+  createSize: typeof createSize;
+  createSqueeze: typeof createSqueeze;
+  createGetMatrixDataType: typeof createGetMatrixDataType;
+  createTypeOf: typeof createTypeOf;
+  createMatrix: typeof createSelectedMatrix;
+  createEqual: typeof createEqual;
+  createIsInteger: typeof createIsInteger;
+  createConcat: typeof createConcat;
+  createAtan2: typeof createAtan2;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2332,6 +2352,25 @@ function compatFactoryExports(): {
     createRe,
     createSquare,
     createSubtractScalar,
+    createSqrt,
+    createUnaryMinus: createMathjsUnaryMinus,
+    createFormat,
+    createPrint,
+    createPickRandom,
+    createRandom,
+    createMap,
+    createFilter,
+    createForEach,
+    createFlatten,
+    createSize,
+    createSqueeze,
+    createGetMatrixDataType,
+    createTypeOf,
+    createMatrix: createSelectedMatrix,
+    createEqual,
+    createIsInteger,
+    createConcat,
+    createAtan2,
     createTyped,
   };
 }

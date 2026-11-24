@@ -90,11 +90,15 @@ export function staysRealSqrt(x: number): boolean {
  * `sqrt` share this kernel. NaN, a non-negative value or `predictable` gives `Math.sqrt(x)`. A
  * negative value otherwise gives the Complex `sqrt(-x) i`.
  */
-export function sqrtNumberWith(x: number, predictable: boolean): number | Complex {
+export function sqrtNumberWith(
+  x: number,
+  predictable: boolean,
+  ComplexClass = Complex
+): number | Complex {
   if (Number.isNaN(x) || x >= 0 || predictable) {
     return Math.sqrt(x);
   }
-  return new Complex(0, Math.sqrt(-x));
+  return new ComplexClass(0, Math.sqrt(-x));
 }
 
 /**
@@ -102,11 +106,15 @@ export function sqrtNumberWith(x: number, predictable: boolean): number | Comple
  * number path and gives a Complex, as in mathjs. With `predictable`, the BigNumber square root
  * is the result (NaN for a negative value).
  */
-export function sqrtBigNumberWith(x: BigNumber, predictable: boolean): BigNumber | Complex {
+export function sqrtBigNumberWith(
+  x: BigNumber,
+  predictable: boolean,
+  ComplexClass = Complex
+): BigNumber | Complex {
   if (!x.isNegative() || predictable) {
     return x.sqrt();
   }
-  return new Complex(0, Math.sqrt(-x.toNumber()));
+  return new ComplexClass(0, Math.sqrt(-x.toNumber()));
 }
 
 /**

@@ -1577,7 +1577,10 @@ function matrixFormat(format: unknown): 'sparse' | 'dense' | undefined {
  * A matrix argument is copied, as in mathjs: the result never shares data with it. An explicit `undefined` data
  * argument throws a TypeError, as in mathjs; a call with no argument is an empty matrix.
  */
-export function createMatrixBridge() {
+export function createMatrixBridge(
+  DenseMatrix = MathJSDenseMatrix,
+  SparseMatrix = MathJSSparseMatrix
+) {
   return function matrix(
     data?: unknown[][] | MathJSDenseMatrix | MathJSSparseMatrix | string,
     storageType?: string
@@ -1588,11 +1591,11 @@ export function createMatrixBridge() {
     // list boolean, because a boolean never gives a matrix.
     if (typeof data === 'string' || typeof (data as unknown) === 'boolean') {
       const format = String(data);
-      if (format === 'sparse') return new MathJSSparseMatrix();
-      if (format === 'dense' || format === 'default') return new MathJSDenseMatrix();
+      if (format === 'sparse') return new SparseMatrix();
+      if (format === 'dense' || format === 'default') return new DenseMatrix();
       throw new TypeError('Unknown matrix type ' + JSON.stringify(format) + '.');
     }
-    const isMatrix = data instanceof MathJSSparseMatrix || data instanceof MathJSDenseMatrix;
+    const isMatrix = data instanceof SparseMatrix || data instanceof DenseMatrix;
     // An explicit undefined data argument is not 'no argument': only a call with no argument
     // gives an empty matrix.
     const hasData = data !== undefined || arguments.length > 0;
@@ -1606,29 +1609,28 @@ export function createMatrixBridge() {
     }
     const format = matrixFormat(storageType);
     const sparse = format === 'sparse';
-    if (data === undefined) return sparse ? new MathJSSparseMatrix() : new MathJSDenseMatrix();
+    if (data === undefined) return sparse ? new SparseMatrix() : new DenseMatrix();
     if (Array.isArray(data))
-      return sparse ? new MathJSSparseMatrix(data) : new MathJSDenseMatrix(data as number[][]);
-    if (data instanceof MathJSSparseMatrix) {
+      return sparse ? new SparseMatrix(data) : new DenseMatrix(data as number[][]);
+    if (data instanceof SparseMatrix) {
       return format === 'dense'
-        ? new MathJSDenseMatrix({ data: data.toArray() as number[][], size: data.size() })
+        ? new DenseMatrix({ data: data.toArray() as number[][], size: data.size() })
         : data.clone();
     }
-    if (data instanceof MathJSDenseMatrix)
-      return sparse ? new MathJSSparseMatrix(data) : data.clone();
+    if (data instanceof DenseMatrix) return sparse ? new SparseMatrix(data) : data.clone();
     // A storage object from a caller: the constructor trusts { data, size } (internal producers
     // pass it), so check here that the data has the size, as mathjs does.
     if (!sparse) {
       const o = data as { data?: unknown; size?: unknown };
       if (Array.isArray(o.data) && Array.isArray(o.size)) validate(o.data, o.size as number[]);
-      return new MathJSDenseMatrix(data as never);
+      return new DenseMatrix(data as never);
     }
     if (!isStorageObject(data)) {
       throw new TypeError(
         'Unsupported type of data: expected Array data and size, or CSC values, index, ptr and size'
       );
     }
-    return new MathJSSparseMatrix(data);
+    return new SparseMatrix(data);
   };
 }
 

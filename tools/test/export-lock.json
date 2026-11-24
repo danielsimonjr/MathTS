@@ -12497,6 +12497,9 @@
       "DimensionError": {
         "kind": "function"
       },
+      "EDependencies": {
+        "kind": "object"
+      },
       "FRACTION_ONE": {
         "kind": "object"
       },
@@ -12536,20 +12539,35 @@
       "IndexNode": {
         "kind": "function"
       },
+      "InfinityDependencies": {
+        "kind": "object"
+      },
       "Infinity_": {
         "kind": "number"
       },
       "LN10": {
         "kind": "number"
       },
+      "LN10Dependencies": {
+        "kind": "object"
+      },
       "LN2": {
         "kind": "number"
+      },
+      "LN2Dependencies": {
+        "kind": "object"
       },
       "LOG10E": {
         "kind": "number"
       },
+      "LOG10EDependencies": {
+        "kind": "object"
+      },
       "LOG2E": {
         "kind": "number"
+      },
+      "LOG2EDependencies": {
+        "kind": "object"
       },
       "MathInstance": {
         "kind": "type"
@@ -12563,6 +12581,9 @@
       "MatrixDependencies": {
         "kind": "object"
       },
+      "NaNDependencies": {
+        "kind": "object"
+      },
       "NaN_": {
         "kind": "number"
       },
@@ -12574,6 +12595,9 @@
       },
       "OperatorNode": {
         "kind": "function"
+      },
+      "PIDependencies": {
+        "kind": "object"
       },
       "ParenthesisNode": {
         "kind": "function"
@@ -12596,8 +12620,14 @@
       "SQRT1_2": {
         "kind": "number"
       },
+      "SQRT1_2Dependencies": {
+        "kind": "object"
+      },
       "SQRT2": {
         "kind": "number"
+      },
+      "SQRT2Dependencies": {
+        "kind": "object"
       },
       "Spa": {
         "kind": "function"
@@ -12605,11 +12635,29 @@
       "SparseMatrix": {
         "kind": "function"
       },
+      "SparseMatrixDependencies": {
+        "kind": "object"
+      },
       "SymbolNode": {
         "kind": "function"
       },
       "Unit": {
         "kind": "function"
+      },
+      "_Infinity": {
+        "kind": "number"
+      },
+      "_NaN": {
+        "kind": "number"
+      },
+      "_false": {
+        "kind": "boolean"
+      },
+      "_null": {
+        "kind": "object"
+      },
+      "_true": {
+        "kind": "boolean"
       },
       "abs": {
         "kind": "function"
@@ -12706,6 +12754,9 @@
       },
       "atan2": {
         "kind": "function"
+      },
+      "atan2Dependencies": {
+        "kind": "object"
       },
       "atanDependencies": {
         "kind": "object"
@@ -12818,6 +12869,9 @@
       "concat": {
         "kind": "function"
       },
+      "concatDependencies": {
+        "kind": "object"
+      },
       "conductanceQuantum": {
         "kind": "object"
       },
@@ -12911,6 +12965,9 @@
       "createAtan": {
         "kind": "function"
       },
+      "createAtan2": {
+        "kind": "function"
+      },
       "createAtanh": {
         "kind": "function"
       },
@@ -12924,6 +12981,9 @@
         "kind": "function"
       },
       "createComplexClass": {
+        "kind": "function"
+      },
+      "createConcat": {
         "kind": "function"
       },
       "createConj": {
@@ -12953,6 +13013,12 @@
       "createDenseMatrixClass": {
         "kind": "function"
       },
+      "createE": {
+        "kind": "function"
+      },
+      "createEqual": {
+        "kind": "function"
+      },
       "createEqualScalar": {
         "kind": "function"
       },
@@ -12965,13 +13031,40 @@
       "createExpm1": {
         "kind": "function"
       },
+      "createFalse": {
+        "kind": "function"
+      },
+      "createFilter": {
+        "kind": "function"
+      },
+      "createFlatten": {
+        "kind": "function"
+      },
+      "createForEach": {
+        "kind": "function"
+      },
+      "createFormat": {
+        "kind": "function"
+      },
       "createFractionClass": {
+        "kind": "function"
+      },
+      "createGetMatrixDataType": {
+        "kind": "function"
+      },
+      "createI": {
         "kind": "function"
       },
       "createIm": {
         "kind": "function"
       },
+      "createInfinity": {
+        "kind": "function"
+      },
       "createIsBounded": {
+        "kind": "function"
+      },
+      "createIsInteger": {
         "kind": "function"
       },
       "createIsNaN": {
@@ -12989,6 +13082,18 @@
       "createIsPrime": {
         "kind": "function"
       },
+      "createLN10": {
+        "kind": "function"
+      },
+      "createLN2": {
+        "kind": "function"
+      },
+      "createLOG10E": {
+        "kind": "function"
+      },
+      "createLOG2E": {
+        "kind": "function"
+      },
       "createLgamma": {
         "kind": "function"
       },
@@ -12998,16 +13103,49 @@
       "createLog2": {
         "kind": "function"
       },
+      "createMap": {
+        "kind": "function"
+      },
+      "createMatrix": {
+        "kind": "function"
+      },
       "createMatrixClass": {
         "kind": "function"
       },
       "createMultiplyScalar": {
         "kind": "function"
       },
+      "createNaN": {
+        "kind": "function"
+      },
       "createNot": {
         "kind": "function"
       },
+      "createNull": {
+        "kind": "function"
+      },
+      "createPhi": {
+        "kind": "function"
+      },
+      "createPi": {
+        "kind": "function"
+      },
+      "createPickRandom": {
+        "kind": "function"
+      },
+      "createPrint": {
+        "kind": "function"
+      },
+      "createRandom": {
+        "kind": "function"
+      },
       "createRe": {
+        "kind": "function"
+      },
+      "createSQRT1_2": {
+        "kind": "function"
+      },
+      "createSQRT2": {
         "kind": "function"
       },
       "createSec": {
@@ -13022,7 +13160,19 @@
       "createSinh": {
         "kind": "function"
       },
+      "createSize": {
+        "kind": "function"
+      },
+      "createSparseMatrixClass": {
+        "kind": "function"
+      },
+      "createSqrt": {
+        "kind": "function"
+      },
       "createSquare": {
+        "kind": "function"
+      },
+      "createSqueeze": {
         "kind": "function"
       },
       "createSubtractScalar": {
@@ -13034,10 +13184,28 @@
       "createTanh": {
         "kind": "function"
       },
+      "createTau": {
+        "kind": "function"
+      },
+      "createTrue": {
+        "kind": "function"
+      },
+      "createTypeOf": {
+        "kind": "function"
+      },
       "createTyped": {
         "kind": "function"
       },
+      "createUnaryMinus": {
+        "kind": "function"
+      },
       "createUnit": {
+        "kind": "function"
+      },
+      "createUppercaseE": {
+        "kind": "function"
+      },
+      "createUppercasePi": {
         "kind": "function"
       },
       "cross": {
@@ -13112,6 +13280,9 @@
       "e": {
         "kind": "number"
       },
+      "eDependencies": {
+        "kind": "object"
+      },
       "efimovFactor": {
         "kind": "number"
       },
@@ -13129,6 +13300,9 @@
       },
       "equal": {
         "kind": "function"
+      },
+      "equalDependencies": {
+        "kind": "object"
       },
       "equalScalar": {
         "kind": "function"
@@ -13169,6 +13343,9 @@
       "factory": {
         "kind": "function"
       },
+      "falseDependencies": {
+        "kind": "object"
+      },
       "faraday": {
         "kind": "object"
       },
@@ -13180,6 +13357,9 @@
       },
       "filter": {
         "kind": "function"
+      },
+      "filterDependencies": {
+        "kind": "object"
       },
       "fineStructure": {
         "kind": "number"
@@ -13193,14 +13373,23 @@
       "flatten": {
         "kind": "function"
       },
+      "flattenDependencies": {
+        "kind": "object"
+      },
       "floor": {
         "kind": "function"
       },
       "forEach": {
         "kind": "function"
       },
+      "forEachDependencies": {
+        "kind": "object"
+      },
       "format": {
         "kind": "function"
+      },
+      "formatDependencies": {
+        "kind": "object"
       },
       "fraction": {
         "kind": "function"
@@ -13219,6 +13408,9 @@
       },
       "getMatrixDataType": {
         "kind": "function"
+      },
+      "getMatrixDataTypeDependencies": {
+        "kind": "object"
       },
       "gravitationConstant": {
         "kind": "object"
@@ -13242,6 +13434,9 @@
         "kind": "function"
       },
       "i": {
+        "kind": "object"
+      },
+      "iDependencies": {
         "kind": "object"
       },
       "identity": {
@@ -13357,6 +13552,9 @@
       },
       "isInteger": {
         "kind": "function"
+      },
+      "isIntegerDependencies": {
+        "kind": "object"
       },
       "isMap": {
         "kind": "function"
@@ -13535,11 +13733,17 @@
       "map": {
         "kind": "function"
       },
+      "mapDependencies": {
+        "kind": "object"
+      },
       "mapSlices": {
         "kind": "function"
       },
       "matrix": {
         "kind": "function"
+      },
+      "matrixDependencies": {
+        "kind": "object"
       },
       "matrixFromColumns": {
         "kind": "function"
@@ -13613,6 +13817,9 @@
       "nuclearMagneton": {
         "kind": "object"
       },
+      "nullDependencies": {
+        "kind": "object"
+      },
       "nullish": {
         "kind": "function"
       },
@@ -13649,11 +13856,20 @@
       "phi": {
         "kind": "number"
       },
+      "phiDependencies": {
+        "kind": "object"
+      },
       "pi": {
         "kind": "number"
       },
+      "piDependencies": {
+        "kind": "object"
+      },
       "pickRandom": {
         "kind": "function"
+      },
+      "pickRandomDependencies": {
+        "kind": "object"
       },
       "pinv": {
         "kind": "function"
@@ -13685,6 +13901,9 @@
       "print": {
         "kind": "function"
       },
+      "printDependencies": {
+        "kind": "object"
+      },
       "prod": {
         "kind": "function"
       },
@@ -13702,6 +13921,9 @@
       },
       "random": {
         "kind": "function"
+      },
+      "randomDependencies": {
+        "kind": "object"
       },
       "randomInt": {
         "kind": "function"
@@ -13838,6 +14060,9 @@
       "size": {
         "kind": "function"
       },
+      "sizeDependencies": {
+        "kind": "object"
+      },
       "slu": {
         "kind": "function"
       },
@@ -13865,6 +14090,9 @@
       "sqrt": {
         "kind": "function"
       },
+      "sqrtDependencies": {
+        "kind": "object"
+      },
       "sqrtm": {
         "kind": "function"
       },
@@ -13876,6 +14104,9 @@
       },
       "squeeze": {
         "kind": "function"
+      },
+      "squeezeDependencies": {
+        "kind": "object"
       },
       "std": {
         "kind": "function"
@@ -13925,6 +14156,9 @@
       "tau": {
         "kind": "number"
       },
+      "tauDependencies": {
+        "kind": "object"
+      },
       "thomsonCrossSection": {
         "kind": "object"
       },
@@ -13940,8 +14174,14 @@
       "transpose": {
         "kind": "function"
       },
+      "trueDependencies": {
+        "kind": "object"
+      },
       "typeOf": {
         "kind": "function"
+      },
+      "typeOfDependencies": {
+        "kind": "object"
       },
       "typed": {
         "kind": "function"
@@ -13951,6 +14191,9 @@
       },
       "unaryMinus": {
         "kind": "function"
+      },
+      "unaryMinusDependencies": {
+        "kind": "object"
       },
       "unaryPlus": {
         "kind": "function"

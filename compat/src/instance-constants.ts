@@ -41,6 +41,27 @@ function cloneUnit(name: string, value: number, units: string): InstanceType<typ
   return template.clone() as InstanceType<typeof Unit>;
 }
 
+/** Resolve the MathJS numeric value of a constant using the supplied configuration. */
+export function configuredMathjsConstant(
+  name: keyof typeof mathConstants | 'Infinity' | 'NaN',
+  value: number,
+  config: Parameters<typeof runWithConfig>[0]
+): number | BigNumber {
+  if (config.number !== 'BigNumber') return value;
+  if (name === 'Infinity' || name === 'NaN') return BigNumber.fromNumber(value);
+  const canonical = mathConstants[name];
+  return runWithConfig(config, () => {
+    // MathJS rounds each operation in (sqrt(5) + 1) / 2 at the configured precision.
+    if (canonical === 'phi') return BigNumber.fromNumber(5).sqrt().add(1).divide(2);
+    const result: unknown = evaluate(canonical === 'tau' ? 'pi' : canonical);
+    if (!(result instanceof BigNumber)) {
+      throw new TypeError(`Expected a BigNumber constant for ${canonical}`);
+    }
+    // MathJS derives tau by doubling the already rounded pi.
+    return canonical === 'tau' ? result.multiply(2) : result;
+  });
+}
+
 /** Prepare live reads before the instance defines its property layout. */
 export function compatConstantReaders(
   surface: Record<string, unknown>,
@@ -51,22 +72,14 @@ export function compatConstantReaders(
   const bind = (name: string, read: () => unknown): void => {
     if (Object.hasOwn(surface, name)) reads[name] = read;
   };
-  for (const [name, canonical] of Object.entries(mathConstants)) {
+  for (const name of Object.keys(mathConstants) as (keyof typeof mathConstants)[]) {
     const number = surface[name] as number;
     let precision: number | undefined;
-    let precise: BigNumber | undefined;
-    bind(name as keyof typeof mathConstants, () => {
+    let precise: number | BigNumber | undefined;
+    bind(name, () => {
       if (config.number !== 'BigNumber') return number;
       if (precise === undefined || precision !== config.precision) {
-        const value: unknown = runWithConfig(config, () => {
-          const value: unknown = evaluate(canonical === 'tau' ? 'pi' : canonical);
-          // Mathjs derives tau by doubling the already rounded pi.
-          return canonical === 'tau' && value instanceof BigNumber ? value.multiply(2) : value;
-        });
-        if (!(value instanceof BigNumber)) {
-          throw new TypeError(`Expected a BigNumber constant for ${canonical}`);
-        }
-        precise = value;
+        precise = configuredMathjsConstant(name, number, config);
         precision = config.precision;
       }
       return precise;
