@@ -256,7 +256,7 @@ const MAX_BINARY_EXPONENT = 100_000;
  * The result rounds to the precision (mathjs keeps every digit of a radix string, and 20 digits
  * when the string has a binary exponent). `0x1i8p3` and `0xFFi8.0` throw (mathjs reads them).
  */
-function parseBigNumberString(text: string): BigNumber {
+export function parseBigNumberString(text: string): BigNumber {
   const m =
     /^([+-]?)0([bBoOxX])([0-9a-fA-F]*)(?:(?:\.([0-9a-fA-F]*))?(?:[pP]([+-]?\d+))?|i(\d+))$/.exec(
       text

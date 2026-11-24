@@ -14,7 +14,12 @@ import type { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
  * conflicts with the active typed implementations.
  */
 
-import { factoryScope, registerMathjsFactoryTypes, type TypedBuilder } from './scope.js';
+import {
+  factoryScope,
+  parseBigNumberString,
+  registerMathjsFactoryTypes,
+  type TypedBuilder,
+} from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
@@ -1966,6 +1971,114 @@ const createSelectedNumber = /* #__PURE__ */ factory(
   }
 );
 
+function convertUnitValue(
+  convert: (value: unknown) => unknown,
+  unit: { value: unknown; clone(): { value: unknown } }
+): unknown {
+  const copy = unit.clone();
+  copy.value = convert(unit.value);
+  return copy;
+}
+
+const createSelectedBignumber = /* #__PURE__ */ factory(
+  'bignumber',
+  ['typed', 'BigNumber'],
+  ({ typed, BigNumber }: { typed: TypedBuilder; BigNumber: typeof CoreBigNumber }) =>
+    typed('bignumber', {
+      '': () => new BigNumber(0),
+      number: (value: number) => new BigNumber(String(value)),
+      string: (value: string) => new BigNumber(parseBigNumberString(value).toString()),
+      BigNumber: (value: CoreBigNumber) => value,
+      bigint: (value: bigint) => new BigNumber(String(value)),
+      Unit: typed.referToSelf(
+        (self) => (value: unknown) =>
+          convertUnitValue(self, value as Parameters<typeof convertUnitValue>[1])
+      ),
+      Fraction: (value: CoreFraction) =>
+        new BigNumber(String(value.numerator)).dividedBy(new BigNumber(String(value.denominator))),
+      null: () => new BigNumber(0),
+      'Array | Matrix': typed.referToSelf(
+        (self) => (value: unknown) => mapCollection(value, (entry) => self(entry))
+      ),
+    })
+);
+
+const createSelectedFraction = /* #__PURE__ */ factory(
+  'fraction',
+  ['typed', 'Fraction'],
+  ({ typed, Fraction }: { typed: TypedBuilder; Fraction: typeof CoreFraction }) =>
+    typed('fraction', {
+      number: (value: number) => {
+        if (!Number.isFinite(value))
+          throw new Error(`${value} cannot be represented as a fraction`);
+        return new Fraction(value);
+      },
+      string: (value: string) => new Fraction(value),
+      'number, number': (numerator: number, denominator: number) =>
+        new Fraction(numerator, denominator),
+      'bigint, bigint': (numerator: bigint, denominator: bigint) =>
+        new Fraction(numerator, denominator),
+      null: () => new Fraction(0),
+      BigNumber: (value: CoreBigNumber) => new Fraction(value.toString()),
+      bigint: (value: bigint) => new Fraction(value),
+      Fraction: (value: CoreFraction) => value,
+      Unit: typed.referToSelf(
+        (self) => (value: unknown) =>
+          convertUnitValue(self, value as Parameters<typeof convertUnitValue>[1])
+      ),
+      Object: (value: {
+        n?: bigint | number | string;
+        d?: bigint | number | string;
+        s?: number | bigint;
+      }) => {
+        if (value.n === undefined || value.d === undefined) throw new Error('Invalid argument');
+        const numerator = value.s !== undefined && value.s < 0 ? -BigInt(value.n) : value.n;
+        return new Fraction(numerator, value.d);
+      },
+      'Array | Matrix': typed.referToSelf(
+        (self) => (value: unknown) => mapCollection(value, (entry) => self(entry))
+      ),
+    })
+);
+
+const createSelectedComplex = /* #__PURE__ */ factory(
+  'complex',
+  ['typed', 'Complex'],
+  ({ typed, Complex }: { typed: TypedBuilder; Complex: typeof CoreComplex }) => {
+    const zero = new Complex(0, 0);
+    return typed('complex', {
+      '': () => zero,
+      number: (value: number) => new Complex(value, 0),
+      'number, number': (re: number, im: number) => new Complex(re, im),
+      'BigNumber, BigNumber': (re: CoreBigNumber, im: CoreBigNumber) =>
+        new Complex(re.toNumber(), im.toNumber()),
+      Fraction: (value: CoreFraction) => new Complex(value.valueOf(), 0),
+      Complex: (value: CoreComplex) => new Complex(value.re, value.im),
+      string: (value: string) => {
+        const result = Complex.parse(value);
+        return new Complex(result.re, result.im);
+      },
+      null: () => new Complex(0, 0),
+      Object: (value: Record<string, number>) => {
+        if ('re' in value && 'im' in value) return new Complex(value.re, value.im);
+        const polar = 'r' in value && 'phi' in value;
+        if (!polar && !('abs' in value && 'arg' in value)) {
+          throw new Error(
+            'Expected object with properties (re and im) or (r and phi) or (abs and arg)'
+          );
+        }
+        const result = polar
+          ? Complex.fromPolar(value.r, value.phi)
+          : Complex.fromPolar(value.abs, value.arg);
+        return new Complex(result.re, result.im);
+      },
+      'Array | Matrix': typed.referToSelf(
+        (self) => (value: unknown) => mapCollection(value, (entry) => self(entry))
+      ),
+    });
+  }
+);
+
 /** The signatures of `number` with one argument, each also with `undefined` as the second. */
 function numberSignatures(): Record<string, unknown> {
   const typed = coreTyped as unknown as TypedBuilder;
@@ -2414,6 +2527,10 @@ function compatFactoryExports(): {
   createChain: typeof createChain;
   createChainClass: typeof createChainClass;
   createResultSet: typeof createResultSet;
+  createBignumber: typeof createSelectedBignumber;
+  createFraction: typeof createSelectedFraction;
+  createComplex: typeof createSelectedComplex;
+  createNumeric: typeof createNumeric;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2546,6 +2663,10 @@ function compatFactoryExports(): {
     createChain,
     createChainClass,
     createResultSet,
+    createBignumber: createSelectedBignumber,
+    createFraction: createSelectedFraction,
+    createComplex: createSelectedComplex,
+    createNumeric,
     createTyped,
   };
 }

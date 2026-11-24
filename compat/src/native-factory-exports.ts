@@ -1206,6 +1206,45 @@ const ResultSetDependencies: Pick<CompatFactoryExports, 'createResultSet'> = {
   createResultSet: mathjsCreateResultSet,
 };
 
+const mathjsCreateBignumber: CompatFactoryExports['createBignumber'] = factories.createBignumber;
+const bignumberDependencies: UnaryBundle<'createBignumber'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+} = {
+  BigNumberDependencies,
+  typedDependencies,
+  createBignumber: mathjsCreateBignumber,
+};
+
+const mathjsCreateFraction: CompatFactoryExports['createFraction'] = factories.createFraction;
+const fractionDependencies: UnaryBundle<'createFraction'> & {
+  FractionDependencies: typeof FractionDependencies;
+} = {
+  FractionDependencies,
+  typedDependencies,
+  createFraction: mathjsCreateFraction,
+};
+
+const mathjsCreateComplex: CompatFactoryExports['createComplex'] = factories.createComplex;
+const complexDependencies: UnaryBundle<'createComplex'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+} = {
+  ComplexDependencies,
+  typedDependencies,
+  createComplex: mathjsCreateComplex,
+};
+
+const mathjsCreateNumeric: CompatFactoryExports['createNumeric'] = factories.createNumeric;
+const numericDependencies: Pick<CompatFactoryExports, 'createNumeric'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  fractionDependencies: typeof fractionDependencies;
+  numberDependencies: typeof numberDependencies;
+} = {
+  bignumberDependencies,
+  fractionDependencies,
+  numberDependencies,
+  createNumeric: mathjsCreateNumeric,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1478,5 +1517,13 @@ export {
   chainDependencies,
   mathjsCreateResultSet as createResultSet,
   ResultSetDependencies,
+  mathjsCreateBignumber as createBignumber,
+  bignumberDependencies,
+  mathjsCreateFraction as createFraction,
+  fractionDependencies,
+  mathjsCreateComplex as createComplex,
+  complexDependencies,
+  mathjsCreateNumeric as createNumeric,
+  numericDependencies,
   typedDependencies,
 };

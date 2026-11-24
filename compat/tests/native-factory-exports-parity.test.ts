@@ -5,6 +5,32 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it.each([
+    ['bignumber', ['0xff']],
+    ['bignumber', [123456789012345678901234567890n]],
+    ['fraction', [{ n: 3, d: 7, s: -1 }]],
+    ['fraction', [7n, 19n]],
+    ['complex', ['2 + 3i']],
+    ['complex', [{ abs: 2, arg: 0 }]],
+  ] as const)('uses the selected %s conversion factory', (name, input) => {
+    const bundleName = name + 'Dependencies';
+    const actual = create({ [bundleName]: Reflect.get(compat, bundleName) });
+    const expected = oracle.create({ [bundleName]: Reflect.get(oracle, bundleName) });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const result = Reflect.apply(Reflect.get(actual, name), actual, input);
+    const reference = Reflect.apply(Reflect.get(expected, name), expected, input);
+    if (compat.isBigNumber(result) && oracle.isBigNumber(reference)) {
+      expect(reference.eq(result.toString())).toBe(true);
+    } else if (compat.isFraction(result) && oracle.isFraction(reference)) {
+      expect(result.numerator).toBe(reference.s * reference.n);
+      expect(result.denominator).toBe(reference.d);
+    } else if (compat.isComplex(result) && oracle.isComplex(reference)) {
+      expect([result.re, result.im]).toEqual([reference.re, reference.im]);
+    } else {
+      throw new TypeError(`Unexpected result from ${name}`);
+    }
+  });
+
   it('chains selected functions and functions imported later', () => {
     const actual = create({
       chainDependencies: compat.chainDependencies,
@@ -251,6 +277,7 @@ describe('native compatibility dependency bundles', () => {
     ],
     ['mode', [[1, 2, 2]]],
     ['number', [['0b11.1', '0xFFi8', true]]],
+    ['numeric', ['0b11.1', 'number']],
     ['ceil', [1.2345, 2]],
     ['floor', [-1.2345, 2]],
     ['gcd', [240, 46]],
