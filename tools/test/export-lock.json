@@ -12878,6 +12878,9 @@
       "bigint": {
         "kind": "function"
       },
+      "bigintDependencies": {
+        "kind": "object"
+      },
       "bignumber": {
         "kind": "function"
       },
@@ -12940,6 +12943,9 @@
       },
       "boolean": {
         "kind": "function"
+      },
+      "booleanDependencies": {
+        "kind": "object"
       },
       "catalan": {
         "kind": "function"
@@ -13184,6 +13190,9 @@
       "createBigNumberClass": {
         "kind": "function"
       },
+      "createBigint": {
+        "kind": "function"
+      },
       "createBignumber": {
         "kind": "function"
       },
@@ -13218,6 +13227,9 @@
         "kind": "function"
       },
       "createBoltzmann": {
+        "kind": "function"
+      },
+      "createBoolean": {
         "kind": "function"
       },
       "createCbrt": {
@@ -13989,6 +14001,9 @@
         "kind": "function"
       },
       "createStefanBoltzmann": {
+        "kind": "function"
+      },
+      "createString": {
         "kind": "function"
       },
       "createSubset": {
@@ -15460,6 +15475,9 @@
       },
       "string": {
         "kind": "function"
+      },
+      "stringDependencies": {
+        "kind": "object"
       },
       "subset": {
         "kind": "function"

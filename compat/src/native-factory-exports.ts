@@ -3432,6 +3432,24 @@ const helpDependencies: {
   createHelp: typeof createHelp;
 } = { HelpDependencies, typedDependencies, createHelp };
 
+const mathjsCreateBigint: CompatFactoryExports['createBigint'] = factories.createBigint;
+const bigintDependencies: UnaryBundle<'createBigint'> = {
+  typedDependencies,
+  createBigint: mathjsCreateBigint,
+};
+
+const mathjsCreateBoolean: CompatFactoryExports['createBoolean'] = factories.createBoolean;
+const booleanDependencies: UnaryBundle<'createBoolean'> = {
+  typedDependencies,
+  createBoolean: mathjsCreateBoolean,
+};
+
+const mathjsCreateString: CompatFactoryExports['createString'] = factories.createString;
+const stringDependencies: UnaryBundle<'createString'> = {
+  typedDependencies,
+  createString: mathjsCreateString,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4026,6 +4044,12 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateString as createString,
+  stringDependencies,
+  mathjsCreateBoolean as createBoolean,
+  booleanDependencies,
+  mathjsCreateBigint as createBigint,
+  bigintDependencies,
   mathjsCreateComposition as createComposition,
   compositionDependencies,
   mathjsCreateKldivergence as createKldivergence,
