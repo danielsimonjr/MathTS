@@ -1,3 +1,4 @@
+import { runWithConfig } from '../config-api.js';
 import typedFunction from 'typed-function';
 import { ArgumentsError } from '../error/ArgumentsError.js';
 import { DimensionError } from '../error/DimensionError.js';
@@ -345,11 +346,26 @@ export function create(
     typedFunction as { isTypedFunction?: (value: unknown) => boolean }
   ).isTypedFunction;
 
+  const scopedFunctions = new WeakSet<object>();
+  const instantiateFactory = (resolve: () => unknown): unknown => {
+    const value = runWithConfig(configInternal, resolve);
+    if (typeof value !== 'function' || scopedFunctions.has(value)) return value;
+
+    const scoped = new Proxy(value, {
+      apply(target, receiver, args) {
+        return runWithConfig(configInternal, () => Reflect.apply(target, receiver, args));
+      },
+    });
+    scopedFunctions.add(scoped);
+    return scoped;
+  };
+
   const internalImport = importFactory(
     lazyTyped as unknown as TypedFunction,
     load,
     math,
-    importedFactories as Record<string, FactoryFunction>
+    importedFactories as Record<string, FactoryFunction>,
+    instantiateFactory
   );
   math.import = internalImport;
 

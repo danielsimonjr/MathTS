@@ -80,7 +80,8 @@ export function importFactory(
   typed: TypedFunction,
   _load: (factory: FactoryFunction) => unknown,
   math: MathNamespace,
-  importedFactories: Record<string, FactoryFunction>
+  importedFactories: Record<string, FactoryFunction>,
+  instantiateFactory?: (resolve: () => unknown) => unknown
 ): (functions: unknown, options?: ImportOptions) => void {
   /**
    * Import functions from an object or a module.
@@ -338,7 +339,7 @@ export function importFactory(
     const existingTransform = name in math.expression.transform;
     const existing = hasInheritedOrOwn(namespace, name) ? namespace[name] : undefined;
 
-    const resolver = function (): unknown {
+    const resolve = function (): unknown {
       // collect all dependencies, handle finding both functions and classes and other special cases
       const dependencies: Record<string, unknown> = {};
       factory.dependencies.map(stripOptionalNotation).forEach((dependency) => {
@@ -388,6 +389,8 @@ export function importFactory(
         throw new Error('Cannot import "' + name + '": already exists');
       }
     };
+
+    const resolver = instantiateFactory ? () => instantiateFactory(resolve) : resolve;
 
     const meta = factory.meta as FactoryMeta | undefined;
     const former = (meta?.formerly as string | undefined) ?? '';
