@@ -12653,6 +12653,12 @@
       "atanh": {
         "kind": "function"
       },
+      "atomicMass": {
+        "kind": "object"
+      },
+      "avogadro": {
+        "kind": "object"
+      },
       "bellNumbers": {
         "kind": "function"
       },
@@ -12680,6 +12686,15 @@
       "bitXor": {
         "kind": "function"
       },
+      "bohrMagneton": {
+        "kind": "object"
+      },
+      "bohrRadius": {
+        "kind": "object"
+      },
+      "boltzmann": {
+        "kind": "object"
+      },
       "boolean": {
         "kind": "function"
       },
@@ -12694,6 +12709,9 @@
       },
       "chain": {
         "kind": "function"
+      },
+      "classicalElectronRadius": {
+        "kind": "object"
       },
       "clone": {
         "kind": "function"
@@ -12731,6 +12749,9 @@
       "concat": {
         "kind": "function"
       },
+      "conductanceQuantum": {
+        "kind": "object"
+      },
       "config": {
         "kind": "function"
       },
@@ -12751,6 +12772,12 @@
       },
       "coth": {
         "kind": "function"
+      },
+      "coulomb": {
+        "kind": "object"
+      },
+      "coulombConstant": {
+        "kind": "object"
       },
       "count": {
         "kind": "function"
@@ -12791,6 +12818,9 @@
       "det": {
         "kind": "function"
       },
+      "deuteronMass": {
+        "kind": "object"
+      },
       "diag": {
         "kind": "function"
       },
@@ -12821,8 +12851,20 @@
       "e": {
         "kind": "number"
       },
+      "efimovFactor": {
+        "kind": "number"
+      },
       "eigs": {
         "kind": "function"
+      },
+      "electricConstant": {
+        "kind": "object"
+      },
+      "electronMass": {
+        "kind": "object"
+      },
+      "elementaryCharge": {
+        "kind": "object"
       },
       "equal": {
         "kind": "function"
@@ -12854,11 +12896,23 @@
       "factory": {
         "kind": "function"
       },
+      "faraday": {
+        "kind": "object"
+      },
+      "fermiCoupling": {
+        "kind": "object"
+      },
       "fft": {
         "kind": "function"
       },
       "filter": {
         "kind": "function"
+      },
+      "fineStructure": {
+        "kind": "number"
+      },
+      "firstRadiation": {
+        "kind": "object"
       },
       "fix": {
         "kind": "function"
@@ -12884,13 +12938,28 @@
       "gamma": {
         "kind": "function"
       },
+      "gasConstant": {
+        "kind": "object"
+      },
       "gcd": {
         "kind": "function"
       },
       "getMatrixDataType": {
         "kind": "function"
       },
+      "gravitationConstant": {
+        "kind": "object"
+      },
+      "gravity": {
+        "kind": "object"
+      },
+      "hartreeEnergy": {
+        "kind": "object"
+      },
       "hasNumericValue": {
+        "kind": "function"
+      },
+      "help": {
         "kind": "function"
       },
       "hex": {
@@ -12920,6 +12989,9 @@
       "inv": {
         "kind": "function"
       },
+      "inverseConductanceQuantum": {
+        "kind": "object"
+      },
       "invmod": {
         "kind": "function"
       },
@@ -12936,6 +13008,9 @@
         "kind": "function"
       },
       "isBigInt": {
+        "kind": "function"
+      },
+      "isBigNumber": {
         "kind": "function"
       },
       "isBigNumber_": {
@@ -12956,6 +13031,9 @@
       "isCollection": {
         "kind": "function"
       },
+      "isComplex": {
+        "kind": "function"
+      },
       "isComplex_": {
         "kind": "function"
       },
@@ -12972,6 +13050,9 @@
         "kind": "function"
       },
       "isFinite": {
+        "kind": "function"
+      },
+      "isFraction": {
         "kind": "function"
       },
       "isFraction_": {
@@ -13014,6 +13095,9 @@
         "kind": "function"
       },
       "isNull": {
+        "kind": "function"
+      },
+      "isNumber": {
         "kind": "function"
       },
       "isNumber_": {
@@ -13082,6 +13166,9 @@
       "kldivergence": {
         "kind": "function"
       },
+      "klitzing": {
+        "kind": "object"
+      },
       "kron": {
         "kind": "function"
       },
@@ -13115,6 +13202,9 @@
       "log2": {
         "kind": "function"
       },
+      "loschmidt": {
+        "kind": "object"
+      },
       "lsolve": {
         "kind": "function"
       },
@@ -13132,6 +13222,12 @@
       },
       "mad": {
         "kind": "function"
+      },
+      "magneticConstant": {
+        "kind": "object"
+      },
+      "magneticFluxQuantum": {
+        "kind": "object"
       },
       "map": {
         "kind": "function"
@@ -13169,6 +13265,18 @@
       "mode": {
         "kind": "function"
       },
+      "molarMass": {
+        "kind": "object"
+      },
+      "molarMassC12": {
+        "kind": "object"
+      },
+      "molarPlanckConstant": {
+        "kind": "object"
+      },
+      "molarVolume": {
+        "kind": "object"
+      },
       "multinomial": {
         "kind": "function"
       },
@@ -13177,6 +13285,9 @@
       },
       "multiplyScalar": {
         "kind": "function"
+      },
+      "neutronMass": {
+        "kind": "object"
       },
       "norm": {
         "kind": "function"
@@ -13189,6 +13300,9 @@
       },
       "nthRoots": {
         "kind": "function"
+      },
+      "nuclearMagneton": {
+        "kind": "object"
       },
       "nullish": {
         "kind": "function"
@@ -13235,6 +13349,24 @@
       "pinv": {
         "kind": "function"
       },
+      "planckCharge": {
+        "kind": "object"
+      },
+      "planckConstant": {
+        "kind": "object"
+      },
+      "planckLength": {
+        "kind": "object"
+      },
+      "planckMass": {
+        "kind": "object"
+      },
+      "planckTemperature": {
+        "kind": "object"
+      },
+      "planckTime": {
+        "kind": "object"
+      },
       "polynomialRoot": {
         "kind": "function"
       },
@@ -13247,11 +13379,17 @@
       "prod": {
         "kind": "function"
       },
+      "protonMass": {
+        "kind": "object"
+      },
       "qr": {
         "kind": "function"
       },
       "quantileSeq": {
         "kind": "function"
+      },
+      "quantumOfCirculation": {
+        "kind": "object"
       },
       "random": {
         "kind": "function"
@@ -13267,6 +13405,9 @@
       },
       "re": {
         "kind": "function"
+      },
+      "reducedPlanckConstant": {
+        "kind": "object"
       },
       "replacer": {
         "kind": "function"
@@ -13301,6 +13442,12 @@
       "row": {
         "kind": "function"
       },
+      "rydberg": {
+        "kind": "object"
+      },
+      "sackurTetrode": {
+        "kind": "number"
+      },
       "schur": {
         "kind": "function"
       },
@@ -13309,6 +13456,9 @@
       },
       "sech": {
         "kind": "function"
+      },
+      "secondRadiation": {
+        "kind": "object"
       },
       "setCartesian": {
         "kind": "function"
@@ -13382,6 +13532,9 @@
       "sparse": {
         "kind": "function"
       },
+      "speedOfLight": {
+        "kind": "object"
+      },
       "splitUnit": {
         "kind": "function"
       },
@@ -13399,6 +13552,9 @@
       },
       "std": {
         "kind": "function"
+      },
+      "stefanBoltzmann": {
+        "kind": "object"
       },
       "stirlingS2": {
         "kind": "function"
@@ -13433,6 +13589,9 @@
       "tau": {
         "kind": "number"
       },
+      "thomsonCrossSection": {
+        "kind": "object"
+      },
       "to": {
         "kind": "function"
       },
@@ -13446,6 +13605,9 @@
         "kind": "function"
       },
       "typeOf": {
+        "kind": "function"
+      },
+      "typed": {
         "kind": "function"
       },
       "unaryMinus": {
@@ -13466,11 +13628,20 @@
       "usolveAll": {
         "kind": "function"
       },
+      "vacuumImpedance": {
+        "kind": "object"
+      },
       "variance": {
         "kind": "function"
       },
       "version": {
         "kind": "string"
+      },
+      "weakMixingAngle": {
+        "kind": "number"
+      },
+      "wienDisplacement": {
+        "kind": "object"
       },
       "xgcd": {
         "kind": "function"

@@ -736,6 +736,11 @@ const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathj
 export { namedSetUnion as setUnion };
 
 export * from './named-symbols.js';
+export * from './named-physical-constants.generated.js';
+
+const defaultTyped: MathInstance['typed'] =
+  /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatTyped();
+export { defaultTyped as typed };
 
 // Mathematical functions shared with the functions package.
 export {
@@ -812,6 +817,7 @@ export {
   gamma,
   getMatrixDataType,
   hasNumericValue,
+  help,
   hex,
   hypot,
   ifft,
@@ -940,6 +946,10 @@ export {
   Complex,
   Fraction,
   BigNumber,
+  isBigNumber,
+  isComplex,
+  isFraction,
+  isNumber,
   I,
   COMPLEX_ZERO,
   COMPLEX_ONE,
