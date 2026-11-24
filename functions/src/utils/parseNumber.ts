@@ -79,3 +79,21 @@ export const createParseNumberWithConfig = /* #__PURE__ */ factory(
     return parseNumberWithConfig;
   }
 );
+
+/** Convert reduction text with the selected instance's numeric factory and settings. */
+export function selectedReductionNumberParser(
+  config: { number: string; numberFallback?: string },
+  numeric: (value: string, outputType: string) => unknown
+): (value: string) => unknown {
+  return (value) => {
+    let outputType = config.number;
+    if (outputType === 'bigint') {
+      try {
+        BigInt(value);
+      } catch {
+        outputType = config.numberFallback ?? 'number';
+      }
+    }
+    return numeric(value, outputType);
+  };
+}
