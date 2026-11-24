@@ -1,9 +1,7 @@
-import {
-  factory_mathjsCompat,
-  help as nativeHelp,
-  replacer,
-} from '@danielsimonjr/mathts-functions';
+import { factory_mathjsCompat, help as nativeHelp } from '@danielsimonjr/mathts-functions';
 import { fractionPart, instanceSymbols } from './instance-symbols.js';
+
+import { compatReplacer as replacer } from './serialization.js';
 
 const factory: typeof factory_mathjsCompat.factory = factory_mathjsCompat.factory;
 const factories = /* #__PURE__ */ factory_mathjsCompat.compatFactoryExports();
