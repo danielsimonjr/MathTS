@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.4
+
+### Patch Changes
+
+- 2e88a10: Match mathjs 15.2 instance constants, including configured BigNumber precision, alternate names, and physical values. Use the same resolved constants for direct calls, interpreted expressions, and compiled expressions. Emit instance configuration changes with previous, current, and changed values.
+- 2e88a10: Give compat mathjs-style random, randomInt, and pickRandom streams scoped to an instance. Direct, interpreted, and compiled calls share the same streams and honor changes to randomSeed.
+- Updated dependencies [2e88a10]
+- Updated dependencies [2e88a10]
+  - @danielsimonjr/mathts-functions@0.89.2
+
 ## 0.7.3
 
 ### Patch Changes
