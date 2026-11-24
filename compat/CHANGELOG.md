@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.15
+
+### Patch Changes
+
+- 96c3d0d: Expose selected MathJS factory bundles for matrix powers and decompositions, units, expression parsing, and evaluation. Honor the matrix factory when selected assignment nodes update arrays.
+- Updated dependencies [96c3d0d]
+  - @danielsimonjr/mathts-functions@0.89.13
+
 ## 0.7.14
 
 ### Patch Changes

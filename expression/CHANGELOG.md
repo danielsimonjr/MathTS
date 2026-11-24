@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-expression
 
+## 0.14.4
+
+### Patch Changes
+
+- 96c3d0d: Expose selected MathJS factory bundles for matrix powers and decompositions, units, expression parsing, and evaluation. Honor the matrix factory when selected assignment nodes update arrays.
+
 ## 0.14.3
 
 ### Patch Changes
