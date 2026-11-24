@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.7
+
+### Patch Changes
+
+- 9ed1bee: Expose native MathJS dependency bundles for mode and mapSlices, including empty-input errors and injectable dimension validation.
+- 75fc560: Expose the MathJS number factory and dependency bundle, including signed word-size literals, radix fractions, and JSON revival.
+
 ## 0.89.6
 
 ### Patch Changes
