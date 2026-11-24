@@ -2542,6 +2542,14 @@ function compatFactoryExports(): {
   createHypot: typeof createHypot;
   createLog: typeof createLog;
   createNthRoots: typeof createNthRoots;
+  createDistance: typeof createDistance;
+  createLsolve: typeof createLsolve;
+  createUsolve: typeof createUsolve;
+  createLsolveAll: typeof createLsolveAll;
+  createUsolveAll: typeof createUsolveAll;
+  createLog1p: typeof createLog1p;
+  createRange: typeof createRange;
+  createBernoulli: typeof createBernoulli;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2689,6 +2697,14 @@ function compatFactoryExports(): {
     createHypot,
     createLog,
     createNthRoots,
+    createDistance,
+    createLsolve,
+    createUsolve,
+    createLsolveAll,
+    createUsolveAll,
+    createLog1p,
+    createRange,
+    createBernoulli,
     createTyped,
   };
 }

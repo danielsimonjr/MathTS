@@ -1409,6 +1409,158 @@ const nthRootsDependencies: UnaryBundle<'createNthRoots'> & {
   createNthRoots: mathjsCreateNthRoots,
 };
 
+const mathjsCreateDistance: CompatFactoryExports['createDistance'] = factories.createDistance;
+const distanceDependencies: UnaryBundle<'createDistance'> & {
+  absDependencies: typeof absDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  deepEqualDependencies: typeof deepEqualDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+} = {
+  absDependencies,
+  addScalarDependencies,
+  deepEqualDependencies,
+  divideScalarDependencies,
+  multiplyScalarDependencies,
+  sqrtDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  createDistance: mathjsCreateDistance,
+};
+
+const mathjsCreateLsolve: CompatFactoryExports['createLsolve'] = factories.createLsolve;
+const lsolveDependencies: UnaryBundle<'createLsolve'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+} = {
+  DenseMatrixDependencies,
+  divideScalarDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  createLsolve: mathjsCreateLsolve,
+};
+
+const mathjsCreateUsolve: CompatFactoryExports['createUsolve'] = factories.createUsolve;
+const usolveDependencies: UnaryBundle<'createUsolve'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+} = {
+  DenseMatrixDependencies,
+  divideScalarDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  createUsolve: mathjsCreateUsolve,
+};
+
+const mathjsCreateLsolveAll: CompatFactoryExports['createLsolveAll'] = factories.createLsolveAll;
+const lsolveAllDependencies: UnaryBundle<'createLsolveAll'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+} = {
+  DenseMatrixDependencies,
+  divideScalarDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  createLsolveAll: mathjsCreateLsolveAll,
+};
+
+const mathjsCreateUsolveAll: CompatFactoryExports['createUsolveAll'] = factories.createUsolveAll;
+const usolveAllDependencies: UnaryBundle<'createUsolveAll'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+} = {
+  DenseMatrixDependencies,
+  divideScalarDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  createUsolveAll: mathjsCreateUsolveAll,
+};
+
+const mathjsCreateLog1p: CompatFactoryExports['createLog1p'] = factories.createLog1p;
+const log1pDependencies: UnaryBundle<'createLog1p'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  logDependencies: typeof logDependencies;
+} = {
+  ComplexDependencies,
+  divideScalarDependencies,
+  logDependencies,
+  typedDependencies,
+  createLog1p: mathjsCreateLog1p,
+};
+
+const mathjsCreateRange: CompatFactoryExports['createRange'] = factories.createRange;
+const rangeDependencies: UnaryBundle<'createRange'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  addDependencies: typeof addDependencies;
+  equalDependencies: typeof equalDependencies;
+  isPositiveDependencies: typeof isPositiveDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+  largerDependencies: typeof largerDependencies;
+  largerEqDependencies: typeof largerEqDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  smallerEqDependencies: typeof smallerEqDependencies;
+} = {
+  bignumberDependencies,
+  matrixDependencies,
+  addDependencies,
+  equalDependencies,
+  isPositiveDependencies,
+  isZeroDependencies,
+  largerDependencies,
+  largerEqDependencies,
+  smallerDependencies,
+  smallerEqDependencies,
+  typedDependencies,
+  createRange: mathjsCreateRange,
+};
+
+const mathjsCreateBernoulli: CompatFactoryExports['createBernoulli'] = factories.createBernoulli;
+const bernoulliDependencies: UnaryBundle<'createBernoulli'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  FractionDependencies: typeof FractionDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  numberDependencies: typeof numberDependencies;
+} = {
+  BigNumberDependencies,
+  FractionDependencies,
+  isIntegerDependencies,
+  numberDependencies,
+  typedDependencies,
+  createBernoulli: mathjsCreateBernoulli,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1711,5 +1863,21 @@ export {
   logDependencies,
   mathjsCreateNthRoots as createNthRoots,
   nthRootsDependencies,
+  mathjsCreateDistance as createDistance,
+  distanceDependencies,
+  mathjsCreateLsolve as createLsolve,
+  lsolveDependencies,
+  mathjsCreateUsolve as createUsolve,
+  usolveDependencies,
+  mathjsCreateLsolveAll as createLsolveAll,
+  lsolveAllDependencies,
+  mathjsCreateUsolveAll as createUsolveAll,
+  usolveAllDependencies,
+  mathjsCreateLog1p as createLog1p,
+  log1pDependencies,
+  mathjsCreateRange as createRange,
+  rangeDependencies,
+  mathjsCreateBernoulli as createBernoulli,
+  bernoulliDependencies,
   typedDependencies,
 };
