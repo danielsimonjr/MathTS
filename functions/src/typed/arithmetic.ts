@@ -1825,6 +1825,7 @@ export const log2 = mathTyped('log2', {
  */
 export const log1p = mathTyped('log1p', {
   number: (a: f64): f64 | Complex => log1pReal(a),
+  Complex: (a: Complex): Complex => new Complex(a.re + 1, a.im).log(),
   BigNumber: (a: BigNumber): BigNumber | Complex => log1pBigNumberWith(a, isPredictableMode()),
 
   // Float64Array log1p (synchronous)
@@ -1835,6 +1836,10 @@ export const log1p = mathTyped('log1p', {
     wasmKernel: 'log1p',
     inRealDomain: staysRealLog1p,
   }),
+  'any, any': mathTyped.referToSelf(
+    (self) => (value: unknown, base: unknown) =>
+      (factoryScope.divideScalar as ScalarOp)(self(value), (log as (x: unknown) => unknown)(base))
+  ),
 });
 
 /**

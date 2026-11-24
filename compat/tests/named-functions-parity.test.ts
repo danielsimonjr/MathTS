@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import * as oracle from 'mathjs';
-import { all, combinations, create, derivative, erf, log2, median, norm } from '../src/index.js';
+import {
+  all,
+  combinations,
+  create,
+  derivative,
+  erf,
+  log1p,
+  log2,
+  median,
+  norm,
+} from '../src/index.js';
 
 describe('named compatibility function imports', () => {
   it('matches the upstream results across mathematical categories', () => {
@@ -27,5 +37,18 @@ describe('named compatibility function imports', () => {
     expect(math.norm(math.matrix(data), 'inf')).toBe(expected);
     expect(math.norm(math.sparse(data), 'inf')).toBe(expected);
     expect(math.evaluate('norm([[1, 2], [3, 4]], "inf")')).toBe(expected);
+  });
+
+  it('accepts complex values and an optional base for log1p', () => {
+    const math = create(all);
+    const value = math.complex(1, 2);
+    const expected = oracle.log1p(oracle.complex(1, 2));
+    const actual = log1p(value) as typeof value;
+    expect(actual.re).toBeCloseTo(expected.re, 14);
+    expect(actual.im).toBeCloseTo(expected.im, 14);
+    expect(log1p(9999, 10)).toBeCloseTo(oracle.log1p(9999, 10), 14);
+    expect(math.log1p(9999, 10)).toBeCloseTo(4, 14);
+    expect(math.evaluate('log1p(9999, 10)')).toBeCloseTo(4, 14);
+    expect(() => log1p([1, 2], 10)).toThrow();
   });
 });
