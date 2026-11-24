@@ -5,6 +5,64 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('constructs selected row and column matrices from sparse vectors', () => {
+    for (const name of ['matrixFromRows', 'matrixFromColumns'] as const) {
+      const bundle = name + 'Dependencies';
+      const actual = create({ [bundle]: Reflect.get(compat, bundle) });
+      const expected = oracle.create({ [bundle]: Reflect.get(oracle, bundle) });
+      const run = (instance: object) => {
+        const call = (key: string, ...args: unknown[]) =>
+          Reflect.apply(Reflect.get(instance, key), instance, args);
+        const vectors = [[[1, 0]], [[0, 2]]].map((data) => call('matrix', data, 'sparse'));
+        const result = call(name, ...vectors) as { storage(): string; valueOf(): unknown };
+        expect(() => call(name)).toThrow(TypeError);
+        return [result.storage(), result.valueOf()];
+      };
+      expect(run(actual)).toEqual(run(expected));
+    }
+  });
+
+  it('preserves BigNumber when multiplying selected units', () => {
+    const names = ['multiplyScalar', 'multiply', 'dotMultiply'] as const;
+    const bundleNames = [...names, 'unit', 'bignumber'].map((name) => name + 'Dependencies');
+    const factories = (lib: object) =>
+      Object.fromEntries(bundleNames.map((key) => [key, Reflect.get(lib, key)]));
+    const actual = create(factories(compat));
+    const expected = oracle.create(factories(oracle));
+    for (const name of names) {
+      const call = (instance: object, key: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, key), instance, args);
+      const unitProduct = (instance: object, reversed: boolean) => {
+        const operands = [call(instance, 'bignumber', 3), call(instance, 'unit', '2 cm')];
+        if (reversed) operands.reverse();
+        const result = call(instance, name, ...operands) as { value: unknown };
+        return [String(result), Reflect.get(Object(result.value), 'isBigNumber') === true];
+      };
+      for (const reversed of [false, true]) {
+        expect(unitProduct(actual, reversed)).toEqual(unitProduct(expected, reversed));
+      }
+    }
+  });
+
+  it('handles zero BigNumber operands in selected collection logical shifts', () => {
+    const actual = create({
+      rightLogShiftDependencies: compat.rightLogShiftDependencies,
+      bignumberDependencies: compat.bignumberDependencies,
+    });
+    const expected = oracle.create({
+      rightLogShiftDependencies: Reflect.get(oracle, 'rightLogShiftDependencies'),
+      bignumberDependencies: Reflect.get(oracle, 'bignumberDependencies'),
+    });
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const zero = call('bignumber', 0);
+      expect(() => call('rightLogShift', [1, 2], call('bignumber', 1))).toThrow(TypeError);
+      return [call('rightLogShift', [1, 2], zero), call('rightLogShift', zero, [1, 2])];
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
   it('computes selected matrix exponentials and numeric zeta values', () => {
     const actual = create({
       expmDependencies: compat.expmDependencies,

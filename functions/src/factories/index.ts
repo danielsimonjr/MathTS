@@ -719,7 +719,7 @@ import { createBitOr } from '../bitwise/bitOr.js';
 import { createBitXor } from '../bitwise/bitXor.js';
 import { createLeftShift } from '../bitwise/leftShift.js';
 import { createRightArithShift } from '../bitwise/rightArithShift.js';
-import { createRightLogShift } from '../bitwise/rightLogShift.js';
+import { createRightLogShift, createSelectedRightLogShift } from '../bitwise/rightLogShift.js';
 
 // logical
 import { createOr } from '../logical/or.js';
@@ -3005,6 +3005,26 @@ const createSelectedExpm = /* #__PURE__ */ factory(
     })
 );
 
+function selectedMatrixFromVectors(
+  base: FactoryFunction<Record<string, unknown>, (...vectors: unknown[]) => unknown>
+): FactoryFunction<Record<string, unknown>, (...vectors: unknown[]) => unknown> {
+  return factory(base.fn, base.dependencies, (deps: Record<string, unknown>) => {
+    const typed = deps.typed as TypedBuilder;
+    const matrix = deps.matrix as (data: unknown) => unknown;
+    const construct = base(deps);
+    return typed(base.fn, {
+      '...Array': (vectors: unknown[][]) => construct(...vectors),
+      '...Matrix': (vectors: { toArray(): unknown[] }[]) =>
+        matrix(construct(...vectors.map((vector) => vector.toArray()))),
+    });
+  });
+}
+
+const createSelectedMatrixFromRows =
+  /* #__PURE__ */ selectedMatrixFromVectors(createMatrixFromRows);
+const createSelectedMatrixFromColumns =
+  /* #__PURE__ */ selectedMatrixFromVectors(createMatrixFromColumns);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -3119,8 +3139,8 @@ function compatFactoryExports(): {
   createSubtract: typeof createMathjsSubtract;
   createDiag: typeof createDiag;
   createIdentity: typeof createIdentity;
-  createMatrixFromColumns: typeof createMatrixFromColumns;
-  createMatrixFromRows: typeof createMatrixFromRows;
+  createMatrixFromColumns: typeof createSelectedMatrixFromColumns;
+  createMatrixFromRows: typeof createSelectedMatrixFromRows;
   createOnes: typeof createOnes;
   createReshape: typeof createReshape;
   createResize: typeof createMathjsResize;
@@ -3141,7 +3161,7 @@ function compatFactoryExports(): {
   createPartitionSelect: typeof createPartitionSelect;
   createRandomInt: typeof createRandomInt;
   createRightArithShift: typeof createRightArithShift;
-  createRightLogShift: typeof createRightLogShift;
+  createRightLogShift: typeof createSelectedRightLogShift;
   createRound: typeof createRound;
   createSubset: typeof createSubset;
   createTrace: typeof createTrace;
@@ -3461,8 +3481,8 @@ function compatFactoryExports(): {
     createSubtract: createMathjsSubtract,
     createDiag,
     createIdentity,
-    createMatrixFromColumns,
-    createMatrixFromRows,
+    createMatrixFromColumns: createSelectedMatrixFromColumns,
+    createMatrixFromRows: createSelectedMatrixFromRows,
     createOnes,
     createReshape,
     createResize: createMathjsResize,
@@ -3483,7 +3503,7 @@ function compatFactoryExports(): {
     createPartitionSelect,
     createRandomInt,
     createRightArithShift,
-    createRightLogShift,
+    createRightLogShift: createSelectedRightLogShift,
     createRound,
     createSubset,
     createTrace,
