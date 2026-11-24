@@ -13025,6 +13025,9 @@
       "count": {
         "kind": "function"
       },
+      "countDependencies": {
+        "kind": "object"
+      },
       "create": {
         "kind": "function"
       },
@@ -13172,6 +13175,9 @@
       "createCoth": {
         "kind": "function"
       },
+      "createCount": {
+        "kind": "function"
+      },
       "createCsc": {
         "kind": "function"
       },
@@ -13182,6 +13188,9 @@
         "kind": "function"
       },
       "createCube": {
+        "kind": "function"
+      },
+      "createCumSum": {
         "kind": "function"
       },
       "createDeepEqual": {
@@ -13403,6 +13412,12 @@
       "createMatrixFromRows": {
         "kind": "function"
       },
+      "createMax": {
+        "kind": "function"
+      },
+      "createMin": {
+        "kind": "function"
+      },
       "createMod": {
         "kind": "function"
       },
@@ -13470,6 +13485,9 @@
         "kind": "function"
       },
       "createPrint": {
+        "kind": "function"
+      },
+      "createProd": {
         "kind": "function"
       },
       "createQr": {
@@ -13550,6 +13568,9 @@
       "createSetSize": {
         "kind": "function"
       },
+      "createSetSymDifference": {
+        "kind": "function"
+      },
       "createSign": {
         "kind": "function"
       },
@@ -13593,6 +13614,9 @@
         "kind": "function"
       },
       "createSubtractScalar": {
+        "kind": "function"
+      },
+      "createSum": {
         "kind": "function"
       },
       "createTan": {
@@ -13678,6 +13702,9 @@
       },
       "cumsum": {
         "kind": "function"
+      },
+      "cumsumDependencies": {
+        "kind": "object"
       },
       "deepEqual": {
         "kind": "function"
@@ -14303,6 +14330,9 @@
       "max": {
         "kind": "function"
       },
+      "maxDependencies": {
+        "kind": "object"
+      },
       "mean": {
         "kind": "function"
       },
@@ -14311,6 +14341,9 @@
       },
       "min": {
         "kind": "function"
+      },
+      "minDependencies": {
+        "kind": "object"
       },
       "mod": {
         "kind": "function"
@@ -14486,6 +14519,9 @@
       "prod": {
         "kind": "function"
       },
+      "prodDependencies": {
+        "kind": "object"
+      },
       "protonMass": {
         "kind": "object"
       },
@@ -14657,6 +14693,9 @@
       "setSymDifference": {
         "kind": "function"
       },
+      "setSymDifferenceDependencies": {
+        "kind": "object"
+      },
       "setUnion": {
         "kind": "function"
       },
@@ -14782,6 +14821,9 @@
       },
       "sum": {
         "kind": "function"
+      },
+      "sumDependencies": {
+        "kind": "object"
       },
       "sylvester": {
         "kind": "function"

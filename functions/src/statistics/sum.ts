@@ -1,6 +1,7 @@
 import { containsCollections, deepForEach, reduce } from '../utils/collection.js';
 import { pairwiseSum } from '@danielsimonjr/mathts-core';
 import { factory } from '../utils/factory.js';
+import { selectedReductionNumberParser } from '../utils/parseNumber.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import { rejectMisusedIndexedSum } from './sum-indexed-guard.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -157,4 +158,14 @@ export const createSum = /* #__PURE__ */ factory(
       }
     }
   }
+);
+
+export const createMathjsSum = /* #__PURE__ */ factory(
+  name,
+  ['typed', 'config', 'add', 'numeric'],
+  (deps: Omit<SumDependencies, 'parseNumberWithConfig'>) =>
+    createSum({
+      ...deps,
+      parseNumberWithConfig: selectedReductionNumberParser(deps.config, deps.numeric),
+    })
 );
