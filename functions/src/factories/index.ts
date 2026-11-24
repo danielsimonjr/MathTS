@@ -2513,6 +2513,34 @@ function tryCreateFactoryBundle(
   return createFactoryInstance(factories as FactoriesInput, config);
 }
 
+const createSelectedMapTransform: ReturnType<
+  typeof factory<Record<string, unknown>, ReturnType<typeof createMapTransform>>
+> = /* #__PURE__ */ factory(
+  'map',
+  ['typed'],
+  (deps: Record<string, unknown>) => createMapTransform({ ...deps, map: createMap(deps) }),
+  { isTransformFunction: true }
+);
+
+const createSelectedFilterTransform: ReturnType<
+  typeof factory<Record<string, unknown>, ReturnType<typeof createFilterTransform>>
+> = /* #__PURE__ */ factory(
+  'filter',
+  ['typed'],
+  (deps: Record<string, unknown>) => createFilterTransform({ ...deps, filter: createFilter(deps) }),
+  { isTransformFunction: true }
+);
+
+const createSelectedForEachTransform: ReturnType<
+  typeof factory<Record<string, unknown>, ReturnType<typeof createForEachTransform>>
+> = /* #__PURE__ */ factory(
+  'forEach',
+  ['typed'],
+  (deps: Record<string, unknown>) =>
+    createForEachTransform({ ...deps, forEach: createForEach(deps) }),
+  { isTransformFunction: true }
+);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -2572,8 +2600,11 @@ function compatFactoryExports(): {
   createPickRandom: typeof createPickRandom;
   createRandom: typeof createRandom;
   createMap: typeof createMap;
+  createMapTransform: typeof createSelectedMapTransform;
   createFilter: typeof createFilter;
+  createFilterTransform: typeof createSelectedFilterTransform;
   createForEach: typeof createForEach;
+  createForEachTransform: typeof createSelectedForEachTransform;
   createFlatten: typeof createFlatten;
   createSize: typeof createSize;
   createSqueeze: typeof createSqueeze;
@@ -2845,8 +2876,11 @@ function compatFactoryExports(): {
     createPickRandom,
     createRandom,
     createMap,
+    createMapTransform: createSelectedMapTransform,
     createFilter,
+    createFilterTransform: createSelectedFilterTransform,
     createForEach,
+    createForEachTransform: createSelectedForEachTransform,
     createFlatten,
     createSize,
     createSqueeze,

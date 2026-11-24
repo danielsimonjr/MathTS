@@ -2999,6 +2999,27 @@ const createReplacer: ConstructorFactory<typeof replacer> = /* #__PURE__ */ fact
 );
 const replacerDependencies: { createReplacer: typeof createReplacer } = { createReplacer };
 
+const mathjsCreateMapTransform: CompatFactoryExports['createMapTransform'] =
+  factories.createMapTransform;
+const mapTransformDependencies: UnaryBundle<'createMapTransform'> = {
+  typedDependencies,
+  createMapTransform: mathjsCreateMapTransform,
+};
+
+const mathjsCreateFilterTransform: CompatFactoryExports['createFilterTransform'] =
+  factories.createFilterTransform;
+const filterTransformDependencies: UnaryBundle<'createFilterTransform'> = {
+  typedDependencies,
+  createFilterTransform: mathjsCreateFilterTransform,
+};
+
+const mathjsCreateForEachTransform: CompatFactoryExports['createForEachTransform'] =
+  factories.createForEachTransform;
+const forEachTransformDependencies: UnaryBundle<'createForEachTransform'> = {
+  typedDependencies,
+  createForEachTransform: mathjsCreateForEachTransform,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3065,8 +3086,14 @@ export {
   mathjsCreatePickRandom as createPickRandom,
   mathjsCreateRandom as createRandom,
   mathjsCreateMap as createMap,
+  mathjsCreateMapTransform as createMapTransform,
+  mapTransformDependencies,
   mathjsCreateFilter as createFilter,
+  mathjsCreateFilterTransform as createFilterTransform,
+  filterTransformDependencies,
   mathjsCreateForEach as createForEach,
+  mathjsCreateForEachTransform as createForEachTransform,
+  forEachTransformDependencies,
   mathjsCreateFlatten as createFlatten,
   mathjsCreateSize as createSize,
   mathjsCreateSqueeze as createSqueeze,
