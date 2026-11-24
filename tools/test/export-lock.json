@@ -12659,6 +12659,9 @@
       "Range": {
         "kind": "function"
       },
+      "RangeDependencies": {
+        "kind": "object"
+      },
       "RangeNode": {
         "kind": "function"
       },
@@ -13739,6 +13742,9 @@
       "createRange": {
         "kind": "function"
       },
+      "createRangeClass": {
+        "kind": "function"
+      },
       "createRangeNode": {
         "kind": "function"
       },
@@ -13749,6 +13755,9 @@
         "kind": "function"
       },
       "createRelationalNode": {
+        "kind": "function"
+      },
+      "createReplacer": {
         "kind": "function"
       },
       "createReshape": {
@@ -15019,6 +15028,9 @@
       },
       "replacer": {
         "kind": "function"
+      },
+      "replacerDependencies": {
+        "kind": "object"
       },
       "reshape": {
         "kind": "function"

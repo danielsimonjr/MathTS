@@ -5,6 +5,29 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('constructs selected ranges and serializes MathJS numeric tags', () => {
+    const actual = create({
+      RangeDependencies: compat.RangeDependencies,
+      replacerDependencies: compat.replacerDependencies,
+    });
+    const expected = oracle.create({
+      RangeDependencies: Reflect.get(oracle, 'RangeDependencies'),
+      replacerDependencies: Reflect.get(oracle, 'replacerDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+
+    const serialize = (instance: object) => {
+      const range = Reflect.construct(Reflect.get(instance, 'Range'), [5, -1, -2]) as {
+        toArray(): number[];
+      };
+      return JSON.stringify(
+        [range, range.toArray(), Infinity, -Infinity, NaN, 10n],
+        Reflect.get(instance, 'replacer')
+      );
+    };
+    expect(serialize(actual)).toBe(serialize(expected));
+  });
+
   it('extracts selected fraction parts from fractions and nested collections', () => {
     const actual = create({
       numDependencies: compat.numDependencies,
