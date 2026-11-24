@@ -5,6 +5,81 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('shares expression scope across a selected evaluation array', () => {
+    const actual = create({
+      evaluateDependencies: compat.evaluateDependencies,
+      addDependencies: compat.addDependencies,
+    });
+    const expected = oracle.create({
+      evaluateDependencies: Reflect.get(oracle, 'evaluateDependencies'),
+      addDependencies: Reflect.get(oracle, 'addDependencies'),
+    });
+    const expressions = ['x = 3', 'y = 4', 'x + y'];
+    expect(Reflect.apply(Reflect.get(actual, 'evaluate'), actual, [expressions])).toEqual(
+      expected.evaluate(expressions)
+    );
+  });
+
+  it('parses expressions with selected nodes and local operations', () => {
+    const actual = create({
+      parseDependencies: compat.parseDependencies,
+      addDependencies: compat.addDependencies,
+      indexDependencies: compat.indexDependencies,
+    });
+    const expected = oracle.create({
+      parseDependencies: Reflect.get(oracle, 'parseDependencies'),
+      addDependencies: Reflect.get(oracle, 'addDependencies'),
+      indexDependencies: Reflect.get(oracle, 'indexDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const node = actual.parse('x = 2 + 3');
+    const reference = expected.parse('x = 2 + 3');
+    expect(node.toString()).toBe(reference.toString());
+    expect(node.evaluate()).toBe(reference.evaluate());
+
+    const actualScope = { a: [1, 2] };
+    const expectedScope = { a: [1, 2] };
+    expect(actual.parse('a[1] = 7').evaluate(actualScope)).toBe(
+      expected.parse('a[1] = 7').evaluate(expectedScope)
+    );
+    expect(actualScope).toEqual(expectedScope);
+  });
+
+  it('converts units and isolates unit registrations in selected instances', () => {
+    const actual = create({
+      unitDependencies: compat.unitDependencies,
+      createUnitDependencies: compat.createUnitDependencies,
+    });
+    const expected = oracle.create({
+      unitDependencies: Reflect.get(oracle, 'unitDependencies'),
+      createUnitDependencies: Reflect.get(oracle, 'createUnitDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const name = 'compatMeterPair';
+    Reflect.apply(Reflect.get(actual, 'createUnit'), actual, [name, '2 m']);
+    expected.createUnit(name, '2 m');
+    const unit = actual.unit(`5 ${name}`) as { toNumber(target: string): number };
+    expect(unit.toNumber('m')).toBe(expected.unit(`5 ${name}`).toNumber('m'));
+    const other = create({ unitDependencies: compat.unitDependencies });
+    expect(() => other.unit(`5 ${name}`)).toThrow();
+  });
+
+  it('solves selected sparse LU with MathJS permutations', () => {
+    const actual = create({ sluDependencies: compat.sluDependencies });
+    const expected = oracle.create({ sluDependencies: Reflect.get(oracle, 'sluDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const input = [
+      [2, 1],
+      [3, 4],
+    ];
+    const lu = actual.slu(actual.matrix(input, 'sparse'), 0, 1) as ReturnType<typeof oracle.slu>;
+    const reference = expected.slu(expected.matrix(input, 'sparse'), 0, 1);
+    expect(lu.L.valueOf()).toEqual(reference.L.valueOf());
+    expect(lu.U.valueOf()).toEqual(reference.U.valueOf());
+    expect(lu.p).toEqual(reference.p);
+    expect(lu.q).toEqual(reference.q);
+  });
+
   it.each([
     ['dense', 'sparse'],
     ['sparse', 'dense'],
@@ -142,6 +217,9 @@ describe('native compatibility dependency bundles', () => {
   it.each([
     'Node',
     'ConstantNode',
+    'AssignmentNode',
+    'SymbolNode',
+    'FunctionNode',
     'ParenthesisNode',
     'ArrayNode',
     'BlockNode',
@@ -482,6 +560,42 @@ describe('native compatibility dependency bundles', () => {
         ],
       ],
     ],
+    [
+      'det',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
+    [
+      'inv',
+      [
+        [
+          [2, 0],
+          [0, 4],
+        ],
+      ],
+    ],
+    [
+      'pow',
+      [
+        [
+          [1, 2],
+          [0, 1],
+        ],
+        3,
+      ],
+    ],
+    [
+      'cross',
+      [
+        [1, 0, 0],
+        [0, 1, 0],
+      ],
+    ],
+    ['dotPow', [[2, 4], 2]],
     ['multiplyScalar', [3, 4]],
     ['not', [true]],
     ['re', [7]],

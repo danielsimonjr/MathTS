@@ -2061,6 +2061,262 @@ const multiplyDependencies: UnaryBundle<'createMultiply'> & {
   createMultiply: mathjsCreateMultiply,
 };
 
+const mathjsCreateDet: CompatFactoryExports['createDet'] = factories.createDet;
+const detDependencies: UnaryBundle<'createDet'> & {
+  divideScalarDependencies: typeof divideScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  divideScalarDependencies,
+  isZeroDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createDet: mathjsCreateDet,
+};
+
+const mathjsCreateInv: CompatFactoryExports['createInv'] = factories.createInv;
+const invDependencies: UnaryBundle<'createInv'> & {
+  absDependencies: typeof absDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  detDependencies: typeof detDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  identityDependencies: typeof identityDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  absDependencies,
+  addScalarDependencies,
+  detDependencies,
+  divideScalarDependencies,
+  identityDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createInv: mathjsCreateInv,
+};
+
+const mathjsCreatePow: CompatFactoryExports['createPow'] = factories.createPow;
+const powDependencies: UnaryBundle<'createPow'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  fractionDependencies: typeof fractionDependencies;
+  identityDependencies: typeof identityDependencies;
+  invDependencies: typeof invDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  numberDependencies: typeof numberDependencies;
+} = {
+  ComplexDependencies,
+  fractionDependencies,
+  identityDependencies,
+  invDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  numberDependencies,
+  typedDependencies,
+  createPow: mathjsCreatePow,
+};
+
+const mathjsCreateCross: CompatFactoryExports['createCross'] = factories.createCross;
+const crossDependencies: UnaryBundle<'createCross'> & {
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  matrixDependencies,
+  multiplyDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createCross: mathjsCreateCross,
+};
+
+const mathjsCreateDotPow: CompatFactoryExports['createDotPow'] = factories.createDotPow;
+const dotPowDependencies: UnaryBundle<'createDotPow'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  powDependencies: typeof powDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  powDependencies,
+  typedDependencies,
+  createDotPow: mathjsCreateDotPow,
+};
+
+const mathjsCreateSlu: CompatFactoryExports['createSlu'] = factories.createSlu;
+const sluDependencies: UnaryBundle<'createSlu'> & {
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  absDependencies: typeof absDependencies;
+  addDependencies: typeof addDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  largerDependencies: typeof largerDependencies;
+  largerEqDependencies: typeof largerEqDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  subtractDependencies: typeof subtractDependencies;
+  transposeDependencies: typeof transposeDependencies;
+} = {
+  SparseMatrixDependencies,
+  absDependencies,
+  addDependencies,
+  divideScalarDependencies,
+  largerDependencies,
+  largerEqDependencies,
+  multiplyDependencies,
+  subtractDependencies,
+  transposeDependencies,
+  typedDependencies,
+  createSlu: mathjsCreateSlu,
+};
+
+const mathjsCreateUnitClass: CompatFactoryExports['createUnitClass'] = factories.createUnitClass;
+const UnitDependencies: Pick<CompatFactoryExports, 'createUnitClass'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  ComplexDependencies: typeof ComplexDependencies;
+  FractionDependencies: typeof FractionDependencies;
+  absDependencies: typeof absDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalDependencies: typeof equalDependencies;
+  fixDependencies: typeof fixDependencies;
+  formatDependencies: typeof formatDependencies;
+  isNumericDependencies: typeof isNumericDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  numberDependencies: typeof numberDependencies;
+  powDependencies: typeof powDependencies;
+  roundDependencies: typeof roundDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+} = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  FractionDependencies,
+  absDependencies,
+  addScalarDependencies,
+  divideScalarDependencies,
+  equalDependencies,
+  fixDependencies,
+  formatDependencies,
+  isNumericDependencies,
+  multiplyScalarDependencies,
+  numberDependencies,
+  powDependencies,
+  roundDependencies,
+  subtractScalarDependencies,
+  createUnitClass: mathjsCreateUnitClass,
+};
+
+const mathjsCreateUnitFunction: CompatFactoryExports['createUnitFunction'] =
+  factories.createUnitFunction;
+const unitDependencies: Pick<CompatFactoryExports, 'createUnitFunction'> & {
+  UnitDependencies: typeof UnitDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  UnitDependencies,
+  typedDependencies,
+  createUnitFunction: mathjsCreateUnitFunction,
+};
+
+const mathjsCreateCreateUnit: CompatFactoryExports['createCreateUnit'] = factories.createCreateUnit;
+const createUnitDependencies: Pick<CompatFactoryExports, 'createCreateUnit'> & {
+  UnitDependencies: typeof UnitDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  UnitDependencies,
+  typedDependencies,
+  createCreateUnit: mathjsCreateCreateUnit,
+};
+
+const mathjsCreateSymbolNode: CompatFactoryExports['createSymbolNode'] = factories.createSymbolNode;
+const SymbolNodeDependencies: Pick<CompatFactoryExports, 'createSymbolNode'> & {
+  UnitDependencies: typeof UnitDependencies;
+  NodeDependencies: typeof NodeDependencies;
+} = {
+  UnitDependencies,
+  NodeDependencies,
+  createSymbolNode: mathjsCreateSymbolNode,
+};
+
+const mathjsCreateFunctionNode: CompatFactoryExports['createFunctionNode'] =
+  factories.createFunctionNode;
+const FunctionNodeDependencies: Pick<CompatFactoryExports, 'createFunctionNode'> & {
+  NodeDependencies: typeof NodeDependencies;
+  SymbolNodeDependencies: typeof SymbolNodeDependencies;
+} = {
+  NodeDependencies,
+  SymbolNodeDependencies,
+  createFunctionNode: mathjsCreateFunctionNode,
+};
+
+const mathjsCreateAssignmentNode: CompatFactoryExports['createAssignmentNode'] =
+  factories.createAssignmentNode;
+const AssignmentNodeDependencies: Pick<CompatFactoryExports, 'createAssignmentNode'> & {
+  matrixDependencies: typeof matrixDependencies;
+  NodeDependencies: typeof NodeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+} = {
+  matrixDependencies,
+  NodeDependencies,
+  subsetDependencies,
+  createAssignmentNode: mathjsCreateAssignmentNode,
+};
+
+const mathjsCreateParse: CompatFactoryExports['createParse'] = factories.createParse;
+const parseDependencies: Pick<CompatFactoryExports, 'createParse'> & {
+  AccessorNodeDependencies: typeof AccessorNodeDependencies;
+  ArrayNodeDependencies: typeof ArrayNodeDependencies;
+  AssignmentNodeDependencies: typeof AssignmentNodeDependencies;
+  BlockNodeDependencies: typeof BlockNodeDependencies;
+  ConditionalNodeDependencies: typeof ConditionalNodeDependencies;
+  ConstantNodeDependencies: typeof ConstantNodeDependencies;
+  FunctionAssignmentNodeDependencies: typeof FunctionAssignmentNodeDependencies;
+  FunctionNodeDependencies: typeof FunctionNodeDependencies;
+  IndexNodeDependencies: typeof IndexNodeDependencies;
+  ObjectNodeDependencies: typeof ObjectNodeDependencies;
+  OperatorNodeDependencies: typeof OperatorNodeDependencies;
+  ParenthesisNodeDependencies: typeof ParenthesisNodeDependencies;
+  RangeNodeDependencies: typeof RangeNodeDependencies;
+  RelationalNodeDependencies: typeof RelationalNodeDependencies;
+  SymbolNodeDependencies: typeof SymbolNodeDependencies;
+  numericDependencies: typeof numericDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  AccessorNodeDependencies,
+  ArrayNodeDependencies,
+  AssignmentNodeDependencies,
+  BlockNodeDependencies,
+  ConditionalNodeDependencies,
+  ConstantNodeDependencies,
+  FunctionAssignmentNodeDependencies,
+  FunctionNodeDependencies,
+  IndexNodeDependencies,
+  ObjectNodeDependencies,
+  OperatorNodeDependencies,
+  ParenthesisNodeDependencies,
+  RangeNodeDependencies,
+  RelationalNodeDependencies,
+  SymbolNodeDependencies,
+  numericDependencies,
+  typedDependencies,
+  createParse: mathjsCreateParse,
+};
+
+const mathjsCreateEvaluate: CompatFactoryExports['createEvaluate'] = factories.createEvaluate;
+const evaluateDependencies: UnaryBundle<'createEvaluate'> & {
+  parseDependencies: typeof parseDependencies;
+} = { parseDependencies, typedDependencies, createEvaluate: mathjsCreateEvaluate };
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -2453,5 +2709,33 @@ export {
   countDependencies,
   mathjsCreateMultiply as createMultiply,
   multiplyDependencies,
+  mathjsCreateDet as createDet,
+  detDependencies,
+  mathjsCreateInv as createInv,
+  invDependencies,
+  mathjsCreatePow as createPow,
+  powDependencies,
+  mathjsCreateCross as createCross,
+  crossDependencies,
+  mathjsCreateDotPow as createDotPow,
+  dotPowDependencies,
+  mathjsCreateSlu as createSlu,
+  sluDependencies,
+  mathjsCreateUnitClass as createUnitClass,
+  UnitDependencies,
+  mathjsCreateUnitFunction as createUnitFunction,
+  unitDependencies,
+  mathjsCreateCreateUnit as createCreateUnit,
+  createUnitDependencies,
+  mathjsCreateSymbolNode as createSymbolNode,
+  SymbolNodeDependencies,
+  mathjsCreateFunctionNode as createFunctionNode,
+  FunctionNodeDependencies,
+  mathjsCreateAssignmentNode as createAssignmentNode,
+  AssignmentNodeDependencies,
+  mathjsCreateParse as createParse,
+  parseDependencies,
+  mathjsCreateEvaluate as createEvaluate,
+  evaluateDependencies,
   typedDependencies,
 };
