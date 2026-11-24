@@ -678,6 +678,8 @@ export {
   defaultParser as parser,
 };
 
+export * from './named-symbols.js';
+
 // Re-export all shims for direct import
 export * from './shims.js';
 

@@ -340,18 +340,18 @@ See [Migration Guide](../migration/guide.md) for complete details.
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-compat` (84 exports).
+> `@danielsimonjr/mathts-compat` (153 exports).
 
-### Functions (54)
+### Functions (99)
 
-`abs`, `acos`, `add`, `arg`, `asin`, `atan`, `atan2`, `bignumber`, `ceil`, `chain`, `compile`, `complex`, `conj`, `cos`, `create`, `det`, `divide`, `evaluate`, `exp`, `floor`, `fraction`, `gcd`, `identity`, `im`, `isBigNumber_`, `isComplex_`, `isFraction_`, `isMatrix`, `isNumber_`, `lcm`, `log`, `matrix`, `max`, `mean`, `min`, `multiply`, `ones`, `parse`, `parser`, `Parser`, `pow`, `re`, `round`, `sin`, `size`, `sparse`, `sqrt`, `std`, `subtract`, `sum`, `tan`, `transpose`, `variance`, `zeros`
+`abs`, `acos`, `add`, `arg`, `ArgumentsError`, `asin`, `atan`, `atan2`, `bignumber`, `ceil`, `chain`, `compile`, `complex`, `conj`, `cos`, `create`, `den`, `det`, `DimensionError`, `divide`, `evaluate`, `exp`, `factory`, `floor`, `fraction`, `gcd`, `identity`, `im`, `IndexError`, `isAccessorNode`, `isArray`, `isArrayNode`, `isAssignmentNode`, `isBigInt`, `isBigNumber_`, `isBlockNode`, `isBoolean`, `isChain`, `isCollection`, `isComplex_`, `isConditionalNode`, `isConstantNode`, `isDate`, `isDenseMatrix`, `isFraction_`, `isFunction`, `isFunctionAssignmentNode`, `isFunctionNode`, `isHelp`, `isIndex`, `isIndexNode`, `isMap`, `isMatrix`, `isNode`, `isNull`, `isNumber_`, `isObject`, `isObjectNode`, `isObjectWrappingMap`, `isOperatorNode`, `isParenthesisNode`, `isPartitionedMap`, `isRange`, `isRangeNode`, `isRegExp`, `isRelationalNode`, `isResultSet`, `isSparseMatrix`, `isString`, `isSymbolNode`, `isUndefined`, `isUnit`, `lcm`, `log`, `matrix`, `Matrix`, `max`, `mean`, `min`, `multiply`, `num`, `ones`, `parse`, `parser`, `Parser`, `pow`, `re`, `round`, `sin`, `size`, `sparse`, `sqrt`, `std`, `subtract`, `sum`, `tan`, `transpose`, `variance`, `zeros`
 
-### Constants & values (25)
+### Constants & values (26)
 
-`all`, `BIGNUMBER_E`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_ZERO`, `COMPLEX_ONE`, `COMPLEX_ZERO`, `computePool`, `e`, `FRACTION_ONE`, `FRACTION_ZERO`, `i`, `I`, `Infinity_`, `LN10`, `LN2`, `LOG10E`, `LOG2E`, `NaN_`, `phi`, `pi`, `shims`, `SQRT1_2`, `SQRT2`, `tau`
+`all`, `BIGNUMBER_E`, `BIGNUMBER_ONE`, `BIGNUMBER_PI`, `BIGNUMBER_ZERO`, `COMPLEX_ONE`, `COMPLEX_ZERO`, `computePool`, `e`, `FRACTION_ONE`, `FRACTION_ZERO`, `i`, `I`, `Infinity_`, `LN10`, `LN2`, `LOG10E`, `LOG2E`, `NaN_`, `phi`, `pi`, `shims`, `SQRT1_2`, `SQRT2`, `tau`, `version`
 
-### Classes & types (5)
+### Classes & types (28)
 
-`BigNumber`, `Complex`, `DenseMatrix`, `Fraction`, `SparseMatrix`
+`AccessorNode`, `ArrayNode`, `AssignmentNode`, `BigNumber`, `BlockNode`, `Complex`, `ConditionalNode`, `ConstantNode`, `DenseMatrix`, `FibonacciHeap`, `Fraction`, `FunctionAssignmentNode`, `FunctionNode`, `ImmutableDenseMatrix`, `Index`, `IndexNode`, `Node`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `Range`, `RangeNode`, `RelationalNode`, `ResultSet`, `Spa`, `SparseMatrix`, `SymbolNode`, `Unit`
 
 <!-- END GENERATED EXPORT INDEX -->
