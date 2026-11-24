@@ -12,6 +12,7 @@ import packageMetadata from '../package.json' with { type: 'json' };
 
 const { checks, constructors, factory } = factory_mathjsCompat;
 
+/** Build a typed numerator or denominator function for scalars and collections. */
 export function fractionPart(
   name: 'num' | 'den',
   key: 'numerator' | 'denominator',
