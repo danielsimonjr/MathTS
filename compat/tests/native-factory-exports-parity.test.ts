@@ -5,6 +5,38 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('revives tagged values for selected classes and exposes the local package version', () => {
+    const actual = create({
+      reviverDependencies: compat.reviverDependencies,
+      versionDependencies: compat.versionDependencies,
+      bigintDependencies: compat.bigintDependencies,
+      numberDependencies: compat.numberDependencies,
+      ComplexDependencies: compat.ComplexDependencies,
+    });
+    const expected = oracle.create({
+      reviverDependencies: Reflect.get(oracle, 'reviverDependencies'),
+      versionDependencies: Reflect.get(oracle, 'versionDependencies'),
+      bigintDependencies: Reflect.get(oracle, 'bigintDependencies'),
+      numberDependencies: Reflect.get(oracle, 'numberDependencies'),
+      ComplexDependencies: Reflect.get(oracle, 'ComplexDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    expect(actual.version).toBe(compat.version);
+    expect(expected.version).toBe(oracle.version);
+    const json = JSON.stringify([
+      { mathjs: 'number', value: 'Infinity' },
+      { mathjs: 'bigint', value: '12345678901234567890' },
+      { mathjs: 'Complex', re: 3, im: 4 },
+      { mathjs: 'Unknown', value: 1 },
+    ]);
+    const run = (instance: object): unknown[] => JSON.parse(json, Reflect.get(instance, 'reviver'));
+    const result = run(actual);
+    const upstream = run(expected);
+    expect(result.slice(0, 2)).toEqual(upstream.slice(0, 2));
+    expect(String(result[2])).toBe(String(upstream[2]));
+    expect(result[3]).toEqual(upstream[3]);
+  });
+
   it('opens selected parser scopes and retrieves help using a function reference', () => {
     const actual = create({
       parserDependencies: compat.parserDependencies,

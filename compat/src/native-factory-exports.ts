@@ -3450,6 +3450,30 @@ const stringDependencies: UnaryBundle<'createString'> = {
   createString: mathjsCreateString,
 };
 
+const createVersion: ConstructorFactory<string> = /* #__PURE__ */ factory(
+  'version',
+  [],
+  () => instanceSymbols.version
+);
+const versionDependencies: { createVersion: typeof createVersion } = { createVersion };
+
+const createReviver: ConstructorFactory<(_key: string, value: unknown) => unknown> =
+  /* #__PURE__ */ factory(
+    'reviver',
+    ['classes'],
+    ({ classes }: { classes: Record<string, unknown> }) =>
+      (_key: string, value: unknown): unknown => {
+        if (typeof value !== 'object' || value === null || !Object.hasOwn(value, 'mathjs')) {
+          return value;
+        }
+        const tag = Reflect.get(value, 'mathjs');
+        if (typeof tag !== 'string' || !Object.hasOwn(classes, tag)) return value;
+        const constructor = classes[tag] as { fromJSON?: (input: unknown) => unknown } | undefined;
+        return typeof constructor?.fromJSON === 'function' ? constructor.fromJSON(value) : value;
+      }
+  );
+const reviverDependencies: { createReviver: typeof createReviver } = { createReviver };
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4068,6 +4092,10 @@ export {
   RangeDependencies,
   createReplacer,
   replacerDependencies,
+  createReviver,
+  reviverDependencies,
+  createVersion,
+  versionDependencies,
   mathjsCreateHelpClass as createHelpClass,
   HelpDependencies,
   createHelp,
