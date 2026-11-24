@@ -856,6 +856,213 @@ const cbrtDependencies: UnaryBundle<'createCbrt'> & {
   createCbrt: mathjsCreateCbrt,
 };
 
+const mathjsCreateAnd: CompatFactoryExports['createAnd'] = factories.createAnd;
+const andDependencies: UnaryBundle<'createAnd'> & {
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  notDependencies: typeof notDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  notDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createAnd: mathjsCreateAnd,
+};
+
+const mathjsCreateCompareNatural: CompatFactoryExports['createCompareNatural'] =
+  factories.createCompareNatural;
+const compareNaturalDependencies: UnaryBundle<'createCompareNatural'> & {
+  compareDependencies: typeof compareDependencies;
+} = {
+  compareDependencies,
+  typedDependencies,
+  createCompareNatural: mathjsCreateCompareNatural,
+};
+
+const mathjsCreateCtranspose: CompatFactoryExports['createCtranspose'] = factories.createCtranspose;
+const ctransposeDependencies: UnaryBundle<'createCtranspose'> & {
+  conjDependencies: typeof conjDependencies;
+  transposeDependencies: typeof transposeDependencies;
+} = {
+  conjDependencies,
+  transposeDependencies,
+  typedDependencies,
+  createCtranspose: mathjsCreateCtranspose,
+};
+
+const mathjsCreateEqualText: CompatFactoryExports['createEqualText'] = factories.createEqualText;
+const equalTextDependencies: UnaryBundle<'createEqualText'> & {
+  compareTextDependencies: typeof compareTextDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+} = {
+  compareTextDependencies,
+  isZeroDependencies,
+  typedDependencies,
+  createEqualText: mathjsCreateEqualText,
+};
+
+const mathjsCreateKron: CompatFactoryExports['createKron'] = factories.createKron;
+const kronDependencies: UnaryBundle<'createKron'> & {
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+} = {
+  matrixDependencies,
+  multiplyScalarDependencies,
+  typedDependencies,
+  createKron: mathjsCreateKron,
+};
+
+const mathjsCreateLeftShift: CompatFactoryExports['createLeftShift'] = factories.createLeftShift;
+const leftShiftDependencies: UnaryBundle<'createLeftShift'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createLeftShift: mathjsCreateLeftShift,
+};
+
+const mathjsCreateNthRoot: CompatFactoryExports['createNthRoot'] = factories.createNthRoot;
+const nthRootDependencies: UnaryBundle<'createNthRoot'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  BigNumberDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createNthRoot: mathjsCreateNthRoot,
+};
+
+const mathjsCreateNullish: CompatFactoryExports['createNullish'] = factories.createNullish;
+const nullishDependencies: UnaryBundle<'createNullish'> & {
+  deepEqualDependencies: typeof deepEqualDependencies;
+  flattenDependencies: typeof flattenDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  deepEqualDependencies,
+  flattenDependencies,
+  matrixDependencies,
+  sizeDependencies,
+  typedDependencies,
+  createNullish: mathjsCreateNullish,
+};
+
+const mathjsCreatePartitionSelect: CompatFactoryExports['createPartitionSelect'] =
+  factories.createPartitionSelect;
+const partitionSelectDependencies: UnaryBundle<'createPartitionSelect'> & {
+  compareDependencies: typeof compareDependencies;
+  isNaNDependencies: typeof isNaNDependencies;
+  isNumericDependencies: typeof isNumericDependencies;
+} = {
+  compareDependencies,
+  isNaNDependencies,
+  isNumericDependencies,
+  typedDependencies,
+  createPartitionSelect: mathjsCreatePartitionSelect,
+};
+
+const mathjsCreateRandomInt: CompatFactoryExports['createRandomInt'] = factories.createRandomInt;
+const randomIntDependencies: UnaryBundle<'createRandomInt'> & {
+  log2Dependencies: typeof log2Dependencies;
+} = {
+  log2Dependencies,
+  typedDependencies,
+  createRandomInt: mathjsCreateRandomInt,
+};
+
+const mathjsCreateRightArithShift: CompatFactoryExports['createRightArithShift'] =
+  factories.createRightArithShift;
+const rightArithShiftDependencies: UnaryBundle<'createRightArithShift'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createRightArithShift: mathjsCreateRightArithShift,
+};
+
+const mathjsCreateRightLogShift: CompatFactoryExports['createRightLogShift'] =
+  factories.createRightLogShift;
+const rightLogShiftDependencies: UnaryBundle<'createRightLogShift'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createRightLogShift: mathjsCreateRightLogShift,
+};
+
+const mathjsCreateRound: CompatFactoryExports['createRound'] = factories.createRound;
+const roundDependencies: UnaryBundle<'createRound'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  BigNumberDependencies,
+  DenseMatrixDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createRound: mathjsCreateRound,
+};
+
+const mathjsCreateSubset: CompatFactoryExports['createSubset'] = factories.createSubset;
+const subsetDependencies: UnaryBundle<'createSubset'> & {
+  addDependencies: typeof addDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  addDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createSubset: mathjsCreateSubset,
+};
+
+const mathjsCreateTrace: CompatFactoryExports['createTrace'] = factories.createTrace;
+const traceDependencies: UnaryBundle<'createTrace'> & {
+  addDependencies: typeof addDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  addDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createTrace: mathjsCreateTrace,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1072,5 +1279,35 @@ export {
   octDependencies,
   mathjsCreateCbrt as createCbrt,
   cbrtDependencies,
+  mathjsCreateAnd as createAnd,
+  andDependencies,
+  mathjsCreateCompareNatural as createCompareNatural,
+  compareNaturalDependencies,
+  mathjsCreateCtranspose as createCtranspose,
+  ctransposeDependencies,
+  mathjsCreateEqualText as createEqualText,
+  equalTextDependencies,
+  mathjsCreateKron as createKron,
+  kronDependencies,
+  mathjsCreateLeftShift as createLeftShift,
+  leftShiftDependencies,
+  mathjsCreateNthRoot as createNthRoot,
+  nthRootDependencies,
+  mathjsCreateNullish as createNullish,
+  nullishDependencies,
+  mathjsCreatePartitionSelect as createPartitionSelect,
+  partitionSelectDependencies,
+  mathjsCreateRandomInt as createRandomInt,
+  randomIntDependencies,
+  mathjsCreateRightArithShift as createRightArithShift,
+  rightArithShiftDependencies,
+  mathjsCreateRightLogShift as createRightLogShift,
+  rightLogShiftDependencies,
+  mathjsCreateRound as createRound,
+  roundDependencies,
+  mathjsCreateSubset as createSubset,
+  subsetDependencies,
+  mathjsCreateTrace as createTrace,
+  traceDependencies,
   typedDependencies,
 };
