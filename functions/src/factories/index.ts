@@ -1218,7 +1218,7 @@ factoryScope.Chain = Chain;
 // ---------------------------------------------------------------------------
 
 import { createMathjsSubtract, createSubtract } from '../arithmetic/subtract.js';
-import { createDivide } from '../arithmetic/divide.js';
+import { createDivide, createSelectedDivide } from '../arithmetic/divide.js';
 import { createIfft } from '../matrix/ifft.js';
 import { createIndexClass } from '../type/matrix/MatrixIndex.js';
 import { createChain } from '../type/chain/function/chain.js';
@@ -2753,6 +2753,7 @@ function compatFactoryExports(): {
   createIntersect: typeof createSelectedIntersect;
   createResolve: typeof createResolve;
   createSetUnion: typeof createSetUnion;
+  createDivide: typeof createSelectedDivide;
   createTyped: typeof createTyped;
 } {
   return {
@@ -3021,6 +3022,7 @@ function compatFactoryExports(): {
     createIntersect: createSelectedIntersect,
     createResolve,
     createSetUnion,
+    createDivide: createSelectedDivide,
     createTyped,
   };
 }

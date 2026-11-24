@@ -821,6 +821,21 @@ describe('native compatibility dependency bundles', () => {
         [2, 0],
       ],
     ],
+    ['divide', [12, 3]],
+    ['divide', [[2, 4], 2]],
+    [
+      'divide',
+      [
+        [
+          [7, -6],
+          [13, -4],
+        ],
+        [
+          [1, 2],
+          [4, 3],
+        ],
+      ],
+    ],
     [
       'setUnion',
       [
