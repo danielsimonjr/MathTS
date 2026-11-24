@@ -1940,6 +1940,22 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+const createSelectedCompile = /* #__PURE__ */ factory(
+  'compile',
+  ['typed', 'parse'],
+  ({ typed, parse }: { typed: TypedBuilder; parse: (text: string) => MathNode }) => {
+    const compile = (text: string) => parse(text).compile();
+    const compileCollection = (input: unknown): unknown =>
+      Array.isArray(input) || coreIsMatrix(input)
+        ? mapCollection(input, compileCollection)
+        : compile(input as string);
+    return typed('compile', {
+      string: compile,
+      'Array | Matrix': compileCollection,
+    });
+  }
+);
+
 const createSelectedEvaluate = /* #__PURE__ */ factory(
   'evaluate',
   ['typed', 'parse'],
@@ -2674,6 +2690,7 @@ function compatFactoryExports(): {
   createFunctionNode: typeof createFunctionNode;
   createAssignmentNode: typeof createAssignmentNode;
   createParse: typeof createParse;
+  createCompile: typeof createSelectedCompile;
   createEvaluate: typeof createSelectedEvaluate;
   createAtomicMass: typeof mathjsCreateAtomicMass;
   createAvogadro: typeof mathjsCreateAvogadro;
@@ -2735,6 +2752,7 @@ function compatFactoryExports(): {
   createSparse: typeof createSelectedSparse;
   createIntersect: typeof createSelectedIntersect;
   createResolve: typeof createResolve;
+  createSetUnion: typeof createSetUnion;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2940,6 +2958,7 @@ function compatFactoryExports(): {
     createFunctionNode,
     createAssignmentNode,
     createParse,
+    createCompile: createSelectedCompile,
     createEvaluate: createSelectedEvaluate,
     createAtomicMass: mathjsCreateAtomicMass,
     createAvogadro: mathjsCreateAvogadro,
@@ -3001,6 +3020,7 @@ function compatFactoryExports(): {
     createSparse: createSelectedSparse,
     createIntersect: createSelectedIntersect,
     createResolve,
+    createSetUnion,
     createTyped,
   };
 }

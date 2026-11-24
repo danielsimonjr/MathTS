@@ -12989,6 +12989,9 @@
       "compile": {
         "kind": "function"
       },
+      "compileDependencies": {
+        "kind": "object"
+      },
       "complex": {
         "kind": "function"
       },
@@ -13203,6 +13206,9 @@
         "kind": "function"
       },
       "createCompareText": {
+        "kind": "function"
+      },
+      "createCompile": {
         "kind": "function"
       },
       "createComplex": {
@@ -13788,6 +13794,9 @@
         "kind": "function"
       },
       "createSetSymDifference": {
+        "kind": "function"
+      },
+      "createSetUnion": {
         "kind": "function"
       },
       "createSign": {
@@ -15109,6 +15118,9 @@
       },
       "setUnion": {
         "kind": "function"
+      },
+      "setUnionDependencies": {
+        "kind": "object"
       },
       "shims": {
         "kind": "object"
