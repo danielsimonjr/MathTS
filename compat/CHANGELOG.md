@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.16
+
+### Patch Changes
+
+- 1e8bb2b: Expose 51 selected MathJS 15.2 physical constant factory bundles with the values and units supplied by MathJS.
+- Updated dependencies [1e8bb2b]
+  - @danielsimonjr/mathts-functions@0.89.14
+
 ## 0.7.15
 
 ### Patch Changes
