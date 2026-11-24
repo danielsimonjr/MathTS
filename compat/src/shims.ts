@@ -46,6 +46,8 @@ import {
   addScalar as _addScalar,
   subtract as _subtract,
   multiply as _multiply,
+  multiplyScalar as _multiplyScalar,
+  number as _number,
   divide as _divide,
   inv as _inv,
   pow as _pow,
@@ -406,29 +408,48 @@ function withTypedSurface<T extends object>(shim: T, typedFn: object): T {
 }
 
 type OneArg = <T>(value: T) => T;
+type BinaryArithmetic = (left: unknown, right: unknown) => unknown;
+type NumericStringArithmetic = (
+  left: string | number,
+  right: string | number,
+  ...rest: (string | number)[]
+) => number;
+
+function withNumericText(arithmetic: BinaryArithmetic, scalar: BinaryArithmetic): BinaryArithmetic {
+  return (left, right) => {
+    if (typeof left !== 'string' && typeof right !== 'string') return arithmetic(left, right);
+    if (
+      Array.isArray(left) ||
+      Array.isArray(right) ||
+      isCompatBridgeMatrix(left) ||
+      isCompatBridgeMatrix(right)
+    ) {
+      return arithmetic(
+        typeof left === 'string' ? _number(left) : left,
+        typeof right === 'string' ? _number(right) : right
+      );
+    }
+    return scalar(left, right);
+  };
+}
+
 export const add = makeArithmetic(
-  (a, b) =>
-    typeof a === 'string' || typeof b === 'string'
-      ? _addScalar(a, b)
-      : (_add as (left: unknown, right: unknown) => unknown)(a, b),
+  withNumericText(_add as BinaryArithmetic, _addScalar),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b
-) as PublicAdd &
-  OneArg & {
-    (left: string | number, right: string | number, ...rest: (string | number)[]): number;
-  };
+) as PublicAdd & OneArg & NumericStringArithmetic;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
   true
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
-  _multiply as (a: unknown, b: unknown) => unknown,
+  withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
   (a, b) => a * b
-) as typeof _multiply;
+) as typeof _multiply & NumericStringArithmetic;
 /**
  * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
  * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed

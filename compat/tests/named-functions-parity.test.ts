@@ -16,6 +16,7 @@ import {
   log1p,
   log2,
   median,
+  multiply,
   norm,
   pow,
   round,
@@ -199,5 +200,16 @@ describe('named compatibility function imports', () => {
     expect(String(math.evaluate('fraction(sqrt(10))'))).toBe(
       oracle.fraction(Math.sqrt(10)).toFraction()
     );
+  });
+
+  it('converts numeric strings in multiplication and alongside collections', () => {
+    const math = create(all);
+    expect(multiply('5', '2')).toBe(10);
+    expect(multiply('5', 2, '3')).toBe(30);
+    expect(math.multiply('5', 2)).toBe(10);
+    expect(math.evaluate('"5" * "2"')).toBe(10);
+    expect(add([1, 2], '3')).toEqual([4, 5]);
+    expect(multiply([1, 2], '3')).toEqual([3, 6]);
+    expect(() => multiply('abc', '2')).toThrow(/Cannot convert "abc" to a number/);
   });
 });
