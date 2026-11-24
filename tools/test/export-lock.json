@@ -13811,10 +13811,16 @@
       "createSpaClass": {
         "kind": "function"
       },
+      "createSparse": {
+        "kind": "function"
+      },
       "createSparseMatrixClass": {
         "kind": "function"
       },
       "createSpeedOfLight": {
+        "kind": "function"
+      },
+      "createSplitUnit": {
         "kind": "function"
       },
       "createSqrt": {
@@ -13854,6 +13860,12 @@
         "kind": "function"
       },
       "createThomsonCrossSection": {
+        "kind": "function"
+      },
+      "createTo": {
+        "kind": "function"
+      },
+      "createToBest": {
         "kind": "function"
       },
       "createTrace": {
@@ -15152,6 +15164,9 @@
       "sparse": {
         "kind": "function"
       },
+      "sparseDependencies": {
+        "kind": "object"
+      },
       "speedOfLight": {
         "kind": "object"
       },
@@ -15160,6 +15175,9 @@
       },
       "splitUnit": {
         "kind": "function"
+      },
+      "splitUnitDependencies": {
+        "kind": "object"
       },
       "sqrt": {
         "kind": "function"
@@ -15256,6 +15274,12 @@
       },
       "toBest": {
         "kind": "function"
+      },
+      "toBestDependencies": {
+        "kind": "object"
+      },
+      "toDependencies": {
+        "kind": "object"
       },
       "trace": {
         "kind": "function"

@@ -39,3 +39,25 @@ export const createSelectedMatrix = /* #__PURE__ */ factory(
     });
   }
 );
+
+/** Build sparse matrices with the selected instance's constructor. */
+export const createSelectedSparse = /* #__PURE__ */ factory(
+  'sparse',
+  ['typed', 'SparseMatrix'],
+  ({ typed, SparseMatrix }: Pick<SelectedMatrixDependencies, 'typed' | 'SparseMatrix'>) => {
+    function fromData(
+      data: ConstructorParameters<typeof MathJSSparseMatrix>[0],
+      datatype?: string
+    ) {
+      const matrix = new SparseMatrix(data);
+      if (datatype !== undefined) matrix._datatype = datatype;
+      return matrix;
+    }
+    return typed('sparse', {
+      '': () => fromData([]),
+      string: (datatype: string) => fromData([], datatype),
+      'Array | Matrix': fromData,
+      'Array | Matrix, string': fromData,
+    });
+  }
+);
