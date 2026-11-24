@@ -12989,6 +12989,9 @@
       "compile": {
         "kind": "function"
       },
+      "compileDependencies": {
+        "kind": "object"
+      },
       "complex": {
         "kind": "function"
       },
@@ -13205,6 +13208,9 @@
       "createCompareText": {
         "kind": "function"
       },
+      "createCompile": {
+        "kind": "function"
+      },
       "createComplex": {
         "kind": "function"
       },
@@ -13287,6 +13293,9 @@
         "kind": "function"
       },
       "createDistance": {
+        "kind": "function"
+      },
+      "createDivide": {
         "kind": "function"
       },
       "createDivideScalar": {
@@ -13439,6 +13448,9 @@
       "createInfinity": {
         "kind": "function"
       },
+      "createIntersect": {
+        "kind": "function"
+      },
       "createInv": {
         "kind": "function"
       },
@@ -13499,6 +13511,9 @@
       "createLcm": {
         "kind": "function"
       },
+      "createLeafCount": {
+        "kind": "function"
+      },
       "createLeftShift": {
         "kind": "function"
       },
@@ -13557,6 +13572,9 @@
         "kind": "function"
       },
       "createMax": {
+        "kind": "function"
+      },
+      "createMean": {
         "kind": "function"
       },
       "createMin": {
@@ -13652,6 +13670,9 @@
       "createPickRandom": {
         "kind": "function"
       },
+      "createPinv": {
+        "kind": "function"
+      },
       "createPlanckCharge": {
         "kind": "function"
       },
@@ -13668,6 +13689,9 @@
         "kind": "function"
       },
       "createPlanckTime": {
+        "kind": "function"
+      },
+      "createPolynomialRoot": {
         "kind": "function"
       },
       "createPow": {
@@ -13713,6 +13737,9 @@
         "kind": "function"
       },
       "createResize": {
+        "kind": "function"
+      },
+      "createResolve": {
         "kind": "function"
       },
       "createResultSet": {
@@ -13778,6 +13805,9 @@
       "createSetSymDifference": {
         "kind": "function"
       },
+      "createSetUnion": {
+        "kind": "function"
+      },
       "createSign": {
         "kind": "function"
       },
@@ -13805,10 +13835,16 @@
       "createSpaClass": {
         "kind": "function"
       },
+      "createSparse": {
+        "kind": "function"
+      },
       "createSparseMatrixClass": {
         "kind": "function"
       },
       "createSpeedOfLight": {
+        "kind": "function"
+      },
+      "createSplitUnit": {
         "kind": "function"
       },
       "createSqrt": {
@@ -13848,6 +13884,12 @@
         "kind": "function"
       },
       "createThomsonCrossSection": {
+        "kind": "function"
+      },
+      "createTo": {
+        "kind": "function"
+      },
+      "createToBest": {
         "kind": "function"
       },
       "createTrace": {
@@ -13911,6 +13953,9 @@
         "kind": "function"
       },
       "createZeros": {
+        "kind": "function"
+      },
+      "createZpk2tf": {
         "kind": "function"
       },
       "cross": {
@@ -13993,6 +14038,9 @@
       },
       "divide": {
         "kind": "function"
+      },
+      "divideDependencies": {
+        "kind": "object"
       },
       "divideScalar": {
         "kind": "function"
@@ -14273,6 +14321,9 @@
       "intersect": {
         "kind": "function"
       },
+      "intersectDependencies": {
+        "kind": "object"
+      },
       "inv": {
         "kind": "function"
       },
@@ -14519,6 +14570,9 @@
       "leafCount": {
         "kind": "function"
       },
+      "leafCountDependencies": {
+        "kind": "object"
+      },
       "leftShift": {
         "kind": "function"
       },
@@ -14644,6 +14698,9 @@
       },
       "mean": {
         "kind": "function"
+      },
+      "meanDependencies": {
+        "kind": "object"
       },
       "median": {
         "kind": "function"
@@ -14819,6 +14876,9 @@
       "pinv": {
         "kind": "function"
       },
+      "pinvDependencies": {
+        "kind": "object"
+      },
       "planckCharge": {
         "kind": "object"
       },
@@ -14857,6 +14917,9 @@
       },
       "polynomialRoot": {
         "kind": "function"
+      },
+      "polynomialRootDependencies": {
+        "kind": "object"
       },
       "pow": {
         "kind": "function"
@@ -14947,6 +15010,9 @@
       },
       "resolve": {
         "kind": "function"
+      },
+      "resolveDependencies": {
+        "kind": "object"
       },
       "reviver": {
         "kind": "function"
@@ -15071,6 +15137,9 @@
       "setUnion": {
         "kind": "function"
       },
+      "setUnionDependencies": {
+        "kind": "object"
+      },
       "shims": {
         "kind": "object"
       },
@@ -15137,6 +15206,9 @@
       "sparse": {
         "kind": "function"
       },
+      "sparseDependencies": {
+        "kind": "object"
+      },
       "speedOfLight": {
         "kind": "object"
       },
@@ -15145,6 +15217,9 @@
       },
       "splitUnit": {
         "kind": "function"
+      },
+      "splitUnitDependencies": {
+        "kind": "object"
       },
       "sqrt": {
         "kind": "function"
@@ -15241,6 +15316,12 @@
       },
       "toBest": {
         "kind": "function"
+      },
+      "toBestDependencies": {
+        "kind": "object"
+      },
+      "toDependencies": {
+        "kind": "object"
       },
       "trace": {
         "kind": "function"
@@ -15349,6 +15430,9 @@
       },
       "zpk2tf": {
         "kind": "function"
+      },
+      "zpk2tfDependencies": {
+        "kind": "object"
       }
     }
   },

@@ -5,6 +5,117 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('compiles selected expressions for repeated evaluation', () => {
+    const actual = create({ compileDependencies: compat.compileDependencies });
+    const expected = oracle.create({
+      compileDependencies: Reflect.get(oracle, 'compileDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const code = Reflect.apply(Reflect.get(instance, 'compile'), instance, [
+        ['x + 2', 'x * 3'],
+      ]) as { evaluate(scope: { x: number }): unknown }[];
+      return code.map((entry) => [entry.evaluate({ x: 4 }), entry.evaluate({ x: 7 })]);
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
+  it('resolves symbols with the selected MathJS factory', () => {
+    const actual = create({ resolveDependencies: compat.resolveDependencies });
+    const expected = oracle.create({
+      resolveDependencies: Reflect.get(oracle, 'resolveDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const node = Reflect.apply(Reflect.get(instance, 'parse'), instance, ['a + b']);
+      return String(Reflect.apply(Reflect.get(instance, 'resolve'), instance, [node, { a: 4 }]));
+    };
+    expect(run(actual)).toBe(run(expected));
+  });
+
+  it('uses the selected matrix factory for matrix intersections', () => {
+    const actual = create({ intersectDependencies: compat.intersectDependencies });
+    const expected = oracle.create({
+      intersectDependencies: Reflect.get(oracle, 'intersectDependencies'),
+    });
+    const run = (instance: object) => {
+      const points = [
+        [0, 0],
+        [2, 2],
+        [0, 2],
+        [2, 0],
+      ].map((point) => Reflect.apply(Reflect.get(instance, 'matrix'), instance, [point, 'sparse']));
+      return Reflect.apply(Reflect.get(instance, 'intersect'), instance, points) as {
+        storage(): string;
+        valueOf(): unknown;
+      };
+    };
+    const result = run(actual);
+    const upstreamResult = run(expected);
+    expect(result.storage()).toBe(upstreamResult.storage());
+    expect(result.valueOf()).toEqual(upstreamResult.valueOf());
+  });
+
+  it('constructs selected sparse matrices and preserves the requested datatype', () => {
+    const actual = create({ sparseDependencies: compat.sparseDependencies });
+    const expected = oracle.create({
+      sparseDependencies: Reflect.get(oracle, 'sparseDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const matrix = Reflect.apply(Reflect.get(actual, 'sparse'), actual, [[0, 2], 'number']);
+    const reference = expected.sparse([0, 2] as unknown as number[][], 'number');
+    if (!compat.isMatrix(matrix)) throw new TypeError('Expected a sparse matrix');
+    expect(matrix.valueOf()).toEqual(reference.valueOf());
+    expect(Reflect.apply(Reflect.get(matrix, 'datatype'), matrix, [])).toBe(reference.datatype());
+  });
+
+  it('converts and splits selected units like MathJS', () => {
+    const names = [
+      'unitDependencies',
+      'toDependencies',
+      'toBestDependencies',
+      'splitUnitDependencies',
+    ];
+    const actual = create(
+      Object.fromEntries(names.map((name) => [name, Reflect.get(compat, name)]))
+    );
+    const expected = oracle.create(
+      Object.fromEntries(names.map((name) => [name, Reflect.get(oracle, name)]))
+    );
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    for (const name of names.slice(1)) {
+      const bundle = Reflect.get(compat, name);
+      expect(Object.keys(bundle)).toEqual(Object.keys(Reflect.get(oracle, name)));
+    }
+    const run = (instance: object) => {
+      const unit = Reflect.get(instance, 'unit')('3661 s');
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      return [
+        String(call('to', unit, 'min')),
+        String(call('toBest', unit)),
+        String(call('splitUnit', unit, ['h', 'min', 's'])),
+      ];
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
+  it('builds selected transfer function coefficients like MathJS', () => {
+    const actual = create({ zpk2tfDependencies: compat.zpk2tfDependencies });
+    const expected = oracle.create({
+      zpk2tfDependencies: Reflect.get(oracle, 'zpk2tfDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) =>
+      (
+        Reflect.apply(Reflect.get(instance, 'zpk2tf'), instance, [[2], [3], 1]) as {
+          re: number;
+          im: number;
+        }[][]
+      ).map((row) => row.map(({ re, im }) => [re, im]));
+    expect(run(actual)).toEqual(run(expected));
+  });
+
   it('uses selected BigNumber configuration for physical constants', () => {
     const actual = create(
       { planckConstantDependencies: compat.planckConstantDependencies },
@@ -691,6 +802,59 @@ describe('native compatibility dependency bundles', () => {
       ],
     ],
     ['dotPow', [[2, 4], 2]],
+    ['leafCount', ['x + 3']],
+    [
+      'pinv',
+      [
+        [
+          [2, 0],
+          [0, 4],
+        ],
+      ],
+    ],
+    [
+      'intersect',
+      [
+        [0, 0],
+        [2, 2],
+        [0, 2],
+        [2, 0],
+      ],
+    ],
+    ['mean', [[2, 4, 9]]],
+    [
+      'mean',
+      [
+        [
+          ['2', '4'],
+          ['6', '8'],
+        ],
+        1,
+      ],
+    ],
+    ['polynomialRoot', [-6, 11, -6, 1]],
+    ['divide', [12, 3]],
+    ['divide', [[2, 4], 2]],
+    [
+      'divide',
+      [
+        [
+          [7, -6],
+          [13, -4],
+        ],
+        [
+          [1, 2],
+          [4, 3],
+        ],
+      ],
+    ],
+    [
+      'setUnion',
+      [
+        [3, 1, 1],
+        [2, 3],
+      ],
+    ],
     ['multiplyScalar', [3, 4]],
     ['not', [true]],
     ['re', [7]],

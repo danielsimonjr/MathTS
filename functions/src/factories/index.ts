@@ -1,6 +1,6 @@
 import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
 import { createSelectedMultiply } from '../arithmetic/selectedMultiply.js';
-import { createSelectedMatrix } from './selected-matrix.js';
+import { createSelectedMatrix, createSelectedSparse } from './selected-matrix.js';
 import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
 import type { MathNode } from '@danielsimonjr/mathts-expression';
@@ -1218,7 +1218,7 @@ factoryScope.Chain = Chain;
 // ---------------------------------------------------------------------------
 
 import { createMathjsSubtract, createSubtract } from '../arithmetic/subtract.js';
-import { createDivide } from '../arithmetic/divide.js';
+import { createDivide, createSelectedDivide } from '../arithmetic/divide.js';
 import { createIfft } from '../matrix/ifft.js';
 import { createIndexClass } from '../type/matrix/MatrixIndex.js';
 import { createChain } from '../type/chain/function/chain.js';
@@ -1338,7 +1338,7 @@ import { createCsChol } from '../algebra/sparse/csChol.js';
 import { createCsLu } from '../algebra/sparse/csLu.js';
 import { createCsSpsolve } from '../algebra/sparse/csSpsolve.js';
 import { createSpaClass } from '../type/matrix/Spa.js';
-import { createIntersect } from '../geometry/intersect.js';
+import { createIntersect, createSelectedIntersect } from '../geometry/intersect.js';
 import { createMean } from '../statistics/mean.js';
 import { createMedian } from '../statistics/median.js';
 import { createVariance, createVarianceDdof } from '../statistics/variance.js';
@@ -1939,6 +1939,29 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   }
   return undefined;
 }
+
+const createSelectedMean = /* #__PURE__ */ factory(
+  'mean',
+  ['typed', 'add', 'divide'],
+  (deps: Parameters<typeof createMean>[0]) =>
+    createMean({ ...deps, parseNumberWithConfig: (value: string) => value })
+);
+
+const createSelectedCompile = /* #__PURE__ */ factory(
+  'compile',
+  ['typed', 'parse'],
+  ({ typed, parse }: { typed: TypedBuilder; parse: (text: string) => MathNode }) => {
+    const compile = (text: string) => parse(text).compile();
+    const compileCollection = (input: unknown): unknown =>
+      Array.isArray(input) || coreIsMatrix(input)
+        ? mapCollection(input, compileCollection)
+        : compile(input as string);
+    return typed('compile', {
+      string: compile,
+      'Array | Matrix': compileCollection,
+    });
+  }
+);
 
 const createSelectedEvaluate = /* #__PURE__ */ factory(
   'evaluate',
@@ -2674,6 +2697,7 @@ function compatFactoryExports(): {
   createFunctionNode: typeof createFunctionNode;
   createAssignmentNode: typeof createAssignmentNode;
   createParse: typeof createParse;
+  createCompile: typeof createSelectedCompile;
   createEvaluate: typeof createSelectedEvaluate;
   createAtomicMass: typeof mathjsCreateAtomicMass;
   createAvogadro: typeof mathjsCreateAvogadro;
@@ -2726,6 +2750,19 @@ function compatFactoryExports(): {
   createVacuumImpedance: typeof mathjsCreateVacuumImpedance;
   createWeakMixingAngle: typeof mathjsCreateWeakMixingAngle;
   createWienDisplacement: typeof mathjsCreateWienDisplacement;
+  createLeafCount: typeof createLeafCount;
+  createPinv: typeof createPinv;
+  createZpk2tf: typeof createZpk2tf;
+  createTo: typeof createTo;
+  createToBest: typeof createToBest;
+  createSplitUnit: typeof createSplitUnit;
+  createSparse: typeof createSelectedSparse;
+  createIntersect: typeof createSelectedIntersect;
+  createResolve: typeof createResolve;
+  createSetUnion: typeof createSetUnion;
+  createDivide: typeof createSelectedDivide;
+  createMean: typeof createSelectedMean;
+  createPolynomialRoot: typeof createPolynomialRoot;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2931,6 +2968,7 @@ function compatFactoryExports(): {
     createFunctionNode,
     createAssignmentNode,
     createParse,
+    createCompile: createSelectedCompile,
     createEvaluate: createSelectedEvaluate,
     createAtomicMass: mathjsCreateAtomicMass,
     createAvogadro: mathjsCreateAvogadro,
@@ -2983,6 +3021,19 @@ function compatFactoryExports(): {
     createVacuumImpedance: mathjsCreateVacuumImpedance,
     createWeakMixingAngle: mathjsCreateWeakMixingAngle,
     createWienDisplacement: mathjsCreateWienDisplacement,
+    createLeafCount,
+    createPinv,
+    createZpk2tf,
+    createTo,
+    createToBest,
+    createSplitUnit,
+    createSparse: createSelectedSparse,
+    createIntersect: createSelectedIntersect,
+    createResolve,
+    createSetUnion,
+    createDivide: createSelectedDivide,
+    createMean: createSelectedMean,
+    createPolynomialRoot,
     createTyped,
   };
 }
