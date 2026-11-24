@@ -22,6 +22,7 @@ import {
   type TypedBuilder,
 } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
+import { format as formatNumber } from '../utils/number.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
 import { compatSetUnion } from '../typed/set.js';
@@ -2315,6 +2316,50 @@ export function bigint(x?: unknown): unknown {
   return BigInt(x as never);
 }
 
+const createSelectedBigint = /* #__PURE__ */ factory(
+  'bigint',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    Object.assign(
+      typed('bigint', {
+        '': () => 0n,
+        'bigint | number | BigNumber | Fraction | string | boolean | null': bigint,
+        'Array | Matrix': typed.referToSelf(
+          (self) => (value) => mapCollection(value, (v) => self(v))
+        ),
+      }),
+      { fromJSON: ({ value }: { value: string }) => BigInt(value) }
+    )
+);
+
+const createSelectedBoolean = /* #__PURE__ */ factory(
+  'boolean',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('boolean', {
+      '': () => false,
+      'boolean | number | null | BigNumber | string': boolean,
+      'Array | Matrix': typed.referToSelf(
+        (self) => (value) => mapCollection(value, (v) => self(v))
+      ),
+    })
+);
+
+const createSelectedString = /* #__PURE__ */ factory(
+  'string',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('string', {
+      '': () => '',
+      number: formatNumber,
+      'null | boolean | string': String,
+      'Array | Matrix': typed.referToSelf(
+        (self) => (value) => mapCollection(value, (v) => self(v))
+      ),
+      any: String,
+    })
+);
+
 // ---------------------------------------------------------------------------
 // GC4 — mathjs canonical-name aliases. These functions exist but were only
 // exported under a `factory_`-prefixed or renamed identifier; alias the bare
@@ -2932,6 +2977,9 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createString: typeof createSelectedString;
+  createBoolean: typeof createSelectedBoolean;
+  createBigint: typeof createSelectedBigint;
   createHelpClass: typeof createHelpClass;
   createParser: typeof createParser;
   createParserClass: typeof createParserClass;
@@ -3233,6 +3281,9 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createString: createSelectedString,
+    createBoolean: createSelectedBoolean,
+    createBigint: createSelectedBigint,
     createHelpClass,
     createParser,
     createParserClass,

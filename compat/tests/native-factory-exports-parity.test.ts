@@ -1049,6 +1049,33 @@ describe('native compatibility dependency bundles', () => {
     ],
     ['combinations', [7, 5]],
     ['combinationsWithRep', [7, 5]],
+    [
+      'bigint',
+      [
+        [
+          [-1.5, true],
+          ['14', 0],
+        ],
+      ],
+    ],
+    [
+      'boolean',
+      [
+        [
+          ['False', 1],
+          ['2', 0],
+        ],
+      ],
+    ],
+    [
+      'string',
+      [
+        [
+          [1e-10, 1.25],
+          [true, null],
+        ],
+      ],
+    ],
     ['composition', [5, 3]],
     [
       'kldivergence',
