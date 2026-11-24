@@ -2317,6 +2317,413 @@ const evaluateDependencies: UnaryBundle<'createEvaluate'> & {
   parseDependencies: typeof parseDependencies;
 } = { parseDependencies, typedDependencies, createEvaluate: mathjsCreateEvaluate };
 
+const selectedCreateAtomicMass: CompatFactoryExports['createAtomicMass'] =
+  factories.createAtomicMass;
+const selectedCreateAvogadro: CompatFactoryExports['createAvogadro'] = factories.createAvogadro;
+const selectedCreateBohrMagneton: CompatFactoryExports['createBohrMagneton'] =
+  factories.createBohrMagneton;
+const selectedCreateBohrRadius: CompatFactoryExports['createBohrRadius'] =
+  factories.createBohrRadius;
+const selectedCreateBoltzmann: CompatFactoryExports['createBoltzmann'] = factories.createBoltzmann;
+const selectedCreateClassicalElectronRadius: CompatFactoryExports['createClassicalElectronRadius'] =
+  factories.createClassicalElectronRadius;
+const selectedCreateConductanceQuantum: CompatFactoryExports['createConductanceQuantum'] =
+  factories.createConductanceQuantum;
+const selectedCreateCoulomb: CompatFactoryExports['createCoulomb'] = factories.createCoulomb;
+const selectedCreateCoulombConstant: CompatFactoryExports['createCoulombConstant'] =
+  factories.createCoulombConstant;
+const selectedCreateDeuteronMass: CompatFactoryExports['createDeuteronMass'] =
+  factories.createDeuteronMass;
+const selectedCreateEfimovFactor: CompatFactoryExports['createEfimovFactor'] =
+  factories.createEfimovFactor;
+const selectedCreateElectricConstant: CompatFactoryExports['createElectricConstant'] =
+  factories.createElectricConstant;
+const selectedCreateElectronMass: CompatFactoryExports['createElectronMass'] =
+  factories.createElectronMass;
+const selectedCreateElementaryCharge: CompatFactoryExports['createElementaryCharge'] =
+  factories.createElementaryCharge;
+const selectedCreateFaraday: CompatFactoryExports['createFaraday'] = factories.createFaraday;
+const selectedCreateFermiCoupling: CompatFactoryExports['createFermiCoupling'] =
+  factories.createFermiCoupling;
+const selectedCreateFineStructure: CompatFactoryExports['createFineStructure'] =
+  factories.createFineStructure;
+const selectedCreateFirstRadiation: CompatFactoryExports['createFirstRadiation'] =
+  factories.createFirstRadiation;
+const selectedCreateGasConstant: CompatFactoryExports['createGasConstant'] =
+  factories.createGasConstant;
+const selectedCreateGravitationConstant: CompatFactoryExports['createGravitationConstant'] =
+  factories.createGravitationConstant;
+const selectedCreateGravity: CompatFactoryExports['createGravity'] = factories.createGravity;
+const selectedCreateHartreeEnergy: CompatFactoryExports['createHartreeEnergy'] =
+  factories.createHartreeEnergy;
+const selectedCreateInverseConductanceQuantum: CompatFactoryExports['createInverseConductanceQuantum'] =
+  factories.createInverseConductanceQuantum;
+const selectedCreateKlitzing: CompatFactoryExports['createKlitzing'] = factories.createKlitzing;
+const selectedCreateLoschmidt: CompatFactoryExports['createLoschmidt'] = factories.createLoschmidt;
+const selectedCreateMagneticConstant: CompatFactoryExports['createMagneticConstant'] =
+  factories.createMagneticConstant;
+const selectedCreateMagneticFluxQuantum: CompatFactoryExports['createMagneticFluxQuantum'] =
+  factories.createMagneticFluxQuantum;
+const selectedCreateMolarMass: CompatFactoryExports['createMolarMass'] = factories.createMolarMass;
+const selectedCreateMolarMassC12: CompatFactoryExports['createMolarMassC12'] =
+  factories.createMolarMassC12;
+const selectedCreateMolarPlanckConstant: CompatFactoryExports['createMolarPlanckConstant'] =
+  factories.createMolarPlanckConstant;
+const selectedCreateMolarVolume: CompatFactoryExports['createMolarVolume'] =
+  factories.createMolarVolume;
+const selectedCreateNeutronMass: CompatFactoryExports['createNeutronMass'] =
+  factories.createNeutronMass;
+const selectedCreateNuclearMagneton: CompatFactoryExports['createNuclearMagneton'] =
+  factories.createNuclearMagneton;
+const selectedCreatePlanckCharge: CompatFactoryExports['createPlanckCharge'] =
+  factories.createPlanckCharge;
+const selectedCreatePlanckConstant: CompatFactoryExports['createPlanckConstant'] =
+  factories.createPlanckConstant;
+const selectedCreatePlanckLength: CompatFactoryExports['createPlanckLength'] =
+  factories.createPlanckLength;
+const selectedCreatePlanckMass: CompatFactoryExports['createPlanckMass'] =
+  factories.createPlanckMass;
+const selectedCreatePlanckTemperature: CompatFactoryExports['createPlanckTemperature'] =
+  factories.createPlanckTemperature;
+const selectedCreatePlanckTime: CompatFactoryExports['createPlanckTime'] =
+  factories.createPlanckTime;
+const selectedCreateProtonMass: CompatFactoryExports['createProtonMass'] =
+  factories.createProtonMass;
+const selectedCreateQuantumOfCirculation: CompatFactoryExports['createQuantumOfCirculation'] =
+  factories.createQuantumOfCirculation;
+const selectedCreateReducedPlanckConstant: CompatFactoryExports['createReducedPlanckConstant'] =
+  factories.createReducedPlanckConstant;
+const selectedCreateRydberg: CompatFactoryExports['createRydberg'] = factories.createRydberg;
+const selectedCreateSackurTetrode: CompatFactoryExports['createSackurTetrode'] =
+  factories.createSackurTetrode;
+const selectedCreateSecondRadiation: CompatFactoryExports['createSecondRadiation'] =
+  factories.createSecondRadiation;
+const selectedCreateSpeedOfLight: CompatFactoryExports['createSpeedOfLight'] =
+  factories.createSpeedOfLight;
+const selectedCreateStefanBoltzmann: CompatFactoryExports['createStefanBoltzmann'] =
+  factories.createStefanBoltzmann;
+const selectedCreateThomsonCrossSection: CompatFactoryExports['createThomsonCrossSection'] =
+  factories.createThomsonCrossSection;
+const selectedCreateVacuumImpedance: CompatFactoryExports['createVacuumImpedance'] =
+  factories.createVacuumImpedance;
+const selectedCreateWeakMixingAngle: CompatFactoryExports['createWeakMixingAngle'] =
+  factories.createWeakMixingAngle;
+const selectedCreateWienDisplacement: CompatFactoryExports['createWienDisplacement'] =
+  factories.createWienDisplacement;
+
+type NumericConstantBundle<Key extends keyof CompatFactoryExports> = Pick<
+  CompatFactoryExports,
+  Key
+> &
+  WithBigNumber;
+type PhysicalConstantBundle<Key extends keyof CompatFactoryExports> = NumericConstantBundle<Key> & {
+  UnitDependencies: typeof UnitDependencies;
+};
+
+const atomicMassDependencies: PhysicalConstantBundle<'createAtomicMass'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createAtomicMass: selectedCreateAtomicMass,
+};
+
+const avogadroDependencies: PhysicalConstantBundle<'createAvogadro'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createAvogadro: selectedCreateAvogadro,
+};
+
+const bohrMagnetonDependencies: PhysicalConstantBundle<'createBohrMagneton'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createBohrMagneton: selectedCreateBohrMagneton,
+};
+
+const bohrRadiusDependencies: PhysicalConstantBundle<'createBohrRadius'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createBohrRadius: selectedCreateBohrRadius,
+};
+
+const boltzmannDependencies: PhysicalConstantBundle<'createBoltzmann'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createBoltzmann: selectedCreateBoltzmann,
+};
+
+const classicalElectronRadiusDependencies: PhysicalConstantBundle<'createClassicalElectronRadius'> =
+  {
+    BigNumberDependencies,
+    UnitDependencies,
+    createClassicalElectronRadius: selectedCreateClassicalElectronRadius,
+  };
+
+const conductanceQuantumDependencies: PhysicalConstantBundle<'createConductanceQuantum'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createConductanceQuantum: selectedCreateConductanceQuantum,
+};
+
+const coulombDependencies: PhysicalConstantBundle<'createCoulomb'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createCoulomb: selectedCreateCoulomb,
+};
+
+const coulombConstantDependencies: PhysicalConstantBundle<'createCoulombConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createCoulombConstant: selectedCreateCoulombConstant,
+};
+
+const deuteronMassDependencies: PhysicalConstantBundle<'createDeuteronMass'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createDeuteronMass: selectedCreateDeuteronMass,
+};
+
+const efimovFactorDependencies: NumericConstantBundle<'createEfimovFactor'> = {
+  BigNumberDependencies,
+  createEfimovFactor: selectedCreateEfimovFactor,
+};
+
+const electricConstantDependencies: PhysicalConstantBundle<'createElectricConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createElectricConstant: selectedCreateElectricConstant,
+};
+
+const electronMassDependencies: PhysicalConstantBundle<'createElectronMass'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createElectronMass: selectedCreateElectronMass,
+};
+
+const elementaryChargeDependencies: PhysicalConstantBundle<'createElementaryCharge'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createElementaryCharge: selectedCreateElementaryCharge,
+};
+
+const faradayDependencies: PhysicalConstantBundle<'createFaraday'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createFaraday: selectedCreateFaraday,
+};
+
+const fermiCouplingDependencies: PhysicalConstantBundle<'createFermiCoupling'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createFermiCoupling: selectedCreateFermiCoupling,
+};
+
+const fineStructureDependencies: NumericConstantBundle<'createFineStructure'> = {
+  BigNumberDependencies,
+  createFineStructure: selectedCreateFineStructure,
+};
+
+const firstRadiationDependencies: PhysicalConstantBundle<'createFirstRadiation'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createFirstRadiation: selectedCreateFirstRadiation,
+};
+
+const gasConstantDependencies: PhysicalConstantBundle<'createGasConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createGasConstant: selectedCreateGasConstant,
+};
+
+const gravitationConstantDependencies: PhysicalConstantBundle<'createGravitationConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createGravitationConstant: selectedCreateGravitationConstant,
+};
+
+const gravityDependencies: PhysicalConstantBundle<'createGravity'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createGravity: selectedCreateGravity,
+};
+
+const hartreeEnergyDependencies: PhysicalConstantBundle<'createHartreeEnergy'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createHartreeEnergy: selectedCreateHartreeEnergy,
+};
+
+const inverseConductanceQuantumDependencies: PhysicalConstantBundle<'createInverseConductanceQuantum'> =
+  {
+    BigNumberDependencies,
+    UnitDependencies,
+    createInverseConductanceQuantum: selectedCreateInverseConductanceQuantum,
+  };
+
+const klitzingDependencies: PhysicalConstantBundle<'createKlitzing'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createKlitzing: selectedCreateKlitzing,
+};
+
+const loschmidtDependencies: PhysicalConstantBundle<'createLoschmidt'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createLoschmidt: selectedCreateLoschmidt,
+};
+
+const magneticConstantDependencies: PhysicalConstantBundle<'createMagneticConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createMagneticConstant: selectedCreateMagneticConstant,
+};
+
+const magneticFluxQuantumDependencies: PhysicalConstantBundle<'createMagneticFluxQuantum'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createMagneticFluxQuantum: selectedCreateMagneticFluxQuantum,
+};
+
+const molarMassDependencies: PhysicalConstantBundle<'createMolarMass'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createMolarMass: selectedCreateMolarMass,
+};
+
+const molarMassC12Dependencies: PhysicalConstantBundle<'createMolarMassC12'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createMolarMassC12: selectedCreateMolarMassC12,
+};
+
+const molarPlanckConstantDependencies: PhysicalConstantBundle<'createMolarPlanckConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createMolarPlanckConstant: selectedCreateMolarPlanckConstant,
+};
+
+const molarVolumeDependencies: PhysicalConstantBundle<'createMolarVolume'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createMolarVolume: selectedCreateMolarVolume,
+};
+
+const neutronMassDependencies: PhysicalConstantBundle<'createNeutronMass'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createNeutronMass: selectedCreateNeutronMass,
+};
+
+const nuclearMagnetonDependencies: PhysicalConstantBundle<'createNuclearMagneton'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createNuclearMagneton: selectedCreateNuclearMagneton,
+};
+
+const planckChargeDependencies: PhysicalConstantBundle<'createPlanckCharge'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createPlanckCharge: selectedCreatePlanckCharge,
+};
+
+const planckConstantDependencies: PhysicalConstantBundle<'createPlanckConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createPlanckConstant: selectedCreatePlanckConstant,
+};
+
+const planckLengthDependencies: PhysicalConstantBundle<'createPlanckLength'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createPlanckLength: selectedCreatePlanckLength,
+};
+
+const planckMassDependencies: PhysicalConstantBundle<'createPlanckMass'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createPlanckMass: selectedCreatePlanckMass,
+};
+
+const planckTemperatureDependencies: PhysicalConstantBundle<'createPlanckTemperature'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createPlanckTemperature: selectedCreatePlanckTemperature,
+};
+
+const planckTimeDependencies: PhysicalConstantBundle<'createPlanckTime'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createPlanckTime: selectedCreatePlanckTime,
+};
+
+const protonMassDependencies: PhysicalConstantBundle<'createProtonMass'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createProtonMass: selectedCreateProtonMass,
+};
+
+const quantumOfCirculationDependencies: PhysicalConstantBundle<'createQuantumOfCirculation'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createQuantumOfCirculation: selectedCreateQuantumOfCirculation,
+};
+
+const reducedPlanckConstantDependencies: PhysicalConstantBundle<'createReducedPlanckConstant'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createReducedPlanckConstant: selectedCreateReducedPlanckConstant,
+};
+
+const rydbergDependencies: PhysicalConstantBundle<'createRydberg'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createRydberg: selectedCreateRydberg,
+};
+
+const sackurTetrodeDependencies: NumericConstantBundle<'createSackurTetrode'> = {
+  BigNumberDependencies,
+  createSackurTetrode: selectedCreateSackurTetrode,
+};
+
+const secondRadiationDependencies: PhysicalConstantBundle<'createSecondRadiation'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createSecondRadiation: selectedCreateSecondRadiation,
+};
+
+const speedOfLightDependencies: PhysicalConstantBundle<'createSpeedOfLight'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createSpeedOfLight: selectedCreateSpeedOfLight,
+};
+
+const stefanBoltzmannDependencies: PhysicalConstantBundle<'createStefanBoltzmann'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createStefanBoltzmann: selectedCreateStefanBoltzmann,
+};
+
+const thomsonCrossSectionDependencies: PhysicalConstantBundle<'createThomsonCrossSection'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createThomsonCrossSection: selectedCreateThomsonCrossSection,
+};
+
+const vacuumImpedanceDependencies: PhysicalConstantBundle<'createVacuumImpedance'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createVacuumImpedance: selectedCreateVacuumImpedance,
+};
+
+const weakMixingAngleDependencies: NumericConstantBundle<'createWeakMixingAngle'> = {
+  BigNumberDependencies,
+  createWeakMixingAngle: selectedCreateWeakMixingAngle,
+};
+
+const wienDisplacementDependencies: PhysicalConstantBundle<'createWienDisplacement'> = {
+  BigNumberDependencies,
+  UnitDependencies,
+  createWienDisplacement: selectedCreateWienDisplacement,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -2737,5 +3144,107 @@ export {
   parseDependencies,
   mathjsCreateEvaluate as createEvaluate,
   evaluateDependencies,
+  atomicMassDependencies,
+  avogadroDependencies,
+  bohrMagnetonDependencies,
+  bohrRadiusDependencies,
+  boltzmannDependencies,
+  classicalElectronRadiusDependencies,
+  conductanceQuantumDependencies,
+  coulombDependencies,
+  coulombConstantDependencies,
+  deuteronMassDependencies,
+  efimovFactorDependencies,
+  electricConstantDependencies,
+  electronMassDependencies,
+  elementaryChargeDependencies,
+  faradayDependencies,
+  fermiCouplingDependencies,
+  fineStructureDependencies,
+  firstRadiationDependencies,
+  gasConstantDependencies,
+  gravitationConstantDependencies,
+  gravityDependencies,
+  hartreeEnergyDependencies,
+  inverseConductanceQuantumDependencies,
+  klitzingDependencies,
+  loschmidtDependencies,
+  magneticConstantDependencies,
+  magneticFluxQuantumDependencies,
+  molarMassDependencies,
+  molarMassC12Dependencies,
+  molarPlanckConstantDependencies,
+  molarVolumeDependencies,
+  neutronMassDependencies,
+  nuclearMagnetonDependencies,
+  planckChargeDependencies,
+  planckConstantDependencies,
+  planckLengthDependencies,
+  planckMassDependencies,
+  planckTemperatureDependencies,
+  planckTimeDependencies,
+  protonMassDependencies,
+  quantumOfCirculationDependencies,
+  reducedPlanckConstantDependencies,
+  rydbergDependencies,
+  sackurTetrodeDependencies,
+  secondRadiationDependencies,
+  speedOfLightDependencies,
+  stefanBoltzmannDependencies,
+  thomsonCrossSectionDependencies,
+  vacuumImpedanceDependencies,
+  weakMixingAngleDependencies,
+  wienDisplacementDependencies,
+  selectedCreateAtomicMass as createAtomicMass,
+  selectedCreateAvogadro as createAvogadro,
+  selectedCreateBohrMagneton as createBohrMagneton,
+  selectedCreateBohrRadius as createBohrRadius,
+  selectedCreateBoltzmann as createBoltzmann,
+  selectedCreateClassicalElectronRadius as createClassicalElectronRadius,
+  selectedCreateConductanceQuantum as createConductanceQuantum,
+  selectedCreateCoulomb as createCoulomb,
+  selectedCreateCoulombConstant as createCoulombConstant,
+  selectedCreateDeuteronMass as createDeuteronMass,
+  selectedCreateEfimovFactor as createEfimovFactor,
+  selectedCreateElectricConstant as createElectricConstant,
+  selectedCreateElectronMass as createElectronMass,
+  selectedCreateElementaryCharge as createElementaryCharge,
+  selectedCreateFaraday as createFaraday,
+  selectedCreateFermiCoupling as createFermiCoupling,
+  selectedCreateFineStructure as createFineStructure,
+  selectedCreateFirstRadiation as createFirstRadiation,
+  selectedCreateGasConstant as createGasConstant,
+  selectedCreateGravitationConstant as createGravitationConstant,
+  selectedCreateGravity as createGravity,
+  selectedCreateHartreeEnergy as createHartreeEnergy,
+  selectedCreateInverseConductanceQuantum as createInverseConductanceQuantum,
+  selectedCreateKlitzing as createKlitzing,
+  selectedCreateLoschmidt as createLoschmidt,
+  selectedCreateMagneticConstant as createMagneticConstant,
+  selectedCreateMagneticFluxQuantum as createMagneticFluxQuantum,
+  selectedCreateMolarMass as createMolarMass,
+  selectedCreateMolarMassC12 as createMolarMassC12,
+  selectedCreateMolarPlanckConstant as createMolarPlanckConstant,
+  selectedCreateMolarVolume as createMolarVolume,
+  selectedCreateNeutronMass as createNeutronMass,
+  selectedCreateNuclearMagneton as createNuclearMagneton,
+  selectedCreatePlanckCharge as createPlanckCharge,
+  selectedCreatePlanckConstant as createPlanckConstant,
+  selectedCreatePlanckLength as createPlanckLength,
+  selectedCreatePlanckMass as createPlanckMass,
+  selectedCreatePlanckTemperature as createPlanckTemperature,
+  selectedCreatePlanckTime as createPlanckTime,
+  selectedCreateProtonMass as createProtonMass,
+  selectedCreateQuantumOfCirculation as createQuantumOfCirculation,
+  selectedCreateReducedPlanckConstant as createReducedPlanckConstant,
+  selectedCreateRydberg as createRydberg,
+  selectedCreateSackurTetrode as createSackurTetrode,
+  selectedCreateSecondRadiation as createSecondRadiation,
+  selectedCreateSpeedOfLight as createSpeedOfLight,
+  selectedCreateStefanBoltzmann as createStefanBoltzmann,
+  selectedCreateThomsonCrossSection as createThomsonCrossSection,
+  selectedCreateVacuumImpedance as createVacuumImpedance,
+  selectedCreateWeakMixingAngle as createWeakMixingAngle,
+  selectedCreateWienDisplacement as createWienDisplacement,
   typedDependencies,
 };

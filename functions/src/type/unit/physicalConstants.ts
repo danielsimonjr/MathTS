@@ -357,13 +357,15 @@ function attachUncertainty(unit: UnitInstance, uncertaintyAbsolute: string): Uni
  * @param valueStr - The string representation of the constant's value
  * @param unitStr - The unit string (e.g., 'm s^-1')
  * @param uncertaintyAbsolute - Optional CODATA absolute uncertainty for the constant
+ * @param includeUncertainty - Attach the MathTS CODATA uncertainty metadata
  * @returns A factory function that creates the physical constant
  */
 function unitFactory(
   name: string,
   valueStr: string,
   unitStr: string,
-  uncertaintyAbsolute?: string
+  uncertaintyAbsolute?: string,
+  includeUncertainty = true
 ) {
   const dependencies = ['config', 'Unit', 'BigNumber'];
 
@@ -379,7 +381,9 @@ function unitFactory(
 
       const unit = new Unit(value, unitStr);
       unit.fixPrefix = true;
-      const unc = uncertaintyAbsolute ?? CODATA_2022_UNCERTAINTY[name];
+      const unc = includeUncertainty
+        ? (uncertaintyAbsolute ?? CODATA_2022_UNCERTAINTY[name])
+        : undefined;
       return unc === undefined ? unit : attachUncertainty(unit, unc);
     }
   );
@@ -414,7 +418,7 @@ class CodataScalar {
   }
 }
 
-function numberFactory(name: string, value: number) {
+function numberFactory(name: string, value: number, includeUncertainty = true) {
   const dependencies = ['config', 'BigNumber'];
 
   return factory(
@@ -422,7 +426,7 @@ function numberFactory(name: string, value: number) {
     dependencies,
     ({ config, BigNumber }: NumberFactoryDependencies): number | Decimal => {
       const numeric = config.number === 'BigNumber' ? new BigNumber(value) : value;
-      const uncText = CODATA_2022_UNCERTAINTY[name];
+      const uncText = includeUncertainty ? CODATA_2022_UNCERTAINTY[name] : undefined;
       if (uncText === undefined) return numeric;
       const unc = parseFloat(uncText);
       if (typeof numeric === 'number') {
@@ -435,3 +439,350 @@ function numberFactory(name: string, value: number) {
     }
   );
 }
+
+// Values supplied by the MathJS 15.2 selected factories. MathTS factories above use CODATA 2022.
+export const mathjsCreateAtomicMass = /* #__PURE__ */ unitFactory(
+  'atomicMass',
+  '1.66053906660e-27',
+  'kg',
+  undefined,
+  false
+);
+export const mathjsCreateAvogadro = /* #__PURE__ */ unitFactory(
+  'avogadro',
+  '6.02214076e23',
+  'mol^-1',
+  undefined,
+  false
+);
+export const mathjsCreateBohrMagneton = /* #__PURE__ */ unitFactory(
+  'bohrMagneton',
+  '9.2740100783e-24',
+  'J T^-1',
+  undefined,
+  false
+);
+export const mathjsCreateBohrRadius = /* #__PURE__ */ unitFactory(
+  'bohrRadius',
+  '5.29177210903e-11',
+  'm',
+  undefined,
+  false
+);
+export const mathjsCreateBoltzmann = /* #__PURE__ */ unitFactory(
+  'boltzmann',
+  '1.380649e-23',
+  'J K^-1',
+  undefined,
+  false
+);
+export const mathjsCreateClassicalElectronRadius = /* #__PURE__ */ unitFactory(
+  'classicalElectronRadius',
+  '2.8179403262e-15',
+  'm',
+  undefined,
+  false
+);
+export const mathjsCreateConductanceQuantum = /* #__PURE__ */ unitFactory(
+  'conductanceQuantum',
+  '7.748091729863649e-5',
+  'S',
+  undefined,
+  false
+);
+export const mathjsCreateCoulomb = /* #__PURE__ */ unitFactory(
+  'coulomb',
+  '8.987551792261171e9',
+  'N m^2 C^-2',
+  undefined,
+  false
+);
+export const mathjsCreateCoulombConstant = /* #__PURE__ */ unitFactory(
+  'coulombConstant',
+  '8.987551792261171e9',
+  'N m^2 C^-2',
+  undefined,
+  false
+);
+export const mathjsCreateDeuteronMass = /* #__PURE__ */ unitFactory(
+  'deuteronMass',
+  '3.3435830926e-27',
+  'kg',
+  undefined,
+  false
+);
+export const mathjsCreateEfimovFactor = /* #__PURE__ */ numberFactory('efimovFactor', 22.7, false);
+export const mathjsCreateElectricConstant = /* #__PURE__ */ unitFactory(
+  'electricConstant',
+  '8.8541878128e-12',
+  'F m^-1',
+  undefined,
+  false
+);
+export const mathjsCreateElectronMass = /* #__PURE__ */ unitFactory(
+  'electronMass',
+  '9.1093837015e-31',
+  'kg',
+  undefined,
+  false
+);
+export const mathjsCreateElementaryCharge = /* #__PURE__ */ unitFactory(
+  'elementaryCharge',
+  '1.602176634e-19',
+  'C',
+  undefined,
+  false
+);
+export const mathjsCreateFaraday = /* #__PURE__ */ unitFactory(
+  'faraday',
+  '96485.33212331001',
+  'C mol^-1',
+  undefined,
+  false
+);
+export const mathjsCreateFermiCoupling = /* #__PURE__ */ unitFactory(
+  'fermiCoupling',
+  '1.1663787e-5',
+  'GeV^-2',
+  undefined,
+  false
+);
+export const mathjsCreateFineStructure = /* #__PURE__ */ numberFactory(
+  'fineStructure',
+  7.2973525693e-3,
+  false
+);
+export const mathjsCreateFirstRadiation = /* #__PURE__ */ unitFactory(
+  'firstRadiation',
+  '3.7417718521927573e-16',
+  'W m^2',
+  undefined,
+  false
+);
+export const mathjsCreateGasConstant = /* #__PURE__ */ unitFactory(
+  'gasConstant',
+  '8.31446261815324',
+  'J K^-1 mol^-1',
+  undefined,
+  false
+);
+export const mathjsCreateGravitationConstant = /* #__PURE__ */ unitFactory(
+  'gravitationConstant',
+  '6.67430e-11',
+  'm^3 kg^-1 s^-2',
+  undefined,
+  false
+);
+export const mathjsCreateGravity = /* #__PURE__ */ unitFactory(
+  'gravity',
+  '9.80665',
+  'm s^-2',
+  undefined,
+  false
+);
+export const mathjsCreateHartreeEnergy = /* #__PURE__ */ unitFactory(
+  'hartreeEnergy',
+  '4.3597447222071e-18',
+  'J',
+  undefined,
+  false
+);
+export const mathjsCreateInverseConductanceQuantum = /* #__PURE__ */ unitFactory(
+  'inverseConductanceQuantum',
+  '12906.403729652257',
+  'ohm',
+  undefined,
+  false
+);
+export const mathjsCreateKlitzing = /* #__PURE__ */ unitFactory(
+  'klitzing',
+  '25812.807459304513',
+  'ohm',
+  undefined,
+  false
+);
+export const mathjsCreateLoschmidt = /* #__PURE__ */ unitFactory(
+  'loschmidt',
+  '2.686780111798444e25',
+  'm^-3',
+  undefined,
+  false
+);
+export const mathjsCreateMagneticConstant = /* #__PURE__ */ unitFactory(
+  'magneticConstant',
+  '1.25663706212e-6',
+  'N A^-2',
+  undefined,
+  false
+);
+export const mathjsCreateMagneticFluxQuantum = /* #__PURE__ */ unitFactory(
+  'magneticFluxQuantum',
+  '2.0678338484619295e-15',
+  'Wb',
+  undefined,
+  false
+);
+export const mathjsCreateMolarMass = /* #__PURE__ */ unitFactory(
+  'molarMass',
+  '0.99999999965e-3',
+  'kg mol^-1',
+  undefined,
+  false
+);
+export const mathjsCreateMolarMassC12 = /* #__PURE__ */ unitFactory(
+  'molarMassC12',
+  '11.9999999958e-3',
+  'kg mol^-1',
+  undefined,
+  false
+);
+export const mathjsCreateMolarPlanckConstant = /* #__PURE__ */ unitFactory(
+  'molarPlanckConstant',
+  '3.990312712893431e-10',
+  'J s mol^-1',
+  undefined,
+  false
+);
+export const mathjsCreateMolarVolume = /* #__PURE__ */ unitFactory(
+  'molarVolume',
+  '0.022413969545014137',
+  'm^3 mol^-1',
+  undefined,
+  false
+);
+export const mathjsCreateNeutronMass = /* #__PURE__ */ unitFactory(
+  'neutronMass',
+  '1.6749271613e-27',
+  'kg',
+  undefined,
+  false
+);
+export const mathjsCreateNuclearMagneton = /* #__PURE__ */ unitFactory(
+  'nuclearMagneton',
+  '5.0507837461e-27',
+  'J T^-1',
+  undefined,
+  false
+);
+export const mathjsCreatePlanckCharge = /* #__PURE__ */ unitFactory(
+  'planckCharge',
+  '1.87554603778e-18',
+  'C',
+  undefined,
+  false
+);
+export const mathjsCreatePlanckConstant = /* #__PURE__ */ unitFactory(
+  'planckConstant',
+  '6.62607015e-34',
+  'J s',
+  undefined,
+  false
+);
+export const mathjsCreatePlanckLength = /* #__PURE__ */ unitFactory(
+  'planckLength',
+  '1.616255e-35',
+  'm',
+  undefined,
+  false
+);
+export const mathjsCreatePlanckMass = /* #__PURE__ */ unitFactory(
+  'planckMass',
+  '2.176435e-8',
+  'kg',
+  undefined,
+  false
+);
+export const mathjsCreatePlanckTemperature = /* #__PURE__ */ unitFactory(
+  'planckTemperature',
+  '1.416785e+32',
+  'K',
+  undefined,
+  false
+);
+export const mathjsCreatePlanckTime = /* #__PURE__ */ unitFactory(
+  'planckTime',
+  '5.391245e-44',
+  's',
+  undefined,
+  false
+);
+export const mathjsCreateProtonMass = /* #__PURE__ */ unitFactory(
+  'protonMass',
+  '1.67262192369e-27',
+  'kg',
+  undefined,
+  false
+);
+export const mathjsCreateQuantumOfCirculation = /* #__PURE__ */ unitFactory(
+  'quantumOfCirculation',
+  '3.6369475516e-4',
+  'm^2 s^-1',
+  undefined,
+  false
+);
+export const mathjsCreateReducedPlanckConstant = /* #__PURE__ */ unitFactory(
+  'reducedPlanckConstant',
+  '1.0545718176461565e-34',
+  'J s',
+  undefined,
+  false
+);
+export const mathjsCreateRydberg = /* #__PURE__ */ unitFactory(
+  'rydberg',
+  '10973731.568160',
+  'm^-1',
+  undefined,
+  false
+);
+export const mathjsCreateSackurTetrode = /* #__PURE__ */ numberFactory(
+  'sackurTetrode',
+  -1.16487052358,
+  false
+);
+export const mathjsCreateSecondRadiation = /* #__PURE__ */ unitFactory(
+  'secondRadiation',
+  '0.014387768775039337',
+  'm K',
+  undefined,
+  false
+);
+export const mathjsCreateSpeedOfLight = /* #__PURE__ */ unitFactory(
+  'speedOfLight',
+  '299792458',
+  'm s^-1',
+  undefined,
+  false
+);
+export const mathjsCreateStefanBoltzmann = /* #__PURE__ */ unitFactory(
+  'stefanBoltzmann',
+  '5.67037441918443e-8',
+  'W m^-2 K^-4',
+  undefined,
+  false
+);
+export const mathjsCreateThomsonCrossSection = /* #__PURE__ */ unitFactory(
+  'thomsonCrossSection',
+  '6.6524587321e-29',
+  'm^2',
+  undefined,
+  false
+);
+export const mathjsCreateVacuumImpedance = /* #__PURE__ */ unitFactory(
+  'vacuumImpedance',
+  '376.730313667',
+  'ohm',
+  undefined,
+  false
+);
+export const mathjsCreateWeakMixingAngle = /* #__PURE__ */ numberFactory(
+  'weakMixingAngle',
+  0.2229,
+  false
+);
+export const mathjsCreateWienDisplacement = /* #__PURE__ */ unitFactory(
+  'wienDisplacement',
+  '2.897771955e-3',
+  'm K',
+  undefined,
+  false
+);

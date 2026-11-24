@@ -5,6 +5,101 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('uses selected BigNumber configuration for physical constants', () => {
+    const actual = create(
+      { planckConstantDependencies: compat.planckConstantDependencies },
+      { number: 'BigNumber', precision: 30 }
+    );
+    const expected = oracle.create(
+      { planckConstantDependencies: Reflect.get(oracle, 'planckConstantDependencies') },
+      { number: 'BigNumber', precision: 30 }
+    );
+    const value = Reflect.get(actual, 'planckConstant') as { toNumeric(unit: string): unknown };
+    const reference = Reflect.get(expected, 'planckConstant');
+    const numeric = value.toNumeric('J s');
+    expect(compat.isBigNumber(numeric)).toBe(true);
+    const expectedNumeric = reference.toNumeric('J s');
+    if (!oracle.isBigNumber(expectedNumeric)) throw new TypeError('Expected a BigNumber constant');
+    expect(expectedNumeric.eq(String(numeric))).toBe(true);
+  });
+
+  it.each([
+    'atomicMass',
+    'avogadro',
+    'bohrMagneton',
+    'bohrRadius',
+    'boltzmann',
+    'classicalElectronRadius',
+    'conductanceQuantum',
+    'coulomb',
+    'coulombConstant',
+    'deuteronMass',
+    'efimovFactor',
+    'electricConstant',
+    'electronMass',
+    'elementaryCharge',
+    'faraday',
+    'fermiCoupling',
+    'fineStructure',
+    'firstRadiation',
+    'gasConstant',
+    'gravitationConstant',
+    'gravity',
+    'hartreeEnergy',
+    'inverseConductanceQuantum',
+    'klitzing',
+    'loschmidt',
+    'magneticConstant',
+    'magneticFluxQuantum',
+    'molarMass',
+    'molarMassC12',
+    'molarPlanckConstant',
+    'molarVolume',
+    'neutronMass',
+    'nuclearMagneton',
+    'planckCharge',
+    'planckConstant',
+    'planckLength',
+    'planckMass',
+    'planckTemperature',
+    'planckTime',
+    'protonMass',
+    'quantumOfCirculation',
+    'reducedPlanckConstant',
+    'rydberg',
+    'sackurTetrode',
+    'secondRadiation',
+    'speedOfLight',
+    'stefanBoltzmann',
+    'thomsonCrossSection',
+    'vacuumImpedance',
+    'weakMixingAngle',
+    'wienDisplacement',
+  ] as const)('creates the selected %s physical constant', (name) => {
+    const key = name + 'Dependencies';
+    const bundle = Reflect.get(compat, key);
+    const referenceBundle = Reflect.get(oracle, key);
+    expect(Object.keys(bundle)).toEqual(Object.keys(referenceBundle));
+    const factoryName = Object.keys(bundle).find((entry) => entry.startsWith('create'));
+    if (!factoryName) throw new Error(`No factory exported for ${name}`);
+    expect(Reflect.get(compat, factoryName).dependencies).toEqual(
+      Reflect.get(oracle, factoryName).dependencies
+    );
+    const selected = create({ [key]: bundle });
+    const expected = oracle.create({ [key]: referenceBundle });
+    expect(Object.keys(selected).sort()).toEqual(Object.keys(expected).sort());
+    const value = Reflect.get(selected, name);
+    const reference = Reflect.get(expected, name);
+    if (oracle.isUnit(reference)) {
+      const result = value as { formatUnits(): string; toNumber(unit: string): number };
+      const unit = reference.formatUnits();
+      expect(result.formatUnits()).toBe(unit);
+      expect(result.toNumber(unit) / reference.toNumber(unit)).toBeCloseTo(1, 12);
+    } else {
+      expect(value).toBe(reference);
+    }
+  });
+
   it('shares expression scope across a selected evaluation array', () => {
     const actual = create({
       evaluateDependencies: compat.evaluateDependencies,

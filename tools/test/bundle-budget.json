@@ -21,7 +21,7 @@
     "autograd/dist/index.js": 74174,
     "autograd/package.json": 2250,
     "functions/dist/index.js": 2308889,
-    "functions/dist/subpath-evaluate.js": 1522321,
+    "functions/dist/subpath-evaluate.js": 1543532,
     "functions/package.json": 3740,
     "functions/dist/wasm/mathts-as.wasm": 69718,
     "expression/dist/index.js": 366761,
@@ -55,7 +55,7 @@
     "assembly/build/mathts-debug.wasm": 133381,
     "assembly/build/mathts-debug.js": 102906,
     "assembly/package.json": 2903,
-    "compat/dist/index.js": 119451,
+    "compat/dist/index.js": 133721,
     "compat/package.json": 2274,
     "gpu/dist/index.js": 18116,
     "gpu/package.json": 2189,
@@ -208,13 +208,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 1980440
+      "bytes": 2007861
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 1989753
+      "bytes": 2017172
     }
   ]
 }

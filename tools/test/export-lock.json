@@ -12845,7 +12845,13 @@
       "atomicMass": {
         "kind": "object"
       },
+      "atomicMassDependencies": {
+        "kind": "object"
+      },
       "avogadro": {
+        "kind": "object"
+      },
+      "avogadroDependencies": {
         "kind": "object"
       },
       "bellNumbers": {
@@ -12899,10 +12905,19 @@
       "bohrMagneton": {
         "kind": "object"
       },
+      "bohrMagnetonDependencies": {
+        "kind": "object"
+      },
       "bohrRadius": {
         "kind": "object"
       },
+      "bohrRadiusDependencies": {
+        "kind": "object"
+      },
       "boltzmann": {
+        "kind": "object"
+      },
+      "boltzmannDependencies": {
         "kind": "object"
       },
       "boolean": {
@@ -12930,6 +12945,9 @@
         "kind": "object"
       },
       "classicalElectronRadius": {
+        "kind": "object"
+      },
+      "classicalElectronRadiusDependencies": {
         "kind": "object"
       },
       "clone": {
@@ -12992,6 +13010,9 @@
       "conductanceQuantum": {
         "kind": "object"
       },
+      "conductanceQuantumDependencies": {
+        "kind": "object"
+      },
       "config": {
         "kind": "function"
       },
@@ -13032,6 +13053,12 @@
         "kind": "object"
       },
       "coulombConstant": {
+        "kind": "object"
+      },
+      "coulombConstantDependencies": {
+        "kind": "object"
+      },
+      "coulombDependencies": {
         "kind": "object"
       },
       "count": {
@@ -13106,6 +13133,12 @@
       "createAtanh": {
         "kind": "function"
       },
+      "createAtomicMass": {
+        "kind": "function"
+      },
+      "createAvogadro": {
+        "kind": "function"
+      },
       "createBernoulli": {
         "kind": "function"
       },
@@ -13133,6 +13166,15 @@
       "createBlockNode": {
         "kind": "function"
       },
+      "createBohrMagneton": {
+        "kind": "function"
+      },
+      "createBohrRadius": {
+        "kind": "function"
+      },
+      "createBoltzmann": {
+        "kind": "function"
+      },
       "createCbrt": {
         "kind": "function"
       },
@@ -13143,6 +13185,9 @@
         "kind": "function"
       },
       "createChainClass": {
+        "kind": "function"
+      },
+      "createClassicalElectronRadius": {
         "kind": "function"
       },
       "createClone": {
@@ -13172,6 +13217,9 @@
       "createConditionalNode": {
         "kind": "function"
       },
+      "createConductanceQuantum": {
+        "kind": "function"
+      },
       "createConj": {
         "kind": "function"
       },
@@ -13188,6 +13236,12 @@
         "kind": "function"
       },
       "createCoth": {
+        "kind": "function"
+      },
+      "createCoulomb": {
+        "kind": "function"
+      },
+      "createCoulombConstant": {
         "kind": "function"
       },
       "createCount": {
@@ -13223,6 +13277,9 @@
       "createDet": {
         "kind": "function"
       },
+      "createDeuteronMass": {
+        "kind": "function"
+      },
       "createDiag": {
         "kind": "function"
       },
@@ -13250,6 +13307,18 @@
       "createE": {
         "kind": "function"
       },
+      "createEfimovFactor": {
+        "kind": "function"
+      },
+      "createElectricConstant": {
+        "kind": "function"
+      },
+      "createElectronMass": {
+        "kind": "function"
+      },
+      "createElementaryCharge": {
+        "kind": "function"
+      },
       "createEqual": {
         "kind": "function"
       },
@@ -13274,10 +13343,22 @@
       "createFalse": {
         "kind": "function"
       },
+      "createFaraday": {
+        "kind": "function"
+      },
+      "createFermiCoupling": {
+        "kind": "function"
+      },
       "createFibonacciHeapClass": {
         "kind": "function"
       },
       "createFilter": {
+        "kind": "function"
+      },
+      "createFineStructure": {
+        "kind": "function"
+      },
+      "createFirstRadiation": {
         "kind": "function"
       },
       "createFix": {
@@ -13307,10 +13388,22 @@
       "createFunctionNode": {
         "kind": "function"
       },
+      "createGasConstant": {
+        "kind": "function"
+      },
       "createGcd": {
         "kind": "function"
       },
       "createGetMatrixDataType": {
+        "kind": "function"
+      },
+      "createGravitationConstant": {
+        "kind": "function"
+      },
+      "createGravity": {
+        "kind": "function"
+      },
+      "createHartreeEnergy": {
         "kind": "function"
       },
       "createHasNumericValue": {
@@ -13349,6 +13442,9 @@
       "createInv": {
         "kind": "function"
       },
+      "createInverseConductanceQuantum": {
+        "kind": "function"
+      },
       "createIsBounded": {
         "kind": "function"
       },
@@ -13374,6 +13470,9 @@
         "kind": "function"
       },
       "createIsZero": {
+        "kind": "function"
+      },
+      "createKlitzing": {
         "kind": "function"
       },
       "createKron": {
@@ -13418,6 +13517,9 @@
       "createLog2": {
         "kind": "function"
       },
+      "createLoschmidt": {
+        "kind": "function"
+      },
       "createLsolve": {
         "kind": "function"
       },
@@ -13425,6 +13527,12 @@
         "kind": "function"
       },
       "createLup": {
+        "kind": "function"
+      },
+      "createMagneticConstant": {
+        "kind": "function"
+      },
+      "createMagneticFluxQuantum": {
         "kind": "function"
       },
       "createMap": {
@@ -13460,6 +13568,18 @@
       "createMode": {
         "kind": "function"
       },
+      "createMolarMass": {
+        "kind": "function"
+      },
+      "createMolarMassC12": {
+        "kind": "function"
+      },
+      "createMolarPlanckConstant": {
+        "kind": "function"
+      },
+      "createMolarVolume": {
+        "kind": "function"
+      },
       "createMultiply": {
         "kind": "function"
       },
@@ -13467,6 +13587,9 @@
         "kind": "function"
       },
       "createNaN": {
+        "kind": "function"
+      },
+      "createNeutronMass": {
         "kind": "function"
       },
       "createNode": {
@@ -13479,6 +13602,9 @@
         "kind": "function"
       },
       "createNthRoots": {
+        "kind": "function"
+      },
+      "createNuclearMagneton": {
         "kind": "function"
       },
       "createNull": {
@@ -13526,6 +13652,24 @@
       "createPickRandom": {
         "kind": "function"
       },
+      "createPlanckCharge": {
+        "kind": "function"
+      },
+      "createPlanckConstant": {
+        "kind": "function"
+      },
+      "createPlanckLength": {
+        "kind": "function"
+      },
+      "createPlanckMass": {
+        "kind": "function"
+      },
+      "createPlanckTemperature": {
+        "kind": "function"
+      },
+      "createPlanckTime": {
+        "kind": "function"
+      },
       "createPow": {
         "kind": "function"
       },
@@ -13535,7 +13679,13 @@
       "createProd": {
         "kind": "function"
       },
+      "createProtonMass": {
+        "kind": "function"
+      },
       "createQr": {
+        "kind": "function"
+      },
+      "createQuantumOfCirculation": {
         "kind": "function"
       },
       "createRandom": {
@@ -13551,6 +13701,9 @@
         "kind": "function"
       },
       "createRe": {
+        "kind": "function"
+      },
+      "createReducedPlanckConstant": {
         "kind": "function"
       },
       "createRelationalNode": {
@@ -13577,16 +13730,25 @@
       "createRow": {
         "kind": "function"
       },
+      "createRydberg": {
+        "kind": "function"
+      },
       "createSQRT1_2": {
         "kind": "function"
       },
       "createSQRT2": {
         "kind": "function"
       },
+      "createSackurTetrode": {
+        "kind": "function"
+      },
       "createSec": {
         "kind": "function"
       },
       "createSech": {
+        "kind": "function"
+      },
+      "createSecondRadiation": {
         "kind": "function"
       },
       "createSetCartesian": {
@@ -13646,6 +13808,9 @@
       "createSparseMatrixClass": {
         "kind": "function"
       },
+      "createSpeedOfLight": {
+        "kind": "function"
+      },
       "createSqrt": {
         "kind": "function"
       },
@@ -13653,6 +13818,9 @@
         "kind": "function"
       },
       "createSqueeze": {
+        "kind": "function"
+      },
+      "createStefanBoltzmann": {
         "kind": "function"
       },
       "createSubset": {
@@ -13677,6 +13845,9 @@
         "kind": "function"
       },
       "createTau": {
+        "kind": "function"
+      },
+      "createThomsonCrossSection": {
         "kind": "function"
       },
       "createTrace": {
@@ -13725,6 +13896,15 @@
         "kind": "function"
       },
       "createUsolveAll": {
+        "kind": "function"
+      },
+      "createVacuumImpedance": {
+        "kind": "function"
+      },
+      "createWeakMixingAngle": {
+        "kind": "function"
+      },
+      "createWienDisplacement": {
         "kind": "function"
       },
       "createXor": {
@@ -13790,6 +13970,9 @@
       "deuteronMass": {
         "kind": "object"
       },
+      "deuteronMassDependencies": {
+        "kind": "object"
+      },
       "diag": {
         "kind": "function"
       },
@@ -13850,16 +14033,28 @@
       "efimovFactor": {
         "kind": "number"
       },
+      "efimovFactorDependencies": {
+        "kind": "object"
+      },
       "eigs": {
         "kind": "function"
       },
       "electricConstant": {
         "kind": "object"
       },
+      "electricConstantDependencies": {
+        "kind": "object"
+      },
       "electronMass": {
         "kind": "object"
       },
+      "electronMassDependencies": {
+        "kind": "object"
+      },
       "elementaryCharge": {
+        "kind": "object"
+      },
+      "elementaryChargeDependencies": {
         "kind": "object"
       },
       "equal": {
@@ -13919,7 +14114,13 @@
       "faraday": {
         "kind": "object"
       },
+      "faradayDependencies": {
+        "kind": "object"
+      },
       "fermiCoupling": {
+        "kind": "object"
+      },
+      "fermiCouplingDependencies": {
         "kind": "object"
       },
       "fft": {
@@ -13934,7 +14135,13 @@
       "fineStructure": {
         "kind": "number"
       },
+      "fineStructureDependencies": {
+        "kind": "object"
+      },
       "firstRadiation": {
+        "kind": "object"
+      },
+      "firstRadiationDependencies": {
         "kind": "object"
       },
       "fix": {
@@ -13982,6 +14189,9 @@
       "gasConstant": {
         "kind": "object"
       },
+      "gasConstantDependencies": {
+        "kind": "object"
+      },
       "gcd": {
         "kind": "function"
       },
@@ -13997,10 +14207,19 @@
       "gravitationConstant": {
         "kind": "object"
       },
+      "gravitationConstantDependencies": {
+        "kind": "object"
+      },
       "gravity": {
         "kind": "object"
       },
+      "gravityDependencies": {
+        "kind": "object"
+      },
       "hartreeEnergy": {
+        "kind": "object"
+      },
+      "hartreeEnergyDependencies": {
         "kind": "object"
       },
       "hasNumericValue": {
@@ -14061,6 +14280,9 @@
         "kind": "object"
       },
       "inverseConductanceQuantum": {
+        "kind": "object"
+      },
+      "inverseConductanceQuantumDependencies": {
         "kind": "object"
       },
       "invmod": {
@@ -14267,6 +14489,9 @@
       "klitzing": {
         "kind": "object"
       },
+      "klitzingDependencies": {
+        "kind": "object"
+      },
       "kron": {
         "kind": "function"
       },
@@ -14333,6 +14558,9 @@
       "loschmidt": {
         "kind": "object"
       },
+      "loschmidtDependencies": {
+        "kind": "object"
+      },
       "lsolve": {
         "kind": "function"
       },
@@ -14363,7 +14591,13 @@
       "magneticConstant": {
         "kind": "object"
       },
+      "magneticConstantDependencies": {
+        "kind": "object"
+      },
       "magneticFluxQuantum": {
+        "kind": "object"
+      },
+      "magneticFluxQuantumDependencies": {
         "kind": "object"
       },
       "map": {
@@ -14438,10 +14672,22 @@
       "molarMassC12": {
         "kind": "object"
       },
+      "molarMassC12Dependencies": {
+        "kind": "object"
+      },
+      "molarMassDependencies": {
+        "kind": "object"
+      },
       "molarPlanckConstant": {
         "kind": "object"
       },
+      "molarPlanckConstantDependencies": {
+        "kind": "object"
+      },
       "molarVolume": {
+        "kind": "object"
+      },
+      "molarVolumeDependencies": {
         "kind": "object"
       },
       "multinomial": {
@@ -14460,6 +14706,9 @@
         "kind": "object"
       },
       "neutronMass": {
+        "kind": "object"
+      },
+      "neutronMassDependencies": {
         "kind": "object"
       },
       "norm": {
@@ -14484,6 +14733,9 @@
         "kind": "object"
       },
       "nuclearMagneton": {
+        "kind": "object"
+      },
+      "nuclearMagnetonDependencies": {
         "kind": "object"
       },
       "nullDependencies": {
@@ -14570,19 +14822,37 @@
       "planckCharge": {
         "kind": "object"
       },
+      "planckChargeDependencies": {
+        "kind": "object"
+      },
       "planckConstant": {
+        "kind": "object"
+      },
+      "planckConstantDependencies": {
         "kind": "object"
       },
       "planckLength": {
         "kind": "object"
       },
+      "planckLengthDependencies": {
+        "kind": "object"
+      },
       "planckMass": {
+        "kind": "object"
+      },
+      "planckMassDependencies": {
         "kind": "object"
       },
       "planckTemperature": {
         "kind": "object"
       },
+      "planckTemperatureDependencies": {
+        "kind": "object"
+      },
       "planckTime": {
+        "kind": "object"
+      },
+      "planckTimeDependencies": {
         "kind": "object"
       },
       "polynomialRoot": {
@@ -14609,6 +14879,9 @@
       "protonMass": {
         "kind": "object"
       },
+      "protonMassDependencies": {
+        "kind": "object"
+      },
       "qr": {
         "kind": "function"
       },
@@ -14619,6 +14892,9 @@
         "kind": "function"
       },
       "quantumOfCirculation": {
+        "kind": "object"
+      },
+      "quantumOfCirculationDependencies": {
         "kind": "object"
       },
       "random": {
@@ -14649,6 +14925,9 @@
         "kind": "object"
       },
       "reducedPlanckConstant": {
+        "kind": "object"
+      },
+      "reducedPlanckConstantDependencies": {
         "kind": "object"
       },
       "replacer": {
@@ -14705,8 +14984,14 @@
       "rydberg": {
         "kind": "object"
       },
+      "rydbergDependencies": {
+        "kind": "object"
+      },
       "sackurTetrode": {
         "kind": "number"
+      },
+      "sackurTetrodeDependencies": {
+        "kind": "object"
       },
       "schur": {
         "kind": "function"
@@ -14724,6 +15009,9 @@
         "kind": "object"
       },
       "secondRadiation": {
+        "kind": "object"
+      },
+      "secondRadiationDependencies": {
         "kind": "object"
       },
       "setCartesian": {
@@ -14852,6 +15140,9 @@
       "speedOfLight": {
         "kind": "object"
       },
+      "speedOfLightDependencies": {
+        "kind": "object"
+      },
       "splitUnit": {
         "kind": "function"
       },
@@ -14880,6 +15171,9 @@
         "kind": "function"
       },
       "stefanBoltzmann": {
+        "kind": "object"
+      },
+      "stefanBoltzmannDependencies": {
         "kind": "object"
       },
       "stirlingS2": {
@@ -14937,6 +15231,9 @@
         "kind": "object"
       },
       "thomsonCrossSection": {
+        "kind": "object"
+      },
+      "thomsonCrossSectionDependencies": {
         "kind": "object"
       },
       "to": {
@@ -15011,6 +15308,9 @@
       "vacuumImpedance": {
         "kind": "object"
       },
+      "vacuumImpedanceDependencies": {
+        "kind": "object"
+      },
       "variance": {
         "kind": "function"
       },
@@ -15020,7 +15320,13 @@
       "weakMixingAngle": {
         "kind": "number"
       },
+      "weakMixingAngleDependencies": {
+        "kind": "object"
+      },
       "wienDisplacement": {
+        "kind": "object"
+      },
+      "wienDisplacementDependencies": {
         "kind": "object"
       },
       "xgcd": {
