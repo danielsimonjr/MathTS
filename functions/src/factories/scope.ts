@@ -24,7 +24,6 @@ initTypeBridge();
 
 // Register extra types that mathjs factories reference in their typed() signatures
 // but aren't in the default MathTS typed-function instance.
-const typed = mathTyped as unknown as { addType(type: unknown, before: boolean): void };
 const extraTypes = [
   // mathjs uses lowercase 'function' in signatures; typed-function registers 'Function'
   {
@@ -140,13 +139,18 @@ const extraTypes = [
   // MathJSDenseMatrix passes their duck-type tests via .rows, .cols, .get, .type properties.
 ];
 
-for (const t of extraTypes) {
-  try {
-    typed.addType(t, false);
-  } catch {
-    // Already registered — ignore
+/** Register the additional types used by the mathjs-derived factories. */
+export function registerMathjsFactoryTypes(typed: typeof mathTyped): void {
+  for (const type of extraTypes) {
+    try {
+      typed.addType(type, false);
+    } catch {
+      // The default registry may already supply the named type.
+    }
   }
 }
+
+registerMathjsFactoryTypes(mathTyped);
 
 /** Synchronous config overlay stack for {@link runWithConfig} (see config-api.ts). */
 const configOverlayStack: ConfigOptions[] = [];

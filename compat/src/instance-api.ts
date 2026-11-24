@@ -3,7 +3,7 @@
  * expression scope wired for per-instance evaluate.
  */
 
-import { mathTyped } from '@danielsimonjr/mathts-core';
+import type { mathTyped } from '@danielsimonjr/mathts-core';
 import { deepMap, isMatrix } from '@danielsimonjr/mathts-core/internal';
 import {
   createInstanceEvaluator,
@@ -154,13 +154,7 @@ export function wireMathjsInstanceApi(
     mathWithTransform: { num: instance.num, den: instance.den },
   };
 
-  // The call builds through the shared typed instance. Every other member
-  // (`addConversion`, `find`, `isTypedFunction`, ...) is read from mathTyped
-  // through the prototype chain, so the declared `typeof mathTyped` holds.
-  const instanceTyped = Object.setPrototypeOf(
-    (...args: unknown[]) => mathTyped(...(args as Parameters<typeof mathTyped>)),
-    mathTyped
-  ) as WiredCompatInstance['typed'];
+  const instanceTyped = factory_mathjsCompat.createCompatTyped();
 
   if (typeof instance.num !== 'function') delete expressionLayers.mathWithTransform.num;
   if (typeof instance.den !== 'function') delete expressionLayers.mathWithTransform.den;
