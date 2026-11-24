@@ -5,8 +5,10 @@ import {
   cbrt,
   combinations,
   compareNatural,
+  compareText,
   create,
   derivative,
+  equalText,
   erf,
   log1p,
   log2,
@@ -144,5 +146,19 @@ describe('named compatibility function imports', () => {
       (math.evaluate('pow([[1, 2], [4, 3]], -1)') as { valueOf(): unknown }).valueOf()
     ).toEqual(expected);
     expect(() => pow(determinantZero, -1)).toThrow(/not invertible/);
+  });
+
+  it('dispatches named, instance, and expression text comparisons elementwise', () => {
+    const math = create(all);
+    const labels = ['A', 'B', 'C'];
+    expect(compareText('B', labels)).toEqual([1, 0, -1]);
+    expect(equalText(labels, 'B')).toEqual([false, true, false]);
+    expect(math.compareText('B', labels)).toEqual([1, 0, -1]);
+    expect(math.equalText(labels, 'B')).toEqual([false, true, false]);
+    const expression = 'compareText("B", ["A","B","C"])';
+    expect((math.evaluate(expression) as { valueOf(): unknown }).valueOf()).toEqual(
+      oracle.evaluate(expression).valueOf()
+    );
+    expect(() => compareText(1, '1')).toThrow(TypeError);
   });
 });

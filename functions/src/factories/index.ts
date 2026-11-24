@@ -3724,4 +3724,6 @@ export const factory_mathjsCompat = {
   tryCreateFactoryBundle,
   compatFactoryExports,
   setUnion: compatSetUnion,
+  compareText,
+  equalText,
 };
