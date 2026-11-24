@@ -4066,9 +4066,6 @@
       "compareUnits": {
         "kind": "function"
       },
-      "compatSetUnion": {
-        "kind": "function"
-      },
       "compileExpr": {
         "kind": "function"
       },
