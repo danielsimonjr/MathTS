@@ -13454,6 +13454,9 @@
       "createFermiCoupling": {
         "kind": "function"
       },
+      "createFft": {
+        "kind": "function"
+      },
       "createFibonacciHeapClass": {
         "kind": "function"
       },
@@ -13542,6 +13545,9 @@
         "kind": "function"
       },
       "createIdentity": {
+        "kind": "function"
+      },
+      "createIfft": {
         "kind": "function"
       },
       "createIm": {
@@ -14042,6 +14048,9 @@
       "createSqrt": {
         "kind": "function"
       },
+      "createSqrtm": {
+        "kind": "function"
+      },
       "createSquare": {
         "kind": "function"
       },
@@ -14399,6 +14408,9 @@
       "fft": {
         "kind": "function"
       },
+      "fftDependencies": {
+        "kind": "object"
+      },
       "filter": {
         "kind": "function"
       },
@@ -14545,6 +14557,9 @@
       },
       "ifft": {
         "kind": "function"
+      },
+      "ifftDependencies": {
+        "kind": "object"
       },
       "im": {
         "kind": "function"
@@ -15541,6 +15556,9 @@
       },
       "sqrtm": {
         "kind": "function"
+      },
+      "sqrtmDependencies": {
+        "kind": "object"
       },
       "square": {
         "kind": "function"

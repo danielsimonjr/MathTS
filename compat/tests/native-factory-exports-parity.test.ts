@@ -5,6 +5,29 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('transforms and reconstructs selected Fourier spectra', () => {
+    const actual = create({ ifftDependencies: compat.ifftDependencies });
+    const expected = oracle.create({ ifftDependencies: Reflect.get(oracle, 'ifftDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, input: unknown) =>
+        Reflect.apply(Reflect.get(instance, name), instance, [input]) as {
+          re: number;
+          im: number;
+        }[];
+      const spectrum = call('fft', [1, 3, 2, -1]);
+      return [spectrum, call('ifft', spectrum)];
+    };
+    const result = run(actual);
+    const upstream = run(expected);
+    for (const [i, vector] of result.entries()) {
+      for (const [j, value] of vector.entries()) {
+        expect(value.re).toBeCloseTo(upstream[i][j].re, 12);
+        expect(value.im).toBeCloseTo(upstream[i][j].im, 12);
+      }
+    }
+  });
+
   it('solves a selected ordinary differential equation', () => {
     const actual = create({ solveODEDependencies: compat.solveODEDependencies });
     const expected = oracle.create({
@@ -1189,6 +1212,15 @@ describe('native compatibility dependency bundles', () => {
           [1, 3],
         ],
         [5, 5],
+      ],
+    ],
+    [
+      'sqrtm',
+      [
+        [
+          [4, 0],
+          [0, 9],
+        ],
       ],
     ],
     ['gamma', [5]],
