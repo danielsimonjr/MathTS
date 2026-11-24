@@ -2896,6 +2896,49 @@ const divideDependencies: UnaryBundle<'createDivide'> & {
   createDivide: mathjsCreateDivide,
 };
 
+const mathjsCreateMean: CompatFactoryExports['createMean'] = factories.createMean;
+const meanDependencies: UnaryBundle<'createMean'> & {
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+} = {
+  addDependencies,
+  divideDependencies,
+  typedDependencies,
+  createMean: mathjsCreateMean,
+};
+
+const mathjsCreatePolynomialRoot: CompatFactoryExports['createPolynomialRoot'] =
+  factories.createPolynomialRoot;
+const polynomialRootDependencies: UnaryBundle<'createPolynomialRoot'> & {
+  addDependencies: typeof addDependencies;
+  cbrtDependencies: typeof cbrtDependencies;
+  divideDependencies: typeof divideDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  imDependencies: typeof imDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  reDependencies: typeof reDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+  subtractDependencies: typeof subtractDependencies;
+  typeOfDependencies: typeof typeOfDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  addDependencies,
+  cbrtDependencies,
+  divideDependencies,
+  equalScalarDependencies,
+  imDependencies,
+  isZeroDependencies,
+  multiplyDependencies,
+  reDependencies,
+  sqrtDependencies,
+  subtractDependencies,
+  typeOfDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createPolynomialRoot: mathjsCreatePolynomialRoot,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3442,5 +3485,9 @@ export {
   setUnionDependencies,
   mathjsCreateDivide as createDivide,
   divideDependencies,
+  mathjsCreateMean as createMean,
+  meanDependencies,
+  mathjsCreatePolynomialRoot as createPolynomialRoot,
+  polynomialRootDependencies,
   typedDependencies,
 };

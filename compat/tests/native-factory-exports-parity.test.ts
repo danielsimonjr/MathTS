@@ -821,6 +821,18 @@ describe('native compatibility dependency bundles', () => {
         [2, 0],
       ],
     ],
+    ['mean', [[2, 4, 9]]],
+    [
+      'mean',
+      [
+        [
+          ['2', '4'],
+          ['6', '8'],
+        ],
+        1,
+      ],
+    ],
+    ['polynomialRoot', [-6, 11, -6, 1]],
     ['divide', [12, 3]],
     ['divide', [[2, 4], 2]],
     [
