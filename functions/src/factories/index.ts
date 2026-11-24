@@ -1338,7 +1338,7 @@ import { createCsChol } from '../algebra/sparse/csChol.js';
 import { createCsLu } from '../algebra/sparse/csLu.js';
 import { createCsSpsolve } from '../algebra/sparse/csSpsolve.js';
 import { createSpaClass } from '../type/matrix/Spa.js';
-import { createIntersect } from '../geometry/intersect.js';
+import { createIntersect, createSelectedIntersect } from '../geometry/intersect.js';
 import { createMean } from '../statistics/mean.js';
 import { createMedian } from '../statistics/median.js';
 import { createVariance, createVarianceDdof } from '../statistics/variance.js';
@@ -2733,6 +2733,8 @@ function compatFactoryExports(): {
   createToBest: typeof createToBest;
   createSplitUnit: typeof createSplitUnit;
   createSparse: typeof createSelectedSparse;
+  createIntersect: typeof createSelectedIntersect;
+  createResolve: typeof createResolve;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2997,6 +2999,8 @@ function compatFactoryExports(): {
     createToBest,
     createSplitUnit,
     createSparse: createSelectedSparse,
+    createIntersect: createSelectedIntersect,
+    createResolve,
     createTyped,
   };
 }

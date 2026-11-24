@@ -5,6 +5,42 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('resolves symbols with the selected MathJS factory', () => {
+    const actual = create({ resolveDependencies: compat.resolveDependencies });
+    const expected = oracle.create({
+      resolveDependencies: Reflect.get(oracle, 'resolveDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const node = Reflect.apply(Reflect.get(instance, 'parse'), instance, ['a + b']);
+      return String(Reflect.apply(Reflect.get(instance, 'resolve'), instance, [node, { a: 4 }]));
+    };
+    expect(run(actual)).toBe(run(expected));
+  });
+
+  it('uses the selected matrix factory for matrix intersections', () => {
+    const actual = create({ intersectDependencies: compat.intersectDependencies });
+    const expected = oracle.create({
+      intersectDependencies: Reflect.get(oracle, 'intersectDependencies'),
+    });
+    const run = (instance: object) => {
+      const points = [
+        [0, 0],
+        [2, 2],
+        [0, 2],
+        [2, 0],
+      ].map((point) => Reflect.apply(Reflect.get(instance, 'matrix'), instance, [point, 'sparse']));
+      return Reflect.apply(Reflect.get(instance, 'intersect'), instance, points) as {
+        storage(): string;
+        valueOf(): unknown;
+      };
+    };
+    const result = run(actual);
+    const upstreamResult = run(expected);
+    expect(result.storage()).toBe(upstreamResult.storage());
+    expect(result.valueOf()).toEqual(upstreamResult.valueOf());
+  });
+
   it('constructs selected sparse matrices and preserves the requested datatype', () => {
     const actual = create({ sparseDependencies: compat.sparseDependencies });
     const expected = oracle.create({
@@ -759,6 +795,15 @@ describe('native compatibility dependency bundles', () => {
           [2, 0],
           [0, 4],
         ],
+      ],
+    ],
+    [
+      'intersect',
+      [
+        [0, 0],
+        [2, 2],
+        [0, 2],
+        [2, 0],
       ],
     ],
     ['multiplyScalar', [3, 4]],
