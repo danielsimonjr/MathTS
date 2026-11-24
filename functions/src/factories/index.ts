@@ -1712,6 +1712,60 @@ import {
   createFermiCoupling,
 } from '../type/unit/physicalConstants.js';
 
+import {
+  mathjsCreateAtomicMass,
+  mathjsCreateAvogadro,
+  mathjsCreateBohrMagneton,
+  mathjsCreateBohrRadius,
+  mathjsCreateBoltzmann,
+  mathjsCreateClassicalElectronRadius,
+  mathjsCreateConductanceQuantum,
+  mathjsCreateCoulomb,
+  mathjsCreateCoulombConstant,
+  mathjsCreateDeuteronMass,
+  mathjsCreateEfimovFactor,
+  mathjsCreateElectricConstant,
+  mathjsCreateElectronMass,
+  mathjsCreateElementaryCharge,
+  mathjsCreateFaraday,
+  mathjsCreateFermiCoupling,
+  mathjsCreateFineStructure,
+  mathjsCreateFirstRadiation,
+  mathjsCreateGasConstant,
+  mathjsCreateGravitationConstant,
+  mathjsCreateGravity,
+  mathjsCreateHartreeEnergy,
+  mathjsCreateInverseConductanceQuantum,
+  mathjsCreateKlitzing,
+  mathjsCreateLoschmidt,
+  mathjsCreateMagneticConstant,
+  mathjsCreateMagneticFluxQuantum,
+  mathjsCreateMolarMass,
+  mathjsCreateMolarMassC12,
+  mathjsCreateMolarPlanckConstant,
+  mathjsCreateMolarVolume,
+  mathjsCreateNeutronMass,
+  mathjsCreateNuclearMagneton,
+  mathjsCreatePlanckCharge,
+  mathjsCreatePlanckConstant,
+  mathjsCreatePlanckLength,
+  mathjsCreatePlanckMass,
+  mathjsCreatePlanckTemperature,
+  mathjsCreatePlanckTime,
+  mathjsCreateProtonMass,
+  mathjsCreateQuantumOfCirculation,
+  mathjsCreateReducedPlanckConstant,
+  mathjsCreateRydberg,
+  mathjsCreateSackurTetrode,
+  mathjsCreateSecondRadiation,
+  mathjsCreateSpeedOfLight,
+  mathjsCreateStefanBoltzmann,
+  mathjsCreateThomsonCrossSection,
+  mathjsCreateVacuumImpedance,
+  mathjsCreateWeakMixingAngle,
+  mathjsCreateWienDisplacement,
+} from '../type/unit/physicalConstants.js';
+
 export const speedOfLight = createSpeedOfLight(
   factoryScope as Parameters<typeof createSpeedOfLight>[0]
 );
@@ -2621,6 +2675,57 @@ function compatFactoryExports(): {
   createAssignmentNode: typeof createAssignmentNode;
   createParse: typeof createParse;
   createEvaluate: typeof createSelectedEvaluate;
+  createAtomicMass: typeof mathjsCreateAtomicMass;
+  createAvogadro: typeof mathjsCreateAvogadro;
+  createBohrMagneton: typeof mathjsCreateBohrMagneton;
+  createBohrRadius: typeof mathjsCreateBohrRadius;
+  createBoltzmann: typeof mathjsCreateBoltzmann;
+  createClassicalElectronRadius: typeof mathjsCreateClassicalElectronRadius;
+  createConductanceQuantum: typeof mathjsCreateConductanceQuantum;
+  createCoulomb: typeof mathjsCreateCoulomb;
+  createCoulombConstant: typeof mathjsCreateCoulombConstant;
+  createDeuteronMass: typeof mathjsCreateDeuteronMass;
+  createEfimovFactor: typeof mathjsCreateEfimovFactor;
+  createElectricConstant: typeof mathjsCreateElectricConstant;
+  createElectronMass: typeof mathjsCreateElectronMass;
+  createElementaryCharge: typeof mathjsCreateElementaryCharge;
+  createFaraday: typeof mathjsCreateFaraday;
+  createFermiCoupling: typeof mathjsCreateFermiCoupling;
+  createFineStructure: typeof mathjsCreateFineStructure;
+  createFirstRadiation: typeof mathjsCreateFirstRadiation;
+  createGasConstant: typeof mathjsCreateGasConstant;
+  createGravitationConstant: typeof mathjsCreateGravitationConstant;
+  createGravity: typeof mathjsCreateGravity;
+  createHartreeEnergy: typeof mathjsCreateHartreeEnergy;
+  createInverseConductanceQuantum: typeof mathjsCreateInverseConductanceQuantum;
+  createKlitzing: typeof mathjsCreateKlitzing;
+  createLoschmidt: typeof mathjsCreateLoschmidt;
+  createMagneticConstant: typeof mathjsCreateMagneticConstant;
+  createMagneticFluxQuantum: typeof mathjsCreateMagneticFluxQuantum;
+  createMolarMass: typeof mathjsCreateMolarMass;
+  createMolarMassC12: typeof mathjsCreateMolarMassC12;
+  createMolarPlanckConstant: typeof mathjsCreateMolarPlanckConstant;
+  createMolarVolume: typeof mathjsCreateMolarVolume;
+  createNeutronMass: typeof mathjsCreateNeutronMass;
+  createNuclearMagneton: typeof mathjsCreateNuclearMagneton;
+  createPlanckCharge: typeof mathjsCreatePlanckCharge;
+  createPlanckConstant: typeof mathjsCreatePlanckConstant;
+  createPlanckLength: typeof mathjsCreatePlanckLength;
+  createPlanckMass: typeof mathjsCreatePlanckMass;
+  createPlanckTemperature: typeof mathjsCreatePlanckTemperature;
+  createPlanckTime: typeof mathjsCreatePlanckTime;
+  createProtonMass: typeof mathjsCreateProtonMass;
+  createQuantumOfCirculation: typeof mathjsCreateQuantumOfCirculation;
+  createReducedPlanckConstant: typeof mathjsCreateReducedPlanckConstant;
+  createRydberg: typeof mathjsCreateRydberg;
+  createSackurTetrode: typeof mathjsCreateSackurTetrode;
+  createSecondRadiation: typeof mathjsCreateSecondRadiation;
+  createSpeedOfLight: typeof mathjsCreateSpeedOfLight;
+  createStefanBoltzmann: typeof mathjsCreateStefanBoltzmann;
+  createThomsonCrossSection: typeof mathjsCreateThomsonCrossSection;
+  createVacuumImpedance: typeof mathjsCreateVacuumImpedance;
+  createWeakMixingAngle: typeof mathjsCreateWeakMixingAngle;
+  createWienDisplacement: typeof mathjsCreateWienDisplacement;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2827,6 +2932,57 @@ function compatFactoryExports(): {
     createAssignmentNode,
     createParse,
     createEvaluate: createSelectedEvaluate,
+    createAtomicMass: mathjsCreateAtomicMass,
+    createAvogadro: mathjsCreateAvogadro,
+    createBohrMagneton: mathjsCreateBohrMagneton,
+    createBohrRadius: mathjsCreateBohrRadius,
+    createBoltzmann: mathjsCreateBoltzmann,
+    createClassicalElectronRadius: mathjsCreateClassicalElectronRadius,
+    createConductanceQuantum: mathjsCreateConductanceQuantum,
+    createCoulomb: mathjsCreateCoulomb,
+    createCoulombConstant: mathjsCreateCoulombConstant,
+    createDeuteronMass: mathjsCreateDeuteronMass,
+    createEfimovFactor: mathjsCreateEfimovFactor,
+    createElectricConstant: mathjsCreateElectricConstant,
+    createElectronMass: mathjsCreateElectronMass,
+    createElementaryCharge: mathjsCreateElementaryCharge,
+    createFaraday: mathjsCreateFaraday,
+    createFermiCoupling: mathjsCreateFermiCoupling,
+    createFineStructure: mathjsCreateFineStructure,
+    createFirstRadiation: mathjsCreateFirstRadiation,
+    createGasConstant: mathjsCreateGasConstant,
+    createGravitationConstant: mathjsCreateGravitationConstant,
+    createGravity: mathjsCreateGravity,
+    createHartreeEnergy: mathjsCreateHartreeEnergy,
+    createInverseConductanceQuantum: mathjsCreateInverseConductanceQuantum,
+    createKlitzing: mathjsCreateKlitzing,
+    createLoschmidt: mathjsCreateLoschmidt,
+    createMagneticConstant: mathjsCreateMagneticConstant,
+    createMagneticFluxQuantum: mathjsCreateMagneticFluxQuantum,
+    createMolarMass: mathjsCreateMolarMass,
+    createMolarMassC12: mathjsCreateMolarMassC12,
+    createMolarPlanckConstant: mathjsCreateMolarPlanckConstant,
+    createMolarVolume: mathjsCreateMolarVolume,
+    createNeutronMass: mathjsCreateNeutronMass,
+    createNuclearMagneton: mathjsCreateNuclearMagneton,
+    createPlanckCharge: mathjsCreatePlanckCharge,
+    createPlanckConstant: mathjsCreatePlanckConstant,
+    createPlanckLength: mathjsCreatePlanckLength,
+    createPlanckMass: mathjsCreatePlanckMass,
+    createPlanckTemperature: mathjsCreatePlanckTemperature,
+    createPlanckTime: mathjsCreatePlanckTime,
+    createProtonMass: mathjsCreateProtonMass,
+    createQuantumOfCirculation: mathjsCreateQuantumOfCirculation,
+    createReducedPlanckConstant: mathjsCreateReducedPlanckConstant,
+    createRydberg: mathjsCreateRydberg,
+    createSackurTetrode: mathjsCreateSackurTetrode,
+    createSecondRadiation: mathjsCreateSecondRadiation,
+    createSpeedOfLight: mathjsCreateSpeedOfLight,
+    createStefanBoltzmann: mathjsCreateStefanBoltzmann,
+    createThomsonCrossSection: mathjsCreateThomsonCrossSection,
+    createVacuumImpedance: mathjsCreateVacuumImpedance,
+    createWeakMixingAngle: mathjsCreateWeakMixingAngle,
+    createWienDisplacement: mathjsCreateWienDisplacement,
     createTyped,
   };
 }
