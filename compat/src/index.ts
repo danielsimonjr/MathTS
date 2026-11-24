@@ -550,6 +550,7 @@ export function create(
   );
   const expressionConstants: Record<string, () => unknown> = {};
   if (useCompatSetUnion) expressionConstants.setUnion = () => instance.setUnion;
+  if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
