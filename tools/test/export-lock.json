@@ -13574,6 +13574,9 @@
       "createMax": {
         "kind": "function"
       },
+      "createMean": {
+        "kind": "function"
+      },
       "createMin": {
         "kind": "function"
       },
@@ -13686,6 +13689,9 @@
         "kind": "function"
       },
       "createPlanckTime": {
+        "kind": "function"
+      },
+      "createPolynomialRoot": {
         "kind": "function"
       },
       "createPow": {
@@ -14693,6 +14699,9 @@
       "mean": {
         "kind": "function"
       },
+      "meanDependencies": {
+        "kind": "object"
+      },
       "median": {
         "kind": "function"
       },
@@ -14908,6 +14917,9 @@
       },
       "polynomialRoot": {
         "kind": "function"
+      },
+      "polynomialRootDependencies": {
+        "kind": "object"
       },
       "pow": {
         "kind": "function"

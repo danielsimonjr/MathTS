@@ -1940,6 +1940,13 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+const createSelectedMean = /* #__PURE__ */ factory(
+  'mean',
+  ['typed', 'add', 'divide'],
+  (deps: Parameters<typeof createMean>[0]) =>
+    createMean({ ...deps, parseNumberWithConfig: (value: string) => value })
+);
+
 const createSelectedCompile = /* #__PURE__ */ factory(
   'compile',
   ['typed', 'parse'],
@@ -2754,6 +2761,8 @@ function compatFactoryExports(): {
   createResolve: typeof createResolve;
   createSetUnion: typeof createSetUnion;
   createDivide: typeof createSelectedDivide;
+  createMean: typeof createSelectedMean;
+  createPolynomialRoot: typeof createPolynomialRoot;
   createTyped: typeof createTyped;
 } {
   return {
@@ -3023,6 +3032,8 @@ function compatFactoryExports(): {
     createResolve,
     createSetUnion,
     createDivide: createSelectedDivide,
+    createMean: createSelectedMean,
+    createPolynomialRoot,
     createTyped,
   };
 }
