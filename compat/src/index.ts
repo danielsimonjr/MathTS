@@ -17,6 +17,7 @@
  * @packageDocumentation
  */
 
+import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
@@ -776,6 +777,11 @@ export {
 /** Union of two multisets in MathJS result order. */
 const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
 export { namedSetUnion as setUnion };
+
+/** Embedded documentation for names in the MathJS compatibility surface. */
+export const docs = /* #__PURE__ */ Object.fromEntries(
+  Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
+);
 
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';

@@ -14342,6 +14342,9 @@
       "divideScalarDependencies": {
         "kind": "object"
       },
+      "docs": {
+        "kind": "object"
+      },
       "dot": {
         "kind": "function"
       },
