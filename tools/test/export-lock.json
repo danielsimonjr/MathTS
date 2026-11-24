@@ -12845,6 +12845,9 @@
       "ceil": {
         "kind": "function"
       },
+      "ceilDependencies": {
+        "kind": "object"
+      },
       "chain": {
         "kind": "function"
       },
@@ -13028,6 +13031,9 @@
       "createCbrt": {
         "kind": "function"
       },
+      "createCeil": {
+        "kind": "function"
+      },
       "createClone": {
         "kind": "function"
       },
@@ -13118,6 +13124,9 @@
       "createFlatten": {
         "kind": "function"
       },
+      "createFloor": {
+        "kind": "function"
+      },
       "createForEach": {
         "kind": "function"
       },
@@ -13125,6 +13134,9 @@
         "kind": "function"
       },
       "createFractionClass": {
+        "kind": "function"
+      },
+      "createGcd": {
         "kind": "function"
       },
       "createGetMatrixDataType": {
@@ -13223,7 +13235,13 @@
       "createMatrixFromColumns": {
         "kind": "function"
       },
+      "createMatrixFromFunction": {
+        "kind": "function"
+      },
       "createMatrixFromRows": {
+        "kind": "function"
+      },
+      "createMod": {
         "kind": "function"
       },
       "createMode": {
@@ -13310,6 +13328,9 @@
       "createSech": {
         "kind": "function"
       },
+      "createSetSize": {
+        "kind": "function"
+      },
       "createSin": {
         "kind": "function"
       },
@@ -13320,6 +13341,9 @@
         "kind": "function"
       },
       "createSmallerEq": {
+        "kind": "function"
+      },
+      "createSort": {
         "kind": "function"
       },
       "createSparseMatrixClass": {
@@ -13577,6 +13601,9 @@
       "floor": {
         "kind": "function"
       },
+      "floorDependencies": {
+        "kind": "object"
+      },
       "forEach": {
         "kind": "function"
       },
@@ -13603,6 +13630,9 @@
       },
       "gcd": {
         "kind": "function"
+      },
+      "gcdDependencies": {
+        "kind": "object"
       },
       "getMatrixDataType": {
         "kind": "function"
@@ -13982,6 +14012,9 @@
       "matrixFromFunction": {
         "kind": "function"
       },
+      "matrixFromFunctionDependencies": {
+        "kind": "object"
+      },
       "matrixFromRows": {
         "kind": "function"
       },
@@ -14002,6 +14035,9 @@
       },
       "mod": {
         "kind": "function"
+      },
+      "modDependencies": {
+        "kind": "object"
       },
       "mode": {
         "kind": "function"
@@ -14300,6 +14336,9 @@
       "setSize": {
         "kind": "function"
       },
+      "setSizeDependencies": {
+        "kind": "object"
+      },
       "setSymDifference": {
         "kind": "function"
       },
@@ -14356,6 +14395,9 @@
       },
       "sort": {
         "kind": "function"
+      },
+      "sortDependencies": {
+        "kind": "object"
       },
       "sparse": {
         "kind": "function"
