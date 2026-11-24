@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.12
+
+### Patch Changes
+
+- 22f4d3e: Expose the selected MathJS multiply factory and its dependency bundle for scalar, vector, dense, and sparse multiplication.
+
 ## 0.89.11
 
 ### Patch Changes
