@@ -85,3 +85,9 @@ export const createFactorial = /* #__PURE__ */ factory(
     });
   }
 );
+
+export const createSelectedFactorial = /* #__PURE__ */ factory(
+  name,
+  ['typed', 'gamma'],
+  (deps: FactorialDependencies) => createFactorial({ ...deps })
+);

@@ -339,3 +339,31 @@ export const createGamma = /* #__PURE__ */ factory(
     }
   }
 );
+
+export const createSelectedGamma = /* #__PURE__ */ factory(
+  name,
+  [...dependencies, 'config'],
+  (deps: GammaDependencies & { config: { precision?: number } }) => {
+    const gamma = createGamma({ ...deps }) as unknown as {
+      signatures: Record<string, (...args: unknown[]) => unknown>;
+    };
+    const bigGamma = gamma.signatures.BigNumber;
+    const { typed, config, BigNumber } = deps;
+    return typed(name, {
+      ...gamma.signatures,
+      BigNumber: (value: BigNumberType) => {
+        if (value.isNaN()) return BigNumber.fromNumber(Infinity);
+        if (value.isFinite() && !value.isInteger()) throw new Error('Integer BigNumber expected');
+        const precision = BigNumber.precision;
+        if (config.precision === undefined || config.precision === precision)
+          return bigGamma(value);
+        BigNumber.config({ precision: config.precision });
+        try {
+          return bigGamma(value);
+        } finally {
+          BigNumber.config({ precision });
+        }
+      },
+    });
+  }
+);
