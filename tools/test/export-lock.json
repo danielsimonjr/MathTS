@@ -13289,6 +13289,9 @@
       "createCumSum": {
         "kind": "function"
       },
+      "createCumSumTransform": {
+        "kind": "function"
+      },
       "createDeepEqual": {
         "kind": "function"
       },
@@ -13580,6 +13583,9 @@
       "createMapSlices": {
         "kind": "function"
       },
+      "createMapSlicesTransform": {
+        "kind": "function"
+      },
       "createMapTransform": {
         "kind": "function"
       },
@@ -13601,10 +13607,19 @@
       "createMax": {
         "kind": "function"
       },
+      "createMaxTransform": {
+        "kind": "function"
+      },
       "createMean": {
         "kind": "function"
       },
+      "createMeanTransform": {
+        "kind": "function"
+      },
       "createMin": {
+        "kind": "function"
+      },
+      "createMinTransform": {
         "kind": "function"
       },
       "createMod": {
@@ -13907,6 +13922,9 @@
       "createSum": {
         "kind": "function"
       },
+      "createSumTransform": {
+        "kind": "function"
+      },
       "createSymbolNode": {
         "kind": "function"
       },
@@ -14028,6 +14046,9 @@
         "kind": "function"
       },
       "cumsumDependencies": {
+        "kind": "object"
+      },
+      "cumsumTransformDependencies": {
         "kind": "object"
       },
       "deepEqual": {
@@ -14711,6 +14732,9 @@
       "mapSlicesDependencies": {
         "kind": "object"
       },
+      "mapSlicesTransformDependencies": {
+        "kind": "object"
+      },
       "mapTransformDependencies": {
         "kind": "object"
       },
@@ -14744,10 +14768,16 @@
       "maxDependencies": {
         "kind": "object"
       },
+      "maxTransformDependencies": {
+        "kind": "object"
+      },
       "mean": {
         "kind": "function"
       },
       "meanDependencies": {
+        "kind": "object"
+      },
+      "meanTransformDependencies": {
         "kind": "object"
       },
       "median": {
@@ -14757,6 +14787,9 @@
         "kind": "function"
       },
       "minDependencies": {
+        "kind": "object"
+      },
+      "minTransformDependencies": {
         "kind": "object"
       },
       "mod": {
@@ -15333,6 +15366,9 @@
         "kind": "function"
       },
       "sumDependencies": {
+        "kind": "object"
+      },
+      "sumTransformDependencies": {
         "kind": "object"
       },
       "sylvester": {

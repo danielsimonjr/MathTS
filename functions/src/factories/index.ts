@@ -25,7 +25,7 @@ import { replacer } from '../utils/json-replacer.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
 import { compatSetUnion } from '../typed/set.js';
-import { factory, isFactory } from '../utils/factory.js';
+import { factory, isFactory, type FactoryFunction } from '../utils/factory.js';
 import { create as createFactoryInstance, type FactoriesInput } from '../core/create.js';
 import { mixin as attachEmitter } from '../utils/emitter.js';
 import { ArgumentsError } from '../error/ArgumentsError.js';
@@ -2513,33 +2513,62 @@ function tryCreateFactoryBundle(
   return createFactoryInstance(factories as FactoriesInput, config);
 }
 
-const createSelectedMapTransform: ReturnType<
-  typeof factory<Record<string, unknown>, ReturnType<typeof createMapTransform>>
-> = /* #__PURE__ */ factory(
-  'map',
-  ['typed'],
-  (deps: Record<string, unknown>) => createMapTransform({ ...deps, map: createMap(deps) }),
-  { isTransformFunction: true }
-);
+function selectedTransform<TResult>(
+  transform: (deps: Record<string, unknown>) => TResult,
+  base: FactoryFunction
+): FactoryFunction<Record<string, unknown>, TResult> {
+  return factory(
+    base.fn,
+    base.dependencies,
+    (deps: Record<string, unknown>) => transform({ ...deps, [base.fn]: base(deps) }),
+    { ...base.meta, isTransformFunction: true }
+  );
+}
 
-const createSelectedFilterTransform: ReturnType<
-  typeof factory<Record<string, unknown>, ReturnType<typeof createFilterTransform>>
-> = /* #__PURE__ */ factory(
-  'filter',
-  ['typed'],
-  (deps: Record<string, unknown>) => createFilterTransform({ ...deps, filter: createFilter(deps) }),
-  { isTransformFunction: true }
-);
+const createSelectedMapTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMapTransform>
+> = /* #__PURE__ */ selectedTransform(createMapTransform, createMap);
 
-const createSelectedForEachTransform: ReturnType<
-  typeof factory<Record<string, unknown>, ReturnType<typeof createForEachTransform>>
-> = /* #__PURE__ */ factory(
-  'forEach',
-  ['typed'],
-  (deps: Record<string, unknown>) =>
-    createForEachTransform({ ...deps, forEach: createForEach(deps) }),
-  { isTransformFunction: true }
-);
+const createSelectedFilterTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createFilterTransform>
+> = /* #__PURE__ */ selectedTransform(createFilterTransform, createFilter);
+
+const createSelectedForEachTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createForEachTransform>
+> = /* #__PURE__ */ selectedTransform(createForEachTransform, createForEach);
+
+const createSelectedMinTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMinTransform>
+> = /* #__PURE__ */ selectedTransform(createMinTransform, createMin);
+
+const createSelectedMaxTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMaxTransform>
+> = /* #__PURE__ */ selectedTransform(createMaxTransform, createMax);
+
+const createSelectedSumTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createSumTransform>
+> = /* #__PURE__ */ selectedTransform(createSumTransform, createMathjsSum);
+
+const createSelectedCumSumTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createCumSumTransform>
+> = /* #__PURE__ */ selectedTransform(createCumSumTransform, createCumSum);
+
+const createSelectedMapSlicesTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMapSlicesTransform>
+> = /* #__PURE__ */ selectedTransform(createMapSlicesTransform, createMathjsMapSlices);
+
+const createSelectedMeanTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMeanTransform>
+> = /* #__PURE__ */ selectedTransform(createMeanTransform, createSelectedMean);
 
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
@@ -2605,6 +2634,12 @@ function compatFactoryExports(): {
   createFilterTransform: typeof createSelectedFilterTransform;
   createForEach: typeof createForEach;
   createForEachTransform: typeof createSelectedForEachTransform;
+  createMeanTransform: typeof createSelectedMeanTransform;
+  createMapSlicesTransform: typeof createSelectedMapSlicesTransform;
+  createCumSumTransform: typeof createSelectedCumSumTransform;
+  createSumTransform: typeof createSelectedSumTransform;
+  createMaxTransform: typeof createSelectedMaxTransform;
+  createMinTransform: typeof createSelectedMinTransform;
   createFlatten: typeof createFlatten;
   createSize: typeof createSize;
   createSqueeze: typeof createSqueeze;
@@ -2881,6 +2916,12 @@ function compatFactoryExports(): {
     createFilterTransform: createSelectedFilterTransform,
     createForEach,
     createForEachTransform: createSelectedForEachTransform,
+    createMeanTransform: createSelectedMeanTransform,
+    createMapSlicesTransform: createSelectedMapSlicesTransform,
+    createCumSumTransform: createSelectedCumSumTransform,
+    createSumTransform: createSelectedSumTransform,
+    createMaxTransform: createSelectedMaxTransform,
+    createMinTransform: createSelectedMinTransform,
     createFlatten,
     createSize,
     createSqueeze,
