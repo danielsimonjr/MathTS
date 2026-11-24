@@ -100,6 +100,9 @@ function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig
 // Math Instance
 // =============================================================================
 
+type CompatFactoryInput = Record<string, unknown> | readonly unknown[];
+type CompatInstanceCreateInput = CompatFactoryInput | Partial<MathJSConfig>;
+
 /**
  * MathTS instance with mathjs-compatible API
  */
@@ -108,7 +111,7 @@ interface MathInstanceOverrides {
   chain: (value?: unknown) => Chain;
   /** Chain constructor bound to this instance. */
   Chain: ReturnType<typeof createChain>['Chain'];
-  create: typeof create;
+  create: (input?: CompatInstanceCreateInput, options?: Partial<MathJSConfig>) => MathInstance;
   Parser: WiredCompatInstance['Parser'];
   on: WiredCompatInstance['on'];
   off: WiredCompatInstance['off'];
@@ -336,9 +339,9 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
  * @param factories - The namespace to copy.
  * @returns A plain object with every enumerable name of `factories`.
  */
-function surfaceOf(factories: Record<string, unknown>): Record<string, unknown> {
+function surfaceOf(factories: CompatFactoryInput): Record<string, unknown> {
   const surface: Record<string, unknown> = {};
-  for (const key in factories) surface[key] = factories[key];
+  for (const key in factories) surface[key] = Reflect.get(factories, key);
   return surface;
 }
 
@@ -362,7 +365,7 @@ function surfaceOf(factories: Record<string, unknown>): Record<string, unknown> 
  * ```
  */
 export function create(
-  factories: Record<string, unknown> = all,
+  factories: CompatFactoryInput = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
   if (factories !== all) {
@@ -408,12 +411,30 @@ export function create(
     return overlayNeeded;
   };
 
+  function createSibling(
+    input?: CompatInstanceCreateInput,
+    options?: Partial<MathJSConfig>
+  ): MathInstance {
+    if (input === undefined) return create(options === undefined ? factories : all, options);
+    if (
+      options === undefined &&
+      !Array.isArray(input) &&
+      Object.keys(input).every(
+        (name) =>
+          Object.hasOwn(configBaseline, name) && typeof Reflect.get(input, name) !== 'function'
+      )
+    ) {
+      return create(factories, input as Partial<MathJSConfig>);
+    }
+    return create(input as CompatFactoryInput, options);
+  }
+
   const originalSurface = surfaceOf(factories);
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...originalSurface,
-    create,
+    create: createSibling,
 
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
@@ -541,6 +562,7 @@ export function create(
   const isLazy = (key: string, value: unknown): value is (...args: unknown[]) => unknown =>
     typeof value === 'function' &&
     key !== 'config' &&
+    key !== 'create' &&
     key !== 'chain' &&
     !HOT_SCALAR_SHIM_KEYS.has(key);
 

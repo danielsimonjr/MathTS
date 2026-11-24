@@ -2220,7 +2220,7 @@ function isFactoryBundle(value: unknown, ancestors: Set<object>): boolean {
 
 /** Load a namespace of dependency factories through the mathjs factory loader. */
 function tryCreateFactoryBundle(
-  factories: Record<string, unknown>,
+  factories: Record<string, unknown> | readonly unknown[],
   config: NonNullable<Parameters<typeof createFactoryInstance>[1]>
 ): unknown {
   if (!isFactoryBundle(factories, new Set())) return undefined;
