@@ -12527,6 +12527,9 @@
       "FibonacciHeap": {
         "kind": "function"
       },
+      "FibonacciHeapDependencies": {
+        "kind": "object"
+      },
       "Fraction": {
         "kind": "function"
       },
@@ -12682,6 +12685,9 @@
       },
       "Spa": {
         "kind": "function"
+      },
+      "SpaDependencies": {
+        "kind": "object"
       },
       "SparseMatrix": {
         "kind": "function"
@@ -13229,6 +13235,9 @@
       "createFalse": {
         "kind": "function"
       },
+      "createFibonacciHeapClass": {
+        "kind": "function"
+      },
       "createFilter": {
         "kind": "function"
       },
@@ -13370,6 +13379,9 @@
       "createLsolveAll": {
         "kind": "function"
       },
+      "createLup": {
+        "kind": "function"
+      },
       "createMap": {
         "kind": "function"
       },
@@ -13458,6 +13470,9 @@
         "kind": "function"
       },
       "createPrint": {
+        "kind": "function"
+      },
+      "createQr": {
         "kind": "function"
       },
       "createRandom": {
@@ -13554,6 +13569,9 @@
         "kind": "function"
       },
       "createSort": {
+        "kind": "function"
+      },
+      "createSpaClass": {
         "kind": "function"
       },
       "createSparseMatrixClass": {
@@ -14228,6 +14246,9 @@
       "lup": {
         "kind": "function"
       },
+      "lupDependencies": {
+        "kind": "object"
+      },
       "lusolve": {
         "kind": "function"
       },
@@ -14470,6 +14491,9 @@
       },
       "qr": {
         "kind": "function"
+      },
+      "qrDependencies": {
+        "kind": "object"
       },
       "quantileSeq": {
         "kind": "function"

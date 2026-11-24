@@ -2575,6 +2575,10 @@ function compatFactoryExports(): {
   createSetPowerset: typeof createSetPowerset;
   createColumn: typeof createColumn;
   createRow: typeof createRow;
+  createFibonacciHeapClass: typeof createFibonacciHeapClass;
+  createSpaClass: typeof createSpaClass;
+  createQr: typeof createQr;
+  createLup: typeof createLup;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2755,6 +2759,10 @@ function compatFactoryExports(): {
     createSetPowerset,
     createColumn,
     createRow,
+    createFibonacciHeapClass,
+    createSpaClass,
+    createQr,
+    createLup,
     createTyped,
   };
 }

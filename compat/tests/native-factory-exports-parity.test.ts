@@ -5,6 +5,36 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it.each(['qr', 'lup'] as const)('creates the selected %s decomposition', (name) => {
+    const bundleName = name + 'Dependencies';
+    const bundle = Reflect.get(compat, bundleName);
+    const referenceBundle = Reflect.get(oracle, bundleName);
+    expect(Object.keys(bundle)).toEqual(Object.keys(referenceBundle));
+    const selected = create({ [bundleName]: bundle });
+    const expected = oracle.create({ [bundleName]: referenceBundle });
+    expect(Object.keys(selected).sort()).toEqual(Object.keys(expected).sort());
+    const input = [
+      [4, 1],
+      [2, 3],
+    ];
+    expect(Reflect.get(selected, name)(input)).toEqual(Reflect.get(expected, name)(input));
+  });
+
+  it('uses the selected sparse accumulator and heap for LUP', () => {
+    const selected = create({ lupDependencies: compat.lupDependencies });
+    const expected = oracle.create({ lupDependencies: Reflect.get(oracle, 'lupDependencies') });
+    const input = [
+      [4, 1],
+      [2, 3],
+    ];
+    const sparse = Reflect.get(selected, 'matrix')(input, 'sparse');
+    const result = Reflect.get(selected, 'lup')(sparse) as ReturnType<typeof oracle.lup>;
+    const reference = expected.lup(expected.matrix(input, 'sparse'));
+    expect(result.L.valueOf()).toEqual(reference.L.valueOf());
+    expect(result.U.valueOf()).toEqual(reference.U.valueOf());
+    expect(result.p).toEqual(reference.p);
+  });
+
   it('creates selected indices and immutable matrices', () => {
     const actual = create({ indexDependencies: compat.indexDependencies });
     const expected = oracle.create({ indexDependencies: Reflect.get(oracle, 'indexDependencies') });

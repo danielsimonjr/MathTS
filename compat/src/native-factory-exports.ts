@@ -1871,6 +1871,97 @@ const rowDependencies: Pick<CompatFactoryExports, 'createRow'> & {
   createRow: mathjsCreateRow,
 };
 
+const mathjsCreateFibonacciHeapClass: CompatFactoryExports['createFibonacciHeapClass'] =
+  factories.createFibonacciHeapClass;
+const FibonacciHeapDependencies: Pick<CompatFactoryExports, 'createFibonacciHeapClass'> & {
+  largerDependencies: typeof largerDependencies;
+  smallerDependencies: typeof smallerDependencies;
+} = {
+  largerDependencies,
+  smallerDependencies,
+  createFibonacciHeapClass: mathjsCreateFibonacciHeapClass,
+};
+
+const mathjsCreateSpaClass: CompatFactoryExports['createSpaClass'] = factories.createSpaClass;
+const SpaDependencies: Pick<CompatFactoryExports, 'createSpaClass'> & {
+  FibonacciHeapDependencies: typeof FibonacciHeapDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+} = {
+  FibonacciHeapDependencies,
+  addScalarDependencies,
+  equalScalarDependencies,
+  createSpaClass: mathjsCreateSpaClass,
+};
+
+const mathjsCreateQr: CompatFactoryExports['createQr'] = factories.createQr;
+const qrDependencies: Pick<CompatFactoryExports, 'createQr'> & {
+  addScalarDependencies: typeof addScalarDependencies;
+  complexDependencies: typeof complexDependencies;
+  conjDependencies: typeof conjDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalDependencies: typeof equalDependencies;
+  identityDependencies: typeof identityDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  signDependencies: typeof signDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+  typedDependencies: typeof typedDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  addScalarDependencies,
+  complexDependencies,
+  conjDependencies,
+  divideScalarDependencies,
+  equalDependencies,
+  identityDependencies,
+  isZeroDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  signDependencies,
+  sqrtDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  zerosDependencies,
+  createQr: mathjsCreateQr,
+};
+
+const mathjsCreateLup: CompatFactoryExports['createLup'] = factories.createLup;
+const lupDependencies: Pick<CompatFactoryExports, 'createLup'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SpaDependencies: typeof SpaDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  absDependencies: typeof absDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  largerDependencies: typeof largerDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+  typedDependencies: typeof typedDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  DenseMatrixDependencies,
+  SpaDependencies,
+  SparseMatrixDependencies,
+  absDependencies,
+  addScalarDependencies,
+  divideScalarDependencies,
+  equalScalarDependencies,
+  largerDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createLup: mathjsCreateLup,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -2239,5 +2330,13 @@ export {
   columnDependencies,
   mathjsCreateRow as createRow,
   rowDependencies,
+  mathjsCreateFibonacciHeapClass as createFibonacciHeapClass,
+  FibonacciHeapDependencies,
+  mathjsCreateSpaClass as createSpaClass,
+  SpaDependencies,
+  mathjsCreateQr as createQr,
+  qrDependencies,
+  mathjsCreateLup as createLup,
+  lupDependencies,
   typedDependencies,
 };
