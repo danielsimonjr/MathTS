@@ -117,7 +117,7 @@ import {
   multinomial as typedMultinomial,
   permutations as typedPermutations,
 } from '../typed/probability.js';
-import { createLgamma } from '../probability/lgamma.js';
+import { createLgamma, createMathJSLgamma } from '../probability/lgamma.js';
 import { createPickRandom } from '../probability/pickRandom.js';
 import { createRandom } from '../probability/random.js';
 
@@ -3430,7 +3430,7 @@ function compatFactoryExports(): {
     createIsNumeric,
     createIsPositive,
     createIsPrime,
-    createLgamma,
+    createLgamma: createMathJSLgamma,
     createLog10,
     createLog2,
     createMultiplyScalar,
@@ -3749,6 +3749,7 @@ export const factory_mathjsCompat = {
   conj,
   im,
   re,
+  lgamma: createMathJSLgamma(factoryScope as Parameters<typeof createMathJSLgamma>[0]),
   fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),
   toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),
 };

@@ -16,6 +16,8 @@ import {
   fraction,
   fractionDependencies,
   im,
+  lgamma,
+  lgammaDependencies,
   log1p,
   log2,
   median,
@@ -246,5 +248,18 @@ describe('named compatibility function imports', () => {
       const expected = oracle.evaluate(expression) as { toArray(): unknown[] };
       expect(actual.toArray().map(String)).toEqual(expected.toArray().map(String));
     }
+  });
+
+  it('matches the MathJS real-axis log-gamma domain', () => {
+    const math = create(all);
+    const selected = create({ lgammaDependencies });
+    for (const value of [-Infinity, -3, -0.5, -0, 0, Infinity, NaN]) {
+      const expected = oracle.lgamma(value);
+      for (const actual of [lgamma(value), math.lgamma(value), selected.lgamma(value)]) {
+        expect(actual).toBe(expected);
+      }
+    }
+    expect(math.evaluate('lgamma(-0.5)')).toBeNaN();
+    expect(lgamma(math.complex(-0.5, 0))).toMatchObject({ re: NaN, im: 0 });
   });
 });
