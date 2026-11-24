@@ -1,4 +1,5 @@
 import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
+import { createSelectedMultiply } from '../arithmetic/selectedMultiply.js';
 import { createSelectedMatrix } from './selected-matrix.js';
 import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
@@ -2586,6 +2587,7 @@ function compatFactoryExports(): {
   createSum: typeof createMathjsSum;
   createProd: typeof createMathjsProd;
   createCount: typeof createCount;
+  createMultiply: typeof createSelectedMultiply;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2777,6 +2779,7 @@ function compatFactoryExports(): {
     createSum: createMathjsSum,
     createProd: createMathjsProd,
     createCount,
+    createMultiply: createSelectedMultiply,
     createTyped,
   };
 }

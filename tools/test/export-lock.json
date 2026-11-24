@@ -13424,6 +13424,9 @@
       "createMode": {
         "kind": "function"
       },
+      "createMultiply": {
+        "kind": "function"
+      },
       "createMultiplyScalar": {
         "kind": "function"
       },
@@ -14374,6 +14377,9 @@
       },
       "multiply": {
         "kind": "function"
+      },
+      "multiplyDependencies": {
+        "kind": "object"
       },
       "multiplyScalar": {
         "kind": "function"
