@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.8
+
+### Patch Changes
+
+- b6915dd: Expose more native MathJS factory bundles for bit shifts, matrix operations, comparisons, and numeric functions.
+- c71620c: Expose native MathJS dependency bundles for binary, hexadecimal, and octal formatting and cube roots.
+- Updated dependencies [b6915dd]
+- Updated dependencies [c71620c]
+  - @danielsimonjr/mathts-functions@0.89.6
+
 ## 0.7.7
 
 ### Patch Changes
