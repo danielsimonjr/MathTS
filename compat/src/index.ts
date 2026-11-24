@@ -614,7 +614,12 @@ export function create(
     instance as Record<string, unknown>,
     currentConfig,
     flat.parser === functionsNamespace.parser,
-    expressionConstants
+    expressionConstants,
+    new Set(
+      ['random', 'randomInt', 'pickRandom'].filter(
+        (name) => originalSurface[name] === functionsNamespace[name]
+      )
+    )
   );
 
   return instance as unknown as MathInstance;

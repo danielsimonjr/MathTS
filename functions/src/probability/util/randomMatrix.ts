@@ -1,3 +1,5 @@
+import { assertAllocSize } from '../../utils/limits.js';
+
 // Recursive type for nested arrays
 type NestedNumberArray = number | NestedNumberArray[];
 
@@ -8,18 +10,11 @@ type NestedNumberArray = number | NestedNumberArray[];
  * @returns {Array}
  */
 export function randomMatrix(size: number[], random: () => number): NestedNumberArray[] {
-  const data: NestedNumberArray[] = [];
-  size = size.slice(0);
-
-  if (size.length > 1) {
-    for (let i = 0, length = size.shift(); i < (length as number); i++) {
-      data.push(randomMatrix(size, random));
-    }
-  } else {
-    for (let i = 0, length = size.shift(); i < (length as number); i++) {
-      data.push(random());
-    }
-  }
-
-  return data;
+  const dimensions = size.map((dimension) => (dimension > 0 ? Math.ceil(dimension) : 0));
+  assertAllocSize('random', dimensions);
+  const fill = (axis: number): NestedNumberArray[] =>
+    Array.from({ length: dimensions[axis] }, () =>
+      axis + 1 < dimensions.length ? fill(axis + 1) : random()
+    );
+  return fill(0);
 }

@@ -98,13 +98,15 @@ function scrubDenylist(scope: Record<string, unknown>): void {
  * @param currentConfig - The live config object of the instance.
  * @param bindParser - When `true`, `instance.parser` becomes a parser that evaluates
  *   with the instance evaluator. Default: `false`.
- * @param constants - Live reads of the instance's configured constants.
+ * @param constants - Live reads of the instance's configured expression bindings.
+ * @param defaultRandom - Random functions supplied by the built-in namespace.
  */
 export function wireMathjsInstanceApi(
   instance: Record<string, unknown>,
   currentConfig: MathJSConfig,
   bindParser = false,
-  constants: Readonly<Record<string, () => unknown>> = {}
+  constants: Record<string, () => unknown> = {},
+  defaultRandom: ReadonlySet<string> = new Set()
 ): WiredCompatInstance {
   wiredInstances.add(instance);
   const brandHolder: object = Object.getPrototypeOf(instance) ?? instance;
@@ -134,6 +136,21 @@ export function wireMathjsInstanceApi(
   instance.on = emitter.on;
   instance.off = emitter.off;
   instance.once = emitter.once;
+
+  if (defaultRandom.size > 0) {
+    const factories = factory_mathjsCompat.createCompatRandomSources(
+      currentConfig as Parameters<typeof factory_mathjsCompat.createCompatRandomSources>[0],
+      (event: string, callback: (current: MathJSConfig, previous: MathJSConfig) => void) =>
+        emitter.on(event, (...args) => {
+          callback(...(args as Parameters<typeof callback>));
+        })
+    );
+    for (const [name, build] of Object.entries(factories)) {
+      if (!defaultRandom.has(name)) continue;
+      instance[name] = build();
+      constants[name] = () => instance[name];
+    }
+  }
 
   const UnitCtor = instance.Unit as { isValuelessUnit: (name: string) => boolean } | undefined;
   if (UnitCtor?.isValuelessUnit) {
