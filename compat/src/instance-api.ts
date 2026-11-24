@@ -10,14 +10,13 @@ import {
   factory_mathjsCompat,
   EVALUATE_SCOPE_OMIT,
   parser as functionsParser,
-  reviver,
   runWithConfig,
   type BridgeMatrix,
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
-import { compatReplacer as replacer } from './serialization.js';
+import { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
 
 type MathNamespace = Parameters<typeof importFactory>[2];

@@ -829,7 +829,7 @@ export const docs = /* #__PURE__ */ Object.fromEntries(
   Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
 );
 
-export { compatReplacer as replacer } from './serialization.js';
+export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
 
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';
@@ -977,7 +977,6 @@ export {
   reshape,
   resize,
   resolve,
-  reviver,
   rightArithShift,
   rightLogShift,
   rotate,

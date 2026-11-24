@@ -470,6 +470,26 @@ describe('native compatibility dependency bundles', () => {
     }
   });
 
+  it('revives MathJS ranges, indices, and complete expression trees by default', () => {
+    const math = create(compat.all);
+    const upstream = [
+      Reflect.construct(Reflect.get(oracle, 'Range'), [1, 10, 2]),
+      oracle.index(1, 2),
+      oracle.parse('x[2] + 3'),
+    ];
+    const serialized = JSON.stringify(upstream, oracle.replacer);
+    for (const reviver of [compat.reviver, math.reviver]) {
+      const [range, index, expression] = JSON.parse(serialized, reviver);
+      expect(compat.isRange(range)).toBe(true);
+      expect(range.toArray()).toEqual([1, 3, 5, 7, 9]);
+      expect(compat.isIndex(index)).toBe(true);
+      expect(index.size()).toEqual([1, 1]);
+      expect(expression).toBeInstanceOf(compat.OperatorNode);
+      expect(expression.toString()).toBe('x[2] + 3');
+      expect(JSON.stringify([range, index, expression], math.replacer)).toBe(serialized);
+    }
+  });
+
   it('extracts selected fraction parts from fractions and nested collections', () => {
     const actual = create({
       numDependencies: compat.numDependencies,
