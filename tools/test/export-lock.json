@@ -12497,6 +12497,9 @@
       "NaN_": {
         "kind": "number"
       },
+      "Parser": {
+        "kind": "function"
+      },
       "SQRT1_2": {
         "kind": "number"
       },
@@ -12536,6 +12539,12 @@
       "ceil": {
         "kind": "function"
       },
+      "chain": {
+        "kind": "function"
+      },
+      "compile": {
+        "kind": "function"
+      },
       "complex": {
         "kind": "function"
       },
@@ -12559,6 +12568,9 @@
       },
       "e": {
         "kind": "number"
+      },
+      "evaluate": {
+        "kind": "function"
       },
       "exp": {
         "kind": "function"
@@ -12618,6 +12630,12 @@
         "kind": "function"
       },
       "ones": {
+        "kind": "function"
+      },
+      "parse": {
+        "kind": "function"
+      },
+      "parser": {
         "kind": "function"
       },
       "phi": {
