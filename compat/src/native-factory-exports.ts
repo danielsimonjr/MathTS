@@ -3182,6 +3182,129 @@ const concatTransformDependencies: UnaryBundle<'createConcatTransform'> & {
   createConcatTransform: mathjsCreateConcatTransform,
 };
 
+const mathjsCreateAndTransform: CompatFactoryExports['createAndTransform'] =
+  factories.createAndTransform;
+const andTransformDependencies: UnaryBundle<'createAndTransform'> & {
+  addDependencies: typeof addDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  notDependencies: typeof notDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  addDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  notDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createAndTransform: mathjsCreateAndTransform,
+};
+
+const mathjsCreateBitAndTransform: CompatFactoryExports['createBitAndTransform'] =
+  factories.createBitAndTransform;
+const bitAndTransformDependencies: UnaryBundle<'createBitAndTransform'> & {
+  addDependencies: typeof addDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  notDependencies: typeof notDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  addDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  notDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createBitAndTransform: mathjsCreateBitAndTransform,
+};
+
+const mathjsCreateDiffTransform: CompatFactoryExports['createDiffTransform'] =
+  factories.createDiffTransform;
+const diffTransformDependencies: UnaryBundle<'createDiffTransform'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  numberDependencies: typeof numberDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  bignumberDependencies,
+  matrixDependencies,
+  numberDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createDiffTransform: mathjsCreateDiffTransform,
+};
+
+const mathjsCreateSubsetTransform: CompatFactoryExports['createSubsetTransform'] =
+  factories.createSubsetTransform;
+const subsetTransformDependencies: UnaryBundle<'createSubsetTransform'> & {
+  addDependencies: typeof addDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  addDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createSubsetTransform: mathjsCreateSubsetTransform,
+};
+
+const mathjsCreatePrintTransform: CompatFactoryExports['createPrintTransform'] =
+  factories.createPrintTransform;
+const printTransformDependencies: UnaryBundle<'createPrintTransform'> & {
+  addDependencies: typeof addDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  addDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createPrintTransform: mathjsCreatePrintTransform,
+};
+
+const mathjsCreateRangeTransform: CompatFactoryExports['createRangeTransform'] =
+  factories.createRangeTransform;
+const rangeTransformDependencies: UnaryBundle<'createRangeTransform'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  addDependencies: typeof addDependencies;
+  equalDependencies: typeof equalDependencies;
+  isPositiveDependencies: typeof isPositiveDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+  largerDependencies: typeof largerDependencies;
+  largerEqDependencies: typeof largerEqDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  smallerEqDependencies: typeof smallerEqDependencies;
+} = {
+  bignumberDependencies,
+  matrixDependencies,
+  addDependencies,
+  equalDependencies,
+  isPositiveDependencies,
+  isZeroDependencies,
+  largerDependencies,
+  largerEqDependencies,
+  smallerDependencies,
+  smallerEqDependencies,
+  typedDependencies,
+  createRangeTransform: mathjsCreateRangeTransform,
+};
+
+const mathjsCreateIndexTransform: CompatFactoryExports['createIndexTransform'] =
+  factories.createIndexTransform;
+const indexTransformDependencies: { createIndexTransform: typeof mathjsCreateIndexTransform } & {
+  IndexDependencies: typeof IndexDependencies;
+  getMatrixDataTypeDependencies: typeof getMatrixDataTypeDependencies;
+} = {
+  IndexDependencies,
+  getMatrixDataTypeDependencies,
+  createIndexTransform: mathjsCreateIndexTransform,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3245,6 +3368,8 @@ export {
   mathjsCreateSubtractScalar as createSubtractScalar,
   mathjsCreateFormat as createFormat,
   mathjsCreatePrint as createPrint,
+  mathjsCreatePrintTransform as createPrintTransform,
+  printTransformDependencies,
   mathjsCreatePickRandom as createPickRandom,
   mathjsCreateRandom as createRandom,
   mathjsCreateMap as createMap,
@@ -3355,6 +3480,8 @@ export {
   concatDependencies,
   atan2Dependencies,
   mathjsCreateBitAnd as createBitAnd,
+  mathjsCreateBitAndTransform as createBitAndTransform,
+  bitAndTransformDependencies,
   bitAndDependencies,
   mathjsCreateBitOr as createBitOr,
   mathjsCreateBitOrTransform as createBitOrTransform,
@@ -3423,6 +3550,8 @@ export {
   mathjsCreateCbrt as createCbrt,
   cbrtDependencies,
   mathjsCreateAnd as createAnd,
+  mathjsCreateAndTransform as createAndTransform,
+  andTransformDependencies,
   andDependencies,
   mathjsCreateCompareNatural as createCompareNatural,
   compareNaturalDependencies,
@@ -3451,6 +3580,8 @@ export {
   mathjsCreateRound as createRound,
   roundDependencies,
   mathjsCreateSubset as createSubset,
+  mathjsCreateSubsetTransform as createSubsetTransform,
+  subsetTransformDependencies,
   subsetDependencies,
   mathjsCreateTrace as createTrace,
   traceDependencies,
@@ -3489,6 +3620,8 @@ export {
   mathjsCreateNumeric as createNumeric,
   numericDependencies,
   mathjsCreateDiff as createDiff,
+  mathjsCreateDiffTransform as createDiffTransform,
+  diffTransformDependencies,
   diffDependencies,
   mathjsCreateDivideScalar as createDivideScalar,
   divideScalarDependencies,
@@ -3523,6 +3656,8 @@ export {
   mathjsCreateLog1p as createLog1p,
   log1pDependencies,
   mathjsCreateRange as createRange,
+  mathjsCreateRangeTransform as createRangeTransform,
+  rangeTransformDependencies,
   rangeDependencies,
   mathjsCreateBernoulli as createBernoulli,
   bernoulliDependencies,
@@ -3557,6 +3692,8 @@ export {
   mathjsCreateIndexClass as createIndexClass,
   IndexDependencies,
   mathjsCreateIndex as createIndex,
+  mathjsCreateIndexTransform as createIndexTransform,
+  indexTransformDependencies,
   indexDependencies,
   mathjsCreateSetDifference as createSetDifference,
   setDifferenceDependencies,

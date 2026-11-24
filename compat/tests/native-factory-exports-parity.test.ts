@@ -7,6 +7,13 @@ const { create, createSin, sinDependencies } = compat;
 describe('native compatibility dependency bundles', () => {
   it('evaluates selected transforms with MathJS expression semantics', () => {
     const cases = [
+      ['and', 'And', 'false and missing'],
+      ['bitAnd', 'BitAnd', '0 & missing'],
+      ['diff', 'Diff', 'diff([[1, 3], [4, 8]], 2)'],
+      ['range', 'Range', '2:4'],
+      ['print', 'Print', 'print("$1", [42, 7])'],
+      ['subset', 'Subset', 'A[2]'],
+      ['index', 'Index', 'A[2]'],
       ['or', 'Or', 'true or missing'],
       ['bitOr', 'BitOr', '1 | 2'],
       ['nullish', 'Nullish', '4 ?? missing'],
@@ -24,7 +31,7 @@ describe('native compatibility dependency bundles', () => {
     const run = (instance: object, expression: string) =>
       Reflect.apply(Reflect.get(instance, 'evaluate'), instance, [
         expression,
-        { first: (row: unknown[]) => row[0] },
+        { A: [10, 20], first: (row: unknown[]) => row[0] },
       ]);
     for (const [name, factoryName, expression] of cases) {
       const key = name + 'TransformDependencies';
@@ -40,12 +47,25 @@ describe('native compatibility dependency bundles', () => {
       ) as unknown as TransformFactory;
       expect(actualFactory.dependencies).toEqual(expectedFactory.dependencies);
       expect(actualFactory.meta).toEqual(expectedFactory.meta);
+      const extraKeys =
+        name === 'index'
+          ? ['subsetTransformDependencies']
+          : name === 'subset'
+            ? ['indexTransformDependencies']
+            : [];
+      const extras = (library: object) =>
+        Object.fromEntries(extraKeys.map((extraKey) => [extraKey, Reflect.get(library, extraKey)]));
       const actual = create(
-        { [key]: actualBundle, evaluateDependencies: compat.evaluateDependencies },
+        {
+          ...extras(compat),
+          [key]: actualBundle,
+          evaluateDependencies: compat.evaluateDependencies,
+        },
         config
       );
       const expected = oracle.create(
         {
+          ...extras(oracle),
           [key]: expectedBundle,
           evaluateDependencies: Reflect.get(oracle, 'evaluateDependencies'),
         },
