@@ -2332,6 +2332,21 @@ function compatFactoryExports(): {
   createHex: typeof createHex;
   createOct: typeof createOct;
   createCbrt: typeof createCbrt;
+  createAnd: typeof createAnd;
+  createCompareNatural: typeof createCompareNatural;
+  createCtranspose: typeof createCtranspose;
+  createEqualText: typeof createEqualText;
+  createKron: typeof createKron;
+  createLeftShift: typeof createLeftShift;
+  createNthRoot: typeof createNthRoot;
+  createNullish: typeof createNullish;
+  createPartitionSelect: typeof createPartitionSelect;
+  createRandomInt: typeof createRandomInt;
+  createRightArithShift: typeof createRightArithShift;
+  createRightLogShift: typeof createRightLogShift;
+  createRound: typeof createRound;
+  createSubset: typeof createSubset;
+  createTrace: typeof createTrace;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2436,6 +2451,21 @@ function compatFactoryExports(): {
     createHex,
     createOct,
     createCbrt,
+    createAnd,
+    createCompareNatural,
+    createCtranspose,
+    createEqualText,
+    createKron,
+    createLeftShift,
+    createNthRoot,
+    createNullish,
+    createPartitionSelect,
+    createRandomInt,
+    createRightArithShift,
+    createRightLogShift,
+    createRound,
+    createSubset,
+    createTrace,
     createTyped,
   };
 }
