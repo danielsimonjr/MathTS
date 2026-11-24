@@ -13355,6 +13355,9 @@
       "createDenseMatrixClass": {
         "kind": "function"
       },
+      "createDerivative": {
+        "kind": "function"
+      },
       "createDet": {
         "kind": "function"
       },
@@ -13862,6 +13865,9 @@
       "createRangeTransform": {
         "kind": "function"
       },
+      "createRationalize": {
+        "kind": "function"
+      },
       "createRe": {
         "kind": "function"
       },
@@ -13958,6 +13964,15 @@
       "createSign": {
         "kind": "function"
       },
+      "createSimplify": {
+        "kind": "function"
+      },
+      "createSimplifyConstant": {
+        "kind": "function"
+      },
+      "createSimplifyCore": {
+        "kind": "function"
+      },
       "createSin": {
         "kind": "function"
       },
@@ -14028,6 +14043,9 @@
         "kind": "function"
       },
       "createSymbolNode": {
+        "kind": "function"
+      },
+      "createSymbolicEqual": {
         "kind": "function"
       },
       "createTan": {
@@ -14170,6 +14188,9 @@
       },
       "derivative": {
         "kind": "function"
+      },
+      "derivativeDependencies": {
+        "kind": "object"
       },
       "det": {
         "kind": "function"
@@ -15200,6 +15221,9 @@
       "rationalize": {
         "kind": "function"
       },
+      "rationalizeDependencies": {
+        "kind": "object"
+      },
       "re": {
         "kind": "function"
       },
@@ -15383,8 +15407,17 @@
       "simplifyConstant": {
         "kind": "function"
       },
+      "simplifyConstantDependencies": {
+        "kind": "object"
+      },
       "simplifyCore": {
         "kind": "function"
+      },
+      "simplifyCoreDependencies": {
+        "kind": "object"
+      },
+      "simplifyDependencies": {
+        "kind": "object"
       },
       "sin": {
         "kind": "function"
@@ -15523,6 +15556,9 @@
       },
       "symbolicEqual": {
         "kind": "function"
+      },
+      "symbolicEqualDependencies": {
+        "kind": "object"
       },
       "tan": {
         "kind": "function"

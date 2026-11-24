@@ -1178,7 +1178,10 @@ import { createNodeOperations } from '../arithmetic/utils/nodeOperations.js';
 import { createLeafCount } from '../algebra/leafCount.js';
 import { createResolve } from '../algebra/resolve.js';
 import { createSubstitute } from '../algebra/substitute.js';
-import { createSimplifyConstant } from '../algebra/simplifyConstant.js';
+import {
+  createSimplifyConstant,
+  createSelectedSimplifyConstant,
+} from '../algebra/simplifyConstant.js';
 import { createUtil as createSimplifyUtil } from '../algebra/simplify/util.js';
 import { createSplitUnit } from '../type/unit/function/splitUnit.js';
 import { createFft } from '../matrix/fft.js';
@@ -1963,6 +1966,19 @@ const createSelectedCombinationsWithRep = /* #__PURE__ */ factory(
       'BigNumber, BigNumber': typedCombinationsWithRep.signatures['BigNumber,BigNumber'],
     })
 );
+
+const createSelectedParse: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createParse>
+> = /* #__PURE__ */ factory('parse', createParse.dependencies, (deps: Record<string, unknown>) => {
+  const parse = createParse(deps);
+  const typed = deps.typed as typeof coreTyped;
+  typed.addConversion(
+    { from: 'string', to: 'Node', convert: (value) => parse(value as string) },
+    { override: true }
+  );
+  return parse;
+});
 
 const createSelectedMean = /* #__PURE__ */ factory(
   'mean',
@@ -2908,7 +2924,7 @@ function compatFactoryExports(): {
   createSymbolNode: typeof createSymbolNode;
   createFunctionNode: typeof createFunctionNode;
   createAssignmentNode: typeof createAssignmentNode;
-  createParse: typeof createParse;
+  createParse: typeof createSelectedParse;
   createCompile: typeof createSelectedCompile;
   createEvaluate: typeof createSelectedEvaluate;
   createAtomicMass: typeof mathjsCreateAtomicMass;
@@ -2977,6 +2993,12 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createSymbolicEqual: typeof createSymbolicEqual;
+  createRationalize: typeof createRationalize;
+  createDerivative: typeof createDerivative;
+  createSimplify: typeof createSimplify;
+  createSimplifyConstant: typeof createSelectedSimplifyConstant;
+  createSimplifyCore: typeof createSimplifyCore;
   createString: typeof createSelectedString;
   createBoolean: typeof createSelectedBoolean;
   createBigint: typeof createSelectedBigint;
@@ -3212,7 +3234,7 @@ function compatFactoryExports(): {
     createSymbolNode,
     createFunctionNode,
     createAssignmentNode,
-    createParse,
+    createParse: createSelectedParse,
     createCompile: createSelectedCompile,
     createEvaluate: createSelectedEvaluate,
     createAtomicMass: mathjsCreateAtomicMass,
@@ -3281,6 +3303,12 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createSymbolicEqual,
+    createRationalize,
+    createDerivative,
+    createSimplify,
+    createSimplifyConstant: createSelectedSimplifyConstant,
+    createSimplifyCore,
     createString: createSelectedString,
     createBoolean: createSelectedBoolean,
     createBigint: createSelectedBigint,

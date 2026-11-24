@@ -5,6 +5,36 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('simplifies selected expression trees and compares selected symbolic forms', () => {
+    const actual = create({
+      symbolicEqualDependencies: compat.symbolicEqualDependencies,
+      derivativeDependencies: compat.derivativeDependencies,
+      rationalizeDependencies: compat.rationalizeDependencies,
+      simplifyDependencies: compat.simplifyDependencies,
+    });
+    const expected = oracle.create({
+      symbolicEqualDependencies: Reflect.get(oracle, 'symbolicEqualDependencies'),
+      derivativeDependencies: Reflect.get(oracle, 'derivativeDependencies'),
+      rationalizeDependencies: Reflect.get(oracle, 'rationalizeDependencies'),
+      simplifyDependencies: Reflect.get(oracle, 'simplifyDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const node = call('parse', 'x + (2 + 3)');
+      return [
+        String(call('simplifyCore', node)),
+        String(call('simplifyConstant', node)),
+        String(call('simplify', 'x + 2 + 3')),
+        call('symbolicEqual', 'x + x', '2*x'),
+        String(call('derivative', 'x^2', 'x')),
+        String(call('rationalize', 'x + 1/2')),
+      ];
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
   it('revives tagged values for selected classes and exposes the local package version', () => {
     const actual = create({
       reviverDependencies: compat.reviverDependencies,
