@@ -5,6 +5,17 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('creates selected indices and immutable matrices', () => {
+    const actual = create({ indexDependencies: compat.indexDependencies });
+    const expected = oracle.create({ indexDependencies: Reflect.get(oracle, 'indexDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    expect(String(actual.index(1, [2, 3]))).toBe(String(expected.index(1, [2, 3])));
+    const OracleMatrix = Reflect.get(expected, 'ImmutableDenseMatrix');
+    expect(new actual.ImmutableDenseMatrix([[1, 2]]).valueOf()).toEqual(
+      new OracleMatrix([[1, 2]]).valueOf()
+    );
+  });
+
   it.each([
     'Node',
     'ConstantNode',
@@ -407,6 +418,51 @@ describe('native compatibility dependency bundles', () => {
     ['log1p', [0.5]],
     ['range', [1, 6, 2]],
     ['bernoulli', [4]],
+    [
+      'setDifference',
+      [
+        [1, 2],
+        [2, 3],
+      ],
+    ],
+    [
+      'setIntersect',
+      [
+        [1, 2],
+        [2, 3],
+      ],
+    ],
+    ['setDistinct', [[1, 1, 2]]],
+    [
+      'setCartesian',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    ['setIsSubset', [[1], [1, 2]]],
+    ['setMultiplicity', [2, [1, 2, 2]]],
+    ['setPowerset', [[1, 2]]],
+    [
+      'column',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        1,
+      ],
+    ],
+    [
+      'row',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        1,
+      ],
+    ],
     ['ceil', [1.2345, 2]],
     ['floor', [-1.2345, 2]],
     ['gcd', [240, 46]],
