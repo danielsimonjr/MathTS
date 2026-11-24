@@ -191,7 +191,7 @@
     },
     "matrix": {
       "name": "@danielsimonjr/mathts-matrix",
-      "version": "0.13.1",
+      "version": "0.13.2",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.30.1",
         "@danielsimonjr/mathts-gpu": "^0.4.1",

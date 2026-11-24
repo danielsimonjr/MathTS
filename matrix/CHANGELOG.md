@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.13.2
+
+### Patch Changes
+
+- a62ace5: Keep singular vectors normalized and retain small representable singular values in the Jacobi fallback by computing column norms and rotations without squaring away their scale.
+
 ## 0.13.1
 
 ### Patch Changes
