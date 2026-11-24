@@ -5,6 +5,22 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('builds selected transfer function coefficients like MathJS', () => {
+    const actual = create({ zpk2tfDependencies: compat.zpk2tfDependencies });
+    const expected = oracle.create({
+      zpk2tfDependencies: Reflect.get(oracle, 'zpk2tfDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) =>
+      (
+        Reflect.apply(Reflect.get(instance, 'zpk2tf'), instance, [[2], [3], 1]) as {
+          re: number;
+          im: number;
+        }[][]
+      ).map((row) => row.map(({ re, im }) => [re, im]));
+    expect(run(actual)).toEqual(run(expected));
+  });
+
   it('uses selected BigNumber configuration for physical constants', () => {
     const actual = create(
       { planckConstantDependencies: compat.planckConstantDependencies },
@@ -691,6 +707,16 @@ describe('native compatibility dependency bundles', () => {
       ],
     ],
     ['dotPow', [[2, 4], 2]],
+    ['leafCount', ['x + 3']],
+    [
+      'pinv',
+      [
+        [
+          [2, 0],
+          [0, 4],
+        ],
+      ],
+    ],
     ['multiplyScalar', [3, 4]],
     ['not', [true]],
     ['re', [7]],

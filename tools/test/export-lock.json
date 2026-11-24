@@ -13499,6 +13499,9 @@
       "createLcm": {
         "kind": "function"
       },
+      "createLeafCount": {
+        "kind": "function"
+      },
       "createLeftShift": {
         "kind": "function"
       },
@@ -13650,6 +13653,9 @@
         "kind": "function"
       },
       "createPickRandom": {
+        "kind": "function"
+      },
+      "createPinv": {
         "kind": "function"
       },
       "createPlanckCharge": {
@@ -13911,6 +13917,9 @@
         "kind": "function"
       },
       "createZeros": {
+        "kind": "function"
+      },
+      "createZpk2tf": {
         "kind": "function"
       },
       "cross": {
@@ -14519,6 +14528,9 @@
       "leafCount": {
         "kind": "function"
       },
+      "leafCountDependencies": {
+        "kind": "object"
+      },
       "leftShift": {
         "kind": "function"
       },
@@ -14818,6 +14830,9 @@
       },
       "pinv": {
         "kind": "function"
+      },
+      "pinvDependencies": {
+        "kind": "object"
       },
       "planckCharge": {
         "kind": "object"
@@ -15349,6 +15364,9 @@
       },
       "zpk2tf": {
         "kind": "function"
+      },
+      "zpk2tfDependencies": {
+        "kind": "object"
       }
     }
   },
