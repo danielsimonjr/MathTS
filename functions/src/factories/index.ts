@@ -157,7 +157,7 @@ import { createTan } from '../trigonometry/tan.js';
 import { createTanh } from '../trigonometry/tanh.js';
 
 // unit
-import { createToBest } from '../unit/toBest.js';
+import { createMathJSToBest, createToBest } from '../unit/toBest.js';
 
 // utils
 import { createClone } from '../utils/clone.js';
@@ -3650,7 +3650,7 @@ function compatFactoryExports(): {
     createPinv,
     createZpk2tf,
     createTo,
-    createToBest,
+    createToBest: createMathJSToBest,
     createSplitUnit,
     createSparse: createSelectedSparse,
     createIntersect: createSelectedIntersect,
@@ -3726,4 +3726,5 @@ export const factory_mathjsCompat = {
   setUnion: compatSetUnion,
   compareText,
   equalText,
+  toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),
 };

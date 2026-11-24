@@ -155,6 +155,7 @@ interface MathInstanceOverrides {
   pow: typeof shims.pow;
   compareText: typeof namedCompareText;
   equalText: typeof namedEqualText;
+  toBest: typeof namedToBest;
   sqrt: typeof shims.sqrt;
   abs: typeof shims.abs;
   exp: typeof shims.exp;
@@ -541,6 +542,7 @@ export function create(
     setUnion: namedSetUnion,
     compareText: namedCompareText,
     equalText: namedEqualText,
+    toBest: namedToBest,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
@@ -796,7 +798,15 @@ const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
   (left: string, right: string): boolean;
   (left: unknown, right: unknown): unknown;
 };
-export { namedSetUnion as setUnion, namedCompareText as compareText, namedEqualText as equalText };
+const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
+  ...args: unknown[]
+) => ReturnType<typeof mathFunctions.toBest>;
+export {
+  namedSetUnion as setUnion,
+  namedCompareText as compareText,
+  namedEqualText as equalText,
+  namedToBest as toBest,
+};
 
 /** Embedded documentation for names in the MathJS compatibility surface. */
 export const docs = /* #__PURE__ */ Object.fromEntries(
@@ -991,7 +1001,6 @@ export {
   symbolicEqual,
   tanh,
   to,
-  toBest,
   trace,
   typeOf,
   unaryMinus,

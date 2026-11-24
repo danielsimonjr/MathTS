@@ -18,6 +18,7 @@ import {
   pow,
   round,
   toBest,
+  toBestDependencies,
 } from '../src/index.js';
 
 describe('named compatibility function imports', () => {
@@ -169,5 +170,18 @@ describe('named compatibility function imports', () => {
     expect(math.add('2', 3, '4')).toBe(9);
     expect(math.evaluate('"2.3" + "4"')).toBe(6.3);
     expect(() => add('abc', '4')).toThrow(/Cannot convert "abc" to a number/);
+  });
+
+  it('uses the MathJS default prefix offset in each compatibility entry point', () => {
+    const math = create(all);
+    const selected = create({ toBestDependencies });
+    const value = math.unit(0.000000123, 'A') as typeof math.speedOfLight;
+    const expression = 'toBest(unit(0.000000123, "A"))';
+    const expected = String(oracle.evaluate(expression));
+    expect(String(toBest(value))).toBe(expected);
+    expect(String(math.toBest(value))).toBe(expected);
+    expect(String(selected.toBest(value))).toBe(expected);
+    expect(String(math.evaluate(expression))).toBe(expected);
+    expect(String(toBest(value, [], { offset: 0 }))).toBe('0.123 uA');
   });
 });
