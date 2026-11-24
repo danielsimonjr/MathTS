@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.11
+
+### Patch Changes
+
+- e9c3b59: Expose selected MathJS dependency bundles for minimum, maximum, cumulative sum, sum, product, count, and symmetric difference.
+
 ## 0.89.10
 
 ### Patch Changes
