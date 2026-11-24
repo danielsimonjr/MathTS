@@ -31,6 +31,26 @@ describe('native compatibility dependency bundles', () => {
     }
   });
 
+  it('computes all roots using the selected nthRoots dependencies', () => {
+    const actual = create({ nthRootsDependencies: compat.nthRootsDependencies });
+    const expected = oracle.create({
+      nthRootsDependencies: Reflect.get(oracle, 'nthRootsDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const result = Reflect.get(actual, 'nthRoots')(8, 3);
+    const oracleResult = Reflect.get(expected, 'nthRoots')(8, 3);
+    if (!Array.isArray(result) || !Array.isArray(oracleResult)) {
+      throw new TypeError('Expected nthRoots to return arrays');
+    }
+    const roots = result as { re: number; im: number }[];
+    const reference = oracleResult as { re: number; im: number }[];
+    expect(roots).toHaveLength(reference.length);
+    roots.forEach(({ re, im }, index) => {
+      expect(re).toBeCloseTo(reference[index].re, 14);
+      expect(im).toBeCloseTo(reference[index].im, 14);
+    });
+  });
+
   it('chains selected functions and functions imported later', () => {
     const actual = create({
       chainDependencies: compat.chainDependencies,
@@ -278,6 +298,16 @@ describe('native compatibility dependency bundles', () => {
     ['mode', [[1, 2, 2]]],
     ['number', [['0b11.1', '0xFFi8', true]]],
     ['numeric', ['0b11.1', 'number']],
+    ['diff', [[1, 4, 9]]],
+    ['divideScalar', [7, 2]],
+    ['fix', [-3.75]],
+    ['larger', [3, 2]],
+    ['sign', [-42]],
+    ['smaller', [3, 2]],
+    ['unaryPlus', ['8']],
+    ['dotDivide', [[2, 4], 2]],
+    ['hypot', [3, 4]],
+    ['log', [16, 2]],
     ['ceil', [1.2345, 2]],
     ['floor', [-1.2345, 2]],
     ['gcd', [240, 46]],

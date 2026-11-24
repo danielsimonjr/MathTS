@@ -2531,6 +2531,17 @@ function compatFactoryExports(): {
   createFraction: typeof createSelectedFraction;
   createComplex: typeof createSelectedComplex;
   createNumeric: typeof createNumeric;
+  createDiff: typeof createDiff;
+  createDivideScalar: typeof createDivideScalar;
+  createFix: typeof createFix;
+  createLarger: typeof createLarger;
+  createSign: typeof createSign;
+  createSmaller: typeof createSmaller;
+  createUnaryPlus: typeof createUnaryPlus;
+  createDotDivide: typeof createDotDivide;
+  createHypot: typeof createHypot;
+  createLog: typeof createLog;
+  createNthRoots: typeof createNthRoots;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2667,6 +2678,17 @@ function compatFactoryExports(): {
     createFraction: createSelectedFraction,
     createComplex: createSelectedComplex,
     createNumeric,
+    createDiff,
+    createDivideScalar,
+    createFix,
+    createLarger,
+    createSign,
+    createSmaller,
+    createUnaryPlus,
+    createDotDivide,
+    createHypot,
+    createLog,
+    createNthRoots,
     createTyped,
   };
 }
