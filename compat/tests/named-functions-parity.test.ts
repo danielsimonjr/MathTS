@@ -4,6 +4,7 @@ import {
   all,
   cbrt,
   combinations,
+  compareNatural,
   create,
   derivative,
   erf,
@@ -106,5 +107,19 @@ describe('named compatibility function imports', () => {
     expect(String(math.evaluate('toBest(unit(10, "m"), "mm,km", {offset: 1.5})'))).toBe(
       String(oracleToBest(expected, ['mm', 'km'], options))
     );
+  });
+
+  it('naturally orders units by normalized magnitude and dimension', () => {
+    const math = create(all);
+    for (const [left, right] of [
+      ['5 cm', '40 mm'],
+      ['1 m', '1000 mm'],
+      ['1 m', '1 s'],
+    ]) {
+      expect(compareNatural(math.unit(left), math.unit(right))).toBe(
+        oracle.compareNatural(oracle.unit(left), oracle.unit(right))
+      );
+    }
+    expect(math.evaluate('compareNatural(5cm, 40mm)')).toBe(1);
   });
 });
