@@ -13382,6 +13382,9 @@
       "createFilter": {
         "kind": "function"
       },
+      "createFilterTransform": {
+        "kind": "function"
+      },
       "createFineStructure": {
         "kind": "function"
       },
@@ -13398,6 +13401,9 @@
         "kind": "function"
       },
       "createForEach": {
+        "kind": "function"
+      },
+      "createForEachTransform": {
         "kind": "function"
       },
       "createFormat": {
@@ -13572,6 +13578,9 @@
         "kind": "function"
       },
       "createMapSlices": {
+        "kind": "function"
+      },
+      "createMapTransform": {
         "kind": "function"
       },
       "createMatrix": {
@@ -14210,6 +14219,9 @@
       "filterDependencies": {
         "kind": "object"
       },
+      "filterTransformDependencies": {
+        "kind": "object"
+      },
       "fineStructure": {
         "kind": "number"
       },
@@ -14244,6 +14256,9 @@
         "kind": "function"
       },
       "forEachDependencies": {
+        "kind": "object"
+      },
+      "forEachTransformDependencies": {
         "kind": "object"
       },
       "format": {
@@ -14694,6 +14709,9 @@
         "kind": "function"
       },
       "mapSlicesDependencies": {
+        "kind": "object"
+      },
+      "mapTransformDependencies": {
         "kind": "object"
       },
       "matrix": {

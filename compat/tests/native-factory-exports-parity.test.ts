@@ -5,6 +5,48 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('evaluates selected callback transforms with one-based indices', () => {
+    const actual = create(
+      {
+        evaluateDependencies: compat.evaluateDependencies,
+        addDependencies: compat.addDependencies,
+        largerDependencies: compat.largerDependencies,
+        mapTransformDependencies: compat.mapTransformDependencies,
+        filterTransformDependencies: compat.filterTransformDependencies,
+        forEachTransformDependencies: compat.forEachTransformDependencies,
+      },
+      { matrix: 'Array' }
+    );
+    const expected = oracle.create(
+      Object.fromEntries(
+        ['evaluate', 'add', 'larger', 'mapTransform', 'filterTransform', 'forEachTransform'].map(
+          (name) => {
+            const key = name + 'Dependencies';
+            return [key, Reflect.get(oracle, key)];
+          }
+        )
+      ),
+      { matrix: 'Array' }
+    );
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+
+    const evaluate = (instance: object, expression: string, scope: object = {}) =>
+      Reflect.apply(Reflect.get(instance, 'evaluate'), instance, [expression, scope]);
+    for (const expression of ['map([4, 9], i)', 'filter([3, -2, 5], x > 0)']) {
+      expect(evaluate(actual, expression, { i: (_x: unknown, index: unknown) => index })).toEqual(
+        evaluate(expected, expression, { i: (_x: unknown, index: unknown) => index })
+      );
+    }
+    const indices = (instance: object) => {
+      const out: unknown[] = [];
+      evaluate(instance, 'forEach([4, 9], collect)', {
+        collect: (_value: unknown, index: unknown) => out.push(index),
+      });
+      return out;
+    };
+    expect(indices(actual)).toEqual(indices(expected));
+  });
+
   it('constructs selected ranges and serializes MathJS numeric tags', () => {
     const actual = create({
       RangeDependencies: compat.RangeDependencies,
