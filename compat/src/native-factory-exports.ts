@@ -3854,6 +3854,37 @@ const bellNumbersDependencies: UnaryBundle<'createBellNumbers'> & {
   createBellNumbers: mathjsCreateBellNumbers,
 };
 
+const mathjsCreateFft: CompatFactoryExports['createFft'] = factories.createFft;
+
+const mathjsCreateIfft: CompatFactoryExports['createIfft'] = factories.createIfft;
+
+const mathjsCreateSqrtm: CompatFactoryExports['createSqrtm'] = factories.createSqrtm;
+const sqrtmDependencies: UnaryBundle<'createSqrtm'> & {
+  absDependencies: typeof absDependencies;
+  addDependencies: typeof addDependencies;
+  identityDependencies: typeof identityDependencies;
+  invDependencies: typeof invDependencies;
+  mapDependencies: typeof mapDependencies;
+  maxDependencies: typeof maxDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  absDependencies,
+  addDependencies,
+  identityDependencies,
+  invDependencies,
+  mapDependencies,
+  maxDependencies,
+  multiplyDependencies,
+  sizeDependencies,
+  sqrtDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createSqrtm: mathjsCreateSqrtm,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4448,6 +4479,10 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateSqrtm as createSqrtm,
+  sqrtmDependencies,
+  mathjsCreateIfft as createIfft,
+  mathjsCreateFft as createFft,
   mathjsCreateBellNumbers as createBellNumbers,
   bellNumbersDependencies,
   mathjsCreateStirlingS2 as createStirlingS2,

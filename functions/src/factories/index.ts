@@ -1185,7 +1185,7 @@ import {
 } from '../algebra/simplifyConstant.js';
 import { createUtil as createSimplifyUtil } from '../algebra/simplify/util.js';
 import { createSplitUnit } from '../type/unit/function/splitUnit.js';
-import { createFft } from '../matrix/fft.js';
+import { createFft, createSelectedFft } from '../matrix/fft.js';
 import { createChainClass } from '../type/chain/Chain.js';
 
 export const nodeOperations = createNodeOperations(
@@ -1227,7 +1227,7 @@ factoryScope.Chain = Chain;
 
 import { createMathjsSubtract, createSubtract } from '../arithmetic/subtract.js';
 import { createDivide, createSelectedDivide } from '../arithmetic/divide.js';
-import { createIfft } from '../matrix/ifft.js';
+import { createIfft, createSelectedIfft } from '../matrix/ifft.js';
 import { createIndexClass } from '../type/matrix/MatrixIndex.js';
 import { createChain } from '../type/chain/function/chain.js';
 import { createCreateUnit } from '../type/unit/function/createUnit.js';
@@ -2793,6 +2793,12 @@ const createSelectedMultinomial = /* #__PURE__ */ factory(
     })
 );
 
+const createSelectedSqrtm: typeof createSqrtm = /* #__PURE__ */ factory(
+  'sqrtm',
+  createSqrtm.dependencies.filter((dependency) => dependency !== 'matrix'),
+  (deps: Record<string, unknown>) => createSqrtm({ ...deps, matrix: factoryScope.matrix })
+);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -3087,6 +3093,9 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createSqrtm: typeof createSelectedSqrtm;
+  createIfft: typeof createSelectedIfft;
+  createFft: typeof createSelectedFft;
   createBellNumbers: typeof createBellNumbers;
   createStirlingS2: typeof createStirlingS2;
   createMultinomial: typeof createSelectedMultinomial;
@@ -3406,6 +3415,9 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createSqrtm: createSelectedSqrtm,
+    createIfft: createSelectedIfft,
+    createFft: createSelectedFft,
     createBellNumbers,
     createStirlingS2,
     createMultinomial: createSelectedMultinomial,

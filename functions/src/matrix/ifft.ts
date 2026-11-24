@@ -1,3 +1,4 @@
+import { Complex } from '@danielsimonjr/mathts-core';
 import { arraySize } from '../utils/array.js';
 import { fftCoreFloat64 } from '../signal/fft-core-f64.js';
 import { complexToInterleaved } from './complex-to-interleaved.js';
@@ -71,83 +72,81 @@ interface Dependencies {
 const name = 'ifft';
 const dependencies = ['typed', 'fft', 'dotDivide', 'conj', 'complex'];
 
-export const createIfft = /* #__PURE__ */ factory(
-  name,
-  dependencies,
-  ({ typed, fft, dotDivide, conj, complex }: Dependencies) => {
-    /** The inverse transform of a whole array or Matrix (every axis). */
-    const inverse = function (arr: ComplexArrayND | Matrix): ComplexArrayND | Matrix {
-      const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
-      const totalSize = size.reduce((acc: number, curr: number) => acc * curr, 1);
-      // Empty input: the transform of no elements has the same empty shape (fft validates it).
-      if (totalSize === 0) return fft(arr) as ComplexArrayND | Matrix;
+function buildIfft({ typed, fft, dotDivide, conj, complex }: Dependencies, extended: boolean) {
+  /** The inverse transform of a whole array or Matrix (every axis). */
+  const inverse = function (arr: ComplexArrayND | Matrix): ComplexArrayND | Matrix {
+    const size = isMatrix(arr) ? (arr as Matrix).size() : arraySize(arr);
+    const totalSize = size.reduce((acc: number, curr: number) => acc * curr, 1);
+    // Empty input: the transform of no elements has the same empty shape (fft validates it).
+    if (totalSize === 0) return fft(arr) as ComplexArrayND | Matrix;
 
-      // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
-      //
-      // The fallback below is `dotDivide(conj(fft(conj(arr))), n)`: three full passes
-      // over the data through typed-function dispatch, on top of the forward transform.
-      // The flat Float64Array core does the inverse directly, and already applies the
-      // 1/n scaling.
-      //
-      // This used to route to the AssemblyScript WASM kernel, which is ~6x SLOWER than
-      // the flat JS core (1039 ms vs 170 ms at n=2^20).
-      //
-      // `complexToInterleaved` returns null for anything not representable as f64
-      // (BigNumber, Fraction, Unit), so those fall through and keep exact semantics.
-      if (size.length === 1) {
-        const length = size[0];
-        if (length >= FAST_IFFT_THRESHOLD && isPowerOf2(length)) {
-          const arrData = isMatrix(arr) ? (arr as Matrix).valueOf() : arr;
-          const interleaved = complexToInterleaved(arrData as unknown[], complex);
-          if (interleaved) {
-            const real = new Float64Array(length);
-            const imag = new Float64Array(length);
-            for (let i = 0; i < length; i++) {
-              real[i] = interleaved[i * 2];
-              imag[i] = interleaved[i * 2 + 1];
-            }
-            const out = fftCoreFloat64(real, imag, true); // inverse: scales by 1/n
-            const packed = new Float64Array(length * 2);
-            for (let i = 0; i < length; i++) {
-              packed[i * 2] = out.real[i];
-              packed[i * 2 + 1] = out.imag[i];
-            }
-            const result = interleavedToComplex(packed, length, complex);
-            if (isMatrix(arr)) {
-              return (arr as Matrix).create(result);
-            }
-            return result as ComplexArrayND;
+    // FAST PATH — 1-D, power-of-two, plain numeric/Complex data.
+    //
+    // The fallback below is `dotDivide(conj(fft(conj(arr))), n)`: three full passes
+    // over the data through typed-function dispatch, on top of the forward transform.
+    // The flat Float64Array core does the inverse directly, and already applies the
+    // 1/n scaling.
+    //
+    // This used to route to the AssemblyScript WASM kernel, which is ~6x SLOWER than
+    // the flat JS core (1039 ms vs 170 ms at n=2^20).
+    //
+    // `complexToInterleaved` returns null for anything not representable as f64
+    // (BigNumber, Fraction, Unit), so those fall through and keep exact semantics.
+    if (size.length === 1) {
+      const length = size[0];
+      if (length >= FAST_IFFT_THRESHOLD && isPowerOf2(length)) {
+        const arrData = isMatrix(arr) ? (arr as Matrix).valueOf() : arr;
+        const interleaved = complexToInterleaved(arrData as unknown[], complex);
+        if (interleaved) {
+          const real = new Float64Array(length);
+          const imag = new Float64Array(length);
+          for (let i = 0; i < length; i++) {
+            real[i] = interleaved[i * 2];
+            imag[i] = interleaved[i * 2 + 1];
           }
+          const out = fftCoreFloat64(real, imag, true); // inverse: scales by 1/n
+          const packed = new Float64Array(length * 2);
+          for (let i = 0; i < length; i++) {
+            packed[i * 2] = out.real[i];
+            packed[i * 2 + 1] = out.imag[i];
+          }
+          const result = interleavedToComplex(packed, length, complex);
+          if (isMatrix(arr)) {
+            return (arr as Matrix).create(result);
+          }
+          return result as ComplexArrayND;
         }
       }
+    }
 
-      // JavaScript fallback
-      return dotDivide(conj(fft(conj(arr))), totalSize) as ComplexArrayND | Matrix;
-    };
+    // JavaScript fallback
+    return dotDivide(conj(fft(conj(arr))), totalSize) as ComplexArrayND | Matrix;
+  };
 
-    /**
-     * Calculate N-dimensional inverse Fourier transform
-     *
-     * Syntax:
-     *
-     *     math.ifft(arr)
-     *     math.ifft(arr, n)
-     *
-     * Examples:
-     *
-     *    math.ifft([[2, 2], [0, 0]]) // returns [[{re:1, im:0}, {re:0, im:0}], [{re:1, im:0}, {re:0, im:0}]]
-     *
-     * See Also:
-     *
-     *      fft
-     *
-     * @param {Array | Matrix} arr    An array or matrix
-     * @param {number} [n]            Number of bins (1-D input only). The input is cropped
-     *                                or zero-padded to `n` values, as NumPy does.
-     * @return {Array | Matrix}       N-dimensional inverse Fourier transformation of the array
-     */
-    return typed(name, {
-      'Array | Matrix': inverse,
+  /**
+   * Calculate N-dimensional inverse Fourier transform
+   *
+   * Syntax:
+   *
+   *     math.ifft(arr)
+   *     math.ifft(arr, n)
+   *
+   * Examples:
+   *
+   *    math.ifft([[2, 2], [0, 0]]) // returns [[{re:1, im:0}, {re:0, im:0}], [{re:1, im:0}, {re:0, im:0}]]
+   *
+   * See Also:
+   *
+   *      fft
+   *
+   * @param {Array | Matrix} arr    An array or matrix
+   * @param {number} [n]            Number of bins (1-D input only). The input is cropped
+   *                                or zero-padded to `n` values, as NumPy does.
+   * @return {Array | Matrix}       N-dimensional inverse Fourier transformation of the array
+   */
+  return typed(name, {
+    'Array | Matrix': inverse,
+    ...(extended && {
       // NumPy `ifft(a, n)`: the input is cropped or zero-padded to length `n` first, so the
       // result has `n` bins. One axis only; an N-dimensional input has no single length to set.
       'Array | Matrix, number': function (
@@ -167,6 +166,17 @@ export const createIfft = /* #__PURE__ */ factory(
         const out = inverse(sized as ComplexArrayND);
         return isMatrix(arr) ? (arr as Matrix).create(out as unknown[]) : out;
       },
-    });
-  }
+    }),
+  });
+}
+
+export const createIfft = /* #__PURE__ */ factory(name, dependencies, (deps: Dependencies) =>
+  buildIfft(deps, true)
+);
+
+export const createSelectedIfft = /* #__PURE__ */ factory(
+  name,
+  dependencies.filter((dependency) => dependency !== 'complex'),
+  (deps: Omit<Dependencies, 'complex'>) =>
+    buildIfft({ ...deps, complex: (re, im) => new Complex(re, im) }, false)
 );
