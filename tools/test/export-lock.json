@@ -12899,6 +12899,9 @@
       "bitOrDependencies": {
         "kind": "object"
       },
+      "bitOrTransformDependencies": {
+        "kind": "object"
+      },
       "bitXor": {
         "kind": "function"
       },
@@ -12965,6 +12968,9 @@
       "columnDependencies": {
         "kind": "object"
       },
+      "columnTransformDependencies": {
+        "kind": "object"
+      },
       "combinations": {
         "kind": "function"
       },
@@ -13017,6 +13023,9 @@
         "kind": "function"
       },
       "concatDependencies": {
+        "kind": "object"
+      },
+      "concatTransformDependencies": {
         "kind": "object"
       },
       "conductanceQuantum": {
@@ -13172,6 +13181,9 @@
       "createBitOr": {
         "kind": "function"
       },
+      "createBitOrTransform": {
+        "kind": "function"
+      },
       "createBitXor": {
         "kind": "function"
       },
@@ -13208,6 +13220,9 @@
       "createColumn": {
         "kind": "function"
       },
+      "createColumnTransform": {
+        "kind": "function"
+      },
       "createCombinations": {
         "kind": "function"
       },
@@ -13233,6 +13248,9 @@
         "kind": "function"
       },
       "createConcat": {
+        "kind": "function"
+      },
+      "createConcatTransform": {
         "kind": "function"
       },
       "createConditionalNode": {
@@ -13673,6 +13691,9 @@
       "createNullish": {
         "kind": "function"
       },
+      "createNullishTransform": {
+        "kind": "function"
+      },
       "createNum": {
         "kind": "function"
       },
@@ -13695,6 +13716,9 @@
         "kind": "function"
       },
       "createOr": {
+        "kind": "function"
+      },
+      "createOrTransform": {
         "kind": "function"
       },
       "createParenthesisNode": {
@@ -13806,6 +13830,9 @@
         "kind": "function"
       },
       "createRow": {
+        "kind": "function"
+      },
+      "createRowTransform": {
         "kind": "function"
       },
       "createRydberg": {
@@ -14885,6 +14912,9 @@
       "nullishDependencies": {
         "kind": "object"
       },
+      "nullishTransformDependencies": {
+        "kind": "object"
+      },
       "num": {
         "kind": "function"
       },
@@ -14919,6 +14949,9 @@
         "kind": "function"
       },
       "orDependencies": {
+        "kind": "object"
+      },
+      "orTransformDependencies": {
         "kind": "object"
       },
       "parse": {
@@ -15132,6 +15165,9 @@
         "kind": "function"
       },
       "rowDependencies": {
+        "kind": "object"
+      },
+      "rowTransformDependencies": {
         "kind": "object"
       },
       "rydberg": {
