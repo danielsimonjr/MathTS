@@ -2913,6 +2913,98 @@ const createSelectedQuantileSeqTransform: FactoryFunction<
   { isTransformFunction: true }
 );
 
+const createSelectedEigs: typeof createEigs = /* #__PURE__ */ factory(
+  'eigs',
+  [...createEigs.dependencies, 'equal', 'larger', 'smaller', 'usolveAll'],
+  (deps: Record<string, unknown>) => createEigs(deps)
+);
+
+const createSelectedSchur: typeof createSchur = /* #__PURE__ */ factory(
+  'schur',
+  [...createSchur.dependencies, 'identity', 'multiply', 'norm', 'qr', 'subtract'],
+  (deps: Record<string, unknown>) => createSchur(deps)
+);
+
+const createSelectedZeta: typeof createZeta = /* #__PURE__ */ factory(
+  'zeta',
+  [
+    ...createZeta.dependencies.filter((dependency) => dependency !== 'lgamma'),
+    'config',
+    'equal',
+    'isBounded',
+    'isNegative',
+  ],
+  (deps: Record<string, unknown>) =>
+    createZeta({
+      ...deps,
+      lgamma: createLgamma({ ...deps, Complex: deps.Complex ?? factoryScope.Complex }),
+    })
+);
+
+type ExpmMatrix = {
+  size(): number[];
+  get(index: [number, number]): unknown;
+  create(data: unknown[][]): unknown;
+};
+
+const createSelectedExpm = /* #__PURE__ */ factory(
+  'expm',
+  ['typed', 'abs', 'add', 'identity', 'inv', 'multiply'],
+  ({
+    typed,
+    abs,
+    add,
+    identity,
+    inv,
+    multiply,
+  }: {
+    typed: TypedBuilder;
+    abs: (value: unknown) => unknown;
+    add: (a: unknown, b: unknown) => unknown;
+    identity: (size: number) => unknown;
+    inv: (value: unknown) => unknown;
+    multiply: (a: unknown, b: unknown) => unknown;
+  }) =>
+    typed('expm', {
+      Matrix: (input: ExpmMatrix) => {
+        const size = input.size();
+        const n = size[0];
+        if (size.length !== 2 || n !== size[1]) {
+          throw new RangeError(`Matrix must be square (size: [${size.join(', ')}])`);
+        }
+        let norm = 0;
+        for (let row = 0; row < n; row += 1) {
+          let rowTotal = 0;
+          for (let col = 0; col < n; col += 1) {
+            rowTotal += Number(abs(input.get([row, col])));
+          }
+          norm = Math.max(norm, rowTotal);
+        }
+        if (!Number.isFinite(norm)) throw new RangeError('Expected a finite matrix norm');
+
+        const squarings = norm > 1 ? Math.ceil(Math.log2(norm)) : 0;
+        const scaled = multiply(input, 2 ** -squarings);
+        const order = 13;
+        let numerator = identity(n);
+        let denominator = numerator;
+        let power = scaled;
+        let coefficient = 1;
+        for (let degree = 1; degree <= order; degree += 1) {
+          if (degree > 1) power = multiply(power, scaled);
+          coefficient *= (order - degree + 1) / (degree * (2 * order - degree + 1));
+          const term = multiply(coefficient, power);
+          numerator = add(numerator, term);
+          denominator = add(denominator, degree % 2 === 0 ? term : multiply(-1, term));
+        }
+        let result = multiply(inv(denominator), numerator);
+        for (let step = 0; step < squarings; step += 1) result = multiply(result, result);
+        if (checks.isSparseMatrix(input))
+          return input.create(Object(result).valueOf() as unknown[][]);
+        return result;
+      },
+    })
+);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -3207,6 +3299,15 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createExpm: typeof createSelectedExpm;
+  createZeta: typeof createSelectedZeta;
+  createLyap: typeof createLyap;
+  createSylvester: typeof createSylvester;
+  createSchur: typeof createSelectedSchur;
+  createRotate: typeof createRotate;
+  createRotationMatrix: typeof createRotationMatrix;
+  createNorm: typeof createNorm;
+  createEigs: typeof createSelectedEigs;
   createInvmod: typeof createSelectedInvmod;
   createXgcd: typeof createSelectedXgcd;
   createCorr: typeof createSelectedCorr;
@@ -3540,6 +3641,15 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createExpm: createSelectedExpm,
+    createZeta: createSelectedZeta,
+    createLyap,
+    createSylvester,
+    createSchur: createSelectedSchur,
+    createRotate,
+    createRotationMatrix,
+    createNorm,
+    createEigs: createSelectedEigs,
     createInvmod: createSelectedInvmod,
     createXgcd: createSelectedXgcd,
     createCorr: createSelectedCorr,

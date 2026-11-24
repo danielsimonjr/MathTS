@@ -13418,6 +13418,9 @@
       "createEfimovFactor": {
         "kind": "function"
       },
+      "createEigs": {
+        "kind": "function"
+      },
       "createElectricConstant": {
         "kind": "function"
       },
@@ -13443,6 +13446,9 @@
         "kind": "function"
       },
       "createExp": {
+        "kind": "function"
+      },
+      "createExpm": {
         "kind": "function"
       },
       "createExpm1": {
@@ -13682,6 +13688,9 @@
       "createLusolve": {
         "kind": "function"
       },
+      "createLyap": {
+        "kind": "function"
+      },
       "createMad": {
         "kind": "function"
       },
@@ -13773,6 +13782,9 @@
         "kind": "function"
       },
       "createNode": {
+        "kind": "function"
+      },
+      "createNorm": {
         "kind": "function"
       },
       "createNot": {
@@ -13955,6 +13967,12 @@
       "createRightLogShift": {
         "kind": "function"
       },
+      "createRotate": {
+        "kind": "function"
+      },
+      "createRotationMatrix": {
+        "kind": "function"
+      },
       "createRound": {
         "kind": "function"
       },
@@ -13974,6 +13992,9 @@
         "kind": "function"
       },
       "createSackurTetrode": {
+        "kind": "function"
+      },
+      "createSchur": {
         "kind": "function"
       },
       "createSec": {
@@ -14111,6 +14132,9 @@
       "createSumTransform": {
         "kind": "function"
       },
+      "createSylvester": {
+        "kind": "function"
+      },
       "createSymbolNode": {
         "kind": "function"
       },
@@ -14208,6 +14232,9 @@
         "kind": "function"
       },
       "createZeros": {
+        "kind": "function"
+      },
+      "createZeta": {
         "kind": "function"
       },
       "createZpk2tf": {
@@ -14354,6 +14381,9 @@
       "eigs": {
         "kind": "function"
       },
+      "eigsDependencies": {
+        "kind": "object"
+      },
       "electricConstant": {
         "kind": "object"
       },
@@ -14415,6 +14445,9 @@
         "kind": "function"
       },
       "expm1Dependencies": {
+        "kind": "object"
+      },
+      "expmDependencies": {
         "kind": "object"
       },
       "factorial": {
@@ -14942,6 +14975,9 @@
       "lyap": {
         "kind": "function"
       },
+      "lyapDependencies": {
+        "kind": "object"
+      },
       "mad": {
         "kind": "function"
       },
@@ -15097,6 +15133,9 @@
       },
       "norm": {
         "kind": "function"
+      },
+      "normDependencies": {
+        "kind": "object"
       },
       "not": {
         "kind": "function"
@@ -15395,8 +15434,14 @@
       "rotate": {
         "kind": "function"
       },
+      "rotateDependencies": {
+        "kind": "object"
+      },
       "rotationMatrix": {
         "kind": "function"
+      },
+      "rotationMatrixDependencies": {
+        "kind": "object"
       },
       "round": {
         "kind": "function"
@@ -15427,6 +15472,9 @@
       },
       "schur": {
         "kind": "function"
+      },
+      "schurDependencies": {
+        "kind": "object"
       },
       "sec": {
         "kind": "function"
@@ -15683,6 +15731,9 @@
       "sylvester": {
         "kind": "function"
       },
+      "sylvesterDependencies": {
+        "kind": "object"
+      },
       "symbolicEqual": {
         "kind": "function"
       },
@@ -15841,6 +15892,9 @@
       },
       "zeta": {
         "kind": "function"
+      },
+      "zetaDependencies": {
+        "kind": "object"
       },
       "zpk2tf": {
         "kind": "function"

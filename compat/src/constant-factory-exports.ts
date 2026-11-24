@@ -15,6 +15,18 @@ import {
   typedDependencies,
   createFft,
   createIfft,
+  createZeta,
+  addDependencies,
+  divideDependencies,
+  equalDependencies,
+  factorialDependencies,
+  gammaDependencies,
+  isBoundedDependencies,
+  isNegativeDependencies,
+  multiplyDependencies,
+  sinDependencies,
+  smallerEqDependencies,
+  subtractDependencies,
 } from './native-factory-exports.js';
 import { configuredMathjsConstant } from './instance-constants.js';
 
@@ -162,7 +174,46 @@ const ifftDependencies: {
   createIfft,
 };
 
+const zetaDependencies: {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  ComplexDependencies: typeof ComplexDependencies;
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+  equalDependencies: typeof equalDependencies;
+  factorialDependencies: typeof factorialDependencies;
+  gammaDependencies: typeof gammaDependencies;
+  isBoundedDependencies: typeof isBoundedDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  piDependencies: typeof piDependencies;
+  powDependencies: typeof powDependencies;
+  sinDependencies: typeof sinDependencies;
+  smallerEqDependencies: typeof smallerEqDependencies;
+  subtractDependencies: typeof subtractDependencies;
+  typedDependencies: typeof typedDependencies;
+  createZeta: typeof createZeta;
+} = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  addDependencies,
+  divideDependencies,
+  equalDependencies,
+  factorialDependencies,
+  gammaDependencies,
+  isBoundedDependencies,
+  isNegativeDependencies,
+  multiplyDependencies,
+  piDependencies,
+  powDependencies,
+  sinDependencies,
+  smallerEqDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createZeta,
+};
+
 export {
+  zetaDependencies,
   ifftDependencies,
   fftDependencies,
   mathjsFalse as _false,

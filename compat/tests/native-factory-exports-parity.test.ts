@@ -5,6 +5,67 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('computes selected matrix exponentials and numeric zeta values', () => {
+    const actual = create({
+      expmDependencies: compat.expmDependencies,
+      zetaDependencies: compat.zetaDependencies,
+      sparseDependencies: compat.sparseDependencies,
+    });
+    const expected = oracle.create({
+      expmDependencies: Reflect.get(oracle, 'expmDependencies'),
+      zetaDependencies: Reflect.get(oracle, 'zetaDependencies'),
+      sparseDependencies: Reflect.get(oracle, 'sparseDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const input = call('sparse', [
+        [0, 2],
+        [0, 0],
+      ]);
+      const result = call('expm', input) as { storage(): string; valueOf(): number[][] };
+      return { matrix: result.valueOf(), storage: result.storage(), zeta: Number(call('zeta', 5)) };
+    };
+    const result = run(actual);
+    const upstream = run(expected);
+    expect(result.storage).toBe(upstream.storage);
+    for (const [i, row] of result.matrix.entries()) {
+      for (const [j, value] of row.entries()) expect(value).toBeCloseTo(upstream.matrix[i][j], 12);
+    }
+    expect(result.zeta).toBeCloseTo(upstream.zeta, 6);
+  });
+
+  it('computes selected eigenvalues and reconstructs a Schur decomposition', () => {
+    const actual = create({ lyapDependencies: compat.lyapDependencies });
+    const expected = oracle.create({ lyapDependencies: Reflect.get(oracle, 'lyapDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const values = (
+        call('eigs', [
+          [2, 1],
+          [1, 2],
+        ]) as { values: number[] }
+      ).values;
+      const input = [
+        [1, 2],
+        [0, 3],
+      ];
+      const { U, T } = call('schur', input) as { U: unknown; T: unknown };
+      const reconstructed = call('multiply', call('multiply', U, T), call('transpose', U));
+      const rows = Object(reconstructed).valueOf() as number[][];
+      for (const [i, row] of rows.entries()) {
+        for (const [j, entry] of row.entries()) expect(entry).toBeCloseTo(input[i][j], 12);
+      }
+      return values;
+    };
+    const values = run(actual);
+    const upstream = run(expected);
+    for (const [i, value] of values.entries()) expect(value).toBeCloseTo(upstream[i], 12);
+  });
+
   it('solves selected modular inverses with BigNumber inputs', () => {
     const actual = create({ invmodDependencies: compat.invmodDependencies });
     const expected = oracle.create({
@@ -749,10 +810,22 @@ describe('native compatibility dependency bundles', () => {
     }
   });
 
-  it('loads all supported MathJS dependency bundles together', () => {
-    const names = Object.keys(oracle).filter(
-      (name) => name.endsWith('Dependencies') && Object.hasOwn(compat, name)
-    );
+  it('matches and loads the entire MathJS dependency bundle catalog', () => {
+    const names = Object.keys(oracle).filter((name) => name.endsWith('Dependencies'));
+    for (const name of names) {
+      const actualBundle = Reflect.get(compat, name) as Record<string, unknown>;
+      const expectedBundle = Reflect.get(oracle, name) as Record<string, unknown>;
+      expect(Object.keys(actualBundle).sort(), name).toEqual(Object.keys(expectedBundle).sort());
+      for (const [key, value] of Object.entries(expectedBundle)) {
+        if (typeof value !== 'function') continue;
+        for (const property of ['fn', 'dependencies', 'meta']) {
+          const actualFactory = actualBundle[key] as object;
+          expect(Reflect.get(actualFactory, property), `${name}.${key}.${property}`).toEqual(
+            Reflect.get(value, property)
+          );
+        }
+      }
+    }
     const actual = create(
       Object.fromEntries(names.map((name) => [name, Reflect.get(compat, name)]))
     );
@@ -1278,6 +1351,11 @@ describe('native compatibility dependency bundles', () => {
     ],
     ['xgcd', [8, 12]],
     ['invmod', [7, 13]],
+    ['norm', [[3, 4]]],
+    ['rotationMatrix', [0.75]],
+    ['rotate', [[2, 3], 0.75]],
+    ['sylvester', [[[-2]], [[-3]], [[10]]]],
+    ['lyap', [[[-2]], [[8]]]],
     ['composition', [5, 3]],
     [
       'kldivergence',
