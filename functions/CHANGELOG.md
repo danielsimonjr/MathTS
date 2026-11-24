@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.1
+
+### Patch Changes
+
+- 7704089: Publish the source changes that were missing from the previous npm versions so that the runtime dependencies expose the contracts used by the functions bundle. Compute determinants, means, and covariances without premature overflow. Apply instance precision to BigNumber arithmetic, simplify exact radical identities before numerical approximation, and clarify errors for untracked autodiff operands.
+- Updated dependencies [7704089]
+  - @danielsimonjr/mathts-core@0.30.1
+  - @danielsimonjr/mathts-matrix@0.13.1
+  - @danielsimonjr/mathts-expression@0.14.3
+  - @danielsimonjr/mathts-gpu@0.4.1
+
 ## 0.89.0
 
 ### Minor Changes
