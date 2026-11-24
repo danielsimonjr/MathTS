@@ -45,28 +45,40 @@ class CompatChain {
  * A name that is not a function in `math` gives `undefined`.
  *
  * @param math - The math instance that supplies the chain methods.
- * @returns A function that wraps a value in a chain.
+ * @returns A chain constructor and its callable factory bound to the same instance.
  */
-export function createChain(math: Record<string, unknown>): (value: unknown) => Chain {
-  function chain(value: unknown): Chain {
-    const base = Object.assign(new CompatChain(), {
-      done: () => value,
-      valueOf: () => value,
-      toString: () => String(value),
-    });
-    return new Proxy(base, {
-      get(target, prop: string | symbol) {
-        if (prop in target || typeof prop === 'symbol') {
-          return (target as unknown as Record<string | symbol, unknown>)[prop];
-        }
-        const fn = math[prop as string];
-        if (typeof fn === 'function') {
-          return (...args: unknown[]) =>
-            chain((fn as (...a: unknown[]) => unknown)(value, ...args));
-        }
-        return undefined;
-      },
-    }) as unknown as Chain;
+export function createChain(math: Record<string, unknown>): {
+  chain: (value?: unknown) => Chain;
+  Chain: new (value?: unknown) => Chain;
+} {
+  const Constructor = class Chain extends CompatChain {
+    constructor(value?: unknown) {
+      super();
+      const base = Object.assign(this, {
+        done: () => value,
+        valueOf: () => value,
+        toString: () => String(value),
+      });
+      return new Proxy(base, {
+        get(target, prop: string | symbol) {
+          if (prop in target || typeof prop === 'symbol') {
+            return (target as unknown as Record<string | symbol, unknown>)[prop];
+          }
+          const fn = math[prop];
+          if (typeof fn === 'function') {
+            return (...args: unknown[]) =>
+              chain((fn as (...values: unknown[]) => unknown)(value, ...args));
+          }
+          return undefined;
+        },
+      });
+    }
+  };
+  const ChainConstructor = Constructor as unknown as new (value?: unknown) => Chain;
+
+  function chain(value?: unknown): Chain {
+    return new ChainConstructor(value);
   }
-  return chain;
+
+  return { chain, Chain: ChainConstructor };
 }

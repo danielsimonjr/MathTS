@@ -12467,6 +12467,9 @@
       "COMPLEX_ZERO": {
         "kind": "object"
       },
+      "Chain": {
+        "kind": "function"
+      },
       "CompatMatrixValue": {
         "kind": "type"
       },

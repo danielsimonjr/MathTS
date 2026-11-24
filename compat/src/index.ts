@@ -105,7 +105,9 @@ function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig
  */
 interface MathInstanceOverrides {
   /** Fluent chain: `math.chain(x).add(3).done()`. */
-  chain: (value: unknown) => Chain;
+  chain: (value?: unknown) => Chain;
+  /** Chain constructor bound to this instance. */
+  Chain: ReturnType<typeof createChain>['Chain'];
   create: typeof create;
   Parser: WiredCompatInstance['Parser'];
   on: WiredCompatInstance['on'];
@@ -619,7 +621,9 @@ export function create(
   // so its assignment goes to the setter of its prototype level.
 
   // GC12 — fluent chain API (math.chain(x).add(3).done()).
-  instance.chain = createChain(instance as Record<string, unknown>);
+  const chainApi = createChain(instance);
+  instance.chain = chainApi.chain;
+  if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
 
   // Only the parser of the functions namespace is bound to the instance: a parser that
   // the caller supplies stays as given (#1250).
@@ -682,10 +686,26 @@ export const Parser = function Parser(options?: Parameters<MathInstance['parser'
 /** Create a compatibility parser with its own retained scope. */
 const defaultParser: MathInstance['parser'] = (options) => new Parser(options);
 
+const defaultChainApi = /* #__PURE__ */ createChain(
+  /* #__PURE__ */ new Proxy<Record<string, unknown>>(
+    {},
+    {
+      get(_target, property) {
+        return Reflect.get(getDefaultInstance(), property);
+      },
+    }
+  )
+);
+
 /** Start a fluent chain using the default compatibility instance. */
-const defaultChain: MathInstance['chain'] = (value) => getDefaultInstance().chain(value);
+const defaultChain: MathInstance['chain'] = /* #__PURE__ */ (() => defaultChainApi.chain)();
+
+/** Chain constructor that uses the default compatibility instance. */
+const defaultChainConstructor: MathInstance['Chain'] = /* #__PURE__ */ (() =>
+  defaultChainApi.Chain)();
 
 export {
+  defaultChainConstructor as Chain,
   defaultChain as chain,
   defaultCompile as compile,
   defaultEvaluate as evaluate,
