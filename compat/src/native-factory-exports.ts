@@ -810,6 +810,52 @@ const zerosDependencies: UnaryBundle<'createZeros'> & {
   createZeros: mathjsCreateZeros,
 };
 
+const mathjsCreateBin: CompatFactoryExports['createBin'] = factories.createBin;
+const binDependencies: UnaryBundle<'createBin'> & {
+  formatDependencies: typeof formatDependencies;
+} = {
+  formatDependencies,
+  typedDependencies,
+  createBin: mathjsCreateBin,
+};
+
+const mathjsCreateHex: CompatFactoryExports['createHex'] = factories.createHex;
+const hexDependencies: UnaryBundle<'createHex'> & {
+  formatDependencies: typeof formatDependencies;
+} = {
+  formatDependencies,
+  typedDependencies,
+  createHex: mathjsCreateHex,
+};
+
+const mathjsCreateOct: CompatFactoryExports['createOct'] = factories.createOct;
+const octDependencies: UnaryBundle<'createOct'> & {
+  formatDependencies: typeof formatDependencies;
+} = {
+  formatDependencies,
+  typedDependencies,
+  createOct: mathjsCreateOct,
+};
+
+const mathjsCreateCbrt: CompatFactoryExports['createCbrt'] = factories.createCbrt;
+const cbrtDependencies: UnaryBundle<'createCbrt'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  ComplexDependencies: typeof ComplexDependencies;
+  FractionDependencies: typeof FractionDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  FractionDependencies,
+  isNegativeDependencies,
+  matrixDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createCbrt: mathjsCreateCbrt,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1018,5 +1064,13 @@ export {
   transposeDependencies,
   mathjsCreateZeros as createZeros,
   zerosDependencies,
+  mathjsCreateBin as createBin,
+  binDependencies,
+  mathjsCreateHex as createHex,
+  hexDependencies,
+  mathjsCreateOct as createOct,
+  octDependencies,
+  mathjsCreateCbrt as createCbrt,
+  cbrtDependencies,
   typedDependencies,
 };
