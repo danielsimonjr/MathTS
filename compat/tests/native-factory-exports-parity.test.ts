@@ -61,6 +61,43 @@ describe('native compatibility dependency bundles', () => {
     );
   });
 
+  it('adds selected dense and sparse matrices like MathJS', () => {
+    const upstreamBundle = Reflect.get(oracle, 'addDependencies') as Parameters<
+      typeof oracle.create
+    >[0];
+    const actual = create({ addDependencies: compat.addDependencies });
+    const expected = oracle.create({ addDependencies: upstreamBundle } as typeof upstreamBundle);
+    const left = [
+      [1, 0],
+      [0, 2],
+    ];
+    const right = [
+      [0, 3],
+      [0, 4],
+    ];
+    const result = actual.add(actual.matrix(left, 'dense'), actual.matrix(right, 'sparse'));
+    const reference = expected.add(
+      expected.matrix(left, 'dense'),
+      expected.matrix(right, 'sparse')
+    );
+    expect((result as { valueOf(): unknown }).valueOf()).toEqual(reference.valueOf());
+  });
+
+  it('honors a substituted addScalar factory dependency', () => {
+    const math = create({ addDependencies: compat.addDependencies });
+    math.import(
+      { addScalar: (left: number, right: number) => left + right + 10 },
+      { override: true }
+    );
+    expect(math.add(1, 2)).toBe(13);
+  });
+
+  it('rejects extra arguments in selected subtraction', () => {
+    const math = create({ subtractDependencies: compat.subtractDependencies });
+    const subtract = math.subtract as (...args: unknown[]) => unknown;
+    expect(() => subtract(9, 2, 1)).toThrow(TypeError);
+  });
+
   it.each([
     ['acos', [0.5]],
     ['acosh', [2]],
@@ -142,6 +179,78 @@ describe('native compatibility dependency bundles', () => {
     ['squeeze', [[[1], [2]]]],
     ['getMatrixDataType', [[[1, 2]]]],
     ['typeOf', [[1, 2]]],
+    ['bitAnd', [6, 3]],
+    ['bitOr', [6, 3]],
+    ['bitXor', [6, 3]],
+    ['compare', [6, 3]],
+    ['compareText', ['a', 'b']],
+    [
+      'deepEqual',
+      [
+        [1, 2],
+        [1, 2],
+      ],
+    ],
+    [
+      'dot',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    [
+      'dotMultiply',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    ['hasNumericValue', ['3']],
+    ['isFinite', [3]],
+    ['isZero', [0]],
+    ['lcm', [6, 3]],
+    ['largerEq', [6, 3]],
+    ['smallerEq', [6, 3]],
+    ['unequal', [6, 3]],
+    ['or', [false, true]],
+    ['xor', [true, true]],
+    ['add', [2, 3, 4]],
+    ['subtract', [6, 3]],
+    ['diag', [[2, 3]]],
+    ['identity', [2]],
+    [
+      'matrixFromColumns',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    [
+      'matrixFromRows',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    ['ones', [2, 2]],
+    [
+      'reshape',
+      [
+        [1, 2, 3, 4],
+        [2, 2],
+      ],
+    ],
+    ['resize', [[[1]], [2, 2], 0]],
+    [
+      'transpose',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
+    ['zeros', [2, 2]],
   ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
     const factoryName = 'create' + name[0].toUpperCase() + name.slice(1);
@@ -161,6 +270,8 @@ describe('native compatibility dependency bundles', () => {
     const expected = upstreamFn(...args);
     if (typeof result === 'number' && typeof expected === 'number' && Number.isFinite(expected)) {
       expect(result).toBeCloseTo(expected, 14);
+    } else if (compat.isMatrix(result) && oracle.isMatrix(expected)) {
+      expect(result.valueOf()).toEqual(expected.valueOf());
     } else {
       expect(result).toEqual(expected);
     }

@@ -12704,6 +12704,9 @@
       "add": {
         "kind": "function"
       },
+      "addDependencies": {
+        "kind": "object"
+      },
       "addScalar": {
         "kind": "function"
       },
@@ -12791,6 +12794,9 @@
       "bitAnd": {
         "kind": "function"
       },
+      "bitAndDependencies": {
+        "kind": "object"
+      },
       "bitNot": {
         "kind": "function"
       },
@@ -12800,8 +12806,14 @@
       "bitOr": {
         "kind": "function"
       },
+      "bitOrDependencies": {
+        "kind": "object"
+      },
       "bitXor": {
         "kind": "function"
+      },
+      "bitXorDependencies": {
+        "kind": "object"
       },
       "bohrMagneton": {
         "kind": "object"
@@ -12848,11 +12860,17 @@
       "compare": {
         "kind": "function"
       },
+      "compareDependencies": {
+        "kind": "object"
+      },
       "compareNatural": {
         "kind": "function"
       },
       "compareText": {
         "kind": "function"
+      },
+      "compareTextDependencies": {
+        "kind": "object"
       },
       "compile": {
         "kind": "function"
@@ -12944,6 +12962,9 @@
       "createAcsch": {
         "kind": "function"
       },
+      "createAdd": {
+        "kind": "function"
+      },
       "createAddScalar": {
         "kind": "function"
       },
@@ -12974,10 +12995,25 @@
       "createBigNumberClass": {
         "kind": "function"
       },
+      "createBitAnd": {
+        "kind": "function"
+      },
       "createBitNot": {
         "kind": "function"
       },
+      "createBitOr": {
+        "kind": "function"
+      },
+      "createBitXor": {
+        "kind": "function"
+      },
       "createClone": {
+        "kind": "function"
+      },
+      "createCompare": {
+        "kind": "function"
+      },
+      "createCompareText": {
         "kind": "function"
       },
       "createComplexClass": {
@@ -13010,7 +13046,19 @@
       "createCube": {
         "kind": "function"
       },
+      "createDeepEqual": {
+        "kind": "function"
+      },
       "createDenseMatrixClass": {
+        "kind": "function"
+      },
+      "createDiag": {
+        "kind": "function"
+      },
+      "createDot": {
+        "kind": "function"
+      },
+      "createDotMultiply": {
         "kind": "function"
       },
       "createE": {
@@ -13052,7 +13100,13 @@
       "createGetMatrixDataType": {
         "kind": "function"
       },
+      "createHasNumericValue": {
+        "kind": "function"
+      },
       "createI": {
+        "kind": "function"
+      },
+      "createIdentity": {
         "kind": "function"
       },
       "createIm": {
@@ -13062,6 +13116,9 @@
         "kind": "function"
       },
       "createIsBounded": {
+        "kind": "function"
+      },
+      "createIsFinite": {
         "kind": "function"
       },
       "createIsInteger": {
@@ -13082,6 +13139,9 @@
       "createIsPrime": {
         "kind": "function"
       },
+      "createIsZero": {
+        "kind": "function"
+      },
       "createLN10": {
         "kind": "function"
       },
@@ -13092,6 +13152,12 @@
         "kind": "function"
       },
       "createLOG2E": {
+        "kind": "function"
+      },
+      "createLargerEq": {
+        "kind": "function"
+      },
+      "createLcm": {
         "kind": "function"
       },
       "createLgamma": {
@@ -13112,6 +13178,12 @@
       "createMatrixClass": {
         "kind": "function"
       },
+      "createMatrixFromColumns": {
+        "kind": "function"
+      },
+      "createMatrixFromRows": {
+        "kind": "function"
+      },
       "createMultiplyScalar": {
         "kind": "function"
       },
@@ -13122,6 +13194,12 @@
         "kind": "function"
       },
       "createNull": {
+        "kind": "function"
+      },
+      "createOnes": {
+        "kind": "function"
+      },
+      "createOr": {
         "kind": "function"
       },
       "createPhi": {
@@ -13140,6 +13218,12 @@
         "kind": "function"
       },
       "createRe": {
+        "kind": "function"
+      },
+      "createReshape": {
+        "kind": "function"
+      },
+      "createResize": {
         "kind": "function"
       },
       "createSQRT1_2": {
@@ -13163,6 +13247,9 @@
       "createSize": {
         "kind": "function"
       },
+      "createSmallerEq": {
+        "kind": "function"
+      },
       "createSparseMatrixClass": {
         "kind": "function"
       },
@@ -13173,6 +13260,9 @@
         "kind": "function"
       },
       "createSqueeze": {
+        "kind": "function"
+      },
+      "createSubtract": {
         "kind": "function"
       },
       "createSubtractScalar": {
@@ -13187,6 +13277,9 @@
       "createTau": {
         "kind": "function"
       },
+      "createTranspose": {
+        "kind": "function"
+      },
       "createTrue": {
         "kind": "function"
       },
@@ -13199,6 +13292,9 @@
       "createUnaryMinus": {
         "kind": "function"
       },
+      "createUnequal": {
+        "kind": "function"
+      },
       "createUnit": {
         "kind": "function"
       },
@@ -13206,6 +13302,12 @@
         "kind": "function"
       },
       "createUppercasePi": {
+        "kind": "function"
+      },
+      "createXor": {
+        "kind": "function"
+      },
+      "createZeros": {
         "kind": "function"
       },
       "cross": {
@@ -13238,6 +13340,9 @@
       "deepEqual": {
         "kind": "function"
       },
+      "deepEqualDependencies": {
+        "kind": "object"
+      },
       "den": {
         "kind": "function"
       },
@@ -13252,6 +13357,9 @@
       },
       "diag": {
         "kind": "function"
+      },
+      "diagDependencies": {
+        "kind": "object"
       },
       "diff": {
         "kind": "function"
@@ -13268,11 +13376,17 @@
       "dot": {
         "kind": "function"
       },
+      "dotDependencies": {
+        "kind": "object"
+      },
       "dotDivide": {
         "kind": "function"
       },
       "dotMultiply": {
         "kind": "function"
+      },
+      "dotMultiplyDependencies": {
+        "kind": "object"
       },
       "dotPow": {
         "kind": "function"
@@ -13424,6 +13538,9 @@
       "hasNumericValue": {
         "kind": "function"
       },
+      "hasNumericValueDependencies": {
+        "kind": "object"
+      },
       "help": {
         "kind": "function"
       },
@@ -13441,6 +13558,9 @@
       },
       "identity": {
         "kind": "function"
+      },
+      "identityDependencies": {
+        "kind": "object"
       },
       "ifft": {
         "kind": "function"
@@ -13525,6 +13645,9 @@
       },
       "isFinite": {
         "kind": "function"
+      },
+      "isFiniteDependencies": {
+        "kind": "object"
       },
       "isFraction": {
         "kind": "function"
@@ -13655,6 +13778,9 @@
       "isZero": {
         "kind": "function"
       },
+      "isZeroDependencies": {
+        "kind": "object"
+      },
       "kldivergence": {
         "kind": "function"
       },
@@ -13670,8 +13796,14 @@
       "largerEq": {
         "kind": "function"
       },
+      "largerEqDependencies": {
+        "kind": "object"
+      },
       "lcm": {
         "kind": "function"
+      },
+      "lcmDependencies": {
+        "kind": "object"
       },
       "leafCount": {
         "kind": "function"
@@ -13748,11 +13880,17 @@
       "matrixFromColumns": {
         "kind": "function"
       },
+      "matrixFromColumnsDependencies": {
+        "kind": "object"
+      },
       "matrixFromFunction": {
         "kind": "function"
       },
       "matrixFromRows": {
         "kind": "function"
+      },
+      "matrixFromRowsDependencies": {
+        "kind": "object"
       },
       "max": {
         "kind": "function"
@@ -13838,8 +13976,14 @@
       "ones": {
         "kind": "function"
       },
+      "onesDependencies": {
+        "kind": "object"
+      },
       "or": {
         "kind": "function"
+      },
+      "orDependencies": {
+        "kind": "object"
       },
       "parse": {
         "kind": "function"
@@ -13949,8 +14093,14 @@
       "reshape": {
         "kind": "function"
       },
+      "reshapeDependencies": {
+        "kind": "object"
+      },
       "resize": {
         "kind": "function"
+      },
+      "resizeDependencies": {
+        "kind": "object"
       },
       "resolve": {
         "kind": "function"
@@ -14072,6 +14222,9 @@
       "smallerEq": {
         "kind": "function"
       },
+      "smallerEqDependencies": {
+        "kind": "object"
+      },
       "solveODE": {
         "kind": "function"
       },
@@ -14126,6 +14279,9 @@
       "subtract": {
         "kind": "function"
       },
+      "subtractDependencies": {
+        "kind": "object"
+      },
       "subtractScalar": {
         "kind": "function"
       },
@@ -14174,6 +14330,9 @@
       "transpose": {
         "kind": "function"
       },
+      "transposeDependencies": {
+        "kind": "object"
+      },
       "trueDependencies": {
         "kind": "object"
       },
@@ -14200,6 +14359,9 @@
       },
       "unequal": {
         "kind": "function"
+      },
+      "unequalDependencies": {
+        "kind": "object"
       },
       "unit": {
         "kind": "function"
@@ -14231,8 +14393,14 @@
       "xor": {
         "kind": "function"
       },
+      "xorDependencies": {
+        "kind": "object"
+      },
       "zeros": {
         "kind": "function"
+      },
+      "zerosDependencies": {
+        "kind": "object"
       },
       "zeta": {
         "kind": "function"

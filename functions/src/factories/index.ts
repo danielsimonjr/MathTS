@@ -1,3 +1,4 @@
+import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
 import { createSelectedMatrix } from './selected-matrix.js';
 import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
@@ -565,7 +566,7 @@ import { createCatalan } from '../combinatorics/catalan.js';
 import { createConcat } from '../matrix/concat.js';
 import { createInv } from '../matrix/inv.js';
 import { createMapSlices } from '../matrix/mapSlices.js';
-import { createResize } from '../matrix/resize.js';
+import { createMathjsResize, createResize } from '../matrix/resize.js';
 import { createSubset } from '../matrix/subset.js';
 
 // probability
@@ -1210,7 +1211,7 @@ factoryScope.Chain = Chain;
 // Tier 12: subtract, divide, and dependent types
 // ---------------------------------------------------------------------------
 
-import { createSubtract } from '../arithmetic/subtract.js';
+import { createMathjsSubtract, createSubtract } from '../arithmetic/subtract.js';
 import { createDivide } from '../arithmetic/divide.js';
 import { createIfft } from '../matrix/ifft.js';
 import { createIndexClass } from '../type/matrix/MatrixIndex.js';
@@ -2299,6 +2300,34 @@ function compatFactoryExports(): {
   createIsInteger: typeof createIsInteger;
   createConcat: typeof createConcat;
   createAtan2: typeof createAtan2;
+  createBitAnd: typeof createBitAnd;
+  createBitOr: typeof createBitOr;
+  createBitXor: typeof createBitXor;
+  createCompare: typeof createCompare;
+  createCompareText: typeof createCompareText;
+  createDeepEqual: typeof createDeepEqual;
+  createDot: typeof createDot;
+  createDotMultiply: typeof createDotMultiply;
+  createHasNumericValue: typeof createHasNumericValue;
+  createIsFinite: typeof createIsFinite;
+  createIsZero: typeof createIsZero;
+  createLcm: typeof createLcm;
+  createLargerEq: typeof createLargerEq;
+  createSmallerEq: typeof createSmallerEq;
+  createUnequal: typeof createUnequal;
+  createOr: typeof createOr;
+  createXor: typeof createXor;
+  createAdd: typeof createSelectedAdd;
+  createSubtract: typeof createMathjsSubtract;
+  createDiag: typeof createDiag;
+  createIdentity: typeof createIdentity;
+  createMatrixFromColumns: typeof createMatrixFromColumns;
+  createMatrixFromRows: typeof createMatrixFromRows;
+  createOnes: typeof createOnes;
+  createReshape: typeof createReshape;
+  createResize: typeof createMathjsResize;
+  createTranspose: typeof createTranspose;
+  createZeros: typeof createZeros;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2371,6 +2400,34 @@ function compatFactoryExports(): {
     createIsInteger,
     createConcat,
     createAtan2,
+    createBitAnd,
+    createBitOr,
+    createBitXor,
+    createCompare,
+    createCompareText,
+    createDeepEqual,
+    createDot,
+    createDotMultiply,
+    createHasNumericValue,
+    createIsFinite,
+    createIsZero,
+    createLcm,
+    createLargerEq,
+    createSmallerEq,
+    createUnequal,
+    createOr,
+    createXor,
+    createAdd: createSelectedAdd,
+    createSubtract: createMathjsSubtract,
+    createDiag,
+    createIdentity,
+    createMatrixFromColumns,
+    createMatrixFromRows,
+    createOnes,
+    createReshape,
+    createResize: createMathjsResize,
+    createTranspose,
+    createZeros,
     createTyped,
   };
 }

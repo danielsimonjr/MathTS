@@ -476,6 +476,340 @@ const atan2Dependencies: UnaryBundle<'createAtan2'> &
   createAtan2: mathjsCreateAtan2,
 };
 
+const mathjsCreateBitAnd: CompatFactoryExports['createBitAnd'] = factories.createBitAnd;
+const bitAndDependencies: UnaryBundle<'createBitAnd'> & {
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createBitAnd: mathjsCreateBitAnd,
+};
+const mathjsCreateBitOr: CompatFactoryExports['createBitOr'] = factories.createBitOr;
+const bitOrDependencies: UnaryBundle<'createBitOr'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createBitOr: mathjsCreateBitOr,
+};
+const mathjsCreateBitXor: CompatFactoryExports['createBitXor'] = factories.createBitXor;
+const bitXorDependencies: UnaryBundle<'createBitXor'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createBitXor: mathjsCreateBitXor,
+};
+const mathjsCreateCompare: CompatFactoryExports['createCompare'] = factories.createCompare;
+const compareDependencies: UnaryBundle<'createCompare'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  FractionDependencies: typeof FractionDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  BigNumberDependencies,
+  DenseMatrixDependencies,
+  FractionDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createCompare: mathjsCreateCompare,
+};
+const mathjsCreateCompareText: CompatFactoryExports['createCompareText'] =
+  factories.createCompareText;
+const compareTextDependencies: UnaryBundle<'createCompareText'> & {
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createCompareText: mathjsCreateCompareText,
+};
+const mathjsCreateDeepEqual: CompatFactoryExports['createDeepEqual'] = factories.createDeepEqual;
+const deepEqualDependencies: UnaryBundle<'createDeepEqual'> & {
+  equalDependencies: typeof equalDependencies;
+} = { equalDependencies, typedDependencies, createDeepEqual: mathjsCreateDeepEqual };
+const mathjsCreateDot: CompatFactoryExports['createDot'] = factories.createDot;
+const dotDependencies: UnaryBundle<'createDot'> & {
+  addScalarDependencies: typeof addScalarDependencies;
+  conjDependencies: typeof conjDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  addScalarDependencies,
+  conjDependencies,
+  multiplyScalarDependencies,
+  sizeDependencies,
+  typedDependencies,
+  createDot: mathjsCreateDot,
+};
+const mathjsCreateDotMultiply: CompatFactoryExports['createDotMultiply'] =
+  factories.createDotMultiply;
+const dotMultiplyDependencies: UnaryBundle<'createDotMultiply'> & {
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+} = {
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  typedDependencies,
+  createDotMultiply: mathjsCreateDotMultiply,
+};
+const mathjsCreateHasNumericValue: CompatFactoryExports['createHasNumericValue'] =
+  factories.createHasNumericValue;
+const hasNumericValueDependencies: UnaryBundle<'createHasNumericValue'> & {
+  isNumericDependencies: typeof isNumericDependencies;
+} = {
+  isNumericDependencies,
+  typedDependencies,
+  createHasNumericValue: mathjsCreateHasNumericValue,
+};
+const mathjsCreateIsFinite: CompatFactoryExports['createIsFinite'] = factories.createIsFinite;
+const isFiniteDependencies: UnaryBundle<'createIsFinite'> & {
+  isBoundedDependencies: typeof isBoundedDependencies;
+  mapDependencies: typeof mapDependencies;
+} = {
+  isBoundedDependencies,
+  mapDependencies,
+  typedDependencies,
+  createIsFinite: mathjsCreateIsFinite,
+};
+const mathjsCreateIsZero: CompatFactoryExports['createIsZero'] = factories.createIsZero;
+const isZeroDependencies: UnaryBundle<'createIsZero'> & {
+  equalScalarDependencies: typeof equalScalarDependencies;
+} = { equalScalarDependencies, typedDependencies, createIsZero: mathjsCreateIsZero };
+const mathjsCreateLcm: CompatFactoryExports['createLcm'] = factories.createLcm;
+const lcmDependencies: UnaryBundle<'createLcm'> & {
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createLcm: mathjsCreateLcm,
+};
+const mathjsCreateLargerEq: CompatFactoryExports['createLargerEq'] = factories.createLargerEq;
+const largerEqDependencies: UnaryBundle<'createLargerEq'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createLargerEq: mathjsCreateLargerEq,
+};
+const mathjsCreateSmallerEq: CompatFactoryExports['createSmallerEq'] = factories.createSmallerEq;
+const smallerEqDependencies: UnaryBundle<'createSmallerEq'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createSmallerEq: mathjsCreateSmallerEq,
+};
+const mathjsCreateUnequal: CompatFactoryExports['createUnequal'] = factories.createUnequal;
+const unequalDependencies: UnaryBundle<'createUnequal'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createUnequal: mathjsCreateUnequal,
+};
+const mathjsCreateOr: CompatFactoryExports['createOr'] = factories.createOr;
+const orDependencies: UnaryBundle<'createOr'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createOr: mathjsCreateOr,
+};
+const mathjsCreateXor: CompatFactoryExports['createXor'] = factories.createXor;
+const xorDependencies: UnaryBundle<'createXor'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createXor: mathjsCreateXor,
+};
+
+const mathjsCreateAdd: CompatFactoryExports['createAdd'] = factories.createAdd;
+const addDependencies: UnaryBundle<'createAdd'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  addScalarDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createAdd: mathjsCreateAdd,
+};
+const mathjsCreateSubtract: CompatFactoryExports['createSubtract'] = factories.createSubtract;
+const subtractDependencies: UnaryBundle<'createSubtract'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createSubtract: mathjsCreateSubtract,
+};
+
+const mathjsCreateDiag: CompatFactoryExports['createDiag'] = factories.createDiag;
+const diagDependencies: UnaryBundle<'createDiag'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createDiag: mathjsCreateDiag,
+};
+const mathjsCreateIdentity: CompatFactoryExports['createIdentity'] = factories.createIdentity;
+const identityDependencies: UnaryBundle<'createIdentity'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  BigNumberDependencies,
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createIdentity: mathjsCreateIdentity,
+};
+const mathjsCreateMatrixFromColumns: CompatFactoryExports['createMatrixFromColumns'] =
+  factories.createMatrixFromColumns;
+const matrixFromColumnsDependencies: UnaryBundle<'createMatrixFromColumns'> & {
+  flattenDependencies: typeof flattenDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  flattenDependencies,
+  matrixDependencies,
+  sizeDependencies,
+  typedDependencies,
+  createMatrixFromColumns: mathjsCreateMatrixFromColumns,
+};
+const mathjsCreateMatrixFromRows: CompatFactoryExports['createMatrixFromRows'] =
+  factories.createMatrixFromRows;
+const matrixFromRowsDependencies: UnaryBundle<'createMatrixFromRows'> & {
+  flattenDependencies: typeof flattenDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  flattenDependencies,
+  matrixDependencies,
+  sizeDependencies,
+  typedDependencies,
+  createMatrixFromRows: mathjsCreateMatrixFromRows,
+};
+const mathjsCreateOnes: CompatFactoryExports['createOnes'] = factories.createOnes;
+const onesDependencies: UnaryBundle<'createOnes'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = { BigNumberDependencies, matrixDependencies, typedDependencies, createOnes: mathjsCreateOnes };
+const mathjsCreateReshape: CompatFactoryExports['createReshape'] = factories.createReshape;
+const reshapeDependencies: UnaryBundle<'createReshape'> & {
+  isIntegerDependencies: typeof isIntegerDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  isIntegerDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createReshape: mathjsCreateReshape,
+};
+const mathjsCreateResize: CompatFactoryExports['createResize'] = factories.createResize;
+const resizeDependencies: {
+  matrixDependencies: typeof matrixDependencies;
+  createResize: typeof mathjsCreateResize;
+} = { matrixDependencies, createResize: mathjsCreateResize };
+const mathjsCreateTranspose: CompatFactoryExports['createTranspose'] = factories.createTranspose;
+const transposeDependencies: UnaryBundle<'createTranspose'> & {
+  matrixDependencies: typeof matrixDependencies;
+} = { matrixDependencies, typedDependencies, createTranspose: mathjsCreateTranspose };
+const mathjsCreateZeros: CompatFactoryExports['createZeros'] = factories.createZeros;
+const zerosDependencies: UnaryBundle<'createZeros'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  BigNumberDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createZeros: mathjsCreateZeros,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -628,5 +962,61 @@ export {
   isIntegerDependencies,
   concatDependencies,
   atan2Dependencies,
+  mathjsCreateBitAnd as createBitAnd,
+  bitAndDependencies,
+  mathjsCreateBitOr as createBitOr,
+  bitOrDependencies,
+  mathjsCreateBitXor as createBitXor,
+  bitXorDependencies,
+  mathjsCreateCompare as createCompare,
+  compareDependencies,
+  mathjsCreateCompareText as createCompareText,
+  compareTextDependencies,
+  mathjsCreateDeepEqual as createDeepEqual,
+  deepEqualDependencies,
+  mathjsCreateDot as createDot,
+  dotDependencies,
+  mathjsCreateDotMultiply as createDotMultiply,
+  dotMultiplyDependencies,
+  mathjsCreateHasNumericValue as createHasNumericValue,
+  hasNumericValueDependencies,
+  mathjsCreateIsFinite as createIsFinite,
+  isFiniteDependencies,
+  mathjsCreateIsZero as createIsZero,
+  isZeroDependencies,
+  mathjsCreateLcm as createLcm,
+  lcmDependencies,
+  mathjsCreateLargerEq as createLargerEq,
+  largerEqDependencies,
+  mathjsCreateSmallerEq as createSmallerEq,
+  smallerEqDependencies,
+  mathjsCreateUnequal as createUnequal,
+  unequalDependencies,
+  mathjsCreateOr as createOr,
+  orDependencies,
+  mathjsCreateXor as createXor,
+  xorDependencies,
+  mathjsCreateAdd as createAdd,
+  mathjsCreateSubtract as createSubtract,
+  addDependencies,
+  subtractDependencies,
+  mathjsCreateDiag as createDiag,
+  diagDependencies,
+  mathjsCreateIdentity as createIdentity,
+  identityDependencies,
+  mathjsCreateMatrixFromColumns as createMatrixFromColumns,
+  matrixFromColumnsDependencies,
+  mathjsCreateMatrixFromRows as createMatrixFromRows,
+  matrixFromRowsDependencies,
+  mathjsCreateOnes as createOnes,
+  onesDependencies,
+  mathjsCreateReshape as createReshape,
+  reshapeDependencies,
+  mathjsCreateResize as createResize,
+  resizeDependencies,
+  mathjsCreateTranspose as createTranspose,
+  transposeDependencies,
+  mathjsCreateZeros as createZeros,
+  zerosDependencies,
   typedDependencies,
 };
