@@ -2939,6 +2939,20 @@ const polynomialRootDependencies: UnaryBundle<'createPolynomialRoot'> & {
   createPolynomialRoot: mathjsCreatePolynomialRoot,
 };
 
+const mathjsCreateCombinations: CompatFactoryExports['createCombinations'] =
+  factories.createCombinations;
+const combinationsDependencies: UnaryBundle<'createCombinations'> = {
+  typedDependencies,
+  createCombinations: mathjsCreateCombinations,
+};
+
+const mathjsCreateCombinationsWithRep: CompatFactoryExports['createCombinationsWithRep'] =
+  factories.createCombinationsWithRep;
+const combinationsWithRepDependencies: UnaryBundle<'createCombinationsWithRep'> = {
+  typedDependencies,
+  createCombinationsWithRep: mathjsCreateCombinationsWithRep,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3489,5 +3503,9 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateCombinations as createCombinations,
+  combinationsDependencies,
+  mathjsCreateCombinationsWithRep as createCombinationsWithRep,
+  combinationsWithRepDependencies,
   typedDependencies,
 };

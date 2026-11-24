@@ -5,6 +5,28 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('computes selected combinations with BigNumber inputs', () => {
+    const actual = create({
+      combinationsDependencies: compat.combinationsDependencies,
+      combinationsWithRepDependencies: compat.combinationsWithRepDependencies,
+    });
+    const expected = oracle.create({
+      combinationsDependencies: Reflect.get(oracle, 'combinationsDependencies'),
+      combinationsWithRepDependencies: Reflect.get(oracle, 'combinationsWithRepDependencies'),
+    });
+    for (const name of ['combinations', 'combinationsWithRep']) {
+      const result = Reflect.apply(Reflect.get(actual, name), actual, [
+        compat.bignumber(12),
+        compat.bignumber(4),
+      ]);
+      const upstream = Reflect.apply(Reflect.get(expected, name), expected, [
+        oracle.bignumber(12),
+        oracle.bignumber(4),
+      ]);
+      expect(String(result)).toBe(String(upstream));
+    }
+  });
+
   it('compiles selected expressions for repeated evaluation', () => {
     const actual = create({ compileDependencies: compat.compileDependencies });
     const expected = oracle.create({
@@ -821,6 +843,8 @@ describe('native compatibility dependency bundles', () => {
         [2, 0],
       ],
     ],
+    ['combinations', [7, 5]],
+    ['combinationsWithRep', [7, 5]],
     ['mean', [[2, 4, 9]]],
     [
       'mean',
