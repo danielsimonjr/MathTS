@@ -15,7 +15,8 @@ import { factoryScope, registerMathjsFactoryTypes, type TypedBuilder } from './s
 import { replacer } from '../utils/json-replacer.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
-import { factory } from '../utils/factory.js';
+import { factory, isFactory } from '../utils/factory.js';
+import { create as createFactoryInstance, type FactoriesInput } from '../core/create.js';
 import { mixin as attachEmitter } from '../utils/emitter.js';
 import { ArgumentsError } from '../error/ArgumentsError.js';
 import { MathJSDenseMatrix, MathJSSparseMatrix } from './matrix-bridge.js';
@@ -2203,6 +2204,27 @@ function createCompatTyped(): typeof coreTyped {
   return typed;
 }
 
+function isFactoryBundle(value: unknown, ancestors: Set<object>): boolean {
+  if (isFactory(value)) return true;
+  if (typeof value !== 'object' || value === null || ancestors.has(value)) return false;
+  const prototype: unknown = Object.getPrototypeOf(value);
+  if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) return false;
+  ancestors.add(value);
+  const entries = Object.values(value);
+  const result = entries.length > 0 && entries.every((entry) => isFactoryBundle(entry, ancestors));
+  ancestors.delete(value);
+  return result;
+}
+
+/** Load a namespace of dependency factories through the mathjs factory loader. */
+function tryCreateFactoryBundle(
+  factories: Record<string, unknown>,
+  config: NonNullable<Parameters<typeof createFactoryInstance>[1]>
+): unknown {
+  if (!isFactoryBundle(factories, new Set())) return undefined;
+  return createFactoryInstance(factories as FactoriesInput, config);
+}
+
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
   constructors: compatConstructors,
@@ -2212,4 +2234,5 @@ export const factory_mathjsCompat = {
   configFactory,
   createCompatRandomSources,
   createCompatTyped,
+  tryCreateFactoryBundle,
 };

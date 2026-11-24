@@ -351,6 +351,11 @@ export function create(
   factories: Record<string, unknown> = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
+  if (factories !== all) {
+    const selected = mathFunctions.factory_mathjsCompat.tryCreateFactoryBundle(factories, config);
+    if (selected !== undefined) return selected as MathInstance;
+  }
+
   const defaultsAtCreate: MathJSConfig = {
     ...mathFunctions.config(),
     ...defaultConfig,
