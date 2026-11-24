@@ -12503,6 +12503,9 @@
       "FunctionNode": {
         "kind": "function"
       },
+      "Help": {
+        "kind": "function"
+      },
       "I": {
         "kind": "object"
       },
@@ -12596,16 +12599,49 @@
       "acos": {
         "kind": "function"
       },
+      "acosh": {
+        "kind": "function"
+      },
+      "acot": {
+        "kind": "function"
+      },
+      "acoth": {
+        "kind": "function"
+      },
+      "acsc": {
+        "kind": "function"
+      },
+      "acsch": {
+        "kind": "function"
+      },
       "add": {
+        "kind": "function"
+      },
+      "addScalar": {
         "kind": "function"
       },
       "all": {
         "kind": "object"
       },
+      "and": {
+        "kind": "function"
+      },
+      "apply": {
+        "kind": "function"
+      },
       "arg": {
         "kind": "function"
       },
+      "asec": {
+        "kind": "function"
+      },
+      "asech": {
+        "kind": "function"
+      },
       "asin": {
+        "kind": "function"
+      },
+      "asinh": {
         "kind": "function"
       },
       "atan": {
@@ -12614,7 +12650,43 @@
       "atan2": {
         "kind": "function"
       },
+      "atanh": {
+        "kind": "function"
+      },
+      "bellNumbers": {
+        "kind": "function"
+      },
+      "bernoulli": {
+        "kind": "function"
+      },
+      "bigint": {
+        "kind": "function"
+      },
       "bignumber": {
+        "kind": "function"
+      },
+      "bin": {
+        "kind": "function"
+      },
+      "bitAnd": {
+        "kind": "function"
+      },
+      "bitNot": {
+        "kind": "function"
+      },
+      "bitOr": {
+        "kind": "function"
+      },
+      "bitXor": {
+        "kind": "function"
+      },
+      "boolean": {
+        "kind": "function"
+      },
+      "catalan": {
+        "kind": "function"
+      },
+      "cbrt": {
         "kind": "function"
       },
       "ceil": {
@@ -12623,35 +12695,143 @@
       "chain": {
         "kind": "function"
       },
+      "clone": {
+        "kind": "function"
+      },
+      "column": {
+        "kind": "function"
+      },
+      "combinations": {
+        "kind": "function"
+      },
+      "combinationsWithRep": {
+        "kind": "function"
+      },
+      "compare": {
+        "kind": "function"
+      },
+      "compareNatural": {
+        "kind": "function"
+      },
+      "compareText": {
+        "kind": "function"
+      },
       "compile": {
         "kind": "function"
       },
       "complex": {
         "kind": "function"
       },
+      "composition": {
+        "kind": "function"
+      },
       "computePool": {
         "kind": "object"
       },
+      "concat": {
+        "kind": "function"
+      },
       "conj": {
+        "kind": "function"
+      },
+      "corr": {
         "kind": "function"
       },
       "cos": {
         "kind": "function"
       },
+      "cosh": {
+        "kind": "function"
+      },
+      "cot": {
+        "kind": "function"
+      },
+      "coth": {
+        "kind": "function"
+      },
+      "count": {
+        "kind": "function"
+      },
       "create": {
+        "kind": "function"
+      },
+      "createUnit": {
+        "kind": "function"
+      },
+      "cross": {
+        "kind": "function"
+      },
+      "csc": {
+        "kind": "function"
+      },
+      "csch": {
+        "kind": "function"
+      },
+      "ctranspose": {
+        "kind": "function"
+      },
+      "cube": {
+        "kind": "function"
+      },
+      "cumsum": {
+        "kind": "function"
+      },
+      "deepEqual": {
         "kind": "function"
       },
       "den": {
         "kind": "function"
       },
+      "derivative": {
+        "kind": "function"
+      },
       "det": {
+        "kind": "function"
+      },
+      "diag": {
+        "kind": "function"
+      },
+      "diff": {
+        "kind": "function"
+      },
+      "distance": {
         "kind": "function"
       },
       "divide": {
         "kind": "function"
       },
+      "divideScalar": {
+        "kind": "function"
+      },
+      "dot": {
+        "kind": "function"
+      },
+      "dotDivide": {
+        "kind": "function"
+      },
+      "dotMultiply": {
+        "kind": "function"
+      },
+      "dotPow": {
+        "kind": "function"
+      },
       "e": {
         "kind": "number"
+      },
+      "eigs": {
+        "kind": "function"
+      },
+      "equal": {
+        "kind": "function"
+      },
+      "equalScalar": {
+        "kind": "function"
+      },
+      "equalText": {
+        "kind": "function"
+      },
+      "erf": {
+        "kind": "function"
       },
       "evaluate": {
         "kind": "function"
@@ -12659,16 +12839,61 @@
       "exp": {
         "kind": "function"
       },
+      "expm": {
+        "kind": "function"
+      },
+      "expm1": {
+        "kind": "function"
+      },
+      "factorial": {
+        "kind": "function"
+      },
       "factory": {
+        "kind": "function"
+      },
+      "fft": {
+        "kind": "function"
+      },
+      "filter": {
+        "kind": "function"
+      },
+      "fix": {
+        "kind": "function"
+      },
+      "flatten": {
         "kind": "function"
       },
       "floor": {
         "kind": "function"
       },
+      "forEach": {
+        "kind": "function"
+      },
+      "format": {
+        "kind": "function"
+      },
       "fraction": {
         "kind": "function"
       },
+      "freqz": {
+        "kind": "function"
+      },
+      "gamma": {
+        "kind": "function"
+      },
       "gcd": {
+        "kind": "function"
+      },
+      "getMatrixDataType": {
+        "kind": "function"
+      },
+      "hasNumericValue": {
+        "kind": "function"
+      },
+      "hex": {
+        "kind": "function"
+      },
+      "hypot": {
         "kind": "function"
       },
       "i": {
@@ -12677,7 +12902,22 @@
       "identity": {
         "kind": "function"
       },
+      "ifft": {
+        "kind": "function"
+      },
       "im": {
+        "kind": "function"
+      },
+      "index": {
+        "kind": "function"
+      },
+      "intersect": {
+        "kind": "function"
+      },
+      "inv": {
+        "kind": "function"
+      },
+      "invmod": {
         "kind": "function"
       },
       "isAccessorNode": {
@@ -12704,6 +12944,9 @@
       "isBoolean": {
         "kind": "function"
       },
+      "isBounded": {
+        "kind": "function"
+      },
       "isChain": {
         "kind": "function"
       },
@@ -12723,6 +12966,9 @@
         "kind": "function"
       },
       "isDenseMatrix": {
+        "kind": "function"
+      },
+      "isFinite": {
         "kind": "function"
       },
       "isFraction_": {
@@ -12746,10 +12992,19 @@
       "isIndexNode": {
         "kind": "function"
       },
+      "isInteger": {
+        "kind": "function"
+      },
       "isMap": {
         "kind": "function"
       },
       "isMatrix": {
+        "kind": "function"
+      },
+      "isNaN": {
+        "kind": "function"
+      },
+      "isNegative": {
         "kind": "function"
       },
       "isNode": {
@@ -12759,6 +13014,9 @@
         "kind": "function"
       },
       "isNumber_": {
+        "kind": "function"
+      },
+      "isNumeric": {
         "kind": "function"
       },
       "isObject": {
@@ -12777,6 +13035,12 @@
         "kind": "function"
       },
       "isPartitionedMap": {
+        "kind": "function"
+      },
+      "isPositive": {
+        "kind": "function"
+      },
+      "isPrime": {
         "kind": "function"
       },
       "isRange": {
@@ -12809,13 +13073,79 @@
       "isUnit": {
         "kind": "function"
       },
+      "isZero": {
+        "kind": "function"
+      },
+      "kldivergence": {
+        "kind": "function"
+      },
+      "kron": {
+        "kind": "function"
+      },
+      "larger": {
+        "kind": "function"
+      },
+      "largerEq": {
+        "kind": "function"
+      },
       "lcm": {
+        "kind": "function"
+      },
+      "leafCount": {
+        "kind": "function"
+      },
+      "leftShift": {
+        "kind": "function"
+      },
+      "lgamma": {
         "kind": "function"
       },
       "log": {
         "kind": "function"
       },
+      "log10": {
+        "kind": "function"
+      },
+      "log1p": {
+        "kind": "function"
+      },
+      "log2": {
+        "kind": "function"
+      },
+      "lsolve": {
+        "kind": "function"
+      },
+      "lsolveAll": {
+        "kind": "function"
+      },
+      "lup": {
+        "kind": "function"
+      },
+      "lusolve": {
+        "kind": "function"
+      },
+      "lyap": {
+        "kind": "function"
+      },
+      "mad": {
+        "kind": "function"
+      },
+      "map": {
+        "kind": "function"
+      },
+      "mapSlices": {
+        "kind": "function"
+      },
       "matrix": {
+        "kind": "function"
+      },
+      "matrixFromColumns": {
+        "kind": "function"
+      },
+      "matrixFromFunction": {
+        "kind": "function"
+      },
+      "matrixFromRows": {
         "kind": "function"
       },
       "max": {
@@ -12824,16 +13154,58 @@
       "mean": {
         "kind": "function"
       },
+      "median": {
+        "kind": "function"
+      },
       "min": {
+        "kind": "function"
+      },
+      "mod": {
+        "kind": "function"
+      },
+      "mode": {
+        "kind": "function"
+      },
+      "multinomial": {
         "kind": "function"
       },
       "multiply": {
         "kind": "function"
       },
+      "multiplyScalar": {
+        "kind": "function"
+      },
+      "norm": {
+        "kind": "function"
+      },
+      "not": {
+        "kind": "function"
+      },
+      "nthRoot": {
+        "kind": "function"
+      },
+      "nthRoots": {
+        "kind": "function"
+      },
+      "nullish": {
+        "kind": "function"
+      },
       "num": {
         "kind": "function"
       },
+      "number": {
+        "kind": "function"
+      },
+      "numeric": {
+        "kind": "function"
+      },
+      "oct": {
+        "kind": "function"
+      },
       "ones": {
+        "kind": "function"
+      },
+      "or": {
         "kind": "function"
       },
       "parse": {
@@ -12842,52 +13214,241 @@
       "parser": {
         "kind": "function"
       },
+      "partitionSelect": {
+        "kind": "function"
+      },
+      "permutations": {
+        "kind": "function"
+      },
       "phi": {
         "kind": "number"
       },
       "pi": {
         "kind": "number"
       },
+      "pinv": {
+        "kind": "function"
+      },
+      "polynomialRoot": {
+        "kind": "function"
+      },
       "pow": {
+        "kind": "function"
+      },
+      "print": {
+        "kind": "function"
+      },
+      "prod": {
+        "kind": "function"
+      },
+      "qr": {
+        "kind": "function"
+      },
+      "quantileSeq": {
+        "kind": "function"
+      },
+      "range": {
+        "kind": "function"
+      },
+      "rationalize": {
         "kind": "function"
       },
       "re": {
         "kind": "function"
       },
+      "replacer": {
+        "kind": "function"
+      },
+      "reshape": {
+        "kind": "function"
+      },
+      "resize": {
+        "kind": "function"
+      },
+      "resolve": {
+        "kind": "function"
+      },
+      "reviver": {
+        "kind": "function"
+      },
+      "rightArithShift": {
+        "kind": "function"
+      },
+      "rightLogShift": {
+        "kind": "function"
+      },
+      "rotate": {
+        "kind": "function"
+      },
+      "rotationMatrix": {
+        "kind": "function"
+      },
       "round": {
+        "kind": "function"
+      },
+      "row": {
+        "kind": "function"
+      },
+      "schur": {
+        "kind": "function"
+      },
+      "sec": {
+        "kind": "function"
+      },
+      "sech": {
+        "kind": "function"
+      },
+      "setCartesian": {
+        "kind": "function"
+      },
+      "setDifference": {
+        "kind": "function"
+      },
+      "setDistinct": {
+        "kind": "function"
+      },
+      "setIntersect": {
+        "kind": "function"
+      },
+      "setIsSubset": {
+        "kind": "function"
+      },
+      "setMultiplicity": {
+        "kind": "function"
+      },
+      "setPowerset": {
+        "kind": "function"
+      },
+      "setSize": {
+        "kind": "function"
+      },
+      "setSymDifference": {
         "kind": "function"
       },
       "shims": {
         "kind": "object"
       },
+      "sign": {
+        "kind": "function"
+      },
+      "simplify": {
+        "kind": "function"
+      },
+      "simplifyConstant": {
+        "kind": "function"
+      },
+      "simplifyCore": {
+        "kind": "function"
+      },
       "sin": {
+        "kind": "function"
+      },
+      "sinh": {
         "kind": "function"
       },
       "size": {
         "kind": "function"
       },
+      "slu": {
+        "kind": "function"
+      },
+      "smaller": {
+        "kind": "function"
+      },
+      "smallerEq": {
+        "kind": "function"
+      },
+      "solveODE": {
+        "kind": "function"
+      },
+      "sort": {
+        "kind": "function"
+      },
       "sparse": {
+        "kind": "function"
+      },
+      "splitUnit": {
         "kind": "function"
       },
       "sqrt": {
         "kind": "function"
       },
+      "sqrtm": {
+        "kind": "function"
+      },
+      "square": {
+        "kind": "function"
+      },
+      "squeeze": {
+        "kind": "function"
+      },
       "std": {
+        "kind": "function"
+      },
+      "stirlingS2": {
+        "kind": "function"
+      },
+      "string": {
+        "kind": "function"
+      },
+      "subset": {
         "kind": "function"
       },
       "subtract": {
         "kind": "function"
       },
+      "subtractScalar": {
+        "kind": "function"
+      },
       "sum": {
+        "kind": "function"
+      },
+      "sylvester": {
+        "kind": "function"
+      },
+      "symbolicEqual": {
         "kind": "function"
       },
       "tan": {
         "kind": "function"
       },
+      "tanh": {
+        "kind": "function"
+      },
       "tau": {
         "kind": "number"
       },
+      "to": {
+        "kind": "function"
+      },
+      "toBest": {
+        "kind": "function"
+      },
+      "trace": {
+        "kind": "function"
+      },
       "transpose": {
+        "kind": "function"
+      },
+      "typeOf": {
+        "kind": "function"
+      },
+      "unaryMinus": {
+        "kind": "function"
+      },
+      "unaryPlus": {
+        "kind": "function"
+      },
+      "unequal": {
+        "kind": "function"
+      },
+      "unit": {
+        "kind": "function"
+      },
+      "usolve": {
+        "kind": "function"
+      },
+      "usolveAll": {
         "kind": "function"
       },
       "variance": {
@@ -12896,7 +13457,19 @@
       "version": {
         "kind": "string"
       },
+      "xgcd": {
+        "kind": "function"
+      },
+      "xor": {
+        "kind": "function"
+      },
       "zeros": {
+        "kind": "function"
+      },
+      "zeta": {
+        "kind": "function"
+      },
+      "zpk2tf": {
         "kind": "function"
       }
     }
