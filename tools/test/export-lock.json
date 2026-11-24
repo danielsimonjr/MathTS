@@ -12434,11 +12434,17 @@
       "AccessorNode": {
         "kind": "function"
       },
+      "AccessorNodeDependencies": {
+        "kind": "object"
+      },
       "ArgumentsError": {
         "kind": "function"
       },
       "ArrayNode": {
         "kind": "function"
+      },
+      "ArrayNodeDependencies": {
+        "kind": "object"
       },
       "AssignmentNode": {
         "kind": "function"
@@ -12464,6 +12470,9 @@
       "BlockNode": {
         "kind": "function"
       },
+      "BlockNodeDependencies": {
+        "kind": "object"
+      },
       "COMPLEX_ONE": {
         "kind": "object"
       },
@@ -12488,8 +12497,14 @@
       "ConditionalNode": {
         "kind": "function"
       },
+      "ConditionalNodeDependencies": {
+        "kind": "object"
+      },
       "ConstantNode": {
         "kind": "function"
+      },
+      "ConstantNodeDependencies": {
+        "kind": "object"
       },
       "DenseMatrix": {
         "kind": "function"
@@ -12521,6 +12536,9 @@
       "FunctionAssignmentNode": {
         "kind": "function"
       },
+      "FunctionAssignmentNodeDependencies": {
+        "kind": "object"
+      },
       "FunctionNode": {
         "kind": "function"
       },
@@ -12541,6 +12559,9 @@
       },
       "IndexNode": {
         "kind": "function"
+      },
+      "IndexNodeDependencies": {
+        "kind": "object"
       },
       "InfinityDependencies": {
         "kind": "object"
@@ -12593,17 +12614,29 @@
       "Node": {
         "kind": "function"
       },
+      "NodeDependencies": {
+        "kind": "object"
+      },
       "ObjectNode": {
         "kind": "function"
       },
+      "ObjectNodeDependencies": {
+        "kind": "object"
+      },
       "OperatorNode": {
         "kind": "function"
+      },
+      "OperatorNodeDependencies": {
+        "kind": "object"
       },
       "PIDependencies": {
         "kind": "object"
       },
       "ParenthesisNode": {
         "kind": "function"
+      },
+      "ParenthesisNodeDependencies": {
+        "kind": "object"
       },
       "Parser": {
         "kind": "function"
@@ -12614,8 +12647,14 @@
       "RangeNode": {
         "kind": "function"
       },
+      "RangeNodeDependencies": {
+        "kind": "object"
+      },
       "RelationalNode": {
         "kind": "function"
+      },
+      "RelationalNodeDependencies": {
+        "kind": "object"
       },
       "ResultSet": {
         "kind": "function"
@@ -12977,6 +13016,9 @@
       "createAbs": {
         "kind": "function"
       },
+      "createAccessorNode": {
+        "kind": "function"
+      },
       "createAcos": {
         "kind": "function"
       },
@@ -13005,6 +13047,9 @@
         "kind": "function"
       },
       "createArg": {
+        "kind": "function"
+      },
+      "createArrayNode": {
         "kind": "function"
       },
       "createAsec": {
@@ -13052,6 +13097,9 @@
       "createBitXor": {
         "kind": "function"
       },
+      "createBlockNode": {
+        "kind": "function"
+      },
       "createCbrt": {
         "kind": "function"
       },
@@ -13085,7 +13133,13 @@
       "createConcat": {
         "kind": "function"
       },
+      "createConditionalNode": {
+        "kind": "function"
+      },
       "createConj": {
+        "kind": "function"
+      },
+      "createConstantNode": {
         "kind": "function"
       },
       "createCos": {
@@ -13187,6 +13241,9 @@
       "createFractionClass": {
         "kind": "function"
       },
+      "createFunctionAssignmentNode": {
+        "kind": "function"
+      },
       "createGcd": {
         "kind": "function"
       },
@@ -13209,6 +13266,9 @@
         "kind": "function"
       },
       "createIm": {
+        "kind": "function"
+      },
+      "createIndexNode": {
         "kind": "function"
       },
       "createInfinity": {
@@ -13322,6 +13382,9 @@
       "createNaN": {
         "kind": "function"
       },
+      "createNode": {
+        "kind": "function"
+      },
       "createNot": {
         "kind": "function"
       },
@@ -13343,13 +13406,22 @@
       "createNumeric": {
         "kind": "function"
       },
+      "createObjectNode": {
+        "kind": "function"
+      },
       "createOct": {
         "kind": "function"
       },
       "createOnes": {
         "kind": "function"
       },
+      "createOperatorNode": {
+        "kind": "function"
+      },
       "createOr": {
+        "kind": "function"
+      },
+      "createParenthesisNode": {
         "kind": "function"
       },
       "createPartitionSelect": {
@@ -13376,7 +13448,13 @@
       "createRange": {
         "kind": "function"
       },
+      "createRangeNode": {
+        "kind": "function"
+      },
       "createRe": {
+        "kind": "function"
+      },
+      "createRelationalNode": {
         "kind": "function"
       },
       "createReshape": {
