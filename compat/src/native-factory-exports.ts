@@ -1063,6 +1063,17 @@ const traceDependencies: UnaryBundle<'createTrace'> & {
   createTrace: mathjsCreateTrace,
 };
 
+const mathjsCreateMapSlices: CompatFactoryExports['createMapSlices'] = factories.createMapSlices;
+const mapSlicesDependencies: UnaryBundle<'createMapSlices'> & {
+  isIntegerDependencies: typeof isIntegerDependencies;
+} = { isIntegerDependencies, typedDependencies, createMapSlices: mathjsCreateMapSlices };
+
+const mathjsCreateMode: CompatFactoryExports['createMode'] = factories.createMode;
+const modeDependencies: UnaryBundle<'createMode'> & {
+  isNaNDependencies: typeof isNaNDependencies;
+  isNumericDependencies: typeof isNumericDependencies;
+} = { isNaNDependencies, isNumericDependencies, typedDependencies, createMode: mathjsCreateMode };
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1309,5 +1320,9 @@ export {
   subsetDependencies,
   mathjsCreateTrace as createTrace,
   traceDependencies,
+  mathjsCreateMapSlices as createMapSlices,
+  mapSlicesDependencies,
+  mathjsCreateMode as createMode,
+  modeDependencies,
   typedDependencies,
 };

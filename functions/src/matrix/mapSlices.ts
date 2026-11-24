@@ -2,6 +2,7 @@ import { _switch, validateDimension } from '@danielsimonjr/mathts-core/internal'
 import { factory } from '../utils/factory.js';
 import { arraySize } from '../utils/array.js';
 import { isMatrix } from '../utils/is.js';
+import { IndexError } from '../error/IndexError.js';
 
 import { TypedFunction, Matrix, BigNumber } from '../types.js';
 
@@ -14,67 +15,93 @@ const dependencies = ['typed'];
 export const createMapSlices = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed }: { typed: TypedFunction }): TypedFunction => {
-    /**
-     * Apply a function that maps an array to a scalar
-     * along a given axis of a matrix or array.
-     * Returns a new matrix or array with one less dimension than the input.
-     *
-     * Syntax:
-     *
-     *     math.mapSlices(A, dim, callback)
-     *
-     * Where:
-     *
-     * - `dim: number` is a zero-based dimension over which to concatenate the matrices.
-     *
-     * Examples:
-     *
-     *    const A = [[1, 2], [3, 4]]
-     *    const sum = math.sum
-     *
-     *    math.mapSlices(A, 0, sum)             // returns [4, 6]
-     *    math.mapSlices(A, 1, sum)             // returns [3, 7]
-     *
-     * See also:
-     *
-     *    map, filter, forEach
-     *
-     * Note:
-     *
-     *    `mapSlices()` is also currently available via its deprecated
-     *    synonym `apply()`.
-     *
-     * @param {Array | Matrix} array   The input Matrix
-     * @param {number} dim             The dimension along which the callback is applied
-     * @param {Function} callback      The callback function that is applied. This Function
-     *                                 should take an array or 1-d matrix as an input and
-     *                                 return a number.
-     * @return {Array | Matrix} res    The residual matrix with the function mapped on the slices over some dimension.
-     */
-    return typed(name, {
-      'Array | Matrix, number | BigNumber, function': function (
-        mat: unknown[] | Matrix,
-        dim: number | BigNumber,
-        callback: SliceCallback
-      ) {
-        const dimNum = typeof dim === 'number' ? dim : dim.toNumber();
-        const size = Array.isArray(mat) ? arraySize(mat) : mat.size();
-        validateDimension(dimNum, size.length);
-
-        if (isMatrix(mat)) {
-          const m = mat as Matrix & {
-            create(data: unknown, datatype?: string): unknown;
-          };
-          return m.create(_mapSlices(m.valueOf(), dimNum, callback), m.datatype());
-        } else {
-          return _mapSlices(mat, dimNum, callback);
-        }
-      },
-    }) as unknown as TypedFunction;
-  },
+  ({ typed }: { typed: TypedFunction }): TypedFunction =>
+    buildMapSlices(typed, (_dim, dimension, rank) => validateDimension(dimension, rank)),
   { formerly: 'apply' }
 );
+
+interface MathjsMapSlicesDependencies {
+  typed: TypedFunction;
+  isInteger: (value: number | BigNumber) => boolean;
+}
+
+export const createMathjsMapSlices = /* #__PURE__ */ factory(
+  name,
+  ['typed', 'isInteger'],
+  ({ typed, isInteger }: MathjsMapSlicesDependencies): TypedFunction =>
+    buildMapSlices(typed, (dim, dimension, rank) => {
+      if (!isInteger(dim)) {
+        throw new TypeError('Integer number expected for dimension');
+      }
+      if (dimension < 0 || dimension >= rank) {
+        throw new IndexError(dimension, rank);
+      }
+    }),
+  { formerly: 'apply' }
+);
+
+function buildMapSlices(
+  typed: TypedFunction,
+  validate: (dim: number | BigNumber, dimension: number, rank: number) => void
+): TypedFunction {
+  /**
+   * Apply a function that maps an array to a scalar
+   * along a given axis of a matrix or array.
+   * Returns a new matrix or array with one less dimension than the input.
+   *
+   * Syntax:
+   *
+   *     math.mapSlices(A, dim, callback)
+   *
+   * Where:
+   *
+   * - `dim: number` is a zero-based dimension over which to concatenate the matrices.
+   *
+   * Examples:
+   *
+   *    const A = [[1, 2], [3, 4]]
+   *    const sum = math.sum
+   *
+   *    math.mapSlices(A, 0, sum)             // returns [4, 6]
+   *    math.mapSlices(A, 1, sum)             // returns [3, 7]
+   *
+   * See also:
+   *
+   *    map, filter, forEach
+   *
+   * Note:
+   *
+   *    `mapSlices()` is also currently available via its deprecated
+   *    synonym `apply()`.
+   *
+   * @param {Array | Matrix} array   The input Matrix
+   * @param {number} dim             The dimension along which the callback is applied
+   * @param {Function} callback      The callback function that is applied. This Function
+   *                                 should take an array or 1-d matrix as an input and
+   *                                 return a number.
+   * @return {Array | Matrix} res    The residual matrix with the function mapped on the slices over some dimension.
+   */
+  return typed(name, {
+    'Array | Matrix, number | BigNumber, function': function (
+      mat: unknown[] | Matrix,
+      dim: number | BigNumber,
+      callback: SliceCallback
+    ) {
+      const dimNum = typeof dim === 'number' ? dim : dim.toNumber();
+      const size = Array.isArray(mat) ? arraySize(mat) : mat.size();
+      validate(dim, dimNum, size.length);
+
+      if (isMatrix(mat)) {
+        const m = mat as Matrix & {
+          create(data: unknown, datatype?: string): unknown;
+        };
+        return m.create(_mapSlices(m.valueOf(), dimNum, callback), m.datatype());
+      } else {
+        return _mapSlices(mat, dimNum, callback);
+      }
+    },
+  }) as unknown as TypedFunction;
+}
 
 /**
  * Recursively reduce a matrix

@@ -13211,6 +13211,9 @@
       "createMap": {
         "kind": "function"
       },
+      "createMapSlices": {
+        "kind": "function"
+      },
       "createMatrix": {
         "kind": "function"
       },
@@ -13221,6 +13224,9 @@
         "kind": "function"
       },
       "createMatrixFromRows": {
+        "kind": "function"
+      },
+      "createMode": {
         "kind": "function"
       },
       "createMultiplyScalar": {
@@ -13955,6 +13961,9 @@
       "mapSlices": {
         "kind": "function"
       },
+      "mapSlicesDependencies": {
+        "kind": "object"
+      },
       "matrix": {
         "kind": "function"
       },
@@ -13993,6 +14002,9 @@
       },
       "mode": {
         "kind": "function"
+      },
+      "modeDependencies": {
+        "kind": "object"
       },
       "molarMass": {
         "kind": "object"

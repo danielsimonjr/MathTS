@@ -5,6 +5,18 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('uses the supplied integer predicate when validating a slice dimension', () => {
+    const mapSlices = compat.createMapSlices({ typed: compat.typed, isInteger: () => false });
+    expect(() => mapSlices([1, 2], 0, () => 0)).toThrow('Integer number expected for dimension');
+  });
+
+  it('matches the selected MathJS mode error for an empty input', () => {
+    const selected = create({ modeDependencies: compat.modeDependencies });
+    expect(() => Reflect.get(selected, 'mode')([])).toThrow(
+      'Cannot calculate mode of an empty array'
+    );
+  });
+
   it('reads an indexed subset like MathJS', () => {
     const upstreamBundle = Reflect.get(oracle, 'subsetDependencies') as Parameters<
       typeof oracle.create
@@ -186,6 +198,18 @@ describe('native compatibility dependency bundles', () => {
     ['equalText', ['file', 'file']],
     ['kron', [[[1, 2]], [[3], [4]]]],
     ['leftShift', [3, 2]],
+    [
+      'mapSlices',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        0,
+        (values: number[]) => values.length,
+      ],
+    ],
+    ['mode', [[1, 2, 2]]],
     ['nthRoot', [16, 2]],
     ['nullish', [null, 42]],
     ['partitionSelect', [[3, 1, 2], 1]],
