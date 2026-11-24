@@ -4,8 +4,10 @@ import {
   all,
   cbrt,
   combinations,
+  compareText,
   create,
   derivative,
+  equalText,
   erf,
   log1p,
   log2,
@@ -105,6 +107,17 @@ describe('named compatibility function imports', () => {
     );
     expect(String(math.evaluate('toBest(unit(10, "m"), "mm,km", {offset: 1.5})'))).toBe(
       String(oracleToBest(expected, ['mm', 'km'], options))
+    );
+  });
+
+  it('compares strings elementwise against arrays and matrices', () => {
+    const math = create(all);
+    const labels = ['A', 'B', 'C'];
+    expect(compareText('B', labels)).toEqual([1, 0, -1]);
+    expect(equalText(labels, 'B')).toEqual([false, true, false]);
+    const expression = 'compareText("B", ["A","B","C"])';
+    expect((math.evaluate(expression) as { valueOf(): unknown }).valueOf()).toEqual(
+      oracle.evaluate(expression).valueOf()
     );
   });
 });
