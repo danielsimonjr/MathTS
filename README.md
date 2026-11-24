@@ -18,7 +18,7 @@ artefacts) and `@danielsimonjr/mathts-typed-function` (fork consumed via npm ali
 
 <!-- BEGIN GENERATED FUNCTIONS STATS (tools/sync-readme-functions-stats.mjs) -->
 
-The function layer (`@danielsimonjr/mathts-functions` 0.89.16) exposes **1,387 exports** in
+The function layer (`@danielsimonjr/mathts-functions` 0.89.17) exposes **1,387 exports** in
 27 categories — arithmetic through CAS, special functions, statistics and hypothesis tests,
 quadrature and optimisation, number theory, signal processing, linear algebra and geometry.
 <!-- END GENERATED FUNCTIONS STATS -->
