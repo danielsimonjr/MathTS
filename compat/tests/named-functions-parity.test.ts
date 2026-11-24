@@ -12,6 +12,7 @@ import {
   median,
   norm,
   round,
+  toBest,
 } from '../src/index.js';
 
 describe('named compatibility function imports', () => {
@@ -86,5 +87,24 @@ describe('named compatibility function imports', () => {
     );
     expect(String(math.evaluate('round(3.241 cm, 2, cm)'))).toBe('3.24 cm');
     expect(String(round([value, math.unit('2.178 cm'), 0], 2, target))).toBe('3.24 cm,2.18 cm,0');
+  });
+
+  it('allows preferred units and an offset in toBest', () => {
+    const math = create(all);
+    const value = math.unit(10, 'm') as typeof math.speedOfLight;
+    const expected = oracle.unit(10, 'm');
+    const options = { offset: 1.5 };
+    const oracleToBest = oracle.toBest as unknown as (
+      value: typeof expected,
+      units: string | string[],
+      options?: { offset: number }
+    ) => typeof expected;
+    expect(String(toBest(value, 'cm'))).toBe(String(oracleToBest(expected, ['cm'])));
+    expect(String(math.toBest(value, ['mm', 'km'], options))).toBe(
+      String(oracleToBest(expected, ['mm', 'km'], options))
+    );
+    expect(String(math.evaluate('toBest(unit(10, "m"), "mm,km", {offset: 1.5})'))).toBe(
+      String(oracleToBest(expected, ['mm', 'km'], options))
+    );
   });
 });

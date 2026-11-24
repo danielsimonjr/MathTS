@@ -56,6 +56,14 @@ export const to = mathTyped('to', {
 // toBest(value)
 // =============================================================================
 
+function toBestOf(
+  value: UnitInstance,
+  units: string | Array<string | UnitInstance>,
+  options?: Parameters<UnitInstance['toBest']>[1]
+): UnitInstance {
+  return value.toBest(typeof units === 'string' ? units.split(',') : units, options);
+}
+
 /**
  * Pick a unit-of-magnitude representation that places the displayed value
  * closest to 1.
@@ -71,6 +79,8 @@ export const to = mathTyped('to', {
  */
 export const toBest = mathTyped('toBest', {
   Unit: (value: UnitInstance): UnitInstance => value.toBest(),
+  'Unit, string | Array': toBestOf,
+  'Unit, string | Array, Object': toBestOf,
 });
 
 // =============================================================================
