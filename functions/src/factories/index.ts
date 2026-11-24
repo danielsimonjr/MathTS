@@ -2411,6 +2411,9 @@ function compatFactoryExports(): {
   createMatrixFromFunction: typeof createMatrixFromFunction;
   createSetSize: typeof createSetSize;
   createSort: typeof createSort;
+  createChain: typeof createChain;
+  createChainClass: typeof createChainClass;
+  createResultSet: typeof createResultSet;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2540,6 +2543,9 @@ function compatFactoryExports(): {
     createMatrixFromFunction,
     createSetSize,
     createSort,
+    createChain,
+    createChainClass,
+    createResultSet,
     createTyped,
   };
 }

@@ -12473,6 +12473,9 @@
       "Chain": {
         "kind": "function"
       },
+      "ChainDependencies": {
+        "kind": "object"
+      },
       "CompatMatrixValue": {
         "kind": "type"
       },
@@ -12616,6 +12619,9 @@
       },
       "ResultSet": {
         "kind": "function"
+      },
+      "ResultSetDependencies": {
+        "kind": "object"
       },
       "SQRT1_2": {
         "kind": "number"
@@ -12851,6 +12857,9 @@
       "chain": {
         "kind": "function"
       },
+      "chainDependencies": {
+        "kind": "object"
+      },
       "classicalElectronRadius": {
         "kind": "object"
       },
@@ -13032,6 +13041,12 @@
         "kind": "function"
       },
       "createCeil": {
+        "kind": "function"
+      },
+      "createChain": {
+        "kind": "function"
+      },
+      "createChainClass": {
         "kind": "function"
       },
       "createClone": {
@@ -13305,6 +13320,9 @@
         "kind": "function"
       },
       "createResize": {
+        "kind": "function"
+      },
+      "createResultSet": {
         "kind": "function"
       },
       "createRightArithShift": {

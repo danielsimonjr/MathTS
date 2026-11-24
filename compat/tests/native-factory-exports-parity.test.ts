@@ -5,6 +5,39 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('chains selected functions and functions imported later', () => {
+    const actual = create({
+      chainDependencies: compat.chainDependencies,
+      sinDependencies,
+      subtractDependencies: compat.subtractDependencies,
+    });
+    const expected = oracle.create({
+      chainDependencies: Reflect.get(oracle, 'chainDependencies'),
+      sinDependencies: Reflect.get(oracle, 'sinDependencies'),
+      subtractDependencies: Reflect.get(oracle, 'subtractDependencies'),
+    });
+    const double = (value: number) => value * 2;
+    actual.import({ double });
+    expected.import({ double });
+    const applyDouble = (chain: object) =>
+      (Reflect.apply(Reflect.get(chain, 'double'), chain, []) as { done(): unknown }).done();
+    expect(applyDouble(actual.chain(0.5).sin())).toBe(applyDouble(expected.chain(0.5).sin()));
+    expect(actual.chain(7).subtract(4).done()).toBe(expected.chain(7).subtract(4).done());
+    expect(compat.createChainClass.dependencies).toEqual(
+      Reflect.get(oracle, 'createChainClass').dependencies
+    );
+  });
+
+  it('constructs and revives a selected ResultSet', () => {
+    const selected = create({ ResultSetDependencies: compat.ResultSetDependencies });
+    const result = new selected.ResultSet([2, 'three']);
+    const OracleResultSet = Reflect.get(oracle, 'ResultSet');
+    const expected = new OracleResultSet([2, 'three']);
+    expect(result.toString()).toBe(expected.toString());
+    expect(result.toJSON()).toEqual(expected.toJSON());
+    expect(selected.ResultSet.fromJSON(result.toJSON()).valueOf()).toEqual(expected.valueOf());
+  });
+
   it('matches number word-size validation and JSON revival', () => {
     const selected = create({ numberDependencies: compat.numberDependencies });
     const number = Reflect.get(selected, 'number');
