@@ -13295,6 +13295,9 @@
       "createDistance": {
         "kind": "function"
       },
+      "createDivide": {
+        "kind": "function"
+      },
       "createDivideScalar": {
         "kind": "function"
       },
@@ -14029,6 +14032,9 @@
       },
       "divide": {
         "kind": "function"
+      },
+      "divideDependencies": {
+        "kind": "object"
       },
       "divideScalar": {
         "kind": "function"

@@ -2879,6 +2879,23 @@ const setUnionDependencies: UnaryBundle<'createSetUnion'> & {
   createSetUnion: mathjsCreateSetUnion,
 };
 
+const mathjsCreateDivide: CompatFactoryExports['createDivide'] = factories.createDivide;
+const divideDependencies: UnaryBundle<'createDivide'> & {
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  invDependencies: typeof invDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+} = {
+  divideScalarDependencies,
+  equalScalarDependencies,
+  invDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  typedDependencies,
+  createDivide: mathjsCreateDivide,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3423,5 +3440,7 @@ export {
   resolveDependencies,
   mathjsCreateSetUnion as createSetUnion,
   setUnionDependencies,
+  mathjsCreateDivide as createDivide,
+  divideDependencies,
   typedDependencies,
 };
