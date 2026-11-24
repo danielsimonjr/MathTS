@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.10
+
+### Patch Changes
+
+- aafaf92: Expose native MathJS factory bundles for rounding, modular arithmetic, matrix construction, sorting, and set size.
+- 602aec8: Expose MathJS factory bundles for Chain, chain, and ResultSet.
+- Updated dependencies [aafaf92]
+- Updated dependencies [602aec8]
+  - @danielsimonjr/mathts-functions@0.89.8
+
 ## 0.7.9
 
 ### Patch Changes
