@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.16
+
+### Patch Changes
+
+- 057ba46: Expose MathJS expression transform factories for map, filter, and forEach.
+- 057ba46: Expose MathJS factory bundles for filter frequency response, Kullback–Leibler divergence, and integer compositions.
+- 057ba46: Expose MathJS expression transform factories for min, max, sum, cumsum, mean, and mapSlices.
+- 057ba46: Expose MathJS expression transform factories for or, bitOr, nullish, column, row, and concat.
+- 057ba46: Expose MathJS Parser, parser, Help, and help factory bundles for selected instances.
+- 057ba46: Expose MathJS factory bundles for combinations with and without replacement.
+- 057ba46: Expose MathJS expression transform factories for and, bitAnd, diff, index, print, range, and subset.
+- 057ba46: Expose MathJS factory bundles for bigint, boolean, and string conversions.
+
 ## 0.89.15
 
 ### Patch Changes
