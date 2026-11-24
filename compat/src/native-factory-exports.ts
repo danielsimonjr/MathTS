@@ -686,6 +686,43 @@ const xorDependencies: UnaryBundle<'createXor'> & {
   createXor: mathjsCreateXor,
 };
 
+const mathjsCreateAdd: CompatFactoryExports['createAdd'] = factories.createAdd;
+const addDependencies: UnaryBundle<'createAdd'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  addScalarDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createAdd: mathjsCreateAdd,
+};
+const mathjsCreateSubtract: CompatFactoryExports['createSubtract'] = factories.createSubtract;
+const subtractDependencies: UnaryBundle<'createSubtract'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  subtractScalarDependencies: typeof subtractScalarDependencies;
+  unaryMinusDependencies: typeof unaryMinusDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  subtractScalarDependencies,
+  typedDependencies,
+  unaryMinusDependencies,
+  createSubtract: mathjsCreateSubtract,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -872,5 +909,9 @@ export {
   orDependencies,
   mathjsCreateXor as createXor,
   xorDependencies,
+  mathjsCreateAdd as createAdd,
+  mathjsCreateSubtract as createSubtract,
+  addDependencies,
+  subtractDependencies,
   typedDependencies,
 };

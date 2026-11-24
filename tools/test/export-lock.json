@@ -12704,6 +12704,9 @@
       "add": {
         "kind": "function"
       },
+      "addDependencies": {
+        "kind": "object"
+      },
       "addScalar": {
         "kind": "function"
       },
@@ -12957,6 +12960,9 @@
         "kind": "function"
       },
       "createAcsch": {
+        "kind": "function"
+      },
+      "createAdd": {
         "kind": "function"
       },
       "createAddScalar": {
@@ -13233,6 +13239,9 @@
         "kind": "function"
       },
       "createSqueeze": {
+        "kind": "function"
+      },
+      "createSubtract": {
         "kind": "function"
       },
       "createSubtractScalar": {
@@ -14221,6 +14230,9 @@
       },
       "subtract": {
         "kind": "function"
+      },
+      "subtractDependencies": {
+        "kind": "object"
       },
       "subtractScalar": {
         "kind": "function"

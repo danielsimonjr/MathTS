@@ -61,6 +61,43 @@ describe('native compatibility dependency bundles', () => {
     );
   });
 
+  it('adds selected dense and sparse matrices like MathJS', () => {
+    const upstreamBundle = Reflect.get(oracle, 'addDependencies') as Parameters<
+      typeof oracle.create
+    >[0];
+    const actual = create({ addDependencies: compat.addDependencies });
+    const expected = oracle.create({ addDependencies: upstreamBundle } as typeof upstreamBundle);
+    const left = [
+      [1, 0],
+      [0, 2],
+    ];
+    const right = [
+      [0, 3],
+      [0, 4],
+    ];
+    const result = actual.add(actual.matrix(left, 'dense'), actual.matrix(right, 'sparse'));
+    const reference = expected.add(
+      expected.matrix(left, 'dense'),
+      expected.matrix(right, 'sparse')
+    );
+    expect((result as { valueOf(): unknown }).valueOf()).toEqual(reference.valueOf());
+  });
+
+  it('honors a substituted addScalar factory dependency', () => {
+    const math = create({ addDependencies: compat.addDependencies });
+    math.import(
+      { addScalar: (left: number, right: number) => left + right + 10 },
+      { override: true }
+    );
+    expect(math.add(1, 2)).toBe(13);
+  });
+
+  it('rejects extra arguments in selected subtraction', () => {
+    const math = create({ subtractDependencies: compat.subtractDependencies });
+    const subtract = math.subtract as (...args: unknown[]) => unknown;
+    expect(() => subtract(9, 2, 1)).toThrow(TypeError);
+  });
+
   it.each([
     ['acos', [0.5]],
     ['acosh', [2]],
@@ -177,6 +214,8 @@ describe('native compatibility dependency bundles', () => {
     ['unequal', [6, 3]],
     ['or', [false, true]],
     ['xor', [true, true]],
+    ['add', [2, 3, 4]],
+    ['subtract', [6, 3]],
   ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
     const factoryName = 'create' + name[0].toUpperCase() + name.slice(1);

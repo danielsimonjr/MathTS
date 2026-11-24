@@ -1,3 +1,4 @@
+import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
 import { createSelectedMatrix } from './selected-matrix.js';
 import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
@@ -1210,7 +1211,7 @@ factoryScope.Chain = Chain;
 // Tier 12: subtract, divide, and dependent types
 // ---------------------------------------------------------------------------
 
-import { createSubtract } from '../arithmetic/subtract.js';
+import { createMathjsSubtract, createSubtract } from '../arithmetic/subtract.js';
 import { createDivide } from '../arithmetic/divide.js';
 import { createIfft } from '../matrix/ifft.js';
 import { createIndexClass } from '../type/matrix/MatrixIndex.js';
@@ -2316,6 +2317,8 @@ function compatFactoryExports(): {
   createUnequal: typeof createUnequal;
   createOr: typeof createOr;
   createXor: typeof createXor;
+  createAdd: typeof createSelectedAdd;
+  createSubtract: typeof createMathjsSubtract;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2405,6 +2408,8 @@ function compatFactoryExports(): {
     createUnequal,
     createOr,
     createXor,
+    createAdd: createSelectedAdd,
+    createSubtract: createMathjsSubtract,
     createTyped,
   };
 }
