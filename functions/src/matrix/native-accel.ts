@@ -16,6 +16,7 @@
  * singular matrix — is handled correctly (a singular matrix has det 0), verified
  * against numpy.
  */
+import { determinantFromPivots } from './determinant-scale.js';
 import { hypotList } from '../utils/hypot-list.js';
 import { DenseMatrix, lu, eig, balanceForEig } from '@danielsimonjr/mathts-matrix';
 import { Complex } from '@danielsimonjr/mathts-core';
@@ -74,10 +75,8 @@ export function acceleratedDet<T>(a: unknown, factoryDet: (m: unknown) => T): T 
   if (!isLargeNumericSquare(a)) return factoryDet(a);
   try {
     const { U, P } = lu(DenseMatrix.fromArray(a)) as { U: { toArray(): number[][] }; P: number[] };
-    const Ud = U.toArray();
-    let d = permutationParity(P);
-    for (let i = 0; i < a.length; i++) d *= Ud[i][i];
-    return d as unknown as T;
+    const result = determinantFromPivots(U.toArray(), permutationParity(P));
+    return Number.isNaN(result) ? factoryDet(a) : (result as unknown as T);
   } catch (e) {
     if (e instanceof Error && SINGULAR.test(e.message)) return 0 as unknown as T;
     return factoryDet(a); // any other native failure → proven factory path

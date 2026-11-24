@@ -12,7 +12,7 @@
  * across the package boundary rather than being lost in that module's very large
  * generated declaration file.
  */
-import { isDeterministic, setDeterministic } from '@danielsimonjr/mathts-core';
+import { BigNumber, isDeterministic, setDeterministic } from '@danielsimonjr/mathts-core';
 import { DEFAULT_CONFIG, type ConfigOptions } from './core/config.js';
 import { pushConfigOverlay, popConfigOverlay } from './factories/scope.js';
 
@@ -43,11 +43,17 @@ import { pushConfigOverlay, popConfigOverlay } from './factories/scope.js';
  * ```
  */
 export function runWithConfig<T>(overlay: Partial<ConfigOptions>, fn: () => T): T {
+  const precision = overlay.precision;
+  const previous = precision === undefined ? undefined : BigNumber.precision;
+  if (precision !== undefined && precision !== previous) BigNumber.config({ precision });
   pushConfigOverlay(overlay as ConfigOptions);
   try {
     return fn();
   } finally {
     popConfigOverlay();
+    if (previous !== undefined && precision !== previous) {
+      BigNumber.config({ precision: previous });
+    }
   }
 }
 

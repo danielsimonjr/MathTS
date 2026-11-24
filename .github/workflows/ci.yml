@@ -54,6 +54,12 @@ jobs:
       - name: Check Bun matches the packageManager pin
         run: node tools/test/check-bun-version.mjs
 
+      - name: Check that the version PR versions every changed package
+        if: github.event_name == 'pull_request' && github.head_ref == 'changeset-release/main'
+        run: |
+          git fetch --tags --depth=1 origin
+          node tools/test/check-release-source-versions.mjs
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 

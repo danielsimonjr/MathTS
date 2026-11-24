@@ -67,3 +67,10 @@ describe('#904 autograd inputs made from a strided view', () => {
     expect([...x.matmul(w).data]).toEqual([3, 2, 1]);
   });
 });
+
+it('identifies an untracked right operand before comparing tape ownership', () => {
+  expect(() => taped(X).matmul(W as unknown as TapedTensor)).toThrow(
+    /expected a tracked TapedTensor operand/
+  );
+  expect(() => taped(X).matmul(taped(W))).toThrow(/different Tapes/);
+});

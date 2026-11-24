@@ -187,7 +187,10 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
      */
     function _simplifyCore(
       nodeToSimplify: MathNode,
-      options: { context?: Record<string, Record<string, boolean>> } = {}
+      options: {
+        context?: Record<string, Record<string, boolean>>;
+        onRetainedRadical?: () => void;
+      } = {}
     ): MathNode {
       const context = options ? options.context : undefined;
       if (hasProperty(nodeToSimplify, 'trivial', context)) {
@@ -215,6 +218,23 @@ export const createSimplifyCore = /* #__PURE__ */ factory(
       let node: MathNode = nodeToSimplify;
       if (isFunctionNode(node)) {
         const fnode = node as unknown as FuncNode;
+        if (options.onRetainedRadical && fnode.name === 'sqrt' && fnode.args.length === 1) {
+          const base = _simplifyCore(fnode.args[0], options);
+          const value = (base as ConstNode).value;
+          // Normalize literal real roots to the same AST as a fractional power
+          // before collecting powers. Do not apply real identities to complex roots.
+          if (
+            isConstantNode(base) &&
+            typeof value === 'number' &&
+            Number.isSafeInteger(value) &&
+            value >= 0
+          ) {
+            return new OperatorNode('^', 'pow', [
+              base,
+              new OperatorNode('/', 'divide', [node1, new ConstantNode(2)]),
+            ]);
+          }
+        }
         const op = getOperator(fnode.name);
         if (op) {
           // Replace FunctionNode with a new OperatorNode

@@ -140,7 +140,7 @@ describe('G19 #767 Float64Array on reductions', () => {
 describe('G19 #776 huge identical values', () => {
   it('exact issue repro: variance is 0, not NaN', () => {
     const huge = [1e308, 1e308, 1e308];
-    expect(mean(huge)).toBe(Infinity);
+    expect(mean(huge)).toBe(1e308);
     expect(variance(huge)).toBe(0);
     expect(Number.isNaN(variance(huge))).toBe(false);
     expect(variance(new Float64Array(huge))).toBe(0);

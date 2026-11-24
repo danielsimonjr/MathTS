@@ -29,6 +29,7 @@ type Options = {
   context?: Record<string, Record<string, boolean>>;
   exactFractions?: boolean;
   fractionsLimit?: number;
+  onRetainedRadical?: () => void;
 };
 /** Builds a binary OperatorNode/FunctionNode from child nodes */
 type MakeNode = (args: MathNode[]) => MathNode;
@@ -241,6 +242,17 @@ export const createSimplifyConstant = /* #__PURE__ */ factory(
           throw new TypeError(
             'Cannot fold an implicit conversion to BigNumber with more than 15 significant digits'
           );
+        }
+      }
+      if (
+        options.onRetainedRadical &&
+        (fnname === 'sqrt' || (fnname === 'pow' && Number(args[1]) === 0.5)) &&
+        (typeof args[0] === 'number' || isFraction(args[0]))
+      ) {
+        const base = Number(args[0]);
+        if (Number.isSafeInteger(base) && base > 0 && !Number.isInteger(Math.sqrt(base))) {
+          options.onRetainedRadical();
+          throw new TypeError('Keep an irrational root symbolic during exact folding');
         }
       }
       let result: unknown;

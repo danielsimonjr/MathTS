@@ -1,3 +1,4 @@
+import { determinantWithScaledRows } from './determinant-scale.js';
 import { isMatrix } from '../utils/is.js';
 import { clone } from '../utils/object.js';
 import { format } from '../utils/string.js';
@@ -159,7 +160,14 @@ export const createDet = /* #__PURE__ */ factory(
               if (rows === 0) {
                 return 1; // det of the 0 x 0 matrix is per definition 1
               }
-              return _det(matrixValue.clone().valueOf() as Scalar[][], rows, cols);
+              const data = matrixValue.clone().valueOf() as Scalar[][];
+              if (rows > 1 && isPlainNumberMatrix(data)) {
+                return determinantWithScaledRows(
+                  data as number[][],
+                  (scaled) => _det(scaled, rows, cols) as number
+                );
+              }
+              return _det(data, rows, cols);
             }
             throw notSquareError('Matrix must be square ' + '(size: ' + format(size, {}) + ')');
           }

@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { simplify, expand, derivative, symbolicIntegral, evaluate } from '../src/index.js';
+import {
+  simplify,
+  expand,
+  derivative,
+  symbolicIntegral,
+  evaluate,
+  symbolicEqual,
+} from '../src/index.js';
 
 const XS = [-2.5, -1, 0.5, 1, 3.75];
 
@@ -52,6 +59,12 @@ describe('#986 constant function calls fold in simplify and derivative', () => {
 });
 
 describe('#987 expand and simplify keep constants intact', () => {
+  it('combines exact radicals before approximating unmatched roots', () => {
+    expect(String(simplify('2^(1/2)*sqrt(2)'))).toBe('2');
+    expect(String(simplify('sqrt(2)+1-sqrt(2)'))).toBe('1');
+    expect(symbolicEqual('sqrt(2)*sqrt(2)', '2')).toBe(true);
+  });
+
   it('expand distributes a constant call over a sum', () => {
     expect(String(expand('sqrt(2)*(x+1)'))).toBe('sqrt(2)*x + sqrt(2)');
     expect(String(expand('exp(1)*(x+1)'))).toBe('exp(1)*x + exp(1)');
