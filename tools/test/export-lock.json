@@ -12797,6 +12797,9 @@
       "bignumber": {
         "kind": "function"
       },
+      "bignumberDependencies": {
+        "kind": "object"
+      },
       "bin": {
         "kind": "function"
       },
@@ -12901,6 +12904,9 @@
       },
       "complex": {
         "kind": "function"
+      },
+      "complexDependencies": {
+        "kind": "object"
       },
       "composition": {
         "kind": "function"
@@ -13022,6 +13028,9 @@
       "createBigNumberClass": {
         "kind": "function"
       },
+      "createBignumber": {
+        "kind": "function"
+      },
       "createBin": {
         "kind": "function"
       },
@@ -13059,6 +13068,9 @@
         "kind": "function"
       },
       "createCompareText": {
+        "kind": "function"
+      },
+      "createComplex": {
         "kind": "function"
       },
       "createComplexClass": {
@@ -13103,7 +13115,16 @@
       "createDiag": {
         "kind": "function"
       },
+      "createDiff": {
+        "kind": "function"
+      },
+      "createDivideScalar": {
+        "kind": "function"
+      },
       "createDot": {
+        "kind": "function"
+      },
+      "createDotDivide": {
         "kind": "function"
       },
       "createDotMultiply": {
@@ -13136,6 +13157,9 @@
       "createFilter": {
         "kind": "function"
       },
+      "createFix": {
+        "kind": "function"
+      },
       "createFlatten": {
         "kind": "function"
       },
@@ -13146,6 +13170,9 @@
         "kind": "function"
       },
       "createFormat": {
+        "kind": "function"
+      },
+      "createFraction": {
         "kind": "function"
       },
       "createFractionClass": {
@@ -13161,6 +13188,9 @@
         "kind": "function"
       },
       "createHex": {
+        "kind": "function"
+      },
+      "createHypot": {
         "kind": "function"
       },
       "createI": {
@@ -13217,6 +13247,9 @@
       "createLOG2E": {
         "kind": "function"
       },
+      "createLarger": {
+        "kind": "function"
+      },
       "createLargerEq": {
         "kind": "function"
       },
@@ -13227,6 +13260,9 @@
         "kind": "function"
       },
       "createLgamma": {
+        "kind": "function"
+      },
+      "createLog": {
         "kind": "function"
       },
       "createLog10": {
@@ -13274,6 +13310,9 @@
       "createNthRoot": {
         "kind": "function"
       },
+      "createNthRoots": {
+        "kind": "function"
+      },
       "createNull": {
         "kind": "function"
       },
@@ -13281,6 +13320,9 @@
         "kind": "function"
       },
       "createNumber": {
+        "kind": "function"
+      },
+      "createNumeric": {
         "kind": "function"
       },
       "createOct": {
@@ -13349,6 +13391,9 @@
       "createSetSize": {
         "kind": "function"
       },
+      "createSign": {
+        "kind": "function"
+      },
       "createSin": {
         "kind": "function"
       },
@@ -13356,6 +13401,9 @@
         "kind": "function"
       },
       "createSize": {
+        "kind": "function"
+      },
+      "createSmaller": {
         "kind": "function"
       },
       "createSmallerEq": {
@@ -13410,6 +13458,9 @@
         "kind": "function"
       },
       "createUnaryMinus": {
+        "kind": "function"
+      },
+      "createUnaryPlus": {
         "kind": "function"
       },
       "createUnequal": {
@@ -13487,6 +13538,9 @@
       "diff": {
         "kind": "function"
       },
+      "diffDependencies": {
+        "kind": "object"
+      },
       "distance": {
         "kind": "function"
       },
@@ -13496,6 +13550,9 @@
       "divideScalar": {
         "kind": "function"
       },
+      "divideScalarDependencies": {
+        "kind": "object"
+      },
       "dot": {
         "kind": "function"
       },
@@ -13504,6 +13561,9 @@
       },
       "dotDivide": {
         "kind": "function"
+      },
+      "dotDivideDependencies": {
+        "kind": "object"
       },
       "dotMultiply": {
         "kind": "function"
@@ -13610,6 +13670,9 @@
       "fix": {
         "kind": "function"
       },
+      "fixDependencies": {
+        "kind": "object"
+      },
       "flatten": {
         "kind": "function"
       },
@@ -13636,6 +13699,9 @@
       },
       "fraction": {
         "kind": "function"
+      },
+      "fractionDependencies": {
+        "kind": "object"
       },
       "freqz": {
         "kind": "function"
@@ -13684,6 +13750,9 @@
       },
       "hypot": {
         "kind": "function"
+      },
+      "hypotDependencies": {
+        "kind": "object"
       },
       "i": {
         "kind": "object"
@@ -13931,6 +14000,9 @@
       "larger": {
         "kind": "function"
       },
+      "largerDependencies": {
+        "kind": "object"
+      },
       "largerEq": {
         "kind": "function"
       },
@@ -13974,6 +14046,9 @@
         "kind": "function"
       },
       "log2Dependencies": {
+        "kind": "object"
+      },
+      "logDependencies": {
         "kind": "object"
       },
       "loschmidt": {
@@ -14108,6 +14183,9 @@
       "nthRoots": {
         "kind": "function"
       },
+      "nthRootsDependencies": {
+        "kind": "object"
+      },
       "nuclearMagneton": {
         "kind": "object"
       },
@@ -14131,6 +14209,9 @@
       },
       "numeric": {
         "kind": "function"
+      },
+      "numericDependencies": {
+        "kind": "object"
       },
       "oct": {
         "kind": "function"
@@ -14369,6 +14450,9 @@
       "sign": {
         "kind": "function"
       },
+      "signDependencies": {
+        "kind": "object"
+      },
       "simplify": {
         "kind": "function"
       },
@@ -14401,6 +14485,9 @@
       },
       "smaller": {
         "kind": "function"
+      },
+      "smallerDependencies": {
+        "kind": "object"
       },
       "smallerEq": {
         "kind": "function"
@@ -14548,6 +14635,9 @@
       },
       "unaryPlus": {
         "kind": "function"
+      },
+      "unaryPlusDependencies": {
+        "kind": "object"
       },
       "unequal": {
         "kind": "function"

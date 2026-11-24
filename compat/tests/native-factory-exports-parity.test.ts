@@ -5,6 +5,52 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it.each([
+    ['bignumber', ['0xff']],
+    ['bignumber', [123456789012345678901234567890n]],
+    ['fraction', [{ n: 3, d: 7, s: -1 }]],
+    ['fraction', [7n, 19n]],
+    ['complex', ['2 + 3i']],
+    ['complex', [{ abs: 2, arg: 0 }]],
+  ] as const)('uses the selected %s conversion factory', (name, input) => {
+    const bundleName = name + 'Dependencies';
+    const actual = create({ [bundleName]: Reflect.get(compat, bundleName) });
+    const expected = oracle.create({ [bundleName]: Reflect.get(oracle, bundleName) });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const result = Reflect.apply(Reflect.get(actual, name), actual, input);
+    const reference = Reflect.apply(Reflect.get(expected, name), expected, input);
+    if (compat.isBigNumber(result) && oracle.isBigNumber(reference)) {
+      expect(reference.eq(result.toString())).toBe(true);
+    } else if (compat.isFraction(result) && oracle.isFraction(reference)) {
+      expect(result.numerator).toBe(reference.s * reference.n);
+      expect(result.denominator).toBe(reference.d);
+    } else if (compat.isComplex(result) && oracle.isComplex(reference)) {
+      expect([result.re, result.im]).toEqual([reference.re, reference.im]);
+    } else {
+      throw new TypeError(`Unexpected result from ${name}`);
+    }
+  });
+
+  it('computes all roots using the selected nthRoots dependencies', () => {
+    const actual = create({ nthRootsDependencies: compat.nthRootsDependencies });
+    const expected = oracle.create({
+      nthRootsDependencies: Reflect.get(oracle, 'nthRootsDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const result = Reflect.get(actual, 'nthRoots')(8, 3);
+    const oracleResult = Reflect.get(expected, 'nthRoots')(8, 3);
+    if (!Array.isArray(result) || !Array.isArray(oracleResult)) {
+      throw new TypeError('Expected nthRoots to return arrays');
+    }
+    const roots = result as { re: number; im: number }[];
+    const reference = oracleResult as { re: number; im: number }[];
+    expect(roots).toHaveLength(reference.length);
+    roots.forEach(({ re, im }, index) => {
+      expect(re).toBeCloseTo(reference[index].re, 14);
+      expect(im).toBeCloseTo(reference[index].im, 14);
+    });
+  });
+
   it('chains selected functions and functions imported later', () => {
     const actual = create({
       chainDependencies: compat.chainDependencies,
@@ -251,6 +297,17 @@ describe('native compatibility dependency bundles', () => {
     ],
     ['mode', [[1, 2, 2]]],
     ['number', [['0b11.1', '0xFFi8', true]]],
+    ['numeric', ['0b11.1', 'number']],
+    ['diff', [[1, 4, 9]]],
+    ['divideScalar', [7, 2]],
+    ['fix', [-3.75]],
+    ['larger', [3, 2]],
+    ['sign', [-42]],
+    ['smaller', [3, 2]],
+    ['unaryPlus', ['8']],
+    ['dotDivide', [[2, 4], 2]],
+    ['hypot', [3, 4]],
+    ['log', [16, 2]],
     ['ceil', [1.2345, 2]],
     ['floor', [-1.2345, 2]],
     ['gcd', [240, 46]],

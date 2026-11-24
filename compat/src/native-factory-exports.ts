@@ -1206,6 +1206,209 @@ const ResultSetDependencies: Pick<CompatFactoryExports, 'createResultSet'> = {
   createResultSet: mathjsCreateResultSet,
 };
 
+const mathjsCreateBignumber: CompatFactoryExports['createBignumber'] = factories.createBignumber;
+const bignumberDependencies: UnaryBundle<'createBignumber'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+} = {
+  BigNumberDependencies,
+  typedDependencies,
+  createBignumber: mathjsCreateBignumber,
+};
+
+const mathjsCreateFraction: CompatFactoryExports['createFraction'] = factories.createFraction;
+const fractionDependencies: UnaryBundle<'createFraction'> & {
+  FractionDependencies: typeof FractionDependencies;
+} = {
+  FractionDependencies,
+  typedDependencies,
+  createFraction: mathjsCreateFraction,
+};
+
+const mathjsCreateComplex: CompatFactoryExports['createComplex'] = factories.createComplex;
+const complexDependencies: UnaryBundle<'createComplex'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+} = {
+  ComplexDependencies,
+  typedDependencies,
+  createComplex: mathjsCreateComplex,
+};
+
+const mathjsCreateNumeric: CompatFactoryExports['createNumeric'] = factories.createNumeric;
+const numericDependencies: Pick<CompatFactoryExports, 'createNumeric'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  fractionDependencies: typeof fractionDependencies;
+  numberDependencies: typeof numberDependencies;
+} = {
+  bignumberDependencies,
+  fractionDependencies,
+  numberDependencies,
+  createNumeric: mathjsCreateNumeric,
+};
+
+const mathjsCreateDiff: CompatFactoryExports['createDiff'] = factories.createDiff;
+const diffDependencies: UnaryBundle<'createDiff'> & {
+  matrixDependencies: typeof matrixDependencies;
+  numberDependencies: typeof numberDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  matrixDependencies,
+  numberDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createDiff: mathjsCreateDiff,
+};
+
+const mathjsCreateDivideScalar: CompatFactoryExports['createDivideScalar'] =
+  factories.createDivideScalar;
+const divideScalarDependencies: UnaryBundle<'createDivideScalar'> & {
+  numericDependencies: typeof numericDependencies;
+} = {
+  numericDependencies,
+  typedDependencies,
+  createDivideScalar: mathjsCreateDivideScalar,
+};
+
+const mathjsCreateFix: CompatFactoryExports['createFix'] = factories.createFix;
+const fixDependencies: UnaryBundle<'createFix'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  ceilDependencies: typeof ceilDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  floorDependencies: typeof floorDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  ComplexDependencies,
+  DenseMatrixDependencies,
+  ceilDependencies,
+  equalScalarDependencies,
+  floorDependencies,
+  matrixDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createFix: mathjsCreateFix,
+};
+
+const mathjsCreateLarger: CompatFactoryExports['createLarger'] = factories.createLarger;
+const largerDependencies: UnaryBundle<'createLarger'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  bignumberDependencies: typeof bignumberDependencies;
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  bignumberDependencies,
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createLarger: mathjsCreateLarger,
+};
+
+const mathjsCreateSign: CompatFactoryExports['createSign'] = factories.createSign;
+const signDependencies: UnaryBundle<'createSign'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  FractionDependencies: typeof FractionDependencies;
+  complexDependencies: typeof complexDependencies;
+} = {
+  BigNumberDependencies,
+  FractionDependencies,
+  complexDependencies,
+  typedDependencies,
+  createSign: mathjsCreateSign,
+};
+
+const mathjsCreateSmaller: CompatFactoryExports['createSmaller'] = factories.createSmaller;
+const smallerDependencies: UnaryBundle<'createSmaller'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  bignumberDependencies: typeof bignumberDependencies;
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  bignumberDependencies,
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createSmaller: mathjsCreateSmaller,
+};
+
+const mathjsCreateUnaryPlus: CompatFactoryExports['createUnaryPlus'] = factories.createUnaryPlus;
+const unaryPlusDependencies: UnaryBundle<'createUnaryPlus'> & {
+  numericDependencies: typeof numericDependencies;
+} = {
+  numericDependencies,
+  typedDependencies,
+  createUnaryPlus: mathjsCreateUnaryPlus,
+};
+
+const mathjsCreateDotDivide: CompatFactoryExports['createDotDivide'] = factories.createDotDivide;
+const dotDivideDependencies: UnaryBundle<'createDotDivide'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  concatDependencies,
+  divideScalarDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createDotDivide: mathjsCreateDotDivide,
+};
+
+const mathjsCreateHypot: CompatFactoryExports['createHypot'] = factories.createHypot;
+const hypotDependencies: UnaryBundle<'createHypot'> & {
+  absDependencies: typeof absDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  isPositiveDependencies: typeof isPositiveDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+} = {
+  absDependencies,
+  addScalarDependencies,
+  divideScalarDependencies,
+  isPositiveDependencies,
+  multiplyScalarDependencies,
+  smallerDependencies,
+  sqrtDependencies,
+  typedDependencies,
+  createHypot: mathjsCreateHypot,
+};
+
+const mathjsCreateLog: CompatFactoryExports['createLog'] = factories.createLog;
+const logDependencies: UnaryBundle<'createLog'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  typeOfDependencies: typeof typeOfDependencies;
+} = {
+  ComplexDependencies,
+  divideScalarDependencies,
+  typeOfDependencies,
+  typedDependencies,
+  createLog: mathjsCreateLog,
+};
+
+const mathjsCreateNthRoots: CompatFactoryExports['createNthRoots'] = factories.createNthRoots;
+const nthRootsDependencies: UnaryBundle<'createNthRoots'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+} = {
+  ComplexDependencies,
+  divideScalarDependencies,
+  typedDependencies,
+  createNthRoots: mathjsCreateNthRoots,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1478,5 +1681,35 @@ export {
   chainDependencies,
   mathjsCreateResultSet as createResultSet,
   ResultSetDependencies,
+  mathjsCreateBignumber as createBignumber,
+  bignumberDependencies,
+  mathjsCreateFraction as createFraction,
+  fractionDependencies,
+  mathjsCreateComplex as createComplex,
+  complexDependencies,
+  mathjsCreateNumeric as createNumeric,
+  numericDependencies,
+  mathjsCreateDiff as createDiff,
+  diffDependencies,
+  mathjsCreateDivideScalar as createDivideScalar,
+  divideScalarDependencies,
+  mathjsCreateFix as createFix,
+  fixDependencies,
+  mathjsCreateLarger as createLarger,
+  largerDependencies,
+  mathjsCreateSign as createSign,
+  signDependencies,
+  mathjsCreateSmaller as createSmaller,
+  smallerDependencies,
+  mathjsCreateUnaryPlus as createUnaryPlus,
+  unaryPlusDependencies,
+  mathjsCreateDotDivide as createDotDivide,
+  dotDivideDependencies,
+  mathjsCreateHypot as createHypot,
+  hypotDependencies,
+  mathjsCreateLog as createLog,
+  logDependencies,
+  mathjsCreateNthRoots as createNthRoots,
+  nthRootsDependencies,
   typedDependencies,
 };
