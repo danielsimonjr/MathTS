@@ -36,6 +36,7 @@ import {
   isComplex,
 } from '@danielsimonjr/mathts-core';
 import { gcdBigInt } from '@danielsimonjr/mathts-core/internal';
+import { multiplyMatrixEntries } from '../arithmetic/matrix-product.js';
 import { fractionGcd, fractionLcm } from '../arithmetic/fraction-gcd.js';
 import { euclidSnap } from './euclid.js';
 import {
@@ -506,20 +507,7 @@ function genericMatrixProduct(
   sizeB: readonly number[]
 ): unknown[][] {
   assertInnerDimensions(sizeA, sizeB);
-  const rows = sizeA[0];
-  const inner = sizeA[1];
-  const cols = sizeB[1];
-  const out: unknown[][] = [];
-  for (let i = 0; i < rows; i++) {
-    const row: unknown[] = [];
-    for (let j = 0; j < cols; j++) {
-      let acc: unknown = inner === 0 ? 0 : mulOp(a[i][0], b[0][j]);
-      for (let k = 1; k < inner; k++) acc = addOp(acc, mulOp(a[i][k], b[k][j]));
-      row.push(acc);
-    }
-    out.push(row);
-  }
-  return out;
+  return multiplyMatrixEntries(a, b, sizeA[0], sizeA[1], sizeB[1], addOp, mulOp);
 }
 
 /**

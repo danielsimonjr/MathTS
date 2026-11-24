@@ -2044,6 +2044,23 @@ const countDependencies: UnaryBundle<'createCount'> & {
   sizeDependencies: typeof sizeDependencies;
 } = { prodDependencies, sizeDependencies, typedDependencies, createCount: mathjsCreateCount };
 
+const mathjsCreateMultiply: CompatFactoryExports['createMultiply'] = factories.createMultiply;
+const multiplyDependencies: UnaryBundle<'createMultiply'> & {
+  addScalarDependencies: typeof addScalarDependencies;
+  dotDependencies: typeof dotDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+} = {
+  addScalarDependencies,
+  dotDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  typedDependencies,
+  createMultiply: mathjsCreateMultiply,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -2434,5 +2451,7 @@ export {
   prodDependencies,
   mathjsCreateCount as createCount,
   countDependencies,
+  mathjsCreateMultiply as createMultiply,
+  multiplyDependencies,
   typedDependencies,
 };
