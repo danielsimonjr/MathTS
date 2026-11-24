@@ -9,7 +9,7 @@ describe('native compatibility dependency bundles', () => {
     const selected = create({ numberDependencies: compat.numberDependencies });
     const number = Reflect.get(selected, 'number');
     expect(() => number('0x100i8')).toThrow('String "0x100" is out of range');
-    expect(number.fromJSON({ value: '2.3' })).toBe(2.3);
+    expect(Reflect.get(number, 'fromJSON')({ value: '2.3' })).toBe(2.3);
   });
 
   it('uses the supplied integer predicate when validating a slice dimension', () => {
