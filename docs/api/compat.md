@@ -340,11 +340,11 @@ See [Migration Guide](../migration/guide.md) for complete details.
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-compat` (78 exports).
+> `@danielsimonjr/mathts-compat` (84 exports).
 
-### Functions (48)
+### Functions (54)
 
-`abs`, `acos`, `add`, `arg`, `asin`, `atan`, `atan2`, `bignumber`, `ceil`, `complex`, `conj`, `cos`, `create`, `det`, `divide`, `exp`, `floor`, `fraction`, `gcd`, `identity`, `im`, `isBigNumber_`, `isComplex_`, `isFraction_`, `isMatrix`, `isNumber_`, `lcm`, `log`, `matrix`, `max`, `mean`, `min`, `multiply`, `ones`, `pow`, `re`, `round`, `sin`, `size`, `sparse`, `sqrt`, `std`, `subtract`, `sum`, `tan`, `transpose`, `variance`, `zeros`
+`abs`, `acos`, `add`, `arg`, `asin`, `atan`, `atan2`, `bignumber`, `ceil`, `chain`, `compile`, `complex`, `conj`, `cos`, `create`, `det`, `divide`, `evaluate`, `exp`, `floor`, `fraction`, `gcd`, `identity`, `im`, `isBigNumber_`, `isComplex_`, `isFraction_`, `isMatrix`, `isNumber_`, `lcm`, `log`, `matrix`, `max`, `mean`, `min`, `multiply`, `ones`, `parse`, `parser`, `Parser`, `pow`, `re`, `round`, `sin`, `size`, `sparse`, `sqrt`, `std`, `subtract`, `sum`, `tan`, `transpose`, `variance`, `zeros`
 
 ### Constants & values (25)
 

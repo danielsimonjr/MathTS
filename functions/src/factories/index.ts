@@ -11,8 +11,9 @@ import type { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
  * conflicts with the active typed implementations.
  */
 
-import { factoryScope, type TypedBuilder } from './scope.js';
+import { factoryScope, registerMathjsFactoryTypes, type TypedBuilder } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
+import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { mixin as attachEmitter } from '../utils/emitter.js';
@@ -1221,6 +1222,7 @@ import {
   isFraction as coreIsFraction,
   isMatrix as coreIsMatrix,
   mathTyped as coreTyped,
+  createMathTSTyped,
 } from '@danielsimonjr/mathts-core';
 import { createUnitClass } from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
@@ -2178,6 +2180,29 @@ function createCompatRandomSources(
   };
 }
 
+/** Create a typed registry with the factory signatures and conversions used by compat. */
+function createCompatTyped(): typeof coreTyped {
+  const typed = createMathTSTyped() as typeof coreTyped;
+  registerMathjsFactoryTypes(typed);
+  typed.addConversion(
+    {
+      from: 'string',
+      to: 'Node',
+      convert: (value) => _parse(value as string),
+    },
+    { override: true }
+  );
+  typed.addConversion(
+    {
+      from: 'Object',
+      to: 'Map',
+      convert: createScopeMap as (value: unknown) => unknown,
+    },
+    { override: true }
+  );
+  return typed;
+}
+
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
   constructors: compatConstructors,
@@ -2186,4 +2211,5 @@ export const factory_mathjsCompat = {
   attachEmitter,
   configFactory,
   createCompatRandomSources,
+  createCompatTyped,
 };

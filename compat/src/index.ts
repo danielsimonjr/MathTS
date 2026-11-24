@@ -111,18 +111,11 @@ interface MathInstanceOverrides {
   ) => void;
   /** mathjs typed-function dispatcher for custom overloads, with the whole `mathTyped` registry surface. */
   typed: WiredCompatInstance['typed'];
-  /** Alias of `compileExpr` (mathjs naming). */
-  compile: (
-    expr: string,
-    options?: { unsafe?: boolean; physics?: boolean; charge?: 'unit' | 'scalar' }
-  ) => {
-    evaluate(scope?: Record<string, unknown>): unknown;
-  };
-  evaluate: (
-    expr: string,
-    scope?: Record<string, unknown>,
-    options?: { unsafe?: boolean; physics?: boolean; charge?: 'unit' | 'scalar' }
-  ) => unknown;
+  /** Compile an expression or a collection of expressions in this instance. */
+  compile: WiredCompatInstance['compile'];
+  compileExpr: WiredCompatInstance['compile'];
+  /** Evaluate an expression or a collection of expressions in this instance. */
+  evaluate: WiredCompatInstance['evaluate'];
   reviver: (key: string, value: unknown) => unknown;
   replacer: (key: string, value: unknown) => unknown;
   subset: (...args: unknown[]) => unknown;
@@ -638,6 +631,47 @@ export const all: Record<string, unknown> = {
 // =============================================================================
 // Re-exports for direct use
 // =============================================================================
+
+let defaultInstance: MathInstance | undefined;
+
+function getDefaultInstance(): MathInstance {
+  return (defaultInstance ??= create(all));
+}
+
+/** Evaluate an expression or a collection in the default compatibility instance. */
+const defaultEvaluate = ((...args: unknown[]) =>
+  (getDefaultInstance().evaluate as (...args: unknown[]) => unknown)(
+    ...args
+  )) as MathInstance['evaluate'];
+
+/** Compile an expression or a collection in the default compatibility instance. */
+const defaultCompile = ((...args: unknown[]) =>
+  (getDefaultInstance().compile as (...args: unknown[]) => unknown)(
+    ...args
+  )) as MathInstance['compile'];
+
+/** Parse an expression into a mathjs-compatible syntax tree. */
+const defaultParse: MathInstance['parse'] = (expression) => getDefaultInstance().parse(expression);
+
+/** Stateful expression parser for the default compatibility instance. */
+export const Parser = function Parser(options?: Parameters<MathInstance['parser']>[0]): object {
+  if (new.target === undefined) throw new TypeError('Parser must be constructed with new');
+  return Reflect.construct(getDefaultInstance().Parser, [options], new.target);
+} as unknown as MathInstance['Parser'];
+
+/** Create a compatibility parser with its own retained scope. */
+const defaultParser: MathInstance['parser'] = (options) => new Parser(options);
+
+/** Start a fluent chain using the default compatibility instance. */
+const defaultChain: MathInstance['chain'] = (value) => getDefaultInstance().chain(value);
+
+export {
+  defaultChain as chain,
+  defaultCompile as compile,
+  defaultEvaluate as evaluate,
+  defaultParse as parse,
+  defaultParser as parser,
+};
 
 // Re-export all shims for direct import
 export * from './shims.js';
