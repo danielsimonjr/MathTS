@@ -2515,11 +2515,12 @@ function tryCreateFactoryBundle(
 
 function selectedTransform<TResult>(
   transform: (deps: Record<string, unknown>) => TResult,
-  base: FactoryFunction
+  base: FactoryFunction,
+  extraDependencies: string[] = []
 ): FactoryFunction<Record<string, unknown>, TResult> {
   return factory(
     base.fn,
-    base.dependencies,
+    [...base.dependencies, ...extraDependencies],
     (deps: Record<string, unknown>) => transform({ ...deps, [base.fn]: base(deps) }),
     { ...base.meta, isTransformFunction: true }
   );
@@ -2600,6 +2601,40 @@ const createSelectedConcatTransform: FactoryFunction<
   ReturnType<typeof createConcatTransform>
 > = /* #__PURE__ */ selectedTransform(createConcatTransform, createConcat);
 
+const createSelectedAndTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createAndTransform>
+> = /* #__PURE__ */ selectedTransform(createAndTransform, createAnd, ['add']);
+
+const createSelectedBitAndTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createBitAndTransform>
+> = /* #__PURE__ */ selectedTransform(createBitAndTransform, createBitAnd, ['add', 'not', 'zeros']);
+
+const createSelectedDiffTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createDiffTransform>
+> = /* #__PURE__ */ selectedTransform(createDiffTransform, createDiff, ['bignumber']);
+
+const createSelectedSubsetTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createSubsetTransform>
+> = /* #__PURE__ */ selectedTransform(createSubsetTransform, createSubset);
+
+const createSelectedPrintTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createPrintTransform>
+> = /* #__PURE__ */ selectedTransform(createPrintTransform, createPrint, [
+  'add',
+  'matrix',
+  'zeros',
+]);
+
+const createSelectedRangeTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createRangeTransform>
+> = /* #__PURE__ */ selectedTransform(createRangeTransform, createRange);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -2664,6 +2699,13 @@ function compatFactoryExports(): {
   createFilterTransform: typeof createSelectedFilterTransform;
   createForEach: typeof createForEach;
   createForEachTransform: typeof createSelectedForEachTransform;
+  createIndexTransform: typeof createIndexTransform;
+  createRangeTransform: typeof createSelectedRangeTransform;
+  createPrintTransform: typeof createSelectedPrintTransform;
+  createSubsetTransform: typeof createSelectedSubsetTransform;
+  createDiffTransform: typeof createSelectedDiffTransform;
+  createBitAndTransform: typeof createSelectedBitAndTransform;
+  createAndTransform: typeof createSelectedAndTransform;
   createConcatTransform: typeof createSelectedConcatTransform;
   createRowTransform: typeof createSelectedRowTransform;
   createColumnTransform: typeof createSelectedColumnTransform;
@@ -2952,6 +2994,13 @@ function compatFactoryExports(): {
     createFilterTransform: createSelectedFilterTransform,
     createForEach,
     createForEachTransform: createSelectedForEachTransform,
+    createIndexTransform,
+    createRangeTransform: createSelectedRangeTransform,
+    createPrintTransform: createSelectedPrintTransform,
+    createSubsetTransform: createSelectedSubsetTransform,
+    createDiffTransform: createSelectedDiffTransform,
+    createBitAndTransform: createSelectedBitAndTransform,
+    createAndTransform: createSelectedAndTransform,
     createConcatTransform: createSelectedConcatTransform,
     createRowTransform: createSelectedRowTransform,
     createColumnTransform: createSelectedColumnTransform,

@@ -12794,6 +12794,9 @@
       "andDependencies": {
         "kind": "object"
       },
+      "andTransformDependencies": {
+        "kind": "object"
+      },
       "apply": {
         "kind": "function"
       },
@@ -12885,6 +12888,9 @@
         "kind": "function"
       },
       "bitAndDependencies": {
+        "kind": "object"
+      },
+      "bitAndTransformDependencies": {
         "kind": "object"
       },
       "bitNot": {
@@ -13124,6 +13130,9 @@
       "createAnd": {
         "kind": "function"
       },
+      "createAndTransform": {
+        "kind": "function"
+      },
       "createArg": {
         "kind": "function"
       },
@@ -13173,6 +13182,9 @@
         "kind": "function"
       },
       "createBitAnd": {
+        "kind": "function"
+      },
+      "createBitAndTransform": {
         "kind": "function"
       },
       "createBitNot": {
@@ -13329,6 +13341,9 @@
         "kind": "function"
       },
       "createDiff": {
+        "kind": "function"
+      },
+      "createDiffTransform": {
         "kind": "function"
       },
       "createDistance": {
@@ -13488,6 +13503,9 @@
         "kind": "function"
       },
       "createIndexNode": {
+        "kind": "function"
+      },
+      "createIndexTransform": {
         "kind": "function"
       },
       "createInfinity": {
@@ -13769,6 +13787,9 @@
       "createPrint": {
         "kind": "function"
       },
+      "createPrintTransform": {
+        "kind": "function"
+      },
       "createProd": {
         "kind": "function"
       },
@@ -13794,6 +13815,9 @@
         "kind": "function"
       },
       "createRangeNode": {
+        "kind": "function"
+      },
+      "createRangeTransform": {
         "kind": "function"
       },
       "createRe": {
@@ -13938,6 +13962,9 @@
         "kind": "function"
       },
       "createSubset": {
+        "kind": "function"
+      },
+      "createSubsetTransform": {
         "kind": "function"
       },
       "createSubtract": {
@@ -14115,6 +14142,9 @@
         "kind": "function"
       },
       "diffDependencies": {
+        "kind": "object"
+      },
+      "diffTransformDependencies": {
         "kind": "object"
       },
       "distance": {
@@ -14409,6 +14439,9 @@
         "kind": "function"
       },
       "indexDependencies": {
+        "kind": "object"
+      },
+      "indexTransformDependencies": {
         "kind": "object"
       },
       "intersect": {
@@ -15050,6 +15083,9 @@
       "printDependencies": {
         "kind": "object"
       },
+      "printTransformDependencies": {
+        "kind": "object"
+      },
       "prod": {
         "kind": "function"
       },
@@ -15093,6 +15129,9 @@
         "kind": "function"
       },
       "rangeDependencies": {
+        "kind": "object"
+      },
+      "rangeTransformDependencies": {
         "kind": "object"
       },
       "rationalize": {
@@ -15384,6 +15423,9 @@
         "kind": "function"
       },
       "subsetDependencies": {
+        "kind": "object"
+      },
+      "subsetTransformDependencies": {
         "kind": "object"
       },
       "subtract": {
