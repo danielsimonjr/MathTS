@@ -569,6 +569,10 @@ export function create(
     expressionConstants.fraction = () => instance.fraction;
   }
   if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
+  for (const name of ['arg', 'conj', 'im', 're'] as const) {
+    if (originalSurface[name] === mathFunctions[name])
+      expressionConstants[name] = () => instance[name];
+  }
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */

@@ -3745,6 +3745,10 @@ export const factory_mathjsCompat = {
   setUnion: compatSetUnion,
   compareText,
   equalText,
+  arg,
+  conj,
+  im,
+  re,
   fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),
   toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),
 };

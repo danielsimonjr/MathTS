@@ -3,22 +3,26 @@ import * as oracle from 'mathjs';
 import {
   add,
   all,
+  arg,
   cbrt,
   combinations,
   compareNatural,
   compareText,
+  conj,
   create,
   derivative,
   equalText,
   erf,
   fraction,
   fractionDependencies,
+  im,
   log1p,
   log2,
   median,
   multiply,
   norm,
   pow,
+  re,
   round,
   toBest,
   toBestDependencies,
@@ -225,5 +229,22 @@ describe('named compatibility function imports', () => {
       }
     }
     expect(fraction('1e4').numerator).toBe(10000n);
+  });
+
+  it('dispatches complex projections over real numbers and collections', () => {
+    const math = create(all);
+    expect(conj(5)).toBe(oracle.conj(5));
+    expect(arg(-5)).toBe(oracle.arg(-5));
+    expect(re([1, math.complex(2, 3)])).toEqual([1, 2]);
+    expect(im([1, math.complex(2, 3)])).toEqual([0, 3]);
+    expect(String(math.conj(math.fraction('1/3')))).toBe(
+      String(oracle.evaluate("conj(fraction('1/3'))"))
+    );
+    for (const name of ['arg', 'conj', 'im', 're']) {
+      const expression = `${name}([1, -2, 2+3i])`;
+      const actual = math.evaluate(expression) as { toArray(): unknown[] };
+      const expected = oracle.evaluate(expression) as { toArray(): unknown[] };
+      expect(actual.toArray().map(String)).toEqual(expected.toArray().map(String));
+    }
   });
 });

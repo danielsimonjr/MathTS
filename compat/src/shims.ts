@@ -578,43 +578,28 @@ export const ceil: TypedFunction = _ceil;
 // Complex-specific Shims
 // =============================================================================
 
-/**
- * Complex conjugate (mathjs-compatible)
- */
-export function conj(c: Complex): Complex {
-  if (!isComplex(c)) {
-    throw new TypeError('Expected Complex number');
-  }
-  return c.conjugate();
-}
+type ComplexProjection = {
+  (value: Complex | number): number;
+  (value: readonly unknown[]): unknown[];
+  (value: unknown): unknown;
+};
 
-/**
- * Real part (mathjs-compatible)
- */
-export function re(c: Complex | number): number {
-  if (typeof c === 'number') return c;
-  if (isComplex(c)) return c.re;
-  throw new TypeError('Expected Complex or number');
-}
+/** Complex conjugate applied elementwise to collections. */
+export const conj = factory_mathjsCompat.conj as {
+  (value: Complex): Complex;
+  (value: number): number;
+  (value: readonly unknown[]): unknown[];
+  (value: unknown): unknown;
+};
 
-/**
- * Imaginary part (mathjs-compatible)
- */
-export function im(c: Complex | number): number {
-  if (typeof c === 'number') return 0;
-  if (isComplex(c)) return c.im;
-  throw new TypeError('Expected Complex or number');
-}
+/** Real part applied elementwise to collections. */
+export const re = factory_mathjsCompat.re as ComplexProjection;
 
-/**
- * Argument (phase) of complex number (mathjs-compatible)
- */
-export function arg(c: Complex): number {
-  if (!isComplex(c)) {
-    throw new TypeError('Expected Complex number');
-  }
-  return c.arg();
-}
+/** Imaginary part applied elementwise to collections. */
+export const im = factory_mathjsCompat.im as ComplexProjection;
+
+/** Complex phase applied elementwise to collections. */
+export const arg = factory_mathjsCompat.arg as ComplexProjection;
 
 // =============================================================================
 // Matrix-specific Shims

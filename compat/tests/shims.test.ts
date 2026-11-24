@@ -40,7 +40,6 @@ import {
   Infinity_,
   NaN_,
 } from '../src/shims.js';
-import { Complex } from '@danielsimonjr/mathts-core';
 
 describe('Inverse trig functions', () => {
   it('asin delegates to functions (in-range matches Math)', () => {
@@ -176,21 +175,9 @@ describe('det() edge cases', () => {
   });
 });
 
-describe('Complex error cases', () => {
-  it('conj should throw for non-Complex', () => {
-    expect(() => conj(5 as unknown as Complex)).toThrow('Expected Complex number');
-  });
-
-  it('re should throw for non-number/non-Complex', () => {
-    expect(() => re('bad' as unknown as number)).toThrow('Expected Complex or number');
-  });
-
-  it('im should throw for non-number/non-Complex', () => {
-    expect(() => im('bad' as unknown as number)).toThrow('Expected Complex or number');
-  });
-
-  it('arg should throw for non-Complex', () => {
-    expect(() => arg(5 as unknown as Complex)).toThrow('Expected Complex number');
+describe('Complex conversion errors', () => {
+  it.each([conj, re, im, arg])('rejects an invalid numeric string', (operation) => {
+    expect(() => operation('bad')).toThrow(/Cannot convert "bad" to a number/);
   });
 });
 
