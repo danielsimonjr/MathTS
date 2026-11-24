@@ -1,3 +1,4 @@
+import FractionJS from 'fraction.js';
 import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
 import { createSelectedMultiply } from '../arithmetic/selectedMultiply.js';
 import { createSelectedMatrix, createSelectedSparse } from './selected-matrix.js';
@@ -2149,7 +2150,8 @@ const createSelectedFraction = /* #__PURE__ */ factory(
       number: (value: number) => {
         if (!Number.isFinite(value))
           throw new Error(`${value} cannot be represented as a fraction`);
-        return new Fraction(value);
+        const { s, n, d } = new FractionJS(value);
+        return new Fraction(s * n, d);
       },
       string: (value: string) => new Fraction(value),
       'number, number': (numerator: number, denominator: number) =>
@@ -2172,6 +2174,12 @@ const createSelectedFraction = /* #__PURE__ */ factory(
         if (value.n === undefined || value.d === undefined) throw new Error('Invalid argument');
         const numerator = value.s !== undefined && value.s < 0 ? -BigInt(value.n) : value.n;
         return new Fraction(numerator, value.d);
+      },
+      any: (value: unknown) => {
+        if ((value as { isBigNumber?: boolean } | null)?.isBigNumber === true) {
+          return new Fraction(String(value));
+        }
+        throw new TypeError('Invalid argument');
       },
       'Array | Matrix': typed.referToSelf(
         (self) => (value: unknown) => mapCollection(value, (entry) => self(entry))
@@ -3726,5 +3734,6 @@ export const factory_mathjsCompat = {
   setUnion: compatSetUnion,
   compareText,
   equalText,
+  fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),
   toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),
 };

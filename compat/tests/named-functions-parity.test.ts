@@ -11,6 +11,8 @@ import {
   derivative,
   equalText,
   erf,
+  fraction,
+  fractionDependencies,
   log1p,
   log2,
   median,
@@ -183,5 +185,19 @@ describe('named compatibility function imports', () => {
     expect(String(selected.toBest(value))).toBe(expected);
     expect(String(math.evaluate(expression))).toBe(expected);
     expect(String(toBest(value, [], { offset: 0 }))).toBe('0.123 uA');
+  });
+
+  it('matches the MathJS approximation of floating-point fractions', () => {
+    const math = create(all);
+    const selected = create({ fractionDependencies });
+    const input = -Math.sqrt(10);
+    const expected = oracle.fraction(input);
+    for (const actual of [fraction(input), math.fraction(input), selected.fraction(input)]) {
+      expect(actual.numerator).toBe(expected.s * expected.n);
+      expect(actual.denominator).toBe(expected.d);
+    }
+    expect(String(math.evaluate('fraction(sqrt(10))'))).toBe(
+      oracle.fraction(Math.sqrt(10)).toFraction()
+    );
   });
 });

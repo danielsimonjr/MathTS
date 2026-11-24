@@ -77,7 +77,7 @@ import {
   zeros as _factoryZeros,
   ones as _factoryOnes,
   transpose as _transpose,
-  fraction as _fraction,
+  factory_mathjsCompat,
   bignumber as _bignumber,
   complex as _complex,
 } from '@danielsimonjr/mathts-functions';
@@ -136,14 +136,14 @@ interface CompatFraction {
  * fraction(0.5)    // Fraction(1, 2)
  * fraction()       // Fraction(0, 1)
  *
- * The function is the functions `fraction` with two more signatures: no argument and
+ * The function is the compatibility fraction factory with two more signatures: no argument and
  * `undefined` give 0, as the compat `fraction` always did. The functions `fraction` is a
  * typed-function, so `map(x, fraction)`, `matrix.map(fraction)` and `evaluate` pass the value
  * alone and not the index as the denominator (#1160). A Fraction of a second copy of core is
  * returned unchanged (#1033), and a BigNumber, a bigint, null, an object `{ n, d }`, a Unit, an
  * Array and a Matrix convert, as in mathjs.
  */
-export const fraction = mathTyped('fraction', _fraction as never, {
+export const fraction = mathTyped('fraction', factory_mathjsCompat.fraction as never, {
   '': () => new Fraction(0, 1),
   undefined: () => new Fraction(0, 1),
 }) as unknown as CompatFraction;
