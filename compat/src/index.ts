@@ -24,7 +24,7 @@ import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { createChain, type Chain } from './chain.js';
-import { wireCompatConstants, type CompatConstantName } from './instance-constants.js';
+import { compatConstantReaders, type CompatConstantName } from './instance-constants.js';
 import type { BigNumber as ConfiguredBigNumber } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
@@ -378,6 +378,11 @@ export function create(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
       configGeneration += 1;
+      if (current.number !== previous.number || current.precision !== previous.precision) {
+        for (const [key, read] of Object.entries(constantReaders)) {
+          if (!Object.isFrozen(instance)) instance[key] = read();
+        }
+      }
       const emit = instance.emit as ((...args: unknown[]) => void) | undefined;
       emit?.(event, current, previous, changes);
     }
@@ -502,6 +507,12 @@ export function create(
   const inheritedKeys = flatKeys.filter((key) => !parityNames.has(key));
   const { levels, perLevel } = createPrototypeLevels(inheritedKeys.length);
   const instance = Object.create(levels[0] ?? Object.prototype) as Record<string, unknown>;
+  const constantReaders = compatConstantReaders(
+    flat,
+    currentConfig,
+    (name) => originalSurface[name] === functionsNamespace[name]
+  );
+  const expressionConstants: Record<string, () => unknown> = {};
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
@@ -531,6 +542,17 @@ export function create(
 
   for (const key of flatKeys) {
     if (!parityNames.has(key)) continue;
+    const readConstant = Object.hasOwn(constantReaders, key) ? constantReaders[key] : undefined;
+    if (readConstant) {
+      Object.defineProperty(instance, key, {
+        value: readConstant(),
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+      if (key !== 'Infinity' && key !== 'NaN') expressionConstants[key] = () => instance[key];
+      continue;
+    }
     const value = flat[key];
     if (!isLazy(key, value)) {
       Object.defineProperty(instance, key, {
@@ -592,11 +614,7 @@ export function create(
     instance as Record<string, unknown>,
     currentConfig,
     flat.parser === functionsNamespace.parser,
-    wireCompatConstants(
-      instance,
-      currentConfig,
-      (name) => originalSurface[name] === functionsNamespace[name]
-    )
+    expressionConstants
   );
 
   return instance as unknown as MathInstance;

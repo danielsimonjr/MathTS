@@ -30,32 +30,29 @@ const scalarConstants = {
 export type CompatConstantName =
   keyof typeof mathConstants | keyof typeof scalarConstants | 'Infinity' | 'NaN';
 
-/** One source of configured values for instance reads and compiled expressions. */
-export function wireCompatConstants(
-  instance: Record<string, unknown>,
+const unitTemplates = new Map<string, InstanceType<typeof Unit>>();
+
+function cloneUnit(name: string, value: number, units: string): InstanceType<typeof Unit> {
+  let template = unitTemplates.get(name);
+  if (template === undefined) {
+    template = new Unit(value, units);
+    unitTemplates.set(name, template);
+  }
+  return template.clone() as InstanceType<typeof Unit>;
+}
+
+/** Prepare live reads before the instance defines its property layout. */
+export function compatConstantReaders(
+  surface: Record<string, unknown>,
   config: MathJSConfig,
   isDefault: (name: string) => boolean
 ): Record<string, () => unknown> {
-  const expressionConstants: Record<string, () => unknown> = {};
+  const reads: Record<string, () => unknown> = {};
   const bind = (name: string, read: () => unknown): void => {
-    if (!Object.hasOwn(instance, name)) return;
-    let overwritten = false;
-    let override: unknown;
-    Object.defineProperty(instance, name, {
-      enumerable: true,
-      configurable: true,
-      get: () => (overwritten ? override : read()),
-      set(value: unknown) {
-        if (Object.isFrozen(instance))
-          throw new TypeError(`Cannot assign to read only property '${name}'`);
-        overwritten = true;
-        override = value;
-      },
-    });
-    if (name !== 'Infinity' && name !== 'NaN') expressionConstants[name] = () => instance[name];
+    if (Object.hasOwn(surface, name)) reads[name] = read;
   };
   for (const [name, canonical] of Object.entries(mathConstants)) {
-    const number = instance[name] as number;
+    const number = surface[name] as number;
     let precision: number | undefined;
     let precise: BigNumber | undefined;
     bind(name as keyof typeof mathConstants, () => {
@@ -84,11 +81,11 @@ export function wireCompatConstants(
   for (const [name, value, units] of MATHJS_UNIT_CONSTANTS) {
     if (!isDefault(name)) continue;
     let cached: InstanceType<typeof Unit> | undefined;
-    bind(name, () => (cached ??= new Unit(value, units)));
+    bind(name, () => (cached ??= cloneUnit(name, value, units)));
   }
   bind('Infinity', () =>
     config.number === 'BigNumber' ? BigNumber.fromNumber(Infinity) : Infinity
   );
   bind('NaN', () => (config.number === 'BigNumber' ? BigNumber.fromNumber(NaN) : NaN));
-  return expressionConstants;
+  return reads;
 }
