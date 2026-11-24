@@ -5,6 +5,13 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('matches number word-size validation and JSON revival', () => {
+    const selected = create({ numberDependencies: compat.numberDependencies });
+    const number = Reflect.get(selected, 'number');
+    expect(() => number('0x100i8')).toThrow('String "0x100" is out of range');
+    expect(number.fromJSON({ value: '2.3' })).toBe(2.3);
+  });
+
   it('uses the supplied integer predicate when validating a slice dimension', () => {
     const mapSlices = compat.createMapSlices({ typed: compat.typed, isInteger: () => false });
     expect(() => mapSlices([1, 2], 0, () => 0)).toThrow('Integer number expected for dimension');
@@ -210,6 +217,7 @@ describe('native compatibility dependency bundles', () => {
       ],
     ],
     ['mode', [[1, 2, 2]]],
+    ['number', [['0b11.1', '0xFFi8', true]]],
     ['nthRoot', [16, 2]],
     ['nullish', [null, 42]],
     ['partitionSelect', [[3, 1, 2], 1]],

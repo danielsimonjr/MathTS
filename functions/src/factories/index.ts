@@ -1912,6 +1912,60 @@ function numberOfOtherValue(x: unknown): number {
   );
 }
 
+const numberRadices: Record<string, number> = { '0b': 2, '0o': 8, '0x': 16 };
+
+function selectedNumberOfText(text: string): number {
+  const radixFraction = /(0[box])([0-9a-fA-F]*)\.([0-9a-fA-F]*)/.exec(text);
+  if (radixFraction) {
+    const [, prefix, whole, digits] = radixFraction;
+    const radix = numberRadices[prefix];
+    let result = parseInt(whole, radix);
+    for (let index = 0; index < digits.length; index++) {
+      result += parseInt(digits[index], radix) / radix ** (index + 1);
+    }
+    if (Number.isNaN(result)) throw new SyntaxError(`String "${text}" is not a valid number`);
+    return result;
+  }
+
+  const sized = /(0[box][0-9a-fA-F]*)i([0-9]*)/.exec(text);
+  if (!sized) return numberOfText(text);
+  const [, literal, size] = sized;
+  const value = numberOfText(literal);
+  const width = Number(size);
+  if (value > 2 ** width - 1) throw new SyntaxError(`String "${literal}" is out of range`);
+  return value >= 2 ** (width - 1) ? value - 2 ** width : value;
+}
+
+const createSelectedNumber = /* #__PURE__ */ factory(
+  'number',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) => {
+    return Object.assign(
+      typed('number', {
+        '': () => 0,
+        number: (value: number) => value,
+        string: selectedNumberOfText,
+        BigNumber: (value: CoreBigNumber) => value.toNumber(),
+        bigint: (value: bigint) => Number(value),
+        Fraction: (value: CoreFraction) => value.valueOf(),
+        Unit: typed.referToSelf((self) => (value: unknown) => {
+          const unit = value as { clone(): { value: unknown }; value: unknown };
+          const clone = unit.clone();
+          clone.value = self(unit.value);
+          return clone;
+        }),
+        null: () => 0,
+        'Unit, string | Unit': (value: { toNumber(unit: unknown): number }, unit: unknown) =>
+          value.toNumber(unit),
+        'Array | Matrix': typed.referToSelf(
+          (self) => (value: unknown) => mapCollection(value, (entry) => self(entry))
+        ),
+      }),
+      { fromJSON: ({ value }: { value: string }) => parseFloat(value) }
+    );
+  }
+);
+
 /** The signatures of `number` with one argument, each also with `undefined` as the second. */
 function numberSignatures(): Record<string, unknown> {
   const typed = coreTyped as unknown as TypedBuilder;
@@ -2349,6 +2403,7 @@ function compatFactoryExports(): {
   createTrace: typeof createTrace;
   createMapSlices: typeof createMathjsMapSlices;
   createMode: typeof createMathjsMode;
+  createNumber: typeof createSelectedNumber;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2470,6 +2525,7 @@ function compatFactoryExports(): {
     createTrace,
     createMapSlices: createMathjsMapSlices,
     createMode: createMathjsMode,
+    createNumber: createSelectedNumber,
     createTyped,
   };
 }
