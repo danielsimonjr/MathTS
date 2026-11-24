@@ -1,5 +1,23 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.17
+
+### Patch Changes
+
+- fa760f9: Expose selected MathJS factories for leafCount, pinv, and zpk2tf. Accept expression strings in leafCount.
+- fa760f9: Expose MathJS factory bundles for compiling expressions and taking multiset unions.
+- fa760f9: Expose MathJS factory bundles for unit conversion, best-unit selection, splitting measurements across units, and sparse matrix construction.
+- fa760f9: Expose the MathJS divide factory bundle, including right division using the injected inverse factory.
+- fa760f9: Expose MathJS factory bundles for geometric intersections and symbolic variable resolution.
+- fa760f9: Expose MathJS factory bundles for calculating means and finding polynomial roots.
+- Updated dependencies [fa760f9]
+- Updated dependencies [fa760f9]
+- Updated dependencies [fa760f9]
+- Updated dependencies [fa760f9]
+- Updated dependencies [fa760f9]
+- Updated dependencies [fa760f9]
+  - @danielsimonjr/mathts-functions@0.89.15
+
 ## 0.7.16
 
 ### Patch Changes
