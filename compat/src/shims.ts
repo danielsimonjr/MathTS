@@ -48,6 +48,7 @@ import {
   divide as _divide,
   inv as _inv,
   pow as _pow,
+  factory_pow as _factoryPow,
   sqrt as _sqrt,
   abs as _abs,
   exp as _exp,
@@ -436,7 +437,20 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
     arguments as unknown as unknown[]
   );
 }, _divide) as TypedFunction;
-export const pow: TypedFunction = _pow;
+export const pow = withTypedSurface(function (base?: unknown, exponent?: unknown): unknown {
+  if (
+    arguments.length === 2 &&
+    (Array.isArray(base) || isCompatBridgeMatrix(base)) &&
+    (typeof exponent === 'number' ||
+      typeof exponent === 'bigint' ||
+      isBigNumber(exponent) ||
+      isFraction(exponent)) &&
+    Number(exponent) < 0
+  ) {
+    return _factoryPow(base, exponent);
+  }
+  return _pow.apply(undefined, arguments as unknown as unknown[]);
+}, _pow) as TypedFunction;
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
   _sqrt as (...args: unknown[]) => unknown,

@@ -550,6 +550,7 @@ export function create(
   );
   const expressionConstants: Record<string, () => unknown> = {};
   if (useCompatSetUnion) expressionConstants.setUnion = () => instance.setUnion;
+  if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */

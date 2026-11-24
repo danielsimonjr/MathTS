@@ -12,6 +12,7 @@ import {
   log2,
   median,
   norm,
+  pow,
   round,
   toBest,
 } from '../src/index.js';
@@ -121,5 +122,27 @@ describe('named compatibility function imports', () => {
       );
     }
     expect(math.evaluate('compareNatural(5cm, 40mm)')).toBe(1);
+  });
+
+  it('takes negative integer powers of invertible matrices', () => {
+    const math = create(all);
+    const values = [
+      [1, 2],
+      [4, 3],
+    ];
+    const determinantZero = [
+      [1, 2],
+      [2, 4],
+    ];
+    const matrixValues = (matrix: unknown) => (matrix as { valueOf(): unknown }).valueOf();
+    const expected = oracle.pow(values, -1);
+    expect(pow(values, -1)).toEqual(expected);
+    expect(matrixValues(math.pow(math.matrix(values), -1))).toEqual(expected);
+    expect(matrixValues(math.pow(math.sparse(values), -1))).toEqual(expected);
+    expect(math.pow(values, math.bignumber(-1))).toEqual(expected);
+    expect(
+      (math.evaluate('pow([[1, 2], [4, 3]], -1)') as { valueOf(): unknown }).valueOf()
+    ).toEqual(expected);
+    expect(() => pow(determinantZero, -1)).toThrow(/not invertible/);
   });
 });
