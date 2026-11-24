@@ -3020,6 +3020,80 @@ const forEachTransformDependencies: UnaryBundle<'createForEachTransform'> = {
   createForEachTransform: mathjsCreateForEachTransform,
 };
 
+const mathjsCreateMinTransform: CompatFactoryExports['createMinTransform'] =
+  factories.createMinTransform;
+const minTransformDependencies: UnaryBundle<'createMinTransform'> & {
+  isNaNDependencies: typeof isNaNDependencies;
+  numericDependencies: typeof numericDependencies;
+  smallerDependencies: typeof smallerDependencies;
+} = {
+  isNaNDependencies,
+  numericDependencies,
+  smallerDependencies,
+  typedDependencies,
+  createMinTransform: mathjsCreateMinTransform,
+};
+
+const mathjsCreateMaxTransform: CompatFactoryExports['createMaxTransform'] =
+  factories.createMaxTransform;
+const maxTransformDependencies: UnaryBundle<'createMaxTransform'> & {
+  isNaNDependencies: typeof isNaNDependencies;
+  largerDependencies: typeof largerDependencies;
+  numericDependencies: typeof numericDependencies;
+} = {
+  isNaNDependencies,
+  largerDependencies,
+  numericDependencies,
+  typedDependencies,
+  createMaxTransform: mathjsCreateMaxTransform,
+};
+
+const mathjsCreateSumTransform: CompatFactoryExports['createSumTransform'] =
+  factories.createSumTransform;
+const sumTransformDependencies: UnaryBundle<'createSumTransform'> & {
+  addDependencies: typeof addDependencies;
+  numericDependencies: typeof numericDependencies;
+} = {
+  addDependencies,
+  numericDependencies,
+  typedDependencies,
+  createSumTransform: mathjsCreateSumTransform,
+};
+
+const mathjsCreateCumSumTransform: CompatFactoryExports['createCumSumTransform'] =
+  factories.createCumSumTransform;
+const cumsumTransformDependencies: UnaryBundle<'createCumSumTransform'> & {
+  addDependencies: typeof addDependencies;
+  unaryPlusDependencies: typeof unaryPlusDependencies;
+} = {
+  addDependencies,
+  typedDependencies,
+  unaryPlusDependencies,
+  createCumSumTransform: mathjsCreateCumSumTransform,
+};
+
+const mathjsCreateMapSlicesTransform: CompatFactoryExports['createMapSlicesTransform'] =
+  factories.createMapSlicesTransform;
+const mapSlicesTransformDependencies: UnaryBundle<'createMapSlicesTransform'> & {
+  isIntegerDependencies: typeof isIntegerDependencies;
+} = {
+  isIntegerDependencies,
+  typedDependencies,
+  createMapSlicesTransform: mathjsCreateMapSlicesTransform,
+};
+
+const mathjsCreateMeanTransform: CompatFactoryExports['createMeanTransform'] =
+  factories.createMeanTransform;
+const meanTransformDependencies: UnaryBundle<'createMeanTransform'> & {
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+} = {
+  addDependencies,
+  divideDependencies,
+  typedDependencies,
+  createMeanTransform: mathjsCreateMeanTransform,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3094,6 +3168,18 @@ export {
   mathjsCreateForEach as createForEach,
   mathjsCreateForEachTransform as createForEachTransform,
   forEachTransformDependencies,
+  mathjsCreateMeanTransform as createMeanTransform,
+  meanTransformDependencies,
+  mathjsCreateMapSlicesTransform as createMapSlicesTransform,
+  mapSlicesTransformDependencies,
+  mathjsCreateCumSumTransform as createCumSumTransform,
+  cumsumTransformDependencies,
+  mathjsCreateSumTransform as createSumTransform,
+  sumTransformDependencies,
+  mathjsCreateMaxTransform as createMaxTransform,
+  maxTransformDependencies,
+  mathjsCreateMinTransform as createMinTransform,
+  minTransformDependencies,
   mathjsCreateFlatten as createFlatten,
   mathjsCreateSize as createSize,
   mathjsCreateSqueeze as createSqueeze,

@@ -5,6 +5,50 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('evaluates selected statistical transforms along one-based dimensions', () => {
+    const cases = [
+      ['min', 'Min', 'min([[4, 1], [3, 9]], 1)'],
+      ['max', 'Max', 'max([[4, 1], [3, 9]], 2)'],
+      ['sum', 'Sum', 'sum([[4, 1], [3, 9]], 1)'],
+      ['cumsum', 'CumSum', 'cumsum([[4, 1], [3, 9]], 2)'],
+      ['mean', 'Mean', 'mean([[4, 1], [3, 9]], 1)'],
+      ['mapSlices', 'MapSlices', 'mapSlices([[4, 1], [3, 9]], 2, first)'],
+    ] as const;
+    const config = { matrix: 'Array' as const };
+    const run = (instance: object, expression: string) =>
+      Reflect.apply(Reflect.get(instance, 'evaluate'), instance, [
+        expression,
+        { first: (row: unknown[]) => row[0] },
+      ]);
+    for (const [name, factoryName, expression] of cases) {
+      const key = name + 'TransformDependencies';
+      const createName = 'create' + factoryName + 'Transform';
+      const actualBundle = Reflect.get(compat, key) as Record<string, unknown>;
+      const expectedBundle = Reflect.get(oracle, key) as Parameters<typeof oracle.create>[0];
+      expect(Object.keys(actualBundle)).toEqual(Object.keys(expectedBundle));
+      type TransformFactory = { dependencies: string[]; meta: object };
+      const actualFactory = Reflect.get(actualBundle, createName) as TransformFactory;
+      const expectedFactory = Reflect.get(
+        expectedBundle,
+        createName
+      ) as unknown as TransformFactory;
+      expect(actualFactory.dependencies).toEqual(expectedFactory.dependencies);
+      expect(actualFactory.meta).toEqual(expectedFactory.meta);
+      const actual = create(
+        { [key]: actualBundle, evaluateDependencies: compat.evaluateDependencies },
+        config
+      );
+      const expected = oracle.create(
+        {
+          [key]: expectedBundle,
+          evaluateDependencies: Reflect.get(oracle, 'evaluateDependencies'),
+        },
+        config
+      );
+      expect(run(actual, expression)).toEqual(run(expected, expression));
+    }
+  });
+
   it('evaluates selected callback transforms with one-based indices', () => {
     const actual = create(
       {
