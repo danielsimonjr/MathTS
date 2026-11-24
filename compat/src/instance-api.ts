@@ -98,11 +98,13 @@ function scrubDenylist(scope: Record<string, unknown>): void {
  * @param currentConfig - The live config object of the instance.
  * @param bindParser - When `true`, `instance.parser` becomes a parser that evaluates
  *   with the instance evaluator. Default: `false`.
+ * @param constants - Live reads of the instance's configured constants.
  */
 export function wireMathjsInstanceApi(
   instance: Record<string, unknown>,
   currentConfig: MathJSConfig,
-  bindParser = false
+  bindParser = false,
+  constants: Readonly<Record<string, () => unknown>> = {}
 ): WiredCompatInstance {
   wiredInstances.add(instance);
   const brandHolder: object = Object.getPrototypeOf(instance) ?? instance;
@@ -151,7 +153,8 @@ export function wireMathjsInstanceApi(
   let evaluator = createInstanceEvaluator(
     expressionLayers.mathWithTransform,
     COMPAT_INTERNAL_NAMES,
-    true
+    true,
+    constants
   );
 
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
@@ -162,7 +165,8 @@ export function wireMathjsInstanceApi(
     evaluator = createInstanceEvaluator(
       expressionLayers.mathWithTransform,
       COMPAT_INTERNAL_NAMES,
-      true
+      true,
+      constants
     );
     instance.evaluate = runBound(evaluator.evaluate);
     const compile = runBound(evaluator.compile);

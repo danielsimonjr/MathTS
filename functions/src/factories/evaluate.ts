@@ -657,11 +657,13 @@ function buildUnsafeScopedMathNamespace(
  *   (compat hides the internal names of the functions namespace, #1216). An imported
  *   name resolves even when it is in this list. Default: none.
  * @param matrixLiterals - Whether the host enables Matrix literals according to its live config.
+ * @param constants - Optional live reads of the host's built-in constants.
  */
 export function createInstanceEvaluator(
   importedExpressionScope: Record<string, unknown>,
   hiddenNames: Iterable<string> = [],
-  matrixLiterals = false
+  matrixLiterals = false,
+  constants: Readonly<Record<string, () => unknown>> = {}
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
@@ -669,6 +671,18 @@ export function createInstanceEvaluator(
   const hidden: ReadonlySet<string> = new Set(hiddenNames);
   const safeScope = buildScopedMathNamespace(importedExpressionScope, hidden);
   const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope, hidden);
+  for (const [name, get] of Object.entries(constants)) {
+    if (
+      EVALUATE_SCOPE_OMIT.has(name) ||
+      hidden.has(name) ||
+      Object.hasOwn(importedExpressionScope, name)
+    ) {
+      continue;
+    }
+    const descriptor = { enumerable: true, get };
+    Object.defineProperty(safeScope, name, descriptor);
+    Object.defineProperty(unsafeScope, name, descriptor);
+  }
   if (matrixLiterals) {
     const key = Symbol.for('mathts.expression.matrixLiterals');
     const enabled = () => liveConfig.matrix === 'Matrix';

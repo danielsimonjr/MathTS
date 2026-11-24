@@ -24,6 +24,8 @@ import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { createChain, type Chain } from './chain.js';
+import { wireCompatConstants, type CompatConstantName } from './instance-constants.js';
+import type { BigNumber as ConfiguredBigNumber } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
@@ -99,7 +101,8 @@ interface MathInstanceOverrides {
   once: WiredCompatInstance['once'];
 
   // Configuration
-  config: (newConfig?: Partial<MathJSConfig>) => MathJSConfig;
+  config: ((newConfig?: Partial<MathJSConfig>) => MathJSConfig) &
+    Omit<ReturnType<typeof mathFunctions.factory_mathjsCompat.configFactory>, never>;
 
   /** mathjs extension API — register functions visible to `evaluate`. */
   import: (
@@ -213,10 +216,14 @@ interface MathInstanceOverrides {
  */
 export type MathInstance = Omit<
   typeof mathFunctions,
-  keyof MathInstanceOverrides | keyof typeof instanceSymbols | CompatInternalName
+  | keyof MathInstanceOverrides
+  | keyof typeof instanceSymbols
+  | CompatInternalName
+  | CompatConstantName
 > &
-  MathInstanceOverrides &
-  typeof instanceSymbols;
+  Omit<MathInstanceOverrides, CompatConstantName> &
+  Omit<typeof instanceSymbols, CompatConstantName> &
+  Record<CompatConstantName, number | ConfiguredBigNumber>;
 
 /** The internal names of the functions namespace (#1216). */
 const INTERNAL_NAMES: ReadonlySet<string> = new Set(COMPAT_INTERNAL_NAMES);
@@ -367,11 +374,14 @@ export function create(
   let configGeneration = 0;
   let decidedGeneration = -1;
   let overlayNeeded = createdWithCustomConfig;
-  /** The only writer of `currentConfig`: every change bumps the generation. */
-  const setConfig = (patch: Partial<MathJSConfig>): void => {
-    Object.assign(currentConfig, patch);
-    configGeneration += 1;
-  };
+  const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
+    currentConfig as RuntimeConfig,
+    (event, current, previous, changes) => {
+      configGeneration += 1;
+      const emit = instance.emit as ((...args: unknown[]) => void) | undefined;
+      emit?.(event, current, previous, changes);
+    }
+  );
   const usesOverlay = (): boolean => {
     if (decidedGeneration !== configGeneration) {
       decidedGeneration = configGeneration;
@@ -381,18 +391,16 @@ export function create(
     return overlayNeeded;
   };
 
+  const originalSurface = surfaceOf(factories);
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
-    ...surfaceOf(factories),
+    ...originalSurface,
     create,
 
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
-    config: (newConfig?: Partial<MathJSConfig>) => {
-      if (newConfig) setConfig(newConfig);
-      return { ...currentConfig };
-    },
+    config: instanceConfig,
 
     // Type creation
     complex: shims.complex,
@@ -583,7 +591,12 @@ export function create(
   wireMathjsInstanceApi(
     instance as Record<string, unknown>,
     currentConfig,
-    flat.parser === functionsNamespace.parser
+    flat.parser === functionsNamespace.parser,
+    wireCompatConstants(
+      instance,
+      currentConfig,
+      (name) => originalSurface[name] === functionsNamespace[name]
+    )
   );
 
   return instance as unknown as MathInstance;

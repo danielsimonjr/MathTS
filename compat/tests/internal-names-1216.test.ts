@@ -181,7 +181,7 @@ describe('the MathInstance type omits the internal names (#1216)', () => {
     // @ts-expect-error factory_abs is internal
     void math.factory_abs;
     const radius: number = math.EARTH_RADIUS_KM;
-    const ln2: number = math.LN2;
+    const ln2 = math.LN2;
     type Hidden = Extract<keyof MathInstance, (typeof COMPAT_INTERNAL_NAMES)[number]>;
     const none: [Hidden] extends [never] ? true : false = true;
     expect([radius, ln2, none]).toEqual([mathFunctions.EARTH_RADIUS_KM, Math.LN2, true]);

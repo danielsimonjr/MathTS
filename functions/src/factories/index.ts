@@ -1,3 +1,4 @@
+import { configFactory } from '../core/function/config.js';
 import type { MathNode } from '@danielsimonjr/mathts-expression';
 import type { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 /**
@@ -2169,4 +2170,5 @@ export const factory_mathjsCompat = {
   checks,
   factory,
   attachEmitter,
+  configFactory,
 };
