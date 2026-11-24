@@ -5,6 +5,25 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('extracts selected fraction parts from fractions and nested collections', () => {
+    const actual = create({
+      numDependencies: compat.numDependencies,
+      denDependencies: compat.denDependencies,
+    });
+    const expected = oracle.create({
+      numDependencies: Reflect.get(oracle, 'numDependencies'),
+      denDependencies: Reflect.get(oracle, 'denDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object, name: 'num' | 'den', value: unknown) =>
+      Reflect.apply(Reflect.get(instance, name), instance, [value]);
+    for (const name of ['num', 'den'] as const) {
+      expect(run(actual, name, [[compat.fraction('-8/6'), compat.bignumber('0.125')]])).toEqual(
+        run(expected, name, [[oracle.fraction('-8/6'), oracle.bignumber('0.125')]])
+      );
+    }
+  });
+
   it('computes selected combinations with BigNumber inputs', () => {
     const actual = create({
       combinationsDependencies: compat.combinationsDependencies,

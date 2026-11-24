@@ -12,13 +12,20 @@ import packageMetadata from '../package.json' with { type: 'json' };
 
 const { checks, constructors, factory } = factory_mathjsCompat;
 
-function fractionPart(name: 'num' | 'den', key: 'numerator' | 'denominator') {
-  return mathTyped(name, {
-    Fraction: (value: Fraction) =>
-      typeof value[key] === 'bigint' ? value[key] : new Fraction(String(value))[key],
-    BigNumber: (value: BigNumber) => new Fraction(value)[key],
-    boolean: (value: boolean) => new Fraction(Number(value))[key],
-    'Array | Matrix': mathTyped.referToSelf(
+export function fractionPart(
+  name: 'num' | 'den',
+  key: 'numerator' | 'denominator',
+  typed: typeof mathTyped = mathTyped,
+  fraction: (value: BigNumber | number) => Fraction = (value) => new Fraction(value)
+) {
+  const read = (value: Fraction) =>
+    typeof value[key] === 'bigint' ? value[key] : new Fraction(String(value))[key];
+
+  return typed(name, {
+    Fraction: read,
+    BigNumber: (value: BigNumber) => read(fraction(value)),
+    boolean: (value: boolean) => read(fraction(Number(value))),
+    'Array | Matrix': typed.referToSelf(
       (self) => (values: Parameters<typeof deepMap>[0]) => deepMap(values, (value) => self(value))
     ),
   });
