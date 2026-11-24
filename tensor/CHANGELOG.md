@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-tensor
 
+## 0.5.3
+
+### Patch Changes
+
+- 7704089: Publish the source changes that were missing from the previous npm versions so that the runtime dependencies expose the contracts used by the functions bundle. Compute determinants, means, and covariances without premature overflow. Apply instance precision to BigNumber arithmetic, simplify exact radical identities before numerical approximation, and clarify errors for untracked autodiff operands.
+- Updated dependencies [7704089]
+  - @danielsimonjr/mathts-core@0.30.1
+  - @danielsimonjr/mathts-matrix@0.13.1
+
 ## 0.5.2
 
 ### Patch Changes
