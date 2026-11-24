@@ -114,6 +114,34 @@ describe('native compatibility dependency bundles', () => {
     ['sqrt', [16]],
     ['unaryMinus', [true]],
     ['subtractScalar', [3, 4]],
+    ['format', [1.23456, { precision: 4 }]],
+    ['print', ['answer=$x', { x: 42 }]],
+    ['pickRandom', [[42]]],
+    ['random', [[0]]],
+    ['map', [[1, 2], (value: number) => value * 2]],
+    ['filter', [[1, 2], (value: number) => value > 1]],
+    ['forEach', [[1, 2], () => undefined]],
+    [
+      'flatten',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
+    [
+      'size',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
+    ['squeeze', [[[1], [2]]]],
+    ['getMatrixDataType', [[[1, 2]]]],
+    ['typeOf', [[1, 2]]],
   ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
     const factoryName = 'create' + name[0].toUpperCase() + name.slice(1);

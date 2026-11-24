@@ -12965,7 +12965,22 @@
       "createExpm1": {
         "kind": "function"
       },
+      "createFilter": {
+        "kind": "function"
+      },
+      "createFlatten": {
+        "kind": "function"
+      },
+      "createForEach": {
+        "kind": "function"
+      },
+      "createFormat": {
+        "kind": "function"
+      },
       "createFractionClass": {
+        "kind": "function"
+      },
+      "createGetMatrixDataType": {
         "kind": "function"
       },
       "createIm": {
@@ -12998,6 +13013,9 @@
       "createLog2": {
         "kind": "function"
       },
+      "createMap": {
+        "kind": "function"
+      },
       "createMatrixClass": {
         "kind": "function"
       },
@@ -13005,6 +13023,15 @@
         "kind": "function"
       },
       "createNot": {
+        "kind": "function"
+      },
+      "createPickRandom": {
+        "kind": "function"
+      },
+      "createPrint": {
+        "kind": "function"
+      },
+      "createRandom": {
         "kind": "function"
       },
       "createRe": {
@@ -13022,10 +13049,16 @@
       "createSinh": {
         "kind": "function"
       },
+      "createSize": {
+        "kind": "function"
+      },
       "createSqrt": {
         "kind": "function"
       },
       "createSquare": {
+        "kind": "function"
+      },
+      "createSqueeze": {
         "kind": "function"
       },
       "createSubtractScalar": {
@@ -13035,6 +13068,9 @@
         "kind": "function"
       },
       "createTanh": {
+        "kind": "function"
+      },
+      "createTypeOf": {
         "kind": "function"
       },
       "createTyped": {
@@ -13187,6 +13223,9 @@
       "filter": {
         "kind": "function"
       },
+      "filterDependencies": {
+        "kind": "object"
+      },
       "fineStructure": {
         "kind": "number"
       },
@@ -13199,14 +13238,23 @@
       "flatten": {
         "kind": "function"
       },
+      "flattenDependencies": {
+        "kind": "object"
+      },
       "floor": {
         "kind": "function"
       },
       "forEach": {
         "kind": "function"
       },
+      "forEachDependencies": {
+        "kind": "object"
+      },
       "format": {
         "kind": "function"
+      },
+      "formatDependencies": {
+        "kind": "object"
       },
       "fraction": {
         "kind": "function"
@@ -13225,6 +13273,9 @@
       },
       "getMatrixDataType": {
         "kind": "function"
+      },
+      "getMatrixDataTypeDependencies": {
+        "kind": "object"
       },
       "gravitationConstant": {
         "kind": "object"
@@ -13541,6 +13592,9 @@
       "map": {
         "kind": "function"
       },
+      "mapDependencies": {
+        "kind": "object"
+      },
       "mapSlices": {
         "kind": "function"
       },
@@ -13661,6 +13715,9 @@
       "pickRandom": {
         "kind": "function"
       },
+      "pickRandomDependencies": {
+        "kind": "object"
+      },
       "pinv": {
         "kind": "function"
       },
@@ -13691,6 +13748,9 @@
       "print": {
         "kind": "function"
       },
+      "printDependencies": {
+        "kind": "object"
+      },
       "prod": {
         "kind": "function"
       },
@@ -13708,6 +13768,9 @@
       },
       "random": {
         "kind": "function"
+      },
+      "randomDependencies": {
+        "kind": "object"
       },
       "randomInt": {
         "kind": "function"
@@ -13844,6 +13907,9 @@
       "size": {
         "kind": "function"
       },
+      "sizeDependencies": {
+        "kind": "object"
+      },
       "slu": {
         "kind": "function"
       },
@@ -13885,6 +13951,9 @@
       },
       "squeeze": {
         "kind": "function"
+      },
+      "squeezeDependencies": {
+        "kind": "object"
       },
       "std": {
         "kind": "function"
@@ -13951,6 +14020,9 @@
       },
       "typeOf": {
         "kind": "function"
+      },
+      "typeOfDependencies": {
+        "kind": "object"
       },
       "typed": {
         "kind": "function"

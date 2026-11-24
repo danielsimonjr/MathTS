@@ -2281,6 +2281,18 @@ function compatFactoryExports(): {
   createSubtractScalar: typeof createSubtractScalar;
   createSqrt: typeof createSqrt;
   createUnaryMinus: typeof createMathjsUnaryMinus;
+  createFormat: typeof createFormat;
+  createPrint: typeof createPrint;
+  createPickRandom: typeof createPickRandom;
+  createRandom: typeof createRandom;
+  createMap: typeof createMap;
+  createFilter: typeof createFilter;
+  createForEach: typeof createForEach;
+  createFlatten: typeof createFlatten;
+  createSize: typeof createSize;
+  createSqueeze: typeof createSqueeze;
+  createGetMatrixDataType: typeof createGetMatrixDataType;
+  createTypeOf: typeof createTypeOf;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2336,6 +2348,18 @@ function compatFactoryExports(): {
     createSubtractScalar,
     createSqrt,
     createUnaryMinus: createMathjsUnaryMinus,
+    createFormat,
+    createPrint,
+    createPickRandom,
+    createRandom,
+    createMap,
+    createFilter,
+    createForEach,
+    createFlatten,
+    createSize,
+    createSqueeze,
+    createGetMatrixDataType,
+    createTypeOf,
     createTyped,
   };
 }

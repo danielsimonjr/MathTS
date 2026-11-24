@@ -64,6 +64,20 @@ const mathjsCreateSubtractScalar: CompatFactoryExports['createSubtractScalar'] =
 const mathjsCreateSqrt: CompatFactoryExports['createSqrt'] = factories.createSqrt;
 const mathjsCreateUnaryMinus: CompatFactoryExports['createUnaryMinus'] = factories.createUnaryMinus;
 
+const mathjsCreateFormat: CompatFactoryExports['createFormat'] = factories.createFormat;
+const mathjsCreatePrint: CompatFactoryExports['createPrint'] = factories.createPrint;
+const mathjsCreatePickRandom: CompatFactoryExports['createPickRandom'] = factories.createPickRandom;
+const mathjsCreateRandom: CompatFactoryExports['createRandom'] = factories.createRandom;
+const mathjsCreateMap: CompatFactoryExports['createMap'] = factories.createMap;
+const mathjsCreateFilter: CompatFactoryExports['createFilter'] = factories.createFilter;
+const mathjsCreateForEach: CompatFactoryExports['createForEach'] = factories.createForEach;
+const mathjsCreateFlatten: CompatFactoryExports['createFlatten'] = factories.createFlatten;
+const mathjsCreateSize: CompatFactoryExports['createSize'] = factories.createSize;
+const mathjsCreateSqueeze: CompatFactoryExports['createSqueeze'] = factories.createSqueeze;
+const mathjsCreateGetMatrixDataType: CompatFactoryExports['createGetMatrixDataType'] =
+  factories.createGetMatrixDataType;
+const mathjsCreateTypeOf: CompatFactoryExports['createTypeOf'] = factories.createTypeOf;
+
 /** Factory for the MathJS-compatible typed dispatcher. */
 const mathjsCreateTyped: CompatFactoryExports['createTyped'] = factories.createTyped;
 
@@ -339,6 +353,52 @@ const unaryMinusDependencies: UnaryBundle<'createUnaryMinus'> = {
   createUnaryMinus: mathjsCreateUnaryMinus,
 };
 
+const formatDependencies: UnaryBundle<'createFormat'> = {
+  typedDependencies,
+  createFormat: mathjsCreateFormat,
+};
+const printDependencies: UnaryBundle<'createPrint'> = {
+  typedDependencies,
+  createPrint: mathjsCreatePrint,
+};
+const pickRandomDependencies: UnaryBundle<'createPickRandom'> = {
+  typedDependencies,
+  createPickRandom: mathjsCreatePickRandom,
+};
+const randomDependencies: UnaryBundle<'createRandom'> = {
+  typedDependencies,
+  createRandom: mathjsCreateRandom,
+};
+const mapDependencies: UnaryBundle<'createMap'> = { typedDependencies, createMap: mathjsCreateMap };
+const filterDependencies: UnaryBundle<'createFilter'> = {
+  typedDependencies,
+  createFilter: mathjsCreateFilter,
+};
+const forEachDependencies: UnaryBundle<'createForEach'> = {
+  typedDependencies,
+  createForEach: mathjsCreateForEach,
+};
+const flattenDependencies: UnaryBundle<'createFlatten'> = {
+  typedDependencies,
+  createFlatten: mathjsCreateFlatten,
+};
+const sizeDependencies: UnaryBundle<'createSize'> = {
+  typedDependencies,
+  createSize: mathjsCreateSize,
+};
+const squeezeDependencies: UnaryBundle<'createSqueeze'> = {
+  typedDependencies,
+  createSqueeze: mathjsCreateSqueeze,
+};
+const getMatrixDataTypeDependencies: UnaryBundle<'createGetMatrixDataType'> = {
+  typedDependencies,
+  createGetMatrixDataType: mathjsCreateGetMatrixDataType,
+};
+const typeOfDependencies: UnaryBundle<'createTypeOf'> = {
+  typedDependencies,
+  createTypeOf: mathjsCreateTypeOf,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -400,6 +460,18 @@ export {
   mathjsCreateRe as createRe,
   mathjsCreateSquare as createSquare,
   mathjsCreateSubtractScalar as createSubtractScalar,
+  mathjsCreateFormat as createFormat,
+  mathjsCreatePrint as createPrint,
+  mathjsCreatePickRandom as createPickRandom,
+  mathjsCreateRandom as createRandom,
+  mathjsCreateMap as createMap,
+  mathjsCreateFilter as createFilter,
+  mathjsCreateForEach as createForEach,
+  mathjsCreateFlatten as createFlatten,
+  mathjsCreateSize as createSize,
+  mathjsCreateSqueeze as createSqueeze,
+  mathjsCreateGetMatrixDataType as createGetMatrixDataType,
+  mathjsCreateTypeOf as createTypeOf,
   mathjsCreateTyped as createTyped,
   acosDependencies,
   acoshDependencies,
@@ -455,5 +527,17 @@ export {
   mathjsCreateUnaryMinus as createUnaryMinus,
   sqrtDependencies,
   unaryMinusDependencies,
+  formatDependencies,
+  printDependencies,
+  pickRandomDependencies,
+  randomDependencies,
+  mapDependencies,
+  filterDependencies,
+  forEachDependencies,
+  flattenDependencies,
+  sizeDependencies,
+  squeezeDependencies,
+  getMatrixDataTypeDependencies,
+  typeOfDependencies,
   typedDependencies,
 };
