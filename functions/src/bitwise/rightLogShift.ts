@@ -168,3 +168,34 @@ export const createRightLogShift = /* #__PURE__ */ factory(
     return rejectBigNumberShift(shift);
   }
 );
+
+export const createSelectedRightLogShift = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  (deps: RightLogShiftDependencies) => {
+    const { typed, equalScalar, matrix, zeros } = deps;
+    const shift = createRightLogShift({ ...deps }) as unknown as {
+      signatures: Record<string, (...args: never[]) => unknown>;
+    };
+    const checkZero = (value: unknown) => {
+      if (!equalScalar(value, 0)) {
+        throw new TypeError('rightLogShift: BigNumber operands are not supported');
+      }
+    };
+    const copy = (value: Matrix | unknown[], count: unknown) => {
+      checkZero(count);
+      if (Array.isArray(value)) return matrix(value).clone().valueOf();
+      return value.clone();
+    };
+    const clear = (value: unknown, counts: Matrix | unknown[]) => {
+      checkZero(value);
+      if (Array.isArray(counts)) return zeros(matrix(counts).size(), 'dense').valueOf();
+      return zeros(counts.size(), counts.storage());
+    };
+    return typed(name, {
+      ...shift.signatures,
+      'Array | DenseMatrix | SparseMatrix, BigNumber': copy,
+      'BigNumber, Array | DenseMatrix | SparseMatrix': clear,
+    });
+  }
+);

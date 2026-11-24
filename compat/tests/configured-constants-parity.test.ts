@@ -69,6 +69,29 @@ describe('mathjs 15.2 instance constants and configuration', () => {
     }
   });
 
+  it('uses BigNumber magnitudes for all configured physical constants', () => {
+    const math = create(all);
+    const oracle = createOracle(oracleAll);
+    const constants = oracle as unknown as Record<string, typeof oracle.speedOfLight>;
+    const compiled = math.compile('planckConstant');
+
+    for (const precision of [10, 40]) {
+      math.config({ number: 'BigNumber', precision });
+      oracle.config({ number: 'BigNumber', precision });
+      for (const [name, , units] of MATHJS_UNIT_CONSTANTS) {
+        const expected = constants[name].toNumeric(units);
+        const value = math[name].toNumeric(units);
+        expect(value).toBeInstanceOf(BigNumber);
+        expect(Number(value) / Number(expected)).toBeCloseTo(1, 8);
+      }
+      const evaluated = compiled.evaluate() as typeof math.planckConstant;
+      expect(evaluated.toNumeric('J s')).toBeInstanceOf(BigNumber);
+    }
+
+    math.config({ number: 'Fraction' });
+    expect(typeof math.planckConstant.toNumeric('J s')).toBe('number');
+  });
+
   it('exposes live config properties and emits the same changes as mathjs', () => {
     const math = create(all);
     const oracle = createOracle(oracleAll);

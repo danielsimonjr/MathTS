@@ -36,6 +36,7 @@ function cloneUnit(name: string, value: number, units: string): InstanceType<typ
   let template = unitTemplates.get(name);
   if (template === undefined) {
     template = new Unit(value, units);
+    template.fixPrefix = true;
     unitTemplates.set(name, template);
   }
   return template.clone() as InstanceType<typeof Unit>;
@@ -91,10 +92,26 @@ export function compatConstantReaders(
       config.number === 'BigNumber' ? BigNumber.fromNumber(number) : number
     );
   }
-  for (const [name, value, units] of MATHJS_UNIT_CONSTANTS) {
+  for (const [name, value, units, decimalValue] of MATHJS_UNIT_CONSTANTS) {
     if (!isDefault(name)) continue;
     let cached: InstanceType<typeof Unit> | undefined;
-    bind(name, () => (cached ??= cloneUnit(name, value, units)));
+    let precise: InstanceType<typeof Unit> | undefined;
+    let precision: number | undefined;
+    bind(name, () => {
+      if (config.number !== 'BigNumber') return (cached ??= cloneUnit(name, value, units));
+      if (precise === undefined || precision !== config.precision) {
+        precise = runWithConfig(config, () => {
+          const magnitude = BigNumber.parse(
+            decimalValue ?? String(value)
+          ) as unknown as ConstructorParameters<typeof Unit>[0];
+          const unit = new Unit(magnitude, units);
+          unit.fixPrefix = true;
+          return unit;
+        });
+        precision = config.precision;
+      }
+      return precise;
+    });
   }
   bind('Infinity', () =>
     config.number === 'BigNumber' ? BigNumber.fromNumber(Infinity) : Infinity

@@ -73,7 +73,7 @@ import { bigintDocs } from './construction/bigint.js';
 import { booleanDocs } from './construction/boolean.js';
 import { complexDocs } from './construction/complex.js';
 import { createUnitDocs } from './construction/createUnit.js';
-import { fractionDocs } from './construction/fraction.js';
+import { denDocs, fractionDocs, numDocs } from './construction/fraction.js';
 import { indexDocs } from './construction/index.js';
 import { matrixDocs } from './construction/matrix.js';
 import { numberDocs } from './construction/number.js';
@@ -407,6 +407,8 @@ export const embeddedDocs = {
   complex: complexDocs,
   createUnit: createUnitDocs,
   fraction: fractionDocs,
+  num: numDocs,
+  den: denDocs,
   index: indexDocs,
   matrix: matrixDocs,
   number: numberDocs,

@@ -57,11 +57,15 @@ export const createMultiplyScalar = /* #__PURE__ */ factory(
         return x.mul(y);
       },
 
-      'number | Fraction | Complex, Unit': (x: unknown, y: HasMultiplyMethod): unknown =>
-        y.multiply(x),
+      'number | Fraction | BigNumber | Complex, Unit': (
+        x: unknown,
+        y: HasMultiplyMethod
+      ): unknown => y.multiply(x),
 
-      'Unit, number | Fraction | Complex | Unit': (x: HasMultiplyMethod, y: unknown): unknown =>
-        x.multiply(y),
+      'Unit, number | Fraction | BigNumber | Complex | Unit': (
+        x: HasMultiplyMethod,
+        y: unknown
+      ): unknown => x.multiply(y),
     });
   }
 );

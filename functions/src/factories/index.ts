@@ -22,6 +22,7 @@ import {
   type TypedBuilder,
 } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
+import { deepForEach } from '../utils/collection.js';
 import { format as formatNumber } from '../utils/number.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
@@ -563,7 +564,7 @@ import { createUsolveAll } from '../algebra/solver/usolveAll.js';
 import { createCbrt } from '../arithmetic/cbrt.js';
 import { createNthRoots } from '../arithmetic/nthRoots.js';
 import { createRound } from '../arithmetic/round.js';
-import { createXgcd } from '../arithmetic/xgcd.js';
+import { createXgcd, createSelectedXgcd } from '../arithmetic/xgcd.js';
 import { createLog } from '../arithmetic/log.js';
 
 // combinatorics
@@ -718,7 +719,7 @@ import { createBitOr } from '../bitwise/bitOr.js';
 import { createBitXor } from '../bitwise/bitXor.js';
 import { createLeftShift } from '../bitwise/leftShift.js';
 import { createRightArithShift } from '../bitwise/rightArithShift.js';
-import { createRightLogShift } from '../bitwise/rightLogShift.js';
+import { createRightLogShift, createSelectedRightLogShift } from '../bitwise/rightLogShift.js';
 
 // logical
 import { createOr } from '../logical/or.js';
@@ -866,7 +867,7 @@ factoryScope.to = to;
 // arithmetic
 import { createDotPow } from '../arithmetic/dotPow.js';
 import { createFix } from '../arithmetic/fix.js';
-import { createInvmod } from '../arithmetic/invmod.js';
+import { createInvmod, createSelectedInvmod } from '../arithmetic/invmod.js';
 
 // bitwise/logical
 import { createAnd } from '../logical/and.js';
@@ -881,7 +882,7 @@ import { createQr } from '../algebra/decomposition/qr.js';
 import { createRange } from '../matrix/range.js';
 
 // probability
-import { createGamma } from '../probability/gamma.js';
+import { createGamma, createSelectedGamma } from '../probability/gamma.js';
 
 // relational
 import { createCompareNatural } from '../relational/compareNatural.js';
@@ -972,7 +973,7 @@ factoryScope.hypot = factory_hypot;
 // Tier 7: factories unlocked by tier 6
 // ---------------------------------------------------------------------------
 
-import { createFactorial } from '../probability/factorial.js';
+import { createFactorial, createSelectedFactorial } from '../probability/factorial.js';
 import { createSetSize } from '../set/setSize.js';
 import { createSort } from '../matrix/sort.js';
 
@@ -1178,10 +1179,13 @@ import { createNodeOperations } from '../arithmetic/utils/nodeOperations.js';
 import { createLeafCount } from '../algebra/leafCount.js';
 import { createResolve } from '../algebra/resolve.js';
 import { createSubstitute } from '../algebra/substitute.js';
-import { createSimplifyConstant } from '../algebra/simplifyConstant.js';
+import {
+  createSimplifyConstant,
+  createSelectedSimplifyConstant,
+} from '../algebra/simplifyConstant.js';
 import { createUtil as createSimplifyUtil } from '../algebra/simplify/util.js';
 import { createSplitUnit } from '../type/unit/function/splitUnit.js';
-import { createFft } from '../matrix/fft.js';
+import { createFft, createSelectedFft } from '../matrix/fft.js';
 import { createChainClass } from '../type/chain/Chain.js';
 
 export const nodeOperations = createNodeOperations(
@@ -1223,7 +1227,7 @@ factoryScope.Chain = Chain;
 
 import { createMathjsSubtract, createSubtract } from '../arithmetic/subtract.js';
 import { createDivide, createSelectedDivide } from '../arithmetic/divide.js';
-import { createIfft } from '../matrix/ifft.js';
+import { createIfft, createSelectedIfft } from '../matrix/ifft.js';
 import { createIndexClass } from '../type/matrix/MatrixIndex.js';
 import { createChain } from '../type/chain/function/chain.js';
 import { createCreateUnit } from '../type/unit/function/createUnit.js';
@@ -1239,7 +1243,7 @@ import {
   mathTyped as coreTyped,
   createMathTSTyped,
 } from '@danielsimonjr/mathts-core';
-import { createUnitClass } from '@danielsimonjr/mathts-core/internal';
+import { createUnitClass, notSquareError } from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
 import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMatrix.js';
 
@@ -1497,8 +1501,8 @@ factoryScope.index = indexFn;
 // ---------------------------------------------------------------------------
 
 import { createEigs } from '../matrix/eigs.js';
-import { createLusolve } from '../algebra/solver/lusolve.js';
-import { createCorr } from '../statistics/corr.js';
+import { createLusolve, createSelectedLusolve } from '../algebra/solver/lusolve.js';
+import { createCorr, createSelectedCorr } from '../statistics/corr.js';
 import { createMad } from '../statistics/mad.js';
 import { createStd } from '../statistics/std.js';
 import { createSetSymDifference } from '../set/setSymDifference.js';
@@ -1963,6 +1967,19 @@ const createSelectedCombinationsWithRep = /* #__PURE__ */ factory(
       'BigNumber, BigNumber': typedCombinationsWithRep.signatures['BigNumber,BigNumber'],
     })
 );
+
+const createSelectedParse: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createParse>
+> = /* #__PURE__ */ factory('parse', createParse.dependencies, (deps: Record<string, unknown>) => {
+  const parse = createParse(deps);
+  const typed = deps.typed as typeof coreTyped;
+  typed.addConversion(
+    { from: 'string', to: 'Node', convert: (value) => parse(value as string) },
+    { override: true }
+  );
+  return parse;
+});
 
 const createSelectedMean = /* #__PURE__ */ factory(
   'mean',
@@ -2683,6 +2700,331 @@ const createSelectedRangeTransform: FactoryFunction<
   ReturnType<typeof createRangeTransform>
 > = /* #__PURE__ */ selectedTransform(createRangeTransform, createRange);
 
+const createSelectedSolveODE: typeof createSolveODE = /* #__PURE__ */ factory(
+  'solveODE',
+  [...createSolveODE.dependencies, 'map'],
+  (deps: Record<string, unknown>) => createSolveODE(deps)
+);
+
+type CountingOperation = (...values: unknown[]) => unknown;
+
+const createSelectedPermutations = /* #__PURE__ */ factory(
+  'permutations',
+  ['typed', 'factorial'],
+  ({ typed, factorial }: { typed: TypedBuilder; factorial: CountingOperation }) =>
+    typed('permutations', {
+      'number | BigNumber': factorial,
+      'number, number': typedPermutations.signatures['number,number'],
+      'BigNumber, BigNumber': typedPermutations.signatures['BigNumber,BigNumber'],
+    })
+);
+
+const createSelectedCatalan = /* #__PURE__ */ factory(
+  'catalan',
+  [
+    'typed',
+    'addScalar',
+    'combinations',
+    'divideScalar',
+    'isInteger',
+    'isNegative',
+    'multiplyScalar',
+  ],
+  ({
+    typed,
+    addScalar,
+    combinations,
+    divideScalar,
+    isInteger,
+    isNegative,
+    multiplyScalar,
+  }: {
+    typed: TypedBuilder;
+    addScalar: CountingOperation;
+    combinations: CountingOperation;
+    divideScalar: CountingOperation;
+    isInteger: CountingOperation;
+    isNegative: CountingOperation;
+    multiplyScalar: CountingOperation;
+  }) =>
+    typed('catalan', {
+      'number | BigNumber': (value: unknown) => {
+        if (!isInteger(value) || isNegative(value)) {
+          throw new TypeError('Non-negative integer value expected in function catalan');
+        }
+        return divideScalar(combinations(multiplyScalar(value, 2), value), addScalar(value, 1));
+      },
+    })
+);
+
+const createSelectedMultinomial = /* #__PURE__ */ factory(
+  'multinomial',
+  ['typed', 'add', 'divide', 'factorial', 'isInteger', 'isPositive', 'multiply'],
+  ({
+    typed,
+    add,
+    divide,
+    factorial,
+    isInteger,
+    isPositive,
+    multiply,
+  }: {
+    typed: TypedBuilder;
+    add: CountingOperation;
+    divide: CountingOperation;
+    factorial: CountingOperation;
+    isInteger: CountingOperation;
+    isPositive: CountingOperation;
+    multiply: CountingOperation;
+  }) =>
+    typed('multinomial', {
+      'Array | Matrix': (values: Parameters<typeof deepForEach>[0]) => {
+        let total: unknown = 0;
+        let divisor: unknown = 1;
+        deepForEach(values, (value) => {
+          if (!isInteger(value) || !isPositive(value)) {
+            throw new TypeError('Positive integer value expected in function multinomial');
+          }
+          total = add(total, value);
+          divisor = multiply(divisor, factorial(value));
+        });
+        return divide(factorial(total), divisor);
+      },
+    })
+);
+
+const createSelectedSqrtm: typeof createSqrtm = /* #__PURE__ */ factory(
+  'sqrtm',
+  createSqrtm.dependencies.filter((dependency) => dependency !== 'matrix'),
+  (deps: Record<string, unknown>) => createSqrtm({ ...deps, matrix: factoryScope.matrix })
+);
+
+function selectedStatisticsDispatcher(
+  typed: typeof coreTyped,
+  name: string,
+  overrides: Record<string, unknown> = {}
+): typeof coreTyped {
+  return new Proxy(typed, {
+    apply(target, receiver, args) {
+      if (args[0] !== name) return Reflect.apply(target, receiver, args);
+      const signatures = Object.fromEntries(
+        Object.entries(args[1] as Record<string, unknown>).filter(
+          ([signature]) => !/(?:Float32Array|Float64Array|Object|string)/.test(signature)
+        )
+      );
+      return Reflect.apply(target, receiver, [
+        name,
+        { ...signatures, ...overrides },
+        ...args.slice(2),
+      ]);
+    },
+  });
+}
+
+function statisticsMapSlices(deps: Record<string, unknown>) {
+  return createMathjsMapSlices({
+    ...deps,
+    isInteger: (value: unknown) => Number.isInteger(Number(value)),
+  });
+}
+
+function unsupportedMedianDimension(): never {
+  throw new Error('median(A, dim) is not yet supported');
+}
+
+const createSelectedMedian: typeof createMedian = /* #__PURE__ */ factory(
+  'median',
+  createMedian.dependencies.filter((dependency) => dependency !== 'mapSlices'),
+  (deps: Record<string, unknown>) =>
+    createMedian({
+      ...deps,
+      mapSlices: unsupportedMedianDimension,
+      typed: selectedStatisticsDispatcher(deps.typed as typeof coreTyped, 'median', {
+        'Array | Matrix, number | BigNumber': unsupportedMedianDimension,
+      }),
+    })
+);
+
+const createSelectedMad: typeof createMad = /* #__PURE__ */ factory(
+  'mad',
+  createMad.dependencies,
+  (deps: Record<string, unknown>) =>
+    createMad({
+      ...deps,
+      typed: selectedStatisticsDispatcher(deps.typed as typeof coreTyped, 'mad'),
+    })
+);
+
+const createSelectedVariance: typeof createVariance = /* #__PURE__ */ factory(
+  'variance',
+  createVariance.dependencies.filter(
+    (dependency) => !['conj', 're', 'parseNumberWithConfig'].includes(dependency)
+  ),
+  (deps: Record<string, unknown>) => {
+    const identity = (value: unknown) => value;
+    return createVariance({
+      ...deps,
+      conj: identity,
+      re: identity,
+      parseNumberWithConfig: identity,
+    });
+  }
+);
+
+const createSelectedStd: typeof createStd = /* #__PURE__ */ factory(
+  'std',
+  createStd.dependencies.filter((dependency) => dependency !== 'mapSlices'),
+  (deps: Record<string, unknown>) => createStd({ ...deps, mapSlices: statisticsMapSlices(deps) })
+);
+
+const createSelectedQuantileSeq: typeof createQuantileSeq = /* #__PURE__ */ factory(
+  'quantileSeq',
+  createQuantileSeq.dependencies,
+  (deps: Record<string, unknown>) =>
+    createQuantileSeq({
+      ...deps,
+      typed: selectedStatisticsDispatcher(deps.typed as typeof coreTyped, 'quantileSeq'),
+    })
+);
+
+const createSelectedVarianceTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createVarianceTransform>
+> = /* #__PURE__ */ selectedTransform(createVarianceTransform, createSelectedVariance);
+
+const createSelectedStdTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createStdTransform>
+> = /* #__PURE__ */ selectedTransform(createStdTransform, createSelectedStd);
+
+const createSelectedQuantileSeqTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createQuantileSeqTransform>
+> = /* #__PURE__ */ factory(
+  'quantileSeq',
+  createSelectedQuantileSeq.dependencies.map((dependency) =>
+    dependency === '?bignumber' ? 'bignumber' : dependency
+  ),
+  (deps: Record<string, unknown>) =>
+    createQuantileSeqTransform({
+      ...deps,
+      quantileSeq: createSelectedQuantileSeq(deps),
+    }),
+  { isTransformFunction: true }
+);
+
+const createSelectedEigs: typeof createEigs = /* #__PURE__ */ factory(
+  'eigs',
+  [...createEigs.dependencies, 'equal', 'larger', 'smaller', 'usolveAll'],
+  (deps: Record<string, unknown>) => createEigs(deps)
+);
+
+const createSelectedSchur: typeof createSchur = /* #__PURE__ */ factory(
+  'schur',
+  [...createSchur.dependencies, 'identity', 'multiply', 'norm', 'qr', 'subtract'],
+  (deps: Record<string, unknown>) => createSchur(deps)
+);
+
+const createSelectedZeta: typeof createZeta = /* #__PURE__ */ factory(
+  'zeta',
+  [
+    ...createZeta.dependencies.filter((dependency) => dependency !== 'lgamma'),
+    'config',
+    'equal',
+    'isBounded',
+    'isNegative',
+  ],
+  (deps: Record<string, unknown>) =>
+    createZeta({
+      ...deps,
+      lgamma: createLgamma({ ...deps, Complex: deps.Complex ?? factoryScope.Complex }),
+    })
+);
+
+type ExpmMatrix = {
+  size(): number[];
+  get(index: [number, number]): unknown;
+  create(data: unknown[][]): unknown;
+};
+
+const createSelectedExpm = /* #__PURE__ */ factory(
+  'expm',
+  ['typed', 'abs', 'add', 'identity', 'inv', 'multiply'],
+  ({
+    typed,
+    abs,
+    add,
+    identity,
+    inv,
+    multiply,
+  }: {
+    typed: TypedBuilder;
+    abs: (value: unknown) => unknown;
+    add: (a: unknown, b: unknown) => unknown;
+    identity: (size: number) => unknown;
+    inv: (value: unknown) => unknown;
+    multiply: (a: unknown, b: unknown) => unknown;
+  }) =>
+    typed('expm', {
+      Matrix: (input: ExpmMatrix) => {
+        const size = input.size();
+        const n = size[0];
+        if (size.length !== 2 || n !== size[1]) {
+          throw notSquareError(`Matrix must be square (size: [${size.join(', ')}])`);
+        }
+        let norm = 0;
+        for (let row = 0; row < n; row += 1) {
+          let rowTotal = 0;
+          for (let col = 0; col < n; col += 1) {
+            rowTotal += Number(abs(input.get([row, col])));
+          }
+          norm = Math.max(norm, rowTotal);
+        }
+        if (!Number.isFinite(norm)) throw new RangeError('Expected a finite matrix norm');
+
+        const squarings = norm > 1 ? Math.ceil(Math.log2(norm)) : 0;
+        const scaled = multiply(input, 2 ** -squarings);
+        const order = 13;
+        let numerator = identity(n);
+        let denominator = numerator;
+        let power = scaled;
+        let coefficient = 1;
+        for (let degree = 1; degree <= order; degree += 1) {
+          if (degree > 1) power = multiply(power, scaled);
+          coefficient *= (order - degree + 1) / (degree * (2 * order - degree + 1));
+          const term = multiply(coefficient, power);
+          numerator = add(numerator, term);
+          denominator = add(denominator, degree % 2 === 0 ? term : multiply(-1, term));
+        }
+        let result = multiply(inv(denominator), numerator);
+        for (let step = 0; step < squarings; step += 1) result = multiply(result, result);
+        if (checks.isSparseMatrix(input))
+          return input.create(Object(result).valueOf() as unknown[][]);
+        return result;
+      },
+    })
+);
+
+function selectedMatrixFromVectors(
+  base: FactoryFunction<Record<string, unknown>, (...vectors: unknown[]) => unknown>
+): FactoryFunction<Record<string, unknown>, (...vectors: unknown[]) => unknown> {
+  return factory(base.fn, base.dependencies, (deps: Record<string, unknown>) => {
+    const typed = deps.typed as TypedBuilder;
+    const matrix = deps.matrix as (data: unknown) => unknown;
+    const construct = base(deps);
+    return typed(base.fn, {
+      '...Array': (vectors: unknown[][]) => construct(...vectors),
+      '...Matrix': (vectors: { toArray(): unknown[] }[]) =>
+        matrix(construct(...vectors.map((vector) => vector.toArray()))),
+    });
+  });
+}
+
+const createSelectedMatrixFromRows =
+  /* #__PURE__ */ selectedMatrixFromVectors(createMatrixFromRows);
+const createSelectedMatrixFromColumns =
+  /* #__PURE__ */ selectedMatrixFromVectors(createMatrixFromColumns);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -2797,8 +3139,8 @@ function compatFactoryExports(): {
   createSubtract: typeof createMathjsSubtract;
   createDiag: typeof createDiag;
   createIdentity: typeof createIdentity;
-  createMatrixFromColumns: typeof createMatrixFromColumns;
-  createMatrixFromRows: typeof createMatrixFromRows;
+  createMatrixFromColumns: typeof createSelectedMatrixFromColumns;
+  createMatrixFromRows: typeof createSelectedMatrixFromRows;
   createOnes: typeof createOnes;
   createReshape: typeof createReshape;
   createResize: typeof createMathjsResize;
@@ -2819,7 +3161,7 @@ function compatFactoryExports(): {
   createPartitionSelect: typeof createPartitionSelect;
   createRandomInt: typeof createRandomInt;
   createRightArithShift: typeof createRightArithShift;
-  createRightLogShift: typeof createRightLogShift;
+  createRightLogShift: typeof createSelectedRightLogShift;
   createRound: typeof createRound;
   createSubset: typeof createSubset;
   createTrace: typeof createTrace;
@@ -2908,7 +3250,7 @@ function compatFactoryExports(): {
   createSymbolNode: typeof createSymbolNode;
   createFunctionNode: typeof createFunctionNode;
   createAssignmentNode: typeof createAssignmentNode;
-  createParse: typeof createParse;
+  createParse: typeof createSelectedParse;
   createCompile: typeof createSelectedCompile;
   createEvaluate: typeof createSelectedEvaluate;
   createAtomicMass: typeof mathjsCreateAtomicMass;
@@ -2977,6 +3319,44 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createExpm: typeof createSelectedExpm;
+  createZeta: typeof createSelectedZeta;
+  createLyap: typeof createLyap;
+  createSylvester: typeof createSylvester;
+  createSchur: typeof createSelectedSchur;
+  createRotate: typeof createRotate;
+  createRotationMatrix: typeof createRotationMatrix;
+  createNorm: typeof createNorm;
+  createEigs: typeof createSelectedEigs;
+  createInvmod: typeof createSelectedInvmod;
+  createXgcd: typeof createSelectedXgcd;
+  createCorr: typeof createSelectedCorr;
+  createStdTransform: typeof createSelectedStdTransform;
+  createVarianceTransform: typeof createSelectedVarianceTransform;
+  createQuantileSeqTransform: typeof createSelectedQuantileSeqTransform;
+  createQuantileSeq: typeof createSelectedQuantileSeq;
+  createStd: typeof createSelectedStd;
+  createVariance: typeof createSelectedVariance;
+  createMad: typeof createSelectedMad;
+  createMedian: typeof createSelectedMedian;
+  createSqrtm: typeof createSelectedSqrtm;
+  createIfft: typeof createSelectedIfft;
+  createFft: typeof createSelectedFft;
+  createBellNumbers: typeof createBellNumbers;
+  createStirlingS2: typeof createStirlingS2;
+  createMultinomial: typeof createSelectedMultinomial;
+  createCatalan: typeof createSelectedCatalan;
+  createPermutations: typeof createSelectedPermutations;
+  createSolveODE: typeof createSelectedSolveODE;
+  createLusolve: typeof createSelectedLusolve;
+  createFactorial: typeof createSelectedFactorial;
+  createGamma: typeof createSelectedGamma;
+  createSymbolicEqual: typeof createSymbolicEqual;
+  createRationalize: typeof createRationalize;
+  createDerivative: typeof createDerivative;
+  createSimplify: typeof createSimplify;
+  createSimplifyConstant: typeof createSelectedSimplifyConstant;
+  createSimplifyCore: typeof createSimplifyCore;
   createString: typeof createSelectedString;
   createBoolean: typeof createSelectedBoolean;
   createBigint: typeof createSelectedBigint;
@@ -3101,8 +3481,8 @@ function compatFactoryExports(): {
     createSubtract: createMathjsSubtract,
     createDiag,
     createIdentity,
-    createMatrixFromColumns,
-    createMatrixFromRows,
+    createMatrixFromColumns: createSelectedMatrixFromColumns,
+    createMatrixFromRows: createSelectedMatrixFromRows,
     createOnes,
     createReshape,
     createResize: createMathjsResize,
@@ -3123,7 +3503,7 @@ function compatFactoryExports(): {
     createPartitionSelect,
     createRandomInt,
     createRightArithShift,
-    createRightLogShift,
+    createRightLogShift: createSelectedRightLogShift,
     createRound,
     createSubset,
     createTrace,
@@ -3212,7 +3592,7 @@ function compatFactoryExports(): {
     createSymbolNode,
     createFunctionNode,
     createAssignmentNode,
-    createParse,
+    createParse: createSelectedParse,
     createCompile: createSelectedCompile,
     createEvaluate: createSelectedEvaluate,
     createAtomicMass: mathjsCreateAtomicMass,
@@ -3281,6 +3661,44 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createExpm: createSelectedExpm,
+    createZeta: createSelectedZeta,
+    createLyap,
+    createSylvester,
+    createSchur: createSelectedSchur,
+    createRotate,
+    createRotationMatrix,
+    createNorm,
+    createEigs: createSelectedEigs,
+    createInvmod: createSelectedInvmod,
+    createXgcd: createSelectedXgcd,
+    createCorr: createSelectedCorr,
+    createStdTransform: createSelectedStdTransform,
+    createVarianceTransform: createSelectedVarianceTransform,
+    createQuantileSeqTransform: createSelectedQuantileSeqTransform,
+    createQuantileSeq: createSelectedQuantileSeq,
+    createStd: createSelectedStd,
+    createVariance: createSelectedVariance,
+    createMad: createSelectedMad,
+    createMedian: createSelectedMedian,
+    createSqrtm: createSelectedSqrtm,
+    createIfft: createSelectedIfft,
+    createFft: createSelectedFft,
+    createBellNumbers,
+    createStirlingS2,
+    createMultinomial: createSelectedMultinomial,
+    createCatalan: createSelectedCatalan,
+    createPermutations: createSelectedPermutations,
+    createSolveODE: createSelectedSolveODE,
+    createLusolve: createSelectedLusolve,
+    createFactorial: createSelectedFactorial,
+    createGamma: createSelectedGamma,
+    createSymbolicEqual,
+    createRationalize,
+    createDerivative,
+    createSimplify,
+    createSimplifyConstant: createSelectedSimplifyConstant,
+    createSimplifyCore,
     createString: createSelectedString,
     createBoolean: createSelectedBoolean,
     createBigint: createSelectedBigint,

@@ -14,6 +14,22 @@ describe('named MathJS symbols', () => {
     expect(compat.isCollection(math.matrix([1, 2]))).toBe(true);
   });
 
+  it('exports the MathJS documentation catalog and fraction help', () => {
+    const upstreamDocs = Reflect.get(oracle, 'docs') as typeof compat.docs;
+    expect(Object.keys(oracle).filter((name) => !Object.hasOwn(compat, name))).toEqual([]);
+    expect(Object.keys(compat.docs).sort()).toEqual(Object.keys(upstreamDocs).sort());
+    const math = compat.create(compat.all);
+    for (const name of ['num', 'den'] as const) {
+      expect(compat.docs[name].name).toBe(upstreamDocs[name].name);
+      expect(compat.help(name).toJSON().name).toBe(name);
+      const call = `${name}(fraction(-2, 3))`;
+      expect(math.evaluate(call)).toBe(oracle.evaluate(call));
+    }
+    expect(Object.hasOwn(compat.create(compat.all), 'docs')).toBe(
+      Object.hasOwn(oracle.create(oracle.all), 'docs')
+    );
+  });
+
   it('can construct a dependency factory from a named import', () => {
     const fixture = compat.factory('answer', [], () => 42);
     const math = compat.create({ fixture }) as unknown as { answer: number };

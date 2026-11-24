@@ -17,6 +17,7 @@
  * @packageDocumentation
  */
 
+import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
@@ -549,6 +550,7 @@ export function create(
   );
   const expressionConstants: Record<string, () => unknown> = {};
   if (useCompatSetUnion) expressionConstants.setUnion = () => instance.setUnion;
+  if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
@@ -776,6 +778,11 @@ export {
 /** Union of two multisets in MathJS result order. */
 const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
 export { namedSetUnion as setUnion };
+
+/** Embedded documentation for names in the MathJS compatibility surface. */
+export const docs = /* #__PURE__ */ Object.fromEntries(
+  Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
+);
 
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';

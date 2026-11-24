@@ -1,5 +1,33 @@
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
-import { BigNumberDependencies, ComplexDependencies } from './native-factory-exports.js';
+import {
+  BigNumberDependencies,
+  ComplexDependencies,
+  addScalarDependencies,
+  ceilDependencies,
+  conjDependencies,
+  divideScalarDependencies,
+  dotDivideDependencies,
+  expDependencies,
+  log2Dependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  powDependencies,
+  typedDependencies,
+  createFft,
+  createIfft,
+  createZeta,
+  addDependencies,
+  divideDependencies,
+  equalDependencies,
+  factorialDependencies,
+  gammaDependencies,
+  isBoundedDependencies,
+  isNegativeDependencies,
+  multiplyDependencies,
+  sinDependencies,
+  smallerEqDependencies,
+  subtractDependencies,
+} from './native-factory-exports.js';
 import { configuredMathjsConstant } from './instance-constants.js';
 
 const factory: typeof factory_mathjsCompat.factory = factory_mathjsCompat.factory;
@@ -100,7 +128,94 @@ const mathjsTrue = true;
 const mathjsNull = null;
 export { Infinity_ as _Infinity, NaN_ as _NaN } from './shims.js';
 
+const fftDependencies: {
+  addScalarDependencies: typeof addScalarDependencies;
+  ceilDependencies: typeof ceilDependencies;
+  conjDependencies: typeof conjDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  dotDivideDependencies: typeof dotDivideDependencies;
+  expDependencies: typeof expDependencies;
+  iDependencies: typeof iDependencies;
+  log2Dependencies: typeof log2Dependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  powDependencies: typeof powDependencies;
+  tauDependencies: typeof tauDependencies;
+  typedDependencies: typeof typedDependencies;
+  createFft: typeof createFft;
+} = {
+  addScalarDependencies,
+  ceilDependencies,
+  conjDependencies,
+  divideScalarDependencies,
+  dotDivideDependencies,
+  expDependencies,
+  iDependencies,
+  log2Dependencies,
+  matrixDependencies,
+  multiplyScalarDependencies,
+  powDependencies,
+  tauDependencies,
+  typedDependencies,
+  createFft,
+};
+
+const ifftDependencies: {
+  conjDependencies: typeof conjDependencies;
+  dotDivideDependencies: typeof dotDivideDependencies;
+  fftDependencies: typeof fftDependencies;
+  typedDependencies: typeof typedDependencies;
+  createIfft: typeof createIfft;
+} = {
+  conjDependencies,
+  dotDivideDependencies,
+  fftDependencies,
+  typedDependencies,
+  createIfft,
+};
+
+const zetaDependencies: {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  ComplexDependencies: typeof ComplexDependencies;
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+  equalDependencies: typeof equalDependencies;
+  factorialDependencies: typeof factorialDependencies;
+  gammaDependencies: typeof gammaDependencies;
+  isBoundedDependencies: typeof isBoundedDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  piDependencies: typeof piDependencies;
+  powDependencies: typeof powDependencies;
+  sinDependencies: typeof sinDependencies;
+  smallerEqDependencies: typeof smallerEqDependencies;
+  subtractDependencies: typeof subtractDependencies;
+  typedDependencies: typeof typedDependencies;
+  createZeta: typeof createZeta;
+} = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  addDependencies,
+  divideDependencies,
+  equalDependencies,
+  factorialDependencies,
+  gammaDependencies,
+  isBoundedDependencies,
+  isNegativeDependencies,
+  multiplyDependencies,
+  piDependencies,
+  powDependencies,
+  sinDependencies,
+  smallerEqDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createZeta,
+};
+
 export {
+  zetaDependencies,
+  ifftDependencies,
+  fftDependencies,
   mathjsFalse as _false,
   mathjsTrue as _true,
   mathjsNull as _null,

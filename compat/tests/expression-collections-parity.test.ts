@@ -61,4 +61,14 @@ describe('compat expression collections', () => {
     expect(() => math.evaluate(invalid)).toThrow(TypeError);
     expect(() => math.compile(invalid)).toThrow(TypeError);
   });
+
+  it('resolves the instance version in evaluated, compiled, and parsed expressions', () => {
+    const math = create(all);
+    const oracle = createOracle(oracleAll);
+    expect(oracle.evaluate('version')).toBe(oracle.version);
+    expect(math.evaluate('version')).toBe(math.version);
+    expect(math.compile('version').evaluate()).toBe(math.version);
+    expect(math.parser().evaluate('version')).toBe(math.version);
+    expect(math.evaluate('version', { version: 'from scope' })).toBe('from scope');
+  });
 });

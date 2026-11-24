@@ -1535,6 +1535,7 @@ export const cbrt = mathTyped('cbrt', {
   // differently).
   Complex: (a: Complex): Complex => a.cbrt(),
   BigNumber: (a: BigNumber): BigNumber => a.cbrt(),
+  Unit: (a: Unit): Unit => (factoryScope.cbrt as (value: Unit) => Unit)(a),
   Dual: (a: Dual): Dual => a.powConst(1 / 3),
 
   // Two-argument allRoots forms (mathjs parity). When `allRoots` is true, all
@@ -1825,6 +1826,7 @@ export const log2 = mathTyped('log2', {
  */
 export const log1p = mathTyped('log1p', {
   number: (a: f64): f64 | Complex => log1pReal(a),
+  Complex: (a: Complex): Complex => new Complex(a.re + 1, a.im).log(),
   BigNumber: (a: BigNumber): BigNumber | Complex => log1pBigNumberWith(a, isPredictableMode()),
 
   // Float64Array log1p (synchronous)
@@ -1835,6 +1837,10 @@ export const log1p = mathTyped('log1p', {
     wasmKernel: 'log1p',
     inRealDomain: staysRealLog1p,
   }),
+  'any, any': mathTyped.referToSelf(
+    (self) => (value: unknown, base: unknown) =>
+      (factoryScope.divideScalar as ScalarOp)(self(value), (log as (x: unknown) => unknown)(base))
+  ),
 });
 
 /**
@@ -1910,6 +1916,18 @@ export const round = mathTyped('round', {
   // (`matAlgo14xDs` and `matAlgo11xS0s` call the scalar function). A zero leaf goes through the
   // scalar row here, so `round([-0], 2)` is `[0]`, as in mathjs.
   'Array | Matrix, number | BigNumber': mapEachLeaf((self, x, n) => self(x, n)),
+  'Array | Matrix | Unit, Unit': (value: unknown, target: Unit): unknown =>
+    (factoryScope.round as ScalarOp)(value, target),
+  'Array | Matrix | Unit, number | BigNumber, Unit': (
+    value: unknown,
+    decimals: number | BigNumber,
+    target: Unit
+  ): unknown =>
+    (factoryScope.round as (x: unknown, n: number | BigNumber, unit: Unit) => unknown)(
+      value,
+      decimals,
+      target
+    ),
   'number | bigint | BigNumber | Fraction | Complex, Array | Matrix': mapEachLeafOfSecond(
     (self, x, n) => self(x, n)
   ),
@@ -2293,7 +2311,7 @@ function matrixNorm(data: f64[][], p: f64 | string = 2): f64 {
     }
     return max;
   }
-  if (p === Infinity) {
+  if (p === Infinity || p === 'inf') {
     let max = 0;
     for (let i = 0; i < rows; i++) {
       let s = 0;
@@ -2346,6 +2364,8 @@ function arrayNorm(arr: unknown[], p?: f64 | string): unknown {
     if (rows[0].length === 0) throw new RangeError('Invalid matrix dimensions');
     return matrixNorm(rows, p);
   }
+  if (p === 'inf' || p === '-inf')
+    return vectorNorm(arr as f64[], p === 'inf' ? Infinity : -Infinity);
   if (typeof p === 'string') return matrixNorm([arr as f64[]], p);
   return vectorNorm(arr as f64[], p);
 }

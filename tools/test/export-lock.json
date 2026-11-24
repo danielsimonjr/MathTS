@@ -12869,6 +12869,9 @@
       "bellNumbers": {
         "kind": "function"
       },
+      "bellNumbersDependencies": {
+        "kind": "object"
+      },
       "bernoulli": {
         "kind": "function"
       },
@@ -12949,6 +12952,9 @@
       },
       "catalan": {
         "kind": "function"
+      },
+      "catalanDependencies": {
+        "kind": "object"
       },
       "cbrt": {
         "kind": "function"
@@ -13067,6 +13073,9 @@
       "corr": {
         "kind": "function"
       },
+      "corrDependencies": {
+        "kind": "object"
+      },
       "cos": {
         "kind": "function"
       },
@@ -13184,6 +13193,9 @@
       "createAvogadro": {
         "kind": "function"
       },
+      "createBellNumbers": {
+        "kind": "function"
+      },
       "createBernoulli": {
         "kind": "function"
       },
@@ -13230,6 +13242,9 @@
         "kind": "function"
       },
       "createBoolean": {
+        "kind": "function"
+      },
+      "createCatalan": {
         "kind": "function"
       },
       "createCbrt": {
@@ -13301,6 +13316,9 @@
       "createConstantNode": {
         "kind": "function"
       },
+      "createCorr": {
+        "kind": "function"
+      },
       "createCos": {
         "kind": "function"
       },
@@ -13355,6 +13373,9 @@
       "createDenseMatrixClass": {
         "kind": "function"
       },
+      "createDerivative": {
+        "kind": "function"
+      },
       "createDet": {
         "kind": "function"
       },
@@ -13397,6 +13418,9 @@
       "createEfimovFactor": {
         "kind": "function"
       },
+      "createEigs": {
+        "kind": "function"
+      },
       "createElectricConstant": {
         "kind": "function"
       },
@@ -13424,7 +13448,13 @@
       "createExp": {
         "kind": "function"
       },
+      "createExpm": {
+        "kind": "function"
+      },
       "createExpm1": {
+        "kind": "function"
+      },
+      "createFactorial": {
         "kind": "function"
       },
       "createFalse": {
@@ -13434,6 +13464,9 @@
         "kind": "function"
       },
       "createFermiCoupling": {
+        "kind": "function"
+      },
+      "createFft": {
         "kind": "function"
       },
       "createFibonacciHeapClass": {
@@ -13484,6 +13517,9 @@
       "createFunctionNode": {
         "kind": "function"
       },
+      "createGamma": {
+        "kind": "function"
+      },
       "createGasConstant": {
         "kind": "function"
       },
@@ -13523,6 +13559,9 @@
       "createIdentity": {
         "kind": "function"
       },
+      "createIfft": {
+        "kind": "function"
+      },
       "createIm": {
         "kind": "function"
       },
@@ -13551,6 +13590,9 @@
         "kind": "function"
       },
       "createInverseConductanceQuantum": {
+        "kind": "function"
+      },
+      "createInvmod": {
         "kind": "function"
       },
       "createIsBounded": {
@@ -13643,6 +13685,15 @@
       "createLup": {
         "kind": "function"
       },
+      "createLusolve": {
+        "kind": "function"
+      },
+      "createLyap": {
+        "kind": "function"
+      },
+      "createMad": {
+        "kind": "function"
+      },
       "createMagneticConstant": {
         "kind": "function"
       },
@@ -13688,6 +13739,9 @@
       "createMeanTransform": {
         "kind": "function"
       },
+      "createMedian": {
+        "kind": "function"
+      },
       "createMin": {
         "kind": "function"
       },
@@ -13712,6 +13766,9 @@
       "createMolarVolume": {
         "kind": "function"
       },
+      "createMultinomial": {
+        "kind": "function"
+      },
       "createMultiply": {
         "kind": "function"
       },
@@ -13725,6 +13782,9 @@
         "kind": "function"
       },
       "createNode": {
+        "kind": "function"
+      },
+      "createNorm": {
         "kind": "function"
       },
       "createNot": {
@@ -13790,6 +13850,9 @@
       "createPartitionSelect": {
         "kind": "function"
       },
+      "createPermutations": {
+        "kind": "function"
+      },
       "createPhi": {
         "kind": "function"
       },
@@ -13841,6 +13904,12 @@
       "createQr": {
         "kind": "function"
       },
+      "createQuantileSeq": {
+        "kind": "function"
+      },
+      "createQuantileSeqTransform": {
+        "kind": "function"
+      },
       "createQuantumOfCirculation": {
         "kind": "function"
       },
@@ -13860,6 +13929,9 @@
         "kind": "function"
       },
       "createRangeTransform": {
+        "kind": "function"
+      },
+      "createRationalize": {
         "kind": "function"
       },
       "createRe": {
@@ -13886,10 +13958,19 @@
       "createResultSet": {
         "kind": "function"
       },
+      "createReviver": {
+        "kind": "function"
+      },
       "createRightArithShift": {
         "kind": "function"
       },
       "createRightLogShift": {
+        "kind": "function"
+      },
+      "createRotate": {
+        "kind": "function"
+      },
+      "createRotationMatrix": {
         "kind": "function"
       },
       "createRound": {
@@ -13911,6 +13992,9 @@
         "kind": "function"
       },
       "createSackurTetrode": {
+        "kind": "function"
+      },
+      "createSchur": {
         "kind": "function"
       },
       "createSec": {
@@ -13955,6 +14039,15 @@
       "createSign": {
         "kind": "function"
       },
+      "createSimplify": {
+        "kind": "function"
+      },
+      "createSimplifyConstant": {
+        "kind": "function"
+      },
+      "createSimplifyCore": {
+        "kind": "function"
+      },
       "createSin": {
         "kind": "function"
       },
@@ -13971,6 +14064,9 @@
         "kind": "function"
       },
       "createSmallerEq": {
+        "kind": "function"
+      },
+      "createSolveODE": {
         "kind": "function"
       },
       "createSort": {
@@ -13994,13 +14090,25 @@
       "createSqrt": {
         "kind": "function"
       },
+      "createSqrtm": {
+        "kind": "function"
+      },
       "createSquare": {
         "kind": "function"
       },
       "createSqueeze": {
         "kind": "function"
       },
+      "createStd": {
+        "kind": "function"
+      },
+      "createStdTransform": {
+        "kind": "function"
+      },
       "createStefanBoltzmann": {
+        "kind": "function"
+      },
+      "createStirlingS2": {
         "kind": "function"
       },
       "createString": {
@@ -14024,7 +14132,13 @@
       "createSumTransform": {
         "kind": "function"
       },
+      "createSylvester": {
+        "kind": "function"
+      },
       "createSymbolNode": {
+        "kind": "function"
+      },
+      "createSymbolicEqual": {
         "kind": "function"
       },
       "createTan": {
@@ -14096,16 +14210,31 @@
       "createVacuumImpedance": {
         "kind": "function"
       },
+      "createVariance": {
+        "kind": "function"
+      },
+      "createVarianceTransform": {
+        "kind": "function"
+      },
+      "createVersion": {
+        "kind": "function"
+      },
       "createWeakMixingAngle": {
         "kind": "function"
       },
       "createWienDisplacement": {
         "kind": "function"
       },
+      "createXgcd": {
+        "kind": "function"
+      },
       "createXor": {
         "kind": "function"
       },
       "createZeros": {
+        "kind": "function"
+      },
+      "createZeta": {
         "kind": "function"
       },
       "createZpk2tf": {
@@ -14165,6 +14294,9 @@
       "derivative": {
         "kind": "function"
       },
+      "derivativeDependencies": {
+        "kind": "object"
+      },
       "det": {
         "kind": "function"
       },
@@ -14210,6 +14342,9 @@
       "divideScalarDependencies": {
         "kind": "object"
       },
+      "docs": {
+        "kind": "object"
+      },
       "dot": {
         "kind": "function"
       },
@@ -14248,6 +14383,9 @@
       },
       "eigs": {
         "kind": "function"
+      },
+      "eigsDependencies": {
+        "kind": "object"
       },
       "electricConstant": {
         "kind": "object"
@@ -14312,8 +14450,14 @@
       "expm1Dependencies": {
         "kind": "object"
       },
+      "expmDependencies": {
+        "kind": "object"
+      },
       "factorial": {
         "kind": "function"
+      },
+      "factorialDependencies": {
+        "kind": "object"
       },
       "factory": {
         "kind": "function"
@@ -14335,6 +14479,9 @@
       },
       "fft": {
         "kind": "function"
+      },
+      "fftDependencies": {
+        "kind": "object"
       },
       "filter": {
         "kind": "function"
@@ -14404,6 +14551,9 @@
       },
       "gamma": {
         "kind": "function"
+      },
+      "gammaDependencies": {
+        "kind": "object"
       },
       "gasConstant": {
         "kind": "object"
@@ -14480,6 +14630,9 @@
       "ifft": {
         "kind": "function"
       },
+      "ifftDependencies": {
+        "kind": "object"
+      },
       "im": {
         "kind": "function"
       },
@@ -14515,6 +14668,9 @@
       },
       "invmod": {
         "kind": "function"
+      },
+      "invmodDependencies": {
+        "kind": "object"
       },
       "isAccessorNode": {
         "kind": "function"
@@ -14816,11 +14972,20 @@
       "lusolve": {
         "kind": "function"
       },
+      "lusolveDependencies": {
+        "kind": "object"
+      },
       "lyap": {
         "kind": "function"
       },
+      "lyapDependencies": {
+        "kind": "object"
+      },
       "mad": {
         "kind": "function"
+      },
+      "madDependencies": {
+        "kind": "object"
       },
       "magneticConstant": {
         "kind": "object"
@@ -14897,6 +15062,9 @@
       "median": {
         "kind": "function"
       },
+      "medianDependencies": {
+        "kind": "object"
+      },
       "min": {
         "kind": "function"
       },
@@ -14945,6 +15113,9 @@
       "multinomial": {
         "kind": "function"
       },
+      "multinomialDependencies": {
+        "kind": "object"
+      },
       "multiply": {
         "kind": "function"
       },
@@ -14965,6 +15136,9 @@
       },
       "norm": {
         "kind": "function"
+      },
+      "normDependencies": {
+        "kind": "object"
       },
       "not": {
         "kind": "function"
@@ -15061,6 +15235,9 @@
       },
       "permutations": {
         "kind": "function"
+      },
+      "permutationsDependencies": {
+        "kind": "object"
       },
       "phi": {
         "kind": "number"
@@ -15164,6 +15341,12 @@
       "quantileSeq": {
         "kind": "function"
       },
+      "quantileSeqDependencies": {
+        "kind": "object"
+      },
+      "quantileSeqTransformDependencies": {
+        "kind": "object"
+      },
       "quantumOfCirculation": {
         "kind": "object"
       },
@@ -15193,6 +15376,9 @@
       },
       "rationalize": {
         "kind": "function"
+      },
+      "rationalizeDependencies": {
+        "kind": "object"
       },
       "re": {
         "kind": "function"
@@ -15233,6 +15419,9 @@
       "reviver": {
         "kind": "function"
       },
+      "reviverDependencies": {
+        "kind": "object"
+      },
       "rightArithShift": {
         "kind": "function"
       },
@@ -15248,8 +15437,14 @@
       "rotate": {
         "kind": "function"
       },
+      "rotateDependencies": {
+        "kind": "object"
+      },
       "rotationMatrix": {
         "kind": "function"
+      },
+      "rotationMatrixDependencies": {
+        "kind": "object"
       },
       "round": {
         "kind": "function"
@@ -15280,6 +15475,9 @@
       },
       "schur": {
         "kind": "function"
+      },
+      "schurDependencies": {
+        "kind": "object"
       },
       "sec": {
         "kind": "function"
@@ -15374,8 +15572,17 @@
       "simplifyConstant": {
         "kind": "function"
       },
+      "simplifyConstantDependencies": {
+        "kind": "object"
+      },
       "simplifyCore": {
         "kind": "function"
+      },
+      "simplifyCoreDependencies": {
+        "kind": "object"
+      },
+      "simplifyDependencies": {
+        "kind": "object"
       },
       "sin": {
         "kind": "function"
@@ -15416,6 +15623,9 @@
       "solveODE": {
         "kind": "function"
       },
+      "solveODEDependencies": {
+        "kind": "object"
+      },
       "sort": {
         "kind": "function"
       },
@@ -15449,6 +15659,9 @@
       "sqrtm": {
         "kind": "function"
       },
+      "sqrtmDependencies": {
+        "kind": "object"
+      },
       "square": {
         "kind": "function"
       },
@@ -15464,6 +15677,12 @@
       "std": {
         "kind": "function"
       },
+      "stdDependencies": {
+        "kind": "object"
+      },
+      "stdTransformDependencies": {
+        "kind": "object"
+      },
       "stefanBoltzmann": {
         "kind": "object"
       },
@@ -15472,6 +15691,9 @@
       },
       "stirlingS2": {
         "kind": "function"
+      },
+      "stirlingS2Dependencies": {
+        "kind": "object"
       },
       "string": {
         "kind": "function"
@@ -15512,8 +15734,14 @@
       "sylvester": {
         "kind": "function"
       },
+      "sylvesterDependencies": {
+        "kind": "object"
+      },
       "symbolicEqual": {
         "kind": "function"
+      },
+      "symbolicEqualDependencies": {
+        "kind": "object"
       },
       "tan": {
         "kind": "function"
@@ -15623,8 +15851,17 @@
       "variance": {
         "kind": "function"
       },
+      "varianceDependencies": {
+        "kind": "object"
+      },
+      "varianceTransformDependencies": {
+        "kind": "object"
+      },
       "version": {
         "kind": "string"
+      },
+      "versionDependencies": {
+        "kind": "object"
       },
       "weakMixingAngle": {
         "kind": "number"
@@ -15641,6 +15878,9 @@
       "xgcd": {
         "kind": "function"
       },
+      "xgcdDependencies": {
+        "kind": "object"
+      },
       "xor": {
         "kind": "function"
       },
@@ -15655,6 +15895,9 @@
       },
       "zeta": {
         "kind": "function"
+      },
+      "zetaDependencies": {
+        "kind": "object"
       },
       "zpk2tf": {
         "kind": "function"

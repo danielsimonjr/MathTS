@@ -11,3 +11,21 @@ export const fractionDocs = {
   ],
   seealso: ['bignumber', 'boolean', 'complex', 'index', 'matrix', 'string', 'unit'],
 };
+
+export const numDocs = {
+  name: 'num',
+  category: 'Fraction',
+  syntax: ['num(x)'],
+  description: 'Return the signed numerator of a reduced fraction as a bigint.',
+  examples: ['num(fraction(2, 3))', 'num(fraction(-5, 8))'],
+  seealso: ['den', 'fraction'],
+};
+
+export const denDocs = {
+  name: 'den',
+  category: 'Fraction',
+  syntax: ['den(x)'],
+  description: 'Return the positive denominator of a reduced fraction as a bigint.',
+  examples: ['den(fraction(2, 3))', 'den(fraction(-5, 8))'],
+  seealso: ['num', 'fraction'],
+};

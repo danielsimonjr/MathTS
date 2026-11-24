@@ -5,6 +5,283 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('constructs selected row and column matrices from sparse vectors', () => {
+    for (const name of ['matrixFromRows', 'matrixFromColumns'] as const) {
+      const bundle = name + 'Dependencies';
+      const actual = create({ [bundle]: Reflect.get(compat, bundle) });
+      const expected = oracle.create({ [bundle]: Reflect.get(oracle, bundle) });
+      const run = (instance: object) => {
+        const call = (key: string, ...args: unknown[]) =>
+          Reflect.apply(Reflect.get(instance, key), instance, args);
+        const vectors = [[[1, 0]], [[0, 2]]].map((data) => call('matrix', data, 'sparse'));
+        const result = call(name, ...vectors) as { storage(): string; valueOf(): unknown };
+        expect(() => call(name)).toThrow(TypeError);
+        return [result.storage(), result.valueOf()];
+      };
+      expect(run(actual)).toEqual(run(expected));
+    }
+  });
+
+  it('preserves BigNumber when multiplying selected units', () => {
+    const names = ['multiplyScalar', 'multiply', 'dotMultiply'] as const;
+    const bundleNames = [...names, 'unit', 'bignumber'].map((name) => name + 'Dependencies');
+    const factories = (lib: object) =>
+      Object.fromEntries(bundleNames.map((key) => [key, Reflect.get(lib, key)]));
+    const actual = create(factories(compat));
+    const expected = oracle.create(factories(oracle));
+    for (const name of names) {
+      const call = (instance: object, key: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, key), instance, args);
+      const unitProduct = (instance: object, reversed: boolean) => {
+        const operands = [call(instance, 'bignumber', 3), call(instance, 'unit', '2 cm')];
+        if (reversed) operands.reverse();
+        const result = call(instance, name, ...operands) as { value: unknown };
+        return [String(result), Reflect.get(Object(result.value), 'isBigNumber') === true];
+      };
+      for (const reversed of [false, true]) {
+        expect(unitProduct(actual, reversed)).toEqual(unitProduct(expected, reversed));
+      }
+    }
+  });
+
+  it('handles zero BigNumber operands in selected collection logical shifts', () => {
+    const actual = create({
+      rightLogShiftDependencies: compat.rightLogShiftDependencies,
+      bignumberDependencies: compat.bignumberDependencies,
+    });
+    const expected = oracle.create({
+      rightLogShiftDependencies: Reflect.get(oracle, 'rightLogShiftDependencies'),
+      bignumberDependencies: Reflect.get(oracle, 'bignumberDependencies'),
+    });
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const zero = call('bignumber', 0);
+      expect(() => call('rightLogShift', [1, 2], call('bignumber', 1))).toThrow(TypeError);
+      return [call('rightLogShift', [1, 2], zero), call('rightLogShift', zero, [1, 2])];
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
+  it('computes selected matrix exponentials and numeric zeta values', () => {
+    const actual = create({
+      expmDependencies: compat.expmDependencies,
+      zetaDependencies: compat.zetaDependencies,
+      sparseDependencies: compat.sparseDependencies,
+    });
+    const expected = oracle.create({
+      expmDependencies: Reflect.get(oracle, 'expmDependencies'),
+      zetaDependencies: Reflect.get(oracle, 'zetaDependencies'),
+      sparseDependencies: Reflect.get(oracle, 'sparseDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const input = call('sparse', [
+        [0, 2],
+        [0, 0],
+      ]);
+      const result = call('expm', input) as { storage(): string; valueOf(): number[][] };
+      return { matrix: result.valueOf(), storage: result.storage(), zeta: Number(call('zeta', 5)) };
+    };
+    const result = run(actual);
+    const upstream = run(expected);
+    expect(result.storage).toBe(upstream.storage);
+    for (const [i, row] of result.matrix.entries()) {
+      for (const [j, value] of row.entries()) expect(value).toBeCloseTo(upstream.matrix[i][j], 12);
+    }
+    expect(result.zeta).toBeCloseTo(upstream.zeta, 6);
+  });
+
+  it('computes selected eigenvalues and reconstructs a Schur decomposition', () => {
+    const actual = create({ lyapDependencies: compat.lyapDependencies });
+    const expected = oracle.create({ lyapDependencies: Reflect.get(oracle, 'lyapDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const values = (
+        call('eigs', [
+          [2, 1],
+          [1, 2],
+        ]) as { values: number[] }
+      ).values;
+      const input = [
+        [1, 2],
+        [0, 3],
+      ];
+      const { U, T } = call('schur', input) as { U: unknown; T: unknown };
+      const reconstructed = call('multiply', call('multiply', U, T), call('transpose', U));
+      const rows = Object(reconstructed).valueOf() as number[][];
+      for (const [i, row] of rows.entries()) {
+        for (const [j, entry] of row.entries()) expect(entry).toBeCloseTo(input[i][j], 12);
+      }
+      return values;
+    };
+    const values = run(actual);
+    const upstream = run(expected);
+    for (const [i, value] of values.entries()) expect(value).toBeCloseTo(upstream[i], 12);
+  });
+
+  it('solves selected modular inverses with BigNumber inputs', () => {
+    const actual = create({ invmodDependencies: compat.invmodDependencies });
+    const expected = oracle.create({
+      invmodDependencies: Reflect.get(oracle, 'invmodDependencies'),
+    });
+    const run = (instance: object, values: unknown[]) =>
+      String(Reflect.apply(Reflect.get(instance, 'invmod'), instance, values));
+    expect(run(actual, [compat.bignumber(23), compat.bignumber(101)])).toBe(
+      run(expected, [oracle.bignumber(23), oracle.bignumber(101)])
+    );
+  });
+
+  it('reports the same unsupported median dimension as MathJS', () => {
+    const actual = create({ medianDependencies: compat.medianDependencies });
+    const expected = oracle.create({
+      medianDependencies: Reflect.get(oracle, 'medianDependencies'),
+    });
+    for (const instance of [actual, expected]) {
+      expect(() =>
+        Reflect.apply(Reflect.get(instance, 'median'), instance, [
+          [
+            [3, 8],
+            [1, 4],
+          ],
+          0,
+        ])
+      ).toThrow('median(A, dim) is not yet supported');
+    }
+  });
+
+  it('transforms and reconstructs selected Fourier spectra', () => {
+    const actual = create({ ifftDependencies: compat.ifftDependencies });
+    const expected = oracle.create({ ifftDependencies: Reflect.get(oracle, 'ifftDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, input: unknown) =>
+        Reflect.apply(Reflect.get(instance, name), instance, [input]) as {
+          re: number;
+          im: number;
+        }[];
+      const spectrum = call('fft', [1, 3, 2, -1]);
+      return [spectrum, call('ifft', spectrum)];
+    };
+    const result = run(actual);
+    const upstream = run(expected);
+    for (const [i, vector] of result.entries()) {
+      for (const [j, value] of vector.entries()) {
+        expect(value.re).toBeCloseTo(upstream[i][j].re, 12);
+        expect(value.im).toBeCloseTo(upstream[i][j].im, 12);
+      }
+    }
+  });
+
+  it('solves a selected ordinary differential equation', () => {
+    const actual = create({ solveODEDependencies: compat.solveODEDependencies });
+    const expected = oracle.create({
+      solveODEDependencies: Reflect.get(oracle, 'solveODEDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const solve = (instance: object) => {
+      const result = Reflect.apply(Reflect.get(instance, 'solveODE'), instance, [
+        (_time: number, value: number) => value,
+        [0, 1],
+        1,
+        { tol: 1e-7 },
+      ]) as { t: number[]; y: number[] };
+      expect(result.t.at(-1)).toBeCloseTo(1, 8);
+      return result.y.at(-1) as number;
+    };
+    expect(solve(actual)).toBeCloseTo(solve(expected), 5);
+  });
+
+  it('uses selected BigNumber precision for gamma and factorial', () => {
+    const config = { precision: 8 };
+    const actual = create({ factorialDependencies: compat.factorialDependencies }, config);
+    const expected = oracle.create(
+      {
+        factorialDependencies: Reflect.get(oracle, 'factorialDependencies'),
+      },
+      config
+    );
+    const run = (instance: object, name: string, value: unknown) =>
+      Number(String(Reflect.apply(Reflect.get(instance, name), instance, [value])));
+    for (const name of ['gamma', 'factorial']) {
+      const result = run(actual, name, compat.bignumber('19'));
+      const upstream = run(expected, name, oracle.bignumber('19'));
+      expect(result / upstream).toBeCloseTo(1, config.precision - 1);
+    }
+    expect(run(actual, 'gamma', compat.bignumber('NaN'))).toBe(
+      run(expected, 'gamma', oracle.bignumber('NaN'))
+    );
+    expect(() => run(actual, 'gamma', compat.bignumber('2.5'))).toThrow(
+      'Integer BigNumber expected'
+    );
+  });
+
+  it('simplifies selected expression trees and compares selected symbolic forms', () => {
+    const actual = create({
+      symbolicEqualDependencies: compat.symbolicEqualDependencies,
+      derivativeDependencies: compat.derivativeDependencies,
+      rationalizeDependencies: compat.rationalizeDependencies,
+      simplifyDependencies: compat.simplifyDependencies,
+    });
+    const expected = oracle.create({
+      symbolicEqualDependencies: Reflect.get(oracle, 'symbolicEqualDependencies'),
+      derivativeDependencies: Reflect.get(oracle, 'derivativeDependencies'),
+      rationalizeDependencies: Reflect.get(oracle, 'rationalizeDependencies'),
+      simplifyDependencies: Reflect.get(oracle, 'simplifyDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      const node = call('parse', 'x + (2 + 3)');
+      return [
+        String(call('simplifyCore', node)),
+        String(call('simplifyConstant', node)),
+        String(call('simplify', 'x + 2 + 3')),
+        call('symbolicEqual', 'x + x', '2*x'),
+        String(call('derivative', 'x^2', 'x')),
+        String(call('rationalize', 'x + 1/2')),
+      ];
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
+  it('revives tagged values for selected classes and exposes the local package version', () => {
+    const actual = create({
+      reviverDependencies: compat.reviverDependencies,
+      versionDependencies: compat.versionDependencies,
+      bigintDependencies: compat.bigintDependencies,
+      numberDependencies: compat.numberDependencies,
+      ComplexDependencies: compat.ComplexDependencies,
+    });
+    const expected = oracle.create({
+      reviverDependencies: Reflect.get(oracle, 'reviverDependencies'),
+      versionDependencies: Reflect.get(oracle, 'versionDependencies'),
+      bigintDependencies: Reflect.get(oracle, 'bigintDependencies'),
+      numberDependencies: Reflect.get(oracle, 'numberDependencies'),
+      ComplexDependencies: Reflect.get(oracle, 'ComplexDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    expect(actual.version).toBe(compat.version);
+    expect(expected.version).toBe(oracle.version);
+    const json = JSON.stringify([
+      { mathjs: 'number', value: 'Infinity' },
+      { mathjs: 'bigint', value: '12345678901234567890' },
+      { mathjs: 'Complex', re: 3, im: 4 },
+      { mathjs: 'Unknown', value: 1 },
+    ]);
+    const run = (instance: object): unknown[] => JSON.parse(json, Reflect.get(instance, 'reviver'));
+    const result = run(actual);
+    const upstream = run(expected);
+    expect(result.slice(0, 2)).toEqual(upstream.slice(0, 2));
+    expect(String(result[2])).toBe(String(upstream[2]));
+    expect(result[3]).toEqual(upstream[3]);
+  });
+
   it('opens selected parser scopes and retrieves help using a function reference', () => {
     const actual = create({
       parserDependencies: compat.parserDependencies,
@@ -51,6 +328,9 @@ describe('native compatibility dependency bundles', () => {
       ['column', 'Column', 'column([[1, 2], [3, 4]], 2)'],
       ['row', 'Row', 'row([[1, 2], [3, 4]], 2)'],
       ['concat', 'Concat', 'concat([[1, 2]], [[3, 4]], 1)'],
+      ['variance', 'Variance', 'variance([[2, 4], [6, 8]], 1)'],
+      ['std', 'Std', 'std([[2, 4], [6, 8]], 2)'],
+      ['quantileSeq', 'QuantileSeq', 'quantileSeq([[2, 4], [6, 8]], 0.5, 2)'],
       ['min', 'Min', 'min([[4, 1], [3, 9]], 1)'],
       ['max', 'Max', 'max([[4, 1], [3, 9]], 2)'],
       ['sum', 'Sum', 'sum([[4, 1], [3, 9]], 1)'],
@@ -588,10 +868,22 @@ describe('native compatibility dependency bundles', () => {
     }
   });
 
-  it('loads all supported MathJS dependency bundles together', () => {
-    const names = Object.keys(oracle).filter(
-      (name) => name.endsWith('Dependencies') && Object.hasOwn(compat, name)
-    );
+  it('matches and loads the entire MathJS dependency bundle catalog', () => {
+    const names = Object.keys(oracle).filter((name) => name.endsWith('Dependencies'));
+    for (const name of names) {
+      const actualBundle = Reflect.get(compat, name) as Record<string, unknown>;
+      const expectedBundle = Reflect.get(oracle, name) as Record<string, unknown>;
+      expect(Object.keys(actualBundle).sort(), name).toEqual(Object.keys(expectedBundle).sort());
+      for (const [key, value] of Object.entries(expectedBundle)) {
+        if (typeof value !== 'function') continue;
+        for (const property of ['fn', 'dependencies', 'meta']) {
+          const actualFactory = actualBundle[key] as object;
+          expect(Reflect.get(actualFactory, property), `${name}.${key}.${property}`).toEqual(
+            Reflect.get(value, property)
+          );
+        }
+      }
+    }
     const actual = create(
       Object.fromEntries(names.map((name) => [name, Reflect.get(compat, name)]))
     );
@@ -1076,6 +1368,52 @@ describe('native compatibility dependency bundles', () => {
         ],
       ],
     ],
+    [
+      'lusolve',
+      [
+        [
+          [2, 1],
+          [1, 3],
+        ],
+        [5, 5],
+      ],
+    ],
+    [
+      'sqrtm',
+      [
+        [
+          [4, 0],
+          [0, 9],
+        ],
+      ],
+    ],
+    ['gamma', [5]],
+    ['factorial', [[3, 4, 5]]],
+    ['permutations', [6]],
+    ['permutations', [6, 2]],
+    ['catalan', [7]],
+    ['multinomial', [[2, 3, 4]]],
+    ['stirlingS2', [8, 3]],
+    ['bellNumbers', [7]],
+    ['median', [[3, 8, 1, 4]]],
+    ['mad', [[1, 3, 9]]],
+    ['variance', [[1, 2, 3], 'unbiased']],
+    ['std', [[1, 2, 3], 'unbiased']],
+    ['quantileSeq', [[1, 2, 3, 4, 5], 0.25]],
+    [
+      'corr',
+      [
+        [1, 2, 3, 4],
+        [4, 2, 1, 3],
+      ],
+    ],
+    ['xgcd', [8, 12]],
+    ['invmod', [7, 13]],
+    ['norm', [[3, 4]]],
+    ['rotationMatrix', [0.75]],
+    ['rotate', [[2, 3], 0.75]],
+    ['sylvester', [[[-2]], [[-3]], [[10]]]],
+    ['lyap', [[[-2]], [[8]]]],
     ['composition', [5, 3]],
     [
       'kldivergence',
