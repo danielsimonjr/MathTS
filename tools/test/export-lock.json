@@ -12791,6 +12791,9 @@
       "bernoulli": {
         "kind": "function"
       },
+      "bernoulliDependencies": {
+        "kind": "object"
+      },
       "bigint": {
         "kind": "function"
       },
@@ -13025,6 +13028,9 @@
       "createAtanh": {
         "kind": "function"
       },
+      "createBernoulli": {
+        "kind": "function"
+      },
       "createBigNumberClass": {
         "kind": "function"
       },
@@ -13116,6 +13122,9 @@
         "kind": "function"
       },
       "createDiff": {
+        "kind": "function"
+      },
+      "createDistance": {
         "kind": "function"
       },
       "createDivideScalar": {
@@ -13268,7 +13277,16 @@
       "createLog10": {
         "kind": "function"
       },
+      "createLog1p": {
+        "kind": "function"
+      },
       "createLog2": {
+        "kind": "function"
+      },
+      "createLsolve": {
+        "kind": "function"
+      },
+      "createLsolveAll": {
         "kind": "function"
       },
       "createMap": {
@@ -13353,6 +13371,9 @@
         "kind": "function"
       },
       "createRandomInt": {
+        "kind": "function"
+      },
+      "createRange": {
         "kind": "function"
       },
       "createRe": {
@@ -13475,6 +13496,12 @@
       "createUppercasePi": {
         "kind": "function"
       },
+      "createUsolve": {
+        "kind": "function"
+      },
+      "createUsolveAll": {
+        "kind": "function"
+      },
       "createXor": {
         "kind": "function"
       },
@@ -13543,6 +13570,9 @@
       },
       "distance": {
         "kind": "function"
+      },
+      "distanceDependencies": {
+        "kind": "object"
       },
       "divide": {
         "kind": "function"
@@ -14042,6 +14072,9 @@
       "log1p": {
         "kind": "function"
       },
+      "log1pDependencies": {
+        "kind": "object"
+      },
       "log2": {
         "kind": "function"
       },
@@ -14059,6 +14092,12 @@
       },
       "lsolveAll": {
         "kind": "function"
+      },
+      "lsolveAllDependencies": {
+        "kind": "object"
+      },
+      "lsolveDependencies": {
+        "kind": "object"
       },
       "lup": {
         "kind": "function"
@@ -14326,6 +14365,9 @@
       },
       "range": {
         "kind": "function"
+      },
+      "rangeDependencies": {
+        "kind": "object"
       },
       "rationalize": {
         "kind": "function"
@@ -14653,6 +14695,12 @@
       },
       "usolveAll": {
         "kind": "function"
+      },
+      "usolveAllDependencies": {
+        "kind": "object"
+      },
+      "usolveDependencies": {
+        "kind": "object"
       },
       "vacuumImpedance": {
         "kind": "object"
