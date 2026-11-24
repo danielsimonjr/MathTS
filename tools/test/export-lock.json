@@ -12554,6 +12554,9 @@
       "Help": {
         "kind": "function"
       },
+      "HelpDependencies": {
+        "kind": "object"
+      },
       "I": {
         "kind": "object"
       },
@@ -12655,6 +12658,9 @@
       },
       "Parser": {
         "kind": "function"
+      },
+      "ParserDependencies": {
+        "kind": "object"
       },
       "Range": {
         "kind": "function"
@@ -13487,6 +13493,12 @@
       "createHasNumericValue": {
         "kind": "function"
       },
+      "createHelp": {
+        "kind": "function"
+      },
+      "createHelpClass": {
+        "kind": "function"
+      },
       "createHex": {
         "kind": "function"
       },
@@ -13755,6 +13767,12 @@
         "kind": "function"
       },
       "createParse": {
+        "kind": "function"
+      },
+      "createParser": {
+        "kind": "function"
+      },
+      "createParserClass": {
         "kind": "function"
       },
       "createPartitionSelect": {
@@ -14417,6 +14435,9 @@
       "help": {
         "kind": "function"
       },
+      "helpDependencies": {
+        "kind": "object"
+      },
       "hex": {
         "kind": "function"
       },
@@ -15013,6 +15034,9 @@
       },
       "parser": {
         "kind": "function"
+      },
+      "parserDependencies": {
+        "kind": "object"
       },
       "partitionSelect": {
         "kind": "function"

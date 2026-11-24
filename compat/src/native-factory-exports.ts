@@ -1,4 +1,8 @@
-import { factory_mathjsCompat, replacer } from '@danielsimonjr/mathts-functions';
+import {
+  factory_mathjsCompat,
+  help as nativeHelp,
+  replacer,
+} from '@danielsimonjr/mathts-functions';
 import { fractionPart, instanceSymbols } from './instance-symbols.js';
 
 const factory: typeof factory_mathjsCompat.factory = factory_mathjsCompat.factory;
@@ -3366,6 +3370,68 @@ const compositionDependencies: UnaryBundle<'createComposition'> & {
   createComposition: mathjsCreateComposition,
 };
 
+const mathjsCreateParserClass: CompatFactoryExports['createParserClass'] =
+  factories.createParserClass;
+const ParserDependencies: Pick<CompatFactoryExports, 'createParserClass'> & {
+  evaluateDependencies: typeof evaluateDependencies;
+  parseDependencies: typeof parseDependencies;
+} = {
+  evaluateDependencies,
+  parseDependencies,
+  createParserClass: mathjsCreateParserClass,
+};
+
+const mathjsCreateParser: CompatFactoryExports['createParser'] = factories.createParser;
+const parserDependencies: UnaryBundle<'createParser'> & {
+  ParserDependencies: typeof ParserDependencies;
+} = {
+  ParserDependencies,
+  typedDependencies,
+  createParser: mathjsCreateParser,
+};
+
+const mathjsCreateHelpClass: CompatFactoryExports['createHelpClass'] = factories.createHelpClass;
+const HelpDependencies: Pick<CompatFactoryExports, 'createHelpClass'> & {
+  evaluateDependencies: typeof evaluateDependencies;
+} = {
+  evaluateDependencies,
+  createHelpClass: mathjsCreateHelpClass,
+};
+
+type HelpFactoryDependencies = {
+  typed: (
+    name: string,
+    signatures: { any: (search: unknown) => unknown }
+  ) => (search: unknown) => unknown;
+  mathWithTransform: Record<string, unknown>;
+  Help: new (doc: unknown) => unknown;
+};
+
+const createHelp: ConstructorFactory<(search: unknown) => unknown> = /* #__PURE__ */ factory(
+  'help',
+  ['typed', 'mathWithTransform', 'Help'],
+  ({ typed, mathWithTransform, Help }: HelpFactoryDependencies) =>
+    typed('help', {
+      any: (search) => {
+        const name =
+          typeof search === 'string'
+            ? search
+            : Object.keys(mathWithTransform).find((key) => mathWithTransform[key] === search);
+        if (name === undefined) {
+          const label = typeof search === 'function' ? search.name : String(search);
+          throw new Error(`No documentation found on "${label}"`);
+        }
+        return new Help(nativeHelp(name).doc);
+      },
+    })
+);
+
+const helpDependencies: {
+  HelpDependencies: typeof HelpDependencies;
+  typedDependencies: typeof typedDependencies;
+  createHelp: typeof createHelp;
+} = { HelpDependencies, typedDependencies, createHelp };
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3978,5 +4044,13 @@ export {
   RangeDependencies,
   createReplacer,
   replacerDependencies,
+  mathjsCreateHelpClass as createHelpClass,
+  HelpDependencies,
+  createHelp,
+  helpDependencies,
+  mathjsCreateParser as createParser,
+  parserDependencies,
+  mathjsCreateParserClass as createParserClass,
+  ParserDependencies,
   typedDependencies,
 };
