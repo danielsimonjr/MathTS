@@ -5,6 +5,18 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('solves selected modular inverses with BigNumber inputs', () => {
+    const actual = create({ invmodDependencies: compat.invmodDependencies });
+    const expected = oracle.create({
+      invmodDependencies: Reflect.get(oracle, 'invmodDependencies'),
+    });
+    const run = (instance: object, values: unknown[]) =>
+      String(Reflect.apply(Reflect.get(instance, 'invmod'), instance, values));
+    expect(run(actual, [compat.bignumber(23), compat.bignumber(101)])).toBe(
+      run(expected, [oracle.bignumber(23), oracle.bignumber(101)])
+    );
+  });
+
   it('reports the same unsupported median dimension as MathJS', () => {
     const actual = create({ medianDependencies: compat.medianDependencies });
     const expected = oracle.create({
@@ -1257,6 +1269,15 @@ describe('native compatibility dependency bundles', () => {
     ['variance', [[1, 2, 3], 'unbiased']],
     ['std', [[1, 2, 3], 'unbiased']],
     ['quantileSeq', [[1, 2, 3, 4, 5], 0.25]],
+    [
+      'corr',
+      [
+        [1, 2, 3, 4],
+        [4, 2, 1, 3],
+      ],
+    ],
+    ['xgcd', [8, 12]],
+    ['invmod', [7, 13]],
     ['composition', [5, 3]],
     [
       'kldivergence',

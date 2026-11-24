@@ -196,7 +196,7 @@
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1387648
+      "bytes": 1402138
     },
     {
       "label": "expression evaluate",

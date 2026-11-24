@@ -564,7 +564,7 @@ import { createUsolveAll } from '../algebra/solver/usolveAll.js';
 import { createCbrt } from '../arithmetic/cbrt.js';
 import { createNthRoots } from '../arithmetic/nthRoots.js';
 import { createRound } from '../arithmetic/round.js';
-import { createXgcd } from '../arithmetic/xgcd.js';
+import { createXgcd, createSelectedXgcd } from '../arithmetic/xgcd.js';
 import { createLog } from '../arithmetic/log.js';
 
 // combinatorics
@@ -867,7 +867,7 @@ factoryScope.to = to;
 // arithmetic
 import { createDotPow } from '../arithmetic/dotPow.js';
 import { createFix } from '../arithmetic/fix.js';
-import { createInvmod } from '../arithmetic/invmod.js';
+import { createInvmod, createSelectedInvmod } from '../arithmetic/invmod.js';
 
 // bitwise/logical
 import { createAnd } from '../logical/and.js';
@@ -1502,7 +1502,7 @@ factoryScope.index = indexFn;
 
 import { createEigs } from '../matrix/eigs.js';
 import { createLusolve, createSelectedLusolve } from '../algebra/solver/lusolve.js';
-import { createCorr } from '../statistics/corr.js';
+import { createCorr, createSelectedCorr } from '../statistics/corr.js';
 import { createMad } from '../statistics/mad.js';
 import { createStd } from '../statistics/std.js';
 import { createSetSymDifference } from '../set/setSymDifference.js';
@@ -3207,6 +3207,9 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createInvmod: typeof createSelectedInvmod;
+  createXgcd: typeof createSelectedXgcd;
+  createCorr: typeof createSelectedCorr;
   createStdTransform: typeof createSelectedStdTransform;
   createVarianceTransform: typeof createSelectedVarianceTransform;
   createQuantileSeqTransform: typeof createSelectedQuantileSeqTransform;
@@ -3537,6 +3540,9 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createInvmod: createSelectedInvmod,
+    createXgcd: createSelectedXgcd,
+    createCorr: createSelectedCorr,
     createStdTransform: createSelectedStdTransform,
     createVarianceTransform: createSelectedVarianceTransform,
     createQuantileSeqTransform: createSelectedQuantileSeqTransform,

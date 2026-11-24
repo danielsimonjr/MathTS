@@ -13073,6 +13073,9 @@
       "corr": {
         "kind": "function"
       },
+      "corrDependencies": {
+        "kind": "object"
+      },
       "cos": {
         "kind": "function"
       },
@@ -13311,6 +13314,9 @@
         "kind": "function"
       },
       "createConstantNode": {
+        "kind": "function"
+      },
+      "createCorr": {
         "kind": "function"
       },
       "createCos": {
@@ -13578,6 +13584,9 @@
         "kind": "function"
       },
       "createInverseConductanceQuantum": {
+        "kind": "function"
+      },
+      "createInvmod": {
         "kind": "function"
       },
       "createIsBounded": {
@@ -14192,6 +14201,9 @@
       "createWienDisplacement": {
         "kind": "function"
       },
+      "createXgcd": {
+        "kind": "function"
+      },
       "createXor": {
         "kind": "function"
       },
@@ -14620,6 +14632,9 @@
       },
       "invmod": {
         "kind": "function"
+      },
+      "invmodDependencies": {
+        "kind": "object"
       },
       "isAccessorNode": {
         "kind": "function"
@@ -15808,6 +15823,9 @@
       },
       "xgcd": {
         "kind": "function"
+      },
+      "xgcdDependencies": {
+        "kind": "object"
       },
       "xor": {
         "kind": "function"

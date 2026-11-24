@@ -4045,6 +4045,63 @@ const stdTransformDependencies: UnaryBundle<'createStdTransform'> & {
   createStdTransform: mathjsCreateStdTransform,
 };
 
+const mathjsCreateCorr: CompatFactoryExports['createCorr'] = factories.createCorr;
+const corrDependencies: UnaryBundle<'createCorr'> & {
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  meanDependencies: typeof meanDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  powDependencies: typeof powDependencies;
+  sqrtDependencies: typeof sqrtDependencies;
+  subtractDependencies: typeof subtractDependencies;
+  sumDependencies: typeof sumDependencies;
+} = {
+  addDependencies,
+  divideDependencies,
+  matrixDependencies,
+  meanDependencies,
+  multiplyDependencies,
+  powDependencies,
+  sqrtDependencies,
+  subtractDependencies,
+  sumDependencies,
+  typedDependencies,
+  createCorr: mathjsCreateCorr,
+};
+
+const mathjsCreateXgcd: CompatFactoryExports['createXgcd'] = factories.createXgcd;
+const xgcdDependencies: UnaryBundle<'createXgcd'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  BigNumberDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createXgcd: mathjsCreateXgcd,
+};
+
+const mathjsCreateInvmod: CompatFactoryExports['createInvmod'] = factories.createInvmod;
+const invmodDependencies: UnaryBundle<'createInvmod'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  addDependencies: typeof addDependencies;
+  equalDependencies: typeof equalDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  modDependencies: typeof modDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  xgcdDependencies: typeof xgcdDependencies;
+} = {
+  BigNumberDependencies,
+  addDependencies,
+  equalDependencies,
+  isIntegerDependencies,
+  modDependencies,
+  smallerDependencies,
+  typedDependencies,
+  xgcdDependencies,
+  createInvmod: mathjsCreateInvmod,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4639,6 +4696,12 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateInvmod as createInvmod,
+  invmodDependencies,
+  mathjsCreateXgcd as createXgcd,
+  xgcdDependencies,
+  mathjsCreateCorr as createCorr,
+  corrDependencies,
   mathjsCreateStdTransform as createStdTransform,
   stdTransformDependencies,
   mathjsCreateVarianceTransform as createVarianceTransform,
