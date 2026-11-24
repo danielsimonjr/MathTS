@@ -153,6 +153,9 @@ interface MathInstanceOverrides {
   multiply: typeof shims.multiply;
   divide: typeof shims.divide;
   pow: typeof shims.pow;
+  compareText: typeof namedCompareText;
+  equalText: typeof namedEqualText;
+  toBest: typeof namedToBest;
   sqrt: typeof shims.sqrt;
   abs: typeof shims.abs;
   exp: typeof shims.exp;
@@ -535,8 +538,16 @@ export function create(
   // Internal names of the functions namespace (#1216) are not surfaced: not own, not
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
-  const useCompatSetUnion = originalSurface.setUnion === mathFunctions.setUnion;
-  if (useCompatSetUnion) flat.setUnion = namedSetUnion;
+  const compatDefaultOverrides = {
+    setUnion: namedSetUnion,
+    compareText: namedCompareText,
+    equalText: namedEqualText,
+    toBest: namedToBest,
+  };
+  const overriddenNames = Object.keys(compatDefaultOverrides).filter(
+    (name) => originalSurface[name] === functionsNamespace[name]
+  ) as (keyof typeof compatDefaultOverrides)[];
+  for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
   );
@@ -549,7 +560,12 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
-  if (useCompatSetUnion) expressionConstants.setUnion = () => instance.setUnion;
+  for (const name of overriddenNames) expressionConstants[name] = () => instance[name];
+  if (originalSurface.add === mathFunctions.add) expressionConstants.add = () => instance.add;
+  if (originalSurface.fraction === mathFunctions.fraction) {
+    expressionConstants.fraction = () => instance.fraction;
+  }
+  if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
@@ -777,7 +793,23 @@ export {
 
 /** Union of two multisets in MathJS result order. */
 const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
-export { namedSetUnion as setUnion };
+const namedCompareText = mathFunctions.factory_mathjsCompat.compareText as {
+  (left: string, right: string): number;
+  (left: unknown, right: unknown): unknown;
+};
+const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
+  (left: string, right: string): boolean;
+  (left: unknown, right: unknown): unknown;
+};
+const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
+  ...args: unknown[]
+) => ReturnType<typeof mathFunctions.toBest>;
+export {
+  namedSetUnion as setUnion,
+  namedCompareText as compareText,
+  namedEqualText as equalText,
+  namedToBest as toBest,
+};
 
 /** Embedded documentation for names in the MathJS compatibility surface. */
 export const docs = /* #__PURE__ */ Object.fromEntries(
@@ -825,7 +857,6 @@ export {
   combinationsWithRep,
   compare,
   compareNatural,
-  compareText,
   composition,
   concat,
   corr,
@@ -853,7 +884,6 @@ export {
   eigs,
   equal,
   equalScalar,
-  equalText,
   erf,
   expm,
   expm1,
@@ -974,7 +1004,6 @@ export {
   symbolicEqual,
   tanh,
   to,
-  toBest,
   trace,
   typeOf,
   unaryMinus,

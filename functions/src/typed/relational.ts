@@ -31,6 +31,7 @@ import {
   isBigNumber,
   isComplex,
   isFraction,
+  isUnit,
 } from '@danielsimonjr/mathts-core';
 import { nearlyEqual } from '../utils/number.js';
 import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
@@ -91,6 +92,7 @@ function typeNameOf(x: unknown): string {
   if (isComplex(x)) return 'Complex';
   if (isBigNumber(x)) return 'BigNumber';
   if (isFraction(x)) return 'Fraction';
+  if (isUnit(x)) return 'Unit';
   if (Array.isArray(x)) return 'Array';
   if (typeof x === 'object') return 'Object';
   return typeof x;
@@ -362,6 +364,13 @@ function _compareNatural(x: unknown, y: unknown): number {
     if (cx.im > cy.im) return 1;
     if (cx.im < cy.im) return -1;
     return 0;
+  }
+
+  if (typeX === 'Unit') {
+    const left = x as Unit;
+    const right = y as Unit;
+    if (left.equalBase(right)) return _compareNatural(left.value, right.value);
+    return compareArrays(_compareNatural, [...left.formatUnits()], [...right.formatUnits()]);
   }
 
   if (typeX === 'boolean') {

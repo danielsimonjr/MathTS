@@ -43,11 +43,13 @@ import type {
 
 import {
   add as _add,
+  addScalar as _addScalar,
   subtract as _subtract,
   multiply as _multiply,
   divide as _divide,
   inv as _inv,
   pow as _pow,
+  factory_pow as _factoryPow,
   sqrt as _sqrt,
   abs as _abs,
   exp as _exp,
@@ -75,7 +77,7 @@ import {
   zeros as _factoryZeros,
   ones as _factoryOnes,
   transpose as _transpose,
-  fraction as _fraction,
+  factory_mathjsCompat,
   bignumber as _bignumber,
   complex as _complex,
 } from '@danielsimonjr/mathts-functions';
@@ -134,14 +136,14 @@ interface CompatFraction {
  * fraction(0.5)    // Fraction(1, 2)
  * fraction()       // Fraction(0, 1)
  *
- * The function is the functions `fraction` with two more signatures: no argument and
+ * The function is the compatibility fraction factory with two more signatures: no argument and
  * `undefined` give 0, as the compat `fraction` always did. The functions `fraction` is a
  * typed-function, so `map(x, fraction)`, `matrix.map(fraction)` and `evaluate` pass the value
  * alone and not the index as the denominator (#1160). A Fraction of a second copy of core is
  * returned unchanged (#1033), and a BigNumber, a bigint, null, an object `{ n, d }`, a Unit, an
  * Array and a Matrix convert, as in mathjs.
  */
-export const fraction = mathTyped('fraction', _fraction as never, {
+export const fraction = mathTyped('fraction', factory_mathjsCompat.fraction as never, {
   '': () => new Fraction(0, 1),
   undefined: () => new Fraction(0, 1),
 }) as unknown as CompatFraction;
@@ -405,11 +407,17 @@ function withTypedSurface<T extends object>(shim: T, typedFn: object): T {
 
 type OneArg = <T>(value: T) => T;
 export const add = makeArithmetic(
-  _add as (a: unknown, b: unknown) => unknown,
+  (a, b) =>
+    typeof a === 'string' || typeof b === 'string'
+      ? _addScalar(a, b)
+      : (_add as (left: unknown, right: unknown) => unknown)(a, b),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b
-) as PublicAdd & OneArg;
+) as PublicAdd &
+  OneArg & {
+    (left: string | number, right: string | number, ...rest: (string | number)[]): number;
+  };
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
@@ -436,7 +444,20 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
     arguments as unknown as unknown[]
   );
 }, _divide) as TypedFunction;
-export const pow: TypedFunction = _pow;
+export const pow = withTypedSurface(function (base?: unknown, exponent?: unknown): unknown {
+  if (
+    arguments.length === 2 &&
+    (Array.isArray(base) || isCompatBridgeMatrix(base)) &&
+    (typeof exponent === 'number' ||
+      typeof exponent === 'bigint' ||
+      isBigNumber(exponent) ||
+      isFraction(exponent)) &&
+    Number(exponent) < 0
+  ) {
+    return _factoryPow(base, exponent);
+  }
+  return _pow.apply(undefined, arguments as unknown as unknown[]);
+}, _pow) as TypedFunction;
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
   _sqrt as (...args: unknown[]) => unknown,

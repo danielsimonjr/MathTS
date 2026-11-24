@@ -1,18 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import * as oracle from 'mathjs';
 import {
+  add,
   all,
   cbrt,
   combinations,
+  compareNatural,
+  compareText,
   create,
   derivative,
+  equalText,
   erf,
+  fraction,
+  fractionDependencies,
   log1p,
   log2,
   median,
   norm,
+  pow,
   round,
   toBest,
+  toBestDependencies,
 } from '../src/index.js';
 
 describe('named compatibility function imports', () => {
@@ -105,6 +113,91 @@ describe('named compatibility function imports', () => {
     );
     expect(String(math.evaluate('toBest(unit(10, "m"), "mm,km", {offset: 1.5})'))).toBe(
       String(oracleToBest(expected, ['mm', 'km'], options))
+    );
+  });
+
+  it('naturally orders units by normalized magnitude and dimension', () => {
+    const math = create(all);
+    for (const [left, right] of [
+      ['5 cm', '40 mm'],
+      ['1 m', '1000 mm'],
+      ['1 m', '1 s'],
+    ]) {
+      expect(compareNatural(math.unit(left), math.unit(right))).toBe(
+        oracle.compareNatural(oracle.unit(left), oracle.unit(right))
+      );
+    }
+    expect(math.evaluate('compareNatural(5cm, 40mm)')).toBe(1);
+  });
+
+  it('takes negative integer powers of invertible matrices', () => {
+    const math = create(all);
+    const values = [
+      [1, 2],
+      [4, 3],
+    ];
+    const determinantZero = [
+      [1, 2],
+      [2, 4],
+    ];
+    const matrixValues = (matrix: unknown) => (matrix as { valueOf(): unknown }).valueOf();
+    const expected = oracle.pow(values, -1);
+    expect(pow(values, -1)).toEqual(expected);
+    expect(matrixValues(math.pow(math.matrix(values), -1))).toEqual(expected);
+    expect(matrixValues(math.pow(math.sparse(values), -1))).toEqual(expected);
+    expect(math.pow(values, math.bignumber(-1))).toEqual(expected);
+    expect(
+      (math.evaluate('pow([[1, 2], [4, 3]], -1)') as { valueOf(): unknown }).valueOf()
+    ).toEqual(expected);
+    expect(() => pow(determinantZero, -1)).toThrow(/not invertible/);
+  });
+
+  it('dispatches named, instance, and expression text comparisons elementwise', () => {
+    const math = create(all);
+    const labels = ['A', 'B', 'C'];
+    expect(compareText('B', labels)).toEqual([1, 0, -1]);
+    expect(equalText(labels, 'B')).toEqual([false, true, false]);
+    expect(math.compareText('B', labels)).toEqual([1, 0, -1]);
+    expect(math.equalText(labels, 'B')).toEqual([false, true, false]);
+    const expression = 'compareText("B", ["A","B","C"])';
+    expect((math.evaluate(expression) as { valueOf(): unknown }).valueOf()).toEqual(
+      oracle.evaluate(expression).valueOf()
+    );
+    expect(() => compareText(1, '1')).toThrow(TypeError);
+  });
+
+  it('converts numeric strings for scalar and expression addition', () => {
+    const math = create(all);
+    expect(add('2.3', '4')).toBe(6.3);
+    expect(math.add('2', 3, '4')).toBe(9);
+    expect(math.evaluate('"2.3" + "4"')).toBe(6.3);
+    expect(() => add('abc', '4')).toThrow(/Cannot convert "abc" to a number/);
+  });
+
+  it('uses the MathJS default prefix offset in each compatibility entry point', () => {
+    const math = create(all);
+    const selected = create({ toBestDependencies });
+    const value = math.unit(0.000000123, 'A') as typeof math.speedOfLight;
+    const expression = 'toBest(unit(0.000000123, "A"))';
+    const expected = String(oracle.evaluate(expression));
+    expect(String(toBest(value))).toBe(expected);
+    expect(String(math.toBest(value))).toBe(expected);
+    expect(String(selected.toBest(value))).toBe(expected);
+    expect(String(math.evaluate(expression))).toBe(expected);
+    expect(String(toBest(value, [], { offset: 0 }))).toBe('0.123 uA');
+  });
+
+  it('matches the MathJS approximation of floating-point fractions', () => {
+    const math = create(all);
+    const selected = create({ fractionDependencies });
+    const input = -Math.sqrt(10);
+    const expected = oracle.fraction(input);
+    for (const actual of [fraction(input), math.fraction(input), selected.fraction(input)]) {
+      expect(actual.numerator).toBe(expected.s * expected.n);
+      expect(actual.denominator).toBe(expected.d);
+    }
+    expect(String(math.evaluate('fraction(sqrt(10))'))).toBe(
+      oracle.fraction(Math.sqrt(10)).toFraction()
     );
   });
 });

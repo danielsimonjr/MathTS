@@ -9,10 +9,16 @@ interface Unit {
 const name = 'toBest';
 const dependencies = ['typed'];
 
-export const createToBest = /* #__PURE__ */ factory(
-  name,
-  dependencies,
-  ({ typed }: { typed: TypedFunction }) => {
+function toBestFactory(defaultOffset?: number) {
+  return factory(name, dependencies, ({ typed }: { typed: TypedFunction }) => {
+    function convert(value: Unit, units?: string | Array<string | Unit>, options?: object): Unit {
+      const preferred = typeof units === 'string' ? units.split(',') : units;
+      return value.toBest(
+        preferred,
+        defaultOffset === undefined ? options : { offset: defaultOffset, ...options }
+      );
+    }
+
     /**
      * Converts a unit to the most appropriate display unit.
      * When no preferred units are provided, the function automatically find the best prefix.
@@ -46,13 +52,15 @@ export const createToBest = /* #__PURE__ */ factory(
      * @return {Unit}                           Value converted to the best matching unit
      */
     return typed(name, {
-      Unit: (x: Unit): Unit => x.toBest(),
-      'Unit, string': (x: Unit, unitList: string): Unit => x.toBest(unitList.split(',')),
-      'Unit, string, Object': (x: Unit, unitList: string, options: object): Unit =>
-        x.toBest(unitList.split(','), options),
-      'Unit, Array': (x: Unit, unitList: (string | Unit)[]): Unit => x.toBest(unitList),
-      'Unit, Array, Object': (x: Unit, unitList: (string | Unit)[], options: object): Unit =>
-        x.toBest(unitList, options),
+      Unit: convert,
+      'Unit, string | Array': convert,
+      'Unit, string | Array, Object': convert,
     });
-  }
-);
+  });
+}
+
+/** Create the native unit display conversion. */
+export const createToBest = /* #__PURE__ */ toBestFactory();
+
+/** Create the unit display conversion with MathJS's default engineering offset. */
+export const createMathJSToBest = /* #__PURE__ */ toBestFactory(1.2);
