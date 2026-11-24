@@ -2312,6 +2312,11 @@ const parseDependencies: Pick<CompatFactoryExports, 'createParse'> & {
   createParse: mathjsCreateParse,
 };
 
+const mathjsCreateCompile: CompatFactoryExports['createCompile'] = factories.createCompile;
+const compileDependencies: UnaryBundle<'createCompile'> & {
+  parseDependencies: typeof parseDependencies;
+} = { parseDependencies, typedDependencies, createCompile: mathjsCreateCompile };
+
 const mathjsCreateEvaluate: CompatFactoryExports['createEvaluate'] = factories.createEvaluate;
 const evaluateDependencies: UnaryBundle<'createEvaluate'> & {
   parseDependencies: typeof parseDependencies;
@@ -2855,6 +2860,25 @@ const resolveDependencies: UnaryBundle<'createResolve'> & {
   createResolve: mathjsCreateResolve,
 };
 
+const mathjsCreateSetUnion: CompatFactoryExports['createSetUnion'] = factories.createSetUnion;
+const setUnionDependencies: UnaryBundle<'createSetUnion'> & {
+  IndexDependencies: typeof IndexDependencies;
+  concatDependencies: typeof concatDependencies;
+  setIntersectDependencies: typeof setIntersectDependencies;
+  setSymDifferenceDependencies: typeof setSymDifferenceDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+} = {
+  IndexDependencies,
+  concatDependencies,
+  setIntersectDependencies,
+  setSymDifferenceDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetUnion: mathjsCreateSetUnion,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3273,6 +3297,8 @@ export {
   AssignmentNodeDependencies,
   mathjsCreateParse as createParse,
   parseDependencies,
+  mathjsCreateCompile as createCompile,
+  compileDependencies,
   mathjsCreateEvaluate as createEvaluate,
   evaluateDependencies,
   atomicMassDependencies,
@@ -3395,5 +3421,7 @@ export {
   intersectDependencies,
   mathjsCreateResolve as createResolve,
   resolveDependencies,
+  mathjsCreateSetUnion as createSetUnion,
+  setUnionDependencies,
   typedDependencies,
 };

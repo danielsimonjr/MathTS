@@ -5,6 +5,21 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('compiles selected expressions for repeated evaluation', () => {
+    const actual = create({ compileDependencies: compat.compileDependencies });
+    const expected = oracle.create({
+      compileDependencies: Reflect.get(oracle, 'compileDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) => {
+      const code = Reflect.apply(Reflect.get(instance, 'compile'), instance, [
+        ['x + 2', 'x * 3'],
+      ]) as { evaluate(scope: { x: number }): unknown }[];
+      return code.map((entry) => [entry.evaluate({ x: 4 }), entry.evaluate({ x: 7 })]);
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
   it('resolves symbols with the selected MathJS factory', () => {
     const actual = create({ resolveDependencies: compat.resolveDependencies });
     const expected = oracle.create({
@@ -804,6 +819,13 @@ describe('native compatibility dependency bundles', () => {
         [2, 2],
         [0, 2],
         [2, 0],
+      ],
+    ],
+    [
+      'setUnion',
+      [
+        [3, 1, 1],
+        [2, 3],
       ],
     ],
     ['multiplyScalar', [3, 4]],
