@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.12
+
+### Patch Changes
+
+- c38f2cc: Expose selected MathJS dependency bundles for QR and LUP decompositions, the sparse accumulator, and the Fibonacci heap.
+- 8a05164: Expose selected MathJS dependency bundles for 13 expression node constructors.
+- c38f2cc: Expose selected MathJS dependency bundles for index construction, immutable matrices, set operations, rows, and columns.
+- Updated dependencies [c38f2cc]
+- Updated dependencies [8a05164]
+- Updated dependencies [c38f2cc]
+  - @danielsimonjr/mathts-functions@0.89.10
+
 ## 0.7.11
 
 ### Patch Changes
