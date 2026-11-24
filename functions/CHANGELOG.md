@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.4
+
+### Patch Changes
+
+- 59fd216: Expose selected scalar arithmetic, comparison, and numeric factories with their MathJS dependency bundles.
+- 59fd216: Accept arrays of factories and bind instance create options to the original factory selection.
+- 59fd216: Expose the MathJS sine factory, its dependency bundle, and the class and typed factories it uses.
+- fa2f915: Expose native MathJS matrix, comparison, concatenation, and atan2 factory bundles.
+- fa2f915: Expose MathJS square-root and negation factory bundles with their declared dependencies.
+- fa2f915: Apply instance settings when resolving and invoking functions from selected compatibility factory bundles.
+- fa2f915: Expose more MathJS collection, formatting, and random factories and their dependency bundles.
+- 59fd216: Expose the MathJS trigonometric and hyperbolic factories and their minimal dependency bundles.
+
 ## 0.89.3
 
 ### Patch Changes
