@@ -12527,6 +12527,9 @@
       "FibonacciHeap": {
         "kind": "function"
       },
+      "FibonacciHeapDependencies": {
+        "kind": "object"
+      },
       "Fraction": {
         "kind": "function"
       },
@@ -12551,8 +12554,14 @@
       "ImmutableDenseMatrix": {
         "kind": "function"
       },
+      "ImmutableDenseMatrixDependencies": {
+        "kind": "object"
+      },
       "Index": {
         "kind": "function"
+      },
+      "IndexDependencies": {
+        "kind": "object"
       },
       "IndexError": {
         "kind": "function"
@@ -12676,6 +12685,9 @@
       },
       "Spa": {
         "kind": "function"
+      },
+      "SpaDependencies": {
+        "kind": "object"
       },
       "SparseMatrix": {
         "kind": "function"
@@ -12917,6 +12929,9 @@
       "column": {
         "kind": "function"
       },
+      "columnDependencies": {
+        "kind": "object"
+      },
       "combinations": {
         "kind": "function"
       },
@@ -13115,6 +13130,9 @@
       "createClone": {
         "kind": "function"
       },
+      "createColumn": {
+        "kind": "function"
+      },
       "createCompare": {
         "kind": "function"
       },
@@ -13217,6 +13235,9 @@
       "createFalse": {
         "kind": "function"
       },
+      "createFibonacciHeapClass": {
+        "kind": "function"
+      },
       "createFilter": {
         "kind": "function"
       },
@@ -13266,6 +13287,15 @@
         "kind": "function"
       },
       "createIm": {
+        "kind": "function"
+      },
+      "createImmutableDenseMatrixClass": {
+        "kind": "function"
+      },
+      "createIndex": {
+        "kind": "function"
+      },
+      "createIndexClass": {
         "kind": "function"
       },
       "createIndexNode": {
@@ -13347,6 +13377,9 @@
         "kind": "function"
       },
       "createLsolveAll": {
+        "kind": "function"
+      },
+      "createLup": {
         "kind": "function"
       },
       "createMap": {
@@ -13439,6 +13472,9 @@
       "createPrint": {
         "kind": "function"
       },
+      "createQr": {
+        "kind": "function"
+      },
       "createRandom": {
         "kind": "function"
       },
@@ -13475,6 +13511,9 @@
       "createRound": {
         "kind": "function"
       },
+      "createRow": {
+        "kind": "function"
+      },
       "createSQRT1_2": {
         "kind": "function"
       },
@@ -13485,6 +13524,27 @@
         "kind": "function"
       },
       "createSech": {
+        "kind": "function"
+      },
+      "createSetCartesian": {
+        "kind": "function"
+      },
+      "createSetDifference": {
+        "kind": "function"
+      },
+      "createSetDistinct": {
+        "kind": "function"
+      },
+      "createSetIntersect": {
+        "kind": "function"
+      },
+      "createSetIsSubset": {
+        "kind": "function"
+      },
+      "createSetMultiplicity": {
+        "kind": "function"
+      },
+      "createSetPowerset": {
         "kind": "function"
       },
       "createSetSize": {
@@ -13509,6 +13569,9 @@
         "kind": "function"
       },
       "createSort": {
+        "kind": "function"
+      },
+      "createSpaClass": {
         "kind": "function"
       },
       "createSparseMatrixClass": {
@@ -13886,6 +13949,9 @@
       "index": {
         "kind": "function"
       },
+      "indexDependencies": {
+        "kind": "object"
+      },
       "intersect": {
         "kind": "function"
       },
@@ -14180,6 +14246,9 @@
       "lup": {
         "kind": "function"
       },
+      "lupDependencies": {
+        "kind": "object"
+      },
       "lusolve": {
         "kind": "function"
       },
@@ -14423,6 +14492,9 @@
       "qr": {
         "kind": "function"
       },
+      "qrDependencies": {
+        "kind": "object"
+      },
       "quantileSeq": {
         "kind": "function"
       },
@@ -14507,6 +14579,9 @@
       "row": {
         "kind": "function"
       },
+      "rowDependencies": {
+        "kind": "object"
+      },
       "rydberg": {
         "kind": "object"
       },
@@ -14534,23 +14609,44 @@
       "setCartesian": {
         "kind": "function"
       },
+      "setCartesianDependencies": {
+        "kind": "object"
+      },
       "setDifference": {
         "kind": "function"
+      },
+      "setDifferenceDependencies": {
+        "kind": "object"
       },
       "setDistinct": {
         "kind": "function"
       },
+      "setDistinctDependencies": {
+        "kind": "object"
+      },
       "setIntersect": {
         "kind": "function"
+      },
+      "setIntersectDependencies": {
+        "kind": "object"
       },
       "setIsSubset": {
         "kind": "function"
       },
+      "setIsSubsetDependencies": {
+        "kind": "object"
+      },
       "setMultiplicity": {
         "kind": "function"
       },
+      "setMultiplicityDependencies": {
+        "kind": "object"
+      },
       "setPowerset": {
         "kind": "function"
+      },
+      "setPowersetDependencies": {
+        "kind": "object"
       },
       "setSize": {
         "kind": "function"

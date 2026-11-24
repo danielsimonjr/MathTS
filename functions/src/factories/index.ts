@@ -2563,6 +2563,22 @@ function compatFactoryExports(): {
   createObjectNode: typeof createObjectNode;
   createIndexNode: typeof createIndexNode;
   createRelationalNode: typeof createRelationalNode;
+  createImmutableDenseMatrixClass: typeof createImmutableDenseMatrixClass;
+  createIndexClass: typeof createIndexClass;
+  createIndex: typeof createIndexFn;
+  createSetDifference: typeof createSetDifference;
+  createSetIntersect: typeof createSetIntersect;
+  createSetDistinct: typeof createSetDistinct;
+  createSetCartesian: typeof createSetCartesian;
+  createSetIsSubset: typeof createSetIsSubset;
+  createSetMultiplicity: typeof createSetMultiplicity;
+  createSetPowerset: typeof createSetPowerset;
+  createColumn: typeof createColumn;
+  createRow: typeof createRow;
+  createFibonacciHeapClass: typeof createFibonacciHeapClass;
+  createSpaClass: typeof createSpaClass;
+  createQr: typeof createQr;
+  createLup: typeof createLup;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2731,6 +2747,22 @@ function compatFactoryExports(): {
     createObjectNode,
     createIndexNode,
     createRelationalNode,
+    createImmutableDenseMatrixClass,
+    createIndexClass,
+    createIndex: createIndexFn,
+    createSetDifference,
+    createSetIntersect,
+    createSetDistinct,
+    createSetCartesian,
+    createSetIsSubset,
+    createSetMultiplicity,
+    createSetPowerset,
+    createColumn,
+    createRow,
+    createFibonacciHeapClass,
+    createSpaClass,
+    createQr,
+    createLup,
     createTyped,
   };
 }
