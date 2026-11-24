@@ -12869,6 +12869,9 @@
       "bellNumbers": {
         "kind": "function"
       },
+      "bellNumbersDependencies": {
+        "kind": "object"
+      },
       "bernoulli": {
         "kind": "function"
       },
@@ -12949,6 +12952,9 @@
       },
       "catalan": {
         "kind": "function"
+      },
+      "catalanDependencies": {
+        "kind": "object"
       },
       "cbrt": {
         "kind": "function"
@@ -13184,6 +13190,9 @@
       "createAvogadro": {
         "kind": "function"
       },
+      "createBellNumbers": {
+        "kind": "function"
+      },
       "createBernoulli": {
         "kind": "function"
       },
@@ -13230,6 +13239,9 @@
         "kind": "function"
       },
       "createBoolean": {
+        "kind": "function"
+      },
+      "createCatalan": {
         "kind": "function"
       },
       "createCbrt": {
@@ -13724,6 +13736,9 @@
       "createMolarVolume": {
         "kind": "function"
       },
+      "createMultinomial": {
+        "kind": "function"
+      },
       "createMultiply": {
         "kind": "function"
       },
@@ -13800,6 +13815,9 @@
         "kind": "function"
       },
       "createPartitionSelect": {
+        "kind": "function"
+      },
+      "createPermutations": {
         "kind": "function"
       },
       "createPhi": {
@@ -14031,6 +14049,9 @@
         "kind": "function"
       },
       "createStefanBoltzmann": {
+        "kind": "function"
+      },
+      "createStirlingS2": {
         "kind": "function"
       },
       "createString": {
@@ -14993,6 +15014,9 @@
       "multinomial": {
         "kind": "function"
       },
+      "multinomialDependencies": {
+        "kind": "object"
+      },
       "multiply": {
         "kind": "function"
       },
@@ -15109,6 +15133,9 @@
       },
       "permutations": {
         "kind": "function"
+      },
+      "permutationsDependencies": {
+        "kind": "object"
       },
       "phi": {
         "kind": "number"
@@ -15538,6 +15565,9 @@
       },
       "stirlingS2": {
         "kind": "function"
+      },
+      "stirlingS2Dependencies": {
+        "kind": "object"
       },
       "string": {
         "kind": "function"

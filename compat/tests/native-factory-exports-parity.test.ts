@@ -1193,6 +1193,12 @@ describe('native compatibility dependency bundles', () => {
     ],
     ['gamma', [5]],
     ['factorial', [[3, 4, 5]]],
+    ['permutations', [6]],
+    ['permutations', [6, 2]],
+    ['catalan', [7]],
+    ['multinomial', [[2, 3, 4]]],
+    ['stirlingS2', [8, 3]],
+    ['bellNumbers', [7]],
     ['composition', [5, 3]],
     [
       'kldivergence',
