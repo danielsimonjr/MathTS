@@ -13430,6 +13430,9 @@
       "createExpm1": {
         "kind": "function"
       },
+      "createFactorial": {
+        "kind": "function"
+      },
       "createFalse": {
         "kind": "function"
       },
@@ -13485,6 +13488,9 @@
         "kind": "function"
       },
       "createFunctionNode": {
+        "kind": "function"
+      },
+      "createGamma": {
         "kind": "function"
       },
       "createGasConstant": {
@@ -14342,6 +14348,9 @@
       "factorial": {
         "kind": "function"
       },
+      "factorialDependencies": {
+        "kind": "object"
+      },
       "factory": {
         "kind": "function"
       },
@@ -14431,6 +14440,9 @@
       },
       "gamma": {
         "kind": "function"
+      },
+      "gammaDependencies": {
+        "kind": "object"
       },
       "gasConstant": {
         "kind": "object"

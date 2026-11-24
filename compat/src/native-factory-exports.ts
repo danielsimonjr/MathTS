@@ -3680,6 +3680,30 @@ const rationalizeDependencies: UnaryBundle<'createRationalize'> & {
   createRationalize: mathjsCreateRationalize,
 };
 
+const mathjsCreateGamma: CompatFactoryExports['createGamma'] = factories.createGamma;
+const gammaDependencies: UnaryBundle<'createGamma'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  ComplexDependencies: typeof ComplexDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  powDependencies: typeof powDependencies;
+} = {
+  BigNumberDependencies,
+  ComplexDependencies,
+  multiplyScalarDependencies,
+  powDependencies,
+  typedDependencies,
+  createGamma: mathjsCreateGamma,
+};
+
+const mathjsCreateFactorial: CompatFactoryExports['createFactorial'] = factories.createFactorial;
+const factorialDependencies: UnaryBundle<'createFactorial'> & {
+  gammaDependencies: typeof gammaDependencies;
+} = {
+  gammaDependencies,
+  typedDependencies,
+  createFactorial: mathjsCreateFactorial,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -4274,6 +4298,10 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateFactorial as createFactorial,
+  factorialDependencies,
+  mathjsCreateGamma as createGamma,
+  gammaDependencies,
   mathjsCreateSymbolicEqual as createSymbolicEqual,
   symbolicEqualDependencies,
   mathjsCreateRationalize as createRationalize,

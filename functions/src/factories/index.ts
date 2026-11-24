@@ -881,7 +881,7 @@ import { createQr } from '../algebra/decomposition/qr.js';
 import { createRange } from '../matrix/range.js';
 
 // probability
-import { createGamma } from '../probability/gamma.js';
+import { createGamma, createSelectedGamma } from '../probability/gamma.js';
 
 // relational
 import { createCompareNatural } from '../relational/compareNatural.js';
@@ -972,7 +972,7 @@ factoryScope.hypot = factory_hypot;
 // Tier 7: factories unlocked by tier 6
 // ---------------------------------------------------------------------------
 
-import { createFactorial } from '../probability/factorial.js';
+import { createFactorial, createSelectedFactorial } from '../probability/factorial.js';
 import { createSetSize } from '../set/setSize.js';
 import { createSort } from '../matrix/sort.js';
 
@@ -2993,6 +2993,8 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createFactorial: typeof createSelectedFactorial;
+  createGamma: typeof createSelectedGamma;
   createSymbolicEqual: typeof createSymbolicEqual;
   createRationalize: typeof createRationalize;
   createDerivative: typeof createDerivative;
@@ -3303,6 +3305,8 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createFactorial: createSelectedFactorial,
+    createGamma: createSelectedGamma,
     createSymbolicEqual,
     createRationalize,
     createDerivative,

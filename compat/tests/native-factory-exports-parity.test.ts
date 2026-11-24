@@ -5,6 +5,30 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('uses selected BigNumber precision for gamma and factorial', () => {
+    const config = { precision: 8 };
+    const actual = create({ factorialDependencies: compat.factorialDependencies }, config);
+    const expected = oracle.create(
+      {
+        factorialDependencies: Reflect.get(oracle, 'factorialDependencies'),
+      },
+      config
+    );
+    const run = (instance: object, name: string, value: unknown) =>
+      Number(String(Reflect.apply(Reflect.get(instance, name), instance, [value])));
+    for (const name of ['gamma', 'factorial']) {
+      const result = run(actual, name, compat.bignumber('19'));
+      const upstream = run(expected, name, oracle.bignumber('19'));
+      expect(result / upstream).toBeCloseTo(1, config.precision - 1);
+    }
+    expect(run(actual, 'gamma', compat.bignumber('NaN'))).toBe(
+      run(expected, 'gamma', oracle.bignumber('NaN'))
+    );
+    expect(() => run(actual, 'gamma', compat.bignumber('2.5'))).toThrow(
+      'Integer BigNumber expected'
+    );
+  });
+
   it('simplifies selected expression trees and compares selected symbolic forms', () => {
     const actual = create({
       symbolicEqualDependencies: compat.symbolicEqualDependencies,
@@ -1138,6 +1162,8 @@ describe('native compatibility dependency bundles', () => {
         ],
       ],
     ],
+    ['gamma', [5]],
+    ['factorial', [[3, 4, 5]]],
     ['composition', [5, 3]],
     [
       'kldivergence',
