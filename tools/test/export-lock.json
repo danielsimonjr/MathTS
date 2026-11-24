@@ -12965,8 +12965,14 @@
       "combinations": {
         "kind": "function"
       },
+      "combinationsDependencies": {
+        "kind": "object"
+      },
       "combinationsWithRep": {
         "kind": "function"
+      },
+      "combinationsWithRepDependencies": {
+        "kind": "object"
       },
       "compare": {
         "kind": "function"
@@ -13197,6 +13203,12 @@
         "kind": "function"
       },
       "createColumn": {
+        "kind": "function"
+      },
+      "createCombinations": {
+        "kind": "function"
+      },
+      "createCombinationsWithRep": {
         "kind": "function"
       },
       "createCompare": {

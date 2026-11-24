@@ -1940,6 +1940,26 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+const createSelectedCombinations = /* #__PURE__ */ factory(
+  'combinations',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('combinations', {
+      'number, number': typedCombinations.signatures['number,number'],
+      'BigNumber, BigNumber': typedCombinations.signatures['BigNumber,BigNumber'],
+    })
+);
+
+const createSelectedCombinationsWithRep = /* #__PURE__ */ factory(
+  'combinationsWithRep',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('combinationsWithRep', {
+      'number, number': typedCombinationsWithRep.signatures['number,number'],
+      'BigNumber, BigNumber': typedCombinationsWithRep.signatures['BigNumber,BigNumber'],
+    })
+);
+
 const createSelectedMean = /* #__PURE__ */ factory(
   'mean',
   ['typed', 'add', 'divide'],
@@ -2762,6 +2782,8 @@ function compatFactoryExports(): {
   createSetUnion: typeof createSetUnion;
   createDivide: typeof createSelectedDivide;
   createMean: typeof createSelectedMean;
+  createCombinations: typeof createSelectedCombinations;
+  createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
   createTyped: typeof createTyped;
 } {
@@ -3033,6 +3055,8 @@ function compatFactoryExports(): {
     createSetUnion,
     createDivide: createSelectedDivide,
     createMean: createSelectedMean,
+    createCombinations: createSelectedCombinations,
+    createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
     createTyped,
   };
