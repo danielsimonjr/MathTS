@@ -5,6 +5,213 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('opens selected parser scopes and retrieves help using a function reference', () => {
+    const actual = create({
+      parserDependencies: compat.parserDependencies,
+      helpDependencies: compat.helpDependencies,
+      addDependencies: compat.addDependencies,
+    });
+    const expected = oracle.create({
+      parserDependencies: Reflect.get(oracle, 'parserDependencies'),
+      helpDependencies: Reflect.get(oracle, 'helpDependencies'),
+      addDependencies: Reflect.get(oracle, 'addDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const runParser = (instance: object) => {
+      const parser = Reflect.apply(Reflect.get(instance, 'parser'), instance, []) as {
+        set(name: string, value: unknown): unknown;
+        evaluate(expr: string): unknown;
+        get(name: string): unknown;
+      };
+      parser.set('x', 7);
+      return [parser.evaluate('x + 3'), parser.get('x')];
+    };
+    expect(runParser(actual)).toEqual(runParser(expected));
+    const helpName = (instance: object) => {
+      const doc = Reflect.apply(Reflect.get(instance, 'help'), instance, [
+        Reflect.get(instance, 'add'),
+      ]) as { toJSON(): { name: string } };
+      return doc.toJSON().name;
+    };
+    expect(helpName(actual)).toBe(helpName(expected));
+  });
+
+  it('evaluates selected transforms with MathJS expression semantics', () => {
+    const cases = [
+      ['and', 'And', 'false and missing'],
+      ['bitAnd', 'BitAnd', '0 & missing'],
+      ['diff', 'Diff', 'diff([[1, 3], [4, 8]], 2)'],
+      ['range', 'Range', '2:4'],
+      ['print', 'Print', 'print("$1", [42, 7])'],
+      ['subset', 'Subset', 'A[2]'],
+      ['index', 'Index', 'A[2]'],
+      ['or', 'Or', 'true or missing'],
+      ['bitOr', 'BitOr', '1 | 2'],
+      ['nullish', 'Nullish', '4 ?? missing'],
+      ['column', 'Column', 'column([[1, 2], [3, 4]], 2)'],
+      ['row', 'Row', 'row([[1, 2], [3, 4]], 2)'],
+      ['concat', 'Concat', 'concat([[1, 2]], [[3, 4]], 1)'],
+      ['min', 'Min', 'min([[4, 1], [3, 9]], 1)'],
+      ['max', 'Max', 'max([[4, 1], [3, 9]], 2)'],
+      ['sum', 'Sum', 'sum([[4, 1], [3, 9]], 1)'],
+      ['cumsum', 'CumSum', 'cumsum([[4, 1], [3, 9]], 2)'],
+      ['mean', 'Mean', 'mean([[4, 1], [3, 9]], 1)'],
+      ['mapSlices', 'MapSlices', 'mapSlices([[4, 1], [3, 9]], 2, first)'],
+    ] as const;
+    const config = { matrix: 'Array' as const };
+    const run = (instance: object, expression: string) =>
+      Reflect.apply(Reflect.get(instance, 'evaluate'), instance, [
+        expression,
+        { A: [10, 20], first: (row: unknown[]) => row[0] },
+      ]);
+    for (const [name, factoryName, expression] of cases) {
+      const key = name + 'TransformDependencies';
+      const createName = 'create' + factoryName + 'Transform';
+      const actualBundle = Reflect.get(compat, key) as Record<string, unknown>;
+      const expectedBundle = Reflect.get(oracle, key) as Parameters<typeof oracle.create>[0];
+      expect(Object.keys(actualBundle)).toEqual(Object.keys(expectedBundle));
+      type TransformFactory = { dependencies: string[]; meta: object };
+      const actualFactory = Reflect.get(actualBundle, createName) as TransformFactory;
+      const expectedFactory = Reflect.get(
+        expectedBundle,
+        createName
+      ) as unknown as TransformFactory;
+      expect(actualFactory.dependencies).toEqual(expectedFactory.dependencies);
+      expect(actualFactory.meta).toEqual(expectedFactory.meta);
+      const extraKeys =
+        name === 'index'
+          ? ['subsetTransformDependencies']
+          : name === 'subset'
+            ? ['indexTransformDependencies']
+            : [];
+      const extras = (library: object) =>
+        Object.fromEntries(extraKeys.map((extraKey) => [extraKey, Reflect.get(library, extraKey)]));
+      const actual = create(
+        {
+          ...extras(compat),
+          [key]: actualBundle,
+          evaluateDependencies: compat.evaluateDependencies,
+        },
+        config
+      );
+      const expected = oracle.create(
+        {
+          ...extras(oracle),
+          [key]: expectedBundle,
+          evaluateDependencies: Reflect.get(oracle, 'evaluateDependencies'),
+        },
+        config
+      );
+      expect(run(actual, expression)).toEqual(run(expected, expression));
+    }
+  });
+
+  it('evaluates selected callback transforms with one-based indices', () => {
+    const actual = create(
+      {
+        evaluateDependencies: compat.evaluateDependencies,
+        addDependencies: compat.addDependencies,
+        largerDependencies: compat.largerDependencies,
+        mapTransformDependencies: compat.mapTransformDependencies,
+        filterTransformDependencies: compat.filterTransformDependencies,
+        forEachTransformDependencies: compat.forEachTransformDependencies,
+      },
+      { matrix: 'Array' }
+    );
+    const expected = oracle.create(
+      Object.fromEntries(
+        ['evaluate', 'add', 'larger', 'mapTransform', 'filterTransform', 'forEachTransform'].map(
+          (name) => {
+            const key = name + 'Dependencies';
+            return [key, Reflect.get(oracle, key)];
+          }
+        )
+      ),
+      { matrix: 'Array' }
+    );
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+
+    const evaluate = (instance: object, expression: string, scope: object = {}) =>
+      Reflect.apply(Reflect.get(instance, 'evaluate'), instance, [expression, scope]);
+    for (const expression of ['map([4, 9], i)', 'filter([3, -2, 5], x > 0)']) {
+      expect(evaluate(actual, expression, { i: (_x: unknown, index: unknown) => index })).toEqual(
+        evaluate(expected, expression, { i: (_x: unknown, index: unknown) => index })
+      );
+    }
+    const indices = (instance: object) => {
+      const out: unknown[] = [];
+      evaluate(instance, 'forEach([4, 9], collect)', {
+        collect: (_value: unknown, index: unknown) => out.push(index),
+      });
+      return out;
+    };
+    expect(indices(actual)).toEqual(indices(expected));
+  });
+
+  it('constructs selected ranges and serializes MathJS numeric tags', () => {
+    const actual = create({
+      RangeDependencies: compat.RangeDependencies,
+      replacerDependencies: compat.replacerDependencies,
+    });
+    const expected = oracle.create({
+      RangeDependencies: Reflect.get(oracle, 'RangeDependencies'),
+      replacerDependencies: Reflect.get(oracle, 'replacerDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+
+    const serialize = (instance: object) => {
+      const range = Reflect.construct(Reflect.get(instance, 'Range'), [5, -1, -2]) as {
+        toArray(): number[];
+      };
+      return JSON.stringify(
+        [range, range.toArray(), Infinity, -Infinity, NaN, 10n],
+        Reflect.get(instance, 'replacer')
+      );
+    };
+    expect(serialize(actual)).toBe(serialize(expected));
+  });
+
+  it('extracts selected fraction parts from fractions and nested collections', () => {
+    const actual = create({
+      numDependencies: compat.numDependencies,
+      denDependencies: compat.denDependencies,
+    });
+    const expected = oracle.create({
+      numDependencies: Reflect.get(oracle, 'numDependencies'),
+      denDependencies: Reflect.get(oracle, 'denDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object, name: 'num' | 'den', value: unknown) =>
+      Reflect.apply(Reflect.get(instance, name), instance, [value]);
+    for (const name of ['num', 'den'] as const) {
+      expect(run(actual, name, [[compat.fraction('-8/6'), compat.bignumber('0.125')]])).toEqual(
+        run(expected, name, [[oracle.fraction('-8/6'), oracle.bignumber('0.125')]])
+      );
+    }
+  });
+
+  it('computes selected combinations with BigNumber inputs', () => {
+    const actual = create({
+      combinationsDependencies: compat.combinationsDependencies,
+      combinationsWithRepDependencies: compat.combinationsWithRepDependencies,
+    });
+    const expected = oracle.create({
+      combinationsDependencies: Reflect.get(oracle, 'combinationsDependencies'),
+      combinationsWithRepDependencies: Reflect.get(oracle, 'combinationsWithRepDependencies'),
+    });
+    for (const name of ['combinations', 'combinationsWithRep']) {
+      const result = Reflect.apply(Reflect.get(actual, name), actual, [
+        compat.bignumber(12),
+        compat.bignumber(4),
+      ]);
+      const upstream = Reflect.apply(Reflect.get(expected, name), expected, [
+        oracle.bignumber(12),
+        oracle.bignumber(4),
+      ]);
+      expect(String(result)).toBe(String(upstream));
+    }
+  });
+
   it('compiles selected expressions for repeated evaluation', () => {
     const actual = create({ compileDependencies: compat.compileDependencies });
     const expected = oracle.create({
@@ -98,6 +305,25 @@ describe('native compatibility dependency bundles', () => {
       ];
     };
     expect(run(actual)).toEqual(run(expected));
+  });
+
+  it('computes selected filter frequency bins and complex response', () => {
+    const actual = create({ freqzDependencies: compat.freqzDependencies });
+    const expected = oracle.create({ freqzDependencies: Reflect.get(oracle, 'freqzDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) =>
+      Reflect.apply(Reflect.get(instance, 'freqz'), instance, [[1, 0.5], [1], 4]) as {
+        w: number[];
+        h: { re: number; im: number }[];
+      };
+    const result = run(actual);
+    const upstream = run(expected);
+    expect(result.w).toEqual(upstream.w);
+    expect(result.h).toHaveLength(upstream.h.length);
+    for (const [i, value] of result.h.entries()) {
+      expect(value.re).toBeCloseTo(upstream.h[i].re, 12);
+      expect(value.im).toBeCloseTo(upstream.h[i].im, 12);
+    }
   });
 
   it('builds selected transfer function coefficients like MathJS', () => {
@@ -819,6 +1045,43 @@ describe('native compatibility dependency bundles', () => {
         [2, 2],
         [0, 2],
         [2, 0],
+      ],
+    ],
+    ['combinations', [7, 5]],
+    ['combinationsWithRep', [7, 5]],
+    [
+      'bigint',
+      [
+        [
+          [-1.5, true],
+          ['14', 0],
+        ],
+      ],
+    ],
+    [
+      'boolean',
+      [
+        [
+          ['False', 1],
+          ['2', 0],
+        ],
+      ],
+    ],
+    [
+      'string',
+      [
+        [
+          [1e-10, 1.25],
+          [true, null],
+        ],
+      ],
+    ],
+    ['composition', [5, 3]],
+    [
+      'kldivergence',
+      [
+        [0.3, 0.7],
+        [0.5, 0.5],
       ],
     ],
     ['mean', [[2, 4, 9]]],

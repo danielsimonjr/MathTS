@@ -22,10 +22,11 @@ import {
   type TypedBuilder,
 } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
+import { format as formatNumber } from '../utils/number.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
 import { compatSetUnion } from '../typed/set.js';
-import { factory, isFactory } from '../utils/factory.js';
+import { factory, isFactory, type FactoryFunction } from '../utils/factory.js';
 import { create as createFactoryInstance, type FactoriesInput } from '../core/create.js';
 import { mixin as attachEmitter } from '../utils/emitter.js';
 import { ArgumentsError } from '../error/ArgumentsError.js';
@@ -1030,6 +1031,9 @@ import {
   createRelationalNode,
   createSymbolNode,
   createParse,
+  createParser,
+  createParserClass,
+  createHelpClass,
 } from '@danielsimonjr/mathts-expression';
 
 import { createResultSet } from '../type/resultset/ResultSet.js';
@@ -1940,6 +1944,26 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+const createSelectedCombinations = /* #__PURE__ */ factory(
+  'combinations',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('combinations', {
+      'number, number': typedCombinations.signatures['number,number'],
+      'BigNumber, BigNumber': typedCombinations.signatures['BigNumber,BigNumber'],
+    })
+);
+
+const createSelectedCombinationsWithRep = /* #__PURE__ */ factory(
+  'combinationsWithRep',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('combinationsWithRep', {
+      'number, number': typedCombinationsWithRep.signatures['number,number'],
+      'BigNumber, BigNumber': typedCombinationsWithRep.signatures['BigNumber,BigNumber'],
+    })
+);
+
 const createSelectedMean = /* #__PURE__ */ factory(
   'mean',
   ['typed', 'add', 'divide'],
@@ -2292,6 +2316,50 @@ export function bigint(x?: unknown): unknown {
   return BigInt(x as never);
 }
 
+const createSelectedBigint = /* #__PURE__ */ factory(
+  'bigint',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    Object.assign(
+      typed('bigint', {
+        '': () => 0n,
+        'bigint | number | BigNumber | Fraction | string | boolean | null': bigint,
+        'Array | Matrix': typed.referToSelf(
+          (self) => (value) => mapCollection(value, (v) => self(v))
+        ),
+      }),
+      { fromJSON: ({ value }: { value: string }) => BigInt(value) }
+    )
+);
+
+const createSelectedBoolean = /* #__PURE__ */ factory(
+  'boolean',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('boolean', {
+      '': () => false,
+      'boolean | number | null | BigNumber | string': boolean,
+      'Array | Matrix': typed.referToSelf(
+        (self) => (value) => mapCollection(value, (v) => self(v))
+      ),
+    })
+);
+
+const createSelectedString = /* #__PURE__ */ factory(
+  'string',
+  ['typed'],
+  ({ typed }: { typed: TypedBuilder }) =>
+    typed('string', {
+      '': () => '',
+      number: formatNumber,
+      'null | boolean | string': String,
+      'Array | Matrix': typed.referToSelf(
+        (self) => (value) => mapCollection(value, (v) => self(v))
+      ),
+      any: String,
+    })
+);
+
 // ---------------------------------------------------------------------------
 // GC4 — mathjs canonical-name aliases. These functions exist but were only
 // exported under a `factory_`-prefixed or renamed identifier; alias the bare
@@ -2493,6 +2561,128 @@ function tryCreateFactoryBundle(
   return createFactoryInstance(factories as FactoriesInput, config);
 }
 
+function selectedTransform<TResult>(
+  transform: (deps: Record<string, unknown>) => TResult,
+  base: FactoryFunction,
+  extraDependencies: string[] = []
+): FactoryFunction<Record<string, unknown>, TResult> {
+  return factory(
+    base.fn,
+    [...base.dependencies, ...extraDependencies],
+    (deps: Record<string, unknown>) => transform({ ...deps, [base.fn]: base(deps) }),
+    { ...base.meta, isTransformFunction: true }
+  );
+}
+
+const createSelectedMapTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMapTransform>
+> = /* #__PURE__ */ selectedTransform(createMapTransform, createMap);
+
+const createSelectedFilterTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createFilterTransform>
+> = /* #__PURE__ */ selectedTransform(createFilterTransform, createFilter);
+
+const createSelectedForEachTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createForEachTransform>
+> = /* #__PURE__ */ selectedTransform(createForEachTransform, createForEach);
+
+const createSelectedMinTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMinTransform>
+> = /* #__PURE__ */ selectedTransform(createMinTransform, createMin);
+
+const createSelectedMaxTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMaxTransform>
+> = /* #__PURE__ */ selectedTransform(createMaxTransform, createMax);
+
+const createSelectedSumTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createSumTransform>
+> = /* #__PURE__ */ selectedTransform(createSumTransform, createMathjsSum);
+
+const createSelectedCumSumTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createCumSumTransform>
+> = /* #__PURE__ */ selectedTransform(createCumSumTransform, createCumSum);
+
+const createSelectedMapSlicesTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMapSlicesTransform>
+> = /* #__PURE__ */ selectedTransform(createMapSlicesTransform, createMathjsMapSlices);
+
+const createSelectedMeanTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createMeanTransform>
+> = /* #__PURE__ */ selectedTransform(createMeanTransform, createSelectedMean);
+
+const createSelectedOrTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createOrTransform>
+> = /* #__PURE__ */ selectedTransform(createOrTransform, createOr);
+
+const createSelectedBitOrTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createBitOrTransform>
+> = /* #__PURE__ */ selectedTransform(createBitOrTransform, createBitOr);
+
+const createSelectedNullishTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createNullishTransform>
+> = /* #__PURE__ */ selectedTransform(createNullishTransform, createNullish);
+
+const createSelectedColumnTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createColumnTransform>
+> = /* #__PURE__ */ selectedTransform(createColumnTransform, createColumn);
+
+const createSelectedRowTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createRowTransform>
+> = /* #__PURE__ */ selectedTransform(createRowTransform, createRow);
+
+const createSelectedConcatTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createConcatTransform>
+> = /* #__PURE__ */ selectedTransform(createConcatTransform, createConcat);
+
+const createSelectedAndTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createAndTransform>
+> = /* #__PURE__ */ selectedTransform(createAndTransform, createAnd, ['add']);
+
+const createSelectedBitAndTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createBitAndTransform>
+> = /* #__PURE__ */ selectedTransform(createBitAndTransform, createBitAnd, ['add', 'not', 'zeros']);
+
+const createSelectedDiffTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createDiffTransform>
+> = /* #__PURE__ */ selectedTransform(createDiffTransform, createDiff, ['bignumber']);
+
+const createSelectedSubsetTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createSubsetTransform>
+> = /* #__PURE__ */ selectedTransform(createSubsetTransform, createSubset);
+
+const createSelectedPrintTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createPrintTransform>
+> = /* #__PURE__ */ selectedTransform(createPrintTransform, createPrint, [
+  'add',
+  'matrix',
+  'zeros',
+]);
+
+const createSelectedRangeTransform: FactoryFunction<
+  Record<string, unknown>,
+  ReturnType<typeof createRangeTransform>
+> = /* #__PURE__ */ selectedTransform(createRangeTransform, createRange);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -2552,8 +2742,30 @@ function compatFactoryExports(): {
   createPickRandom: typeof createPickRandom;
   createRandom: typeof createRandom;
   createMap: typeof createMap;
+  createMapTransform: typeof createSelectedMapTransform;
   createFilter: typeof createFilter;
+  createFilterTransform: typeof createSelectedFilterTransform;
   createForEach: typeof createForEach;
+  createForEachTransform: typeof createSelectedForEachTransform;
+  createIndexTransform: typeof createIndexTransform;
+  createRangeTransform: typeof createSelectedRangeTransform;
+  createPrintTransform: typeof createSelectedPrintTransform;
+  createSubsetTransform: typeof createSelectedSubsetTransform;
+  createDiffTransform: typeof createSelectedDiffTransform;
+  createBitAndTransform: typeof createSelectedBitAndTransform;
+  createAndTransform: typeof createSelectedAndTransform;
+  createConcatTransform: typeof createSelectedConcatTransform;
+  createRowTransform: typeof createSelectedRowTransform;
+  createColumnTransform: typeof createSelectedColumnTransform;
+  createNullishTransform: typeof createSelectedNullishTransform;
+  createBitOrTransform: typeof createSelectedBitOrTransform;
+  createOrTransform: typeof createSelectedOrTransform;
+  createMeanTransform: typeof createSelectedMeanTransform;
+  createMapSlicesTransform: typeof createSelectedMapSlicesTransform;
+  createCumSumTransform: typeof createSelectedCumSumTransform;
+  createSumTransform: typeof createSelectedSumTransform;
+  createMaxTransform: typeof createSelectedMaxTransform;
+  createMinTransform: typeof createSelectedMinTransform;
   createFlatten: typeof createFlatten;
   createSize: typeof createSize;
   createSqueeze: typeof createSqueeze;
@@ -2762,7 +2974,18 @@ function compatFactoryExports(): {
   createSetUnion: typeof createSetUnion;
   createDivide: typeof createSelectedDivide;
   createMean: typeof createSelectedMean;
+  createCombinations: typeof createSelectedCombinations;
+  createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createString: typeof createSelectedString;
+  createBoolean: typeof createSelectedBoolean;
+  createBigint: typeof createSelectedBigint;
+  createHelpClass: typeof createHelpClass;
+  createParser: typeof createParser;
+  createParserClass: typeof createParserClass;
+  createComposition: typeof createComposition;
+  createKldivergence: typeof createKldivergence;
+  createFreqz: typeof createFreqz;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2823,8 +3046,30 @@ function compatFactoryExports(): {
     createPickRandom,
     createRandom,
     createMap,
+    createMapTransform: createSelectedMapTransform,
     createFilter,
+    createFilterTransform: createSelectedFilterTransform,
     createForEach,
+    createForEachTransform: createSelectedForEachTransform,
+    createIndexTransform,
+    createRangeTransform: createSelectedRangeTransform,
+    createPrintTransform: createSelectedPrintTransform,
+    createSubsetTransform: createSelectedSubsetTransform,
+    createDiffTransform: createSelectedDiffTransform,
+    createBitAndTransform: createSelectedBitAndTransform,
+    createAndTransform: createSelectedAndTransform,
+    createConcatTransform: createSelectedConcatTransform,
+    createRowTransform: createSelectedRowTransform,
+    createColumnTransform: createSelectedColumnTransform,
+    createNullishTransform: createSelectedNullishTransform,
+    createBitOrTransform: createSelectedBitOrTransform,
+    createOrTransform: createSelectedOrTransform,
+    createMeanTransform: createSelectedMeanTransform,
+    createMapSlicesTransform: createSelectedMapSlicesTransform,
+    createCumSumTransform: createSelectedCumSumTransform,
+    createSumTransform: createSelectedSumTransform,
+    createMaxTransform: createSelectedMaxTransform,
+    createMinTransform: createSelectedMinTransform,
     createFlatten,
     createSize,
     createSqueeze,
@@ -3033,7 +3278,18 @@ function compatFactoryExports(): {
     createSetUnion,
     createDivide: createSelectedDivide,
     createMean: createSelectedMean,
+    createCombinations: createSelectedCombinations,
+    createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createString: createSelectedString,
+    createBoolean: createSelectedBoolean,
+    createBigint: createSelectedBigint,
+    createHelpClass,
+    createParser,
+    createParserClass,
+    createComposition,
+    createKldivergence,
+    createFreqz,
     createTyped,
   };
 }
