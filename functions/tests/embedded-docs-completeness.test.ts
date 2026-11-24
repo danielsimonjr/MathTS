@@ -83,6 +83,8 @@ describe('embeddedDocs — wired and truthful', () => {
         'compile',
         'help',
         'chain',
+        'num', // fraction helpers exposed by the compatibility expression scope
+        'den',
         'reviver',
         'replacer',
       ]);

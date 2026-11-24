@@ -269,7 +269,6 @@ function _deepEqual(x: unknown, y: unknown): boolean {
  * ```
  */
 export const compareText = mathTyped('compareText', {
-  ...collectionBinaryRows('compareText'),
   'string, string': (x: string, y: string): number => {
     return x < y ? -1 : x > y ? 1 : 0;
   },
@@ -295,7 +294,6 @@ export const compareText = mathTyped('compareText', {
  * ```
  */
 export const equalText = mathTyped('equalText', {
-  ...collectionBinaryRows('equalText'),
   'any, any': (x: unknown, y: unknown): boolean => {
     return (compareText(x, y) as number) === 0;
   },

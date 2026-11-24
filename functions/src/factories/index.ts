@@ -1243,7 +1243,7 @@ import {
   mathTyped as coreTyped,
   createMathTSTyped,
 } from '@danielsimonjr/mathts-core';
-import { createUnitClass } from '@danielsimonjr/mathts-core/internal';
+import { createUnitClass, notSquareError } from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
 import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMatrix.js';
 
@@ -2970,7 +2970,7 @@ const createSelectedExpm = /* #__PURE__ */ factory(
         const size = input.size();
         const n = size[0];
         if (size.length !== 2 || n !== size[1]) {
-          throw new RangeError(`Matrix must be square (size: [${size.join(', ')}])`);
+          throw notSquareError(`Matrix must be square (size: [${size.join(', ')}])`);
         }
         let norm = 0;
         for (let row = 0; row < n; row += 1) {
