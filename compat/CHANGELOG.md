@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.7
+
+### Patch Changes
+
+- 3ae5e5d: Expose native MathJS factory bundles for matrix creation and manipulation.
+- 3ae5e5d: Expose native MathJS dependency bundles for binary operations, comparisons, and numeric predicates.
+- 3ae5e5d: Expose MathJS addition and subtraction factories for selected scalar and matrix instances.
+- Updated dependencies [3ae5e5d]
+- Updated dependencies [3ae5e5d]
+- Updated dependencies [3ae5e5d]
+  - @danielsimonjr/mathts-functions@0.89.5
+
 ## 0.7.6
 
 ### Patch Changes
