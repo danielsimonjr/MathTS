@@ -1,5 +1,24 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.5
+
+### Patch Changes
+
+- 0f1826b: Accept nested expression arrays and expression matrices in compat evaluate and compile, keeping their shape and sharing the supplied scope across expressions.
+- e405551: Load custom mathjs factory bundles passed to compat create, including nested bundles with dependencies.
+- 158b82c: Expose MathJS constructors, type predicates, fraction helpers, and factory directly from compat.
+- 158b82c: Expose a read-only MathJS-compatible global config and the random, randomInt, and pickRandom named imports.
+- 0f1826b: Keep each compat instance's custom typed functions, type registrations, and conversions isolated.
+- 158b82c: Expose existing MathTS mathematical functions as named imports through the MathJS compatibility package.
+- 0f1826b: Provide direct mathjs-style imports for evaluate, compile, parse, Parser, parser, and chain.
+- 158b82c: Match MathJS setUnion ordering in compat, including duplicate elements and matrix inputs.
+- 158b82c: Expose MathJS physical constants, number predicates, and typed as named imports.
+- 158b82c: Bind chain and its Chain constructor to the same instance and expose Chain as a named import.
+- Updated dependencies [e405551]
+- Updated dependencies [0f1826b]
+- Updated dependencies [158b82c]
+  - @danielsimonjr/mathts-functions@0.89.3
+
 ## 0.7.4
 
 ### Patch Changes

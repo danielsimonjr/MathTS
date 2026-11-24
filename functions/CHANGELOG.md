@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.3
+
+### Patch Changes
+
+- e405551: Load custom mathjs factory bundles passed to compat create, including nested bundles with dependencies.
+- 0f1826b: Keep each compat instance's custom typed functions, type registrations, and conversions isolated.
+- 158b82c: Match MathJS setUnion ordering in compat, including duplicate elements and matrix inputs.
+
 ## 0.89.2
 
 ### Patch Changes
