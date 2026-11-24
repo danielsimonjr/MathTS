@@ -7,7 +7,9 @@ function createUnitConstant([
   value,
   units,
 ]: (typeof MATHJS_UNIT_CONSTANTS)[number]): UnitInstance {
-  return new Unit(value, units);
+  const unit = new Unit(value, units);
+  unit.fixPrefix = true;
+  return unit;
 }
 
 /** MathJS 15.2.0 value of atomicMass, expressed in kg. */

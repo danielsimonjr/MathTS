@@ -80,7 +80,9 @@ export async function generatePhysicalExports() {
     "import { MATHJS_UNIT_CONSTANTS } from './parity-names.generated.js';",
     '',
     'function createUnitConstant([, value, units]: (typeof MATHJS_UNIT_CONSTANTS)[number]): UnitInstance {',
-    '  return new Unit(value, units);',
+    '  const unit = new Unit(value, units);',
+    '  unit.fixPrefix = true;',
+    '  return unit;',
     '}',
     '',
     ...unitConstants.flatMap(([name, , units], index) => [

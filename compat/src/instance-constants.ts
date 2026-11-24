@@ -36,6 +36,7 @@ function cloneUnit(name: string, value: number, units: string): InstanceType<typ
   let template = unitTemplates.get(name);
   if (template === undefined) {
     template = new Unit(value, units);
+    template.fixPrefix = true;
     unitTemplates.set(name, template);
   }
   return template.clone() as InstanceType<typeof Unit>;
