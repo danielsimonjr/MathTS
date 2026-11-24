@@ -1080,6 +1080,114 @@ const numberDependencies: UnaryBundle<'createNumber'> = {
   createNumber: mathjsCreateNumber,
 };
 
+const mathjsCreateCeil: CompatFactoryExports['createCeil'] = factories.createCeil;
+const ceilDependencies: UnaryBundle<'createCeil'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  roundDependencies: typeof roundDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  DenseMatrixDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  roundDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createCeil: mathjsCreateCeil,
+};
+
+const mathjsCreateFloor: CompatFactoryExports['createFloor'] = factories.createFloor;
+const floorDependencies: UnaryBundle<'createFloor'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  roundDependencies: typeof roundDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  DenseMatrixDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  roundDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createFloor: mathjsCreateFloor,
+};
+
+const mathjsCreateGcd: CompatFactoryExports['createGcd'] = factories.createGcd;
+const gcdDependencies: UnaryBundle<'createGcd'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  roundDependencies: typeof roundDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  BigNumberDependencies,
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  roundDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createGcd: mathjsCreateGcd,
+};
+
+const mathjsCreateMod: CompatFactoryExports['createMod'] = factories.createMod;
+const modDependencies: UnaryBundle<'createMod'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  concatDependencies: typeof concatDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  roundDependencies: typeof roundDependencies;
+  zerosDependencies: typeof zerosDependencies;
+} = {
+  DenseMatrixDependencies,
+  concatDependencies,
+  equalScalarDependencies,
+  matrixDependencies,
+  roundDependencies,
+  typedDependencies,
+  zerosDependencies,
+  createMod: mathjsCreateMod,
+};
+
+const mathjsCreateMatrixFromFunction: CompatFactoryExports['createMatrixFromFunction'] =
+  factories.createMatrixFromFunction;
+const matrixFromFunctionDependencies: UnaryBundle<'createMatrixFromFunction'> & {
+  isZeroDependencies: typeof isZeroDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  isZeroDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createMatrixFromFunction: mathjsCreateMatrixFromFunction,
+};
+
+const mathjsCreateSetSize: CompatFactoryExports['createSetSize'] = factories.createSetSize;
+const setSizeDependencies: UnaryBundle<'createSetSize'> & {
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+} = {
+  compareNaturalDependencies,
+  typedDependencies,
+  createSetSize: mathjsCreateSetSize,
+};
+
+const mathjsCreateSort: CompatFactoryExports['createSort'] = factories.createSort;
+const sortDependencies: UnaryBundle<'createSort'> & {
+  compareDependencies: typeof compareDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  compareDependencies,
+  compareNaturalDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createSort: mathjsCreateSort,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1332,5 +1440,19 @@ export {
   modeDependencies,
   mathjsCreateNumber as createNumber,
   numberDependencies,
+  mathjsCreateCeil as createCeil,
+  ceilDependencies,
+  mathjsCreateFloor as createFloor,
+  floorDependencies,
+  mathjsCreateGcd as createGcd,
+  gcdDependencies,
+  mathjsCreateMod as createMod,
+  modDependencies,
+  mathjsCreateMatrixFromFunction as createMatrixFromFunction,
+  matrixFromFunctionDependencies,
+  mathjsCreateSetSize as createSetSize,
+  setSizeDependencies,
+  mathjsCreateSort as createSort,
+  sortDependencies,
   typedDependencies,
 };

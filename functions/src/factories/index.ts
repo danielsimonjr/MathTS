@@ -2404,6 +2404,13 @@ function compatFactoryExports(): {
   createMapSlices: typeof createMathjsMapSlices;
   createMode: typeof createMathjsMode;
   createNumber: typeof createSelectedNumber;
+  createCeil: typeof createCeil;
+  createFloor: typeof createFloor;
+  createGcd: typeof createGcd;
+  createMod: typeof createMod;
+  createMatrixFromFunction: typeof createMatrixFromFunction;
+  createSetSize: typeof createSetSize;
+  createSort: typeof createSort;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2526,6 +2533,13 @@ function compatFactoryExports(): {
     createMapSlices: createMathjsMapSlices,
     createMode: createMathjsMode,
     createNumber: createSelectedNumber,
+    createCeil,
+    createFloor,
+    createGcd,
+    createMod,
+    createMatrixFromFunction,
+    createSetSize,
+    createSort,
     createTyped,
   };
 }
