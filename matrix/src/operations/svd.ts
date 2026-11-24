@@ -20,6 +20,7 @@ import {
   SQUARED,
   FOURTH,
 } from './common.js';
+import { SQUARES_SAFE_MIN } from '@danielsimonjr/mathts-core';
 import { sqrtOfSumSquares } from '../types/dense/reduction.js';
 import { applyGivensCols, givensRotation } from './givens.js';
 import {
@@ -261,14 +262,44 @@ function jacobiSVD(A: number[][]): { d: number[]; U: number[][]; V: number[][] }
           gamma += W[i][q] * W[i][q];
           beta += W[i][p] * W[i][q];
         }
-        if (Math.abs(beta) <= EPS * Math.sqrt(alpha * gamma) || (alpha === 0 && gamma === 0)) {
+        const pn = sqrtOfSumSquares(alpha, () => W.map((row) => row[p]));
+        const qn = sqrtOfSumSquares(gamma, () => W.map((row) => row[q]));
+        if (pn === 0 || qn === 0) continue;
+        const product = pn * qn;
+        let correlation = beta / product;
+        if (product < SQUARES_SAFE_MIN || !Number.isFinite(product) || !Number.isFinite(beta)) {
+          // Compute the inner product of the unit columns when the physical
+          // units of the product would lose range before the convergence test.
+          correlation = 0;
+          for (let i = 0; i < m; i++) correlation += (W[i][p] / pn) * (W[i][q] / qn);
+        }
+        if (Math.abs(correlation) <= EPS) continue;
+
+        // Solve for the rotation using a dimensionless Gram matrix. The
+        // rationalized tangent avoids forming zeta or zeta squared.
+        const scale = Math.max(pn, qn);
+        const a = pn / scale;
+        const b = qn / scale;
+        const diagonal = (b - a) * (b + a);
+        const coupling = 2 * correlation * a * b;
+        const t =
+          diagonal === 0
+            ? 1
+            : coupling / (diagonal + Math.sign(diagonal) * Math.hypot(diagonal, coupling));
+        if (t === 0) {
+          // The right rotation can round to zero when the ratio of column
+          // lengths has no binary64 representation. Its effect on the small
+          // column is still representable: remove the projection in unit
+          // coordinates, then restore that column's scale.
+          const [small, large, smallNorm, largeNorm] = pn < qn ? [p, q, pn, qn] : [q, p, qn, pn];
+          for (let i = 0; i < m; i++) {
+            W[i][small] =
+              (W[i][small] / smallNorm - correlation * (W[i][large] / largeNorm)) * smallNorm;
+          }
+          rotated = true;
           continue;
         }
         rotated = true;
-        // Jacobi rotation (c, s) diagonalizing [[alpha, beta], [beta, gamma]].
-        const zeta = (gamma - alpha) / (2 * beta);
-        const sign = zeta >= 0 ? 1 : -1;
-        const t = sign / (Math.abs(zeta) + Math.sqrt(1 + zeta * zeta));
         const c = 1 / Math.sqrt(1 + t * t);
         const s = c * t;
         for (let i = 0; i < m; i++) {
@@ -293,9 +324,9 @@ function jacobiSVD(A: number[][]): { d: number[]; U: number[][]; V: number[][] }
   for (let j = 0; j < n; j++) {
     let norm = 0;
     for (let i = 0; i < m; i++) norm += W[i][j] * W[i][j];
-    norm = Math.sqrt(norm);
+    norm = sqrtOfSumSquares(norm, () => W.map((row) => row[j]));
     d[j] = norm;
-    if (norm > 1e-300) {
+    if (norm > 0) {
       for (let i = 0; i < m; i++) U[i][j] = W[i][j] / norm;
     }
     // else σ = 0 — the U column is filled with a null-space basis vector below so
@@ -306,7 +337,7 @@ function jacobiSVD(A: number[][]): { d: number[]; U: number[][]; V: number[][] }
   // already-filled columns, seeded from standard basis vectors). Processed in
   // ascending j so each new column is orthogonal to all previously filled ones.
   for (let j = 0; j < n; j++) {
-    if (d[j] > 1e-300) continue;
+    if (d[j] > 0) continue;
     const col = new Array(m).fill(0);
     for (let seed = 0; seed < m; seed++) {
       col.fill(0);

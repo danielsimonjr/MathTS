@@ -625,3 +625,34 @@ describe('Singular Value Decomposition', () => {
     });
   });
 });
+
+describe('Jacobi SVD with widely separated column norms', () => {
+  it.each([100, 150, 200])('preserves diagonal factors at scales 1e±%i', (exponent) => {
+    const small = 10 ** -exponent;
+    const large = 10 ** exponent;
+    const { S, U, V, rank } = svd([
+      [small, 0],
+      [0, large],
+    ]);
+    expect(S[0] / large).toBeCloseTo(1, 14);
+    expect(S[1] / small).toBeCloseTo(1, 14);
+    expect(Math.hypot(U[0][1], U[1][1])).toBeCloseTo(1, 14);
+    expect(Math.hypot(V[0][1], V[1][1])).toBeCloseTo(1, 14);
+    expect(rank).toBe(1);
+  });
+
+  it.each([100, 200])(
+    'orthogonalizes even a tiny correlated column at scales 1e±%i',
+    (exponent) => {
+      const small = 10 ** -exponent;
+      const large = 10 ** exponent;
+      const { S, U } = svd([
+        [small, large],
+        [small, 0],
+      ]);
+      expect(S[0] / large).toBeCloseTo(1, 14);
+      expect(S[1] / small).toBeCloseTo(1, 14);
+      expect(U[0][0] * U[0][1] + U[1][0] * U[1][1]).toBeCloseTo(0, 14);
+    }
+  );
+});
