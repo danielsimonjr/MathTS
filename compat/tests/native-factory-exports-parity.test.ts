@@ -216,6 +216,41 @@ describe('native compatibility dependency bundles', () => {
     ['xor', [true, true]],
     ['add', [2, 3, 4]],
     ['subtract', [6, 3]],
+    ['diag', [[2, 3]]],
+    ['identity', [2]],
+    [
+      'matrixFromColumns',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    [
+      'matrixFromRows',
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    ],
+    ['ones', [2, 2]],
+    [
+      'reshape',
+      [
+        [1, 2, 3, 4],
+        [2, 2],
+      ],
+    ],
+    ['resize', [[[1]], [2, 2], 0]],
+    [
+      'transpose',
+      [
+        [
+          [1, 2],
+          [3, 4],
+        ],
+      ],
+    ],
+    ['zeros', [2, 2]],
   ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
     const factoryName = 'create' + name[0].toUpperCase() + name.slice(1);
@@ -235,6 +270,8 @@ describe('native compatibility dependency bundles', () => {
     const expected = upstreamFn(...args);
     if (typeof result === 'number' && typeof expected === 'number' && Number.isFinite(expected)) {
       expect(result).toBeCloseTo(expected, 14);
+    } else if (compat.isMatrix(result) && oracle.isMatrix(expected)) {
+      expect(result.valueOf()).toEqual(expected.valueOf());
     } else {
       expect(result).toEqual(expected);
     }

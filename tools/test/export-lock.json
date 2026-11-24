@@ -13052,6 +13052,9 @@
       "createDenseMatrixClass": {
         "kind": "function"
       },
+      "createDiag": {
+        "kind": "function"
+      },
       "createDot": {
         "kind": "function"
       },
@@ -13101,6 +13104,9 @@
         "kind": "function"
       },
       "createI": {
+        "kind": "function"
+      },
+      "createIdentity": {
         "kind": "function"
       },
       "createIm": {
@@ -13172,6 +13178,12 @@
       "createMatrixClass": {
         "kind": "function"
       },
+      "createMatrixFromColumns": {
+        "kind": "function"
+      },
+      "createMatrixFromRows": {
+        "kind": "function"
+      },
       "createMultiplyScalar": {
         "kind": "function"
       },
@@ -13182,6 +13194,9 @@
         "kind": "function"
       },
       "createNull": {
+        "kind": "function"
+      },
+      "createOnes": {
         "kind": "function"
       },
       "createOr": {
@@ -13203,6 +13218,12 @@
         "kind": "function"
       },
       "createRe": {
+        "kind": "function"
+      },
+      "createReshape": {
+        "kind": "function"
+      },
+      "createResize": {
         "kind": "function"
       },
       "createSQRT1_2": {
@@ -13256,6 +13277,9 @@
       "createTau": {
         "kind": "function"
       },
+      "createTranspose": {
+        "kind": "function"
+      },
       "createTrue": {
         "kind": "function"
       },
@@ -13281,6 +13305,9 @@
         "kind": "function"
       },
       "createXor": {
+        "kind": "function"
+      },
+      "createZeros": {
         "kind": "function"
       },
       "cross": {
@@ -13330,6 +13357,9 @@
       },
       "diag": {
         "kind": "function"
+      },
+      "diagDependencies": {
+        "kind": "object"
       },
       "diff": {
         "kind": "function"
@@ -13528,6 +13558,9 @@
       },
       "identity": {
         "kind": "function"
+      },
+      "identityDependencies": {
+        "kind": "object"
       },
       "ifft": {
         "kind": "function"
@@ -13847,11 +13880,17 @@
       "matrixFromColumns": {
         "kind": "function"
       },
+      "matrixFromColumnsDependencies": {
+        "kind": "object"
+      },
       "matrixFromFunction": {
         "kind": "function"
       },
       "matrixFromRows": {
         "kind": "function"
+      },
+      "matrixFromRowsDependencies": {
+        "kind": "object"
       },
       "max": {
         "kind": "function"
@@ -13936,6 +13975,9 @@
       },
       "ones": {
         "kind": "function"
+      },
+      "onesDependencies": {
+        "kind": "object"
       },
       "or": {
         "kind": "function"
@@ -14051,8 +14093,14 @@
       "reshape": {
         "kind": "function"
       },
+      "reshapeDependencies": {
+        "kind": "object"
+      },
       "resize": {
         "kind": "function"
+      },
+      "resizeDependencies": {
+        "kind": "object"
       },
       "resolve": {
         "kind": "function"
@@ -14282,6 +14330,9 @@
       "transpose": {
         "kind": "function"
       },
+      "transposeDependencies": {
+        "kind": "object"
+      },
       "trueDependencies": {
         "kind": "object"
       },
@@ -14347,6 +14398,9 @@
       },
       "zeros": {
         "kind": "function"
+      },
+      "zerosDependencies": {
+        "kind": "object"
       },
       "zeta": {
         "kind": "function"

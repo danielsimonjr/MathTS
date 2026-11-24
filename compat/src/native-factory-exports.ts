@@ -723,6 +723,93 @@ const subtractDependencies: UnaryBundle<'createSubtract'> & {
   createSubtract: mathjsCreateSubtract,
 };
 
+const mathjsCreateDiag: CompatFactoryExports['createDiag'] = factories.createDiag;
+const diagDependencies: UnaryBundle<'createDiag'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createDiag: mathjsCreateDiag,
+};
+const mathjsCreateIdentity: CompatFactoryExports['createIdentity'] = factories.createIdentity;
+const identityDependencies: UnaryBundle<'createIdentity'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  BigNumberDependencies,
+  DenseMatrixDependencies,
+  SparseMatrixDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createIdentity: mathjsCreateIdentity,
+};
+const mathjsCreateMatrixFromColumns: CompatFactoryExports['createMatrixFromColumns'] =
+  factories.createMatrixFromColumns;
+const matrixFromColumnsDependencies: UnaryBundle<'createMatrixFromColumns'> & {
+  flattenDependencies: typeof flattenDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  flattenDependencies,
+  matrixDependencies,
+  sizeDependencies,
+  typedDependencies,
+  createMatrixFromColumns: mathjsCreateMatrixFromColumns,
+};
+const mathjsCreateMatrixFromRows: CompatFactoryExports['createMatrixFromRows'] =
+  factories.createMatrixFromRows;
+const matrixFromRowsDependencies: UnaryBundle<'createMatrixFromRows'> & {
+  flattenDependencies: typeof flattenDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  sizeDependencies: typeof sizeDependencies;
+} = {
+  flattenDependencies,
+  matrixDependencies,
+  sizeDependencies,
+  typedDependencies,
+  createMatrixFromRows: mathjsCreateMatrixFromRows,
+};
+const mathjsCreateOnes: CompatFactoryExports['createOnes'] = factories.createOnes;
+const onesDependencies: UnaryBundle<'createOnes'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = { BigNumberDependencies, matrixDependencies, typedDependencies, createOnes: mathjsCreateOnes };
+const mathjsCreateReshape: CompatFactoryExports['createReshape'] = factories.createReshape;
+const reshapeDependencies: UnaryBundle<'createReshape'> & {
+  isIntegerDependencies: typeof isIntegerDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  isIntegerDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createReshape: mathjsCreateReshape,
+};
+const mathjsCreateResize: CompatFactoryExports['createResize'] = factories.createResize;
+const resizeDependencies: {
+  matrixDependencies: typeof matrixDependencies;
+  createResize: typeof mathjsCreateResize;
+} = { matrixDependencies, createResize: mathjsCreateResize };
+const mathjsCreateTranspose: CompatFactoryExports['createTranspose'] = factories.createTranspose;
+const transposeDependencies: UnaryBundle<'createTranspose'> & {
+  matrixDependencies: typeof matrixDependencies;
+} = { matrixDependencies, typedDependencies, createTranspose: mathjsCreateTranspose };
+const mathjsCreateZeros: CompatFactoryExports['createZeros'] = factories.createZeros;
+const zerosDependencies: UnaryBundle<'createZeros'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  BigNumberDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createZeros: mathjsCreateZeros,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -913,5 +1000,23 @@ export {
   mathjsCreateSubtract as createSubtract,
   addDependencies,
   subtractDependencies,
+  mathjsCreateDiag as createDiag,
+  diagDependencies,
+  mathjsCreateIdentity as createIdentity,
+  identityDependencies,
+  mathjsCreateMatrixFromColumns as createMatrixFromColumns,
+  matrixFromColumnsDependencies,
+  mathjsCreateMatrixFromRows as createMatrixFromRows,
+  matrixFromRowsDependencies,
+  mathjsCreateOnes as createOnes,
+  onesDependencies,
+  mathjsCreateReshape as createReshape,
+  reshapeDependencies,
+  mathjsCreateResize as createResize,
+  resizeDependencies,
+  mathjsCreateTranspose as createTranspose,
+  transposeDependencies,
+  mathjsCreateZeros as createZeros,
+  zerosDependencies,
   typedDependencies,
 };

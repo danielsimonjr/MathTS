@@ -1,4 +1,5 @@
 import { isBigNumber, isMatrix } from '../utils/is.js';
+import { ArgumentsError } from '../error/ArgumentsError.js';
 import { DimensionError } from '../error/DimensionError.js';
 import { isInteger } from '../utils/number.js';
 import { format } from '../utils/string.js';
@@ -31,6 +32,7 @@ export const createResize = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, config, matrix }: ResizeDependencies) => {
+    const resizeValue = buildResize(config, matrix);
     /**
      * Resize a matrix
      *
@@ -59,7 +61,7 @@ export const createResize = /* #__PURE__ */ factory(
      */
     return typed(name, {
       'any, Array | Matrix': function (x: unknown, size: unknown): unknown {
-        return _resize(x, size);
+        return resizeValue(x, size);
       },
 
       'any, Array | Matrix, any': function (
@@ -67,95 +69,114 @@ export const createResize = /* #__PURE__ */ factory(
         size: unknown,
         defaultValue: unknown
       ): unknown {
-        return _resize(x, size, defaultValue);
+        return resizeValue(x, size, defaultValue);
       },
     });
-
-    function _resize(x: unknown, size: unknown, defaultValue?: unknown): unknown {
-      let sz: unknown[] = isMatrix(size) ? (size.valueOf() as unknown[]) : (size as unknown[]);
-
-      if (isBigNumber(sz[0])) {
-        // convert bignumbers to numbers
-        sz = sz.map(function (value: unknown) {
-          return !isBigNumber(value)
-            ? value
-            : (value as unknown as { toNumber(): number }).toNumber();
-        });
-      }
-
-      // check x is a Matrix
-      if (isMatrix(x)) {
-        // use optimized matrix implementation, return copy
-        return (
-          x as unknown as { resize(size: unknown[], defaultValue: unknown, copy: boolean): unknown }
-        ).resize(sz, defaultValue, true);
-      }
-
-      if (typeof x === 'string') {
-        // resize string
-        return _resizeString(x, sz as number[], defaultValue as string | undefined);
-      }
-
-      // check result should be a matrix
-      const asMatrix = Array.isArray(x) ? false : config.matrix !== 'Array';
-
-      if (sz.length === 0) {
-        // output a scalar
-        let scalar = x;
-        while (Array.isArray(scalar)) {
-          scalar = scalar[0];
-        }
-
-        return clone(scalar);
-      } else {
-        // output an array/matrix
-        let arr: unknown[] = !Array.isArray(x) ? [x] : x;
-        assertAllocSize('resize', sz as number[]);
-        arr = clone(arr);
-
-        const res = arrayResize(arr, sz as number[], defaultValue);
-        return asMatrix ? matrix(res as unknown[]) : res;
-      }
-    }
-
-    /**
-     * Resize a string
-     * @param {string} str
-     * @param {number[]} size
-     * @param {string} [defaultChar=' ']
-     * @private
-     */
-    function _resizeString(str: string, size: number[], defaultChar?: string): string {
-      if (defaultChar !== undefined) {
-        if (typeof defaultChar !== 'string' || defaultChar.length !== 1) {
-          throw new TypeError('Single character expected as defaultValue');
-        }
-      } else {
-        defaultChar = ' ';
-      }
-
-      if (size.length !== 1) {
-        throw new DimensionError(size.length, 1);
-      }
-      const len = size[0];
-      if (typeof len !== 'number' || !isInteger(len)) {
-        throw new TypeError(
-          'Invalid size, must contain positive integers ' + '(size: ' + format(size, {}) + ')'
-        );
-      }
-      assertAllocSize('resize', [len]);
-
-      if (str.length > len) {
-        return str.substring(0, len);
-      } else if (str.length < len) {
-        let res = str;
-        for (let i = 0, ii = len - str.length; i < ii; i++) {
-          res += defaultChar;
-        }
-        return res;
-      } else {
-        return str;
-      }
-    }
   }
 );
+
+/** Build the selected MathJS resize function with its original dependency contract. */
+export const createMathjsResize = /* #__PURE__ */ factory(
+  'resize',
+  ['config', 'matrix'],
+  ({ config, matrix }: Omit<ResizeDependencies, 'typed'>) => {
+    const resizeValue = buildResize(config, matrix);
+    return function resize(value: unknown, size: unknown, defaultValue?: unknown): unknown {
+      if (arguments.length !== 2 && arguments.length !== 3) {
+        throw new ArgumentsError('resize', arguments.length, 2, 3);
+      }
+      return resizeValue(value, size, defaultValue);
+    };
+  }
+);
+
+function buildResize(config: MathJsConfig, matrix: MatrixConstructor) {
+  return resizeValue;
+
+  function resizeValue(x: unknown, size: unknown, defaultValue?: unknown): unknown {
+    let sz: unknown[] = isMatrix(size) ? (size.valueOf() as unknown[]) : (size as unknown[]);
+
+    if (isBigNumber(sz[0])) {
+      // convert bignumbers to numbers
+      sz = sz.map(function (value: unknown) {
+        return !isBigNumber(value)
+          ? value
+          : (value as unknown as { toNumber(): number }).toNumber();
+      });
+    }
+
+    // check x is a Matrix
+    if (isMatrix(x)) {
+      // use optimized matrix implementation, return copy
+      return (
+        x as unknown as { resize(size: unknown[], defaultValue: unknown, copy: boolean): unknown }
+      ).resize(sz, defaultValue, true);
+    }
+
+    if (typeof x === 'string') {
+      // resize string
+      return _resizeString(x, sz as number[], defaultValue as string | undefined);
+    }
+
+    // check result should be a matrix
+    const asMatrix = Array.isArray(x) ? false : config.matrix !== 'Array';
+
+    if (sz.length === 0) {
+      // output a scalar
+      let scalar = x;
+      while (Array.isArray(scalar)) {
+        scalar = scalar[0];
+      }
+
+      return clone(scalar);
+    } else {
+      // output an array/matrix
+      let arr: unknown[] = !Array.isArray(x) ? [x] : x;
+      assertAllocSize('resize', sz as number[]);
+      arr = clone(arr);
+
+      const res = arrayResize(arr, sz as number[], defaultValue);
+      return asMatrix ? matrix(res as unknown[]) : res;
+    }
+  }
+
+  /**
+   * Resize a string
+   * @param {string} str
+   * @param {number[]} size
+   * @param {string} [defaultChar=' ']
+   * @private
+   */
+  function _resizeString(str: string, size: number[], defaultChar?: string): string {
+    if (defaultChar !== undefined) {
+      if (typeof defaultChar !== 'string' || defaultChar.length !== 1) {
+        throw new TypeError('Single character expected as defaultValue');
+      }
+    } else {
+      defaultChar = ' ';
+    }
+
+    if (size.length !== 1) {
+      throw new DimensionError(size.length, 1);
+    }
+    const len = size[0];
+    if (typeof len !== 'number' || !isInteger(len)) {
+      throw new TypeError(
+        'Invalid size, must contain positive integers ' + '(size: ' + format(size, {}) + ')'
+      );
+    }
+    assertAllocSize('resize', [len]);
+
+    if (str.length > len) {
+      return str.substring(0, len);
+    } else if (str.length < len) {
+      let res = str;
+      for (let i = 0, ii = len - str.length; i < ii; i++) {
+        res += defaultChar;
+      }
+      return res;
+    } else {
+      return str;
+    }
+  }
+}

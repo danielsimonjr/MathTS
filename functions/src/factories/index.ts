@@ -566,7 +566,7 @@ import { createCatalan } from '../combinatorics/catalan.js';
 import { createConcat } from '../matrix/concat.js';
 import { createInv } from '../matrix/inv.js';
 import { createMapSlices } from '../matrix/mapSlices.js';
-import { createResize } from '../matrix/resize.js';
+import { createMathjsResize, createResize } from '../matrix/resize.js';
 import { createSubset } from '../matrix/subset.js';
 
 // probability
@@ -2319,6 +2319,15 @@ function compatFactoryExports(): {
   createXor: typeof createXor;
   createAdd: typeof createSelectedAdd;
   createSubtract: typeof createMathjsSubtract;
+  createDiag: typeof createDiag;
+  createIdentity: typeof createIdentity;
+  createMatrixFromColumns: typeof createMatrixFromColumns;
+  createMatrixFromRows: typeof createMatrixFromRows;
+  createOnes: typeof createOnes;
+  createReshape: typeof createReshape;
+  createResize: typeof createMathjsResize;
+  createTranspose: typeof createTranspose;
+  createZeros: typeof createZeros;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2410,6 +2419,15 @@ function compatFactoryExports(): {
     createXor,
     createAdd: createSelectedAdd,
     createSubtract: createMathjsSubtract,
+    createDiag,
+    createIdentity,
+    createMatrixFromColumns,
+    createMatrixFromRows,
+    createOnes,
+    createReshape,
+    createResize: createMathjsResize,
+    createTranspose,
+    createZeros,
     createTyped,
   };
 }
