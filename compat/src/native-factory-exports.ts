@@ -2777,6 +2777,34 @@ const zpk2tfDependencies: UnaryBundle<'createZpk2tf'> & {
   createZpk2tf: mathjsCreateZpk2tf,
 };
 
+const mathjsCreateTo: CompatFactoryExports['createTo'] = factories.createTo;
+const toDependencies: UnaryBundle<'createTo'> & {
+  concatDependencies: typeof concatDependencies;
+  matrixDependencies: typeof matrixDependencies;
+} = {
+  concatDependencies,
+  matrixDependencies,
+  typedDependencies,
+  createTo: mathjsCreateTo,
+};
+
+const mathjsCreateToBest: CompatFactoryExports['createToBest'] = factories.createToBest;
+const toBestDependencies: UnaryBundle<'createToBest'> = {
+  typedDependencies,
+  createToBest: mathjsCreateToBest,
+};
+
+const mathjsCreateSplitUnit: CompatFactoryExports['createSplitUnit'] = factories.createSplitUnit;
+const splitUnitDependencies: UnaryBundle<'createSplitUnit'> = {
+  typedDependencies,
+  createSplitUnit: mathjsCreateSplitUnit,
+};
+
+const mathjsCreateSparse: CompatFactoryExports['createSparse'] = factories.createSparse;
+const sparseDependencies: UnaryBundle<'createSparse'> & {
+  SparseMatrixDependencies: typeof SparseMatrixDependencies;
+} = { SparseMatrixDependencies, typedDependencies, createSparse: mathjsCreateSparse };
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3305,5 +3333,13 @@ export {
   pinvDependencies,
   mathjsCreateZpk2tf as createZpk2tf,
   zpk2tfDependencies,
+  mathjsCreateTo as createTo,
+  toDependencies,
+  mathjsCreateToBest as createToBest,
+  toBestDependencies,
+  mathjsCreateSplitUnit as createSplitUnit,
+  splitUnitDependencies,
+  mathjsCreateSparse as createSparse,
+  sparseDependencies,
   typedDependencies,
 };

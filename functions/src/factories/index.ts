@@ -1,6 +1,6 @@
 import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
 import { createSelectedMultiply } from '../arithmetic/selectedMultiply.js';
-import { createSelectedMatrix } from './selected-matrix.js';
+import { createSelectedMatrix, createSelectedSparse } from './selected-matrix.js';
 import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
 import type { MathNode } from '@danielsimonjr/mathts-expression';
@@ -2729,6 +2729,10 @@ function compatFactoryExports(): {
   createLeafCount: typeof createLeafCount;
   createPinv: typeof createPinv;
   createZpk2tf: typeof createZpk2tf;
+  createTo: typeof createTo;
+  createToBest: typeof createToBest;
+  createSplitUnit: typeof createSplitUnit;
+  createSparse: typeof createSelectedSparse;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2989,6 +2993,10 @@ function compatFactoryExports(): {
     createLeafCount,
     createPinv,
     createZpk2tf,
+    createTo,
+    createToBest,
+    createSplitUnit,
+    createSparse: createSelectedSparse,
     createTyped,
   };
 }

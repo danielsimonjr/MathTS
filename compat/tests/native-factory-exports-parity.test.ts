@@ -5,6 +5,50 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('constructs selected sparse matrices and preserves the requested datatype', () => {
+    const actual = create({ sparseDependencies: compat.sparseDependencies });
+    const expected = oracle.create({
+      sparseDependencies: Reflect.get(oracle, 'sparseDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const matrix = Reflect.apply(Reflect.get(actual, 'sparse'), actual, [[0, 2], 'number']);
+    const reference = expected.sparse([0, 2] as unknown as number[][], 'number');
+    if (!compat.isMatrix(matrix)) throw new TypeError('Expected a sparse matrix');
+    expect(matrix.valueOf()).toEqual(reference.valueOf());
+    expect(Reflect.apply(Reflect.get(matrix, 'datatype'), matrix, [])).toBe(reference.datatype());
+  });
+
+  it('converts and splits selected units like MathJS', () => {
+    const names = [
+      'unitDependencies',
+      'toDependencies',
+      'toBestDependencies',
+      'splitUnitDependencies',
+    ];
+    const actual = create(
+      Object.fromEntries(names.map((name) => [name, Reflect.get(compat, name)]))
+    );
+    const expected = oracle.create(
+      Object.fromEntries(names.map((name) => [name, Reflect.get(oracle, name)]))
+    );
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    for (const name of names.slice(1)) {
+      const bundle = Reflect.get(compat, name);
+      expect(Object.keys(bundle)).toEqual(Object.keys(Reflect.get(oracle, name)));
+    }
+    const run = (instance: object) => {
+      const unit = Reflect.get(instance, 'unit')('3661 s');
+      const call = (name: string, ...args: unknown[]) =>
+        Reflect.apply(Reflect.get(instance, name), instance, args);
+      return [
+        String(call('to', unit, 'min')),
+        String(call('toBest', unit)),
+        String(call('splitUnit', unit, ['h', 'min', 's'])),
+      ];
+    };
+    expect(run(actual)).toEqual(run(expected));
+  });
+
   it('builds selected transfer function coefficients like MathJS', () => {
     const actual = create({ zpk2tfDependencies: compat.zpk2tfDependencies });
     const expected = oracle.create({
