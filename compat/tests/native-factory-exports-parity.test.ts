@@ -5,6 +5,25 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('solves a selected ordinary differential equation', () => {
+    const actual = create({ solveODEDependencies: compat.solveODEDependencies });
+    const expected = oracle.create({
+      solveODEDependencies: Reflect.get(oracle, 'solveODEDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const solve = (instance: object) => {
+      const result = Reflect.apply(Reflect.get(instance, 'solveODE'), instance, [
+        (_time: number, value: number) => value,
+        [0, 1],
+        1,
+        { tol: 1e-7 },
+      ]) as { t: number[]; y: number[] };
+      expect(result.t.at(-1)).toBeCloseTo(1, 8);
+      return result.y.at(-1) as number;
+    };
+    expect(solve(actual)).toBeCloseTo(solve(expected), 5);
+  });
+
   it('uses selected BigNumber precision for gamma and factorial', () => {
     const config = { precision: 8 };
     const actual = create({ factorialDependencies: compat.factorialDependencies }, config);
@@ -1160,6 +1179,16 @@ describe('native compatibility dependency bundles', () => {
           [1e-10, 1.25],
           [true, null],
         ],
+      ],
+    ],
+    [
+      'lusolve',
+      [
+        [
+          [2, 1],
+          [1, 3],
+        ],
+        [5, 5],
       ],
     ],
     ['gamma', [5]],

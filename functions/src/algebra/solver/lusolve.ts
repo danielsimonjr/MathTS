@@ -99,389 +99,390 @@ interface Dependencies {
 const name = 'lusolve';
 const dependencies = ['typed', 'matrix', 'lup', 'slu', 'usolve', 'lsolve', 'DenseMatrix'];
 
-export const createLusolve = /* #__PURE__ */ factory(
-  name,
-  dependencies,
-  ({ typed, matrix, lup, slu, usolve, lsolve, DenseMatrix }: Dependencies) => {
-    const solveValidation = createSolveValidation({
-      DenseMatrix,
-    } as unknown as Parameters<
-      typeof createSolveValidation
-    >[0]) as unknown as SolveValidationFunction;
+function buildLusolve(
+  { typed, matrix, lup, slu, usolve, lsolve, DenseMatrix }: Dependencies,
+  includeFloat64Array: boolean
+) {
+  const solveValidation = createSolveValidation({
+    DenseMatrix,
+  } as unknown as Parameters<
+    typeof createSolveValidation
+  >[0]) as unknown as SolveValidationFunction;
 
-    /**
-     * Read a right-hand side as one column vector of length n. A right-hand side with
-     * more than one column, or with an Array entry, throws, as the shared validation does:
-     * lusolve solves one vector.
-     */
-    function rhsToNumberVector(
-      b: unknown[][] | DenseMatrix | SparseMatrix | unknown[],
-      n: number
-    ): number[] {
-      const mismatch = (): never => {
-        throw new RangeError('Dimension mismatch. Matrix columns must match vector length.');
-      };
-      if (isDenseMatrix(b)) {
-        const dense = b as DenseMatrix;
-        if (dense._size.length === 1) {
-          if (dense._size[0] !== n) mismatch();
-          return (dense._data as unknown as number[]).map((v) => v as number);
+  /**
+   * Read a right-hand side as one column vector of length n. A right-hand side with
+   * more than one column, or with an Array entry, throws, as the shared validation does:
+   * lusolve solves one vector.
+   */
+  function rhsToNumberVector(
+    b: unknown[][] | DenseMatrix | SparseMatrix | unknown[],
+    n: number
+  ): number[] {
+    const mismatch = (): never => {
+      throw new RangeError('Dimension mismatch. Matrix columns must match vector length.');
+    };
+    if (isDenseMatrix(b)) {
+      const dense = b as DenseMatrix;
+      if (dense._size.length === 1) {
+        if (dense._size[0] !== n) mismatch();
+        return (dense._data as unknown as number[]).map((v) => v as number);
+      }
+      if (dense._size.length !== 2 || dense._size[0] !== n || dense._size[1] !== 1) mismatch();
+      return dense._data.map((row) => (row as number[])[0]);
+    }
+    if (isSparseMatrix(b)) {
+      return rhsToNumberVector((b as unknown as { toArray(): unknown[][] }).toArray(), n);
+    }
+    if (isArray(b)) {
+      const arr = b as unknown[];
+      if (arr.length !== n) mismatch();
+      if (arr.length > 0 && Array.isArray(arr[0])) {
+        for (const row of arr as unknown[][]) {
+          if (!Array.isArray(row) || row.length !== 1 || Array.isArray(row[0])) mismatch();
         }
-        if (dense._size.length !== 2 || dense._size[0] !== n || dense._size[1] !== 1) mismatch();
-        return dense._data.map((row) => (row as number[])[0]);
+        return (arr as unknown[][]).map((row) => row[0] as number);
       }
-      if (isSparseMatrix(b)) {
-        return rhsToNumberVector((b as unknown as { toArray(): unknown[][] }).toArray(), n);
+      // An entry of a vector is a scalar. An Array entry is a row of a ragged b.
+      if (arr.some((v) => Array.isArray(v))) mismatch();
+      return arr as number[];
+    }
+    throw new TypeError('Invalid right-hand side for lusolve');
+  }
+
+  /**
+   * Solve `A x = b` for a nested numeric `A` with the packed matrix-package `lu`.
+   * Returns the solution as a plain `n x 1` nested array.
+   */
+  function lusolveFromNested(
+    nested: number[][],
+    b: unknown[][] | DenseMatrix | SparseMatrix
+  ): unknown[][] {
+    if (isEmptyNested(nested)) {
+      // An empty system has the empty solution. A non-square empty input still throws.
+      const cols = nested.length === 0 ? 0 : nested[0].length;
+      if (nested.length !== cols) {
+        throw notSquareError(`lu: matrix must be square (got ${nested.length}×${cols})`);
       }
-      if (isArray(b)) {
-        const arr = b as unknown[];
-        if (arr.length !== n) mismatch();
-        if (arr.length > 0 && Array.isArray(arr[0])) {
-          for (const row of arr as unknown[][]) {
-            if (!Array.isArray(row) || row.length !== 1 || Array.isArray(row[0])) mismatch();
-          }
-          return (arr as unknown[][]).map((row) => row[0] as number);
+      // The shared validation checks b as it does for a matrix A.
+      return solveEmpty(new DenseMatrix({ data: [], size: [0, 0] }), b).valueOf() as number[][];
+    }
+    // The packed lu reads Float64 values. An entry that is not a number (Complex,
+    // BigNumber, Fraction, bigint, string) goes to the typed path, which keeps its type.
+    // The shape checks come first, so both paths throw the same errors. The A
+    // dimension check comes before the b and square checks, as in lup and qr.
+    if (!isNumericRhs(b) || !isNumericRows(nested)) {
+      assertTwoDimensionalNested(nested);
+      rhsToNumberVector(b, nested.length);
+      assertSquareNested(nested);
+      return _lusolveDense(matrix(nested) as DenseMatrix, b).valueOf();
+    }
+    const eq = equilibrateDense(nested, b);
+    const aRows = eq.a as number[][];
+    const bVec = rhsToNumberVector(eq.b as typeof b, aRows.length);
+    let fac;
+    try {
+      fac = lu(aRows);
+    } catch (err) {
+      if (err instanceof Error && /singular/i.test(err.message)) {
+        throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+      }
+      throw err;
+    }
+    validatePackedUpperTriangularPivots(
+      fac.U.toFloat64Array(),
+      aRows.length,
+      fac.L.toFloat64Array()
+    );
+    return luSolve(fac, bVec).map((v) => [v]);
+  }
+
+  /**
+   * Throw when an entry of a row is an Array. A uniform 3-D or deeper A throws the
+   * two-dimensional error with its size. An A of mixed depth throws the jagged-array
+   * error. Only the typed path calls this: the number fast path has no Array entry.
+   */
+  function assertTwoDimensionalNested(rows: unknown[][]): void {
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      if (!Array.isArray(row)) continue;
+      for (let c = 0; c < row.length; c++) {
+        if (!Array.isArray(row[c])) continue;
+        // The size of the first entry of each level: a jagged input is not validated here.
+        const size = arraySize(rows);
+        if (size.length !== 2) {
+          throw new RangeError('Matrix must be two dimensional (size: ' + format(size, {}) + ')');
         }
-        // An entry of a vector is a scalar. An Array entry is a row of a ragged b.
-        if (arr.some((v) => Array.isArray(v))) mismatch();
-        return arr as number[];
-      }
-      throw new TypeError('Invalid right-hand side for lusolve');
-    }
-
-    /**
-     * Solve `A x = b` for a nested numeric `A` with the packed matrix-package `lu`.
-     * Returns the solution as a plain `n x 1` nested array.
-     */
-    function lusolveFromNested(
-      nested: number[][],
-      b: unknown[][] | DenseMatrix | SparseMatrix
-    ): unknown[][] {
-      if (isEmptyNested(nested)) {
-        // An empty system has the empty solution. A non-square empty input still throws.
-        const cols = nested.length === 0 ? 0 : nested[0].length;
-        if (nested.length !== cols) {
-          throw notSquareError(`lu: matrix must be square (got ${nested.length}×${cols})`);
-        }
-        // The shared validation checks b as it does for a matrix A.
-        return solveEmpty(new DenseMatrix({ data: [], size: [0, 0] }), b).valueOf() as number[][];
-      }
-      // The packed lu reads Float64 values. An entry that is not a number (Complex,
-      // BigNumber, Fraction, bigint, string) goes to the typed path, which keeps its type.
-      // The shape checks come first, so both paths throw the same errors. The A
-      // dimension check comes before the b and square checks, as in lup and qr.
-      if (!isNumericRhs(b) || !isNumericRows(nested)) {
-        assertTwoDimensionalNested(nested);
-        rhsToNumberVector(b, nested.length);
-        assertSquareNested(nested);
-        return _lusolveDense(matrix(nested) as DenseMatrix, b).valueOf();
-      }
-      const eq = equilibrateDense(nested, b);
-      const aRows = eq.a as number[][];
-      const bVec = rhsToNumberVector(eq.b as typeof b, aRows.length);
-      let fac;
-      try {
-        fac = lu(aRows);
-      } catch (err) {
-        if (err instanceof Error && /singular/i.test(err.message)) {
-          throw new Error(LUSOLVE_SINGULAR_MESSAGE);
-        }
-        throw err;
-      }
-      validatePackedUpperTriangularPivots(
-        fac.U.toFloat64Array(),
-        aRows.length,
-        fac.L.toFloat64Array()
-      );
-      return luSolve(fac, bVec).map((v) => [v]);
-    }
-
-    /**
-     * Throw when an entry of a row is an Array. A uniform 3-D or deeper A throws the
-     * two-dimensional error with its size. An A of mixed depth throws the jagged-array
-     * error. Only the typed path calls this: the number fast path has no Array entry.
-     */
-    function assertTwoDimensionalNested(rows: unknown[][]): void {
-      for (let r = 0; r < rows.length; r++) {
-        const row = rows[r];
-        if (!Array.isArray(row)) continue;
-        for (let c = 0; c < row.length; c++) {
-          if (!Array.isArray(row[c])) continue;
-          // The size of the first entry of each level: a jagged input is not validated here.
-          const size = arraySize(rows);
-          if (size.length !== 2) {
-            throw new RangeError('Matrix must be two dimensional (size: ' + format(size, {}) + ')');
-          }
-          throw new TypeError(`Matrix decomposition: jagged nested array at row ${r}`);
-        }
+        throw new TypeError(`Matrix decomposition: jagged nested array at row ${r}`);
       }
     }
+  }
 
-    /** Throw the packed-path errors for a 1-D, a jagged or a non-square nested A. */
-    function assertSquareNested(rows: unknown[][]): void {
-      // The packed path's own shape check. It reads the row lengths only, not the entries.
-      const { cols } = nestedMatrixShape(rows);
-      if (rows.length !== cols) {
-        throw notSquareError(`lu: matrix must be square (got ${rows.length}×${cols})`);
+  /** Throw the packed-path errors for a 1-D, a jagged or a non-square nested A. */
+  function assertSquareNested(rows: unknown[][]): void {
+    // The packed path's own shape check. It reads the row lengths only, not the entries.
+    const { cols } = nestedMatrixShape(rows);
+    if (rows.length !== cols) {
+      throw notSquareError(`lu: matrix must be square (got ${rows.length}×${cols})`);
+    }
+  }
+
+  /**
+   * True when every entry of the rows is a number and the rows are at most 2-D. An entry
+   * that is an Array (a 3-D input) is not numeric here: it goes to the typed path, which
+   * throws the two-dimensional error, as for a Complex or BigNumber entry (#1247).
+   */
+  function isNumericRows(rows: unknown[]): boolean {
+    // Index loops, with the entries of a 2-D input read in the inner loop. A recursive
+    // for-of over every row took 0.4 ms for a 128 x 128 number system; these loops take 0.01 ms.
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      if (typeof row === 'number') continue;
+      if (!Array.isArray(row)) return false;
+      for (let c = 0; c < row.length; c++) {
+        const v = row[c];
+        if (typeof v !== 'number') return false;
       }
     }
+    return true;
+  }
 
-    /**
-     * True when every entry of the rows is a number and the rows are at most 2-D. An entry
-     * that is an Array (a 3-D input) is not numeric here: it goes to the typed path, which
-     * throws the two-dimensional error, as for a Complex or BigNumber entry (#1247).
-     */
-    function isNumericRows(rows: unknown[]): boolean {
-      // Index loops, with the entries of a 2-D input read in the inner loop. A recursive
-      // for-of over every row took 0.4 ms for a 128 x 128 number system; these loops take 0.01 ms.
-      for (let r = 0; r < rows.length; r++) {
-        const row = rows[r];
-        if (typeof row === 'number') continue;
-        if (!Array.isArray(row)) return false;
-        for (let c = 0; c < row.length; c++) {
-          const v = row[c];
-          if (typeof v !== 'number') return false;
-        }
-      }
-      return true;
+  /** True when no entry of a right-hand side is a non-number. */
+  function isNumericRhs(b: unknown[][] | DenseMatrix | SparseMatrix | unknown[]): boolean {
+    if (isDenseMatrix(b) || isSparseMatrix(b)) return isNumericRows((b as DenseMatrix).valueOf());
+    return Array.isArray(b) ? isNumericRows(b) : true;
+  }
+
+  /** True when a nested array has no entries: no rows, or every row without columns. */
+  function isEmptyNested(rows: unknown[][]): boolean {
+    return rows.every((row) => Array.isArray(row) && row.length === 0);
+  }
+
+  /** True when a matrix has a zero dimension. */
+  function isEmptyMatrix(m: DenseMatrix | SparseMatrix): boolean {
+    return (m as unknown as { size(): number[] }).size().some((d) => d === 0);
+  }
+
+  /**
+   * Solve an empty system. A 0 x 0 system has the empty solution (a 0 x 1 column).
+   * The shared validation throws the dimension error for a non-square matrix or a
+   * right-hand side of the wrong length.
+   */
+  function solveEmpty(
+    a: DenseMatrix | SparseMatrix,
+    b: unknown[][] | DenseMatrix | SparseMatrix
+  ): DenseMatrix {
+    const size = (a as unknown as { size(): number[] }).size();
+    // matrix([]) is a one-dimensional empty matrix: read it as the 0 x 0 matrix, as [] is.
+    const square =
+      size.length === 1 && size[0] === 0 ? new DenseMatrix({ data: [], size: [0, 0] }) : a;
+    return solveValidation(square, b, true);
+  }
+
+  function isLUPDecomposition(value: unknown): value is LUPDecomposition {
+    if (typeof value !== 'object' || value === null) {
+      return false;
     }
+    const o = value as Record<string, unknown>;
+    return 'L' in o && 'U' in o && 'p' in o;
+  }
 
-    /** True when no entry of a right-hand side is a non-number. */
-    function isNumericRhs(b: unknown[][] | DenseMatrix | SparseMatrix | unknown[]): boolean {
-      if (isDenseMatrix(b) || isSparseMatrix(b)) return isNumericRows((b as DenseMatrix).valueOf());
-      return Array.isArray(b) ? isNumericRows(b) : true;
-    }
-
-    /** True when a nested array has no entries: no rows, or every row without columns. */
-    function isEmptyNested(rows: unknown[][]): boolean {
-      return rows.every((row) => Array.isArray(row) && row.length === 0);
-    }
-
-    /** True when a matrix has a zero dimension. */
-    function isEmptyMatrix(m: DenseMatrix | SparseMatrix): boolean {
-      return (m as unknown as { size(): number[] }).size().some((d) => d === 0);
-    }
-
-    /**
-     * Solve an empty system. A 0 x 0 system has the empty solution (a 0 x 1 column).
-     * The shared validation throws the dimension error for a non-square matrix or a
-     * right-hand side of the wrong length.
-     */
-    function solveEmpty(
-      a: DenseMatrix | SparseMatrix,
-      b: unknown[][] | DenseMatrix | SparseMatrix
-    ): DenseMatrix {
-      const size = (a as unknown as { size(): number[] }).size();
-      // matrix([]) is a one-dimensional empty matrix: read it as the 0 x 0 matrix, as [] is.
-      const square =
-        size.length === 1 && size[0] === 0 ? new DenseMatrix({ data: [], size: [0, 0] }) : a;
-      return solveValidation(square, b, true);
-    }
-
-    function isLUPDecomposition(value: unknown): value is LUPDecomposition {
-      if (typeof value !== 'object' || value === null) {
-        return false;
-      }
-      const o = value as Record<string, unknown>;
-      return 'L' in o && 'U' in o && 'p' in o;
-    }
-
-    /**
-     * Max |entry| when every entry is a finite number.
-     * `NaN` means a non-finite number was seen. `null` means a non-number was seen.
-     */
-    function maxAbsFinite(rows: unknown[][]): number | null {
-      let max = 0;
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (!Array.isArray(row)) return null;
-        for (let j = 0; j < row.length; j++) {
-          const v = row[j];
-          if (typeof v !== 'number') return null;
-          if (!Number.isFinite(v)) return Number.NaN;
-          const a = Math.abs(v);
-          if (a > max) max = a;
-        }
-      }
-      return max;
-    }
-
-    function validateRightHandSide(
-      rhs: unknown[][] | DenseMatrix | SparseMatrix
-    ): unknown[][] | DenseMatrix | SparseMatrix {
-      const b = denseRightHandSide(rhs) as typeof rhs;
-      const raw = isDenseMatrix(b) || isSparseMatrix(b) ? b.valueOf() : b;
-      function validate(entry: unknown): void {
-        if (typeof entry === 'number' && !Number.isFinite(entry)) {
-          throw new TypeError('lusolve: right-hand side must have finite entries');
-        }
-      }
-      if (Array.isArray(raw)) {
-        for (const entry of raw) {
-          if (Array.isArray(entry)) entry.forEach(validate);
-          else validate(entry);
-        }
-      }
-      return b;
-    }
-
-    function scaleRows(rows: unknown[][], scale: number): number[][] {
-      return rows.map((row) => (row as number[]).map((v) => v / scale));
-    }
-
-    /** Divide a numeric RHS by `scale`. `null` when `b` is not all finite numbers. */
-    function scaleRhs(
-      b: unknown[][] | DenseMatrix | SparseMatrix | unknown[],
-      scale: number
-    ): (unknown[][] | DenseMatrix | SparseMatrix | unknown[]) | null {
-      if (isDenseMatrix(b) || isSparseMatrix(b)) {
-        const raw = (b as DenseMatrix).valueOf();
-        const scaled = scaleRhs(raw as unknown[][], scale);
-        if (scaled === null) return null;
-        return matrix(scaled as unknown[][]) as DenseMatrix;
-      }
-      if (!Array.isArray(b)) return null;
-      if (b.length === 0) return b;
-      if (Array.isArray(b[0])) {
-        const rows = b as unknown[][];
-        const rhsScale = maxAbsFinite(rows);
-        if (Number.isNaN(rhsScale)) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
-        if (rhsScale === null) return null;
-        return scaleRows(rows, scale);
-      }
-      for (let i = 0; i < b.length; i++) {
-        const v = b[i];
+  /**
+   * Max |entry| when every entry is a finite number.
+   * `NaN` means a non-finite number was seen. `null` means a non-number was seen.
+   */
+  function maxAbsFinite(rows: unknown[][]): number | null {
+    let max = 0;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (!Array.isArray(row)) return null;
+      for (let j = 0; j < row.length; j++) {
+        const v = row[j];
         if (typeof v !== 'number') return null;
-        if (!Number.isFinite(v)) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+        if (!Number.isFinite(v)) return Number.NaN;
+        const a = Math.abs(v);
+        if (a > max) max = a;
       }
-      return (b as number[]).map((v) => v / scale);
     }
+    return max;
+  }
 
-    /**
-     * Divide A and b by max|A| when that max is positive and below 1, so the
-     * absolute pivot floor matches the matrix's own scale. `A x = b` is unchanged.
-     * Non-finite A throws. A zero matrix throws. Non-numeric A is left alone.
-     */
-    function equilibrateDense(
-      rows: unknown[][],
-      b: unknown[][] | DenseMatrix | SparseMatrix
-    ): { a: unknown[][]; b: unknown[][] | DenseMatrix | SparseMatrix | unknown[] } {
-      const scale = maxAbsFinite(rows);
-      if (scale === null) return { a: rows, b };
-      if (!Number.isFinite(scale))
+  function validateRightHandSide(
+    rhs: unknown[][] | DenseMatrix | SparseMatrix
+  ): unknown[][] | DenseMatrix | SparseMatrix {
+    const b = denseRightHandSide(rhs) as typeof rhs;
+    const raw = isDenseMatrix(b) || isSparseMatrix(b) ? b.valueOf() : b;
+    function validate(entry: unknown): void {
+      if (typeof entry === 'number' && !Number.isFinite(entry)) {
+        throw new TypeError('lusolve: right-hand side must have finite entries');
+      }
+    }
+    if (Array.isArray(raw)) {
+      for (const entry of raw) {
+        if (Array.isArray(entry)) entry.forEach(validate);
+        else validate(entry);
+      }
+    }
+    return b;
+  }
+
+  function scaleRows(rows: unknown[][], scale: number): number[][] {
+    return rows.map((row) => (row as number[]).map((v) => v / scale));
+  }
+
+  /** Divide a numeric RHS by `scale`. `null` when `b` is not all finite numbers. */
+  function scaleRhs(
+    b: unknown[][] | DenseMatrix | SparseMatrix | unknown[],
+    scale: number
+  ): (unknown[][] | DenseMatrix | SparseMatrix | unknown[]) | null {
+    if (isDenseMatrix(b) || isSparseMatrix(b)) {
+      const raw = (b as DenseMatrix).valueOf();
+      const scaled = scaleRhs(raw as unknown[][], scale);
+      if (scaled === null) return null;
+      return matrix(scaled as unknown[][]) as DenseMatrix;
+    }
+    if (!Array.isArray(b)) return null;
+    if (b.length === 0) return b;
+    if (Array.isArray(b[0])) {
+      const rows = b as unknown[][];
+      const rhsScale = maxAbsFinite(rows);
+      if (Number.isNaN(rhsScale)) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+      if (rhsScale === null) return null;
+      return scaleRows(rows, scale);
+    }
+    for (let i = 0; i < b.length; i++) {
+      const v = b[i];
+      if (typeof v !== 'number') return null;
+      if (!Number.isFinite(v)) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+    }
+    return (b as number[]).map((v) => v / scale);
+  }
+
+  /**
+   * Divide A and b by max|A| when that max is positive and below 1, so the
+   * absolute pivot floor matches the matrix's own scale. `A x = b` is unchanged.
+   * Non-finite A throws. A zero matrix throws. Non-numeric A is left alone.
+   */
+  function equilibrateDense(
+    rows: unknown[][],
+    b: unknown[][] | DenseMatrix | SparseMatrix
+  ): { a: unknown[][]; b: unknown[][] | DenseMatrix | SparseMatrix | unknown[] } {
+    const scale = maxAbsFinite(rows);
+    if (scale === null) return { a: rows, b };
+    if (!Number.isFinite(scale))
+      throw new TypeError('lusolve: coefficient matrix must have finite entries');
+    if (scale === 0) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+    if (scale >= 1) return { a: rows, b };
+    const sb = scaleRhs(b, scale);
+    if (sb === null) return { a: rows, b };
+    return { a: scaleRows(rows, scale), b: sb };
+  }
+
+  function equilibrateSparse(
+    a: SparseMatrix,
+    b: unknown[][] | DenseMatrix | SparseMatrix
+  ): { a: SparseMatrix; b: unknown[][] | DenseMatrix | SparseMatrix | unknown[] } {
+    const values = a._values;
+    if (!values) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+    let scale = 0;
+    for (let k = 0; k < values.length; k++) {
+      const v = values[k];
+      if (typeof v !== 'number') return { a, b };
+      if (!Number.isFinite(v))
         throw new TypeError('lusolve: coefficient matrix must have finite entries');
-      if (scale === 0) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
-      if (scale >= 1) return { a: rows, b };
-      const sb = scaleRhs(b, scale);
-      if (sb === null) return { a: rows, b };
-      return { a: scaleRows(rows, scale), b: sb };
+      const av = Math.abs(v);
+      if (av > scale) scale = av;
     }
+    if (scale === 0) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
+    if (scale >= 1) return { a, b };
+    const sb = scaleRhs(b, scale);
+    if (sb === null) return { a, b };
+    const index = a._index;
+    const ptr = a._ptr;
+    if (!index || !ptr) return { a, b };
+    const copy = new MathJSSparseMatrix({
+      values: (values as number[]).map((v) => v / scale),
+      index: index.slice(),
+      ptr: ptr.slice(),
+      size: a._size.slice(),
+      datatype: a._datatype,
+    });
+    return { a: copy as unknown as SparseMatrix, b: sb };
+  }
 
-    function equilibrateSparse(
-      a: SparseMatrix,
-      b: unknown[][] | DenseMatrix | SparseMatrix
-    ): { a: SparseMatrix; b: unknown[][] | DenseMatrix | SparseMatrix | unknown[] } {
-      const values = a._values;
-      if (!values) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
-      let scale = 0;
-      for (let k = 0; k < values.length; k++) {
-        const v = values[k];
-        if (typeof v !== 'number') return { a, b };
-        if (!Number.isFinite(v))
-          throw new TypeError('lusolve: coefficient matrix must have finite entries');
-        const av = Math.abs(v);
-        if (av > scale) scale = av;
-      }
-      if (scale === 0) throw new Error(LUSOLVE_SINGULAR_MESSAGE);
-      if (scale >= 1) return { a, b };
-      const sb = scaleRhs(b, scale);
-      if (sb === null) return { a, b };
-      const index = a._index;
-      const ptr = a._ptr;
-      if (!index || !ptr) return { a, b };
-      const copy = new MathJSSparseMatrix({
-        values: (values as number[]).map((v) => v / scale),
-        index: index.slice(),
-        ptr: ptr.slice(),
-        size: a._size.slice(),
-        datatype: a._datatype,
-      });
-      return { a: copy as unknown as SparseMatrix, b: sb };
+  /** Lift a prefactored numeric U (and b) when every entry is smaller than 1. */
+  function liftTinyFactor(
+    U: DenseMatrix | SparseMatrix,
+    b: DenseMatrix
+  ): { U: DenseMatrix | SparseMatrix; b: DenseMatrix } {
+    if ((U as { isDenseMatrix?: boolean }).isDenseMatrix === true) {
+      const dense = U as DenseMatrix;
+      const eq = equilibrateDense(dense._data, b);
+      if (eq.a === dense._data) return { U, b };
+      return {
+        U: new DenseMatrix({
+          data: eq.a as unknown[][],
+          size: dense._size.slice(),
+          datatype: dense._datatype,
+        }),
+        b: eq.b as DenseMatrix,
+      };
     }
+    const eq = equilibrateSparse(U as SparseMatrix, b);
+    if (eq.a === U) return { U, b };
+    return { U: eq.a, b: eq.b as DenseMatrix };
+  }
 
-    /** Lift a prefactored numeric U (and b) when every entry is smaller than 1. */
-    function liftTinyFactor(
-      U: DenseMatrix | SparseMatrix,
-      b: DenseMatrix
-    ): { U: DenseMatrix | SparseMatrix; b: DenseMatrix } {
-      if ((U as { isDenseMatrix?: boolean }).isDenseMatrix === true) {
-        const dense = U as DenseMatrix;
-        const eq = equilibrateDense(dense._data, b);
-        if (eq.a === dense._data) return { U, b };
-        return {
-          U: new DenseMatrix({
-            data: eq.a as unknown[][],
-            size: dense._size.slice(),
-            datatype: dense._datatype,
-          }),
-          b: eq.b as DenseMatrix,
-        };
-      }
-      const eq = equilibrateSparse(U as SparseMatrix, b);
-      if (eq.a === U) return { U, b };
-      return { U: eq.a, b: eq.b as DenseMatrix };
-    }
+  /**
+   * Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
+   *
+   * Syntax:
+   *
+   *    math.lusolve(A, b)     // returns column vector with the solution to the linear system A * x = b
+   *    math.lusolve(lup, b)   // returns column vector with the solution to the linear system A * x = b, lup = math.lup(A)
+   *
+   * Examples:
+   *
+   *    const m = [[1, 0, 0, 0], [0, 2, 0, 0], [0, 0, 3, 0], [0, 0, 0, 4]]
+   *
+   *    const x = math.lusolve(m, [-1, -1, -1, -1])        // x = [[-1], [-0.5], [-1/3], [-0.25]]
+   *
+   *    const f = math.lup(m)
+   *    const x1 = math.lusolve(f, [-1, -1, -1, -1])       // x1 = [[-1], [-0.5], [-1/3], [-0.25]]
+   *    const x2 = math.lusolve(f, [1, 2, 1, -1])          // x2 = [[1], [1], [1/3], [-0.25]]
+   *
+   *    const a = [[-2, 3], [2, 1]]
+   *    const b = [11, 9]
+   *    const x = math.lusolve(a, b)  // [[2], [5]]
+   *
+   * See also:
+   *
+   *    lup, slu, lsolve, usolve
+   *
+   * @param {Matrix | Array | Object} A      Invertible Matrix or the Matrix LU decomposition
+   * @param {Matrix | Array} b               Column Vector
+   * @param {number} [order]                 The Symbolic Ordering and Analysis order, see slu for details. Matrix must be a SparseMatrix
+   * @param {Number} [threshold]             Partial pivoting threshold (1 for partial pivoting), see slu for details. Matrix must be a SparseMatrix.
+   *
+   * @return {DenseMatrix | Array}           Column vector with the solution to the linear system A * x = b
+   *
+   * An empty (0 x 0) system returns the empty solution.
+   *
+   * Throws when the factorization is singular or contains non-finite values, including
+   * rank-deficient but consistent systems. The pivot cutoff is `8 * n * eps` times the largest
+   * term that the elimination subtracted from the pivot, so a small pivot that no term
+   * cancelled is valid (the diagonal matrix `diag(1e10, 1e-7)` is regular). Numeric systems whose entries are all
+   * smaller than 1 are equilibrated first.
+   */
+  return typed(name, {
+    'Array, Array | Matrix': function (
+      a: unknown[][],
+      rhs: unknown[][] | DenseMatrix | SparseMatrix
+    ): unknown[][] {
+      const b = validateRightHandSide(rhs);
+      return lusolveFromNested(a as number[][], b);
+    },
 
-    /**
-     * Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
-     *
-     * Syntax:
-     *
-     *    math.lusolve(A, b)     // returns column vector with the solution to the linear system A * x = b
-     *    math.lusolve(lup, b)   // returns column vector with the solution to the linear system A * x = b, lup = math.lup(A)
-     *
-     * Examples:
-     *
-     *    const m = [[1, 0, 0, 0], [0, 2, 0, 0], [0, 0, 3, 0], [0, 0, 0, 4]]
-     *
-     *    const x = math.lusolve(m, [-1, -1, -1, -1])        // x = [[-1], [-0.5], [-1/3], [-0.25]]
-     *
-     *    const f = math.lup(m)
-     *    const x1 = math.lusolve(f, [-1, -1, -1, -1])       // x1 = [[-1], [-0.5], [-1/3], [-0.25]]
-     *    const x2 = math.lusolve(f, [1, 2, 1, -1])          // x2 = [[1], [1], [1/3], [-0.25]]
-     *
-     *    const a = [[-2, 3], [2, 1]]
-     *    const b = [11, 9]
-     *    const x = math.lusolve(a, b)  // [[2], [5]]
-     *
-     * See also:
-     *
-     *    lup, slu, lsolve, usolve
-     *
-     * @param {Matrix | Array | Object} A      Invertible Matrix or the Matrix LU decomposition
-     * @param {Matrix | Array} b               Column Vector
-     * @param {number} [order]                 The Symbolic Ordering and Analysis order, see slu for details. Matrix must be a SparseMatrix
-     * @param {Number} [threshold]             Partial pivoting threshold (1 for partial pivoting), see slu for details. Matrix must be a SparseMatrix.
-     *
-     * @return {DenseMatrix | Array}           Column vector with the solution to the linear system A * x = b
-     *
-     * An empty (0 x 0) system returns the empty solution.
-     *
-     * Throws when the factorization is singular or contains non-finite values, including
-     * rank-deficient but consistent systems. The pivot cutoff is `8 * n * eps` times the largest
-     * term that the elimination subtracted from the pivot, so a small pivot that no term
-     * cancelled is valid (the diagonal matrix `diag(1e10, 1e-7)` is regular). Numeric systems whose entries are all
-     * smaller than 1 are equilibrated first.
-     */
-    return typed(name, {
-      'Array, Array | Matrix': function (
-        a: unknown[][],
-        rhs: unknown[][] | DenseMatrix | SparseMatrix
-      ): unknown[][] {
-        const b = validateRightHandSide(rhs);
-        return lusolveFromNested(a as number[][], b);
-      },
-
+    ...(includeFloat64Array && {
       'Float64Array, Array | Matrix': function (
         a: Float64Array,
         rhs: unknown[][] | DenseMatrix | SparseMatrix
@@ -489,132 +490,139 @@ export const createLusolve = /* #__PURE__ */ factory(
         const b = validateRightHandSide(rhs);
         return lusolveFromNested(decompositionInputToNestedArray(a), b);
       },
+    }),
 
-      'DenseMatrix, Array | Matrix': function (
-        a: DenseMatrix,
-        rhs: unknown[][] | DenseMatrix | SparseMatrix
-      ): DenseMatrix {
-        const b = validateRightHandSide(rhs);
-        return _lusolveDense(a, b);
-      },
-
-      'SparseMatrix, Array | Matrix': function (
-        a: SparseMatrix,
-        rhs: unknown[][] | DenseMatrix | SparseMatrix
-      ): DenseMatrix {
-        const b = validateRightHandSide(rhs);
-        // A matrix-package SparseMatrix (CSR) has no _values/_index/_ptr: densify it and
-        // use the dense factorization.
-        if (isEmptyMatrix(a)) return solveEmpty(a, b);
-        const dense = densifyForSolver(a);
-        if (dense) return _lusolveDense(matrix(dense.toArray()) as DenseMatrix, b);
-        const eq = equilibrateSparse(a, b);
-        const d = lup(eq.a);
-        return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
-      },
-
-      'SparseMatrix, Array | Matrix, number, number': function (
-        a: SparseMatrix,
-        rhs: unknown[][] | DenseMatrix | SparseMatrix,
-        order: number,
-        threshold: number
-      ): DenseMatrix {
-        const b = validateRightHandSide(rhs);
-        if (isEmptyMatrix(a)) return solveEmpty(a, b);
-        // A rectangular system gets the solver error (with the lstsq hint) before slu,
-        // which throws its own factorization error (with the lup hint).
-        const size = a._size;
-        if (size[0] !== size[1]) throw nonSquareSolveError(size);
-        const eq = equilibrateSparse(a, b);
-        const d = slu(eq.a, order, threshold);
-        return _lusolve(d.L, d.U, d.p, d.q, eq.b as typeof b);
-      },
-
-      'Object, Array | Matrix': function (
-        a: LUPDecomposition | PackedMatrixDescriptor | unknown,
-        rhs: unknown[][] | DenseMatrix | SparseMatrix
-      ): DenseMatrix | unknown[][] {
-        const b = validateRightHandSide(rhs);
-        if (isLUPDecomposition(a)) {
-          return _lusolve(a.L, a.U, a.p, a.q, b);
-        }
-        if (isPackedMatrixDescriptor(a)) {
-          return lusolveFromNested(decompositionInputToNestedArray(a), b);
-        }
-        const candidate = a as Record<string, unknown>;
-        if (
-          candidate.data instanceof Float64Array &&
-          typeof candidate.rows === 'number' &&
-          typeof candidate.cols === 'number'
-        ) {
-          // Same normalizer as svd/lu: length and integer checks throw TypeError.
-          decompositionInputToNestedArray(a as PackedMatrixDescriptor);
-        }
-        throw new TypeError('Invalid Matrix LU decomposition');
-      },
-    });
-
-    /** LU solve of a dense matrix: equilibrate, factor with partial pivoting, then substitute. */
-    function _lusolveDense(
+    'DenseMatrix, Array | Matrix': function (
       a: DenseMatrix,
-      b: unknown[][] | DenseMatrix | SparseMatrix
+      rhs: unknown[][] | DenseMatrix | SparseMatrix
     ): DenseMatrix {
-      if (isEmptyMatrix(a)) return solveEmpty(a, b);
-      const eq = equilibrateDense(a._data, b);
-      const aMatrix = eq.a === a._data ? a : (matrix(eq.a as unknown[][]) as DenseMatrix);
-      const d = lup(aMatrix);
-      return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
-    }
+      const b = validateRightHandSide(rhs);
+      return _lusolveDense(a, b);
+    },
 
-    function _toMatrix(a: DenseMatrix | SparseMatrix | unknown[][]): DenseMatrix | SparseMatrix {
-      if (isMatrix(a)) {
-        return a as DenseMatrix | SparseMatrix;
+    'SparseMatrix, Array | Matrix': function (
+      a: SparseMatrix,
+      rhs: unknown[][] | DenseMatrix | SparseMatrix
+    ): DenseMatrix {
+      const b = validateRightHandSide(rhs);
+      // A matrix-package SparseMatrix (CSR) has no _values/_index/_ptr: densify it and
+      // use the dense factorization.
+      if (isEmptyMatrix(a)) return solveEmpty(a, b);
+      const dense = densifyForSolver(a);
+      if (dense) return _lusolveDense(matrix(dense.toArray()) as DenseMatrix, b);
+      const eq = equilibrateSparse(a, b);
+      const d = lup(eq.a);
+      return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
+    },
+
+    'SparseMatrix, Array | Matrix, number, number': function (
+      a: SparseMatrix,
+      rhs: unknown[][] | DenseMatrix | SparseMatrix,
+      order: number,
+      threshold: number
+    ): DenseMatrix {
+      const b = validateRightHandSide(rhs);
+      if (isEmptyMatrix(a)) return solveEmpty(a, b);
+      // A rectangular system gets the solver error (with the lstsq hint) before slu,
+      // which throws its own factorization error (with the lup hint).
+      const size = a._size;
+      if (size[0] !== size[1]) throw nonSquareSolveError(size);
+      const eq = equilibrateSparse(a, b);
+      const d = slu(eq.a, order, threshold);
+      return _lusolve(d.L, d.U, d.p, d.q, eq.b as typeof b);
+    },
+
+    'Object, Array | Matrix': function (
+      a: LUPDecomposition | PackedMatrixDescriptor | unknown,
+      rhs: unknown[][] | DenseMatrix | SparseMatrix
+    ): DenseMatrix | unknown[][] {
+      const b = validateRightHandSide(rhs);
+      if (isLUPDecomposition(a)) {
+        return _lusolve(a.L, a.U, a.p, a.q, b);
       }
-      if (isArray(a)) {
-        return matrix(a);
+      if (isPackedMatrixDescriptor(a)) {
+        return lusolveFromNested(decompositionInputToNestedArray(a), b);
+      }
+      const candidate = a as Record<string, unknown>;
+      if (
+        candidate.data instanceof Float64Array &&
+        typeof candidate.rows === 'number' &&
+        typeof candidate.cols === 'number'
+      ) {
+        // Same normalizer as svd/lu: length and integer checks throw TypeError.
+        decompositionInputToNestedArray(a as PackedMatrixDescriptor);
       }
       throw new TypeError('Invalid Matrix LU decomposition');
-    }
+    },
+  });
 
-    function _lusolve(
-      l: DenseMatrix | SparseMatrix | unknown[][],
-      u: DenseMatrix | SparseMatrix | unknown[][],
-      p: number[] | null | undefined,
-      q: number[] | null | undefined,
-      b: unknown[][] | DenseMatrix | SparseMatrix
-    ): DenseMatrix {
-      // verify decomposition
-      const L = _toMatrix(l);
-      const U = _toMatrix(u);
-      if (isEmptyMatrix(L) || isEmptyMatrix(U)) {
-        // L first, then U: the order of the checks of a non-empty factor object.
-        solveEmpty(L, b);
-        return solveEmpty(U, b);
-      }
-
-      // apply row permutations if needed (b is a DenseMatrix)
-      let bMatrix: DenseMatrix;
-      if (p) {
-        bMatrix = solveValidation(L, b, true);
-        bMatrix._data = csIpvec(p, bMatrix._data) as unknown[][];
-      } else {
-        bMatrix = solveValidation(L, b, true);
-      }
-
-      const lifted = liftTinyFactor(U, bMatrix);
-      validateUpperTriangularPivots(lifted.U, L);
-
-      // use forward substitution to resolve L * y = b
-      const y = lsolve(L, lifted.b);
-      // use backward substitution to resolve U * x = y
-      const x = usolve(lifted.U, y);
-
-      // apply column permutations if needed (x is a DenseMatrix)
-      if (q) {
-        x._data = csIpvec(q, x._data) as unknown[][];
-      }
-
-      return x;
-    }
+  /** LU solve of a dense matrix: equilibrate, factor with partial pivoting, then substitute. */
+  function _lusolveDense(a: DenseMatrix, b: unknown[][] | DenseMatrix | SparseMatrix): DenseMatrix {
+    if (isEmptyMatrix(a)) return solveEmpty(a, b);
+    const eq = equilibrateDense(a._data, b);
+    const aMatrix = eq.a === a._data ? a : (matrix(eq.a as unknown[][]) as DenseMatrix);
+    const d = lup(aMatrix);
+    return _lusolve(d.L, d.U, d.p, null, eq.b as typeof b);
   }
+
+  function _toMatrix(a: DenseMatrix | SparseMatrix | unknown[][]): DenseMatrix | SparseMatrix {
+    if (isMatrix(a)) {
+      return a as DenseMatrix | SparseMatrix;
+    }
+    if (isArray(a)) {
+      return matrix(a);
+    }
+    throw new TypeError('Invalid Matrix LU decomposition');
+  }
+
+  function _lusolve(
+    l: DenseMatrix | SparseMatrix | unknown[][],
+    u: DenseMatrix | SparseMatrix | unknown[][],
+    p: number[] | null | undefined,
+    q: number[] | null | undefined,
+    b: unknown[][] | DenseMatrix | SparseMatrix
+  ): DenseMatrix {
+    // verify decomposition
+    const L = _toMatrix(l);
+    const U = _toMatrix(u);
+    if (isEmptyMatrix(L) || isEmptyMatrix(U)) {
+      // L first, then U: the order of the checks of a non-empty factor object.
+      solveEmpty(L, b);
+      return solveEmpty(U, b);
+    }
+
+    // apply row permutations if needed (b is a DenseMatrix)
+    let bMatrix: DenseMatrix;
+    if (p) {
+      bMatrix = solveValidation(L, b, true);
+      bMatrix._data = csIpvec(p, bMatrix._data) as unknown[][];
+    } else {
+      bMatrix = solveValidation(L, b, true);
+    }
+
+    const lifted = liftTinyFactor(U, bMatrix);
+    validateUpperTriangularPivots(lifted.U, L);
+
+    // use forward substitution to resolve L * y = b
+    const y = lsolve(L, lifted.b);
+    // use backward substitution to resolve U * x = y
+    const x = usolve(lifted.U, y);
+
+    // apply column permutations if needed (x is a DenseMatrix)
+    if (q) {
+      x._data = csIpvec(q, x._data) as unknown[][];
+    }
+
+    return x;
+  }
+}
+
+export const createLusolve = /* #__PURE__ */ factory(name, dependencies, (deps: Dependencies) =>
+  buildLusolve(deps, true)
+);
+
+export const createSelectedLusolve = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  (deps: Dependencies) => buildLusolve(deps, false)
 );

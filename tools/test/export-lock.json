@@ -13652,6 +13652,9 @@
       "createLup": {
         "kind": "function"
       },
+      "createLusolve": {
+        "kind": "function"
+      },
       "createMagneticConstant": {
         "kind": "function"
       },
@@ -13995,6 +13998,9 @@
         "kind": "function"
       },
       "createSmallerEq": {
+        "kind": "function"
+      },
+      "createSolveODE": {
         "kind": "function"
       },
       "createSort": {
@@ -14855,6 +14861,9 @@
       "lusolve": {
         "kind": "function"
       },
+      "lusolveDependencies": {
+        "kind": "object"
+      },
       "lyap": {
         "kind": "function"
       },
@@ -15469,6 +15478,9 @@
       },
       "solveODE": {
         "kind": "function"
+      },
+      "solveODEDependencies": {
+        "kind": "object"
       },
       "sort": {
         "kind": "function"

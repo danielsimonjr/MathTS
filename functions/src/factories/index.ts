@@ -1500,7 +1500,7 @@ factoryScope.index = indexFn;
 // ---------------------------------------------------------------------------
 
 import { createEigs } from '../matrix/eigs.js';
-import { createLusolve } from '../algebra/solver/lusolve.js';
+import { createLusolve, createSelectedLusolve } from '../algebra/solver/lusolve.js';
 import { createCorr } from '../statistics/corr.js';
 import { createMad } from '../statistics/mad.js';
 import { createStd } from '../statistics/std.js';
@@ -2699,6 +2699,12 @@ const createSelectedRangeTransform: FactoryFunction<
   ReturnType<typeof createRangeTransform>
 > = /* #__PURE__ */ selectedTransform(createRangeTransform, createRange);
 
+const createSelectedSolveODE: typeof createSolveODE = /* #__PURE__ */ factory(
+  'solveODE',
+  [...createSolveODE.dependencies, 'map'],
+  (deps: Record<string, unknown>) => createSolveODE(deps)
+);
+
 /** Return the dependency factories that have compat named exports. */
 function compatFactoryExports(): {
   createAcos: typeof createAcos;
@@ -2993,6 +2999,8 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createSolveODE: typeof createSelectedSolveODE;
+  createLusolve: typeof createSelectedLusolve;
   createFactorial: typeof createSelectedFactorial;
   createGamma: typeof createSelectedGamma;
   createSymbolicEqual: typeof createSymbolicEqual;
@@ -3305,6 +3313,8 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createSolveODE: createSelectedSolveODE,
+    createLusolve: createSelectedLusolve,
     createFactorial: createSelectedFactorial,
     createGamma: createSelectedGamma,
     createSymbolicEqual,
