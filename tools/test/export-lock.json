@@ -13022,6 +13022,9 @@
       "createSinh": {
         "kind": "function"
       },
+      "createSqrt": {
+        "kind": "function"
+      },
       "createSquare": {
         "kind": "function"
       },
@@ -13035,6 +13038,9 @@
         "kind": "function"
       },
       "createTyped": {
+        "kind": "function"
+      },
+      "createUnaryMinus": {
         "kind": "function"
       },
       "createUnit": {
@@ -13865,6 +13871,9 @@
       "sqrt": {
         "kind": "function"
       },
+      "sqrtDependencies": {
+        "kind": "object"
+      },
       "sqrtm": {
         "kind": "function"
       },
@@ -13951,6 +13960,9 @@
       },
       "unaryMinus": {
         "kind": "function"
+      },
+      "unaryMinusDependencies": {
+        "kind": "object"
       },
       "unaryPlus": {
         "kind": "function"

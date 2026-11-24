@@ -74,7 +74,7 @@ import { createSign } from '../arithmetic/sign.js';
 import { createSqrt } from '../arithmetic/sqrt.js';
 import { createSquare } from '../arithmetic/square.js';
 import { createSubtractScalar } from '../arithmetic/subtractScalar.js';
-import { createUnaryMinus } from '../arithmetic/unaryMinus.js';
+import { createMathjsUnaryMinus, createUnaryMinus } from '../arithmetic/unaryMinus.js';
 
 // bitwise
 import { createBitNot } from '../bitwise/bitNot.js';
@@ -2279,6 +2279,8 @@ function compatFactoryExports(): {
   createRe: typeof createRe;
   createSquare: typeof createSquare;
   createSubtractScalar: typeof createSubtractScalar;
+  createSqrt: typeof createSqrt;
+  createUnaryMinus: typeof createMathjsUnaryMinus;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2332,6 +2334,8 @@ function compatFactoryExports(): {
     createRe,
     createSquare,
     createSubtractScalar,
+    createSqrt,
+    createUnaryMinus: createMathjsUnaryMinus,
     createTyped,
   };
 }

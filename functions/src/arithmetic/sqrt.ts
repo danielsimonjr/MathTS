@@ -9,17 +9,18 @@ interface UnitType {
 }
 
 interface SqrtDependencies {
+  Complex: typeof Complex;
   config: ConfigOptions;
   typed: TypedFunction;
 }
 
 const name = 'sqrt';
-const dependencies = ['config', 'typed'];
+const dependencies = ['Complex', 'config', 'typed'];
 
 export const createSqrt = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ config, typed }: SqrtDependencies) => {
+  ({ Complex: ComplexClass, config, typed }: SqrtDependencies) => {
     /**
      * Calculate the square root of a value.
      *
@@ -47,16 +48,17 @@ export const createSqrt = /* #__PURE__ */ factory(
      *            Returns the square root of `x`
      */
     return typed('sqrt', {
-      number: (x: number): number | Complex => sqrtNumberWith(x, config.predictable),
+      number: (x: number): number | Complex => sqrtNumberWith(x, config.predictable, ComplexClass),
 
       Complex: (x: Complex): Complex => x.sqrt(),
 
-      BigNumber: (x: BigNumber): BigNumber | Complex => sqrtBigNumberWith(x, config.predictable),
+      BigNumber: (x: BigNumber): BigNumber | Complex =>
+        sqrtBigNumberWith(x, config.predictable, ComplexClass),
 
       // A Fraction has no exact square root in general. Use the number path. The result is a
       // number for x >= 0 and a Complex for x < 0 (#1044).
       Fraction: (x: { valueOf(): number }): number | Complex =>
-        sqrtNumberWith(x.valueOf(), config.predictable),
+        sqrtNumberWith(x.valueOf(), config.predictable, ComplexClass),
 
       Unit: function (x: UnitType): UnitType {
         // Someday will work for complex units when they are implemented

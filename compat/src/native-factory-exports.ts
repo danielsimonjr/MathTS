@@ -61,6 +61,9 @@ const mathjsCreateSquare: CompatFactoryExports['createSquare'] = factories.creat
 const mathjsCreateSubtractScalar: CompatFactoryExports['createSubtractScalar'] =
   factories.createSubtractScalar;
 
+const mathjsCreateSqrt: CompatFactoryExports['createSqrt'] = factories.createSqrt;
+const mathjsCreateUnaryMinus: CompatFactoryExports['createUnaryMinus'] = factories.createUnaryMinus;
+
 /** Factory for the MathJS-compatible typed dispatcher. */
 const mathjsCreateTyped: CompatFactoryExports['createTyped'] = factories.createTyped;
 
@@ -326,6 +329,16 @@ const subtractScalarDependencies: UnaryBundle<'createSubtractScalar'> = {
   createSubtractScalar: mathjsCreateSubtractScalar,
 };
 
+const sqrtDependencies: UnaryBundle<'createSqrt'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createSqrt: mathjsCreateSqrt,
+};
+const unaryMinusDependencies: UnaryBundle<'createUnaryMinus'> = {
+  typedDependencies,
+  createUnaryMinus: mathjsCreateUnaryMinus,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -438,5 +451,9 @@ export {
   reDependencies,
   squareDependencies,
   subtractScalarDependencies,
+  mathjsCreateSqrt as createSqrt,
+  mathjsCreateUnaryMinus as createUnaryMinus,
+  sqrtDependencies,
+  unaryMinusDependencies,
   typedDependencies,
 };

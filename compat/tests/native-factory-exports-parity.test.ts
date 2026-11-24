@@ -35,6 +35,32 @@ describe('native compatibility dependency bundles', () => {
     expect(predictable.acos(2)).toBeNaN();
   });
 
+  it('uses the injected Complex constructor for negative real roots', () => {
+    class TracedComplex extends compat.Complex {}
+    const selectedSqrt = compat.createSqrt({
+      Complex: TracedComplex,
+      config: { predictable: false },
+      typed: compat.typed,
+    });
+    const root = selectedSqrt(-4);
+    expect(root).toBeInstanceOf(TracedComplex);
+    expect(root).toMatchObject({ re: 0, im: 2 });
+  });
+
+  it('negates Booleans as numbers even with BigNumber selected', () => {
+    const actual = create(
+      { unaryMinusDependencies: compat.unaryMinusDependencies },
+      { number: 'BigNumber' }
+    );
+    const expected = oracle.create(oracle.all, { number: 'BigNumber' });
+    expect(Reflect.get(actual, 'unaryMinus')(false)).toBe(
+      expected.unaryMinus(false as unknown as number)
+    );
+    expect(Reflect.get(actual, 'unaryMinus')(true)).toBe(
+      expected.unaryMinus(true as unknown as number)
+    );
+  });
+
   it.each([
     ['acos', [0.5]],
     ['acosh', [2]],
@@ -85,6 +111,8 @@ describe('native compatibility dependency bundles', () => {
     ['not', [true]],
     ['re', [7]],
     ['square', [7]],
+    ['sqrt', [16]],
+    ['unaryMinus', [true]],
     ['subtractScalar', [3, 4]],
   ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
