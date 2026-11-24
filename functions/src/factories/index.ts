@@ -177,7 +177,7 @@ import { createDot } from '../matrix/dot.js';
 import { createRandomInt } from '../probability/randomInt.js';
 
 // statistics
-import { createMode } from '../statistics/mode.js';
+import { createMathjsMode, createMode } from '../statistics/mode.js';
 import { createProd } from '../statistics/prod.js';
 
 // string
@@ -565,7 +565,7 @@ import { createCatalan } from '../combinatorics/catalan.js';
 // matrix
 import { createConcat } from '../matrix/concat.js';
 import { createInv } from '../matrix/inv.js';
-import { createMapSlices } from '../matrix/mapSlices.js';
+import { createMapSlices, createMathjsMapSlices } from '../matrix/mapSlices.js';
 import { createMathjsResize, createResize } from '../matrix/resize.js';
 import { createSubset } from '../matrix/subset.js';
 
@@ -2347,6 +2347,8 @@ function compatFactoryExports(): {
   createRound: typeof createRound;
   createSubset: typeof createSubset;
   createTrace: typeof createTrace;
+  createMapSlices: typeof createMathjsMapSlices;
+  createMode: typeof createMathjsMode;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2466,6 +2468,8 @@ function compatFactoryExports(): {
     createRound,
     createSubset,
     createTrace,
+    createMapSlices: createMathjsMapSlices,
+    createMode: createMathjsMode,
     createTyped,
   };
 }
