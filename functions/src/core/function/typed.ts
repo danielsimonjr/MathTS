@@ -216,14 +216,6 @@ export type TypeDefinition = {
   test: TypeTest;
 };
 
-// returns a new instance of typed-function
-let _createTyped: () => TypedFunction = function (): TypedFunction {
-  // initially, return the original instance of typed-function
-  // consecutively, return a new instance from typed.create.
-  _createTyped = typedFunction.create as unknown as () => TypedFunction;
-  return typedFunction as unknown as TypedFunction;
-};
-
 const dependencies = ['?BigNumber', '?Complex', '?DenseMatrix', '?Fraction'];
 
 /**
@@ -238,7 +230,7 @@ export const createTyped = /* #__PURE__ */ factory(
     // TODO: typed-function must be able to silently ignore signatures with unknown data types
 
     // get a new instance of typed-function
-    const _typed: TypedFunction = _createTyped();
+    const _typed = typedFunction.create() as unknown as TypedFunction;
 
     // define all types. The order of the types determines in which order function
     // arguments are type-checked (so for performance it's important to put the

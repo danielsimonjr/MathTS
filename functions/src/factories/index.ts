@@ -1,3 +1,4 @@
+import { createTyped } from '../core/function/typed.js';
 import { configFactory } from '../core/function/config.js';
 import type { MathNode } from '@danielsimonjr/mathts-expression';
 import type { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
@@ -2226,6 +2227,11 @@ function tryCreateFactoryBundle(
   return createFactoryInstance(factories as FactoriesInput, config);
 }
 
+/** Return the dependency factories that have compat named exports. */
+function compatFactoryExports(): { createSin: typeof createSin; createTyped: typeof createTyped } {
+  return { createSin, createTyped };
+}
+
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
   constructors: compatConstructors,
@@ -2236,5 +2242,6 @@ export const factory_mathjsCompat = {
   createCompatRandomSources,
   createCompatTyped,
   tryCreateFactoryBundle,
+  compatFactoryExports,
   setUnion: compatSetUnion,
 };

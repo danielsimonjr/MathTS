@@ -756,6 +756,7 @@ const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathj
 export { namedSetUnion as setUnion };
 
 export * from './named-symbols.js';
+export * from './native-factory-exports.js';
 export * from './named-physical-constants.generated.js';
 
 const defaultTyped: MathInstance['typed'] =
