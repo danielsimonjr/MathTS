@@ -31,6 +31,36 @@ const mathjsCreateSinh: CompatFactoryExports['createSinh'] = factories.createSin
 const mathjsCreateTan: CompatFactoryExports['createTan'] = factories.createTan;
 const mathjsCreateTanh: CompatFactoryExports['createTanh'] = factories.createTanh;
 
+const mathjsCreateAbs: CompatFactoryExports['createAbs'] = factories.createAbs;
+const mathjsCreateAddScalar: CompatFactoryExports['createAddScalar'] = factories.createAddScalar;
+const mathjsCreateArg: CompatFactoryExports['createArg'] = factories.createArg;
+const mathjsCreateBitNot: CompatFactoryExports['createBitNot'] = factories.createBitNot;
+const mathjsCreateClone: CompatFactoryExports['createClone'] = factories.createClone;
+const mathjsCreateConj: CompatFactoryExports['createConj'] = factories.createConj;
+const mathjsCreateCube: CompatFactoryExports['createCube'] = factories.createCube;
+const mathjsCreateEqualScalar: CompatFactoryExports['createEqualScalar'] =
+  factories.createEqualScalar;
+const mathjsCreateErf: CompatFactoryExports['createErf'] = factories.createErf;
+const mathjsCreateExp: CompatFactoryExports['createExp'] = factories.createExp;
+const mathjsCreateExpm1: CompatFactoryExports['createExpm1'] = factories.createExpm1;
+const mathjsCreateIm: CompatFactoryExports['createIm'] = factories.createIm;
+const mathjsCreateIsBounded: CompatFactoryExports['createIsBounded'] = factories.createIsBounded;
+const mathjsCreateIsNaN: CompatFactoryExports['createIsNaN'] = factories.createIsNaN;
+const mathjsCreateIsNegative: CompatFactoryExports['createIsNegative'] = factories.createIsNegative;
+const mathjsCreateIsNumeric: CompatFactoryExports['createIsNumeric'] = factories.createIsNumeric;
+const mathjsCreateIsPositive: CompatFactoryExports['createIsPositive'] = factories.createIsPositive;
+const mathjsCreateIsPrime: CompatFactoryExports['createIsPrime'] = factories.createIsPrime;
+const mathjsCreateLgamma: CompatFactoryExports['createLgamma'] = factories.createLgamma;
+const mathjsCreateLog10: CompatFactoryExports['createLog10'] = factories.createLog10;
+const mathjsCreateLog2: CompatFactoryExports['createLog2'] = factories.createLog2;
+const mathjsCreateMultiplyScalar: CompatFactoryExports['createMultiplyScalar'] =
+  factories.createMultiplyScalar;
+const mathjsCreateNot: CompatFactoryExports['createNot'] = factories.createNot;
+const mathjsCreateRe: CompatFactoryExports['createRe'] = factories.createRe;
+const mathjsCreateSquare: CompatFactoryExports['createSquare'] = factories.createSquare;
+const mathjsCreateSubtractScalar: CompatFactoryExports['createSubtractScalar'] =
+  factories.createSubtractScalar;
+
 /** Factory for the MathJS-compatible typed dispatcher. */
 const mathjsCreateTyped: CompatFactoryExports['createTyped'] = factories.createTyped;
 
@@ -208,6 +238,94 @@ const tanhDependencies: UnaryBundle<'createTanh'> = {
   createTanh: mathjsCreateTanh,
 };
 
+const absDependencies: UnaryBundle<'createAbs'> = { typedDependencies, createAbs: mathjsCreateAbs };
+const addScalarDependencies: UnaryBundle<'createAddScalar'> = {
+  typedDependencies,
+  createAddScalar: mathjsCreateAddScalar,
+};
+const argDependencies: UnaryBundle<'createArg'> = { typedDependencies, createArg: mathjsCreateArg };
+const bitNotDependencies: UnaryBundle<'createBitNot'> = {
+  typedDependencies,
+  createBitNot: mathjsCreateBitNot,
+};
+const cloneDependencies: UnaryBundle<'createClone'> = {
+  typedDependencies,
+  createClone: mathjsCreateClone,
+};
+const conjDependencies: UnaryBundle<'createConj'> = {
+  typedDependencies,
+  createConj: mathjsCreateConj,
+};
+const cubeDependencies: UnaryBundle<'createCube'> = {
+  typedDependencies,
+  createCube: mathjsCreateCube,
+};
+const equalScalarDependencies: UnaryBundle<'createEqualScalar'> = {
+  typedDependencies,
+  createEqualScalar: mathjsCreateEqualScalar,
+};
+const erfDependencies: UnaryBundle<'createErf'> = { typedDependencies, createErf: mathjsCreateErf };
+const expDependencies: UnaryBundle<'createExp'> = { typedDependencies, createExp: mathjsCreateExp };
+const expm1Dependencies: UnaryBundle<'createExpm1'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createExpm1: mathjsCreateExpm1,
+};
+const imDependencies: UnaryBundle<'createIm'> = { typedDependencies, createIm: mathjsCreateIm };
+const isBoundedDependencies: UnaryBundle<'createIsBounded'> = {
+  typedDependencies,
+  createIsBounded: mathjsCreateIsBounded,
+};
+const isNaNDependencies: UnaryBundle<'createIsNaN'> = {
+  typedDependencies,
+  createIsNaN: mathjsCreateIsNaN,
+};
+const isNegativeDependencies: UnaryBundle<'createIsNegative'> = {
+  typedDependencies,
+  createIsNegative: mathjsCreateIsNegative,
+};
+const isNumericDependencies: UnaryBundle<'createIsNumeric'> = {
+  typedDependencies,
+  createIsNumeric: mathjsCreateIsNumeric,
+};
+const isPositiveDependencies: UnaryBundle<'createIsPositive'> = {
+  typedDependencies,
+  createIsPositive: mathjsCreateIsPositive,
+};
+const isPrimeDependencies: UnaryBundle<'createIsPrime'> = {
+  typedDependencies,
+  createIsPrime: mathjsCreateIsPrime,
+};
+const lgammaDependencies: UnaryBundle<'createLgamma'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createLgamma: mathjsCreateLgamma,
+};
+const log10Dependencies: UnaryBundle<'createLog10'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createLog10: mathjsCreateLog10,
+};
+const log2Dependencies: UnaryBundle<'createLog2'> & WithComplex = {
+  ComplexDependencies,
+  typedDependencies,
+  createLog2: mathjsCreateLog2,
+};
+const multiplyScalarDependencies: UnaryBundle<'createMultiplyScalar'> = {
+  typedDependencies,
+  createMultiplyScalar: mathjsCreateMultiplyScalar,
+};
+const notDependencies: UnaryBundle<'createNot'> = { typedDependencies, createNot: mathjsCreateNot };
+const reDependencies: UnaryBundle<'createRe'> = { typedDependencies, createRe: mathjsCreateRe };
+const squareDependencies: UnaryBundle<'createSquare'> = {
+  typedDependencies,
+  createSquare: mathjsCreateSquare,
+};
+const subtractScalarDependencies: UnaryBundle<'createSubtractScalar'> = {
+  typedDependencies,
+  createSubtractScalar: mathjsCreateSubtractScalar,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -243,6 +361,32 @@ export {
   mathjsCreateSinh as createSinh,
   mathjsCreateTan as createTan,
   mathjsCreateTanh as createTanh,
+  mathjsCreateAbs as createAbs,
+  mathjsCreateAddScalar as createAddScalar,
+  mathjsCreateArg as createArg,
+  mathjsCreateBitNot as createBitNot,
+  mathjsCreateClone as createClone,
+  mathjsCreateConj as createConj,
+  mathjsCreateCube as createCube,
+  mathjsCreateEqualScalar as createEqualScalar,
+  mathjsCreateErf as createErf,
+  mathjsCreateExp as createExp,
+  mathjsCreateExpm1 as createExpm1,
+  mathjsCreateIm as createIm,
+  mathjsCreateIsBounded as createIsBounded,
+  mathjsCreateIsNaN as createIsNaN,
+  mathjsCreateIsNegative as createIsNegative,
+  mathjsCreateIsNumeric as createIsNumeric,
+  mathjsCreateIsPositive as createIsPositive,
+  mathjsCreateIsPrime as createIsPrime,
+  mathjsCreateLgamma as createLgamma,
+  mathjsCreateLog10 as createLog10,
+  mathjsCreateLog2 as createLog2,
+  mathjsCreateMultiplyScalar as createMultiplyScalar,
+  mathjsCreateNot as createNot,
+  mathjsCreateRe as createRe,
+  mathjsCreateSquare as createSquare,
+  mathjsCreateSubtractScalar as createSubtractScalar,
   mathjsCreateTyped as createTyped,
   acosDependencies,
   acoshDependencies,
@@ -268,5 +412,31 @@ export {
   sinhDependencies,
   tanDependencies,
   tanhDependencies,
+  absDependencies,
+  addScalarDependencies,
+  argDependencies,
+  bitNotDependencies,
+  cloneDependencies,
+  conjDependencies,
+  cubeDependencies,
+  equalScalarDependencies,
+  erfDependencies,
+  expDependencies,
+  expm1Dependencies,
+  imDependencies,
+  isBoundedDependencies,
+  isNaNDependencies,
+  isNegativeDependencies,
+  isNumericDependencies,
+  isPositiveDependencies,
+  isPrimeDependencies,
+  lgammaDependencies,
+  log10Dependencies,
+  log2Dependencies,
+  multiplyScalarDependencies,
+  notDependencies,
+  reDependencies,
+  squareDependencies,
+  subtractScalarDependencies,
   typedDependencies,
 };

@@ -36,31 +36,57 @@ describe('native compatibility dependency bundles', () => {
   });
 
   it.each([
-    ['acos', 0.5],
-    ['acosh', 2],
-    ['acot', 0.5],
-    ['acoth', 2],
-    ['acsc', 2],
-    ['acsch', 0.5],
-    ['asec', 2],
-    ['asech', 0.5],
-    ['asin', 0.5],
-    ['asinh', 0.5],
-    ['atan', 0.5],
-    ['atanh', 0.5],
-    ['cos', 0.5],
-    ['cosh', 0.5],
-    ['cot', 0.5],
-    ['coth', 0.5],
-    ['csc', 0.5],
-    ['csch', 0.5],
-    ['sec', 0.5],
-    ['sech', 0.5],
-    ['sin', 0.5],
-    ['sinh', 0.5],
-    ['tan', 0.5],
-    ['tanh', 0.5],
-  ])('%s has a native factory and dependency bundle matching MathJS', (name, value) => {
+    ['acos', [0.5]],
+    ['acosh', [2]],
+    ['acot', [0.5]],
+    ['acoth', [2]],
+    ['acsc', [2]],
+    ['acsch', [0.5]],
+    ['asec', [2]],
+    ['asech', [0.5]],
+    ['asin', [0.5]],
+    ['asinh', [0.5]],
+    ['atan', [0.5]],
+    ['atanh', [0.5]],
+    ['cos', [0.5]],
+    ['cosh', [0.5]],
+    ['cot', [0.5]],
+    ['coth', [0.5]],
+    ['csc', [0.5]],
+    ['csch', [0.5]],
+    ['sec', [0.5]],
+    ['sech', [0.5]],
+    ['sin', [0.5]],
+    ['sinh', [0.5]],
+    ['tan', [0.5]],
+    ['tanh', [0.5]],
+    ['abs', [-3.5]],
+    ['addScalar', [3, 4]],
+    ['arg', [-2]],
+    ['bitNot', [6]],
+    ['clone', [3]],
+    ['conj', [4]],
+    ['cube', [3]],
+    ['equalScalar', [2, 2]],
+    ['erf', [0.5]],
+    ['exp', [1]],
+    ['expm1', [0.25]],
+    ['im', [3]],
+    ['isBounded', [2]],
+    ['isNaN', [NaN]],
+    ['isNegative', [-2]],
+    ['isNumeric', [2]],
+    ['isPositive', [2]],
+    ['isPrime', [23]],
+    ['lgamma', [2.5]],
+    ['log10', [1000]],
+    ['log2', [128]],
+    ['multiplyScalar', [3, 4]],
+    ['not', [true]],
+    ['re', [7]],
+    ['square', [7]],
+    ['subtractScalar', [3, 4]],
+  ] as const)('%s has a native dependency bundle matching MathJS', (name, args) => {
     const bundleName = name + 'Dependencies';
     const factoryName = 'create' + name[0].toUpperCase() + name.slice(1);
     const bundle = Reflect.get(compat, bundleName) as Record<string, unknown>;
@@ -72,6 +98,15 @@ describe('native compatibility dependency bundles', () => {
     expect(Reflect.get(compat, factoryName).dependencies).toEqual(
       Reflect.get(oracle, factoryName).dependencies
     );
-    expect(Reflect.get(math, name)(value)).toBeCloseTo(Reflect.get(upstream, name)(value), 14);
+
+    const actualFn = Reflect.get(math, name) as (...values: unknown[]) => unknown;
+    const upstreamFn = Reflect.get(upstream, name) as (...values: unknown[]) => unknown;
+    const result = actualFn(...args);
+    const expected = upstreamFn(...args);
+    if (typeof result === 'number' && typeof expected === 'number' && Number.isFinite(expected)) {
+      expect(result).toBeCloseTo(expected, 14);
+    } else {
+      expect(result).toEqual(expected);
+    }
   });
 });

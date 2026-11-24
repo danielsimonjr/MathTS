@@ -2253,6 +2253,32 @@ function compatFactoryExports(): {
   createSinh: typeof createSinh;
   createTan: typeof createTan;
   createTanh: typeof createTanh;
+  createAbs: typeof createAbs;
+  createAddScalar: typeof createAddScalar;
+  createArg: typeof createArg;
+  createBitNot: typeof createBitNot;
+  createClone: typeof createClone;
+  createConj: typeof createConj;
+  createCube: typeof createCube;
+  createEqualScalar: typeof createEqualScalar;
+  createErf: typeof createErf;
+  createExp: typeof createExp;
+  createExpm1: typeof createExpm1;
+  createIm: typeof createIm;
+  createIsBounded: typeof createIsBounded;
+  createIsNaN: typeof createIsNaN;
+  createIsNegative: typeof createIsNegative;
+  createIsNumeric: typeof createIsNumeric;
+  createIsPositive: typeof createIsPositive;
+  createIsPrime: typeof createIsPrime;
+  createLgamma: typeof createLgamma;
+  createLog10: typeof createLog10;
+  createLog2: typeof createLog2;
+  createMultiplyScalar: typeof createMultiplyScalar;
+  createNot: typeof createNot;
+  createRe: typeof createRe;
+  createSquare: typeof createSquare;
+  createSubtractScalar: typeof createSubtractScalar;
   createTyped: typeof createTyped;
 } {
   return {
@@ -2280,6 +2306,32 @@ function compatFactoryExports(): {
     createSinh,
     createTan,
     createTanh,
+    createAbs,
+    createAddScalar,
+    createArg,
+    createBitNot,
+    createClone,
+    createConj,
+    createCube,
+    createEqualScalar,
+    createErf,
+    createExp,
+    createExpm1,
+    createIm,
+    createIsBounded,
+    createIsNaN,
+    createIsNegative,
+    createIsNumeric,
+    createIsPositive,
+    createIsPrime,
+    createLgamma,
+    createLog10,
+    createLog2,
+    createMultiplyScalar,
+    createNot,
+    createRe,
+    createSquare,
+    createSubtractScalar,
     createTyped,
   };
 }
