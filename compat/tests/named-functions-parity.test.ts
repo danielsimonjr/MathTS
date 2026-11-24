@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import * as oracle from 'mathjs';
 import {
   all,
+  cbrt,
   combinations,
   create,
   derivative,
@@ -10,6 +11,7 @@ import {
   log2,
   median,
   norm,
+  round,
 } from '../src/index.js';
 
 describe('named compatibility function imports', () => {
@@ -43,12 +45,46 @@ describe('named compatibility function imports', () => {
     const math = create(all);
     const value = math.complex(1, 2);
     const expected = oracle.log1p(oracle.complex(1, 2));
-    const actual = log1p(value) as typeof value;
+    const actual = log1p(value);
     expect(actual.re).toBeCloseTo(expected.re, 14);
     expect(actual.im).toBeCloseTo(expected.im, 14);
     expect(log1p(9999, 10)).toBeCloseTo(oracle.log1p(9999, 10), 14);
     expect(math.log1p(9999, 10)).toBeCloseTo(4, 14);
     expect(math.evaluate('log1p(9999, 10)')).toBeCloseTo(4, 14);
     expect(() => log1p([1, 2], 10)).toThrow();
+  });
+
+  it('takes cube roots of values with units', () => {
+    const math = create(all);
+    for (const [value, unit] of [
+      [27, 'm'],
+      [64, 'cm'],
+    ] as const) {
+      const expected = oracle.cbrt(oracle.unit(value, unit + '^3'));
+      const named = cbrt(math.unit(value, unit + '^3')) as typeof math.speedOfLight;
+      const evaluated = math.evaluate('cbrt(' + value + ' ' + unit + '^3)') as typeof named;
+      expect(named.toNumeric(unit)).toBeCloseTo(Number(expected.toNumeric(unit)), 12);
+      expect(evaluated.toNumeric(unit)).toBeCloseTo(Number(expected.toNumeric(unit)), 12);
+    }
+  });
+
+  it('rounds units after converting to the requested target unit', () => {
+    const math = create(all);
+    const target = math.unit('cm');
+    const oracleTarget = oracle.unit('cm');
+    const value = math.unit('3.241 cm');
+    const oracleValue = oracle.unit('3.241 cm');
+    const rounded = round(value, 2, target) as typeof math.speedOfLight;
+    const integral = round(value, target) as typeof math.speedOfLight;
+    expect(integral.toNumeric('cm')).toBeCloseTo(
+      Number(oracle.round(oracleValue, oracleTarget).toNumeric('cm')),
+      14
+    );
+    expect(rounded.toNumeric('cm')).toBeCloseTo(
+      Number(oracle.round(oracleValue, 2, oracleTarget).toNumeric('cm')),
+      14
+    );
+    expect(String(math.evaluate('round(3.241 cm, 2, cm)'))).toBe('3.24 cm');
+    expect(String(round([value, math.unit('2.178 cm'), 0], 2, target))).toBe('3.24 cm,2.18 cm,0');
   });
 });

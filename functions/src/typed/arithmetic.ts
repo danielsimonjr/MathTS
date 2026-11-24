@@ -1535,6 +1535,7 @@ export const cbrt = mathTyped('cbrt', {
   // differently).
   Complex: (a: Complex): Complex => a.cbrt(),
   BigNumber: (a: BigNumber): BigNumber => a.cbrt(),
+  Unit: (a: Unit): Unit => (factoryScope.cbrt as (value: Unit) => Unit)(a),
   Dual: (a: Dual): Dual => a.powConst(1 / 3),
 
   // Two-argument allRoots forms (mathjs parity). When `allRoots` is true, all
@@ -1915,6 +1916,18 @@ export const round = mathTyped('round', {
   // (`matAlgo14xDs` and `matAlgo11xS0s` call the scalar function). A zero leaf goes through the
   // scalar row here, so `round([-0], 2)` is `[0]`, as in mathjs.
   'Array | Matrix, number | BigNumber': mapEachLeaf((self, x, n) => self(x, n)),
+  'Array | Matrix | Unit, Unit': (value: unknown, target: Unit): unknown =>
+    (factoryScope.round as ScalarOp)(value, target),
+  'Array | Matrix | Unit, number | BigNumber, Unit': (
+    value: unknown,
+    decimals: number | BigNumber,
+    target: Unit
+  ): unknown =>
+    (factoryScope.round as (x: unknown, n: number | BigNumber, unit: Unit) => unknown)(
+      value,
+      decimals,
+      target
+    ),
   'number | bigint | BigNumber | Fraction | Complex, Array | Matrix': mapEachLeafOfSecond(
     (self, x, n) => self(x, n)
   ),
