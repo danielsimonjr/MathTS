@@ -1682,6 +1682,195 @@ const RelationalNodeDependencies: Pick<CompatFactoryExports, 'createRelationalNo
   createRelationalNode: mathjsCreateRelationalNode,
 };
 
+const mathjsCreateImmutableDenseMatrixClass: CompatFactoryExports['createImmutableDenseMatrixClass'] =
+  factories.createImmutableDenseMatrixClass;
+const ImmutableDenseMatrixDependencies: Pick<
+  CompatFactoryExports,
+  'createImmutableDenseMatrixClass'
+> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  smallerDependencies: typeof smallerDependencies;
+} = {
+  DenseMatrixDependencies,
+  smallerDependencies,
+  createImmutableDenseMatrixClass: mathjsCreateImmutableDenseMatrixClass,
+};
+
+const mathjsCreateIndexClass: CompatFactoryExports['createIndexClass'] = factories.createIndexClass;
+const IndexDependencies: Pick<CompatFactoryExports, 'createIndexClass'> & {
+  ImmutableDenseMatrixDependencies: typeof ImmutableDenseMatrixDependencies;
+  getMatrixDataTypeDependencies: typeof getMatrixDataTypeDependencies;
+} = {
+  ImmutableDenseMatrixDependencies,
+  getMatrixDataTypeDependencies,
+  createIndexClass: mathjsCreateIndexClass,
+};
+
+const mathjsCreateIndex: CompatFactoryExports['createIndex'] = factories.createIndex;
+const indexDependencies: Pick<CompatFactoryExports, 'createIndex'> & {
+  IndexDependencies: typeof IndexDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  IndexDependencies,
+  typedDependencies,
+  createIndex: mathjsCreateIndex,
+};
+
+const mathjsCreateSetDifference: CompatFactoryExports['createSetDifference'] =
+  factories.createSetDifference;
+const setDifferenceDependencies: Pick<CompatFactoryExports, 'createSetDifference'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  IndexDependencies: typeof IndexDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  DenseMatrixDependencies,
+  IndexDependencies,
+  compareNaturalDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetDifference: mathjsCreateSetDifference,
+};
+
+const mathjsCreateSetIntersect: CompatFactoryExports['createSetIntersect'] =
+  factories.createSetIntersect;
+const setIntersectDependencies: Pick<CompatFactoryExports, 'createSetIntersect'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  IndexDependencies: typeof IndexDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  DenseMatrixDependencies,
+  IndexDependencies,
+  compareNaturalDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetIntersect: mathjsCreateSetIntersect,
+};
+
+const mathjsCreateSetDistinct: CompatFactoryExports['createSetDistinct'] =
+  factories.createSetDistinct;
+const setDistinctDependencies: Pick<CompatFactoryExports, 'createSetDistinct'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  IndexDependencies: typeof IndexDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  DenseMatrixDependencies,
+  IndexDependencies,
+  compareNaturalDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetDistinct: mathjsCreateSetDistinct,
+};
+
+const mathjsCreateSetCartesian: CompatFactoryExports['createSetCartesian'] =
+  factories.createSetCartesian;
+const setCartesianDependencies: Pick<CompatFactoryExports, 'createSetCartesian'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
+  IndexDependencies: typeof IndexDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  DenseMatrixDependencies,
+  IndexDependencies,
+  compareNaturalDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetCartesian: mathjsCreateSetCartesian,
+};
+
+const mathjsCreateSetIsSubset: CompatFactoryExports['createSetIsSubset'] =
+  factories.createSetIsSubset;
+const setIsSubsetDependencies: Pick<CompatFactoryExports, 'createSetIsSubset'> & {
+  IndexDependencies: typeof IndexDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  IndexDependencies,
+  compareNaturalDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetIsSubset: mathjsCreateSetIsSubset,
+};
+
+const mathjsCreateSetMultiplicity: CompatFactoryExports['createSetMultiplicity'] =
+  factories.createSetMultiplicity;
+const setMultiplicityDependencies: Pick<CompatFactoryExports, 'createSetMultiplicity'> & {
+  IndexDependencies: typeof IndexDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  IndexDependencies,
+  compareNaturalDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetMultiplicity: mathjsCreateSetMultiplicity,
+};
+
+const mathjsCreateSetPowerset: CompatFactoryExports['createSetPowerset'] =
+  factories.createSetPowerset;
+const setPowersetDependencies: Pick<CompatFactoryExports, 'createSetPowerset'> & {
+  IndexDependencies: typeof IndexDependencies;
+  compareNaturalDependencies: typeof compareNaturalDependencies;
+  sizeDependencies: typeof sizeDependencies;
+  subsetDependencies: typeof subsetDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  IndexDependencies,
+  compareNaturalDependencies,
+  sizeDependencies,
+  subsetDependencies,
+  typedDependencies,
+  createSetPowerset: mathjsCreateSetPowerset,
+};
+
+const mathjsCreateColumn: CompatFactoryExports['createColumn'] = factories.createColumn;
+const columnDependencies: Pick<CompatFactoryExports, 'createColumn'> & {
+  IndexDependencies: typeof IndexDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  rangeDependencies: typeof rangeDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  IndexDependencies,
+  matrixDependencies,
+  rangeDependencies,
+  typedDependencies,
+  createColumn: mathjsCreateColumn,
+};
+
+const mathjsCreateRow: CompatFactoryExports['createRow'] = factories.createRow;
+const rowDependencies: Pick<CompatFactoryExports, 'createRow'> & {
+  IndexDependencies: typeof IndexDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  rangeDependencies: typeof rangeDependencies;
+  typedDependencies: typeof typedDependencies;
+} = {
+  IndexDependencies,
+  matrixDependencies,
+  rangeDependencies,
+  typedDependencies,
+  createRow: mathjsCreateRow,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -2026,5 +2215,29 @@ export {
   IndexNodeDependencies,
   mathjsCreateRelationalNode as createRelationalNode,
   RelationalNodeDependencies,
+  mathjsCreateImmutableDenseMatrixClass as createImmutableDenseMatrixClass,
+  ImmutableDenseMatrixDependencies,
+  mathjsCreateIndexClass as createIndexClass,
+  IndexDependencies,
+  mathjsCreateIndex as createIndex,
+  indexDependencies,
+  mathjsCreateSetDifference as createSetDifference,
+  setDifferenceDependencies,
+  mathjsCreateSetIntersect as createSetIntersect,
+  setIntersectDependencies,
+  mathjsCreateSetDistinct as createSetDistinct,
+  setDistinctDependencies,
+  mathjsCreateSetCartesian as createSetCartesian,
+  setCartesianDependencies,
+  mathjsCreateSetIsSubset as createSetIsSubset,
+  setIsSubsetDependencies,
+  mathjsCreateSetMultiplicity as createSetMultiplicity,
+  setMultiplicityDependencies,
+  mathjsCreateSetPowerset as createSetPowerset,
+  setPowersetDependencies,
+  mathjsCreateColumn as createColumn,
+  columnDependencies,
+  mathjsCreateRow as createRow,
+  rowDependencies,
   typedDependencies,
 };
