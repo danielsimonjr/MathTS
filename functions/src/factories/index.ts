@@ -1030,6 +1030,9 @@ import {
   createRelationalNode,
   createSymbolNode,
   createParse,
+  createParser,
+  createParserClass,
+  createHelpClass,
 } from '@danielsimonjr/mathts-expression';
 
 import { createResultSet } from '../type/resultset/ResultSet.js';
@@ -2929,6 +2932,9 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createHelpClass: typeof createHelpClass;
+  createParser: typeof createParser;
+  createParserClass: typeof createParserClass;
   createComposition: typeof createComposition;
   createKldivergence: typeof createKldivergence;
   createFreqz: typeof createFreqz;
@@ -3227,6 +3233,9 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createHelpClass,
+    createParser,
+    createParserClass,
     createComposition,
     createKldivergence,
     createFreqz,

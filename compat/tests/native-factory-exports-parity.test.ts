@@ -5,6 +5,37 @@ import * as compat from '../src/index.js';
 const { create, createSin, sinDependencies } = compat;
 
 describe('native compatibility dependency bundles', () => {
+  it('opens selected parser scopes and retrieves help using a function reference', () => {
+    const actual = create({
+      parserDependencies: compat.parserDependencies,
+      helpDependencies: compat.helpDependencies,
+      addDependencies: compat.addDependencies,
+    });
+    const expected = oracle.create({
+      parserDependencies: Reflect.get(oracle, 'parserDependencies'),
+      helpDependencies: Reflect.get(oracle, 'helpDependencies'),
+      addDependencies: Reflect.get(oracle, 'addDependencies'),
+    });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const runParser = (instance: object) => {
+      const parser = Reflect.apply(Reflect.get(instance, 'parser'), instance, []) as {
+        set(name: string, value: unknown): unknown;
+        evaluate(expr: string): unknown;
+        get(name: string): unknown;
+      };
+      parser.set('x', 7);
+      return [parser.evaluate('x + 3'), parser.get('x')];
+    };
+    expect(runParser(actual)).toEqual(runParser(expected));
+    const helpName = (instance: object) => {
+      const doc = Reflect.apply(Reflect.get(instance, 'help'), instance, [
+        Reflect.get(instance, 'add'),
+      ]) as { toJSON(): { name: string } };
+      return doc.toJSON().name;
+    };
+    expect(helpName(actual)).toBe(helpName(expected));
+  });
+
   it('evaluates selected transforms with MathJS expression semantics', () => {
     const cases = [
       ['and', 'And', 'false and missing'],
