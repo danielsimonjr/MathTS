@@ -3305,6 +3305,67 @@ const indexTransformDependencies: { createIndexTransform: typeof mathjsCreateInd
   createIndexTransform: mathjsCreateIndexTransform,
 };
 
+const mathjsCreateFreqz: CompatFactoryExports['createFreqz'] = factories.createFreqz;
+const freqzDependencies: UnaryBundle<'createFreqz'> & {
+  ComplexDependencies: typeof ComplexDependencies;
+  addDependencies: typeof addDependencies;
+  divideDependencies: typeof divideDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+} = {
+  ComplexDependencies,
+  addDependencies,
+  divideDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  typedDependencies,
+  createFreqz: mathjsCreateFreqz,
+};
+
+const mathjsCreateKldivergence: CompatFactoryExports['createKldivergence'] =
+  factories.createKldivergence;
+const kldivergenceDependencies: UnaryBundle<'createKldivergence'> & {
+  divideDependencies: typeof divideDependencies;
+  dotDivideDependencies: typeof dotDivideDependencies;
+  isNumericDependencies: typeof isNumericDependencies;
+  logDependencies: typeof logDependencies;
+  mapDependencies: typeof mapDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  sumDependencies: typeof sumDependencies;
+} = {
+  divideDependencies,
+  dotDivideDependencies,
+  isNumericDependencies,
+  logDependencies,
+  mapDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  sumDependencies,
+  typedDependencies,
+  createKldivergence: mathjsCreateKldivergence,
+};
+
+const mathjsCreateComposition: CompatFactoryExports['createComposition'] =
+  factories.createComposition;
+const compositionDependencies: UnaryBundle<'createComposition'> & {
+  addScalarDependencies: typeof addScalarDependencies;
+  combinationsDependencies: typeof combinationsDependencies;
+  isIntegerDependencies: typeof isIntegerDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
+  isPositiveDependencies: typeof isPositiveDependencies;
+  largerDependencies: typeof largerDependencies;
+} = {
+  addScalarDependencies,
+  combinationsDependencies,
+  isIntegerDependencies,
+  isNegativeDependencies,
+  isPositiveDependencies,
+  largerDependencies,
+  typedDependencies,
+  createComposition: mathjsCreateComposition,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3899,6 +3960,12 @@ export {
   meanDependencies,
   mathjsCreatePolynomialRoot as createPolynomialRoot,
   polynomialRootDependencies,
+  mathjsCreateComposition as createComposition,
+  compositionDependencies,
+  mathjsCreateKldivergence as createKldivergence,
+  kldivergenceDependencies,
+  mathjsCreateFreqz as createFreqz,
+  freqzDependencies,
   mathjsCreateCombinations as createCombinations,
   combinationsDependencies,
   mathjsCreateCombinationsWithRep as createCombinationsWithRep,

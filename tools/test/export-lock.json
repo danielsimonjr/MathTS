@@ -13022,6 +13022,9 @@
       "composition": {
         "kind": "function"
       },
+      "compositionDependencies": {
+        "kind": "object"
+      },
       "computePool": {
         "kind": "object"
       },
@@ -13259,6 +13262,9 @@
       "createComplexClass": {
         "kind": "function"
       },
+      "createComposition": {
+        "kind": "function"
+      },
       "createConcat": {
         "kind": "function"
       },
@@ -13451,6 +13457,9 @@
       "createFractionClass": {
         "kind": "function"
       },
+      "createFreqz": {
+        "kind": "function"
+      },
       "createFunctionAssignmentNode": {
         "kind": "function"
       },
@@ -13545,6 +13554,9 @@
         "kind": "function"
       },
       "createIsZero": {
+        "kind": "function"
+      },
+      "createKldivergence": {
         "kind": "function"
       },
       "createKlitzing": {
@@ -14354,6 +14366,9 @@
       "freqz": {
         "kind": "function"
       },
+      "freqzDependencies": {
+        "kind": "object"
+      },
       "gamma": {
         "kind": "function"
       },
@@ -14662,6 +14677,9 @@
       },
       "kldivergence": {
         "kind": "function"
+      },
+      "kldivergenceDependencies": {
+        "kind": "object"
       },
       "klitzing": {
         "kind": "object"

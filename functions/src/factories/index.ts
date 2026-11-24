@@ -2929,6 +2929,9 @@ function compatFactoryExports(): {
   createCombinations: typeof createSelectedCombinations;
   createCombinationsWithRep: typeof createSelectedCombinationsWithRep;
   createPolynomialRoot: typeof createPolynomialRoot;
+  createComposition: typeof createComposition;
+  createKldivergence: typeof createKldivergence;
+  createFreqz: typeof createFreqz;
   createTyped: typeof createTyped;
 } {
   return {
@@ -3224,6 +3227,9 @@ function compatFactoryExports(): {
     createCombinations: createSelectedCombinations,
     createCombinationsWithRep: createSelectedCombinationsWithRep,
     createPolynomialRoot,
+    createComposition,
+    createKldivergence,
+    createFreqz,
     createTyped,
   };
 }

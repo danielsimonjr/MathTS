@@ -276,6 +276,25 @@ describe('native compatibility dependency bundles', () => {
     expect(run(actual)).toEqual(run(expected));
   });
 
+  it('computes selected filter frequency bins and complex response', () => {
+    const actual = create({ freqzDependencies: compat.freqzDependencies });
+    const expected = oracle.create({ freqzDependencies: Reflect.get(oracle, 'freqzDependencies') });
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+    const run = (instance: object) =>
+      Reflect.apply(Reflect.get(instance, 'freqz'), instance, [[1, 0.5], [1], 4]) as {
+        w: number[];
+        h: { re: number; im: number }[];
+      };
+    const result = run(actual);
+    const upstream = run(expected);
+    expect(result.w).toEqual(upstream.w);
+    expect(result.h).toHaveLength(upstream.h.length);
+    for (const [i, value] of result.h.entries()) {
+      expect(value.re).toBeCloseTo(upstream.h[i].re, 12);
+      expect(value.im).toBeCloseTo(upstream.h[i].im, 12);
+    }
+  });
+
   it('builds selected transfer function coefficients like MathJS', () => {
     const actual = create({ zpk2tfDependencies: compat.zpk2tfDependencies });
     const expected = oracle.create({
@@ -999,6 +1018,14 @@ describe('native compatibility dependency bundles', () => {
     ],
     ['combinations', [7, 5]],
     ['combinationsWithRep', [7, 5]],
+    ['composition', [5, 3]],
+    [
+      'kldivergence',
+      [
+        [0.3, 0.7],
+        [0.5, 0.5],
+      ],
+    ],
     ['mean', [[2, 4, 9]]],
     [
       'mean',
