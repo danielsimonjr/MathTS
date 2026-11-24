@@ -58,6 +58,18 @@ export interface MathJSConfig extends Partial<RuntimeConfig> {
   randomSeed?: string | null;
 }
 
+const moduleDefaults = {
+  relTol: 1e-12,
+  absTol: 1e-15,
+  matrix: 'Matrix',
+  number: 'number',
+  numberFallback: 'number',
+  precision: 64,
+  predictable: false,
+  randomSeed: null,
+  legacySubset: false,
+} as const satisfies MathJSConfig;
+
 /**
  * Default configuration
  */
@@ -643,7 +655,7 @@ export const all: Record<string, unknown> = {
 let defaultInstance: MathInstance | undefined;
 
 function getDefaultInstance(): MathInstance {
-  return (defaultInstance ??= create(all));
+  return (defaultInstance ??= create(all, moduleDefaults));
 }
 
 /** Evaluate an expression or a collection in the default compatibility instance. */
@@ -679,6 +691,44 @@ export {
   defaultEvaluate as evaluate,
   defaultParse as parse,
   defaultParser as parser,
+};
+
+/** Read the configuration for MathJS-compatible named imports. */
+const defaultConfigReader = /* #__PURE__ */ Object.assign(
+  (settings?: Partial<MathJSConfig>) => {
+    if (settings !== undefined) {
+      throw new Error('The global config is readonly. Create an instance to change its settings.');
+    }
+    return { ...moduleDefaults };
+  },
+  moduleDefaults,
+  {
+    MATRIX_OPTIONS: ['Matrix', 'Array'],
+    NUMBER_OPTIONS: ['number', 'BigNumber', 'bigint', 'Fraction'],
+  }
+);
+
+const namedRandomSources =
+  /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatRandomSources(
+    moduleDefaults,
+    undefined
+  );
+type NamedRandomSources = ReturnType<
+  typeof mathFunctions.factory_mathjsCompat.createCompatRandomSources
+>;
+
+const defaultRandom: ReturnType<NamedRandomSources['random']> =
+  /* #__PURE__ */ namedRandomSources.random();
+const defaultRandomInt: ReturnType<NamedRandomSources['randomInt']> =
+  /* #__PURE__ */ namedRandomSources.randomInt();
+const defaultPickRandom: ReturnType<NamedRandomSources['pickRandom']> =
+  /* #__PURE__ */ namedRandomSources.pickRandom();
+
+export {
+  defaultConfigReader as config,
+  defaultPickRandom as pickRandom,
+  defaultRandom as random,
+  defaultRandomInt as randomInt,
 };
 
 /** Union of two multisets in MathJS result order. */

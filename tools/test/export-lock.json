@@ -12731,6 +12731,9 @@
       "concat": {
         "kind": "function"
       },
+      "config": {
+        "kind": "function"
+      },
       "conj": {
         "kind": "function"
       },
@@ -13226,6 +13229,9 @@
       "pi": {
         "kind": "number"
       },
+      "pickRandom": {
+        "kind": "function"
+      },
       "pinv": {
         "kind": "function"
       },
@@ -13245,6 +13251,12 @@
         "kind": "function"
       },
       "quantileSeq": {
+        "kind": "function"
+      },
+      "random": {
+        "kind": "function"
+      },
+      "randomInt": {
         "kind": "function"
       },
       "range": {
