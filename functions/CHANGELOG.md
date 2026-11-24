@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.9
+
+### Patch Changes
+
+- e649d66: Expose MathJS dependency bundles for triangular solves, range generation, distance, log1p, and Bernoulli numbers.
+- cd4f430: Expose selected MathJS factory bundles for bignumber, fraction, complex, and numeric conversions.
+- cd4f430: Expose more selected MathJS arithmetic and matrix factories, including scalar division, elementwise division, logarithms, and roots.
+
 ## 0.89.8
 
 ### Patch Changes
