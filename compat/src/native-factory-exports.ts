@@ -1188,6 +1188,24 @@ const sortDependencies: UnaryBundle<'createSort'> & {
   createSort: mathjsCreateSort,
 };
 
+const mathjsCreateChainClass: CompatFactoryExports['createChainClass'] = factories.createChainClass;
+const ChainDependencies: UnaryBundle<'createChainClass'> = {
+  typedDependencies,
+  createChainClass: mathjsCreateChainClass,
+};
+const mathjsCreateChain: CompatFactoryExports['createChain'] = factories.createChain;
+const chainDependencies: UnaryBundle<'createChain'> & {
+  ChainDependencies: typeof ChainDependencies;
+} = {
+  ChainDependencies,
+  typedDependencies,
+  createChain: mathjsCreateChain,
+};
+const mathjsCreateResultSet: CompatFactoryExports['createResultSet'] = factories.createResultSet;
+const ResultSetDependencies: Pick<CompatFactoryExports, 'createResultSet'> = {
+  createResultSet: mathjsCreateResultSet,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -1454,5 +1472,11 @@ export {
   setSizeDependencies,
   mathjsCreateSort as createSort,
   sortDependencies,
+  mathjsCreateChainClass as createChainClass,
+  ChainDependencies,
+  mathjsCreateChain as createChain,
+  chainDependencies,
+  mathjsCreateResultSet as createResultSet,
+  ResultSetDependencies,
   typedDependencies,
 };
