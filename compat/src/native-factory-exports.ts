@@ -2805,6 +2805,56 @@ const sparseDependencies: UnaryBundle<'createSparse'> & {
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
 } = { SparseMatrixDependencies, typedDependencies, createSparse: mathjsCreateSparse };
 
+const mathjsCreateIntersect: CompatFactoryExports['createIntersect'] = factories.createIntersect;
+const intersectDependencies: UnaryBundle<'createIntersect'> & {
+  absDependencies: typeof absDependencies;
+  addDependencies: typeof addDependencies;
+  addScalarDependencies: typeof addScalarDependencies;
+  divideScalarDependencies: typeof divideScalarDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
+  flattenDependencies: typeof flattenDependencies;
+  isNumericDependencies: typeof isNumericDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+  matrixDependencies: typeof matrixDependencies;
+  multiplyDependencies: typeof multiplyDependencies;
+  multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  smallerDependencies: typeof smallerDependencies;
+  subtractDependencies: typeof subtractDependencies;
+} = {
+  absDependencies,
+  addDependencies,
+  addScalarDependencies,
+  divideScalarDependencies,
+  equalScalarDependencies,
+  flattenDependencies,
+  isNumericDependencies,
+  isZeroDependencies,
+  matrixDependencies,
+  multiplyDependencies,
+  multiplyScalarDependencies,
+  smallerDependencies,
+  subtractDependencies,
+  typedDependencies,
+  createIntersect: mathjsCreateIntersect,
+};
+
+const mathjsCreateResolve: CompatFactoryExports['createResolve'] = factories.createResolve;
+const resolveDependencies: UnaryBundle<'createResolve'> & {
+  ConstantNodeDependencies: typeof ConstantNodeDependencies;
+  FunctionNodeDependencies: typeof FunctionNodeDependencies;
+  OperatorNodeDependencies: typeof OperatorNodeDependencies;
+  ParenthesisNodeDependencies: typeof ParenthesisNodeDependencies;
+  parseDependencies: typeof parseDependencies;
+} = {
+  ConstantNodeDependencies,
+  FunctionNodeDependencies,
+  OperatorNodeDependencies,
+  ParenthesisNodeDependencies,
+  parseDependencies,
+  typedDependencies,
+  createResolve: mathjsCreateResolve,
+};
+
 export {
   BigNumberDependencies,
   ComplexDependencies,
@@ -3341,5 +3391,9 @@ export {
   splitUnitDependencies,
   mathjsCreateSparse as createSparse,
   sparseDependencies,
+  mathjsCreateIntersect as createIntersect,
+  intersectDependencies,
+  mathjsCreateResolve as createResolve,
+  resolveDependencies,
   typedDependencies,
 };

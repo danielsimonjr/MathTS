@@ -13439,6 +13439,9 @@
       "createInfinity": {
         "kind": "function"
       },
+      "createIntersect": {
+        "kind": "function"
+      },
       "createInv": {
         "kind": "function"
       },
@@ -13719,6 +13722,9 @@
         "kind": "function"
       },
       "createResize": {
+        "kind": "function"
+      },
+      "createResolve": {
         "kind": "function"
       },
       "createResultSet": {
@@ -14293,6 +14299,9 @@
       },
       "intersect": {
         "kind": "function"
+      },
+      "intersectDependencies": {
+        "kind": "object"
       },
       "inv": {
         "kind": "function"
@@ -14974,6 +14983,9 @@
       },
       "resolve": {
         "kind": "function"
+      },
+      "resolveDependencies": {
+        "kind": "object"
       },
       "reviver": {
         "kind": "function"
