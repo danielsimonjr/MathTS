@@ -1,5 +1,29 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.18
+
+### Patch Changes
+
+- 057ba46: Expose MathJS expression transform factories for map, filter, and forEach.
+- 057ba46: Expose MathJS factory bundles for filter frequency response, Kullback–Leibler divergence, and integer compositions.
+- 057ba46: Expose MathJS expression transform factories for min, max, sum, cumsum, mean, and mapSlices.
+- 057ba46: Expose MathJS expression transform factories for or, bitOr, nullish, column, row, and concat.
+- 057ba46: Expose MathJS Parser, parser, Help, and help factory bundles for selected instances.
+- 057ba46: Expose MathJS factory bundles for combinations with and without replacement.
+- 057ba46: Expose MathJS expression transform factories for and, bitAnd, diff, index, print, range, and subset.
+- 057ba46: Expose MathJS factory bundles for bigint, boolean, and string conversions.
+- 057ba46: Expose MathJS factory bundles for the Range constructor and JSON replacer.
+- 057ba46: Expose MathJS factory bundles for the numerator and denominator of fractions, including nested collections.
+- Updated dependencies [057ba46]
+- Updated dependencies [057ba46]
+- Updated dependencies [057ba46]
+- Updated dependencies [057ba46]
+- Updated dependencies [057ba46]
+- Updated dependencies [057ba46]
+- Updated dependencies [057ba46]
+- Updated dependencies [057ba46]
+  - @danielsimonjr/mathts-functions@0.89.16
+
 ## 0.7.17
 
 ### Patch Changes
