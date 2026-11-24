@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-expression
 
+## 0.14.5
+
+### Patch Changes
+
+- f14d001: Expose the named MathJS documentation catalog and add help entries for fraction numerator and denominator.
+
 ## 0.14.4
 
 ### Patch Changes

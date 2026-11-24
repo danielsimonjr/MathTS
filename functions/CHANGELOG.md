@@ -1,5 +1,24 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.17
+
+### Patch Changes
+
+- f14d001: Accept MathJS string infinity norm orders for vectors and the positive infinity norm order for matrices.
+- f14d001: Expose MathJS factory bundles for permutations, Catalan numbers, multinomial coefficients, Stirling numbers of the second kind, and Bell numbers.
+- f14d001: Accept preferred unit lists and a display offset in the default MathJS-compatible toBest.
+- f14d001: Expose selected MathJS Fourier transform, inverse Fourier transform, and matrix square-root dependency bundles.
+- f14d001: Expose selected MathJS eigenvalue, norm, rotation, Schur, Sylvester, Lyapunov, matrix exponential, and Riemann zeta factory bundles. Match MathJS class factory metadata in the dependency catalog.
+- f14d001: Support complex arguments and an optional logarithm base in the default MathJS-compatible log1p.
+- f14d001: Support unit-valued operands in the default MathJS-compatible cube root and rounding to a target unit.
+- f14d001: Expose selected MathJS gamma and factorial factory bundles with BigNumber precision and input handling.
+- f14d001: Expose MathJS factory bundles for median, median absolute deviation, variance, standard deviation, quantiles, and their applicable expression transforms.
+- f14d001: Expose selected MathJS correlation, extended greatest common divisor, and modular inverse factory bundles.
+- f14d001: Expose MathJS factory bundles for solving linear systems by LU factorization and for solving ordinary differential equations.
+- f14d001: Expose MathJS expression simplification, symbolic equality, differentiation, and rationalization factory bundles. Selected parsers register string-to-node conversion with their own typed dispatcher.
+- Updated dependencies [f14d001]
+  - @danielsimonjr/mathts-expression@0.14.5
+
 ## 0.89.16
 
 ### Patch Changes

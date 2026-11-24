@@ -1,6 +1,6 @@
 {
   "name": "@danielsimonjr/mathts-expression",
-  "version": "0.14.4",
+  "version": "0.14.5",
   "description": "Expression parser and evaluator for MathTS",
   "author": "Daniel Simon Jr.",
   "license": "MIT",
