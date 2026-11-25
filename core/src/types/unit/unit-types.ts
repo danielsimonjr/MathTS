@@ -23,11 +23,10 @@ export interface BigNumberValue {
   times(other: BigNumberValue | number | string): BigNumberValue;
 }
 
-/** Structural view of a Fraction value (numerator/denominator/sign). */
+/** Structural view of a MathTS Fraction (`numerator` / `denominator`; sign lives in the numerator). */
 export interface FractionValue {
-  n: number;
-  d: number;
-  s: number;
+  numerator: bigint;
+  denominator: bigint;
   isFraction?: boolean;
 }
 
