@@ -258,6 +258,22 @@ jobs:
         if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/dist-freshness.test.mjs
 
+      # The Node vitest runner (`tools/test/run-vitest-node.mjs`) is what Test (22.x) and
+      # Test (24.x) run for the whole suite. These checks pin it with fixtures, before any
+      # test runs: the summary and a failing item's output survive a multi-megabyte dump on
+      # a pipe, its children carry a worker cap so concurrency x workers fits the runner,
+      # the four `functions` shards partition every test file exactly once, the coverage
+      # suite covers every package the plain suite covers, and prepush never reports a
+      # skipped gate as passing.
+      - name: Vitest runner and coverage-scope tests
+        if: needs.changes.outputs.docs_only != 'true'
+        run: |
+          node --test tools/test/run-vitest-node.test.mjs
+          node --test tools/test/run-vitest-node-workers.test.mjs
+          node --test tools/test/functions-shard-partition.test.mjs
+          node --test tools/test/coverage-suite-scope.test.mjs
+          node --test tools/test/prepush-report.test.mjs
+
       - name: Source map backfill tests
         if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/ensure-js-sourcemaps.test.mjs
