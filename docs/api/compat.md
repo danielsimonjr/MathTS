@@ -332,7 +332,7 @@ async function parallelSum(data) {
 | `m.size()`                     | `math.size(m)` returns `[rows, cols]`             |
 | `f.n`, `f.d`                   | `f.numerator`, `f.denominator` (bigint)           |
 
-**`zpk2tf` with 2-D Matrix arguments (#1589):** compat matches mathjs 15.3.0. A non-scalar root or pole has no `.re`/`.im`, so the polynomial product multiplies `NaN + NaNi` factors; compat builds the coefficients with the complex.js `mul`/`add` semantics the oracle's Complex arithmetic uses (a NaN part counts as infinite), giving `zpk2tf(matrix([[1,2],[3,4]]), matrix([[5,6],[7,8]]))` → `[[1, Infinity + Infinityi, Infinity + Infinityi], [1, NaN + NaNi, Infinity + Infinityi]]`. 1-D results are unchanged.
+**`Complex` non-finite arithmetic and `zpk2tf` (#1589):** on `create(all)` only, compat matches mathjs 15.3.0 complex.js rules (NaN parts count as infinite in `add`/`subtract`/`multiply`/`divide`/`dotMultiply`; compat `zpk2tf`/`freqz` use the same arithmetic). Native MathTS `Complex` elsewhere keeps IEEE semantics. The 2-D Matrix `zpk2tf` repro above matches the oracle; 1-D results unchanged. Compat `zpk2tf` gain: `number | bigint | string | boolean` only (not BigNumber or Fraction).
 
 See [Migration Guide](../migration/guide.md) for complete details.
 

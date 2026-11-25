@@ -208,8 +208,23 @@ export function wireMathjsInstanceApi(
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
+  /** Compat shims that must win over the functions singleton in `evaluate` (#1589). */
+  const EVALUATE_SCOPE_OVERRIDES = ['zpk2tf', 'freqz'] as const;
+
+  function syncEvaluateScopeOverrides(): void {
+    for (const name of EVALUATE_SCOPE_OVERRIDES) {
+      const fn = instance[name];
+      if (typeof fn === 'function') {
+        expressionLayers.mathWithTransform[name] = fn;
+      } else {
+        delete expressionLayers.mathWithTransform[name];
+      }
+    }
+  }
+
   function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
+    syncEvaluateScopeOverrides();
     evaluator = createInstanceEvaluator(
       expressionLayers.mathWithTransform,
       COMPAT_INTERNAL_NAMES,

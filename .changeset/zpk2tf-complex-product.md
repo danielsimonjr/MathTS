@@ -1,6 +1,5 @@
 ---
-'@danielsimonjr/mathts-functions': patch
 '@danielsimonjr/mathts-compat': patch
 ---
 
-Match mathjs 15.3.0 `zpk2tf` for 2-D Matrix arguments: the polynomial product uses the complex.js `mul`/`add` semantics the oracle uses (a NaN part counts as infinite), so a non-scalar root yields `Infinity + Infinityi` coefficients instead of `NaN + NaNi`; 1-D results are unchanged (#1589).
+Match mathjs 15.3.0 `Complex` non-finite arithmetic (complex.js 2.4.3) on the compat instance only: wrapped `add`/`subtract`/`multiply`/`divide`/`dotMultiply`, `freqz` via compat complex.js signal factory, `zpk2tf` via mathjs oracle delegation, expression `evaluate` scope wiring for those shims, and doc-sweep config isolation (#1589). Native critical packages are unchanged.

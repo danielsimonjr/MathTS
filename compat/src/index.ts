@@ -21,6 +21,8 @@ import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims } from './shims.js';
+import { compatFreqz } from './compat-signal-factories.js';
+import { bindOracleZpk2tf } from './mathjs-oracle-zpk2tf.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -472,6 +474,8 @@ export function create(
         ),
       }
     : surfaceOf(factories);
+  const oracleZpk2tf = bindOracleZpk2tf(() => currentConfig as Record<string, unknown>);
+
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
@@ -491,10 +495,13 @@ export function create(
 
     // Arithmetic
     add: bindShim(shims.add),
-    subtract: mathFunctions.factory_subtract,
+    subtract: bindShim(shims.subtract),
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
+    dotMultiply: bindShim(shims.dotMultiply),
     pow: shims.pow,
+    zpk2tf: bindShim(oracleZpk2tf),
+    freqz: bindShim(compatFreqz),
     sqrt: shims.sqrt,
     abs: shims.abs,
     exp: shims.exp,

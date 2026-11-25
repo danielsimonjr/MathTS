@@ -42,12 +42,15 @@ import type {
   PublicVariance,
 } from '@danielsimonjr/mathts-functions';
 
+import { withMathjsComplexBinary } from './mathjs-complex.js';
+import { compatComplexPow } from './mathjs-compat-pow.js';
 import {
   add as _add,
   addScalar as _addScalar,
   subtract as _subtract,
   multiply as _multiply,
   multiplyScalar as _multiplyScalar,
+  dotMultiply as _dotMultiply,
   number as _number,
   divide as _divide,
   factory_divide as _factoryDivide,
@@ -440,41 +443,58 @@ function withNumericText(arithmetic: BinaryArithmetic, scalar: BinaryArithmetic)
   };
 }
 
+const _compatAdd = withMathjsComplexBinary(_add as BinaryArithmetic, 'add');
+const _compatSubtract = withMathjsComplexBinary(_subtract as BinaryArithmetic, 'sub');
+const _compatMultiply = withMathjsComplexBinary(_multiply as BinaryArithmetic, 'mul');
+
 export const add = makeArithmetic(
-  withNumericText(_add as BinaryArithmetic, _addScalar),
+  withNumericText(_compatAdd, _addScalar),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b
 ) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = makeArithmetic(
-  _subtract as (a: unknown, b: unknown) => unknown,
+  _compatSubtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
   true
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
-  withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
+  withNumericText(_compatMultiply, _multiplyScalar),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
   (a, b) => a * b
 ) as NumericStringArithmetic & typeof _multiply;
+export const dotMultiply: typeof _dotMultiply = withMathjsComplexBinary(
+  _dotMultiply as BinaryArithmetic,
+  'mul'
+) as typeof _dotMultiply;
 /**
  * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
  * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed
  * function gives the boxed class for every matrix operand. Every other call goes to the typed
  * function.
  */
+const _compatDivideScalar = withMathjsComplexBinary(
+  ((a: unknown, b: unknown) =>
+    (_factoryDivide as (x: unknown, y: unknown) => unknown)(a, b)) as BinaryArithmetic,
+  'div'
+);
 export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
   if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
     return _matMultiply(a, _inv(b) as DenseMatrix);
   }
-  // The mathjs-shaped factory carries the 15.3.0 sparse semantics (a sparse result only
-  // when the image of zero is zero, #1565); the typed surface keeps its older sparse path.
+  if (arguments.length === 2) {
+    return _compatDivideScalar(a, b);
+  }
   return (_factoryDivide as unknown as (...args: unknown[]) => unknown).apply(
     undefined,
     arguments as unknown as unknown[]
   );
 }, _divide) as TypedFunction;
 export const pow = withTypedSurface(function (base?: unknown, exponent?: unknown): unknown {
+  if (arguments.length === 2 && isComplex(base) && isComplex(exponent)) {
+    return compatComplexPow(base, exponent);
+  }
   if (
     arguments.length === 2 &&
     (Array.isArray(base) || isCompatBridgeMatrix(base)) &&
@@ -852,4 +872,5 @@ const _shims = {
 export const shims: Omit<typeof _shims, 'add' | 'sin'> & {
   add: NumericStringArithmetic & PublicAdd;
   sin: PublicSin;
-} = _shims;
+  dotMultiply: typeof _dotMultiply;
+} = { ..._shims, dotMultiply };
