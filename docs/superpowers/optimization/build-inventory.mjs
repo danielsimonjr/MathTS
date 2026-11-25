@@ -63,10 +63,13 @@ function evidence(list) {
 // 1. AssemblyScript standalone audit
 // ---------------------------------------------------------------------------
 /** Standalone = no `import` statement AND no `export … from` re-export, so
- * `asc <file>` compiles it alone. */
+ * `asc <file>` compiles it alone. Also records, per standalone file, the names of the
+ * `function` / `const` declarations it defines, so a caller can ask whether ONE
+ * function's kernel actually lives there (the old code assigned `existing` from the
+ * FUNCTION'S FAMILY, which claimed 242 kernels that no file defines). */
 function auditAssembly() {
   const root = join(REPO, 'assembly', 'src');
-  const out = { standalone: [], dependent: [] };
+  const out = { standalone: [], dependent: [], symbols: new Map() };
   const walk = (dir) => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, e.name);
@@ -76,6 +79,13 @@ function auditAssembly() {
         const dep = /^\s*(import\s|export\s+[^;\n]*\bfrom\s)/m.test(src);
         const rel = p.slice(REPO.length + 1).replace(/\\/g, '/');
         (dep ? out.dependent : out.standalone).push(rel);
+        if (!dep) {
+          // Only EXPORTED declarations: a private local helper (`function cosh` inside
+          // complex.ts, `const idx` inside a loop) is not a kernel anything can call.
+          const names = new Set();
+          for (const m of src.matchAll(/export\s+(?:function|const)\s+(\w+)/g)) names.add(m[1]);
+          out.symbols.set(rel, names);
+        }
       }
     }
   };
@@ -90,6 +100,14 @@ function auditAssembly() {
 // ---------------------------------------------------------------------------
 const TYPED = 'functions/src/typed';
 const POLICY = 'functions/src/wasm/policy.ts';
+/** The matrix package's WASM multiply gate, `matrix/src/config.ts`
+ * `backends.wasm.operationThresholds.multiply`. `BackendManager.multiply` counts
+ * `rows(A) × cols(A) × cols(B)` (multiply-adds) and picks the WASM backend at or above
+ * this value; 13 824 = 24³, the first measured clear win of two Node 24 runs of
+ * `tools/benchmarks/matmul-threshold.mjs` (commit 25ce9aa5, #1420). This was `256`
+ * before that commit; do not hard-code the number in prose again. */
+const MATRIX_WASM_MULTIPLY_FLOPS = 13_824;
+const MATRIX_WASM_MULTIPLY_TEXT = 'flop count ≥ 13824 (24³)';
 const EW_BRIDGE = 'functions/src/wasm/elementwise/wasm-bridge.ts';
 
 /** Policy bands (functions/src/wasm/policy.ts WASM_DISPATCH_POLICY). */
@@ -135,7 +153,7 @@ const PAIRED_FUNCTIONS = {
   atan: { wasm: ewf('atan', `${TYPED}/trigonometry.ts`, "f64UnaryDispatched(a, 'atan'") },
   sinh: { wasm: ewf('sinh', `${TYPED}/arithmetic.ts`, "f64UnaryDispatched(a, 'sinh'") },
   tanh: { wasm: ewf('tanh', `${TYPED}/arithmetic.ts`, "f64UnaryDispatched(a, 'tanh'") },
-  atanh: { wasm: ewf('atanh', `${TYPED}/arithmetic.ts`, "f64UnaryDispatched(a, 'atanh'") },
+  atanh: { wasm: ewf('atanh', `${TYPED}/trigonometry.ts`, "f64UnaryDispatched(a, 'atanh'") },
   expm1: { wasm: ewf('expm1', `${TYPED}/arithmetic.ts`, "f64UnaryDispatched(a, 'expm1'") },
   log1p: { wasm: ewf('log1p', `${TYPED}/arithmetic.ts`, "f64UnaryDispatched(a, 'log1p'") },
   log2: { wasm: ewf('log2', `${TYPED}/arithmetic.ts`, "f64UnaryDispatched(a, 'log2'") },
@@ -216,12 +234,13 @@ const PAIRED_FUNCTIONS = {
   pow: {
     wasm: {
       implemented: true,
-      default:
-        'wasm via the matrix backend for square-matrix powers (backendManager GEMM, flop count ≥ 256; JS below)',
-      kernel: 'matrix_multiply_simd_ptr (matrix backend, not the typed dispatch)',
+      default: `wasm via the matrix backend for square-matrix powers (backendManager GEMM, ${MATRIX_WASM_MULTIPLY_TEXT}; JS below)`,
+      kernel: 'matrix_multiply_simd_ptr',
+      kernelNote: 'the matrix package backend kernel, not a typed-dispatch one',
       path: `${TYPED}/arithmetic.ts matrixPowNumber → backendManager.multiply → WASMBackend SIMD GEMM`,
       evidence: [
         { file: `${TYPED}/arithmetic.ts`, anchor: 'backendManager.multiply(result, base)' },
+        { file: 'matrix/src/config.ts', anchor: 'multiply: 13_824' },
       ],
     },
   },
@@ -583,11 +602,21 @@ const MATRIX_PAIRINGS = {
   multiply: {
     wasm: {
       implemented: true,
-      default: 'wasm (flop count ≥ 256; JS below or when the binary is missing)',
-      path: `matrix DenseMatrix.multiply → backendManager.multiply → WASMBackend SIMD GEMM`,
+      default: `js on the public \`matrix.multiply\` export (DenseMatrix.multiply → arithmetic.multiply → gemmF64); the SIMD GEMM runs only through \`backendManager.multiply\`, which \`functions.multiply\`/\`functions.pow\` reach (${MATRIX_WASM_MULTIPLY_TEXT})`,
+      // The SIMD GEMM lives in the AS kernel behind `WASMBackend.multiply`, so this row
+      // has the same TS-reference + AS-kernel dual as a typed-dispatch pairing.
+      kernel: 'matrix_multiply_simd_ptr',
+      kernelNote:
+        'the matrix package backend kernel (WASMBackend.multiply), not a typed-dispatch one',
+      path: `matrix DenseMatrix.multiply → arithmetic.multiply → gemmF64 (JS, no backendManager); backendManager.multiply → WASMBackend SIMD GEMM`,
       evidence: [
-        { file: 'tensor/src/Tensor.ts', anchor: 'backendManager.multiply(' },
-        { file: 'matrix/src/config.ts', anchor: '256' },
+        {
+          file: 'matrix/src/backends/BackendManager.ts',
+          anchor: 'multiply(a: DenseMatrix, b: DenseMatrix)',
+        },
+        { file: 'matrix/src/types/DenseMatrix.ts', anchor: 'arithmetic.multiply(this, other)' },
+        { file: 'matrix/src/config.ts', anchor: 'multiply: 13_824' },
+        { file: 'matrix/src/backends/WASMBackend.ts', anchor: 'mod.matrix_multiply_simd_ptr(' },
       ],
     },
   },
@@ -596,9 +625,14 @@ const TENSOR_PAIRINGS = {
   matmul: {
     wasm: {
       implemented: true,
-      default: 'wasm (flop count ≥ 256; JS below or when the binary is missing)',
+      default: `wasm (${MATRIX_WASM_MULTIPLY_TEXT}; JS below, before \`backendManager.initialize()\`, or when the binary is missing)`,
+      kernel: 'matrix_multiply_simd_ptr',
+      kernelNote: 'the matrix package backend kernel reached through backendManager',
       path: `tensor Tensor.matmul → backendManager.multiply → WASMBackend SIMD GEMM`,
-      evidence: [{ file: 'tensor/src/Tensor.ts', anchor: 'backendManager.multiply(' }],
+      evidence: [
+        { file: 'tensor/src/Tensor.ts', anchor: 'backendManager.multiply(' },
+        { file: 'matrix/src/config.ts', anchor: 'multiply: 13_824' },
+      ],
     },
     webgpu: {
       implemented: true,
@@ -658,7 +692,10 @@ const FAMILY_KEYWORDS = [
     /(PSD|Spectrogram|Periodogram|Coherence|LombScargle|goertzel|chirpZTransform|findPeaks|stft|istft|czt)$/,
     'signal.spectral',
   ],
-  [/(Window$|^chirp$|^square$|^sawtooth$|^pulseTrain$|^gaussPulse$)/, 'signal.windows-waveforms'],
+  // `square` is NOT here: the only public `square` is the arithmetic `x²`
+  // (functions/src/typed/arithmetic.ts:1503) — there is no square-wave export, so the
+  // old `^square$` alternative mis-familied it and gave it a "window fill" reason.
+  [/(Window$|^chirp$|^sawtooth$|^pulseTrain$|^gaussPulse$)/, 'signal.windows-waveforms'],
   [/^(dwt|idwt|wavedec|waverec|wmaxlev|cwt|dtw)$/, 'signal.wavelets-multirate'],
   [
     /(Dist$|PDF$|CDF$|PMF$|Quantile$|Quantile\w+|^owensT$|^skellam|^zipf|^nakagami|^rice|^dirichlet|^wishart|^gev|^skewNormal|^truncatedNormal|^inverseGamma)/,
@@ -936,7 +973,7 @@ const RULES = {
   },
   'statistics.regression-models': {
     wasm: CAND(
-      'OLS/ridge normal equations are XᵀX matmuls — routing through backendManager GEMM pays for wide X (flop count ≥ 256); lasso/elasticNet coordinate descent is branchy (stay JS)'
+      'OLS/ridge normal equations are XᵀX matmuls — routing through backendManager GEMM pays for wide X (flop count ≥ 13824 = 24³); lasso/elasticNet coordinate descent is branchy (stay JS)'
     ),
     workpool: CAND(
       'XᵀX/Xᵀy fan-out for wide design matrices; the measured pool matmul win starts at 7,077,888 multiply-adds, so useful only for large n·p'
@@ -1018,7 +1055,7 @@ const RULES = {
   },
   'tensor.core-operations': {
     wasm: CAND(
-      'einsum/contractions reduce to GEMM (backendManager already accelerates matmul ≥ 256 flops); elementwise tensor ops could reuse array_*_ptr kernels — wire behind the measured bands'
+      'einsum/contractions reduce to GEMM (backendManager already accelerates matmul ≥ 13824 flops = 24³); elementwise tensor ops could reuse array_*_ptr kernels — wire behind the measured bands'
     ),
     workpool: CAND('large contractions cross the 7M multiply-add pool threshold quickly'),
     webgpu: CAND(
@@ -1040,7 +1077,9 @@ const RULES = {
       'sort_f64 IS paired for median/quantile/percentile (n ≥ 1 048 576); argsort measured 0.92–1.13× ⇒ stays JS'
     ),
     workpool: NW(POOL_MEASURED_LOSS('sort fan-out is memory-bound')),
-    webgpu: NW('bitonic GPU sort is index-fragile in f32 and unmeasured here'),
+    webgpu: NW(
+      'sort/select are index-fragile in f32 (a bitonic GPU sort needs an exact integer permutation) and unmeasured here; the set ops in this family are small element-wise comparisons, not kernels'
+    ),
   },
   'functions.array-reshaping': {
     wasm: NW('pure data movement — memcpy-class, no arithmetic'),
@@ -1140,7 +1179,7 @@ const RULES = {
       "pool implementation exists (parallelFFT/IFFT/Magnitude/Power) but op 'parallelFFT' = 'never' ⇒ inline today; parallelConv/XCorr/AutoCorr engage workers via the nameless 50k gate"
     ),
     webgpu: NW(
-      'GPU implementation exists (parallelFFT/parallelIFFT via fftGpuDispatch); other FFT entries stay JS by the same amortization economics'
+      'only the single real-input FFT (parallelFFT/parallelIFFT) routes to fftGpuDispatch today; the 2-D / DCT / DST / rfft / fftshift wrappers have no GPU dispatch, and their per-frame upload is not amortised until fft2d batching exists (a candidate, not a pairing — see the ranked list)'
     ),
   },
   'signal.filtering': {
@@ -1223,7 +1262,7 @@ const OVERRIDES = {
       'the flat Float64Array helper is sequential JS (functions/src/typed/arithmetic.ts matmulSequential); routing through computePool.matmul pays above 7,077,888 multiply-adds (≈ 192³, measured forceParallel ≤ 0.90× sequential)'
     ),
     wasm: CAND(
-      'route through backendManager GEMM (SIMD, flop count ≥ 256) instead of the plain JS triple loop — the matrix package already ships that path'
+      'route through backendManager GEMM (SIMD, flop count ≥ 13824 = 24³) instead of the plain JS triple loop — the matrix package already ships that path'
     ),
     webgpu: CAND(
       'gpuMatmul exists (opt-in f32) — a fused large-N route could reuse it; unmeasured for this helper'
@@ -1231,7 +1270,7 @@ const OVERRIDES = {
   },
   pow: {
     wasm: NW(
-      'scalar pow is Math.pow (hardware); the MATRIX path is already wasm-paired via backendManager.multiply (SIMD GEMM ≥ 256 flops) — no additional kernel needed'
+      'scalar pow is Math.pow (hardware); the MATRIX path is already wasm-paired via backendManager.multiply (SIMD GEMM ≥ 13824 flops = 24³) — no additional kernel needed'
     ),
   },
   parallelStatCumsum: {
@@ -1266,7 +1305,7 @@ const OVERRIDES = {
       'matrix/src/operations/common.ts matMul runs gemmF64 (pure JS); the pool matmul win starts at 7,077,888 multiply-adds (≈ 192³) — same gate as functions matmul'
     ),
     wasm: CAND(
-      'route through backendManager GEMM (SIMD, flop count ≥ 256) instead of gemmF64 — the matrix package ships that path for DenseMatrix.multiply'
+      'route through backendManager GEMM (SIMD, flop count ≥ 13824 = 24³) instead of gemmF64 — backendManager.multiply ships that path, but the public DenseMatrix/matrix paths do not call it (M17)'
     ),
   },
 };
@@ -1277,10 +1316,15 @@ function classify(family, name, pairings, kind, pkg) {
   for (const backend of ['wasm', 'workpool', 'webgpu']) {
     const p = pairings?.[backend];
     if (p && p.implemented) {
-      const engages = !/default: 'js|^js /.test(p.default ?? '');
+      // A pairing whose default engagement is `js …` is wired-but-idle: the code path
+      // exists but the shipped policy/router keeps this caller on JS. Saying
+      // "implemented: js …" read as a contradiction, so name the state.
+      const idle = /^(js\b|never\b)/.test(p.default ?? '');
       out[backend] = {
         cls: 'paired',
-        reason: p.default ? `implemented: ${p.default}` : 'implementation exists for this backend',
+        reason: p.default
+          ? `${idle ? 'wired-but-idle (JS today)' : 'implemented'}: ${p.default}`
+          : 'implementation exists for this backend',
       };
       continue;
     }
@@ -1389,7 +1433,7 @@ const MISMATCHES = [
     doc: 'docs/reference/functions.md — Arithmetic table, pow row',
     claim: 'Accel cell "—"',
     actual:
-      'the matrix-power path routes through backendManager.multiply → WASMBackend SIMD GEMM at flop count ≥ 256 (functions/src/typed/arithmetic.ts matrixPowNumber) — under-claim',
+      'the matrix-power path routes through backendManager.multiply → WASMBackend SIMD GEMM at flop count ≥ 13824 = 24³ (functions/src/typed/arithmetic.ts matrixPowNumber) — under-claim',
     severity: 'low',
     status: 'fixed in this PR',
     fix: 'curated table cell',
@@ -1403,6 +1447,80 @@ const MISMATCHES = [
     severity: 'medium',
     status: 'open — code docstrings (recorded so the name-vs-reality trap is documented)',
     fix: 'code docstrings (out of scope for a docs-only PR — recorded here so the challenger sees the name-vs-reality trap; the Accel/classification data in inventory.json reflects the JS reality)',
+  },
+  {
+    id: 'M11',
+    doc: 'this inventory — every `wasm (flop count ≥ 256 …)` claim (functions.md `pow` row, the ranked list, the matrix/tensor pairings)',
+    claim: 'the matrix package engages WASM GEMM at flop count ≥ 256',
+    actual:
+      'matrix/src/config.ts sets `backends.wasm.operationThresholds.multiply = 13_824` (24³) since commit 25ce9aa5 (#1420, measured crossover); `256` is the pre-#1420 value. Verified at runtime: a 12³ `backendManager.multiply` (1728 flops) stays on JS and 24³ (13 824) takes the WASM kernel.',
+    severity: 'high',
+    status:
+      'fixed in this PR (generator now emits 13824 everywhere and reads the threshold from config.ts)',
+    fix: 'corrected the generator’s prose and evidence anchors',
+  },
+  {
+    id: 'M12',
+    doc: 'this inventory — `asStandalone: existing`',
+    claim: '284 entries are "an import-free kernel already covers the function"',
+    actual:
+      'the state was assigned from the FUNCTION’S FAMILY, not from the function: all 77 `arithmetic.elementwise` rows cited `assembly/src/elementwise.ts`, which declares 18 `array_<op>_ptr` kernels and no `add`/`multiply`/`sqrt`/`acos`/`cumsum`; `functions.special` did the same for 76 rows against `special.ts`’s 20 exports. Only 86 of the 284 cited files actually declare the named function’s kernel. The count is now 86 and the rest are `candidate` with the family-file note.',
+    severity: 'high',
+    status: 'fixed in this PR (generator now audits each cited file’s exported declarations)',
+    fix: 'per-function kernel audit in build-inventory.mjs',
+  },
+  {
+    id: 'M13',
+    doc: 'this inventory — `pairings.wasm.kernel` for `pow`',
+    claim:
+      'kernel `matrix_multiply_simd_ptr (matrix backend, not the typed dispatch)` — a kernel id with a parenthetical inside it',
+    actual:
+      'the parenthetical made the id unresolvable (`KERNEL_HOME` had no such key), so `asImpl` was null for a `paired` row and `dualSetup.wasm` said `none` while `classification.wasm` said `paired`. The id is now `matrix_multiply_simd_ptr` with a separate `kernelNote`, and the row carries the AS file:line.',
+    severity: 'medium',
+    status: 'fixed in this PR',
+    fix: 'split the kernel id from its note; map it to assembly/src/ops/matrix.ts',
+  },
+  {
+    id: 'M14',
+    doc: 'this inventory — `pairings.workpool` for parallelStatMedian/Quantile/Percentile and `asStandalone` for `sort`',
+    claim: '`sort` and the `parallelStat*` sort users are backed by `sort_f64`',
+    actual:
+      'true only above the policy band (n ≥ 1 048 576) and only on the typed statistics path; the public `sort` factory (functions/src/matrix/sort.ts) never calls `sortF64Dispatch`, so its row is `existing` for the kernel file but unpaired for dispatch — the notes now say so.',
+    severity: 'low',
+    status:
+      'fixed in this PR (asImpl note distinguishes a standalone kernel from a dispatch pairing)',
+    fix: 'asImpl.note on unpaired standalone entries',
+  },
+  {
+    id: 'M15',
+    doc: 'this inventory — `dualSetup.wasm` for `pow` and `matrix.multiply`',
+    claim: 'none',
+    actual:
+      'both are classified `paired` and both have a TS reference + an AS kernel, so `dualSetup.wasm` is `existing` (it read `none` only because `asImpl` was null — see M13).',
+    severity: 'medium',
+    status: 'fixed in this PR',
+    fix: 'dualSetup keys off "asImpl came from a pairing kernel", not off asImpl being non-null',
+  },
+  {
+    id: 'M16',
+    doc: 'generated parallel-pairing.md — the nameless-50k "effectively parallelized" rows',
+    claim:
+      'parallelStatCorr / MAD / Norm / Std / Variance / Histogram are effective via `applyKernel`',
+    actual:
+      "functions/src/typed/statistics.ts contains no `applyKernel` call (grep: 0); those helpers call the named `computePool.<op>` methods, whose op thresholds are `'never'` — the detector matched a recursion on the helper’s own name. This inventory records the code-verified routing (default `js`), which the generated report’s `Effectively parallelized` table contradicts.",
+    severity: 'medium',
+    status: 'open — generator source (recorded; out of scope for a docs-only PR)',
+    fix: 'fix the `parallel*(` recursion match in the detector, or drop the column',
+  },
+  {
+    id: 'M17',
+    doc: 'docs/reference/functions.md — the `pow` row; and this inventory’s `matrix.multiply` pairing default',
+    claim: 'the matrix product is WASM-accelerated at flop count ≥ threshold',
+    actual:
+      'measured at runtime: the PUBLIC `DenseMatrix.multiply` and the public `matrix.multiply` export both run `arithmetic.multiply → gemmF64` (JS) and never call `backendManager`, at 24³ and 64³ (0 `wasmBackend.multiply` calls). Only `backendManager.multiply` — reached by `functions.multiply`/`functions.pow` — takes the WASM kernel (1 and 3 calls at 24³/64³; none at 12³). `CLAUDE.md` says the same ("Public `DenseMatrix.multiply` … stay on JS"), but the `pow` cell and the pairing prose implied the whole matrix path was accelerated.',
+    severity: 'high',
+    status: 'fixed in this PR (pairing `default`/`path` now name which caller is accelerated)',
+    fix: 'pairing distinguishes the public DenseMatrix path (JS) from backendManager (WASM)',
   },
 ];
 
@@ -1887,6 +2005,40 @@ const FAMILY_STANDALONE = {
   'expression.language': { state: 'blocked', reason: 'parser/tree structures' },
 };
 
+/** The names an AS declaration for one public function can take: the export itself
+ * (`lgamma_f64`, `sort_f64`), the pointer kernel (`array_abs_ptr`), the i32 array
+ * kernel (`bitAnd_i32_array`), or the plain snake name (`tridiag_solve_f64`). */
+function kernelNameCandidates(name) {
+  const snake = name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+  return new Set([`array_${snake}_ptr`, `${snake}_i32_array`, name, `${snake}_f64`, `${name}_f64`]);
+}
+
+/** The import-free assembly/src file that defines a kernel for THIS function, or null.
+ * Proof is the file's own `function`/`const` declarations (see `auditAssembly`), so a
+ * family's kernels never stand in for a function it does not implement.
+ *
+ * The match is deliberately narrow, because a same-named AS helper is not always the
+ * function's kernel: `ops/scalar.ts` holds two-argument scalar helpers (`min_f64`,
+ * `max_f64`, `abs_f64`, `clamp_f64`) that a NAMED public array reduction (`min(A)`,
+ * `abs(A)`) does not use, and `ops/array.ts` / `ops/matrix.ts` hold binary in-place
+ * kernels behind the vectorised ops, not the public elementwise dispatch. Those three
+ * files therefore only satisfy the `array_<op>_ptr` form, which IS the elementwise
+ * pointer kernel the bridge calls. */
+function kernelCoversFunction(name) {
+  const scalarHelperFiles = new Set([
+    'assembly/src/ops/scalar.ts',
+    'assembly/src/ops/array.ts',
+    'assembly/src/ops/matrix.ts',
+  ]);
+  const snake = name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+  for (const [file, symbols] of assemblyAudit.symbols) {
+    if (symbols.has(`array_${snake}_ptr`) || symbols.has(`${snake}_i32_array`)) return file;
+    if (scalarHelperFiles.has(file)) continue;
+    if (symbols.has(name) || symbols.has(`${snake}_f64`) || symbols.has(`${name}_f64`)) return file;
+  }
+  return null;
+}
+
 const entries = [];
 for (const pkg of PACKAGES) {
   for (const { name, kind } of surfaces[pkg]) {
@@ -1921,27 +2073,55 @@ for (const pkg of PACKAGES) {
       sa = { state: 'blocked', reason: 'not a function (constant/class/namespace)' };
     else if (kernel && KERNEL_HOME[kernel]) {
       const file = KERNEL_HOME[kernel];
-      sa = standaloneSet.has(file)
-        ? { state: 'existing', file }
-        : {
-            state: 'candidate',
-            file,
-            note: `kernel exists in ${file} but that file imports helpers — inline them for an import-free standalone`,
-          };
+      // `existing` needs the kernel DECLARED in that import-free file, not merely the
+      // file to exist. `fused_chain` is a dispatch label, not a declaration: the chain
+      // is a sequence of the file's `array_*_ptr` kernels, so it qualifies only when the
+      // file declares those pointer kernels.
+      const declared =
+        assemblyAudit.symbols.get(file)?.has(kernel) ||
+        (kernel === 'fused_chain' &&
+          [...(assemblyAudit.symbols.get(file) ?? [])].some((n) => n.endsWith('_ptr')));
+      sa =
+        standaloneSet.has(file) && declared
+          ? { state: 'existing', file }
+          : {
+              state: 'candidate',
+              file,
+              note: `kernel exists in ${file} but ${
+                standaloneSet.has(file)
+                  ? 'is not declared there as a callable export'
+                  : 'that file imports helpers — inline them for an import-free standalone'
+              }`,
+            };
     } else if (pairing?.wasm?.implemented) {
       sa = {
         state: 'candidate',
         note: 'wasm path exists through bridge plumbing; a standalone copy of its kernel is writable',
       };
-    } else
-      sa =
-        FAMILY_STANDALONE[family] ??
-        (family
-          ? fallbackStandalone
-          : {
-              state: 'blocked',
-              reason: 'non-numeric infrastructure (pool lifecycle, docs, constants)',
-            });
+    } else {
+      // No pairing kernel: `existing` must be PROVEN for THIS function. The old code
+      // trusted FAMILY_STANDALONE, so every `arithmetic.elementwise` row claimed
+      // `assembly/src/elementwise.ts` — including 242 rows no assembly file defines
+      // (`add`, `multiply`, `acos`, `cumsum`, `besselI`, …). Ask the file's own symbol
+      // table instead, and fall back to `candidate` with the true reason.
+      const famSa = FAMILY_STANDALONE[family];
+      const home = kernelCoversFunction(name, pkg);
+      if (home) sa = { state: 'existing', file: home };
+      else if (famSa && famSa.state === 'existing')
+        sa = {
+          state: 'candidate',
+          note: `the ${family} family has import-free kernels in ${famSa.file}, but none defines \`${name}\` itself — a new import-free kernel is writable (family-level claim corrected)`,
+        };
+      else
+        sa =
+          famSa ??
+          (family
+            ? fallbackStandalone
+            : {
+                state: 'blocked',
+                reason: 'non-numeric infrastructure (pool lifecycle, docs, constants)',
+              });
+    }
 
     // doc-vs-code mismatch per entry
     const mismatch = [];
@@ -2004,13 +2184,42 @@ for (const pkg of PACKAGES) {
         }
       : null;
     let asImpl = null;
+    let asImplFromPairing = false;
     if (pairing?.wasm?.kernel && KERNEL_HOME[pairing.wasm.kernel]) {
       const f = KERNEL_HOME[pairing.wasm.kernel];
+      asImplFromPairing = true;
       asImpl = {
         file: f,
+        // `fused_chain` is the policy key for a SEQUENCE of pointer kernels, not a
+        // declaration of its own: point at the first kernel the chain can run.
         line: asKernelLine(f, pairing.wasm.kernel),
         kernel: pairing.wasm.kernel,
+        ...(pairing.wasm.kernel === 'fused_chain'
+          ? {
+              note: 'a dispatch label, not a declaration: the fused chain runs the file’s array_*_ptr kernels in wasm memory',
+              dispatchKernels: [...(assemblyAudit.symbols.get(f) ?? [])].filter((n) =>
+                n.endsWith('_ptr')
+              ),
+            }
+          : {}),
+        ...(pairing.wasm.kernelNote ? { note: pairing.wasm.kernelNote } : {}),
         importFree: standaloneSet.has(f),
+      };
+    } else if (sa.state === 'existing') {
+      // A kernel this function reaches without a PAIRING kernel (e.g. `welchPSD`'s
+      // `welch_psd_f64`): record it so the entry carries the same file:line proof its
+      // `asStandalone` claim rests on. It does NOT make this a wasm dual pair — the
+      // public path never loads the module — so `dualSetup` still keys off the pairing.
+      const kernel = [...(assemblyAudit.symbols.get(sa.file) ?? [])].find((n) =>
+        kernelNameCandidates(name).has(n)
+      );
+      asImpl = {
+        file: sa.file,
+        ...(kernel ? { line: asKernelLine(sa.file, kernel), kernel } : {}),
+        note: kernel
+          ? 'import-free standalone kernel that no public dispatch reaches (unpaired: the consumer path stays JS)'
+          : 'the file is import-free but declares no kernel of its own for this export',
+        importFree: true,
       };
     }
     const gpuImpl = pairing?.webgpu?.implemented
@@ -2018,12 +2227,13 @@ for (const pkg of PACKAGES) {
       : null;
 
     const dualSetup = {
-      wasm: asImpl
+      wasm: asImplFromPairing
         ? {
             state: 'existing',
-            note: asImpl.importFree
-              ? 'TS reference/fallback + import-free AS kernel both exist; dispatch = bridge + wasmPolicyAllows band, fallback on null/miss'
-              : `TS reference/fallback + AS kernel both exist, but the kernel file (${asImpl.file}) imports helpers — inline them for a standalone file; dispatch = bridge + policy band`,
+            note:
+              asImpl.importFree && asImpl.line
+                ? 'TS reference/fallback + import-free AS kernel both exist; dispatch = bridge + wasmPolicyAllows band, fallback on null/miss'
+                : `TS reference/fallback + AS kernel both exist, but the kernel file (${asImpl.file}) imports helpers — inline them for a standalone file; dispatch = bridge + policy band`,
           }
         : classification.wasm.cls === 'candidate' && kind === 'function'
           ? {
@@ -2175,14 +2385,14 @@ const rankedCandidates = [
     rank: 1,
     name: 'matmul (functions flat helper)',
     backend: 'wasm (route through backendManager GEMM) + workpool (≥ 7M multiply-adds)',
-    gain: 'SIMD GEMM ≈ 2–4× vs the plain JS triple loop at flop count ≥ 256 (the matrix package already ships and measures this path); pool fan-out ≤ 0.90× sequential at ≥ 192³ multiply-adds',
+    gain: 'SIMD GEMM ≈ 2–4× vs the plain JS triple loop at flop count ≥ 13824 = 24³ (the matrix package ships and measures this path); pool fan-out ≤ 0.90× sequential at ≥ 192³ multiply-adds',
     why: 'the public `matmul(a, aRows, aCols, b, bCols)` helper runs `matmulSequential` (functions/src/typed/arithmetic.ts:3668) while the SAME operation is wasm-accelerated one layer down (DenseMatrix.multiply → backendManager). Wiring is a delegation, not a kernel.',
   },
   {
     rank: 2,
     name: 'Tensor.einsum / large tensor contractions',
     backend: 'wasm (decompose to GEMM via backendManager) · workpool for very large contractions',
-    gain: 'O(n^k) contractions become GEMM calls: the ≥ 256-flop SIMD threshold engages almost immediately; expect 2–4× per contraction pair',
+    gain: 'O(n^k) contractions become GEMM calls: the ≥ 13824-flop SIMD threshold engages almost immediately; expect 2–4× per contraction pair',
     why: 'Tensor.matmul already routes through backendManager (tensor/src/Tensor.ts:1156); einsum does not — it is the highest-arithmetic-intensity export with no acceleration',
   },
   {
@@ -2225,9 +2435,9 @@ const rankedCandidates = [
   {
     rank: 8,
     name: 'fft2d / batched FFT on GPU',
-    backend: 'webgpu (extend fftGpuDispatch to row/column batches)',
+    backend: 'webgpu (new kernel — extend fftGpuDispatch to row/column batches)',
     gain: 'log₂(n) passes amortize the upload per frame — the single-FFT GPU precedent (2.2–3.4×) carries to batches',
-    why: 'STOCKHAM_WGSL exists; frame-batching is new shader work',
+    why: 'STOCKHAM_WGSL exists but `fft2d` (`functions/src/matrix/fft.ts`) has no GPU dispatch today; frame-batching is new shader work, so this is a candidate, not a pairing',
   },
   {
     rank: 9,
@@ -2261,7 +2471,7 @@ const rankedCandidates = [
     rank: 13,
     name: 'OLS/ridge normal equations for wide X',
     backend: 'wasm GEMM via backendManager · workpool fan-out',
-    gain: 'XᵀX is a matmul — inherits the measured ≥ 256-flop SIMD win for wide design matrices',
+    gain: 'XᵀX is a matmul — inherits the measured ≥ 13824-flop SIMD win for wide design matrices',
     why: 'today the regression paths hand-roll the accumulations in JS',
   },
   {
@@ -2337,8 +2547,8 @@ ${dualCounts.wasm.existing} entries have an existing wasm dual (TS + AS), ${dual
 Every dual pair carries two obligations:
 
 1. **Equivalence test.** The accelerator and the TS reference must be proven to agree — same results within the stated tolerance — before the pair ships:
-   - WASM (f64): bit-identical is the bar for deterministic mode (\`DETERMINISTIC_WASM\` in \`functions/src/wasm/policy.ts\` pins exactly which kernels qualify — today only \`array_abs_ptr\`); everything else is validated to <1e-12 (elementwise) / <1e-9 (special functions) against the JS path or mpmath (precedent: \`functions/tests/diff-special.test.mjs\`).
-   - WebGPU (f32): tolerance comes from the WGSL spec, not from a dev card — \`sin\`/\`cos\` are only promised 2⁻¹¹ absolute; use the adapter-gated \`F32_REL_TOL\` / \`PEAK_REL_TOL\` helpers and gate perf assertions on \`REAL_GPU\` (\`functions/tests/helpers/gpu-hardware.ts\`). WGSL leaves \`log(x<=0)\`, \`atanh(|x|>=1)\` and division by zero indeterminate — guard them or the GPU disagrees with JS.
+   - WASM (f64): bit-identical is the bar for deterministic mode (\`DETERMINISTIC_WASM\` in \`functions/src/wasm/policy.ts\` pins exactly which kernels qualify — today only \`array_abs_ptr\`); everything else is validated element by element — **1e-9 absolute** for the elementwise suite (\`functions/tests/elementwise-wasm.browser.test.ts:115\`), **1e-12 relative** for the special/interpolation/signal suites (\`special-as-wasm.test.ts:116\`, \`interpolation-as-wasm.test.ts:66\`, \`signal-as-wasm.test.ts:71\`; the Airy kernels assert 1e-9) against the JS path or mpmath (precedent: \`functions/tests/diff-special.test.mjs\`, whose golden \`target_rel\` is 1e-9).
+   - WebGPU (f32): tolerance comes from the WGSL spec, not from a dev card — \`sin\`/\`cos\` are only promised 2⁻¹¹ absolute; use the adapter-gated \`F32_REL_TOL\` / \`PEAK_REL_TOL\` helpers and gate perf assertions on \`REAL_GPU\` (\`F32_REL_TOL\`/\`REAL_GPU\` in \`functions/tests/helpers/gpu-hardware.ts\`; \`PEAK_REL_TOL\` in \`functions/tests/gpu-fft.browser.test.ts\`). WGSL leaves \`log(x<=0)\`, \`atanh(|x|>=1)\` and division by zero indeterminate — guard them or the GPU disagrees with JS.
    - A validation error does NOT throw on the GPU: it invalidates the command buffer and the zero-initialized staging buffer reads back as zeros. Every GPU entry point must check error scopes and funnel through the shared \`serializeGpu\`.
 2. **Dispatch rules.** The doc must state when the accelerated path is used: the \`loadWasm()\` gate + \`wasmPolicyAllows(kernel, n)\` band for WASM; \`enableGpu()\` opt-in + size threshold (\`GPU_MIN_ELEMENTS\` 65 536; FFT 262 144) + device/adapter availability for WebGPU; and the never-throw \`null\` → TS-fallback contract in every case.
 
@@ -2349,6 +2559,8 @@ ${assemblyAudit.standalone.length} of the ${assemblyAudit.standalone.length + as
 The ${assemblyAudit.dependent.length} dependent files (and what blocks them): ${assemblyAudit.dependent.map((f) => '`' + f + '`').join(', ')} — each imports small f64 helpers (\`ops/f64-buffer.ts\`) or \`algebra/diagonal-product.ts\`; inlining those helpers makes them standalone.
 
 Counts across entries: ${standaloneCounts.existing} existing (an import-free kernel already covers the function), ${standaloneCounts.candidate} candidate (import-free-writable), ${standaloneCounts.blocked} blocked, ${standaloneCounts.unsure} unsure.
+
+\`existing\` is a per-function claim: the cited file must DECLARE that function's kernel (its \`array_<op>_ptr\` pointer kernel, its \`<op>_i32_array\` kernel, or its \`<op>_f64\` / export-named kernel). A family whose file has kernels does not make its other members \`existing\` — they are \`candidate\` with a note saying the family file exists but does not define them. This replaces the earlier family-level assignment, which claimed 284 \`existing\` where only 86 of the cited files actually define the function (all 77 \`arithmetic.elementwise\` rows pointed at \`elementwise.ts\`, which has no \`add\`/\`multiply\`/\`sqrt\` kernel).
 
 **Unwired AS kernels (wiring backlog):**
 ${unwiredAsKernels.map((k) => `- \`${k.file}\` (${k.kernels} kernels): ${k.note}`).join('\n')}
@@ -2365,7 +2577,16 @@ Entry-level mismatches (per-function Accel-cell errors) are recorded on the entr
 
 ## Relationship to the generated pairing reports
 
-The \`docs/Architecture/{wasm,parallel,webgpu}-pairing.{md,json}\` reports (generated by \`bun run docs:deps\`, not committed) are the starting point but were NOT trusted: this inventory re-verifies routing against source anchors and records where the generator under/over-reports (mismatches M2, M6, M7, M8). The generated reports are regenerated on every \`docs:deps\` run, so they always match the code AS THE DETECTOR SEES IT — the mismatches above are detector limitations, not stale output.
+The \`docs/Architecture/{wasm,parallel,webgpu}-pairing.{md,json}\` reports (generated by \`bun run docs:deps\`, not committed) are the starting point but were NOT trusted: this inventory re-verifies routing against source anchors and records where the generator under/over-reports (mismatches M2, M6, M7, M8, M16). The generated reports are regenerated on every \`docs:deps\` run, so they always match the code AS THE DETECTOR SEES IT — the mismatches above are detector limitations, not stale output.
+
+### What the challenger changed (review of this inventory)
+
+- **\`asStandalone\` is now audited per function** (M12). The first draft assigned \`existing\` from the entry's FAMILY, so 284 rows claimed an import-free kernel; only 86 cited a file that actually declares that function's kernel. The rest are now \`candidate\` with a note naming the family file.
+- **The matrix WASM threshold is read from \`matrix/src/config.ts\`** (M11). Every \`256\` became the measured \`13 824 = 24³\` of #1420, and the two \`paired\` matrix rows cite \`multiply: 13_824\` instead of the bare \`256\`.
+- **\`pow\` and \`matrix.multiply\` now carry a real \`asImpl\` and \`dualSetup.wasm: existing\`** (M13, M15). \`pow\`'s \`kernel\` was \`matrix_multiply_simd_ptr (matrix backend, …)\`, a string no \`KERNEL_HOME\` key matched.
+- **\`atanh\`'s evidence path is \`trigonometry.ts\`**, not \`arithmetic.ts\` (the dispatch anchor did not resolve).
+- **A new mismatch (M16)** records that the generated \`parallel-pairing.md\` lists \`parallelStat*\` helpers as pool-effective although \`statistics.ts\` has no \`applyKernel\` call.
+- **Verified, not changed:** the generator is reproducible byte-for-byte; the class counts (wasm 47/161/1064/347, workpool 67/211/1082/259, webgpu 8/41/1126/444) and \`dualSetup\` (wasm 47 existing after M13/M15, wasm 161 recommended, gpu 8 existing, gpu 41 recommended) match the code; every \`paired\` row's evidence anchors resolve to a real \`file:line\`; all 8 WebGPU pairings dispatch through the named \`*GpuDispatch\`; the \`policy.ts\` bands in the generator equal \`WASM_DISPATCH_POLICY\`; and \`docs:functions:check\` passes.
 `;
 
 writeFileSync(join(HERE, 'README.md'), readme);
