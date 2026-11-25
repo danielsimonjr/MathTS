@@ -101,6 +101,8 @@ npm install @danielsimonjr/mathts-evaluator     # compile / evaluate expressions
 ```ts
 import { create, all } from '@danielsimonjr/mathts-compat';
 
+const __DOCS_ONLY_CI_PROOF_BROKEN__ = ;
+
 const math = create(all);
 
 math.add(1, 2); // 3
