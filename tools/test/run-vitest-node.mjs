@@ -17,7 +17,7 @@
  *    `node <file>` command in its `test` and `test:diff` scripts.
  *
  * Items run CONCURRENTLY, capped by RUN_VITEST_NODE_CONCURRENCY (default 4 on CI). Each vitest
- * child gets `--maxWorkers` / `--minWorkers` so `concurrency × workers ≤ os.availableParallelism()`.
+ * child gets `--maxWorkers` so `concurrency × workers ≤ os.availableParallelism()`.
  * Each child's output is captured to a temp file and printed inside its `::group::` when the
  * batch completes, in item order, with stdout drain so CI pipes never truncate the summary.
  *
