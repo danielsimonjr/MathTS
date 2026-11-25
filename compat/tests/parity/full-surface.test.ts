@@ -42,24 +42,20 @@ describe('full-surface differential harness (#1574)', () => {
     expect(missing, 'names with docs but no compat instance function').toEqual([]);
   });
 
-  it(
-    'every embedded-docs example matches the oracle or a recorded gap',
-    async () => {
-      const { perName, total } = await docsExamples();
-      expect(total).toBeGreaterThan(900);
-      const { labels } = sweepDocs(perName);
-      const unrecorded = [...labels].filter((l) => !ALL_GAPS.has(l));
-      expect(unrecorded, 'doc example divergences not recorded in known-gaps.json').toEqual([]);
-      // pickRandom docs are stochastic: the same label can match or diverge across
-      // runs. Keep the labels in known-gaps.json so a mismatch stays recorded; do
-      // not treat an accidental match as a stale gap.
-      const stale = [...ALL_GAPS].filter(
-        (l) => l.startsWith('{') && !labels.has(l) && !l.includes('pickRandom')
-      );
-      expect(stale, 'known-gaps.json lists doc labels that now match the oracle').toEqual([]);
-    },
-    180_000
-  );
+  it('every embedded-docs example matches the oracle or a recorded gap', async () => {
+    const { perName, total } = await docsExamples();
+    expect(total).toBeGreaterThan(900);
+    const { labels } = sweepDocs(perName);
+    const unrecorded = [...labels].filter((l) => !ALL_GAPS.has(l));
+    expect(unrecorded, 'doc example divergences not recorded in known-gaps.json').toEqual([]);
+    // pickRandom docs are stochastic: the same label can match or diverge across
+    // runs. Keep the labels in known-gaps.json so a mismatch stays recorded; do
+    // not treat an accidental match as a stale gap.
+    const stale = [...ALL_GAPS].filter(
+      (l) => l.startsWith('{') && !labels.has(l) && !l.includes('pickRandom')
+    );
+    expect(stale, 'known-gaps.json lists doc labels that now match the oracle').toEqual([]);
+  }, 180_000);
 
   it('every instance function matches the oracle over the argument pool or a recorded gap', () => {
     const { labels } = sweepPool();
