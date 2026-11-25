@@ -1,6 +1,5 @@
 ---
 '@danielsimonjr/mathts-compat': patch
-'@danielsimonjr/mathts-functions': patch
 ---
 
-G07 `nullish` and logical Unit parity (#1555): typed `nullish` now routes scalar and collection calls through `createNullish` (same path as `??`, element-wise fill, dimension mismatch, TypeError on plain objects). `not`/`and`/`or`/`xor` gain `Unit` signatures that test the unit value. Fraction `format` (`2/1`) remains G15 (#1721).
+G07 `nullish` and logical Unit parity (#1555): `create(all)` binds factory `nullish`/`not`/`and`/`or`/`xor` (mathjs 15.3.0 semantics: Fraction preserved, element-wise nullish, Unit value truthiness, TypeError on plain objects). Native `functions` typed logical unchanged. Fraction `format` (`2/1`) remains G15 (#1721).

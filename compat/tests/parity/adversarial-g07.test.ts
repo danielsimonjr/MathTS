@@ -5,7 +5,14 @@ import { pair } from './oracle.js';
 /**
  * G07 adversarial probes (#1555: `nullish` must not convert a Fraction).
  *
+ * Tests `@danielsimonjr/mathts-compat` `create(all)` only (oracle: mathjs 15.3.0).
+ *
  * F3 (Fraction `format` / `2/1`) is owned by G15 (#1721); those rows live there, not here.
+ *
+ * Native finding (not asserted here): `@danielsimonjr/mathts-functions` typed `nullish` still
+ * converts a non-nullish Fraction to Complex and uses loose `any, any`; typed logical ops treat
+ * Units as object-truthy. Left unchanged per critical-library policy — compat factory bindings
+ * supply mathjs parity.
  *
  *  F1  `math.nullish` must be element-wise on collections (same implementation as `??`).
  *  F2  `not`/`and`/`or`/`xor` must read a `Unit` by value, not JS object truthiness.

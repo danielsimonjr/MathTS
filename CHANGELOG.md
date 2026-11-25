@@ -17,9 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **G07 `nullish` and logical `Unit` parity (#1555):** Typed `nullish` delegates to the same factory implementation as the `??` operator (element-wise on collections, dimension checks, no plain-object `any, any` fallback). `not`/`and`/`or`/`xor` use Unit value truthiness like mathjs. Fraction `format` (`2/1`) is G15 (#1721), not this change.
-
-- **Preserve Fraction and Unit in `nullish` (#1555):** Added explicit `Fraction, any` and `Unit, any` signatures to `nullish` so non-nullish Fractions are not converted to Complex. `nullish(fraction(1,3), 2)` was `Complex 0.33333333333333` and is `Fraction 1/3`, as mathjs 15.3.0 returns.
+- **G07 `nullish` and logical `Unit` parity (#1555):** `mathts-compat` `create(all)` binds factory `nullish`/`not`/`and`/`or`/`xor` for mathjs 15.3.0 parity (Fraction preserved in `nullish`, element-wise collections, Unit value truthiness, `nullish({}, 2)` throws). Native `functions` typed logical unchanged. Fraction `format` (`2/1`) is G15 (#1721), not this change.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 
