@@ -34,6 +34,11 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
+import {
+  createCompatFormat,
+  createCompatPrint,
+  createCompatString,
+} from './fraction-format-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 
@@ -598,7 +603,9 @@ export function create(
     square: mathFunctions.factory_square,
     tanh: mathFunctions.factory_tanh,
     bignumber: shims.bignumber,
-    string: namedString,
+    format: namedFormat,
+    print: namedPrint,
+    string: namedCompatString,
     setUnion: namedSetUnion,
     compareText: namedCompareText,
     equalText: namedEqualText,
@@ -889,6 +896,12 @@ export {
 /** Union of two multisets in MathJS result order. */
 const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
 const namedString = mathFunctions.factory_mathjsCompat.string as typeof mathFunctions.string;
+const namedCompatString = /* #__PURE__ */ createCompatString(namedString);
+const namedFormat = /* #__PURE__ */ createCompatFormat(mathFunctions.format);
+const namedPrint = /* #__PURE__ */ createCompatPrint(
+  mathFunctions.print as (template: string, values: unknown, options?: unknown) => string,
+  mathFunctions.format
+);
 const namedCompareText = mathFunctions.factory_mathjsCompat.compareText as {
   (left: string, right: string): number;
   (left: unknown, right: unknown): unknown;
@@ -914,7 +927,9 @@ const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.toBest>;
 export {
-  namedString as string,
+  namedFormat as format,
+  namedPrint as print,
+  namedCompatString as string,
   namedSetUnion as setUnion,
   namedCompareText as compareText,
   namedEqualText as equalText,
@@ -1007,7 +1022,6 @@ export {
   fix,
   flatten,
   forEach,
-  format,
   freqz,
   gamma,
   getMatrixDataType,
@@ -1066,7 +1080,6 @@ export {
   partitionSelect,
   pinv,
   polynomialRoot,
-  print,
   prod,
   qr,
   quantileSeq,
