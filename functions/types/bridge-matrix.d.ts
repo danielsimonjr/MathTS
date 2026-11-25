@@ -22,6 +22,8 @@ export interface BridgeMatrix extends MatrixValue {
   valueOf(): unknown;
   /** One entry set in place, by an index array. Returns the same matrix. */
   set(index: number[], value: unknown, defaultValue?: unknown): BridgeMatrix;
+  /** Read a scalar or matrix by index, or replace the selection in place. */
+  subset(index: unknown, replacement?: unknown, defaultValue?: unknown): unknown;
   /** A new matrix of the callback result for each entry. */
   map(callback: (value: unknown, index: number[], matrix: BridgeMatrix) => unknown): BridgeMatrix;
   /** Call the callback for each entry. */

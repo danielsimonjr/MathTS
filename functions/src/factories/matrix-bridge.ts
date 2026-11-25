@@ -17,7 +17,7 @@ import {
   getArrayDataType,
   isEmpty2DSize,
 } from '@danielsimonjr/mathts-core/internal';
-import { typeOf } from '../utils/is.js';
+import { isIndex, typeOf } from '../utils/is.js';
 import { callbackArity } from '../utils/function-source.js';
 import {
   arraySize,
@@ -41,7 +41,6 @@ import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 // `multiply` / `transpose` stay on the synchronous JS backend until a caller
 // initializes the manager explicitly.
 
-/** The subset of the mathjs `Index` API the bridge matrices consume. */
 function validateRowSwap(i: number, j: number, size: number[]): void {
   if (!Number.isInteger(i) || !Number.isInteger(j)) {
     throw new Error('Row index must be positive integers');
@@ -53,6 +52,7 @@ function validateRowSwap(i: number, j: number, size: number[]): void {
   validateIndex(j, size[0]);
 }
 
+/** The subset of the mathjs `Index` API the bridge matrices consume. */
 interface MatrixIndexLike {
   isScalar(): boolean;
   size(): number[];
@@ -86,6 +86,22 @@ function matrixIndexSelectors(index: MatrixIndexLike): IndexSelector[] {
     }
   }
   return out;
+}
+
+function validateIndexSelection(dimensions: IndexSelector[], size: number[]): void {
+  for (let axis = 0; axis < dimensions.length; axis++) {
+    const { sel } = dimensions[axis];
+    if (sel.length === 0) continue;
+    let min = sel[0];
+    let max = sel[0];
+    for (const index of sel) {
+      validateIndex(index);
+      if (index < min) min = index;
+      if (index > max) max = index;
+    }
+    validateIndex(min, size[axis]);
+    validateIndex(max, size[axis]);
+  }
 }
 
 /**
@@ -400,21 +416,7 @@ export class MathJSDenseMatrix {
     if (dims.length !== this._size.length) {
       throw new DimensionError(dims.length, this._size.length);
     }
-    // As the mathjs `_get`: check the smallest and then the largest index of each axis, so an
-    // error names the same index as mathjs.
-    for (let d = 0; d < dims.length; d++) {
-      const { sel } = dims[d];
-      if (sel.length === 0) continue;
-      let min = sel[0];
-      let max = sel[0];
-      for (const i of sel) {
-        validateIndex(i);
-        if (i < min) min = i;
-        if (i > max) max = i;
-      }
-      validateIndex(min, this._size[d]);
-      validateIndex(max, this._size[d]);
-    }
+    validateIndexSelection(dims, this._size);
     if (index.isScalar()) return this.get(dims.map((d) => d.sel[0]));
     const last = dims.length - 1;
     const read = (data: unknown, depth: number): unknown => {
@@ -1101,6 +1103,111 @@ export class MathJSSparseMatrix {
       }
     }
 
+    return this;
+  }
+
+  subset(index: unknown, replacement?: unknown, defaultValue?: unknown): unknown {
+    if (this._values === null) throw new Error('Cannot invoke subset on a Pattern only matrix');
+    if (arguments.length < 1 || arguments.length > 3) {
+      throw new SyntaxError('Wrong number of arguments');
+    }
+    if (!isIndex(index)) throw new TypeError('Invalid index');
+    const selector = index as unknown as MatrixIndexLike;
+    const dimensions = matrixIndexSelectors(selector);
+    if (arguments.length === 1) return this._selectSubset(selector, dimensions);
+    return this._replaceSubset(selector, dimensions, replacement, defaultValue);
+  }
+
+  private _selectSubset(selector: MatrixIndexLike, dimensions: IndexSelector[]): unknown {
+    if (dimensions.length !== 2) throw new DimensionError(dimensions.length, 2);
+    validateIndexSelection(dimensions, this._size);
+    const [rows, columns] = dimensions.map(({ sel }) => sel);
+    if (selector.isScalar()) return this.get([rows[0], columns[0]]);
+
+    const rowPositions = new Map(rows.map((row, position) => [row, position]));
+    const values: unknown[] = [];
+    const index: number[] = [];
+    const ptr = [0];
+    for (const column of columns) {
+      const entries: Array<{ row: number; value: unknown }> = [];
+      for (let offset = this._ptr[column]; offset < this._ptr[column + 1]; offset++) {
+        const row = rowPositions.get(this._index[offset]);
+        if (row !== undefined) entries.push({ row, value: this._values![offset] });
+      }
+      entries.sort((a, b) => a.row - b.row);
+      for (const { row, value } of entries) {
+        index.push(row);
+        values.push(value);
+      }
+      ptr.push(index.length);
+    }
+    return new MathJSSparseMatrix({
+      values,
+      index,
+      ptr,
+      size: [rows.length, columns.length],
+      datatype: this._datatype,
+    });
+  }
+
+  private _replaceSubset(
+    selector: MatrixIndexLike,
+    dimensions: IndexSelector[],
+    replacement: unknown,
+    defaultValue: unknown
+  ): this {
+    const data = (replacement as { toArray?: () => unknown } | null)?.toArray
+      ? (replacement as { toArray(): unknown }).toArray()
+      : replacement;
+    const isScalar = selector.isScalar();
+    if (dimensions.length !== 2 && (isScalar || dimensions.length !== 1)) {
+      throw new DimensionError(dimensions.length, 2, isScalar ? undefined : '<');
+    }
+    const shape = dimensions.map(({ sel }) => sel.length);
+    let size = arraySize(data);
+    let values = data;
+    if (isScalar) {
+      if (size.length !== 0) throw new TypeError('Scalar expected');
+    } else {
+      if (size.length < shape.length) {
+        let axis = 0;
+        while (shape[axis] === 1 && size[axis] === 1) axis++;
+        let outer = 0;
+        for (; shape[axis] === 1; axis++) outer++;
+        const own = values === replacement ? copyAxes(values, size.length) : values;
+        values = unsqueeze(own as unknown[], shape.length, outer, size);
+        size = arraySize(values);
+      }
+      if (size.length !== shape.length || size.some((length, axis) => length !== shape[axis])) {
+        throw new DimensionError(shape, size, '>');
+      }
+    }
+
+    const rows = dimensions[0].sel;
+    const columns = dimensions[1]?.sel ?? [0];
+    let [height, width] = this._size;
+    for (const row of rows) {
+      validateIndex(row);
+      height = Math.max(height, row + 1);
+    }
+    for (const column of columns) {
+      validateIndex(column);
+      width = Math.max(width, column + 1);
+    }
+    if (rows.length === 0 || columns.length === 0) return this;
+    if (defaultValue && (height !== this._size[0] || width !== this._size[1])) {
+      this.resize([height, width], defaultValue);
+    }
+    for (let row = 0; row < rows.length; row++) {
+      for (let col = 0; col < columns.length; col++) {
+        const value = isScalar
+          ? values
+          : dimensions.length === 1
+            ? (values as unknown[])[row]
+            : (values as unknown[][])[row][col];
+        this.set([rows[row], columns[col]], value);
+      }
+    }
     return this;
   }
 
