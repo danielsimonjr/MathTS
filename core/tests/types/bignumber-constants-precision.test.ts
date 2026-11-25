@@ -64,7 +64,7 @@ describe('BigNumber constants at the default precision', () => {
   });
 
   it('a BigNumber deg value converts with π at the configured precision', () => {
-    const rad = new Unit(BigNumber.fromNumber(180) as never, 'deg').toSI().value as unknown as {
+    const rad = new Unit(BigNumber.fromNumber(180), 'deg').toSI().value as unknown as {
       toString(): string;
     };
     expectDigits(rad, PI, 64);
