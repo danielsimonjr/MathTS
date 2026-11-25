@@ -91,6 +91,7 @@ export const createSelectedMultiply = /* #__PURE__ */ factory(
             }
           }
           for (const [row, value] of accumulators) {
+            if (isZero(value)) continue;
             index.push(row);
             values.push(value);
           }

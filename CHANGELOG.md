@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **G17 sparse structural zeros (#1582):** factory CSC sparse construction (`MathJSSparseMatrix` constructor, `set`, `resize`, `SparseMatrix.diagonal`) uses `isStructuralZero` so BigNumber, Fraction, Complex and Unit zeros are not stored (number entries keep exact `=== 0`, so `1e-100` stays stored). Typed CSC sparse add/subtract/multiply with Unit operands routes through factory matAlgo paths instead of `toArray()` element-wise walks that paired `Unit` with numeric implicit zeros.
+- **G17 sparse structural zeros (#1582):** factory CSC sparse construction (`MathJSSparseMatrix` constructor, `set`, `resize`, `SparseMatrix.diagonal`) uses `isStructuralZero` so BigNumber, Fraction, Complex and Unit zeros are not stored (number entries keep exact `=== 0`, so `1e-100` stays stored; `-0` is dropped; `NaN` is kept). The same predicate is used on the other CSC write paths that compared with `!== 0`: `sparseMatrixFromVectors`, `matAlgo07xSSf`, Gustavson sparse×sparse product, and mixed sparse×dense `selectedMultiply` accumulators. Typed CSC sparse add/subtract/multiply with Unit operands routes through factory matAlgo paths instead of `toArray()` element-wise walks that paired `Unit` with numeric implicit zeros. The public CSR `SparseMatrix` (`matrix/`) stays `Float64Array` with `!== 0` (numbers only).
 
 ### Changed
 
