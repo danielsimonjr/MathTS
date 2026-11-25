@@ -22,7 +22,7 @@ interface ComplexType {
 }
 
 interface FractionType {
-  s: bigint;
+  isNegative(): boolean;
   ceil(n?: number): FractionType;
   floor(n?: number): FractionType;
 }
@@ -175,14 +175,15 @@ export const createFix = /* #__PURE__ */ factory(
       'bigint, BigNumber': (b: bigint, _dummy: BigNumberType): bigint => b,
 
       Fraction: function (x: FractionType): FractionType {
-        return x.s < 0n ? x.ceil() : x.floor();
+        // MathTS Fraction has no fraction.js `.s` field (#1551); use its own sign API.
+        return x.isNegative() ? x.ceil() : x.floor();
       },
 
       'Fraction, number | BigNumber': function (
         x: FractionType,
         n: number | BigNumberType
       ): FractionType {
-        return (x.s < 0n ? ceil(x, n) : floor(x, n)) as FractionType;
+        return (x.isNegative() ? ceil(x, n) : floor(x, n)) as FractionType;
       },
 
       'Unit, number, Unit': typed.referToSelf(
