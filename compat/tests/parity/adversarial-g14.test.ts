@@ -514,9 +514,10 @@ describe('G14: creating a compat instance must not mutate native', () => {
     const NativeUnit = factory_mathjsCompat.constructors.Unit;
     expect(Object.hasOwn(NativeUnit.UNITS, '__g14_probe__')).toBe(false);
     const math = createCompat(compatAll);
-    math.Unit.UNITS.__g14_probe__ = { probe: true };
+    const units = math.Unit.UNITS as Record<string, unknown>;
+    units.__g14_probe__ = { probe: true };
     expect(Object.hasOwn(NativeUnit.UNITS, '__g14_probe__')).toBe(false);
-    expect(math.Unit.UNITS.__g14_probe__).toEqual({ probe: true });
+    expect(units.__g14_probe__).toEqual({ probe: true });
   });
 });
 
