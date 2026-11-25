@@ -332,6 +332,16 @@ async function parallelSum(data) {
 | `m.size()`                     | `math.size(m)` returns `[rows, cols]`             |
 | `f.n`, `f.d`                   | `f.numerator`, `f.denominator` (bigint)           |
 
+### Matched on purpose
+
+These cosmetic behaviors match mathjs 15.3.0 even where the result looks odd:
+
+- Boolean-operator `toTex` spacing: `parse('true and false').toTex()` is
+  `true\wedgefalse`, `not true` is `\negtrue`, and `true xor false` is
+  `true\veebarfalse` — no space after the operator command (#1578). A symbol
+  whose name is a valueless unit (`cm`, `b`, `A`) renders as `\mathrm{…}`, and
+  `deg` as `^\circ` (#1577).
+
 See [Migration Guide](../migration/guide.md) for complete details.
 
 ## Complete export index

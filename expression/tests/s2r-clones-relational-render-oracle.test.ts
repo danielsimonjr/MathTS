@@ -36,13 +36,14 @@ describe('RelationalNode render oracle — chained comparisons', () => {
   });
 
   it('toTex keep: SymbolNode leading space + latexOperators.smaller / smallerEq', () => {
-    // SymbolNode TeX is " a"; latexOperators.smaller is "<"; smallerEq is "\\leq".
-    expect(relational('a < b <= c').toTex()).toBe(' a< b\\leq c');
-    expect(relational('a < b <= c').toTex({ parenthesis: 'keep' })).toBe(' a< b\\leq c');
+    // SymbolNode TeX is " x"; latexOperators.smaller is "<"; smallerEq is "\\leq".
+    // Operands are non-unit symbols (#1577): `b` and `c` are valueless units.
+    expect(relational('x < y <= z').toTex()).toBe(' x< y\\leq z');
+    expect(relational('x < y <= z').toTex({ parenthesis: 'keep' })).toBe(' x< y\\leq z');
   });
 
   it('toTex auto matches keep when the source has no ParenthesisNodes', () => {
-    expect(relational('a < b <= c').toTex({ parenthesis: 'auto' })).toBe(' a< b\\leq c');
+    expect(relational('x < y <= z').toTex({ parenthesis: 'auto' })).toBe(' x< y\\leq z');
   });
 
   it('toString all wraps every operand including symbols', () => {
@@ -50,14 +51,14 @@ describe('RelationalNode render oracle — chained comparisons', () => {
   });
 
   it('toTex all wraps every operand with \\left( \\right)', () => {
-    expect(relational('a < b <= c').toTex({ parenthesis: 'all' })).toBe(
-      '\\left( a\\right)<\\left( b\\right)\\leq\\left( c\\right)'
+    expect(relational('x < y <= z').toTex({ parenthesis: 'all' })).toBe(
+      '\\left( x\\right)<\\left( y\\right)\\leq\\left( z\\right)'
     );
   });
 
   it('toString / toTex use operatorMap and latexOperators for == / !=', () => {
     expect(relational('a == b != c').toString()).toBe('a == b != c');
-    expect(relational('a == b != c').toTex()).toBe(' a= b\\neq c');
+    expect(relational('x == y != z').toTex()).toBe(' x= y\\neq z');
   });
 });
 
@@ -93,13 +94,13 @@ describe('RelationalNode render oracle — parenthesis keep vs auto', () => {
   });
 
   it('toTex keep wraps the ParenthesisNode with \\left( \\right)', () => {
-    expect(relational('(a + b) < c < d').toTex({ parenthesis: 'keep' })).toBe(
-      '\\left( a+ b\\right)< c< d'
+    expect(relational('(x + y) < z < w').toTex({ parenthesis: 'keep' })).toBe(
+      '\\left( x+ y\\right)< z< w'
     );
   });
 
   it('toTex auto drops the ParenthesisNode wrapper', () => {
-    expect(relational('(a + b) < c < d').toTex({ parenthesis: 'auto' })).toBe(' a+ b< c< d');
+    expect(relational('(x + y) < z < w').toTex({ parenthesis: 'auto' })).toBe(' x+ y< z< w');
   });
 });
 

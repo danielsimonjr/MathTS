@@ -20,13 +20,15 @@ const FIXTURE: ScoredCandidate<ScalarNode>[] = [
   { complexity: 3, loss: 0.125, score: null, item: scalar.op('*', [a, b]) },
 ];
 
-// Formula cells are the strings pinned in scalar-node-bridge.test.ts (` x`, ` a+ b`, ` a\cdot b`),
-// each in math mode because a `tabular` cell is text mode.
+// Formula cells are the strings pinned in scalar-node-bridge.test.ts (` x`, ` a+\mathrm{b}`, ` a\cdot\mathrm{b}`),
+// each in math mode because a `tabular` cell is text mode. The `\mathrm{b}` is
+// #1577: `b` (barn) is a valueless unit, so its symbol renders as `\mathrm{b}`,
+// matching mathjs 15.3.0.
 const EXPECTED_LATEX = String.raw`\begin{tabular}{cccc}
 complexity & loss & score & equation \\
 1 & 0.500000 & 0.00000 & $ x$ \\
-3 & 0.250000 & 0.346574 & $ a+ b$ \\
-3 & 0.125000 &  & $ a\cdot b$ \\
+3 & 0.250000 & 0.346574 & $ a+\mathrm{b}$ \\
+3 & 0.125000 &  & $ a\cdot\mathrm{b}$ \\
 \end{tabular}`;
 
 const EXPECTED_JSON: FrontJson = {
@@ -38,14 +40,14 @@ const EXPECTED_JSON: FrontJson = {
       loss: 0.25,
       score: ROW2_SCORE,
       key: '{"k":"+","a":[{"k":"s","v":"a"},{"k":"s","v":"b"}]}',
-      tex: ' a+ b',
+      tex: ' a+\\mathrm{b}',
     },
     {
       complexity: 3,
       loss: 0.125,
       score: null,
       key: '{"k":"*","a":[{"k":"s","v":"a"},{"k":"s","v":"b"}]}',
-      tex: ' a\\cdot b',
+      tex: ' a\\cdot\\mathrm{b}',
     },
   ],
 };
@@ -70,8 +72,8 @@ describe('frontToLatexTable', () => {
       String.raw`\begin{tabular}{cccc}
 complexity & loss & score & equation \\
 1 & 0.500000 & 0.00000 & $ x$ \\
-3 & 0.250000 & 0.346574 & $ a+ b$ \\
-5 & 0.125000 & 0.346574 & $ a\cdot b$ \\
+3 & 0.250000 & 0.346574 & $ a+\mathrm{b}$ \\
+5 & 0.125000 & 0.346574 & $ a\cdot\mathrm{b}$ \\
 \end{tabular}`
     );
   });
@@ -83,8 +85,8 @@ complexity & loss & score & equation \\
       String.raw`\begin{tabular}{cccc}
 complexity & loss & score & equation \\
 1 & 0.500000 &  & $ x$ \\
-3 & 0.250000 &  & $ a+ b$ \\
-5 & 0.125000 &  & $ a\cdot b$ \\
+3 & 0.250000 &  & $ a+\mathrm{b}$ \\
+5 & 0.125000 &  & $ a\cdot\mathrm{b}$ \\
 \end{tabular}`
     );
   });
@@ -123,12 +125,12 @@ complexity & loss & score & equation \\
       String.raw`\begin{tabular}{cccc}
 complexity & loss & score & equation \\
 1 & 0.500 & 0.00 & $ x$ \\
-3 & 0.250 & 0.347 & $ a+ b$ \\
-3 & 0.125 &  & $ a\cdot b$ \\
+3 & 0.250 & 0.347 & $ a+\mathrm{b}$ \\
+3 & 0.125 &  & $ a\cdot\mathrm{b}$ \\
 \end{tabular}`
     );
     expect(frontToLatexTable(FIXTURE, { precision: 1 }).split('\n')[3]).toBe(
-      String.raw`3 & 0.3 & 0.3 & $ a+ b$ \\`
+      String.raw`3 & 0.3 & 0.3 & $ a+\mathrm{b}$ \\`
     );
   });
 
@@ -252,8 +254,8 @@ describe('frontToJson', () => {
     ];
     const [first, second] = frontToJson(rows).rows;
     expect(first!.key).toBe(second!.key);
-    expect(first!.tex).toBe(' a+ b');
-    expect(second!.tex).toBe(' b+ a');
+    expect(first!.tex).toBe(' a+\\mathrm{b}');
+    expect(second!.tex).toBe('\\mathrm{b}+ a');
   });
 
   it('is {schemaVersion: 1, rows: []} for an empty front', () => {
