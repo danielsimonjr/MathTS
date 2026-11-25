@@ -131,8 +131,10 @@ jobs:
       - name: Format check
         run: bun run format:check
 
-      - name: Docs-only classifier tests
-        run: node --test tools/test/classify-pr-changes.test.mjs
+      - name: Docs-only classifier and manifest guard
+        run: |
+          node --test tools/test/classify-pr-changes.test.mjs
+          node --test tools/test/docs-only-ci-guard.test.mjs
 
       # The dependency-graph reports in docs/Architecture are generated and not committed
       # (.gitignore names them), so a clean checkout has none of them. This step writes them and
@@ -507,13 +509,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Documentation-only pull request
-        if: needs.changes.outputs.docs_only == 'true'
+      - name: Documentation-only pull request (Test 24.x)
+        if: needs.changes.outputs.docs_only == 'true' && matrix.node-version != '22.x'
         run: |
-          echo "Documentation-only changes: skipping Node ${{ matrix.node-version }} test suite."
+          echo "Documentation-only changes: vitest and doc gates run on Test (22.x) only."
 
       - name: Setup Bun
-        if: needs.changes.outputs.docs_only != 'true'
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
@@ -523,13 +525,13 @@ jobs:
         run: node tools/test/check-bun-version.mjs
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        if: needs.changes.outputs.docs_only != 'true'
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        if: needs.changes.outputs.docs_only != 'true'
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         run: bun install --frozen-lockfile
 
       # npm 10 (bundled with Node 22) cannot install a package that has a git
@@ -543,8 +545,13 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build
-        if: needs.changes.outputs.docs_only != 'true'
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         run: bun run build
+
+      # Markdown and README samples are not inert: run the pinned docs gate subset.
+      - name: Documentation gates (docs-only pull requests)
+        if: needs.changes.outputs.docs_only == 'true' && matrix.node-version == '22.x'
+        run: node tools/ci/run-docs-only-tests.mjs
 
       # Every package's tests under vitest on the matrix Node, plus the root suites
       # and the assembly Node test scripts. Prints a `[runtime-probe]` line.
