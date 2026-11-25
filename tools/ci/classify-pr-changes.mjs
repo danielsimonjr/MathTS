@@ -56,10 +56,11 @@ function readChangedPaths() {
   if (fromEnv) {
     return fromEnv.split('\n').filter(Boolean);
   }
-  const chunks = [];
-  process.stdin.setEncoding('utf8');
-  for (const chunk of process.stdin) chunks.push(chunk);
-  return chunks.join('').split('\n').filter((line) => line.trim());
+  if (process.stdin.isTTY) return [];
+  return readFileSync(0, 'utf8')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 function main() {
