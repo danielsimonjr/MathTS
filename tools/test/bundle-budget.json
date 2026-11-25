@@ -20,7 +20,7 @@
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 74174,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2334351,
+    "functions/dist/index.js": 2359674,
     "functions/dist/subpath-evaluate.js": 1577784,
     "functions/package.json": 3740,
     "functions/dist/wasm/mathts-as.wasm": 69718,
@@ -184,13 +184,13 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1391661
+      "bytes": 1405743
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1392028
+      "bytes": 1406114
     },
     {
       "label": "functions barrel evaluate",
