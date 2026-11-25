@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Compat expression policy matches mathjs by default (#1549, #1556, #1562, #1576, #1580):** Enabled assignment, function definitions, in-expression `simplify`/`derivative`/`parse`/`evaluate`/`compile`/`parser`/`help`/`config`, `ResultSet` block results, and declared function names on compat `create(all)`; opt-in hardening via `{ safe: true }`. Typed `evaluate` remains safe by default. BREAKING: compat `evaluate`/`parser`/`compile` no longer throw `Security:` by default (pass `{ safe: true }` to opt in), and multi-statement blocks return `ResultSet` on both compat and typed `evaluate`.
+
+- **`range` cannot allocate without bound when the step direction is misread:** the `range` loop now stops one entry past the span it already asserts as an allocation size, so a sign test that fails on a value type (`isPositive` of a compat Fraction, #1551) turns a hang into a short wrong answer instead of an out-of-memory crash.
+
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
 
 - **mathjs 15.3.0 G11 adversarial fixes (#1563–#1566, #1574):** mixed-type `mod`/`xgcd`/`invmod` and `stirlingS2` keep bigint results; compat `subtract` and `mod` bind mathjs factories; sparse `isZero` uses `equalScalar` tolerances; `sqrt`/`larger` refuse out-of-range bigint; `multinomial` overflow matches 15.3.0 (`NaN`).

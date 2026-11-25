@@ -22,7 +22,7 @@
  */
 
 import { mathTyped } from '@danielsimonjr/mathts-core';
-import { expressionView, getDefaultMathScope } from './default-math-scope.js';
+import { ResultSet, expressionView, getDefaultMathScope } from './default-math-scope.js';
 import { nodeBaseFor } from './node/default-node.js';
 import { createAccessorNode } from './node/AccessorNode.js';
 import { createArrayNode } from './node/ArrayNode.js';
@@ -40,24 +40,6 @@ import { createRangeNode } from './node/RangeNode.js';
 import { createRelationalNode } from './node/RelationalNode.js';
 import { createSymbolNode } from './node/SymbolNode.js';
 import type { DefaultDependencies } from './utils/factory.js';
-
-/** Result container that a block of statements returns. It has the shape of the `ResultSet` type. */
-class ResultSet {
-  entries: unknown[];
-  constructor(entries: unknown[]) {
-    this.entries = entries;
-  }
-  /** The type guard `isResultSet` reads this flag from the constructor prototype. */
-  get isResultSet(): true {
-    return true;
-  }
-  valueOf(): unknown[] {
-    return this.entries;
-  }
-  toString(): string {
-    return '[' + this.entries.map(String).join(', ') + ']';
-  }
-}
 
 function numeric(value: string, _type: string): number {
   return Number(value);

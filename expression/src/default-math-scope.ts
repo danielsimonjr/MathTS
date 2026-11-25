@@ -74,6 +74,29 @@ export const EXPRESSION_SCOPE_OMIT: ReadonlySet<string> = new Set([
 /** Names kept off the default math scope: the denylist plus the parser dependencies. */
 const SAFE_SCOPE_OMIT: readonly string[] = [...EXPRESSION_SCOPE_OMIT, 'config', 'numeric'];
 
+/**
+ * Result container that a block of statements returns (#1556). It has the shape
+ * of the `ResultSet` type: `entries`, the `isResultSet` constructor flag, and
+ * `valueOf` / `toString` like mathjs. The scope carries the constructor, so the
+ * compiler can build a ResultSet for every block.
+ */
+export class ResultSet {
+  entries: unknown[];
+  constructor(entries: unknown[]) {
+    this.entries = entries;
+  }
+  /** The type guard `isResultSet` reads this flag from the constructor prototype. */
+  get isResultSet(): true {
+    return true;
+  }
+  valueOf(): unknown[] {
+    return this.entries;
+  }
+  toString(): string {
+    return '[' + this.entries.map(String).join(', ') + ']';
+  }
+}
+
 const expressionViews = new WeakMap<object, Record<string, unknown>>();
 
 /**
@@ -253,6 +276,8 @@ export function getDefaultMathScope(): Record<string, unknown> {
   // see the symbols deleted above. Arrays only: the default scope has no matrix.
   scope.map = createCallbackTransform('map', false);
   scope.filter = createCallbackTransform('filter', true);
+  // Every block result is a ResultSet (#1556); the scope carries the constructor.
+  scope.ResultSet = ResultSet;
   boundMathScope = scope;
   return scope;
 }

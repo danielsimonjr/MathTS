@@ -4,7 +4,9 @@ import { parse, evaluate, compileExpr } from '@danielsimonjr/mathts-functions';
 describe('dogfood G32a regressions', () => {
   it('#817 parse accepts block and line comments', () => {
     expect(evaluate('/* c */ 1')).toBe(1);
-    expect(evaluate('// c\n1')).toBe(1);
+    // #1556: a newline-delimited block returns a ResultSet of its visible results.
+    const lineComment = evaluate('// c\n1') as unknown as { entries: unknown[] };
+    expect(lineComment.entries).toEqual([1]);
     expect(evaluate('/* a */ /* b */ 2 + 3')).toBe(5);
   });
 

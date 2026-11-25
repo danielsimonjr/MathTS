@@ -581,6 +581,12 @@ function compileBlockNode(
     evaluate: compileNode(block.node, math, argNames, depth),
     visible: block.visible,
   }));
+  // Every block returns a ResultSet, like mathjs (#1556). The constructor comes
+  // from the math scope so the host's class (and `instanceof`) is used.
+  const ResultSetClass = math.ResultSet as (new (entries: unknown[]) => unknown) | undefined;
+  if (typeof ResultSetClass !== 'function') {
+    throw new Error('ResultSet is not in the math scope');
+  }
 
   return function evalBlockNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     const results: unknown[] = [];
@@ -590,10 +596,7 @@ function compileBlockNode(
         results.push(result);
       }
     }
-    // Return ResultSet-like array if multiple visible results, otherwise last result
-    if (results.length === 1) return results[0];
-    if (results.length > 1) return results;
-    return undefined;
+    return new ResultSetClass(results);
   };
 }
 
@@ -742,6 +745,9 @@ function compileFunctionAssignmentNode(
       return evalExpr(scope, childArgs, undefined);
     };
     (fn as unknown as { syntax: string }).syntax = name + '(' + params.join(', ') + ')';
+    // The declared name is the function's `.name` (#1580); the closure variable
+    // would otherwise infer the name `fn`.
+    Object.defineProperty(fn, 'name', { value: name, configurable: true });
     scope.set(name, fn);
     return fn;
   };

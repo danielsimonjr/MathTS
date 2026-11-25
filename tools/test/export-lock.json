@@ -7837,6 +7837,9 @@
       "EvaluateOptions": {
         "kind": "type"
       },
+      "EvaluatePolicy": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -8091,6 +8094,9 @@
       },
       "properties": {
         "kind": "object"
+      },
+      "resolveMode": {
+        "kind": "function"
       },
       "scalarCanonical": {
         "kind": "function"
@@ -8141,6 +8147,9 @@
       "EvaluateOptions": {
         "kind": "type"
       },
+      "EvaluatePolicy": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -8395,6 +8404,9 @@
       },
       "properties": {
         "kind": "object"
+      },
+      "resolveMode": {
+        "kind": "type"
       },
       "scalarCanonical": {
         "kind": "type"
@@ -8747,6 +8759,9 @@
       "EvaluateOptions": {
         "kind": "type"
       },
+      "EvaluatePolicy": {
+        "kind": "type"
+      },
       "IndexLike": {
         "kind": "type"
       },
@@ -9000,6 +9015,9 @@
         "kind": "type"
       },
       "properties": {
+        "kind": "type"
+      },
+      "resolveMode": {
         "kind": "type"
       },
       "scalarCanonical": {

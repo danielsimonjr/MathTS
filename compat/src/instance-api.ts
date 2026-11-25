@@ -208,6 +208,15 @@ export function wireMathjsInstanceApi(
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
+  /**
+   * Compat runs the mathjs policy by default (#1549): no AST validator, no
+   * result sanitizer, and the mathjs scope. `{ safe: true }` opts back into
+   * the typed-API hardening for that call.
+   */
+  function policyOptions(options?: PhysicsEvaluateOptions): PhysicsEvaluateOptions | undefined {
+    return options?.safe === true ? options : { ...options, policy: 'mathjs' };
+  }
+
   function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
     evaluator = createInstanceEvaluator(
@@ -220,11 +229,13 @@ export function wireMathjsInstanceApi(
     );
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
-        mapExpressions(expression, (text) => evaluator.evaluate(text, scope, options))
+        mapExpressions(expression, (text) =>
+          evaluator.evaluate(text, scope, policyOptions(options))
+        )
     );
     instance.compile = runBound((expression: unknown, options?: PhysicsEvaluateOptions) =>
       mapExpressions(expression, (text) => {
-        const compiled = evaluator.compile(text, options);
+        const compiled = evaluator.compile(text, policyOptions(options));
         return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
       })
     );
@@ -253,7 +264,11 @@ export function wireMathjsInstanceApi(
   ): ReturnType<typeof functionsParser> {
     const made = functionsParser(options);
     made.evaluate = (expr: string): unknown =>
-      (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
+      (instance.evaluate as WiredCompatInstance['evaluate'])(
+        expr,
+        made.scope,
+        policyOptions(options)
+      );
     return Object.assign(this, made);
   }
   const ParserClass = Parser as unknown as WiredCompatInstance['Parser'];

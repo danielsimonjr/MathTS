@@ -335,9 +335,20 @@ export const createRange = /* #__PURE__ */ factory(
       const span = (asNumber(end) - asNumber(start)) / asNumber(step);
       if (span >= 0)
         assertAllocSize('range', [includeEnd ? Math.floor(span) + 1 : Math.ceil(span)]);
+      // A misread step direction (a sign test that fails on a type the comparator
+      // still orders) would walk away from `end` forever. The asserted allocation
+      // size is the honest bound: stop once the loop has filled one slot more
+      // than the span allows, so the loop can never outgrow it.
+      const bound =
+        Number.isFinite(span) && span >= 0
+          ? (includeEnd ? Math.floor(span) + 1 : Math.ceil(span)) + 1
+          : Number.isFinite(span)
+            ? Math.ceil(-span) + 2
+            : Infinity;
       let x = start;
       while (ongoing(x, end)) {
         array.push(x);
+        if (array.length >= bound) break;
         x = add(x, step);
       }
       return array;

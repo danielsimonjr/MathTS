@@ -38,9 +38,39 @@ export function getDefaultEvaluate(): ReturnType<typeof createEvaluate> {
  *   The validator otherwise rejects assignments, function definitions, and
  *   calls to high-risk builtins (`import`, `createUnit`, `evaluate`, …).
  *   Only opt out when the host is providing trusted, hand-authored input.
+ * @property safe - When `true`, forces the safe policy (validator and result
+ *   sanitizer on). Passing this together with `unsafe: true` throws a
+ *   `TypeError` before the expression is parsed.
+ * @property policy - `'mathjs'` runs the mathjs policy: no AST validator and
+ *   no result sanitizer, with a scope that may expose the expression-building
+ *   names. `'safe'` is the default validator-plus-sanitizer policy.
  */
+export type EvaluatePolicy = 'safe' | 'mathjs';
+
 export interface EvaluateOptions {
   unsafe?: boolean;
+  safe?: boolean;
+  policy?: EvaluatePolicy;
+}
+
+/** How one evaluate / compile run treats untrusted shapes. */
+type PolicyMode = 'validate' | 'skip';
+
+/**
+ * Resolve the policy of one call. `unsafe: true` and `policy: 'mathjs'` both
+ * skip the validator and the sanitizer; `safe: true` forces the safe policy.
+ * The combination of `safe` and `unsafe` is rejected before any parse. Exported
+ * so a host that picks a runner (safe or mathjs scope) can validate the options
+ * with the same rule the runner applies.
+ */
+export function resolveMode(options?: EvaluateOptions): PolicyMode {
+  if (options?.safe === true) {
+    if (options.unsafe === true) {
+      throw new TypeError('Pass either `{ safe: true }` or `{ unsafe: true }`, not both');
+    }
+    return 'validate';
+  }
+  return options?.unsafe === true || options?.policy === 'mathjs' ? 'skip' : 'validate';
 }
 
 /**
@@ -300,9 +330,12 @@ export function createEvaluate(
     scope?: Record<string, unknown> | Scope,
     options?: EvaluateOptions
   ): unknown {
-    const unsafe = options?.unsafe === true;
-    // Safe and unsafe compiles of the same text are distinct entries.
-    const key = (unsafe ? 'u:' : 's:') + (cacheKey ? cacheKey() + '\u0000' : '') + expr;
+    const mode = resolveMode(options);
+    // Safe, mathjs-policy and unsafe compiles of the same text are distinct entries.
+    const key =
+      (mode === 'skip' ? (options?.unsafe === true ? 'u:' : 'm:') : 's:') +
+      (cacheKey ? cacheKey() + '\u0000' : '') +
+      expr;
     let compiled = cache.get(key);
     if (compiled !== undefined) {
       // refresh recency (Map iterates in insertion order)
@@ -310,7 +343,7 @@ export function createEvaluate(
       cache.set(key, compiled);
     } else {
       const node = parse(expr);
-      if (!unsafe) {
+      if (mode === 'validate') {
         validateAst(node);
       }
       compiled = compile(node, mathNamespace);
@@ -321,7 +354,7 @@ export function createEvaluate(
       }
     }
     const result = compiled.evaluate(scope);
-    return unsafe ? result : sanitizeEvaluateResult(result, new WeakSet(), trusted);
+    return mode === 'skip' ? result : sanitizeEvaluateResult(result, new WeakSet(), trusted);
   }
 
   return evaluate;
@@ -351,12 +384,12 @@ export function compileExpressionWithDeps(
   options?: EvaluateOptions
 ): CompiledExpression {
   const node = parseFn(expr);
-  const unsafe = options?.unsafe === true;
-  if (!unsafe) {
+  const mode = resolveMode(options);
+  if (mode === 'validate') {
     validateAst(node);
   }
   const compiled = compile(node, mathScope);
-  if (unsafe) return compiled;
+  if (mode === 'skip') return compiled;
   const trusted = trustedMathFunctions(mathScope);
   return {
     evaluate(scope?: Record<string, unknown> | Scope): unknown {

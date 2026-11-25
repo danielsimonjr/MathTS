@@ -71,7 +71,12 @@ describe('dogfood G20 default parse/evaluate', () => {
     const scope: Record<string, unknown> = {};
     expect(evaluate('a = 4', scope, { unsafe: true })).toBe(4);
     expect(scope.a).toBe(4);
-    expect(evaluate('f(x) = x + 1; f(3)', {}, { unsafe: true })).toBe(4);
+    // #1556: block results are ResultSets on the typed API too — the visible
+    // result of `f(x) = x + 1; f(3)` is the call, wrapped in `.entries`.
+    const block = evaluate('f(x) = x + 1; f(3)', {}, { unsafe: true }) as {
+      entries: unknown[];
+    };
+    expect(block.entries).toEqual([4]);
   });
 
   it('numeric overflow throws; 1e308 and Infinity stay', () => {

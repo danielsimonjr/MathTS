@@ -135,6 +135,17 @@ function getSafeMethod(object: unknown, method: unknown): unknown {
  * @return {boolean} Returns true when safe, false otherwise
  */
 function isSafeMethod(object: unknown, method: unknown): boolean {
+  // AST nodes expose their evaluate/compile/render methods to expressions that
+  // created them (mathjs parity, #1549); every other host object stays locked.
+  if (
+    object !== null &&
+    object !== undefined &&
+    (object as { isNode?: boolean }).isNode === true &&
+    NODE_METHODS.has(method as string) &&
+    typeof (object as Record<string, unknown>)[method as string] === 'function'
+  ) {
+    return true;
+  }
   if (!isSandboxReceiver(object)) return false;
   if (
     object === null ||
@@ -189,6 +200,16 @@ const safeNativeProperties = {
   length: true,
   name: true,
 };
+
+/** Methods an expression may call on an AST node it created (#1549). */
+const NODE_METHODS: ReadonlySet<string> = new Set([
+  'evaluate',
+  'compile',
+  'toString',
+  'toTex',
+  'toHTML',
+  'toMathML',
+]);
 
 const safeNativeMethods = {
   toString: true,
