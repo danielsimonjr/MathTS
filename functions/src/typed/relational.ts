@@ -36,7 +36,9 @@ import {
 } from '@danielsimonjr/mathts-core';
 import { isDenseMatrix, isSparseMatrix } from '../utils/is.js';
 import { nearlyEqual } from '../utils/number.js';
-import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
+import { stringToNumber } from '@danielsimonjr/mathts-core/internal';
+import { collectionBinaryRows } from './collection-binary.js';
+import { unitsEqual } from './unit-compare.js';
 
 // =============================================================================
 // Internal helpers
@@ -154,6 +156,11 @@ export const equalScalar = mathTyped('equalScalar', {
 
   'Complex, Complex': (x: Complex, y: Complex): boolean => complexNearlyEqual(x, y),
 
+  // Two Units are equal when they measure one quantity in one dimension (#1552): the values
+  // are SI-normalized already, so `50 cm` and `0.5 m` hold the same value. Without this row
+  // the structural fallback below compared BigNumber Unit values by reference.
+  'Unit, Unit': (x: Unit, y: Unit): boolean => unitsEqual(x, y),
+
   'string, string': (x: string, y: string): boolean => x === y,
 
   // null / undefined strict identity
@@ -239,6 +246,13 @@ function _deepEqual(x: unknown, y: unknown): boolean {
     return true;
   }
   if (Array.isArray(y)) return false;
+  // mathjs compares strings by their numeric value here (deepEqual delegates its scalar
+  // rows to `equal`, whose string→number conversion throws for non-numeric strings) — a
+  // Unit's `valueOf` is its string form, so `deepEqual(unit('1 m'), unit('1 m'))` throws
+  // `Cannot convert "1 m" to a number` in mathjs 15.3.0 too (#1552).
+  if (typeof x === 'string' && typeof y === 'string') {
+    return equalScalar(stringToNumber(x), stringToNumber(y)) as boolean;
+  }
   return equalScalar(x, y) as boolean;
 }
 
@@ -453,7 +467,7 @@ export const compareUnits = mathTyped('compareUnits', {
     }
 
     if (!ux.equalBase(uy)) {
-      throw new Error('Cannot compare units with different bases');
+      throw new Error('Cannot compare units with different base');
     }
 
     return _compareNatural(ux.value, uy.value);

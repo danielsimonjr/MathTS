@@ -187,8 +187,9 @@ describe('relational — compareUnits duck-typing', () => {
   });
 
   it('throws on different bases', () => {
+    // mathjs 15.3.0 says `Cannot compare units with different base` (singular, #1552).
     expect(() => compareUnits(makeUnit(5, 'length'), makeUnit(5, 'mass'))).toThrow(
-      /different bases/
+      /different base/
     );
   });
 

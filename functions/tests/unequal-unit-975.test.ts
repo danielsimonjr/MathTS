@@ -42,8 +42,11 @@ describe('#975 equal and unequal of Units use the tolerance of the number rows',
     expect(unequal(unit('0.3 m'), sum())).toBe(false);
     expect(unequal([unit('0.3 m')], [sum()])).toEqual([false]);
   });
-  it('a dimension mismatch stays unequal', () => {
-    expect(equal(unit('1 m'), unit('1 s'))).toBe(false);
-    expect(unequal(unit('1 m'), unit('1 s'))).toBe(true);
+  it('a dimension mismatch throws, as in mathjs 15.3.0 (#1552)', () => {
+    // mathjs `equal` / `unequal` of two Units with different dimensions throw
+    // `Cannot compare units with different base` (compareUnits inside equalScalar);
+    // they returned false / true here before #1552.
+    expect(() => equal(unit('1 m'), unit('1 s'))).toThrow(/different base/);
+    expect(() => unequal(unit('1 m'), unit('1 s'))).toThrow(/different base/);
   });
 });

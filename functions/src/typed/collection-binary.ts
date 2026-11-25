@@ -2,25 +2,18 @@
  * The typed binary functions use the factories' existing collection algorithms for their
  * Array and Matrix signatures. Scalar signatures continue to dispatch directly.
  */
-import { equal as coreEqual } from '@danielsimonjr/mathts-core';
 
 /**
- * True when two Units measure one quantity: one dimension, and values that are equal under the
- * tolerance of the number rows of `equal` (mathjs: `0.3 m` equals `0.1 m + 0.2 m`). The scalar
+ * True when two Units measure one quantity: one dimension, and values that are equal under
+ * the scalar `equal` semantics (mathjs: `0.3 m` equals `0.1 m + 0.2 m`, and
+ * `50 cm` equals `0.5 m` with BigNumber values too). Different dimensions throw the
+ * mathjs error, as they do for every relational function on Units (#1552). The scalar
  * rows of `equal` and `unequal` both use it, so the two always agree (#975).
  *
- * @param a - Left Unit.
- * @param b - Right Unit.
- * @returns Whether the Units are equal.
+ * The canonical definition lives in `./unit-compare.js`, beside the ordering helpers it
+ * shares its value comparison with; this re-export keeps the historical import path.
  */
-export function unitsEqual(a: unknown, b: unknown): boolean {
-  const x = a as { equalBase(o: unknown): boolean; value: unknown };
-  const y = b as { value: unknown };
-  if (!x.equalBase(b)) return false;
-  return typeof x.value === 'number' && typeof y.value === 'number'
-    ? coreEqual(x.value, y.value)
-    : x.value === y.value;
-}
+export { unitsEqual } from './unit-compare.js';
 
 /** A binary operation. */
 export type BinaryFn = (a: unknown, b: unknown) => unknown;

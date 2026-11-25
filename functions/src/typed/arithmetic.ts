@@ -109,7 +109,8 @@ import { modWithFloor } from '../arithmetic/mod-with-floor.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { assertInnerDimensions, sparseProduct } from './sparse-product.js';
-import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
+import { collectionBinaryRows } from './collection-binary.js';
+import { unitsEqual, unitsCompare } from './unit-compare.js';
 import { exactReductions } from './exact-reductions.js';
 import {
   ROUND_DECIMALS_NOT_INTEGER,
@@ -783,19 +784,9 @@ interface UnitLike {
 
 const asUnit = (u: unknown): UnitLike => u as UnitLike;
 
-/** Same-dimension test. */
-function unitSameDimension(a: unknown, b: unknown): boolean {
-  return asUnit(a).equalBase(b);
-}
-
 /** Comparison sign of two dimensionally-compatible units (throws if incompatible). */
 function unitCmp(a: Unit, b: Unit): i32 {
-  if (!unitSameDimension(a, b)) {
-    throw new Error('Cannot compare units with different dimensions');
-  }
-  const va = asUnit(a).value as number;
-  const vb = asUnit(b).value as number;
-  return va > vb ? 1 : va < vb ? -1 : 0;
+  return unitsCompare(a, b) as i32;
 }
 
 /**
