@@ -42,6 +42,17 @@ import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 // initializes the manager explicitly.
 
 /** The subset of the mathjs `Index` API the bridge matrices consume. */
+function validateRowSwap(i: number, j: number, size: number[]): void {
+  if (!Number.isInteger(i) || !Number.isInteger(j)) {
+    throw new Error('Row index must be positive integers');
+  }
+  if (size.length !== 2) {
+    throw new Error('Only two dimensional matrix is supported');
+  }
+  validateIndex(i, size[0]);
+  validateIndex(j, size[0]);
+}
+
 interface MatrixIndexLike {
   isScalar(): boolean;
   size(): number[];
@@ -216,8 +227,18 @@ export class MathJSDenseMatrix {
     };
   }
 
+  format(options?: unknown): string {
+    return formatGeneric(this._data, options);
+  }
+
   toString(): string {
     return formatGeneric(this._data);
+  }
+
+  swapRows(i: number, j: number): this {
+    validateRowSwap(i, j, this._size);
+    MathJSDenseMatrix._swapRows(i, j, this._data);
+    return this;
   }
 
   /**
@@ -1365,6 +1386,29 @@ export class MathJSSparseMatrix {
     };
   }
 
+  format(options?: unknown): string {
+    const [rows, columns] = this._size;
+    const dimensions = formatGeneric(rows, options) + ' x ' + formatGeneric(columns, options);
+    let result = 'Sparse Matrix [' + dimensions + '] density: ';
+    result += formatGeneric(this.density(), options) + '\n';
+
+    for (let column = 0; column < columns; column++) {
+      for (let offset = this._ptr[column]; offset < this._ptr[column + 1]; offset++) {
+        const row = formatGeneric(this._index[offset], options);
+        const col = formatGeneric(column, options);
+        const value = this._values ? formatGeneric(this._values[offset], options) : 'X';
+        result += '\n    (' + row + ', ' + col + ') ==> ' + value;
+      }
+    }
+    return result;
+  }
+
+  swapRows(i: number, j: number): this {
+    validateRowSwap(i, j, this._size);
+    MathJSSparseMatrix._swapRows(i, j, this._size[1], this._values, this._index, this._ptr);
+    return this;
+  }
+
   /** mathjs prints a sparse matrix as its nested-array form. */
   toString(): string {
     return formatGeneric(this.toArray());
@@ -1419,7 +1463,7 @@ export class MathJSSparseMatrix {
     j: number,
     pi: number,
     n: number,
-    values: unknown[],
+    values: unknown[] | null,
     index: number[],
     ptr: number[]
   ): void {

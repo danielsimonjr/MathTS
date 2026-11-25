@@ -14,6 +14,7 @@ import {
   derivative,
   equalText,
   erf,
+  format,
   fraction,
   fractionDependencies,
   im,
@@ -37,23 +38,13 @@ describe('named compatibility function imports', () => {
   it('reports the MathJS matrix type names across compatibility entry points', () => {
     const math = create(all);
     const selected = create({ typeOfDependencies });
+    const data = [
+      [1, 0],
+      [0, 2],
+    ];
     for (const storage of ['dense', 'sparse'] as const) {
-      const matrix = math.matrix(
-        [
-          [1, 0],
-          [0, 2],
-        ],
-        storage
-      );
-      const expected = oracle.typeOf(
-        oracle.matrix(
-          [
-            [1, 0],
-            [0, 2],
-          ],
-          storage
-        )
-      );
+      const matrix = math.matrix(data, storage);
+      const expected = oracle.typeOf(oracle.matrix(data, storage));
       expect(typeOf(matrix)).toBe(expected);
       expect(math.typeOf(matrix)).toBe(expected);
       expect(selected.typeOf(matrix)).toBe(expected);
@@ -65,38 +56,14 @@ describe('named compatibility function imports', () => {
   it('naturally orders matrix values and uses storage type to break ties', () => {
     const math = create(all);
     const selected = create({ compareNaturalDependencies });
-    const dense = math.matrix(
-      [
-        [1, 0],
-        [0, 2],
-      ],
-      'dense'
-    );
-    const sparse = math.matrix(
-      [
-        [1, 0],
-        [0, 2],
-      ],
-      'sparse'
-    );
-    const referenceDense = oracle.matrix(
-      [
-        [1, 0],
-        [0, 2],
-      ],
-      'dense'
-    );
-    const referenceSparse = oracle.matrix(
-      [
-        [1, 0],
-        [0, 2],
-      ],
-      'sparse'
-    );
     const array = [
       [1, 0],
       [0, 2],
     ];
+    const dense = math.matrix(array, 'dense');
+    const sparse = math.matrix(array, 'sparse');
+    const referenceDense = oracle.matrix(array, 'dense');
+    const referenceSparse = oracle.matrix(array, 'sparse');
     const larger = [
       [1, 0],
       [0, 3],
@@ -115,6 +82,42 @@ describe('named compatibility function imports', () => {
     expect(math.evaluate('compareNatural(x, y)', { x: dense, y: sparse })).toBe(
       oracle.compareNatural(referenceDense, referenceSparse)
     );
+  });
+
+  it.each(['dense', 'sparse'] as const)('formats %s matrices with numeric options', (storage) => {
+    const math = create(all);
+    const data = [
+      [1.2345, 0],
+      [0, 2.3456],
+    ];
+    const matrix = math.matrix(data, storage);
+    const expected = oracle.matrix(data, storage);
+
+    expect(matrix.format(3)).toBe(oracle.format(expected, 3));
+    expect(format(matrix, 3)).toBe(oracle.format(expected, 3));
+    expect(math.format(matrix, { notation: 'fixed', precision: 2 })).toBe(
+      oracle.format(expected, { notation: 'fixed', precision: 2 })
+    );
+    expect(math.evaluate('format(x, 3)', { x: matrix })).toBe(oracle.format(expected, 3));
+    expect(matrix.toString()).toBe(expected.toString());
+  });
+
+  it.each(['dense', 'sparse'] as const)('swaps %s matrix rows in place', (storage) => {
+    const math = create(all);
+    const data = [
+      [1, 0, 3],
+      [0, 2, 4],
+      [5, 0, 0],
+    ];
+    const matrix = math.matrix(data, storage);
+    const expected = oracle.matrix(data, storage);
+
+    expect(matrix.swapRows(0, 1)).toBe(matrix);
+    expect(matrix.toArray()).toEqual(expected.swapRows(0, 1).toArray());
+    expect(matrix.swapRows(1, 1).toArray()).toEqual(expected.toArray());
+    expect(() => matrix.swapRows(1, 3)).toThrow('Index out of range');
+    expect(() => matrix.swapRows(0.5, 1)).toThrow('Row index must be positive integers');
+    expect(matrix.toArray()).toEqual(expected.toArray());
   });
 
   it('matches the upstream results across mathematical categories', () => {

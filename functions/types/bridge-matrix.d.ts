@@ -32,5 +32,8 @@ export interface BridgeMatrix extends MatrixValue {
   reshape(size: number[], copy?: boolean): BridgeMatrix;
   clone(): BridgeMatrix;
   storage(): string;
+  /** Swap two rows of a 2-D matrix in place. */
+  swapRows(i: number, j: number): this;
+  format(options?: unknown): string;
   toString(): string;
 }
