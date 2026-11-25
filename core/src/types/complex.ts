@@ -305,9 +305,12 @@ export class Complex implements IComplex {
     return { mathjs: 'Complex', re: this.re, im: this.im };
   }
 
-  /**
-   * Return polar representation
-   */
+  /** Components in rectangular coordinates. */
+  toVector(): [number, number] {
+    return [this.re, this.im];
+  }
+
+  /** Return polar coordinates. */
   toPolar(): { r: number; phi: number } {
     return { r: this.abs(), phi: this.arg() };
   }
@@ -573,6 +576,14 @@ export class Complex implements IComplex {
   exp(): Complex {
     const ea = Math.exp(this.re);
     return new Complex(ea * Math.cos(this.im), ea * Math.sin(this.im));
+  }
+
+  /** Exponential minus one, retaining precision near zero. */
+  expm1(): Complex {
+    const halfAngleSine = Math.sin(0.5 * this.im);
+    const real = Math.expm1(this.re) * Math.cos(this.im) - 2 * halfAngleSine * halfAngleSine;
+    const imaginary = Math.exp(this.re) * Math.sin(this.im);
+    return new Complex(real, imaginary);
   }
 
   /**
@@ -861,6 +872,10 @@ export class Complex implements IComplex {
    */
   isNaN(): boolean {
     return Number.isNaN(this.re) || Number.isNaN(this.im);
+  }
+
+  isFinite(): boolean {
+    return Number.isFinite(this.re) && Number.isFinite(this.im);
   }
 
   /**

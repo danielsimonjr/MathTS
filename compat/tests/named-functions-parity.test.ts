@@ -149,6 +149,28 @@ describe('named compatibility function imports', () => {
     }
   });
 
+  it('matches MathJS complex instance components, finiteness, and expm1', () => {
+    const math = create(all);
+    for (const [real, imaginary] of [
+      [1e-16, 1e-12],
+      [-2, 0],
+      [0, -0],
+      [Infinity, -2],
+      [NaN, 0],
+    ]) {
+      const actual = math.complex(real, imaginary);
+      // MathJS exposes these complex.js methods at runtime but omits them from its declarations.
+      const expected = oracle.complex(real, imaginary) as ReturnType<typeof oracle.complex> & {
+        toVector(): [number, number];
+        isFinite(): boolean;
+        expm1(): { toVector(): [number, number] };
+      };
+      expect(actual.toVector()).toEqual(expected.toVector());
+      expect(actual.isFinite()).toBe(expected.isFinite());
+      expect(actual.expm1().toVector()).toEqual(expected.expm1().toVector());
+    }
+  });
+
   it('matches the upstream results across mathematical categories', () => {
     expect(combinations(12, 3)).toBe(oracle.combinations(12, 3));
     expect(log2(16)).toBe(oracle.log2(16));
