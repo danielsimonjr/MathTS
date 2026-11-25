@@ -1533,9 +1533,6 @@
       "stretch": {
         "kind": "function"
       },
-      "stringToNumber": {
-        "kind": "function"
-      },
       "stringify": {
         "kind": "function"
       },
