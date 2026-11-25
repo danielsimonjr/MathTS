@@ -134,10 +134,7 @@ export const createMatAlgo07xSSf = /* #__PURE__ */ factory(
 
           // invoke callback
           const cij: MatrixValue = cf(va, vb);
-          // Store all non zero and true values, as the mathjs matAlgo07xSSf source
-          // does (`cij !== 0 && cij !== false`): it does not consult the typed
-          // `isZero` here, so a BigNumber/BigInt result is stored like mathjs stores
-          // it and a boolean false is omitted.
+          // Store all non zero and true values
           if (cij !== 0 && cij !== false) {
             cindex.push(i); // row index
             cvalues.push(cij); // computed value
