@@ -3,7 +3,13 @@
  * `parse().toString()` parity (#1579, #1586) — compat wrappers only; native
  * {@link @danielsimonjr/mathts-core} Fraction formatting is unchanged.
  */
-import { isFraction, isUnit, type Fraction } from '@danielsimonjr/mathts-core';
+import {
+  isFraction,
+  isMatrix,
+  isSparseMatrix,
+  isUnit,
+  type Fraction,
+} from '@danielsimonjr/mathts-core';
 import type { StringOptions } from '@danielsimonjr/mathts-expression';
 import Frac from 'fraction.js';
 
@@ -32,6 +38,23 @@ function arrayContainsFraction(value: unknown[]): boolean {
   return false;
 }
 
+function matrixContainsFraction(value: {
+  toArray?: () => unknown;
+  forEach?: (callback: (entry: unknown) => void) => void;
+}): boolean {
+  if (typeof value.forEach === 'function' && isSparseMatrix(value)) {
+    let found = false;
+    value.forEach((entry) => {
+      if (isFraction(entry)) {
+        found = true;
+      }
+    });
+    return found;
+  }
+  const data = typeof value.toArray === 'function' ? value.toArray() : undefined;
+  return Array.isArray(data) && arrayContainsFraction(data);
+}
+
 function fractionOptionsUseDecimal(options: unknown): boolean {
   return (
     typeof options === 'object' &&
@@ -45,14 +68,9 @@ export function mathjsFractionDecimalString(numerator: bigint, denominator: bigi
   return new Frac(numerator, denominator).toString();
 }
 
-function formatCompatArray(
-  array: unknown[],
-  options: unknown,
-  nativeFormat: (value: unknown, options?: unknown) => string
-): string {
-  if (!arrayContainsFraction(array)) {
-    return nativeFormat(array, options);
-  }
+type NativeFormat = (value: unknown, options?: unknown) => string;
+
+function formatCompatArray(array: unknown[], options: unknown, nativeFormat: NativeFormat): string {
   const parts: string[] = [];
   for (let i = 0; i < array.length; i++) {
     if (i !== 0) {
@@ -63,16 +81,83 @@ function formatCompatArray(
   return `[${parts.join('')}]`;
 }
 
-function formatCompatValue(
-  value: unknown,
+function formatSparseCompat(
+  value: {
+    size(): number[];
+    density(): number;
+    forEach(callback: (entry: unknown, index: number[]) => void): void;
+  },
   options: unknown,
-  nativeFormat: (value: unknown, options?: unknown) => string
+  nativeFormat: NativeFormat
 ): string {
+  const [rows, columns] = value.size();
+  let result =
+    'Sparse Matrix [' +
+    formatCompatValue(rows, options, nativeFormat) +
+    ' x ' +
+    formatCompatValue(columns, options, nativeFormat) +
+    '] density: ' +
+    formatCompatValue(value.density(), options, nativeFormat) +
+    '\n';
+  value.forEach((entry, index) => {
+    // mathjs CSC format lists stored entries only (implicit numeric zeros omitted).
+    if (entry === 0 || entry === 0n) {
+      return;
+    }
+    result +=
+      '\n    (' +
+      formatCompatValue(index[0], options, nativeFormat) +
+      ', ' +
+      formatCompatValue(index[1], options, nativeFormat) +
+      ') ==> ' +
+      formatCompatValue(entry, options, nativeFormat);
+  });
+  return result;
+}
+
+function formatCompatValue(value: unknown, options: unknown, nativeFormat: NativeFormat): string {
   if (isFraction(value) && !fractionOptionsUseDecimal(options)) {
     return formatFractionRatio(value);
   }
   if (Array.isArray(value)) {
+    if (!arrayContainsFraction(value)) {
+      return nativeFormat(value, options);
+    }
     return formatCompatArray(value, options, nativeFormat);
+  }
+  if (isSparseMatrix(value)) {
+    if (
+      !matrixContainsFraction(
+        value as {
+          toArray?: () => unknown;
+          forEach?: (callback: (entry: unknown) => void) => void;
+        }
+      )
+    ) {
+      return nativeFormat(value, options);
+    }
+    return formatSparseCompat(
+      value as {
+        size(): number[];
+        density(): number;
+        forEach(callback: (entry: unknown, index: number[]) => void): void;
+      },
+      options,
+      nativeFormat
+    );
+  }
+  if (isMatrix(value)) {
+    if (
+      !matrixContainsFraction(
+        value as {
+          toArray?: () => unknown;
+          forEach?: (callback: (entry: unknown) => void) => void;
+        }
+      )
+    ) {
+      return nativeFormat(value, options);
+    }
+    return formatCompatValue((value as { toArray(): unknown }).toArray(), options, nativeFormat);
   }
   if (isUnit(value)) {
     const unit = value as { format?: (opts?: unknown) => string; value?: unknown };
@@ -88,16 +173,14 @@ function formatCompatValue(
   return nativeFormat(value, options);
 }
 
-type NativeFormat = (value: unknown, options?: unknown) => string;
-
 /** Wrap the native `format` so Fraction ratios and units match mathjs 15.3.0 (#1579). */
 export function createCompatFormat(nativeFormat: NativeFormat): NativeFormat {
   return (value: unknown, options?: unknown) => formatCompatValue(value, options, nativeFormat);
 }
 
-type NativeString = (value: unknown) => string;
+type NativeString = (value: unknown) => unknown;
 
-function stringCompatValue(value: unknown, nativeString: NativeString): string {
+function stringCompatValue(value: unknown, nativeString: NativeString): unknown {
   if (isFraction(value)) {
     return mathjsFractionDecimalString(value.numerator, value.denominator);
   }
@@ -105,7 +188,22 @@ function stringCompatValue(value: unknown, nativeString: NativeString): string {
     if (!arrayContainsFraction(value)) {
       return nativeString(value);
     }
-    return `[${value.map((entry) => stringCompatValue(entry, nativeString)).join(', ')}]`;
+    return value.map((entry) => stringCompatValue(entry, nativeString));
+  }
+  if (isMatrix(value)) {
+    if (
+      !matrixContainsFraction(
+        value as {
+          toArray?: () => unknown;
+          forEach?: (callback: (entry: unknown) => void) => void;
+        }
+      )
+    ) {
+      return nativeString(value);
+    }
+    return (value as { map: (fn: (entry: unknown) => unknown) => unknown }).map((entry) =>
+      stringCompatValue(entry, nativeString)
+    );
   }
   return nativeString(value);
 }
@@ -117,12 +215,52 @@ export function createCompatString(nativeString: NativeString): NativeString {
 
 type PrintFn = (template: string, values: unknown, options?: unknown) => string;
 
-/** Wrap `print` so the wrong-first-arg error text matches mathjs (#1579). */
-export function createCompatPrint(nativePrint: PrintFn): PrintFn {
+const PRINT_TEMPLATE = /\$([\w.]+)/g;
+
+function interpolatePrint(
+  template: string,
+  values: Record<string, unknown> | unknown[],
+  options: unknown,
+  format: NativeFormat
+): string {
+  return template.replace(PRINT_TEMPLATE, (original: string, key: string): string => {
+    const keys = key.split('.');
+    let value: unknown = (values as Record<string, unknown>)[keys.shift()!];
+    if (value !== undefined && isMatrix(value)) {
+      value = (value as { toArray: () => unknown }).toArray();
+    }
+    while (keys.length && value !== undefined) {
+      const k = keys.shift();
+      value = k ? (value as Record<string, unknown>)[k] : (value as string) + '.';
+    }
+    if (value !== undefined) {
+      if (typeof value === 'string') {
+        return value;
+      }
+      return format(value, options);
+    }
+    return original;
+  });
+}
+
+/** Wrap `print` so Fraction placeholders and the wrong-first-arg error match mathjs (#1579). */
+export function createCompatPrint(nativePrint: PrintFn, nativeFormat: NativeFormat): PrintFn {
+  const format = createCompatFormat(nativeFormat);
   const invoke = (...args: unknown[]): string =>
     (nativePrint as (...a: unknown[]) => string)(...args);
   const wrapped = Object.assign((...args: unknown[]) => {
     try {
+      const template = args[0];
+      const values = args[1];
+      const options = args[2];
+      if (typeof template === 'string' && values != null && typeof values === 'object') {
+        return interpolatePrint(
+          template,
+          values as Record<string, unknown> | unknown[],
+          options,
+          format
+        );
+      }
       return invoke(...args);
     } catch (error) {
       if (

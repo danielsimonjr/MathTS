@@ -83,6 +83,36 @@ describe('G15 compat: format(Fraction) prints the ratio (mathjs 15.3.0 #1579)', 
   it('F1 numeric(4, "Fraction") formats as "4/1"', () => {
     expectParity((l) => l.format(l.numeric(4, 'Fraction')));
   });
+
+  it('G07 F3 routed here: format(fraction(2)) is "2/1" (nullish/format whole Fraction)', () => {
+    expectParity((l) => l.format(l.fraction(2)));
+  });
+
+  it('F1 format of a dense matrix of Fractions matches the oracle', () => {
+    expectParity((l) => l.format(l.matrix([l.fraction(1), l.fraction(2)])));
+  });
+
+  it('F1 format of a 2-D dense matrix of Fractions matches the oracle', () => {
+    expectParity((l) =>
+      l.format(
+        l.matrix([
+          [l.fraction(1), l.fraction(0)],
+          [l.fraction(2), l.fraction(3)],
+        ])
+      )
+    );
+  });
+
+  it('F1 format of a sparse matrix of Fractions matches the oracle', () => {
+    expectParity((l) =>
+      l.format(
+        l.sparse([
+          [l.fraction(1), 0],
+          [0, l.fraction(2)],
+        ] as never)
+      )
+    );
+  });
 });
 
 describe('G15 compat: string(Fraction) prints the decimal form (#1579, #1721)', () => {
@@ -92,6 +122,14 @@ describe('G15 compat: string(Fraction) prints the decimal form (#1579, #1721)', 
 
   it('F2 string(fraction(2, 3)) is "0.(6)"', () => {
     expectParity((l) => l.string(l.fraction(2, 3)));
+  });
+
+  it('F2 string() maps a nested array of Fractions (does not stringify the container)', () => {
+    expectParity((l) => l.string([[l.fraction(1, 3), l.fraction(1, 2)]]));
+  });
+
+  it('F2 string() maps a dense matrix of Fractions', () => {
+    expectParity((l) => l.string(l.matrix([l.fraction(1, 3), l.fraction(2)])));
   });
 });
 
@@ -118,6 +156,10 @@ describe('G15 compat: ConstantNode.toString under number: "Fraction" (#1586)', (
 describe('G15 compat: print(Fraction) matches the mathjs error', () => {
   it('F4 print(fraction(2)) throws the oracle message', () => {
     expectParity((l) => l.print(l.fraction(2)));
+  });
+
+  it('F4 print interpolates a Fraction placeholder as n/1', () => {
+    expectParity((l) => l.print('x=$x', { x: l.fraction(2) }));
   });
 });
 
@@ -153,6 +195,18 @@ describe('G15 policy: native core/expression Fraction formatting is unchanged fr
     expect(formatGeneric(new Fraction(4n, 2n))).toBe('2');
     expect(formatGeneric(new Fraction(0n, 5n))).toBe('0');
     expect(formatGeneric(new Fraction(1n, 3n))).toBe('1/3');
+  });
+
+  it('creating a compat instance does not change native format of a Fraction', async () => {
+    const functions = await import('@danielsimonjr/mathts-functions');
+    const core = await import('@danielsimonjr/mathts-core');
+    const Fraction = (core as unknown as { Fraction: new (n: bigint, d: bigint) => unknown })
+      .Fraction;
+    const before = functions.format(new Fraction(2n, 1n));
+    compat();
+    const after = functions.format(new Fraction(2n, 1n));
+    expect(before).toBe('2');
+    expect(after).toBe(before);
   });
 
   it('expression ConstantNode.toString() keeps the main output ("2", "1/3")', async () => {

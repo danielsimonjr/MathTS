@@ -82,8 +82,10 @@ math.config({ precision: 128 });
 
 ### Fraction formatting (#1579, #1586)
 
-On the compat instance, `format(fraction(2))` is `"2/1"`, `string(fraction(1, 3))` is `"0.(3)"`
-(repeating/terminating caps match mathjs 15.3.0 / fraction.js), and
+On the compat instance, `format(fraction(2))` is `"2/1"` (the same `n/1` form inside arrays,
+dense and sparse matrices, and Fraction unit magnitudes), `string(fraction(1, 3))` is `"0.(3)"`
+(repeating/terminating caps match mathjs 15.3.0 / fraction.js; collections map element-wise),
+`print('x=$x', { x: fraction(2) })` interpolates `"x=2/1"`, and
 `print(fraction(2))` throws the same `TypeError` wording as mathjs. With
 `number: 'Fraction'`, `parse('1/3 + 1/4').toString()` is `"1/1 / 3/1 + 1/1 / 4/1"`;
 `evaluate('1/3 + 1/4')` stays the Fraction `7/12`. Native `@danielsimonjr/mathts-core` and

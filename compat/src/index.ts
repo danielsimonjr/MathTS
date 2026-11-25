@@ -895,7 +895,8 @@ const namedString = mathFunctions.factory_mathjsCompat.string as typeof mathFunc
 const namedCompatString = /* #__PURE__ */ createCompatString(namedString);
 const namedFormat = /* #__PURE__ */ createCompatFormat(mathFunctions.format);
 const namedPrint = /* #__PURE__ */ createCompatPrint(
-  mathFunctions.print as (template: string, values: unknown, options?: unknown) => string
+  mathFunctions.print as (template: string, values: unknown, options?: unknown) => string,
+  mathFunctions.format
 );
 const namedCompareText = mathFunctions.factory_mathjsCompat.compareText as {
   (left: string, right: string): number;
