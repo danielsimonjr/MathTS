@@ -501,3 +501,23 @@ it('rounds each decimal counting operation at the instance precision', () => {
     }
   }
 });
+
+it('rounds BigNumber digits before choosing or printing the exponent', () => {
+  for (const value of [
+    '9.99',
+    '-99.96',
+    '1.235',
+    '0.0000001',
+    '0.0000009999',
+    '0',
+    'Infinity',
+    'NaN',
+  ]) {
+    const actual = create(all).bignumber(value);
+    const expected = oracle.bignumber(value);
+    for (const digits of [1, 2, 3, 5]) {
+      expect(actual.toExponential(digits - 1)).toBe(expected.toExponential(digits - 1));
+      expect(actual.toPrecision(digits)).toBe(expected.toPrecision(digits));
+    }
+  }
+});

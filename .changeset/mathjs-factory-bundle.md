@@ -12,3 +12,4 @@ Compatibility units now normalize and format readings using the mathjs order of 
 Each full compatibility instance keeps its own custom unit definitions for conversion, expressions, and JSON restoration.
 Compatibility combinations follow mathjs floating-point rounding for safe integer inputs. Compatibility xgcd uses mathjs coefficient arithmetic and the configured matrix output.
 Decimal combinations round each multiplication and division at the configured precision. Combinations with replacement use the mathjs range products for number inputs.
+BigNumber exponential and precision formatting now round the significand before choosing notation and account for carries into the next exponent.
