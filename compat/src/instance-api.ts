@@ -1,4 +1,5 @@
 import { compatDecimalResult } from './bignumber.js';
+import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
 /**
  * mathjs instance methods on `create(all)`: import, typed, compile, and
  * expression scope wired for per-instance evaluate.
@@ -272,8 +273,15 @@ export function wireMathjsInstanceApi(
   const initialEvaluator = rebindEvaluator();
   if (bindParse) {
     instance.parse = new Proxy(initialEvaluator.parse, {
-      apply: (_target, receiver, args) =>
-        runWithConfig(currentConfig, () => Reflect.apply(evaluator.parse, receiver, args)),
+      apply: (_target, receiver, args) => {
+        const node = runWithConfig(currentConfig, () =>
+          Reflect.apply(evaluator.parse, receiver, args)
+        );
+        return wrapParseNodeForCompatToString(
+          node as { toString(options?: unknown): string },
+          currentConfig.number as string | undefined
+        );
+      },
     });
   }
 
