@@ -1735,7 +1735,9 @@ const buildUnitClass =
      * @return true if both units are equal
      */
     Unit.prototype.equals = function (this: UnitInstance, other: UnitInstance): boolean {
-      return this.equalBase(other) && equal(this.value, other.value);
+      if (!this.equalBase(other)) return false;
+      // Affine units (degC/degF) store a scale-only `.value`; compare absolute SI.
+      return equal(this.toSI().value, other.toSI().value);
     };
 
     /**
