@@ -41,3 +41,39 @@ describe('Unit ordering rejects Complex-valued units', () => {
     );
   });
 });
+
+describe('Unit equality uses absolute SI (offset and prefixes)', () => {
+  const smaller = math.smaller as unknown as Fn;
+  const smallerEq = math.smallerEq as unknown as Fn;
+  const largerEq = math.largerEq as unknown as Fn;
+  const unequal = math.unequal as unknown as Fn;
+  const compareNatural = math.compareNatural as unknown as Fn;
+  const fraction = math.fraction as unknown as (...a: unknown[]) => unknown;
+
+  it('0 degC equals 32 degF and 273.15 K', () => {
+    expect(equal(unit(0, 'degC'), unit(32, 'degF'))).toBe(true);
+    expect(equal(unit(0, 'degC'), unit(273.15, 'K'))).toBe(true);
+    expect(unequal(unit(0, 'degC'), unit(32, 'degF'))).toBe(false);
+    expect(compare(unit(0, 'degC'), unit(32, 'degF'))).toBe(0);
+    expect(compareNatural(unit(0, 'degC'), unit(32, 'degF'))).toBe(0);
+  });
+
+  it('0 degC is not equal to 0 degF', () => {
+    expect(equal(unit(0, 'degC'), unit(0, 'degF'))).toBe(false);
+    expect(larger(unit(0, 'degC'), unit(0, 'degF'))).toBe(true);
+    expect(smaller(unit(0, 'degC'), unit(0, 'degF'))).toBe(false);
+  });
+
+  it('prefix and BigNumber SI stay exact through toSI', () => {
+    expect(equal(unit(bignumber(1), 'km'), unit(bignumber(1000), 'm'))).toBe(true);
+    expect(equal(unit(fraction(50, 1), 'cm'), unit(fraction(1, 2), 'm'))).toBe(true);
+    expect(equal(unit(bignumber(0), 'degC'), unit(bignumber(32), 'degF'))).toBe(true);
+  });
+
+  it('0.1 m + 0.2 m equals 0.3 m (relTol of scalar equal)', () => {
+    const add = math.add as unknown as Fn;
+    expect(equal(add(unit(0.1, 'm'), unit(0.2, 'm')), unit(0.3, 'm'))).toBe(true);
+    expect(smallerEq(unit(0.3, 'm'), add(unit(0.1, 'm'), unit(0.2, 'm')))).toBe(true);
+    expect(largerEq(unit(0.3, 'm'), add(unit(0.1, 'm'), unit(0.2, 'm')))).toBe(true);
+  });
+});

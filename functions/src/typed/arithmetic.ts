@@ -775,6 +775,7 @@ interface UnitLike {
   _exactSI?: unknown;
   equalBase(other: unknown): boolean;
   clone(): UnitLike;
+  toSI(): UnitLike;
   multiply(other: unknown): unknown;
   divide(other: unknown): unknown;
   divideInto(numerator: unknown): unknown;
@@ -793,7 +794,7 @@ function unitCmp(a: Unit, b: Unit): i32 {
   if (!unitSameDimension(a, b)) {
     throw new Error('Cannot compare units with different dimensions');
   }
-  return unitValuesCompare(asUnit(a).value, asUnit(b).value);
+  return unitValuesCompare(asUnit(a).toSI().value, asUnit(b).toSI().value);
 }
 
 /**

@@ -206,4 +206,37 @@ describe('G04 adversarial: Unit equality through the compat layer', () => {
     expect(compat).toBe(oracle);
     expect(compat).toContain('loss of precision');
   });
+
+  // mathjs compares affine temperatures by scale-only `.value`, so 0 degC != 32 degF.
+  // Compat copies that quirk; native equal (functions) accounts for offset.
+  it('F9 equal(0 degC, 32 degF) matches mathjs (false)', () => {
+    const { oracle, compat } = both({}, (L) => L.equal(L.unit(0, 'degC'), L.unit(32, 'degF')));
+    expect(compat).toBe(oracle);
+    expect(compat).toBe('boolean false');
+  });
+
+  it('F9 min(5 cm, 2 inch) matches mathjs (the smaller quantity, 5 cm)', () => {
+    const { oracle, compat } = both({}, (L) => L.min(L.unit('5 cm'), L.unit('2 inch')));
+    expect(compat).toBe(oracle);
+  });
+
+  it('F9 max(5 cm, 2 inch) matches mathjs (2 inch)', () => {
+    const { oracle, compat } = both({}, (L) => L.max(L.unit('5 cm'), L.unit('2 inch')));
+    expect(compat).toBe(oracle);
+  });
+
+  it('F9 sign(-2 m) matches mathjs', () => {
+    const { oracle, compat } = both({}, (L) => L.sign(L.unit(-2, 'm')));
+    expect(compat).toBe(oracle);
+  });
+});
+
+describe('G04: creating a compat instance does not change native Unit equal', () => {
+  it('native 0 degC == 32 degF stays true after create(all)', async () => {
+    const F = await import('@danielsimonjr/mathts-functions');
+    const before = F.equal(F.unit(0, 'degC'), F.unit(32, 'degF'));
+    createCompat(compatAll);
+    expect(F.equal(F.unit(0, 'degC'), F.unit(32, 'degF'))).toBe(before);
+    expect(before).toBe(true);
+  });
 });

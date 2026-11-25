@@ -35,7 +35,14 @@ import type {
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
-import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
+import {
+  applyUnitRelationalParity,
+  factoryMaxUnits,
+  factoryMinUnits,
+  factorySignUnits,
+  wrapUnitExtrema,
+  type UnitRelationalOps,
+} from './unit-relational.js';
 import { wrapFractionFormatParity } from './format-parity.js';
 
 // =============================================================================
@@ -544,8 +551,9 @@ export function create(
     mean: shims.mean,
     std: shims.std,
     variance: shims.variance,
-    min: shims.min,
-    max: shims.max,
+    min: wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
+    max: wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
+    sign: wrapUnitExtrema(mathFunctions.sign as (...args: unknown[]) => unknown, factorySignUnits),
 
     // Number theory
     gcd: shims.gcd,

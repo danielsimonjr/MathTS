@@ -12,6 +12,9 @@ import {
   factory_equal,
   factory_larger,
   factory_largerEq,
+  factory_max,
+  factory_min,
+  factory_sign,
   factory_smaller,
   factory_smallerEq,
 } from '@danielsimonjr/mathts-functions';
@@ -184,3 +187,23 @@ export function applyUnitRelationalParity(ops: UnitRelationalOps): UnitRelationa
     smallerEq,
   };
 }
+
+function containsUnit(value: unknown): boolean {
+  if (isUnit(value)) return true;
+  if (Array.isArray(value)) return value.some(containsUnit);
+  return false;
+}
+
+type VariadicOp = (...args: unknown[]) => unknown;
+
+/**
+ * mathjs `min`/`max`/`sign` accept Units. Native typed extrema do not; route those
+ * calls through the activated factories (thin adapter, no reimplementation).
+ */
+export function wrapUnitExtrema(native: VariadicOp, factoryOp: VariadicOp): VariadicOp {
+  return (...args: unknown[]) => (args.some(containsUnit) ? factoryOp(...args) : native(...args));
+}
+
+export const factoryMinUnits = factory_min as VariadicOp;
+export const factoryMaxUnits = factory_max as VariadicOp;
+export const factorySignUnits = factory_sign as VariadicOp;

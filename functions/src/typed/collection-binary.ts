@@ -13,20 +13,35 @@ import {
   type NumericScalar,
 } from '@danielsimonjr/mathts-core';
 
+type UnitSiLike = {
+  equalBase(o: unknown): boolean;
+  value: unknown;
+  toSI(): { value: unknown };
+};
+
+/**
+ * SI magnitude of a Unit, including affine offset (Kelvin for degC/degF).
+ * Prefix-only and scale-only units already store SI in `.value`; `toSI()` is
+ * exact for BigNumber and Fraction (no round-trip through `number`).
+ */
+export function unitSiValue(u: unknown): unknown {
+  return (u as UnitSiLike).toSI().value;
+}
+
 /**
  * True when two Units measure one quantity: one dimension, and values that are equal under the
- * tolerance of the number rows of `equal` (mathjs: `0.3 m` equals `0.1 m + 0.2 m`). The scalar
- * rows of `equal` and `unequal` both use it, so the two always agree (#975).
+ * tolerance of the number rows of `equal` (mathjs: `0.3 m` equals `0.1 m + 0.2 m`). Affine
+ * temperatures (`0 degC` and `32 degF`) compare as absolute SI, not as scale-only `.value`.
+ * The scalar rows of `equal` and `unequal` both use it, so the two always agree (#975).
  *
  * @param a - Left Unit.
  * @param b - Right Unit.
  * @returns Whether the Units are equal.
  */
 export function unitsEqual(a: unknown, b: unknown): boolean {
-  const x = a as { equalBase(o: unknown): boolean; value: unknown };
-  const y = b as { value: unknown };
+  const x = a as UnitSiLike;
   if (!x.equalBase(b)) return false;
-  return coreEqual(x.value as NumericScalar, y.value as NumericScalar);
+  return coreEqual(unitSiValue(a) as NumericScalar, unitSiValue(b) as NumericScalar);
 }
 
 const COMPLEX_ORDER_ERR = 'No ordering relation is defined for complex numbers';
@@ -57,6 +72,7 @@ export function unitValuesCompare(va: unknown, vb: unknown): -1 | 0 | 1 {
     if (Number.isNaN(va) && Number.isNaN(vb)) return 0;
     if (Number.isNaN(va)) return 1;
     if (Number.isNaN(vb)) return -1;
+    if (coreEqual(va, vb)) return 0;
     return va > vb ? 1 : va < vb ? -1 : 0;
   }
   const nx = scalarNumber(va as NumericScalar);
@@ -64,6 +80,7 @@ export function unitValuesCompare(va: unknown, vb: unknown): -1 | 0 | 1 {
   if (Number.isNaN(nx) && Number.isNaN(ny)) return 0;
   if (Number.isNaN(nx)) return 1;
   if (Number.isNaN(ny)) return -1;
+  if (coreEqual(nx, ny)) return 0;
   return nx > ny ? 1 : nx < ny ? -1 : 0;
 }
 
