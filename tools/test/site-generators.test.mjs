@@ -28,7 +28,7 @@ function countsFromReference(referenceText) {
   const exports = indexText.match(/\((\d+) exports\)/);
   assert.ok(exports, 'reference index has no "(N exports)" header');
   const section = indexText.split('### Functions by category')[1]?.split(/\n### /)[0] ?? '';
-  const labels = [...section.matchAll(/^\*\*(.+?)\*\* \(\d+\): /gm)].map((m) => m[1]);
+  const labels = [...section.matchAll(/^\*\*(.+?)\*\* \(\d+\):/gm)].map((m) => m[1]);
   return {
     exports: Number(exports[1]),
     groups: labels.length,
