@@ -16,22 +16,24 @@ human-facing overview.
 
 ## Build / Test / Verify (run from repo root)
 
-| Task          | Command                                                  | Notes                                                                                           |
-| ------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development  |
-| Build all     | `bun run build`                                          | turbo, respects dep graph                                                                       |
-| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 47/47, 0 errors** (includes the builds it waits for)                  |
-| Test all      | `bun run test`                                           | turbo runs each package's own runner (`bun test`, or vitest in `functions`), then root vitest   |
-| Lint / format | `bun run lint` · `bun run format`                        | oxlint (`--deny-warnings`: a warning fails) + prettier                                          |
-| Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts                                       |
-| One package   | `bunx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                 |
-| One test file | `bunx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                 |
-| WASM (AS)     | `bun run build:wasm`                                     | AssemblyScript — the **sole** WASM backend; `bun run build` runs it first, and fails without it |
+| Task          | Command                                                  | Notes                                                                                                                                                |
+| ------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development                                                       |
+| Build all     | `bun run build`                                          | turbo, respects dep graph                                                                                                                            |
+| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 47/47, 0 errors** (includes the builds it waits for)                                                                       |
+| Test all      | `bun run test`                                           | turbo runs each package's own runner (`bun test`, or vitest in `functions`), then root vitest                                                        |
+| Lint / format | `bun run lint` · `bun run format`                        | oxlint (`--deny-warnings`: a warning fails) + prettier                                                                                               |
+| Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts; now also runs the root vitest suites (same suites as `bun run test`, once, with coverage) |
+| Pre-push gate | `bun run prepush`                                        | **required before every push**: lint + format:check + code-docs + bundle-budget (build first — it reads `dist/`)                                     |
+| One package   | `bunx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                                                                      |
+| One test file | `bunx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                                                                      |
+| WASM (AS)     | `bun run build:wasm`                                     | AssemblyScript — the **sole** WASM backend; `bun run build` runs it first, and fails without it                                                      |
 
 Bun migration status / next phases: `docs/roadmap/BUN_MIGRATION.md`.
 
 **Before claiming "done":** run `bun run typecheck` (must stay 0 errors) and the
 affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
+Run `bun run prepush` before every push (see the table above).
 
 ---
 
