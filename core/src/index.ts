@@ -264,7 +264,9 @@ function readDefinedPkgVersion(): string {
     return __PKG_VERSION__;
   } catch (error) {
     if (error instanceof ReferenceError) {
-      const injected = (globalThis as { __PKG_VERSION__?: string }).__PKG_VERSION__;
+      // tsdown `define` rewrites the identifier `__PKG_VERSION__` even on
+      // `globalThis.__PKG_VERSION__`, which would emit `globalThis."0.30.3"`.
+      const injected = (globalThis as Record<string, unknown>)[['__PKG', 'VERSION__'].join('_')];
       if (typeof injected === 'string') return injected;
     }
     throw error;

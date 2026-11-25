@@ -265,6 +265,12 @@ describe('generate-functions-reference surfaces file', () => {
 });
 
 describe('__PKG_VERSION__ for docs:functions (Bun source execution)', () => {
+  test('tsdown define does not emit globalThis."<version>" in core dist', () => {
+    const dist = readFileSync(join(REPO, 'core/dist/index.js'), 'utf8');
+    assert.doesNotMatch(dist, /globalThis\."/);
+    assert.match(dist, /__PKG['"]\s*,\s*['"]VERSION__/);
+  });
+
   test('core/src VERSION reads globalThis when the tsdown define is missing', () => {
     const script = [
       'globalThis.__PKG_VERSION__ = "from-global";',
