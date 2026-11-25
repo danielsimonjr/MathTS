@@ -1155,6 +1155,9 @@
       "atanh": {
         "kind": "function"
       },
+      "bigintToNumber": {
+        "kind": "function"
+      },
       "broadcastArrays": {
         "kind": "function"
       },

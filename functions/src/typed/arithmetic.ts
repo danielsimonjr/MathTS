@@ -1,3 +1,4 @@
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import type { PublicSinh, PublicCosh, PublicTanh } from './public-type-exports.js';
 /**
  * Typed Arithmetic Functions
@@ -852,9 +853,9 @@ export const add = withBinaryScalarGuards(
 
     'bigint, bigint': (a: i64, b: i64): i64 => a + b,
 
-    'bigint, number': (a: i64, b: f64): f64 => Number(a) + b,
+    'bigint, number': (a: i64, b: f64): f64 => bigintToNumber(a) + b,
 
-    'number, bigint': (a: f64, b: i64): f64 => a + Number(b),
+    'number, bigint': (a: f64, b: i64): f64 => a + bigintToNumber(b),
 
     'Complex, Complex': (a: Complex, b: Complex): Complex => a.add(b),
 
@@ -1074,9 +1075,9 @@ export const multiply = withBinaryScalarGuards(
 
     'bigint, bigint': (a: i64, b: i64): i64 => a * b,
 
-    'bigint, number': (a: i64, b: f64): f64 => Number(a) * b,
+    'bigint, number': (a: i64, b: f64): f64 => bigintToNumber(a) * b,
 
-    'number, bigint': (a: f64, b: i64): f64 => a * Number(b),
+    'number, bigint': (a: f64, b: i64): f64 => a * bigintToNumber(b),
 
     'Complex, Complex': (a: Complex, b: Complex): Complex => a.multiply(b),
 

@@ -31,6 +31,7 @@
 
 import { unaryCollectionCallback } from '@danielsimonjr/mathts-core/internal';
 import { mathTyped, BigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import type { Fraction } from '@danielsimonjr/mathts-core';
 import type { IMatrix as Matrix } from '@danielsimonjr/mathts-core';
 import { deepMap } from '../utils/collection.js';
@@ -163,7 +164,8 @@ function bernoulliNumber(n: number): number {
  */
 function scalarToNumber(value: number | bigint | Fraction): number {
   if (typeof value === 'number') return value;
-  return typeof value === 'bigint' ? Number(value) : value.toNumber();
+  // The implicit bigint conversion carries the 15.3.0 safe-range guard (#3803, #1566).
+  return typeof value === 'bigint' ? bigintToNumber(value) : value.toNumber();
 }
 
 /** True when `n` is a non-negative integer BigNumber (false for NaN, Infinity and a fraction). */
@@ -375,6 +377,8 @@ function multinomialOfEntries(entries: unknown[]): number | BigNumber {
   for (const entry of entries) collectMultinomialParts(entry, parts);
   if (parts.length === 0) return 1;
   if (!parts.some((p) => isBigNumber(p))) return multinomialExact(parts as number[]);
+  // A BigNumber entry promotes the whole product to BigNumber, as the typed conversion
+  // does for the mixed varargs of mathjs 15.3.0 (#3790, #1563).
   return roundedMultinomial(parts.map((p) => (isBigNumber(p) ? p.toBigInt() : BigInt(p))));
 }
 

@@ -50,6 +50,7 @@ import {
   multiplyScalar as _multiplyScalar,
   number as _number,
   divide as _divide,
+  factory_divide as _factoryDivide,
   inv as _inv,
   pow as _pow,
   factory_pow as _factoryPow,
@@ -466,7 +467,9 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
   if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
     return _matMultiply(a, _inv(b) as DenseMatrix);
   }
-  return (_divide as (...args: unknown[]) => unknown).apply(
+  // The mathjs-shaped factory carries the 15.3.0 sparse semantics (a sparse result only
+  // when the image of zero is zero, #1565); the typed surface keeps its older sparse path.
+  return (_factoryDivide as unknown as (...args: unknown[]) => unknown).apply(
     undefined,
     arguments as unknown as unknown[]
   );
