@@ -31,6 +31,9 @@ export function getDefaultEvaluate(): ReturnType<typeof createEvaluate> {
   return defaultEvaluate;
 }
 
+/** Evaluate policy: `'safe'` (default validator) or `'mathjs'` (no validator). */
+export type EvaluatePolicy = 'safe' | 'mathjs';
+
 /**
  * Options accepted by evaluate / compileExpression.
  *
@@ -45,8 +48,6 @@ export function getDefaultEvaluate(): ReturnType<typeof createEvaluate> {
  *   no result sanitizer, with a scope that may expose the expression-building
  *   names. `'safe'` is the default validator-plus-sanitizer policy.
  */
-export type EvaluatePolicy = 'safe' | 'mathjs';
-
 export interface EvaluateOptions {
   unsafe?: boolean;
   safe?: boolean;

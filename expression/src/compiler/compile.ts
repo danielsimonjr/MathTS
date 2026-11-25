@@ -536,7 +536,7 @@ function compileAssignmentNode(
     };
   }
 
-  if (asgNode.object?.isAccessorNode) {
+  if (asgNode.object?.isAccessorNode && !asgNode.index) {
     const evalObject = compileNode(asgNode.object.object as MathNode, math, argNames, depth);
     if (asgNode.object.index?.isObjectProperty?.()) {
       const prop = asgNode.object.index.getObjectProperty?.() ?? '';

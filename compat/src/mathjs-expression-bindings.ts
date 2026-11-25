@@ -8,6 +8,7 @@ import type { PhysicsEvaluateOptions } from '@danielsimonjr/mathts-functions';
 type HelpResult = ReturnType<ReturnType<typeof createHelpClass>['fromJSON']>;
 type HelpCtor = new (doc: unknown) => HelpResult;
 
+/** Compat instance evaluate / compile / parser surface used by mathjs-policy bindings. */
 export type CompatExpressionApi = {
   evaluate(
     expr: string,

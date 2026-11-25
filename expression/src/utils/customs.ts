@@ -131,13 +131,7 @@ function getSafeMethod(object: unknown, method: unknown): unknown {
   return (object as Record<string, unknown>)[method as string];
 }
 
-/**
- * Check whether a method is safe.
- * Throws an error when that's not the case (for example for `constructor`).
- * @param {Object} object
- * @param {string} method
- * @return {boolean} Returns true when safe, false otherwise
- */
+/** True when `object` is an expression-defined function (has an own `syntax` string). */
 function isExpressionDefinedFunction(object: unknown): boolean {
   return (
     typeof object === 'function' &&
@@ -146,6 +140,13 @@ function isExpressionDefinedFunction(object: unknown): boolean {
   );
 }
 
+/**
+ * Check whether a method is safe.
+ * Throws an error when that's not the case (for example for `constructor`).
+ * @param {Object} object
+ * @param {string} method
+ * @return {boolean} Returns true when safe, false otherwise
+ */
 function isSafeMethod(object: unknown, method: unknown): boolean {
   // User-defined expression functions expose toString/valueOf like mathjs (#1580).
   if (

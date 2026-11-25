@@ -247,6 +247,9 @@ export function wireMathjsInstanceApi(
    * the typed-API hardening for that call.
    */
   function policyOptions(options?: CompatEvaluateOptions): PhysicsEvaluateOptions | undefined {
+    if (options?.safe === true && options?.unsafe === true) {
+      throw new TypeError('Pass either `{ safe: true }` or `{ unsafe: true }`, not both');
+    }
     if (options?.safe === true) {
       const { safe: _safe, ...rest } = options;
       return rest;
