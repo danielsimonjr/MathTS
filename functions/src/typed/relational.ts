@@ -36,7 +36,7 @@ import {
 } from '@danielsimonjr/mathts-core';
 import { isDenseMatrix, isSparseMatrix } from '../utils/is.js';
 import { nearlyEqual } from '../utils/number.js';
-import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
+import { collectionBinaryRows, unitSiValue, unitsEqual } from './collection-binary.js';
 
 // =============================================================================
 // Internal helpers
@@ -355,7 +355,7 @@ function _compareNatural(x: unknown, y: unknown): number {
   if (typeX === 'Unit') {
     const left = x as Unit;
     const right = y as Unit;
-    if (left.equalBase(right)) return _compareNatural(left.value, right.value);
+    if (left.equalBase(right)) return _compareNatural(unitSiValue(left), unitSiValue(right));
     return compareArrays(_compareNatural, [...left.formatUnits()], [...right.formatUnits()]);
   }
 
@@ -456,7 +456,7 @@ export const compareUnits = mathTyped('compareUnits', {
       throw new Error('Cannot compare units with different bases');
     }
 
-    return _compareNatural(ux.value, uy.value);
+    return _compareNatural(unitSiValue(ux), unitSiValue(uy));
   },
 });
 

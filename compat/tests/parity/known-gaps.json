@@ -5054,8 +5054,6 @@
     "{\"number\":\"BigNumber\"} 5 * 4 * 3 * 2 * 1",
     "{\"number\":\"BigNumber\"} 5 inch to cm",
     "{\"number\":\"BigNumber\"} 5!",
-    "{\"number\":\"BigNumber\"} 50cm != 0.5m",
-    "{\"number\":\"BigNumber\"} 50cm == 0.5m",
     "{\"number\":\"BigNumber\"} A = [1, 2, 3; -1, 2, 3; 2, 0, 3]",
     "{\"number\":\"BigNumber\"} A = [1, 2, 3; 4, 5, 6]",
     "{\"number\":\"BigNumber\"} A = [1, 2, 4, 7, 0]",
