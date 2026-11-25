@@ -42,6 +42,9 @@ const steps = [
   { name: 'format:check (prettier)', args: ['bun', 'run', 'format:check'] },
 ];
 
+/** Gates that were skipped (not run) — must not be reported as passed. @type {string[]} */
+const skippedGates = [];
+
 // The code-docs check shells out to the `repo-tools` global binary (see
 // tools/test/code-docs-gate.json). CI installs it in the Architecture docs job; a machine
 // without it gets a skip with the install hint instead of a confusing ENOENT failure. The
@@ -49,9 +52,11 @@ const steps = [
 if (binaryAvailable('repo-tools')) {
   steps.push({ name: 'code-docs check', args: ['node', 'tools/test/check-code-docs.mjs'] });
 } else {
-  const pin = readFileSync(join(repoRoot, '.github/workflows/ci.yml'), 'utf8').match(
-    /^\s*REPO_TOOLS_VERSION: (\S+)/m
-  )?.[1];
+  skippedGates.push('code-docs check');
+  const ciYml = join(repoRoot, '.github/workflows/ci.yml');
+  const pin = existsSync(ciYml)
+    ? readFileSync(ciYml, 'utf8').match(/^\s*REPO_TOOLS_VERSION: (\S+)/m)?.[1]
+    : undefined;
   console.log(
     'prepush: skipping the code-docs check — the `repo-tools` global binary is not installed.\n' +
       `  CI runs it (Architecture docs job); to run it locally: npm install --global @danielsimonjr/repo-tools@${pin ?? '<version pinned in .github/workflows/ci.yml>'}`
@@ -84,4 +89,10 @@ if (failed) {
   console.error('\nprepush: FAIL — fix the steps above before pushing.');
   process.exit(1);
 }
-console.log('\nprepush: OK — all pre-push gates pass.');
+if (skippedGates.length > 0) {
+  console.log(
+    `\nprepush: OK — executed gates passed; skipped (not run, not counted as pass): ${skippedGates.join(', ')}.`
+  );
+} else {
+  console.log('\nprepush: OK — all pre-push gates pass.');
+}

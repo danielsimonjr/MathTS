@@ -16,20 +16,18 @@
  * 3. The standalone Node test scripts of packages without a vitest config (`assembly`): every
  *    `node <file>` command in its `test` and `test:diff` scripts.
  *
- * The items run CONCURRENTLY, capped by RUN_VITEST_NODE_CONCURRENCY (default 4 — the vCPU
- * count of the GitHub `ubuntu-latest` runner; each capped child keeps vitest's own default
- * worker pool). Coverage job's OOM history (SIGABRT under Turbo at full concurrency) was with
- * coverage instrumentation across every package at once; plain vitest children at 4 are well
- * inside the 16 GB of the runner. Each child's output is captured to a temp file and printed
- * inside its `::group::` when the batch completes, in item order, so the log stays readable.
+ * Items run CONCURRENTLY, capped by RUN_VITEST_NODE_CONCURRENCY (default 4 on CI). Each vitest
+ * child gets `--maxWorkers` / `--minWorkers` so `concurrency × workers ≤ os.availableParallelism()`.
+ * Each child's output is captured to a temp file and printed inside its `::group::` when the
+ * batch completes, in item order, with stdout drain so CI pipes never truncate the summary.
  *
- * The script refuses to run under Bun. It exits 1 when any step fails, and it prints one summary
- * line per step. Prerequisite: `bun run build:wasm && bun run build`.
+ * Prerequisite: `bun run build:wasm && bun run build`.
  */
 import { spawn } from 'node:child_process';
 import { closeSync, existsSync, mkdtempSync, openSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { availableParallelism, tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { performance } from 'node:perf_hooks';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 
 if (typeof globalThis.Bun !== 'undefined') {
@@ -43,10 +41,35 @@ const concurrency = Math.max(
   1,
   Number.parseInt(process.env.RUN_VITEST_NODE_CONCURRENCY ?? '', 10) || 4
 );
+const machineCpus = availableParallelism();
+const vitestWorkersPerItem = Math.max(1, Math.floor(machineCpus / concurrency));
+
+/**
+ * Vitest worker flags so total worker slots stay within machine parallelism.
+ * @returns {string[]}
+ */
+function vitestWorkerArgs() {
+  const w = String(vitestWorkersPerItem);
+  return [`--maxWorkers=${w}`, `--minWorkers=${w}`];
+}
+
+/**
+ * Writes to stdout and waits for drain when the pipe buffer is full (CI captures stdout).
+ * @param {string} text
+ * @returns {Promise<void>}
+ */
+function writeStdout(text) {
+  if (!text) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const ok = process.stdout.write(text, (err) => (err ? reject(err) : undefined));
+    if (ok) resolve();
+    else process.stdout.once('drain', resolve);
+  });
+}
 
 /**
  * One unit of work: a command run with the current Node binary in a working directory.
- * @typedef {{ label: string, cwd: string, args: string[] }} Item
+ * @typedef {{ label: string, cwd: string, args: string[], isVitest: boolean }} Item
  */
 
 /**
@@ -54,6 +77,7 @@ const concurrency = Math.max(
  * @returns {Item[]}
  */
 function collectItems() {
+  const workerFlags = vitestWorkerArgs();
   /** @type {Item[]} */
   const items = [];
   for (const dir of workspaceDirs()) {
@@ -64,11 +88,17 @@ function collectItems() {
           items.push({
             label: `vitest ${dir} (shard ${shard}/${FUNCTION_SHARDS})`,
             cwd,
-            args: [vitestBin, 'run', `--shard=${shard}/${FUNCTION_SHARDS}`],
+            args: [vitestBin, 'run', `--shard=${shard}/${FUNCTION_SHARDS}`, ...workerFlags],
+            isVitest: true,
           });
         }
       } else {
-        items.push({ label: `vitest ${dir}`, cwd, args: [vitestBin, 'run'] });
+        items.push({
+          label: `vitest ${dir}`,
+          cwd,
+          args: [vitestBin, 'run', ...workerFlags],
+          isVitest: true,
+        });
       }
       continue;
     }
@@ -79,15 +109,28 @@ function collectItems() {
       .filter((part) => /^node \S+$/.test(part))
       .map((part) => part.slice('node '.length));
     if (nodeFiles.length === 0) {
-      items.push({ label: `${dir}: no vitest config and no node test scripts`, cwd, args: [] });
+      items.push({
+        label: `${dir}: no vitest config and no node test scripts`,
+        cwd,
+        args: [],
+        isVitest: false,
+      });
       continue;
     }
-    for (const file of nodeFiles) items.push({ label: `node ${dir}/${file}`, cwd, args: [file] });
+    for (const file of nodeFiles) {
+      items.push({
+        label: `node ${dir}/${file}`,
+        cwd,
+        args: [file],
+        isVitest: false,
+      });
+    }
   }
   items.push({
     label: 'vitest root (tests/integration, tests/wasm)',
     cwd: repoRoot,
-    args: [vitestBin, 'run'],
+    args: [vitestBin, 'run', ...workerFlags],
+    isVitest: true,
   });
   return items;
 }
@@ -96,56 +139,82 @@ function collectItems() {
  * Runs one item, capturing its output to a file.
  * @param {Item} item
  * @param {string} logPath where the child's stdout+stderr is captured
- * @returns {Promise<number | string>} exit code, or the spawn-error message
+ * @returns {Promise<{ status: number | string, durationMs: number }>}
  */
 async function runItem(item, logPath) {
-  if (item.args.length === 0) return 'no test command'; // matches the old `status: 'none'` failure
+  if (item.args.length === 0) {
+    return { status: 'no test command', durationMs: 0 };
+  }
+  const started = performance.now();
   const out = openSync(logPath, 'w');
   try {
     const child = spawn(process.execPath, item.args, {
       cwd: item.cwd,
       stdio: ['ignore', out, out],
     });
-    return await new Promise((resolve) => {
+    const status = await new Promise((resolve) => {
       child.on('error', (err) => resolve(`spawn error: ${err.message}`));
       child.on('close', (code) => resolve(code));
     });
+    return { status, durationMs: performance.now() - started };
   } finally {
     closeSync(out);
   }
 }
 
+/** @param {number} ms */
+function formatDuration(ms) {
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
 console.log(
-  `[runtime-probe] runner process.version=${process.version} typeof Bun=${typeof globalThis.Bun}`
+  `[runtime-probe] runner process.version=${process.version} typeof Bun=${typeof globalThis.Bun} ` +
+    `cpus=${machineCpus} concurrency=${concurrency} vitestWorkersPerItem=${vitestWorkersPerItem}`
 );
 
 const items = collectItems();
 const tempDir = mkdtempSync(join(tmpdir(), 'run-vitest-node-'));
-/** @type {{ label: string, ok: boolean, status: number | string }[]} */
+/** @type {{ label: string, ok: boolean, status: number | string, durationMs: number }[]} */
 const results = new Array(items.length);
 let next = 0;
 
 async function worker() {
   while (next < items.length) {
     const i = next++;
-    const status = await runItem(items[i], join(tempDir, `item-${i}.log`));
-    results[i] = { label: items[i].label, ok: status === 0, status };
+    const { status, durationMs } = await runItem(items[i], join(tempDir, `item-${i}.log`));
+    results[i] = { label: items[i].label, ok: status === 0, status, durationMs };
   }
 }
 
 await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
 
-// Print every item's captured output inside its own group, in item order.
 for (let i = 0; i < items.length; i++) {
-  console.log(`\n::group::${items[i].label} (node ${process.version})`);
-  process.stdout.write(readFileSync(join(tempDir, `item-${i}.log`), 'utf8'));
-  console.log('::endgroup::');
+  await writeStdout(`\n::group::${items[i].label} (node ${process.version})\n`);
+  const body = readFileSync(join(tempDir, `item-${i}.log`), 'utf8');
+  await writeStdout(body);
+  if (!body.endsWith('\n')) await writeStdout('\n');
+  await writeStdout('::endgroup::\n');
 }
 rmSync(tempDir, { recursive: true, force: true });
 
-console.log(`\nrun-vitest-node summary (node ${process.version}):`);
-for (const r of results)
-  console.log(`  ${r.ok ? 'ok  ' : 'FAIL'} ${r.label}${r.ok ? '' : ` (exit ${r.status})`}`);
 const failed = results.filter((r) => !r.ok).length;
-console.log(`run-vitest-node: ${results.length - failed} passed, ${failed} failed`);
-process.exit(failed > 0 ? 1 : 0);
+const totalMs = results.reduce((sum, r) => sum + r.durationMs, 0);
+
+await writeStdout(`\nrun-vitest-node summary (node ${process.version}, wall ${formatDuration(totalMs)}):\n`);
+const labelWidth = Math.max(...results.map((r) => r.label.length), 'label'.length);
+await writeStdout(`${'status'.padEnd(6)} ${'time'.padStart(8)}  ${'item'.padEnd(labelWidth)}\n`);
+await writeStdout(`${'-'.repeat(6)} ${'-'.repeat(8)}  ${'-'.repeat(labelWidth)}\n`);
+for (const r of results) {
+  const status = r.ok ? 'ok' : 'FAIL';
+  const suffix = r.ok ? '' : ` (exit ${r.status})`;
+  await writeStdout(
+    `${status.padEnd(6)} ${formatDuration(r.durationMs).padStart(8)}  ${r.label}${suffix}\n`
+  );
+}
+for (const r of results) {
+  await writeStdout(`  ${r.ok ? 'ok  ' : 'FAIL'} ${r.label}${r.ok ? '' : ` (exit ${r.status})`}\n`);
+}
+await writeStdout(`run-vitest-node: ${results.length - failed} passed, ${failed} failed\n`);
+
+process.exitCode = failed > 0 ? 1 : 0;
