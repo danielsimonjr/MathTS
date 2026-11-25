@@ -18,6 +18,10 @@
     {
       "file": "compat/tests/parity/full-surface.test.ts",
       "testNamePattern": "embedded-docs|intentional divergences"
+    },
+    {
+      "file": "compat/tests/parity/adversarial-g19.test.ts",
+      "testNamePattern": "F4:"
     }
   ],
   "nodeTest": ["tools/test/sync-readme-functions-stats.test.mjs"],
