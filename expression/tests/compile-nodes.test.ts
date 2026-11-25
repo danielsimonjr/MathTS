@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { compile as compileNode } from '../src/compiler/compile.js';
-import { ResultSet } from '../src/default-math-scope.js';
 import type { MathNode } from '../src/node/Node.js';
 
 /**
@@ -210,45 +209,25 @@ describe('compile - AssignmentNode (property target)', () => {
 
 // ── BlockNode ────────────────────────────────────────────────────────────────
 describe('compile - BlockNode (visibility)', () => {
-  // #1556: every block now returns a ResultSet built from the scope's
-  // constructor, so these expectations read `.entries` instead of the raw value.
-  it('returns the single visible result in a ResultSet', () => {
+  it('returns the single visible result', () => {
     const node = blockNode([
       { node: constantNode(1), visible: false },
       { node: constantNode(2), visible: true },
     ]);
-    const result = compileNode(node as unknown as Parameters<typeof compileNode>[0], {
-      ...mathScope,
-      ResultSet,
-    }) as unknown as {
-      evaluate(): { entries: unknown[] };
-    };
-    expect(result.evaluate().entries).toEqual([2]);
+    expect(compile(node, mathScope).evaluate()).toBe(2);
   });
 
-  it('returns the visible results in a ResultSet', () => {
+  it('returns an array when multiple results are visible', () => {
     const node = blockNode([
       { node: constantNode(1), visible: true },
       { node: constantNode(2), visible: true },
     ]);
-    const result = compileNode(node as unknown as Parameters<typeof compileNode>[0], {
-      ...mathScope,
-      ResultSet,
-    }) as unknown as {
-      evaluate(): { entries: unknown[] };
-    };
-    expect(result.evaluate().entries).toEqual([1, 2]);
+    expect(compile(node, mathScope).evaluate()).toEqual([1, 2]);
   });
 
-  it('returns an empty ResultSet when no result is visible', () => {
+  it('returns undefined when no result is visible', () => {
     const node = blockNode([{ node: constantNode(1), visible: false }]);
-    const result = compileNode(node as unknown as Parameters<typeof compileNode>[0], {
-      ...mathScope,
-      ResultSet,
-    }) as unknown as {
-      evaluate(): { entries: unknown[] };
-    };
-    expect(result.evaluate().entries).toEqual([]);
+    expect(compile(node, mathScope).evaluate()).toBeUndefined();
   });
 });
 

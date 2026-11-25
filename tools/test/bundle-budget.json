@@ -5,7 +5,6 @@
     "ratio": 0.01
   },
   "files": {
-    "packages/typed-function/dist/index.js": 4566,
     "packages/typed-function/package.json": 2215,
     "packages/workerpool/dist/index.js": 58963,
     "packages/workerpool/dist/worker.js": 26149,
@@ -16,58 +15,39 @@
     "matrix/dist/index.js": 242144,
     "matrix/package.json": 2569,
     "matrix/dist/wasm/mathts-as.wasm": 69718,
-    "tensor/dist/index.js": 88576,
     "tensor/package.json": 2215,
-    "autograd/dist/index.js": 74477,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2360858,
-    "functions/dist/subpath-evaluate.js": 1585044,
+    "functions/dist/index.js": 2361286,
+    "functions/dist/subpath-evaluate.js": 1585472,
     "functions/package.json": 3741,
     "functions/dist/wasm/mathts-as.wasm": 69718,
-    "expression/dist/index.js": 370641,
+    "expression/dist/index.js": 372889,
     "expression/package.json": 2208,
-    "parser/dist/index.js": 541,
     "parser/package.json": 2382,
-    "units/dist/index.js": 1009,
     "units/package.json": 2229,
-    "numbers/dist/index.js": 422,
     "numbers/package.json": 2198,
-    "ast/dist/index.js": 401,
     "ast/package.json": 2347,
-    "evaluator/dist/index.js": 173,
     "evaluator/package.json": 2240,
-    "linalg/dist/index.js": 389,
     "linalg/package.json": 2316,
-    "arithmetic/dist/index.js": 410,
     "arithmetic/package.json": 2162,
-    "trigonometry/dist/index.js": 226,
     "trigonometry/package.json": 2162,
-    "statistics/dist/index.js": 2552,
     "statistics/package.json": 2468,
-    "signal/dist/index.js": 560,
     "signal/package.json": 2156,
     "parallel/dist/index.js": 51519,
     "parallel/package.json": 2283,
-    "workbook/dist/index.js": 49937,
     "workbook/package.json": 2123,
     "assembly/build/mathts.js": 96584,
     "assembly/build/mathts.wasm": 69718,
     "assembly/build/mathts-debug.wasm": 133381,
     "assembly/build/mathts-debug.js": 103537,
     "assembly/package.json": 2903,
-    "compat/dist/index.js": 188718,
+    "compat/dist/index.js": 188969,
     "compat/package.json": 2327,
     "gpu/dist/index.js": 18275,
     "gpu/package.json": 2189,
-    "plot/dist/index.js": 38126,
-    "plot/dist/render-file.js": 6475,
     "plot/package.json": 2499
   },
   "entries": {
-    "packages/typed-function/dist/index.js": {
-      "export": "NoMatchingSignatureError",
-      "treeShake": true
-    },
     "packages/workerpool/dist/index.js": {
       "export": "MathWorkerPool",
       "treeShake": false
@@ -86,14 +66,6 @@
       "export": "BackendManager",
       "treeShake": true
     },
-    "tensor/dist/index.js": {
-      "export": "Index",
-      "treeShake": true
-    },
-    "autograd/dist/index.js": {
-      "export": "DualTensor",
-      "treeShake": true
-    },
     "functions/dist/index.js": {
       "export": "Chain",
       "treeShake": true
@@ -106,52 +78,8 @@
       "export": "ScalarBuildError",
       "treeShake": true
     },
-    "parser/dist/index.js": {
-      "export": "createAccessorNode",
-      "treeShake": true
-    },
-    "units/dist/index.js": {
-      "export": "DimensionMismatchError",
-      "treeShake": true
-    },
-    "numbers/dist/index.js": {
-      "export": "BigNumber",
-      "treeShake": true
-    },
-    "ast/dist/index.js": {
-      "export": "createAccessorNode",
-      "treeShake": true
-    },
-    "evaluator/dist/index.js": {
-      "export": "compile",
-      "treeShake": true
-    },
-    "linalg/dist/index.js": {
-      "export": "DenseMatrix",
-      "treeShake": true
-    },
-    "arithmetic/dist/index.js": {
-      "export": "abs",
-      "treeShake": true
-    },
-    "trigonometry/dist/index.js": {
-      "export": "acos",
-      "treeShake": true
-    },
-    "statistics/dist/index.js": {
-      "export": "acf",
-      "treeShake": true
-    },
-    "signal/dist/index.js": {
-      "export": "autoCorrelation",
-      "treeShake": true
-    },
     "parallel/dist/index.js": {
       "export": "ComputePool",
-      "treeShake": true
-    },
-    "workbook/dist/index.js": {
-      "export": "Session",
       "treeShake": true
     },
     "assembly/build/mathts.js": {
@@ -169,14 +97,6 @@
     "gpu/dist/index.js": {
       "export": "BufferPool",
       "treeShake": true
-    },
-    "plot/dist/index.js": {
-      "export": "area",
-      "treeShake": true
-    },
-    "plot/dist/render-file.js": {
-      "export": "PlotRenderError",
-      "treeShake": true
     }
   },
   "bundles": [
@@ -184,37 +104,37 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1523534
+      "bytes": 1524610
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1523580
+      "bytes": 1524656
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1531861
+      "bytes": 1532937
     },
     {
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "bytes": 277611
+      "bytes": 278510
     },
     {
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 2038526
+      "bytes": 2039718
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 2047845
+      "bytes": 2049037
     }
   ]
 }

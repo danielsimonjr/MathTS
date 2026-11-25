@@ -1,7 +1,7 @@
 ---
 '@danielsimonjr/mathts-compat': minor
-'@danielsimonjr/mathts-expression': minor
-'@danielsimonjr/mathts-functions': minor
+'@danielsimonjr/mathts-expression': patch
+'@danielsimonjr/mathts-functions': patch
 ---
 
-Compat `create(all)` follows the mathjs expression policy by default (#1549, #1556, #1562, #1576, #1580): `evaluate` / `compile` / `parser` allow assignment, function definitions, in-expression `simplify`/`derivative`/`parse`/`evaluate`/`compile`/`parser`/`help`/`config`, node methods, and `ResultSet` block results; functions defined in expressions carry their declared name. Pass `{ safe: true }` to opt back into the typed-API sandbox. The typed `evaluate` / `compileExpr` / `parser` stay safe by default and keep `{ unsafe: true }` as their opt-out. BREAKING: compat `evaluate`/`parser`/`compile` no longer throw `Security:` by default, and multi-statement blocks return a `ResultSet` on both compat and typed `evaluate`. `range` can no longer allocate without bound when the step direction is misread (a guard against the #1551 sign-test defect).
+Compat `create(all)` matches mathjs **15.3.0** expression behavior by default (#1549, #1556, #1562, #1576, #1580): assignment, in-expression `help` / `config` / `parse` / `evaluate` / `compile` / `parser`, and `ResultSet` block results. Pass `{ safe: true }` on compat `evaluate` / `compile` / `parser` to opt back into the MathTS sandbox. Native `@danielsimonjr/mathts-expression` and `evaluate` from `@danielsimonjr/mathts-functions` stay safe by default (`{ unsafe: true }` opt-out); block statements keep native return semantics (ResultSet is enabled only when `compatBlockResultSet` is in the math scope). Expression assignment compilation fixes index/property scope-binding bugs (security). `createInstanceEvaluator` accepts optional compat-only unsafe-scope bindings without changing default native evaluate.

@@ -110,11 +110,7 @@ describe('G22 dogfood — expression lexer, sandbox, overflow', () => {
   it('#725 assignment requires unsafe; default evaluate rejects', () => {
     expect(parse('f(x) = x^2').toTex()).toContain('x');
     expect(() => evaluate('f(x)=x^2; f(3)')).toThrow(/disabled.*unsafe: true/);
-    // #1556: block results are ResultSets on the typed API too.
-    const block = evaluate('f(x)=x^2; f(3)', {}, { unsafe: true }) as unknown as {
-      entries: unknown[];
-    };
-    expect(block.entries).toEqual([9]);
+    expect(evaluate('f(x)=x^2; f(3)', {}, { unsafe: true })).toBe(9);
   });
 
   it('#793 and #725 expression README sample imports parse and documents unsafe', () => {

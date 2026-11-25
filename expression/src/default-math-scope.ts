@@ -276,8 +276,6 @@ export function getDefaultMathScope(): Record<string, unknown> {
   // see the symbols deleted above. Arrays only: the default scope has no matrix.
   scope.map = createCallbackTransform('map', false);
   scope.filter = createCallbackTransform('filter', true);
-  // Every block result is a ResultSet (#1556); the scope carries the constructor.
-  scope.ResultSet = ResultSet;
   boundMathScope = scope;
   return scope;
 }

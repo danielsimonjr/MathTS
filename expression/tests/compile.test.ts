@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { compile } from '../src/compiler/compile.js';
-import { ResultSet } from '../src/default-math-scope.js';
 import type { MathNode } from '../src/node/Node.js';
 
 /**
@@ -360,26 +359,19 @@ describe('compile - AssignmentNode', () => {
 });
 
 describe('compile - BlockNode', () => {
-  // #1556: every block returns a ResultSet built from the scope's constructor.
-  it('should evaluate a single visible block into a ResultSet', () => {
+  it('should evaluate a single visible block', () => {
     const node = blockNode([{ node: constantNode(42), visible: true }]);
-    const result = compile(node, { ...mathScope, ResultSet }) as unknown as {
-      evaluate(): { entries: unknown[] };
-    };
-    expect(result.evaluate().entries).toEqual([42]);
+    expect(compile(node, mathScope).evaluate()).toBe(42);
   });
 
-  it('should return only visible results in a ResultSet', () => {
+  it('should return only visible results', () => {
     const node = blockNode([
       { node: assignmentNode('x', constantNode(5)), visible: false },
       { node: operatorNode('+', 'add', [symbolNode('x'), constantNode(3)]), visible: true },
     ]);
-    // The assignment is not visible, so only the second result is in the ResultSet
+    // The assignment is not visible, so only the second result is returned
     const scope = { x: 5 }; // pre-set x since our simple assign might not propagate through the Map
-    const result = compile(node, { ...mathScope, ResultSet }) as unknown as {
-      evaluate(s: unknown): { entries: unknown[] };
-    };
-    expect(result.evaluate(scope).entries).toEqual([8]);
+    expect(compile(node, mathScope).evaluate(scope)).toBe(8);
   });
 });
 

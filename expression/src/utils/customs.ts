@@ -68,6 +68,10 @@ function getSafeProperty(object: unknown, prop: unknown): unknown {
  */
 // TODO: merge this function into access.js?
 function setSafeProperty(object: unknown, prop: unknown, value: unknown): unknown {
+  // mathjs blocks assigning to `length` on arrays (sandbox parity).
+  if (Array.isArray(object) && prop === 'length') {
+    throw new Error('No access to property "length"');
+  }
   // only allow setting safe properties of a plain object
   if (isSafeProperty(object, prop)) {
     (object as Record<string, unknown>)[prop as string] = value;
@@ -134,7 +138,23 @@ function getSafeMethod(object: unknown, method: unknown): unknown {
  * @param {string} method
  * @return {boolean} Returns true when safe, false otherwise
  */
+function isExpressionDefinedFunction(object: unknown): boolean {
+  return (
+    typeof object === 'function' &&
+    typeof (object as { syntax?: unknown }).syntax === 'string' &&
+    Object.prototype.hasOwnProperty.call(object, 'syntax')
+  );
+}
+
 function isSafeMethod(object: unknown, method: unknown): boolean {
+  // User-defined expression functions expose toString/valueOf like mathjs (#1580).
+  if (
+    isExpressionDefinedFunction(object) &&
+    method === 'toString' &&
+    typeof (object as { toString?: unknown }).toString === 'function'
+  ) {
+    return true;
+  }
   // AST nodes expose their evaluate/compile/render methods to expressions that
   // created them (mathjs parity, #1549); every other host object stays locked.
   if (

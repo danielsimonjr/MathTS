@@ -13,9 +13,6 @@ import {
   type createParse,
   compileExpressionWithDeps as _compileExpression,
   EXPRESSION_SCOPE_OMIT,
-  resolveMode,
-  type EvaluateOptions,
-  type EvaluatePolicy,
 } from '@danielsimonjr/mathts-expression';
 import {
   BigNumber,
@@ -43,7 +40,6 @@ interface Scope {
 import { factoryScope } from './scope.js';
 import * as activatedFactories from './index.js';
 import * as typedFns from '../typed/expression-eval-barrel.js';
-import * as helpModule from '../help.js';
 
 /**
  * Symbols that build or evaluate other expressions, or that are the typed-function
@@ -242,41 +238,6 @@ bindNumericConstants(factoryScope.mathWithTransform as Record<string, unknown>);
 const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
 const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint);
 
-// ---------------------------------------------------------------------------
-// Step 3b: mathjs-policy scope bindings (#1549, #1562)
-// ---------------------------------------------------------------------------
-// The mathjs policy (compat `create(all)` default) resolves the names that
-// build or evaluate other expressions. They are bound in the unsafe scope so
-// the safe typed scope never sees them. `config` stays the config object here;
-// compat binds its instance's config function through the imported scope.
-
-/** Compile in the mathjs scope pair: no validator, no result sanitizer. */
-function compileMathjsPolicy(expr: string, options?: PhysicsEvaluateOptions) {
-  return compileInScope(mathScope, unsafeMathScope, expr, { ...options, unsafe: true });
-}
-
-/** Evaluate in the mathjs scope pair: no validator, no result sanitizer. */
-function evaluateMathjsPolicy(
-  exprOrExprs: string | string[],
-  scope?: Record<string, unknown> | Scope,
-  options?: PhysicsEvaluateOptions
-): unknown {
-  return runEvaluate(_evaluate, _evaluateUnsafe, exprOrExprs, scope, {
-    ...options,
-    unsafe: true,
-  });
-}
-
-const mathjsPolicyScopeBindings: Record<string, unknown> = {
-  help: (search: unknown): unknown => helpModule.help(search),
-  parser: (options?: PhysicsEvaluateOptions) => parser(options),
-  compile: compileMathjsPolicy,
-  evaluate: evaluateMathjsPolicy,
-};
-for (const [key, value] of Object.entries(mathjsPolicyScopeBindings)) {
-  unsafeMathScope[key] = value;
-}
-
 type EvaluateRunner = ReturnType<typeof createEvaluate>;
 type ExpressionScope = Parameters<typeof _compileExpression>[1];
 
@@ -293,18 +254,8 @@ function runEvaluate(
 ): unknown {
   const physics = assertPhysicsOptions(options);
   const bound = physics === undefined ? scope : physicsScope(scope, physics);
-  resolveMode(options);
-  const mathjsPolicy = options?.policy === 'mathjs' && options?.safe !== true;
-  const unsafeRunnerSelected = options?.unsafe === true || mathjsPolicy;
-  const inner: EvaluateOptions | undefined =
-    options?.safe === true
-      ? { safe: true }
-      : options?.unsafe === true
-        ? { unsafe: true }
-        : mathjsPolicy
-          ? { policy: 'mathjs' }
-          : undefined;
-  const runner = unsafeRunnerSelected ? unsafeRunner : safeRunner;
+  const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
+  const runner = options?.unsafe === true ? unsafeRunner : safeRunner;
   if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
   return runner(exprOrExprs, bound, inner);
 }
@@ -320,14 +271,11 @@ function compileInScope(
   options: PhysicsEvaluateOptions | undefined,
   parseExpression: typeof parse = parse
 ) {
-  const mathjsPolicy = options?.policy === 'mathjs' && options?.safe !== true;
-  resolveMode(options);
-  const useUnsafe = options?.unsafe === true || mathjsPolicy;
   const compiled = _compileExpression(
     parseExpression,
-    useUnsafe ? unsafeScope : safeScope,
+    options?.unsafe === true ? unsafeScope : safeScope,
     expr,
-    options
+    options?.unsafe === true ? { unsafe: true } : undefined
   );
   const physics = assertPhysicsOptions(options);
   if (physics === undefined) return compiled;
@@ -366,19 +314,6 @@ export interface PhysicsEvaluateOptions {
    * Only opt out when the host is providing trusted, hand-authored input.
    */
   unsafe?: boolean;
-  /**
-   * When `true`, forces the safe policy on a runner that would otherwise run
-   * the mathjs policy. Passing this together with `unsafe: true` throws a
-   * `TypeError` before the expression is parsed.
-   */
-  safe?: boolean;
-  /**
-   * `'mathjs'` runs the mathjs policy: no AST validator, no result sanitizer,
-   * and a scope that exposes the expression-building names (`simplify`,
-   * `derivative`, `evaluate`, …). This is what compat `create(all)` uses by
-   * default; the typed surface stays safe unless a caller passes it.
-   */
-  policy?: EvaluatePolicy;
   /**
    * Opt-in physics constant bindings (CODATA units on `e0`, `G`, `c`, `hbar`, …).
    *
@@ -735,7 +670,12 @@ export function createInstanceEvaluator(
   matrixLiterals = false,
   constants: Readonly<Record<string, () => unknown>> = {},
   mathjsSyntax = false,
-  decimalLiteral?: (value: unknown) => unknown
+  decimalLiteral?: (value: unknown) => unknown,
+  /**
+   * Optional expression-only names for the unsafe scope (compat `create(all)`).
+   * Ignored unless the caller passes them; native evaluate is unchanged.
+   */
+  expressionUnsafeBindings?: Record<string, unknown>
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
@@ -744,6 +684,13 @@ export function createInstanceEvaluator(
   const hidden: ReadonlySet<string> = new Set(hiddenNames);
   const safeScope = buildScopedMathNamespace(importedExpressionScope, hidden);
   const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope, hidden);
+  if (expressionUnsafeBindings) {
+    for (const [key, value] of Object.entries(expressionUnsafeBindings)) {
+      if (EVALUATE_SCOPE_OMIT.has(key) && !hidden.has(key)) {
+        unsafeScope[key] = value;
+      }
+    }
+  }
   // Node.compile uses the factory transforms (including one-based indexing).
   // Overlay the same instance bindings without replacing its other operators.
   const parseScope = omitEvaluateInternals({

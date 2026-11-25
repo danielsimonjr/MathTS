@@ -1169,23 +1169,18 @@
   "1551": [
     "isNegative: mathjs rejects 2 argument(s) on the pool",
     "isPositive: mathjs rejects 2 argument(s) on the pool",
-    "{} isInteger(2)",
     "{} isInteger([3, 0.5, -2])",
-    "{} isNegative(-4)",
     "{} isNegative([3, 0.5, -2])",
-    "{} isPositive(2)",
     "{} isPositive([3, 0.5, -2])",
     "{\"number\":\"BigNumber\"} isInteger(2)",
     "{\"number\":\"BigNumber\"} isInteger([3, 0.5, -2])",
     "{\"number\":\"BigNumber\"} isNegative(-4)",
     "{\"number\":\"BigNumber\"} isNegative([3, 0.5, -2])",
-    "{\"number\":\"BigNumber\"} isPositive(2)",
     "{\"number\":\"BigNumber\"} isPositive([3, 0.5, -2])",
     "{\"matrix\":\"Array\"} isInteger(2)",
     "{\"matrix\":\"Array\"} isInteger([3, 0.5, -2])",
     "{\"matrix\":\"Array\"} isNegative(-4)",
     "{\"matrix\":\"Array\"} isNegative([3, 0.5, -2])",
-    "{\"matrix\":\"Array\"} isPositive(2)",
     "{\"matrix\":\"Array\"} isPositive([3, 0.5, -2])"
   ],
   "1552": [
@@ -1271,8 +1266,6 @@
     "unequal: (Unit 5 cm, number 2)",
     "unequal: (Unit 5 cm, number 2.5)",
     "unequal: (Unit 5 cm, number 3)",
-    "{} 50cm == 0.5m",
-    "{} 50cm != 0.5m",
     "{\"matrix\":\"Array\"} 50cm == 0.5m",
     "{\"matrix\":\"Array\"} 50cm != 0.5m"
   ],
@@ -1397,6 +1390,11 @@
     "compare: (SparseMatrix Sparse Matrix [1 x 2] density: 0.5\n\n    (0, 1) ==> 1, number 3)",
     "pinv: mathjs rejects 2 argument(s) on the pool",
     "unaryPlus: mathjs rejects 2 argument(s) on the pool"
+  ],
+  "1557": [
+    "{} f[[1,2], [1,3]] = [9, 10; 11, 12]",
+    "{\"number\":\"BigNumber\"} f[[1,2], [1,3]] = [9, 10; 11, 12]",
+    "{\"matrix\":\"Array\"} f[[1,2], [1,3]] = [9, 10; 11, 12]"
   ],
   "1558": [
     "acoth: mathjs rejects 2 argument(s) on the pool",
@@ -5538,16 +5536,6 @@
     "{} zeta(4)",
     "{} zpk2tf([1 - 3i, 2 + 2i], [-1, -2])",
     "{} zpk2tf([1, 2], [-1, -2])",
-    "{} zpk2tf([1, 2], [-1, -2], 1)",
-    "{} rotationMatrix(1, matrix([0, 0, 1]), \"sparse\")",
-    "{\"matrix\":\"Array\"} rotationMatrix(1, matrix([0, 0, 1]), \"sparse\")"
-  ],
-  "1557": [
-    "{} f = d * e",
-    "{} f[[1,2], [1,3]] = [9, 10; 11, 12]",
-    "{\"number\":\"BigNumber\"} f = d * e",
-    "{\"number\":\"BigNumber\"} f[[1,2], [1,3]] = [9, 10; 11, 12]",
-    "{\"matrix\":\"Array\"} f = d * e",
-    "{\"matrix\":\"Array\"} f[[1,2], [1,3]] = [9, 10; 11, 12]"
+    "{} zpk2tf([1, 2], [-1, -2], 1)"
   ]
 }
