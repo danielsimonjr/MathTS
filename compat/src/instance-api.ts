@@ -16,7 +16,11 @@ import {
 } from '@danielsimonjr/mathts-functions';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
-import { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+import {
+  compatReplacer as replacer,
+  compatReviver as reviver,
+  reviveInstanceValue,
+} from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
 
 type MathNamespace = Parameters<typeof importFactory>[2];
@@ -259,7 +263,8 @@ export function wireMathjsInstanceApi(
 
   instance.import = mathImport;
   instance.typed = instanceTyped;
-  instance.reviver = reviver;
+  instance.reviver = (key: string, value: unknown) =>
+    reviveInstanceValue(key, value, instance.Unit as typeof factory_mathjsCompat.constructors.Unit);
   instance.replacer = replacer;
 
   const initialEvaluator = rebindEvaluator();

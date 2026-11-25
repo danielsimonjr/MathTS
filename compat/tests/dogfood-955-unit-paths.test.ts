@@ -33,3 +33,15 @@ describe('mathjs unit normalization and formatting', () => {
     }
   });
 });
+
+it('keeps custom unit names local to the instance that registered them', () => {
+  const first = compat.create(compat.all);
+  const sibling = first.create();
+  first.createUnit('customParityLength', '2 m');
+  expect(first.unit(3, 'customParityLength').toNumber('m')).toBe(6);
+  expect(String(first.evaluate('3 customParityLength to m'))).toBe('6 m');
+  expect(() => sibling.unit(1, 'customParityLength')).toThrow();
+  const json = JSON.stringify(first.unit(2, 'customParityLength'));
+  expect(JSON.parse(json, first.reviver).toNumber('m')).toBe(4);
+  expect(() => JSON.parse(json, sibling.reviver)).toThrow();
+});

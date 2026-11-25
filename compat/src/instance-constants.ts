@@ -31,18 +31,6 @@ export type CompatConstantName =
   keyof typeof mathConstants | keyof typeof scalarConstants | 'Infinity' | 'NaN';
 
 const Unit = factory_mathjsCompat.constructors.Unit;
-const unitTemplates = new Map<string, InstanceType<typeof Unit>>();
-
-function cloneUnit(name: string, value: number, units: string): InstanceType<typeof Unit> {
-  let template = unitTemplates.get(name);
-  if (template === undefined) {
-    template = new Unit(value, units);
-    template.fixPrefix = true;
-    unitTemplates.set(name, template);
-  }
-  return template.clone() as InstanceType<typeof Unit>;
-}
-
 /** Resolve the MathJS numeric value of a constant using the supplied configuration. */
 export function configuredMathjsConstant(
   name: keyof typeof mathConstants | 'Infinity' | 'NaN',
@@ -68,6 +56,7 @@ export function configuredMathjsConstant(
 export function compatConstantReaders(
   surface: Record<string, unknown>,
   config: Parameters<typeof runWithConfig>[0],
+  UnitClass: typeof Unit,
   isDefault: (name: string) => boolean
 ): Record<string, () => unknown> {
   const reads: Record<string, () => unknown> = {};
@@ -99,13 +88,19 @@ export function compatConstantReaders(
     let precise: InstanceType<typeof Unit> | undefined;
     let precision: number | undefined;
     bind(name, () => {
-      if (config.number !== 'BigNumber') return (cached ??= cloneUnit(name, value, units));
+      if (config.number !== 'BigNumber') {
+        if (!cached) {
+          cached = new UnitClass(value, units);
+          cached.fixPrefix = true;
+        }
+        return cached;
+      }
       if (precise === undefined || precision !== config.precision) {
         precise = runWithConfig(config, () => {
           const magnitude = BigNumber.parse(
             decimalValue ?? String(value)
           ) as unknown as ConstructorParameters<typeof Unit>[0];
-          const unit = new Unit(magnitude, units);
+          const unit = new UnitClass(magnitude, units);
           unit.fixPrefix = true;
           return unit;
         });

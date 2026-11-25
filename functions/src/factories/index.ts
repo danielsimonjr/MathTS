@@ -3751,6 +3751,24 @@ export const factory_mathjsCompat = {
   factory,
   attachEmitter,
   configFactory,
+  createCompatUnitSources(config: Parameters<typeof createMathjsUnitClass>[0]['config']) {
+    const listeners: ((current: typeof config, previous: typeof config) => void)[] = [];
+    const Unit = createMathjsUnitClass({
+      ...factoryScope,
+      config,
+      on: (_event: string, callback: (current: typeof config, previous: typeof config) => void) =>
+        listeners.push(callback),
+    });
+    const deps = { typed: factoryScope.typed, Unit };
+    return {
+      Unit,
+      unit: createUnitFunction(deps),
+      createUnit: createCreateUnit(deps),
+      update(current: typeof config, previous: typeof config) {
+        for (const listener of listeners) listener(current, previous);
+      },
+    };
+  },
   createCompatRandomSources,
   createCompatTyped,
   tryCreateFactoryBundle,

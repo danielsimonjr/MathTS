@@ -400,10 +400,18 @@ export function create(
   let configGeneration = 0;
   let decidedGeneration = -1;
   let overlayNeeded = createdWithCustomConfig;
+  const fullBundle =
+    factories === all ||
+    Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
+  const localUnits =
+    config === moduleDefaults || !fullBundle
+      ? undefined
+      : mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig);
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
       configGeneration += 1;
+      localUnits?.update(current, previous);
       if (current.number !== previous.number || current.precision !== previous.precision) {
         for (const [key, read] of Object.entries(constantReaders)) {
           if (!Object.isFrozen(instance)) instance[key] = read();
@@ -441,9 +449,6 @@ export function create(
   }
 
   // Mixed namespaces may extend a spread of all with ordinary functions or values.
-  const fullBundle =
-    factories === all ||
-    Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
   const originalSurface: Record<string, unknown> = fullBundle
     ? {
         ...mathFunctions,
@@ -580,8 +585,8 @@ export function create(
     compareText: namedCompareText,
     equalText: namedEqualText,
     toBest: namedToBest,
-    unit: namedUnit,
-    createUnit: namedCreateUnit,
+    unit: localUnits?.unit ?? namedUnit,
+    createUnit: localUnits?.createUnit ?? namedCreateUnit,
     permutations: namedPermutations,
     lgamma: namedLgamma,
   };
@@ -589,6 +594,7 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   ) as (keyof typeof compatDefaultOverrides)[];
   for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
+  if (localUnits && flat.Unit === instanceSymbols.Unit) flat.Unit = localUnits.Unit;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
   );
@@ -598,6 +604,7 @@ export function create(
   const constantReaders = compatConstantReaders(
     flat,
     currentConfig,
+    localUnits?.Unit ?? instanceSymbols.Unit,
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
