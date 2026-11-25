@@ -4,6 +4,7 @@
  * Docs-only means every changed path is an allowlisted documentation path; anything else
  * (src, tests, tools, .github, lockfiles, tsconfig, bundle locks, assembly, etc.) is code.
  */
+import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 
 /** Basenames (case-sensitive) treated as license / policy docs at any directory depth. */
