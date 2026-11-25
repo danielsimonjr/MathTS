@@ -246,6 +246,12 @@ describe('Unit', () => {
       expect(a.equalBase(b)).toBe(true);
       expect(a.equals(b)).toBe(false);
     });
+
+    it('equals: affine temperatures compare as absolute SI', () => {
+      expect(new Unit(0, 'degC').equals(new Unit(32, 'degF'))).toBe(true);
+      expect(new Unit(0, 'degC').equals(new Unit(273.15, 'K'))).toBe(true);
+      expect(new Unit(0, 'degC').equals(new Unit(0, 'degF'))).toBe(false);
+    });
   });
 
   // -----------------------------------------------------------------------
