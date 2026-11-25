@@ -5,7 +5,6 @@ import type {
   MatrixValue,
   MatrixArray,
   MatrixCallback,
-  EqualScalarFunction,
   TypedFunction,
   SparseMatrixConstructorData,
 } from '../types.js';
@@ -23,15 +22,21 @@ interface SparseMatrix {
   _datatype?: DataType;
   getDataType(): string;
   createSparseMatrix(config: SparseMatrixConstructorData): SparseMatrix;
+  /** The zero value of the matrix's datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero?: MatrixValue;
+  /** The zero test for the matrix's datatype. */
+  isZero(value: MatrixValue): boolean;
+  /** The full typed-function `isZero`, whatever the matrix datatype. */
+  isZero_Full(value: MatrixValue): boolean;
 }
 
 const name = 'matAlgo08xS0Sid';
-const dependencies = ['typed', 'equalScalar'];
+const dependencies = ['typed'];
 
 export const createMatAlgo08xS0Sid = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, equalScalar }: { typed: TypedFunction; equalScalar: EqualScalarFunction }) => {
+  ({ typed }: { typed: TypedFunction }) => {
     /**
      * Iterates over SparseMatrix A and SparseMatrix B nonzero items and invokes the callback function f(Aij, Bij).
      * Callback function invoked MAX(NNZA, NNZB) times
@@ -92,10 +97,8 @@ export const createMatAlgo08xS0Sid = /* #__PURE__ */ factory(
 
       // datatype
       let dt: DataType;
-      // equal signature to use
-      let eq: EqualScalarFunction = equalScalar;
-      // zero value
-      let zero: MatrixValue = 0;
+      // isZero signature to use
+      let isZ: (value: MatrixValue) => boolean = (v) => a.isZero_Full(v);
       // callback signature to use
       let cf: MatrixCallback = callback;
 
@@ -103,12 +106,21 @@ export const createMatAlgo08xS0Sid = /* #__PURE__ */ factory(
       if (typeof adt === 'string' && adt === bdt && adt !== 'mixed') {
         // datatype
         dt = adt;
-        // find signature that matches (dt, dt)
-        eq = typed.find(equalScalar, [dt, dt]) as EqualScalarFunction;
-        // convert 0 to the same datatype
-        zero = typed.convert(0, dt);
-        // callback
-        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
+      }
+      // try to find an isZero signature:
+      if (dt === a._datatype) {
+        isZ = (v) => a.isZero(v);
+      } else if (dt === b._datatype) {
+        isZ = (v) => b.isZero(v);
+      }
+      // try to pin down a callback signature:
+      if (
+        typeof adt === 'string' &&
+        adt !== 'mixed' &&
+        typeof bdt === 'string' &&
+        bdt !== 'mixed'
+      ) {
+        cf = typed.find(callback, [adt, bdt]) as unknown as MatrixCallback;
       }
 
       // result arrays
@@ -160,7 +172,7 @@ export const createMatAlgo08xS0Sid = /* #__PURE__ */ factory(
           // value @ i
           const v: MatrixValue = x[i];
           // check for zero value
-          if (!eq(v, zero)) {
+          if (!isZ(v)) {
             // push value
             cvalues.push(v);
             // increment pointer

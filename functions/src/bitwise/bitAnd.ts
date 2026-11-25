@@ -12,24 +12,21 @@ import type { AlgorithmFunction } from '../type/matrix/types.js';
 interface BitAndDependencies {
   typed: TypedFunction;
   matrix: (data: unknown[]) => unknown;
-  equalScalar: TypedFunction;
-  concat: TypedFunction;
 }
 
 const name = 'bitAnd';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'concat'];
+const dependencies = ['typed', 'matrix'];
 
 export const createBitAnd = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, concat }: BitAndDependencies) => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
-    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+  ({ typed, matrix }: BitAndDependencies) => {
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
+    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

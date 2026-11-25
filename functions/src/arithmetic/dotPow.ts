@@ -3,7 +3,6 @@ import type { TypedFunction } from '../core/function/typed.js';
 import type { AlgorithmFunction, ElementwiseOperation } from '../type/matrix/types.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
 import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
@@ -14,45 +13,27 @@ interface PowFunction extends TypedFunction {
 
 interface DotPowDependencies {
   typed: TypedFunction;
-  equalScalar: TypedFunction;
+
   matrix: TypedFunction;
   pow: PowFunction;
   DenseMatrix: unknown;
-  concat: TypedFunction;
+
   SparseMatrix: unknown;
 }
 
 const name = 'dotPow';
-const dependencies = [
-  'typed',
-  'equalScalar',
-  'matrix',
-  'pow',
-  'DenseMatrix',
-  'concat',
-  'SparseMatrix',
-];
+const dependencies = ['typed', 'matrix', 'pow', 'DenseMatrix', 'SparseMatrix'];
 
 export const createDotPow = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    equalScalar,
-    matrix,
-    pow,
-    DenseMatrix,
-    concat,
-    SparseMatrix,
-  }: DotPowDependencies): TypedFunction => {
+  ({ typed, matrix, pow, DenseMatrix, SparseMatrix }: DotPowDependencies): TypedFunction => {
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     const powScalarSignatures: Record<string, TypedFunction> = {};
@@ -94,7 +75,7 @@ export const createDotPow = /* #__PURE__ */ factory(
         elop: powScalar as unknown as ElementwiseOperation,
         SS: matAlgo07xSSf as unknown as AlgorithmFunction,
         DS: matAlgo03xDSf as unknown as AlgorithmFunction,
-        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
         sS: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
     ) as TypedFunction;

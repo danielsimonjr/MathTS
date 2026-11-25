@@ -17,25 +17,16 @@ interface NodeOperations {
 interface SubtractDependencies {
   typed: TypedFunction;
   matrix: TypedFunction;
-  equalScalar: TypedFunction;
+
   subtractScalar: TypedFunction;
-  unaryMinus: TypedFunction;
+
   DenseMatrix: unknown;
-  concat: TypedFunction;
+
   nodeOperations?: NodeOperations;
 }
 
 const name = 'subtract';
-const dependencies = [
-  'typed',
-  'matrix',
-  'equalScalar',
-  'subtractScalar',
-  'unaryMinus',
-  'DenseMatrix',
-  'concat',
-  'nodeOperations',
-];
+const dependencies = ['typed', 'matrix', 'subtractScalar', 'DenseMatrix'];
 
 /** Native MathTS subtraction, including symbolic and variadic signatures. */
 export const createSubtract = /* #__PURE__ */ factory(name, dependencies, buildSubtract);
@@ -43,28 +34,25 @@ export const createSubtract = /* #__PURE__ */ factory(name, dependencies, buildS
 /** MathJS subtraction with the binary scalar and matrix signatures. */
 export const createMathjsSubtract = /* #__PURE__ */ factory(
   name,
-  ['DenseMatrix', 'concat', 'equalScalar', 'matrix', 'subtractScalar', 'typed', 'unaryMinus'],
+  ['typed', 'matrix', 'subtractScalar', 'DenseMatrix'],
   buildSubtract
 );
 
 function buildSubtract({
   typed,
   matrix,
-  equalScalar,
   subtractScalar,
   DenseMatrix,
-  concat,
   nodeOperations,
 }: SubtractDependencies) {
   const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
   const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
-  const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
+  const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed });
   const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
   const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
   const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
     typed,
     matrix,
-    concat,
   });
 
   /**

@@ -1,14 +1,9 @@
 import { factory } from '../../utils/factory.js';
 import { isZeroEntry } from '../../utils/isExactZero.js';
-import type {
-  FibonacciHeapNode,
-  FibonacciHeapInterface,
-  MatrixValue,
-  EqualScalarFunction,
-} from './types.js';
+import type { FibonacciHeapNode, FibonacciHeapInterface, MatrixValue } from './types.js';
 
 const name = 'Spa';
-const dependencies = ['addScalar', 'equalScalar', 'FibonacciHeap'];
+const dependencies = ['addScalar', 'isZero', 'FibonacciHeap'];
 
 /**
  * Value type for Spa elements.
@@ -27,14 +22,14 @@ type AddScalarFunction = (a: MatrixValue, b: MatrixValue) => MatrixValue;
  */
 interface SpaDependencies {
   addScalar: AddScalarFunction;
-  equalScalar: EqualScalarFunction;
+  isZero: unknown;
   FibonacciHeap: new () => FibonacciHeapInterface<SpaValue>;
 }
 
 export const createSpaClass = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ addScalar, equalScalar, FibonacciHeap }: SpaDependencies) => {
+  ({ addScalar, FibonacciHeap }: SpaDependencies) => {
     /**
      * An ordered Sparse Accumulator is a representation for a sparse vector that includes a dense array
      * of the vector elements and an ordered list of non-zero elements.
@@ -113,7 +108,7 @@ export const createSpaClass = /* #__PURE__ */ factory(
           // check it is in range
           if (node.key >= from) {
             // check value is not zero
-            if (!isZeroEntry(node.value, equalScalar)) {
+            if (!isZeroEntry(node.value)) {
               // invoke callback
               callback(node.key, node.value, this);
             }

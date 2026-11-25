@@ -26,24 +26,21 @@ interface BigNumberType {
 interface LcmDependencies {
   typed: TypedFunction;
   matrix: TypedFunction;
-  equalScalar: TypedFunction;
-  concat: TypedFunction;
 }
 
 const name = 'lcm';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'concat'];
+const dependencies = ['typed', 'matrix'];
 
 export const createLcm = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, concat }: LcmDependencies): TypedFunction => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
-    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+  ({ typed, matrix }: LcmDependencies): TypedFunction => {
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
+    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     const lcmTypes = 'number | BigNumber | Fraction | Matrix | Array';

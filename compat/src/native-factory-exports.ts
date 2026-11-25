@@ -415,17 +415,60 @@ const createSparseMatrixClass: ConstructorFactory<
   (typeof factory_mathjsCompat.constructors)['SparseMatrix']
 > = /* #__PURE__ */ factory(
   'SparseMatrix',
-  ['Matrix', 'equalScalar', 'typed'],
+  ['Matrix', 'isZero', 'numeric', 'typed'],
   () => factory_mathjsCompat.constructors.SparseMatrix,
   { isClass: true }
 );
 
+const mathjsCreateIsZero: CompatFactoryExports['createIsZero'] = factories.createIsZero;
+const isZeroDependencies: UnaryBundle<'createIsZero'> & {
+  equalScalarDependencies: typeof equalScalarDependencies;
+} = { equalScalarDependencies, typedDependencies, createIsZero: mathjsCreateIsZero };
+const mathjsCreateNumeric: CompatFactoryExports['createNumeric'] = factories.createNumeric;
+const mathjsCreateBignumber: CompatFactoryExports['createBignumber'] = factories.createBignumber;
+const bignumberDependencies: UnaryBundle<'createBignumber'> & {
+  BigNumberDependencies: typeof BigNumberDependencies;
+} = {
+  BigNumberDependencies,
+  typedDependencies,
+  createBignumber: mathjsCreateBignumber,
+};
+const mathjsCreateFraction: CompatFactoryExports['createFraction'] = factories.createFraction;
+const fractionDependencies: UnaryBundle<'createFraction'> & {
+  FractionDependencies: typeof FractionDependencies;
+} = {
+  FractionDependencies,
+  typedDependencies,
+  createFraction: mathjsCreateFraction,
+};
+const mathjsCreateNumber: CompatFactoryExports['createNumber'] = factories.createNumber;
+const numberDependencies: UnaryBundle<'createNumber'> = {
+  typedDependencies,
+  createNumber: mathjsCreateNumber,
+};
+const numericDependencies: Pick<CompatFactoryExports, 'createNumeric'> & {
+  bignumberDependencies: typeof bignumberDependencies;
+  fractionDependencies: typeof fractionDependencies;
+  numberDependencies: typeof numberDependencies;
+} = {
+  bignumberDependencies,
+  fractionDependencies,
+  numberDependencies,
+  createNumeric: mathjsCreateNumeric,
+};
 const SparseMatrixDependencies: {
   MatrixDependencies: typeof MatrixDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
+  numericDependencies: typeof numericDependencies;
   typedDependencies: typeof typedDependencies;
   createSparseMatrixClass: typeof createSparseMatrixClass;
-} = { MatrixDependencies, equalScalarDependencies, typedDependencies, createSparseMatrixClass };
+} = {
+  MatrixDependencies,
+  isZeroDependencies,
+  numericDependencies,
+  typedDependencies,
+  createSparseMatrixClass,
+};
 
 const matrixDependencies: UnaryBundle<'createMatrix'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
@@ -470,14 +513,10 @@ const concatDependencies: UnaryBundle<'createConcat'> & {
 const atan2Dependencies: UnaryBundle<'createAtan2'> &
   WithBigNumber & {
     DenseMatrixDependencies: typeof DenseMatrixDependencies;
-    concatDependencies: typeof concatDependencies;
-    equalScalarDependencies: typeof equalScalarDependencies;
     matrixDependencies: typeof matrixDependencies;
   } = {
   BigNumberDependencies,
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createAtan2: mathjsCreateAtan2,
@@ -485,12 +524,8 @@ const atan2Dependencies: UnaryBundle<'createAtan2'> &
 
 const mathjsCreateBitAnd: CompatFactoryExports['createBitAnd'] = factories.createBitAnd;
 const bitAndDependencies: UnaryBundle<'createBitAnd'> & {
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createBitAnd: mathjsCreateBitAnd,
@@ -498,13 +533,9 @@ const bitAndDependencies: UnaryBundle<'createBitAnd'> & {
 const mathjsCreateBitOr: CompatFactoryExports['createBitOr'] = factories.createBitOr;
 const bitOrDependencies: UnaryBundle<'createBitOr'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createBitOr: mathjsCreateBitOr,
@@ -513,12 +544,10 @@ const mathjsCreateBitXor: CompatFactoryExports['createBitXor'] = factories.creat
 const bitXorDependencies: UnaryBundle<'createBitXor'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createBitXor: mathjsCreateBitXor,
@@ -528,15 +557,11 @@ const compareDependencies: UnaryBundle<'createCompare'> & {
   BigNumberDependencies: typeof BigNumberDependencies;
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   FractionDependencies: typeof FractionDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   BigNumberDependencies,
   DenseMatrixDependencies,
   FractionDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createCompare: mathjsCreateCompare,
@@ -544,10 +569,8 @@ const compareDependencies: UnaryBundle<'createCompare'> & {
 const mathjsCreateCompareText: CompatFactoryExports['createCompareText'] =
   factories.createCompareText;
 const compareTextDependencies: UnaryBundle<'createCompareText'> & {
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createCompareText: mathjsCreateCompareText,
@@ -573,13 +596,9 @@ const dotDependencies: UnaryBundle<'createDot'> & {
 const mathjsCreateDotMultiply: CompatFactoryExports['createDotMultiply'] =
   factories.createDotMultiply;
 const dotMultiplyDependencies: UnaryBundle<'createDotMultiply'> & {
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
 } = {
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   multiplyScalarDependencies,
   typedDependencies,
@@ -604,18 +623,11 @@ const isFiniteDependencies: UnaryBundle<'createIsFinite'> & {
   typedDependencies,
   createIsFinite: mathjsCreateIsFinite,
 };
-const mathjsCreateIsZero: CompatFactoryExports['createIsZero'] = factories.createIsZero;
-const isZeroDependencies: UnaryBundle<'createIsZero'> & {
-  equalScalarDependencies: typeof equalScalarDependencies;
-} = { equalScalarDependencies, typedDependencies, createIsZero: mathjsCreateIsZero };
+
 const mathjsCreateLcm: CompatFactoryExports['createLcm'] = factories.createLcm;
 const lcmDependencies: UnaryBundle<'createLcm'> & {
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createLcm: mathjsCreateLcm,
@@ -624,12 +636,10 @@ const mathjsCreateLargerEq: CompatFactoryExports['createLargerEq'] = factories.c
 const largerEqDependencies: UnaryBundle<'createLargerEq'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createLargerEq: mathjsCreateLargerEq,
@@ -638,12 +648,10 @@ const mathjsCreateSmallerEq: CompatFactoryExports['createSmallerEq'] = factories
 const smallerEqDependencies: UnaryBundle<'createSmallerEq'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createSmallerEq: mathjsCreateSmallerEq,
@@ -652,13 +660,11 @@ const mathjsCreateUnequal: CompatFactoryExports['createUnequal'] = factories.cre
 const unequalDependencies: UnaryBundle<'createUnequal'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
   equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
-  concatDependencies,
   equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
@@ -667,13 +673,9 @@ const unequalDependencies: UnaryBundle<'createUnequal'> & {
 const mathjsCreateOr: CompatFactoryExports['createOr'] = factories.createOr;
 const orDependencies: UnaryBundle<'createOr'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createOr: mathjsCreateOr,
@@ -682,12 +684,10 @@ const mathjsCreateXor: CompatFactoryExports['createXor'] = factories.createXor;
 const xorDependencies: UnaryBundle<'createXor'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createXor: mathjsCreateXor,
@@ -696,17 +696,11 @@ const xorDependencies: UnaryBundle<'createXor'> & {
 const mathjsCreateAdd: CompatFactoryExports['createAdd'] = factories.createAdd;
 const addDependencies: UnaryBundle<'createAdd'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  SparseMatrixDependencies: typeof SparseMatrixDependencies;
   addScalarDependencies: typeof addScalarDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
-  SparseMatrixDependencies,
   addScalarDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createAdd: mathjsCreateAdd,
@@ -714,19 +708,13 @@ const addDependencies: UnaryBundle<'createAdd'> & {
 const mathjsCreateSubtract: CompatFactoryExports['createSubtract'] = factories.createSubtract;
 const subtractDependencies: UnaryBundle<'createSubtract'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
-  unaryMinusDependencies: typeof unaryMinusDependencies;
 } = {
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   subtractScalarDependencies,
   typedDependencies,
-  unaryMinusDependencies,
   createSubtract: mathjsCreateSubtract,
 };
 
@@ -865,14 +853,10 @@ const cbrtDependencies: UnaryBundle<'createCbrt'> & {
 
 const mathjsCreateAnd: CompatFactoryExports['createAnd'] = factories.createAnd;
 const andDependencies: UnaryBundle<'createAnd'> & {
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
   notDependencies: typeof notDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   notDependencies,
   typedDependencies,
@@ -926,14 +910,12 @@ const kronDependencies: UnaryBundle<'createKron'> & {
 const mathjsCreateLeftShift: CompatFactoryExports['createLeftShift'] = factories.createLeftShift;
 const leftShiftDependencies: UnaryBundle<'createLeftShift'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   typedDependencies,
   zerosDependencies,
@@ -943,13 +925,9 @@ const leftShiftDependencies: UnaryBundle<'createLeftShift'> & {
 const mathjsCreateNthRoot: CompatFactoryExports['createNthRoot'] = factories.createNthRoot;
 const nthRootDependencies: UnaryBundle<'createNthRoot'> & {
   BigNumberDependencies: typeof BigNumberDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   BigNumberDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createNthRoot: mathjsCreateNthRoot,
@@ -997,14 +975,12 @@ const mathjsCreateRightArithShift: CompatFactoryExports['createRightArithShift']
   factories.createRightArithShift;
 const rightArithShiftDependencies: UnaryBundle<'createRightArithShift'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   typedDependencies,
   zerosDependencies,
@@ -1015,14 +991,12 @@ const mathjsCreateRightLogShift: CompatFactoryExports['createRightLogShift'] =
   factories.createRightLogShift;
 const rightLogShiftDependencies: UnaryBundle<'createRightLogShift'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   typedDependencies,
   zerosDependencies,
@@ -1033,13 +1007,13 @@ const mathjsCreateRound: CompatFactoryExports['createRound'] = factories.createR
 const roundDependencies: UnaryBundle<'createRound'> & {
   BigNumberDependencies: typeof BigNumberDependencies;
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   BigNumberDependencies,
   DenseMatrixDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   typedDependencies,
   zerosDependencies,
@@ -1081,22 +1055,16 @@ const modeDependencies: UnaryBundle<'createMode'> & {
   isNumericDependencies: typeof isNumericDependencies;
 } = { isNaNDependencies, isNumericDependencies, typedDependencies, createMode: mathjsCreateMode };
 
-const mathjsCreateNumber: CompatFactoryExports['createNumber'] = factories.createNumber;
-const numberDependencies: UnaryBundle<'createNumber'> = {
-  typedDependencies,
-  createNumber: mathjsCreateNumber,
-};
-
 const mathjsCreateCeil: CompatFactoryExports['createCeil'] = factories.createCeil;
 const ceilDependencies: UnaryBundle<'createCeil'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   roundDependencies: typeof roundDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   DenseMatrixDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   roundDependencies,
   typedDependencies,
@@ -1107,13 +1075,13 @@ const ceilDependencies: UnaryBundle<'createCeil'> & {
 const mathjsCreateFloor: CompatFactoryExports['createFloor'] = factories.createFloor;
 const floorDependencies: UnaryBundle<'createFloor'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   roundDependencies: typeof roundDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   DenseMatrixDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   roundDependencies,
   typedDependencies,
@@ -1126,7 +1094,7 @@ const gcdDependencies: UnaryBundle<'createGcd'> & {
   BigNumberDependencies: typeof BigNumberDependencies;
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   roundDependencies: typeof roundDependencies;
   zerosDependencies: typeof zerosDependencies;
@@ -1134,7 +1102,7 @@ const gcdDependencies: UnaryBundle<'createGcd'> & {
   BigNumberDependencies,
   DenseMatrixDependencies,
   concatDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   roundDependencies,
   typedDependencies,
@@ -1145,15 +1113,13 @@ const gcdDependencies: UnaryBundle<'createGcd'> & {
 const mathjsCreateMod: CompatFactoryExports['createMod'] = factories.createMod;
 const modDependencies: UnaryBundle<'createMod'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   roundDependencies: typeof roundDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   DenseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   roundDependencies,
   typedDependencies,
@@ -1213,24 +1179,6 @@ const ResultSetDependencies: Pick<CompatFactoryExports, 'createResultSet'> = {
   createResultSet: mathjsCreateResultSet,
 };
 
-const mathjsCreateBignumber: CompatFactoryExports['createBignumber'] = factories.createBignumber;
-const bignumberDependencies: UnaryBundle<'createBignumber'> & {
-  BigNumberDependencies: typeof BigNumberDependencies;
-} = {
-  BigNumberDependencies,
-  typedDependencies,
-  createBignumber: mathjsCreateBignumber,
-};
-
-const mathjsCreateFraction: CompatFactoryExports['createFraction'] = factories.createFraction;
-const fractionDependencies: UnaryBundle<'createFraction'> & {
-  FractionDependencies: typeof FractionDependencies;
-} = {
-  FractionDependencies,
-  typedDependencies,
-  createFraction: mathjsCreateFraction,
-};
-
 const mathjsCreateComplex: CompatFactoryExports['createComplex'] = factories.createComplex;
 const complexDependencies: UnaryBundle<'createComplex'> & {
   ComplexDependencies: typeof ComplexDependencies;
@@ -1238,18 +1186,6 @@ const complexDependencies: UnaryBundle<'createComplex'> & {
   ComplexDependencies,
   typedDependencies,
   createComplex: mathjsCreateComplex,
-};
-
-const mathjsCreateNumeric: CompatFactoryExports['createNumeric'] = factories.createNumeric;
-const numericDependencies: Pick<CompatFactoryExports, 'createNumeric'> & {
-  bignumberDependencies: typeof bignumberDependencies;
-  fractionDependencies: typeof fractionDependencies;
-  numberDependencies: typeof numberDependencies;
-} = {
-  bignumberDependencies,
-  fractionDependencies,
-  numberDependencies,
-  createNumeric: mathjsCreateNumeric,
 };
 
 const mathjsCreateDiff: CompatFactoryExports['createDiff'] = factories.createDiff;
@@ -1280,16 +1216,16 @@ const fixDependencies: UnaryBundle<'createFix'> & {
   ComplexDependencies: typeof ComplexDependencies;
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   ceilDependencies: typeof ceilDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   floorDependencies: typeof floorDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
   ComplexDependencies,
   DenseMatrixDependencies,
   ceilDependencies,
-  equalScalarDependencies,
   floorDependencies,
+  isZeroDependencies,
   matrixDependencies,
   typedDependencies,
   zerosDependencies,
@@ -1301,13 +1237,11 @@ const largerDependencies: UnaryBundle<'createLarger'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
   bignumberDependencies: typeof bignumberDependencies;
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
   bignumberDependencies,
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createLarger: mathjsCreateLarger,
@@ -1331,13 +1265,11 @@ const smallerDependencies: UnaryBundle<'createSmaller'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
   bignumberDependencies: typeof bignumberDependencies;
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
   bignumberDependencies,
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createSmaller: mathjsCreateSmaller,
@@ -1356,16 +1288,12 @@ const mathjsCreateDotDivide: CompatFactoryExports['createDotDivide'] = factories
 const dotDivideDependencies: UnaryBundle<'createDotDivide'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
-  concatDependencies,
   divideScalarDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   typedDependencies,
   createDotDivide: mathjsCreateDotDivide,
@@ -1441,14 +1369,14 @@ const mathjsCreateLsolve: CompatFactoryExports['createLsolve'] = factories.creat
 const lsolveDependencies: UnaryBundle<'createLsolve'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
 } = {
   DenseMatrixDependencies,
   divideScalarDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   multiplyScalarDependencies,
   subtractScalarDependencies,
@@ -1460,14 +1388,14 @@ const mathjsCreateUsolve: CompatFactoryExports['createUsolve'] = factories.creat
 const usolveDependencies: UnaryBundle<'createUsolve'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
 } = {
   DenseMatrixDependencies,
   divideScalarDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   multiplyScalarDependencies,
   subtractScalarDependencies,
@@ -1479,14 +1407,14 @@ const mathjsCreateLsolveAll: CompatFactoryExports['createLsolveAll'] = factories
 const lsolveAllDependencies: UnaryBundle<'createLsolveAll'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
 } = {
   DenseMatrixDependencies,
   divideScalarDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   multiplyScalarDependencies,
   subtractScalarDependencies,
@@ -1498,14 +1426,14 @@ const mathjsCreateUsolveAll: CompatFactoryExports['createUsolveAll'] = factories
 const usolveAllDependencies: UnaryBundle<'createUsolveAll'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
 } = {
   DenseMatrixDependencies,
   divideScalarDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   multiplyScalarDependencies,
   subtractScalarDependencies,
@@ -1893,21 +1821,20 @@ const mathjsCreateSpaClass: CompatFactoryExports['createSpaClass'] = factories.c
 const SpaDependencies: Pick<CompatFactoryExports, 'createSpaClass'> & {
   FibonacciHeapDependencies: typeof FibonacciHeapDependencies;
   addScalarDependencies: typeof addScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
 } = {
   FibonacciHeapDependencies,
   addScalarDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   createSpaClass: mathjsCreateSpaClass,
 };
 
 const mathjsCreateQr: CompatFactoryExports['createQr'] = factories.createQr;
-const qrDependencies: Pick<CompatFactoryExports, 'createQr'> & {
+const qrDependencies: UnaryBundle<'createQr'> & {
   addScalarDependencies: typeof addScalarDependencies;
   complexDependencies: typeof complexDependencies;
   conjDependencies: typeof conjDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalDependencies: typeof equalDependencies;
   identityDependencies: typeof identityDependencies;
   isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
@@ -1915,7 +1842,6 @@ const qrDependencies: Pick<CompatFactoryExports, 'createQr'> & {
   signDependencies: typeof signDependencies;
   sqrtDependencies: typeof sqrtDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
-  typedDependencies: typeof typedDependencies;
   unaryMinusDependencies: typeof unaryMinusDependencies;
   zerosDependencies: typeof zerosDependencies;
 } = {
@@ -1923,7 +1849,6 @@ const qrDependencies: Pick<CompatFactoryExports, 'createQr'> & {
   complexDependencies,
   conjDependencies,
   divideScalarDependencies,
-  equalDependencies,
   identityDependencies,
   isZeroDependencies,
   matrixDependencies,
@@ -1938,19 +1863,18 @@ const qrDependencies: Pick<CompatFactoryExports, 'createQr'> & {
 };
 
 const mathjsCreateLup: CompatFactoryExports['createLup'] = factories.createLup;
-const lupDependencies: Pick<CompatFactoryExports, 'createLup'> & {
+const lupDependencies: UnaryBundle<'createLup'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SpaDependencies: typeof SpaDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
   absDependencies: typeof absDependencies;
   addScalarDependencies: typeof addScalarDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   largerDependencies: typeof largerDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
-  typedDependencies: typeof typedDependencies;
   unaryMinusDependencies: typeof unaryMinusDependencies;
 } = {
   DenseMatrixDependencies,
@@ -1959,7 +1883,7 @@ const lupDependencies: Pick<CompatFactoryExports, 'createLup'> & {
   absDependencies,
   addScalarDependencies,
   divideScalarDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   largerDependencies,
   matrixDependencies,
   multiplyScalarDependencies,
@@ -2055,13 +1979,13 @@ const mathjsCreateMultiply: CompatFactoryExports['createMultiply'] = factories.c
 const multiplyDependencies: UnaryBundle<'createMultiply'> & {
   addScalarDependencies: typeof addScalarDependencies;
   dotDependencies: typeof dotDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
 } = {
   addScalarDependencies,
   dotDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   multiplyScalarDependencies,
   typedDependencies,
@@ -2148,15 +2072,11 @@ const mathjsCreateDotPow: CompatFactoryExports['createDotPow'] = factories.creat
 const dotPowDependencies: UnaryBundle<'createDotPow'> & {
   DenseMatrixDependencies: typeof DenseMatrixDependencies;
   SparseMatrixDependencies: typeof SparseMatrixDependencies;
-  concatDependencies: typeof concatDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   matrixDependencies: typeof matrixDependencies;
   powDependencies: typeof powDependencies;
 } = {
   DenseMatrixDependencies,
   SparseMatrixDependencies,
-  concatDependencies,
-  equalScalarDependencies,
   matrixDependencies,
   powDependencies,
   typedDependencies,
@@ -2791,10 +2711,8 @@ const zpk2tfDependencies: UnaryBundle<'createZpk2tf'> & {
 
 const mathjsCreateTo: CompatFactoryExports['createTo'] = factories.createTo;
 const toDependencies: UnaryBundle<'createTo'> & {
-  concatDependencies: typeof concatDependencies;
   matrixDependencies: typeof matrixDependencies;
 } = {
-  concatDependencies,
   matrixDependencies,
   typedDependencies,
   createTo: mathjsCreateTo,
@@ -2888,14 +2806,14 @@ const setUnionDependencies: UnaryBundle<'createSetUnion'> & {
 
 const mathjsCreateDivide: CompatFactoryExports['createDivide'] = factories.createDivide;
 const divideDependencies: UnaryBundle<'createDivide'> & {
+  DenseMatrixDependencies: typeof DenseMatrixDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
   invDependencies: typeof invDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyDependencies: typeof multiplyDependencies;
 } = {
+  DenseMatrixDependencies,
   divideScalarDependencies,
-  equalScalarDependencies,
   invDependencies,
   matrixDependencies,
   multiplyDependencies,
@@ -3195,6 +3113,7 @@ const andTransformDependencies: UnaryBundle<'createAndTransform'> & {
   addDependencies: typeof addDependencies;
   concatDependencies: typeof concatDependencies;
   equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   notDependencies: typeof notDependencies;
   zerosDependencies: typeof zerosDependencies;
@@ -3202,6 +3121,7 @@ const andTransformDependencies: UnaryBundle<'createAndTransform'> & {
   addDependencies,
   concatDependencies,
   equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   notDependencies,
   typedDependencies,
@@ -3215,6 +3135,7 @@ const bitAndTransformDependencies: UnaryBundle<'createBitAndTransform'> & {
   addDependencies: typeof addDependencies;
   concatDependencies: typeof concatDependencies;
   equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   matrixDependencies: typeof matrixDependencies;
   notDependencies: typeof notDependencies;
   zerosDependencies: typeof zerosDependencies;
@@ -3222,6 +3143,7 @@ const bitAndTransformDependencies: UnaryBundle<'createBitAndTransform'> & {
   addDependencies,
   concatDependencies,
   equalScalarDependencies,
+  isZeroDependencies,
   matrixDependencies,
   notDependencies,
   typedDependencies,
@@ -3766,19 +3688,23 @@ const permutationsDependencies: UnaryBundle<'createPermutations'> & {
 
 const mathjsCreateCatalan: CompatFactoryExports['createCatalan'] = factories.createCatalan;
 const catalanDependencies: UnaryBundle<'createCatalan'> & {
-  addScalarDependencies: typeof addScalarDependencies;
-  combinationsDependencies: typeof combinationsDependencies;
+  bigintDependencies: typeof bigintDependencies;
+  bignumberDependencies: typeof bignumberDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
   isIntegerDependencies: typeof isIntegerDependencies;
   isNegativeDependencies: typeof isNegativeDependencies;
   multiplyScalarDependencies: typeof multiplyScalarDependencies;
+  numberDependencies: typeof numberDependencies;
+  typeOfDependencies: typeof typeOfDependencies;
 } = {
-  addScalarDependencies,
-  combinationsDependencies,
+  bigintDependencies,
+  bignumberDependencies,
   divideScalarDependencies,
   isIntegerDependencies,
   isNegativeDependencies,
   multiplyScalarDependencies,
+  numberDependencies,
+  typeOfDependencies,
   typedDependencies,
   createCatalan: mathjsCreateCatalan,
 };
@@ -3787,24 +3713,25 @@ const mathjsCreateMultinomial: CompatFactoryExports['createMultinomial'] =
   factories.createMultinomial;
 const multinomialDependencies: UnaryBundle<'createMultinomial'> & {
   addDependencies: typeof addDependencies;
-  divideDependencies: typeof divideDependencies;
-  factorialDependencies: typeof factorialDependencies;
+  combinationsDependencies: typeof combinationsDependencies;
   isIntegerDependencies: typeof isIntegerDependencies;
-  isPositiveDependencies: typeof isPositiveDependencies;
+  isNegativeDependencies: typeof isNegativeDependencies;
   multiplyDependencies: typeof multiplyDependencies;
+  sizeDependencies: typeof sizeDependencies;
 } = {
   addDependencies,
-  divideDependencies,
-  factorialDependencies,
+  combinationsDependencies,
   isIntegerDependencies,
-  isPositiveDependencies,
+  isNegativeDependencies,
   multiplyDependencies,
+  sizeDependencies,
   typedDependencies,
   createMultinomial: mathjsCreateMultinomial,
 };
 
 const mathjsCreateStirlingS2: CompatFactoryExports['createStirlingS2'] = factories.createStirlingS2;
 const stirlingS2Dependencies: UnaryBundle<'createStirlingS2'> & {
+  bigintDependencies: typeof bigintDependencies;
   bignumberDependencies: typeof bignumberDependencies;
   addScalarDependencies: typeof addScalarDependencies;
   combinationsDependencies: typeof combinationsDependencies;
@@ -3817,7 +3744,9 @@ const stirlingS2Dependencies: UnaryBundle<'createStirlingS2'> & {
   numberDependencies: typeof numberDependencies;
   powDependencies: typeof powDependencies;
   subtractScalarDependencies: typeof subtractScalarDependencies;
+  typeOfDependencies: typeof typeOfDependencies;
 } = {
+  bigintDependencies,
   bignumberDependencies,
   addScalarDependencies,
   combinationsDependencies,
@@ -3830,6 +3759,7 @@ const stirlingS2Dependencies: UnaryBundle<'createStirlingS2'> & {
   numberDependencies,
   powDependencies,
   subtractScalarDependencies,
+  typeOfDependencies,
   typedDependencies,
   createStirlingS2: mathjsCreateStirlingS2,
 };
@@ -3887,12 +3817,14 @@ const medianDependencies: UnaryBundle<'createMedian'> & {
   compareDependencies: typeof compareDependencies;
   divideDependencies: typeof divideDependencies;
   partitionSelectDependencies: typeof partitionSelectDependencies;
+  unaryPlusDependencies: typeof unaryPlusDependencies;
 } = {
   addDependencies,
   compareDependencies,
   divideDependencies,
   partitionSelectDependencies,
   typedDependencies,
+  unaryPlusDependencies,
   createMedian: mathjsCreateMedian,
 };
 
@@ -4080,19 +4012,17 @@ const xgcdDependencies: UnaryBundle<'createXgcd'> & {
 const mathjsCreateInvmod: CompatFactoryExports['createInvmod'] = factories.createInvmod;
 const invmodDependencies: UnaryBundle<'createInvmod'> & {
   BigNumberDependencies: typeof BigNumberDependencies;
-  addDependencies: typeof addDependencies;
-  equalDependencies: typeof equalDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
   isIntegerDependencies: typeof isIntegerDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   modDependencies: typeof modDependencies;
-  smallerDependencies: typeof smallerDependencies;
   xgcdDependencies: typeof xgcdDependencies;
 } = {
   BigNumberDependencies,
-  addDependencies,
-  equalDependencies,
+  equalScalarDependencies,
   isIntegerDependencies,
+  isZeroDependencies,
   modDependencies,
-  smallerDependencies,
   typedDependencies,
   xgcdDependencies,
   createInvmod: mathjsCreateInvmod,
@@ -4111,10 +4041,11 @@ const eigsDependencies: UnaryBundle<'createEigs'> & {
   diagDependencies: typeof diagDependencies;
   divideScalarDependencies: typeof divideScalarDependencies;
   dotDependencies: typeof dotDependencies;
-  equalDependencies: typeof equalDependencies;
+  equalScalarDependencies: typeof equalScalarDependencies;
   flattenDependencies: typeof flattenDependencies;
   imDependencies: typeof imDependencies;
   invDependencies: typeof invDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   largerDependencies: typeof largerDependencies;
   matrixDependencies: typeof matrixDependencies;
   matrixFromColumnsDependencies: typeof matrixFromColumnsDependencies;
@@ -4143,10 +4074,11 @@ const eigsDependencies: UnaryBundle<'createEigs'> & {
   diagDependencies,
   divideScalarDependencies,
   dotDependencies,
-  equalDependencies,
+  equalScalarDependencies,
   flattenDependencies,
   imDependencies,
   invDependencies,
+  isZeroDependencies,
   largerDependencies,
   matrixDependencies,
   matrixFromColumnsDependencies,
@@ -4174,7 +4106,7 @@ const normDependencies: UnaryBundle<'createNorm'> & {
   conjDependencies: typeof conjDependencies;
   ctransposeDependencies: typeof ctransposeDependencies;
   eigsDependencies: typeof eigsDependencies;
-  equalScalarDependencies: typeof equalScalarDependencies;
+  isZeroDependencies: typeof isZeroDependencies;
   largerDependencies: typeof largerDependencies;
   matrixDependencies: typeof matrixDependencies;
   multiplyDependencies: typeof multiplyDependencies;
@@ -4187,7 +4119,7 @@ const normDependencies: UnaryBundle<'createNorm'> & {
   conjDependencies,
   ctransposeDependencies,
   eigsDependencies,
-  equalScalarDependencies,
+  isZeroDependencies,
   largerDependencies,
   matrixDependencies,
   multiplyDependencies,

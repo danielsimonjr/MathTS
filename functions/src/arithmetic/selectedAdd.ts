@@ -10,15 +10,14 @@ interface SelectedAddDependencies {
   typed: TypedFunction;
   matrix: TypedFunction;
   addScalar: TypedFunction;
-  equalScalar: TypedFunction;
   DenseMatrix: unknown;
 }
 
 /** Build MathJS-compatible addition using the selected scalar and matrix operations. */
 export const createSelectedAdd = /* #__PURE__ */ factory(
   'add',
-  ['DenseMatrix', 'SparseMatrix', 'addScalar', 'concat', 'equalScalar', 'matrix', 'typed'],
-  ({ typed, matrix, addScalar, equalScalar, DenseMatrix }: SelectedAddDependencies) => {
+  ['typed', 'matrix', 'addScalar', 'DenseMatrix'],
+  ({ typed, matrix, addScalar, DenseMatrix }: SelectedAddDependencies) => {
     const matrixSuite = createMatrixAlgorithmSuite({ typed, matrix });
     return typed(
       'add',
@@ -35,7 +34,7 @@ export const createSelectedAdd = /* #__PURE__ */ factory(
       matrixSuite({
         elop: addScalar,
         DS: createMatAlgo01xDSid({ typed }) as unknown as AlgorithmFunction,
-        SS: createMatAlgo04xSidSid({ typed, equalScalar }) as unknown as AlgorithmFunction,
+        SS: createMatAlgo04xSidSid({ typed }) as unknown as AlgorithmFunction,
         Ss: createMatAlgo10xSids({ typed, DenseMatrix }) as unknown as AlgorithmFunction,
       })
     );

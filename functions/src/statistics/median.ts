@@ -27,11 +27,23 @@ interface MedianDependencies {
   divide: TypedFunction;
   compare: TypedFunction;
   partitionSelect: TypedFunction;
+
+  // MathTS addition: median(A, dim) support (mathjs 15.3.0 throws for a dim argument).
   mapSlices: TypedFunction;
 }
 
 const name = 'median';
-const dependencies = ['typed', 'add', 'divide', 'compare', 'partitionSelect', 'mapSlices'];
+// mapSlices is a MathTS addition: median(A, dim) is supported here, while mathjs 15.3.0
+// throws 'median(A, dim) is not yet supported' (#3809 kept our dimension support).
+const dependencies = [
+  'typed',
+  'add',
+  'unaryPlus',
+  'divide',
+  'compare',
+  'partitionSelect',
+  'mapSlices',
+];
 
 type NumberCompare = (a: number, b: number) => number;
 

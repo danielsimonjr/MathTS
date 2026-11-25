@@ -1,4 +1,5 @@
 import { factory } from '../../../utils/factory.js';
+import { createMatAlgo11xS0s } from './matAlgo11xS0s.js';
 import type {
   DataType,
   MatrixValue,
@@ -35,6 +36,12 @@ interface SparseMatrix {
   _ptr: number[];
   _size: [number, number];
   _datatype?: DataType;
+  /** The zero value of the matrix's datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero?: MatrixValue;
+  /** The zero test for the matrix's datatype. */
+  isZero(value: MatrixValue): boolean;
+  /** The full typed-function `isZero`, whatever the matrix datatype. */
+  isZero_Full(value: MatrixValue): boolean;
 }
 
 const name = 'matAlgo12xSfs';
@@ -44,6 +51,7 @@ export const createMatAlgo12xSfs = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, DenseMatrix }: { typed: TypedFunction; DenseMatrix: DenseMatrixConstructor }) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     /**
      * Iterates over SparseMatrix S nonzero items and invokes the callback function f(Sij, b).
      * Callback function invoked MxN times.
@@ -68,7 +76,7 @@ export const createMatAlgo12xSfs = /* #__PURE__ */ factory(
       b: MatrixValue,
       callback: MatrixCallback,
       inverse: boolean
-    ): DenseMatrix {
+    ): DenseMatrix | SparseMatrix {
       // sparse matrix arrays
       const avalues = s._values;
       const aindex = s._index;
@@ -94,10 +102,29 @@ export const createMatAlgo12xSfs = /* #__PURE__ */ factory(
       if (typeof adt === 'string') {
         // datatype
         dt = adt;
-        // convert b to the same datatype
-        b = typed.convert(b, dt);
-        // callback
-        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
+        // resolve the callback against the scalar zero of the matrix datatype
+        const resolved = (
+          inverse
+            ? typed.resolve(callback as never, [b, s.zero])
+            : typed.resolve(callback as never, [s.zero, b])
+        ) as { implementation: MatrixCallback } | null;
+        if (resolved && resolved.implementation) cf = resolved.implementation;
+      }
+
+      // the value for all zero items of S
+      const fzero: MatrixValue = inverse
+        ? cf(b, s.zero as MatrixValue)
+        : cf(s.zero as MatrixValue, b);
+
+      // the zero items stay zero, so the result is sparse. A boolean result
+      // stays dense, since false would become 0 in a sparse matrix (#1565)
+      if (typeof fzero !== 'boolean' && s.isZero(fzero)) {
+        return matAlgo11xS0s(
+          s as Parameters<typeof matAlgo11xS0s>[0],
+          b,
+          callback,
+          inverse
+        ) as unknown as DenseMatrix;
       }
 
       // result arrays
@@ -133,7 +160,7 @@ export const createMatAlgo12xSfs = /* #__PURE__ */ factory(
             cdata[i][j] = inverse ? cf(b, x[i]) : cf(x[i], b);
           } else {
             // dense matrix value @ i, j
-            cdata[i][j] = inverse ? cf(b, 0) : cf(0, b);
+            cdata[i][j] = fzero;
           }
         }
       }

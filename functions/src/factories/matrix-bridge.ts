@@ -32,6 +32,7 @@ import {
 import { DimensionError } from '../error/DimensionError.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
+import { BigNumber, Complex, Fraction } from '@danielsimonjr/mathts-core';
 
 // Do not call `backendManager.initialize()` at import time. That compiles and
 // instantiates the AssemblyScript module on every process that loads the
@@ -781,6 +782,32 @@ function isZeroScalar(value: unknown): boolean {
 }
 
 /**
+ * The zero value of a datatype, as mathjs `typed.convert(0, datatype)` produces for the
+ * datatypes a sparse matrix stores (mathjs 15.3.0 exposes it as the matrix `zero`).
+ */
+function sparseZeroFor(datatype: string | undefined): unknown {
+  if (!datatype) return 0;
+  switch (datatype) {
+    case 'number':
+      return 0;
+    case 'BigNumber':
+      return new BigNumber(0);
+    case 'Fraction':
+      return new Fraction(0);
+    case 'Complex':
+      return new Complex(0, 0);
+    case 'boolean':
+      return false;
+    case 'bigint':
+      return 0n;
+    case 'string':
+      return '0';
+    default:
+      return 0;
+  }
+}
+
+/**
  * mathjs-compatible sparse matrix using CSC format.
  *
  * Internal storage:
@@ -795,11 +822,13 @@ function isZeroScalar(value: unknown): boolean {
 export class MathJSSparseMatrix {
   /** The matrix flag. The prototype holds the value (see `Object.defineProperty` below). */
   declare readonly isMatrix: boolean;
-  _values: unknown[] | null;
-  _index: number[];
-  _ptr: number[];
-  _size: number[];
+  _values!: unknown[] | null;
+  _index!: number[];
+  _ptr!: number[];
+  _size!: number[];
   _datatype: string | undefined;
+  /** The zero value of the matrix datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero: unknown;
 
   constructor(
     data?:
@@ -819,6 +848,28 @@ export class MathJSSparseMatrix {
           _datatype?: string;
         }
   ) {
+    this._construct(data);
+    this.zero = sparseZeroFor(this._datatype);
+  }
+
+  private _construct(
+    data?:
+      | unknown[][]
+      | MathJSDenseMatrix
+      | {
+          values?: unknown[] | null;
+          index?: number[];
+          ptr?: number[];
+          _values?: unknown[] | null;
+          _index?: number[];
+          _ptr?: number[];
+          size?: number[];
+          _size?: number[];
+          data?: unknown[][];
+          datatype?: string;
+          _datatype?: string;
+        }
+  ): void {
     // A string is a datatype in mathjs (`sparse('number')`): it builds the empty matrix
     if (data === undefined || data === null || typeof (data as unknown) === 'string') {
       // Empty matrix
@@ -1216,6 +1267,21 @@ export class MathJSSparseMatrix {
    */
   getDataType(): string {
     return this._datatype ?? (getArrayDataType(this._values ?? [], typeOf) as string);
+  }
+
+  /**
+   * The full zero test, whatever the matrix datatype (mathjs 15.3.0 stores the
+   * typed-function `isZero` here).
+   */
+  isZero_Full(value: unknown): boolean {
+    return isZeroScalar(value);
+  }
+
+  /**
+   * The zero test for the matrix datatype (mathjs 15.3.0 SparseMatrix API).
+   */
+  isZero(value: unknown): boolean {
+    return isZeroScalar(value);
   }
 
   /**

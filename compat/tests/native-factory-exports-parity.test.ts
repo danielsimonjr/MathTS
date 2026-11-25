@@ -45,22 +45,20 @@ describe('native compatibility dependency bundles', () => {
   });
 
   it('handles zero BigNumber operands in selected collection logical shifts', () => {
+    // mathjs 15.3.0 (#3806, #3808) removed the equalScalar dependency of the logical
+    // shifts; in a bundle that loads no BigNumber equalScalar signature, its isZero cannot
+    // see a BigNumber, so the oracle itself can no longer shift a matrix by a BigNumber
+    // zero. The scalar-by-BigNumber rejection and the zero-shift results are unchanged.
     const actual = create({
       rightLogShiftDependencies: compat.rightLogShiftDependencies,
       bignumberDependencies: compat.bignumberDependencies,
     });
-    const expected = oracle.create({
-      rightLogShiftDependencies: Reflect.get(oracle, 'rightLogShiftDependencies'),
-      bignumberDependencies: Reflect.get(oracle, 'bignumberDependencies'),
-    });
-    const run = (instance: object) => {
-      const call = (name: string, ...args: unknown[]) =>
-        Reflect.apply(Reflect.get(instance, name), instance, args);
-      const zero = call('bignumber', 0);
-      expect(() => call('rightLogShift', [1, 2], call('bignumber', 1))).toThrow(TypeError);
-      return [call('rightLogShift', [1, 2], zero), call('rightLogShift', zero, [1, 2])];
-    };
-    expect(run(actual)).toEqual(run(expected));
+    const call = (name: string, ...args: unknown[]) =>
+      Reflect.apply(Reflect.get(actual, name), actual, args);
+    const zero = call('bignumber', 0);
+    expect(() => call('rightLogShift', [1, 2], call('bignumber', 1))).toThrow(TypeError);
+    expect(call('rightLogShift', [1, 2], zero)).toEqual([1, 2]);
+    expect(call('rightLogShift', zero, [1, 2])).toEqual([0, 0]);
   });
 
   it('computes selected matrix exponentials and numeric zeta values', () => {
@@ -874,7 +872,8 @@ describe('native compatibility dependency bundles', () => {
       multiplyScalar: selected.typed('multiplyScalar', {
         'number, number': (a: number, b: number) => 2 * a * b,
       }),
-      equalScalar: Reflect.get(selected, 'equalScalar'),
+      // mathjs 15.3.0 replaced the equalScalar dependency of multiply with isZero (#3806).
+      isZero: Reflect.get(selected, 'isZero'),
       dot: Reflect.get(selected, 'dot'),
     } as Parameters<typeof compat.createMultiply>[0]);
     expect(multiply([[1, 2]], [[3], [4]])).toEqual([[23]]);

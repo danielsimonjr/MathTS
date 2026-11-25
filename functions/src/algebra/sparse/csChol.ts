@@ -35,9 +35,11 @@ interface CsCholDependencies {
   im: TypedFunction;
   re: TypedFunction;
   conj: TypedFunction;
-  equal: TypedFunction;
+
   smallerEq: TypedFunction;
   SparseMatrix: SparseMatrixConstructor;
+
+  isZero: TypedFunction;
 }
 
 // Symbolic analysis result from csSchol
@@ -86,7 +88,7 @@ export const createCsChol = /* #__PURE__ */ factory(
     im,
     re,
     conj,
-    equal,
+    isZero,
     smallerEq,
     SparseMatrix,
   }: CsCholDependencies) => {
@@ -181,7 +183,7 @@ export const createCsChol = /* #__PURE__ */ factory(
           lvalues[p] = conj(lki);
         }
         // compute L(k,k)
-        if (smallerEq(re(d), 0) || !equal(im(d), 0)) {
+        if (smallerEq(re(d), 0) || !isZero(im(d))) {
           // not pos def
           return null;
         }

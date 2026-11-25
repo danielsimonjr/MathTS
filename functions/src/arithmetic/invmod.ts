@@ -7,26 +7,36 @@ interface InvmodDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
   xgcd: TypedFunction;
-  equal: TypedFunction;
-  smaller: TypedFunction;
+
   mod: TypedFunction;
-  add: TypedFunction;
+
   isInteger: (x: unknown) => boolean;
   BigNumber?: new (value: number) => unknown;
+
+  equalScalar: TypedFunction;
+
+  isZero: TypedFunction;
 }
 
 const name = 'invmod';
-const dependencies = ['typed', 'config', 'xgcd', 'equal', 'smaller', 'mod', 'add', 'isInteger'];
+const dependencies = [
+  'typed',
+  'config',
+  'BigNumber',
+  'xgcd',
+  'equalScalar',
+  'mod',
+  'isInteger',
+  'isZero',
+];
 
 function buildInvmod({
   typed,
   xgcd,
-  equal,
-  smaller,
+  equalScalar,
   mod,
-  add,
   isInteger,
-  BigNumber,
+  isZero,
 }: InvmodDependencies): TypedFunction {
   /**
    * Calculate the (modular) multiplicative inverse of a modulo b. Solution to the equation `ax ≣ 1 (mod b)`
@@ -52,30 +62,28 @@ function buildInvmod({
    *                              where `invmod(a,b)*a ≣ 1 (mod b)`
    */
   return typed(name, {
-    'number, number': invmod,
-    'BigNumber, BigNumber': invmod,
+    'bigint, bigint': invmodUnchecked,
+    'number | BigNumber, number | BigNumber | bigint': invmod,
+    'bigint, number | BigNumber': invmod,
   }) as TypedFunction;
 
   function invmod(a: unknown, b: unknown): unknown {
-    if (!isInteger(a) || !isInteger(b))
-      throw new Error('Parameters in function invmod must be integer numbers');
-    a = mod(a, b);
-    if (equal(b, 0)) throw new Error('Divisor must be non zero');
+    if (!isInteger(a) || !isInteger(b)) {
+      throw new Error(`Arguments of invmod must be integers, not ${String(a)} and ${String(b)}`);
+    }
+    return invmodUnchecked(a, b);
+  }
+
+  function invmodUnchecked(a: unknown, b: unknown): unknown {
+    if (isZero(b)) return NaN;
+    a = mod(a, b); // reduce the size of the problem
     const res = xgcd(a, b) as { valueOf(): unknown[] };
-    const resVal = res.valueOf();
-    const [gcd, invValue] = resVal;
-    const one = BigNumber ? new BigNumber(1) : 1;
-    const zero = BigNumber ? new BigNumber(0) : 0;
-    if (!equal(gcd, one)) return NaN;
-    let inv = mod(invValue, b);
-    if (smaller(inv, zero)) inv = add(inv, b);
-    return inv;
+    const [gcd, invValue] = res.valueOf();
+    if (!equalScalar(gcd, 1)) return NaN;
+    // Make sure we end up in the proper value range mod b (#3710)
+    return mod(invValue, b);
   }
 }
 
 export const createInvmod = /* #__PURE__ */ factory(name, dependencies, buildInvmod);
-export const createSelectedInvmod = /* #__PURE__ */ factory(
-  name,
-  [...dependencies, 'BigNumber'],
-  buildInvmod
-);
+export const createSelectedInvmod = /* #__PURE__ */ factory(name, dependencies, buildInvmod);

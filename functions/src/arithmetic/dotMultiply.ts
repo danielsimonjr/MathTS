@@ -10,31 +10,23 @@ import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithm
 interface DotMultiplyDependencies {
   typed: TypedFunction;
   matrix: TypedFunction;
-  equalScalar: TypedFunction;
+
   multiplyScalar: TypedFunction;
-  concat: TypedFunction;
 }
 
 const name = 'dotMultiply';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'multiplyScalar', 'concat'];
+const dependencies = ['typed', 'matrix', 'multiplyScalar'];
 
 export const createDotMultiply = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    equalScalar,
-    multiplyScalar,
-    concat,
-  }: DotMultiplyDependencies): TypedFunction => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
-    const matAlgo09xS0Sf = createMatAlgo09xS0Sf({ typed, equalScalar });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+  ({ typed, matrix, multiplyScalar }: DotMultiplyDependencies): TypedFunction => {
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
+    const matAlgo09xS0Sf = createMatAlgo09xS0Sf({ typed });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

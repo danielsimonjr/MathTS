@@ -4,7 +4,6 @@ import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 import type { TypedFunction } from '../core/function/typed.js';
-import type { ConfigOptions } from '../core/config.js';
 import type { AlgorithmFunction } from '../type/matrix/types.js';
 
 // Type definitions for unequal
@@ -22,11 +21,11 @@ interface SparseMatrixConstructor {
 
 interface UnequalDependencies {
   typed: TypedFunction;
-  config: ConfigOptions;
+
   equalScalar: TypedFunction;
   matrix: MatrixFactory;
   DenseMatrix: DenseMatrixConstructor;
-  concat: TypedFunction;
+
   SparseMatrix: SparseMatrixConstructor;
 }
 
@@ -36,35 +35,18 @@ interface UnequalNumberDependencies {
 }
 
 const name = 'unequal';
-const dependencies = [
-  'typed',
-  'config',
-  'equalScalar',
-  'matrix',
-  'DenseMatrix',
-  'concat',
-  'SparseMatrix',
-];
+const dependencies = ['typed', 'equalScalar', 'matrix', 'DenseMatrix', 'SparseMatrix'];
 
 export const createUnequal = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config: _config,
-    equalScalar,
-    matrix,
-    DenseMatrix,
-    concat,
-    SparseMatrix,
-  }: UnequalDependencies) => {
+  ({ typed, equalScalar, matrix, DenseMatrix, SparseMatrix }: UnequalDependencies) => {
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

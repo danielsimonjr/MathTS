@@ -102,14 +102,16 @@ describe('#1164 integer functions of BigNumbers through the expression language'
   it('#1164 invmod keeps its values after xgcd moved to one implementation', () => {
     expect(ev('invmod(3, 11)')).toBe(4);
     expect(ev('invmod(-3, 11)')).toBe(7);
-    expect(ev('invmod(3, -11)')).toBe(-18);
+    // mathjs 15.3.0 (#3710) makes invmod return the canonical representative in the
+    // modulus range, so a negative modulus now gives -7, not -18 (#1566 group).
+    expect(ev('invmod(3, -11)')).toBe(-7);
     expect(pv('invmod(3, 11)')).toBe(4);
     expect(pv('invmod(-3, 11)')).toBe(7);
-    expect(pv('invmod(3, -11)')).toBe(-18);
+    expect(pv('invmod(3, -11)')).toBe(-7);
     for (const run of [ev, pv]) {
       expect(str(run('invmod(bignumber(3), bignumber(11))'))).toBe('4');
       expect(str(run('invmod(bignumber(-3), bignumber(11))'))).toBe('7');
-      expect(str(run('invmod(bignumber(3), bignumber(-11))'))).toBe('-18');
+      expect(str(run('invmod(bignumber(3), bignumber(-11))'))).toBe('-7');
     }
   });
 
@@ -298,7 +300,9 @@ describe('#1096 gcd and lcm of Fractions and of more than two values', () => {
 
 describe('#1093 multinomial through the expression language', () => {
   it('#1093 a matrix of arrays is a 2-D matrix on the parse path', () => {
-    expect(pv('multinomial([[1, 2], [3, 4]])')).toBe(12600);
+    // mathjs 15.3.0 (#3790, #1563) throws DimensionError for a multidimensional
+    // multinomial input instead of flattening it.
+    expect(() => pv('multinomial([[1, 2], [3, 4]])')).toThrow(RangeError);
     expect(pv('sum([[1, 2], [3, 4]])')).toBe(10);
     expect((pv('[[1, 2], [3, 4]]') as { size(): number[] }).size()).toEqual([2, 2]);
     expect((pv('matrix([matrix([1, 2]), matrix([3, 4])])') as { size(): number[] }).size()).toEqual(
@@ -323,11 +327,10 @@ describe('#1093 multinomial through the expression language', () => {
     );
   });
 
-  it('#1093 multinomial of a ragged plain Array on the API path equals mathjs (60)', () => {
-    // A plain Array is not validated as a matrix, in mathjs and here: multinomial counts all of
-    // its entries (1 + 2 + 3). The expression-language array literal is a container question of
-    // batch EV, not a multinomial row.
-    expect(math.multinomial([[1, 2], [3]])).toBe(60);
+  it('#1093 multinomial of a ragged plain Array on the API path equals mathjs', () => {
+    // mathjs 15.3.0 (#3790, #1563) reads the size of the argument and rejects anything
+    // that is not one-dimensional; a ragged nested array is no longer flattened.
+    expect(() => math.multinomial([[1, 2], [3]])).toThrow(RangeError);
   });
 });
 

@@ -1,23 +1,15 @@
 import { factory } from '../../../utils/factory.js';
-import { clone } from '../../../utils/object.js';
 import { findTypedImpl } from '../../../utils/typed-impl.js';
-import type {
-  DataType,
-  DenseMatrixData,
-  MatrixCallback,
-  TypedFunction,
-  DenseMatrixConstructorData,
-  MatrixValue,
-} from '../types.js';
+import type { DataType, MatrixCallback, TypedFunction, MatrixValue } from '../types.js';
 
 /**
  * DenseMatrix interface for algorithm operations.
  */
 interface DenseMatrix {
-  _data: DenseMatrixData;
+  _data: unknown;
   _size: number[];
   _datatype?: DataType;
-  createDenseMatrix(data: DenseMatrixConstructorData): DenseMatrix;
+  map(callback: (value: MatrixValue, index: number[], matrix: unknown) => MatrixValue): DenseMatrix;
 }
 
 const name = 'matAlgo14xDs';
@@ -55,13 +47,8 @@ export const createMatAlgo14xDs = /* #__PURE__ */ factory(
       callback: MatrixCallback,
       inverse: boolean
     ): DenseMatrix {
-      // a arrays
-      const adata = a._data;
-      const asize = a._size;
       const adt: DataType = a._datatype;
 
-      // datatype
-      let dt: DataType;
       // callback signature to use
       let cf: MatrixCallback = callback;
 
@@ -74,8 +61,7 @@ export const createMatAlgo14xDs = /* #__PURE__ */ factory(
         );
         if (impl) {
           try {
-            b = typed.convert(b, adt);
-            dt = adt;
+            b = typed.convert(b, adt) as MatrixValue;
             cf = impl;
           } catch {
             cf = callback;
@@ -83,64 +69,8 @@ export const createMatAlgo14xDs = /* #__PURE__ */ factory(
         }
       }
 
-      // populate cdata, iterate through dimensions
-      const cdata: DenseMatrixData =
-        asize.length > 0 ? _iterate(cf, 0, asize, asize[0], adata, b, inverse) : [];
-
-      // c matrix
-      return a.createDenseMatrix({
-        data: cdata,
-        size: clone(asize),
-        datatype: dt,
-      });
+      // map over the matrix elements, as in mathjs 15.3.0 (the matrix keeps its size)
+      return inverse ? a.map((v) => cf(b, v)) : a.map((v) => cf(v, b));
     };
-
-    /**
-     * Recursive function to iterate through matrix dimensions.
-     *
-     * @param f - The callback function to apply
-     * @param level - Current recursion depth
-     * @param s - Size array (dimensions)
-     * @param n - Size at current level
-     * @param av - Data from matrix A at current level
-     * @param bv - The scalar value
-     * @param inverse - Whether to invert the callback order
-     * @returns Resulting array at this level
-     */
-    function _iterate(
-      f: MatrixCallback,
-      level: number,
-      s: number[],
-      n: number,
-      av: DenseMatrixData,
-      bv: MatrixValue,
-      inverse: boolean
-    ): MatrixValue[] {
-      // initialize array for this level
-      const cv: MatrixValue[] = [];
-      // check we reach the last level
-      if (level === s.length - 1) {
-        // loop arrays in last level
-        for (let i = 0; i < n; i++) {
-          // invoke callback and store value
-          cv[i] = inverse ? f(bv, (av as MatrixValue[])[i]) : f((av as MatrixValue[])[i], bv);
-        }
-      } else {
-        // iterate current level
-        for (let j = 0; j < n; j++) {
-          // iterate next level
-          cv[j] = _iterate(
-            f,
-            level + 1,
-            s,
-            s[level + 1],
-            (av as DenseMatrixData[])[j],
-            bv,
-            inverse
-          );
-        }
-      }
-      return cv;
-    }
   }
 );

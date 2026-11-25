@@ -44,14 +44,15 @@ interface FloorNumberDependencies {
 }
 
 interface FloorDependencies extends FloorNumberDependencies {
+  isZero: TypedFunction;
   matrix: (data: unknown[]) => Matrix;
-  equalScalar: TypedFunction;
+
   zeros: (size: number[], storage?: string) => Matrix;
   DenseMatrix: new (data: unknown) => Matrix;
 }
 
 const name = 'floor';
-const dependencies = ['typed', 'config', 'round', 'matrix', 'equalScalar', 'zeros', 'DenseMatrix'];
+const dependencies = ['typed', 'config', 'round', 'matrix', 'isZero', 'zeros', 'DenseMatrix'];
 
 const bigTen = BigNumber.fromNumber(10);
 
@@ -88,8 +89,8 @@ export const createFloorNumber = /* #__PURE__ */ factory(
 export const createFloor = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, round, matrix, equalScalar, zeros, DenseMatrix }: FloorDependencies) => {
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+  ({ typed, config, round, matrix, zeros, DenseMatrix, isZero }: FloorDependencies) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
@@ -275,7 +276,7 @@ export const createFloor = /* #__PURE__ */ factory(
       'number | Complex | Fraction | BigNumber, Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: number | ComplexType | FractionType | BigNumberType, y: Matrix): Matrix => {
-            if (equalScalar(x, 0)) return zeros(y.size(), y.storage());
+            if (isZero(x)) return zeros(y.size(), y.storage());
             if (y.storage() === 'dense') {
               return matAlgo14xDs(
                 y as unknown as Parameters<typeof matAlgo14xDs>[0],

@@ -11,22 +11,20 @@ interface MatrixFactory {
 interface CompareTextDependencies {
   typed: TypedFunction;
   matrix: MatrixFactory;
-  concat: TypedFunction;
 }
 
 const name = 'compareText';
-const dependencies = ['typed', 'matrix', 'concat'];
+const dependencies = ['typed', 'matrix'];
 
 (_compareText as unknown as { signature: string }).signature = 'any, any';
 
 export const createCompareText = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, concat }: CompareTextDependencies) => {
+  ({ typed, matrix }: CompareTextDependencies) => {
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

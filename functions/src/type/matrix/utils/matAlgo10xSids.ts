@@ -35,6 +35,12 @@ interface SparseMatrix {
   _ptr: number[];
   _size: [number, number];
   _datatype?: DataType;
+  /** The zero value of the matrix's datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero?: MatrixValue;
+  /** The zero test for the matrix's datatype. */
+  isZero(value: MatrixValue): boolean;
+  /** The full typed-function `isZero`, whatever the matrix datatype. */
+  isZero_Full(value: MatrixValue): boolean;
 }
 
 const name = 'matAlgo10xSids';

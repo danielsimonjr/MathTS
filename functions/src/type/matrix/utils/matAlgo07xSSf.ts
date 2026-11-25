@@ -21,6 +21,12 @@ interface SparseMatrix {
   _data?: MatrixArray;
   _datatype?: DataType;
   getDataType(): string;
+  /** The zero value of the matrix's datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero?: MatrixValue;
+  /** The zero test for the matrix's datatype. */
+  isZero(value: MatrixValue): boolean;
+  /** The full typed-function `isZero`, whatever the matrix datatype. */
+  isZero_Full(value: MatrixValue): boolean;
 }
 
 /**
@@ -84,8 +90,22 @@ export const createMatAlgo07xSSf = /* #__PURE__ */ factory(
       // process data types
       if (typeof adt === 'string' && adt === bdt && adt !== 'mixed') {
         dt = adt;
-        zero = typed.convert(0, dt);
-        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
+        if (dt === a._datatype) {
+          zero = a.zero as MatrixValue;
+        } else if (dt === b._datatype) {
+          zero = b.zero as MatrixValue;
+        } else {
+          zero = typed.convert(0, dt) as MatrixValue;
+        }
+      }
+      // find callback signature
+      if (
+        typeof adt === 'string' &&
+        adt !== 'mixed' &&
+        typeof bdt === 'string' &&
+        bdt !== 'mixed'
+      ) {
+        cf = typed.find(callback, [adt, bdt]) as unknown as MatrixCallback;
       }
 
       // result arrays for sparse format

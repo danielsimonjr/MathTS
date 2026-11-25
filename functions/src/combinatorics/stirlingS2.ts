@@ -48,7 +48,9 @@ const dependencies = [
   'isInteger',
   'number',
   '?bignumber',
+  '?bigint',
   'larger',
+  'typeOf',
 ];
 
 export const createStirlingS2 = /* #__PURE__ */ factory(

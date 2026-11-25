@@ -41,7 +41,7 @@ interface LargerDependencies {
   bignumber: BigNumberFactory;
   matrix: MatrixFactory;
   DenseMatrix: DenseMatrixConstructor;
-  concat: TypedFunction;
+
   SparseMatrix: SparseMatrixConstructor;
 }
 
@@ -51,27 +51,18 @@ interface LargerNumberDependencies {
 }
 
 const name = 'larger';
-const dependencies = [
-  'typed',
-  'config',
-  'bignumber',
-  'matrix',
-  'DenseMatrix',
-  'concat',
-  'SparseMatrix',
-];
+const dependencies = ['typed', 'config', 'bignumber', 'matrix', 'DenseMatrix', 'SparseMatrix'];
 
 export const createLarger = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, bignumber, matrix, DenseMatrix, concat, SparseMatrix }: LargerDependencies) => {
+  ({ typed, config, bignumber, matrix, DenseMatrix, SparseMatrix }: LargerDependencies) => {
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
     const compareUnits = createCompareUnits({ typed });
 

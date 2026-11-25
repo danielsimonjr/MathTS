@@ -100,11 +100,13 @@ interface Dependencies {
   multiplyScalar: TypedFunction;
   subtractScalar: TypedFunction;
   larger: TypedFunction;
-  equalScalar: TypedFunction;
+
   unaryMinus: TypedFunction;
   DenseMatrix: DenseMatrixConstructor;
   SparseMatrix: SparseMatrixConstructor;
   Spa: SpaConstructor;
+
+  isZero: TypedFunction;
 }
 
 const name = 'lup';
@@ -117,7 +119,7 @@ const dependencies = [
   'multiplyScalar',
   'subtractScalar',
   'larger',
-  'equalScalar',
+  'isZero',
   'unaryMinus',
   'DenseMatrix',
   'SparseMatrix',
@@ -136,7 +138,6 @@ export const createLup = /* #__PURE__ */ factory(
     multiplyScalar,
     subtractScalar,
     larger,
-    equalScalar,
     unaryMinus,
     DenseMatrix,
     SparseMatrix,
@@ -362,7 +363,7 @@ export const createLup = /* #__PURE__ */ factory(
             for (i = j + 1; i < rows; i++) {
               // value @ i, j
               const vij = data[i][j];
-              if (!isZeroEntry(vij, equalScalar)) {
+              if (!isZeroEntry(vij)) {
                 // update data
                 data[i][j] = divideScalar(data[i][j], vjj);
               }
@@ -559,7 +560,7 @@ export const createLup = /* #__PURE__ */ factory(
             // update value
             v = divideScalar(v, vjj);
             // check value is non zero
-            if (!isZeroEntry(v, equalScalar)) {
+            if (!isZeroEntry(v)) {
               // update lower triangular matrix
               lvalues.push(v);
               lindex.push(x);

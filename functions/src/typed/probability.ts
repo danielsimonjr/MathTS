@@ -41,6 +41,8 @@ import { binomialLoop, roundedLoop } from '../probability/rounded-loop.js';
 import seedrandom from 'seedrandom';
 import { gammaNumber } from '../plain/number/probability.js';
 import { denseOfSize } from '../factories/matrix-bridge.js';
+import { arraySize } from '../utils/array.js';
+import { DimensionError } from '../error/DimensionError.js';
 import { multinomialExact } from '../probability/multinomial-exact.js';
 
 // =============================================================================
@@ -363,9 +365,23 @@ export const combinationsWithRep = mathTyped('combinationsWithRep', {
 });
 
 /**
+ * The multinomial of a flat list of non-negative integer counts, as in mathjs 15.3.0: the
+ * empty product is the number 1, a zero count contributes nothing, and the exact bigint
+ * engine keeps number results exact while they fit a double.
+ */
+function multinomialOfEntries(entries: unknown[]): number | BigNumber {
+  const parts: (number | BigNumber)[] = [];
+  // Validate every entry before any early return, as mathjs does.
+  for (const entry of entries) collectMultinomialParts(entry, parts);
+  if (parts.length === 0) return 1;
+  if (!parts.some((p) => isBigNumber(p))) return multinomialExact(parts as number[]);
+  return roundedMultinomial(parts.map((p) => (isBigNumber(p) ? p.toBigInt() : BigInt(p))));
+}
+
+/**
  * Read the entries of a multinomial argument, in order, into `parts`. A nested Array or Matrix is
  * read recursively. A boolean is 0 or 1, as in mathjs. A hole of an Array is read as `undefined`.
- * @throws TypeError for an entry that is not an integer of 1 or more
+ * @throws TypeError for an entry that is not a non-negative integer
  */
 function collectMultinomialParts(value: unknown, parts: (number | BigNumber)[]): void {
   if (Array.isArray(value)) {
@@ -378,8 +394,8 @@ function collectMultinomialParts(value: unknown, parts: (number | BigNumber)[]):
   }
   const entry = typeof value === 'boolean' || typeof value === 'string' ? Number(value) : value;
   const valid = isBigNumber(entry)
-    ? entry.isInteger() && entry.greaterThanOrEqual(1)
-    : typeof entry === 'number' && Number.isInteger(entry) && entry >= 1;
+    ? entry.isInteger() && entry.greaterThanOrEqual(0)
+    : typeof entry === 'number' && Number.isInteger(entry) && entry >= 0;
   if (!valid) {
     throw new TypeError('Positive integer value expected in function multinomial');
   }
@@ -450,13 +466,21 @@ function roundedMultinomial(parts: readonly bigint[]): BigNumber {
  * multinomial([3])        // 1
  */
 export const multinomial = mathTyped('multinomial', {
-  // A nested array or a matrix counts all of its entries, as in mathjs.
+  // Varargs of non-negative integers, as in mathjs 15.3.0 (#3790, #1563).
+  '...number | BigNumber | bigint | Fraction': (values: unknown[]): number | BigNumber =>
+    multinomialOfEntries(values),
+  // A one-dimensional array or matrix of counts. A matrix with more than one axis throws
+  // DimensionError, as in mathjs 15.3.0 (#1563).
   'Array | Matrix': (input: unknown[] | Matrix): number | BigNumber => {
-    const parts: (number | BigNumber)[] = [];
-    // Validate every entry before any early return, as mathjs does.
-    collectMultinomialParts(input, parts);
-    if (!parts.some((p) => isBigNumber(p))) return multinomialExact(parts as number[]);
-    return roundedMultinomial(parts.map((p) => (isBigNumber(p) ? p.toBigInt() : BigInt(p))));
+    const nested =
+      input !== null && typeof input === 'object' && (input as { toArray?: () => unknown }).toArray
+        ? ((input as { toArray(): unknown }).toArray() as unknown[])
+        : (input as unknown[]);
+    const dims = arraySize(nested);
+    if (dims.length !== 1) {
+      throw new DimensionError(dims.length, 1);
+    }
+    return multinomialOfEntries(nested);
   },
 });
 

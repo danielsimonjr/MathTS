@@ -15,20 +15,18 @@ interface Matrix {
 interface ToDependencies {
   typed: TypedFunction;
   matrix: (data: unknown[]) => Matrix;
-  concat: TypedFunction;
 }
 
 const name = 'to';
-const dependencies = ['typed', 'matrix', 'concat'];
+const dependencies = ['typed', 'matrix'];
 
 export const createTo = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, concat }: ToDependencies) => {
+  ({ typed, matrix }: ToDependencies) => {
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**
