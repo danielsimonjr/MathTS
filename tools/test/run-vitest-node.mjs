@@ -49,8 +49,7 @@ const vitestWorkersPerItem = Math.max(1, Math.floor(machineCpus / concurrency));
  * @returns {string[]}
  */
 function vitestWorkerArgs() {
-  const w = String(vitestWorkersPerItem);
-  return [`--maxWorkers=${w}`, `--minWorkers=${w}`];
+  return [`--maxWorkers=${vitestWorkersPerItem}`];
 }
 
 /**
@@ -162,7 +161,10 @@ async function runItem(item, logPath) {
   }
 }
 
-/** @param {number} ms */
+/**
+ * Human-readable duration for summary output.
+ * @param {number} ms
+ */
 function formatDuration(ms) {
   if (ms < 1000) return `${Math.round(ms)}ms`;
   return `${(ms / 1000).toFixed(1)}s`;
