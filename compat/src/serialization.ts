@@ -1,5 +1,6 @@
 import { isBigNumber, isFraction } from '@danielsimonjr/mathts-core';
 import {
+  factory_mathjsCompat,
   replacer as nativeReplacer,
   reviver as nativeReviver,
 } from '@danielsimonjr/mathts-functions';
@@ -19,10 +20,7 @@ export function compatReplacer(this: unknown, key: string, value: unknown): unkn
     };
   }
   if (isBigNumber(original)) {
-    const scientific = original.toExponential();
-    const exponent = Number(scientific.split('e')[1]);
-    const value = exponent > -7 && exponent < 21 ? original.toFixed() : scientific;
-    return { mathjs: 'BigNumber', value };
+    return { mathjs: 'BigNumber', value: factory_mathjsCompat.string(original) };
   }
   return nativeReplacer(key, value);
 }

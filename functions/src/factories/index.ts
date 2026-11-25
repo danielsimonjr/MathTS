@@ -2456,7 +2456,10 @@ const createSelectedString = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self) => (value) => mapCollection(value, (v) => self(v))
       ),
-      any: String,
+      any: (value: unknown) => {
+        if (!coreIsBigNumber(value)) return String(value);
+        return value.e <= -7 || value.e >= 21 ? value.toExponential() : value.toFixed();
+      },
     })
 );
 
@@ -3833,6 +3836,7 @@ export const factory_mathjsCompat = {
   createCompatTyped,
   tryCreateFactoryBundle,
   compatFactoryExports,
+  string: createSelectedString({ typed: createTyped(factoryScope) }),
   setUnion: compatSetUnion,
   compareText,
   equalText,

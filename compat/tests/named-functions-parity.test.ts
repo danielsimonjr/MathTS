@@ -1,3 +1,4 @@
+import { string as compatString, stringDependencies } from '../src/index.js';
 import { describe, expect, it } from 'vitest';
 import * as oracle from 'mathjs';
 import {
@@ -462,4 +463,21 @@ describe('named compatibility function imports', () => {
     expect(actual.re).toBeCloseTo(expected.re, 14);
     expect(actual.im).toBeCloseTo(expected.im, 14);
   });
+});
+
+it('uses mathjs notation for numbers and BigNumbers in string conversions', () => {
+  const full = create(all);
+  const selected = create({ stringDependencies });
+  const values = ['0', '1e-7', '-1.25e-6', '1e20', '1e21', 'NaN', 'Infinity'];
+  for (const input of values) {
+    const value = full.bignumber(input);
+    const expected = oracle.string(oracle.bignumber(input));
+    expect(compatString(value)).toBe(expected);
+    expect(selected.string(value)).toBe(expected);
+    expect(full.string(value)).toBe(expected);
+    expect(full.evaluate('string(x)', { x: value })).toBe(expected);
+  }
+  for (const n of [1e-5, 1e6]) {
+    expect(compatString([n])).toEqual(oracle.string([n]));
+  }
 });
