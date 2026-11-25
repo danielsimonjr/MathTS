@@ -1,3 +1,4 @@
+import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
 /**
  * mathjs Compatibility Shims
  *
@@ -81,7 +82,6 @@ import {
   det as _det,
   size as _size,
   factory_mathjsCompat,
-  bignumber as _bignumber,
   complex as _complex,
 } from '@danielsimonjr/mathts-functions';
 
@@ -151,6 +151,11 @@ export const fraction = mathTyped('fraction', factory_mathjsCompat.fraction as n
   undefined: () => new Fraction(0, 1),
 }) as unknown as CompatFraction;
 
+const compatBignumber = factory_mathjsCompat.compatFactoryExports().createBignumber({
+  typed: factory_mathjsCompat.createCompatTyped(),
+  BigNumber: CompatBigNumber,
+});
+
 /**
  * Create a BigNumber (mathjs-compatible). An Array or a Matrix converts element by element,
  * a Unit converts its value, and no value gives 0.
@@ -167,9 +172,9 @@ export function bignumber(
 ): BigNumber;
 export function bignumber(value?: unknown): unknown {
   if (value === undefined) {
-    return BigNumber.fromNumber(0);
+    return new CompatBigNumber(0);
   }
-  return _bignumber(value as object);
+  return compatBignumber(value);
 }
 
 /** Matrix values returned from the compat `matrix` shim (native, or the bridge matrix of `functions`). */
@@ -345,7 +350,7 @@ const applyArithmetic = (
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
     return unwrap(matrixFn(aa, bb));
   }
-  return scalarFn(a, b);
+  return compatDecimalResult(scalarFn(a, b));
 };
 
 // mathjs `add`/`subtract`/`multiply` are variadic and left-fold over all

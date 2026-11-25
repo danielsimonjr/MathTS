@@ -40,8 +40,11 @@ describe('#1166 item 2: expm1 of a small BigNumber keeps the argument', () => {
       bignumber: (x: string) => unknown;
       evaluate: (expr: string) => unknown;
     };
-    eq(math.expm1(math.bignumber('1e-70')), '1e-70');
-    eq(math.evaluate('expm1(1e-70)'), '1e-70');
+    for (const result of [math.expm1(math.bignumber('1e-70')), math.evaluate('expm1(1e-70)')]) {
+      expect(result).toBeInstanceOf(BigNumber);
+      expect((result as BigNumber).equals(bn('1e-70'))).toBe(true);
+      expect(String(result)).toBe('1e-70');
+    }
   });
 
   it('expm1(1e10) and expm1(-1e10) do not throw', () => {

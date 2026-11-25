@@ -1,4 +1,5 @@
-import { BigNumber, Complex, Fraction, Range } from '@danielsimonjr/mathts-core';
+import { BigNumber } from './bignumber.js';
+import { Complex, Fraction, Range } from '@danielsimonjr/mathts-core';
 import {
   DimensionError,
   IndexError,

@@ -45,6 +45,7 @@ math.complex(2, 3); // 2 + 3i
 - `math.add`, `math.subtract`, and `math.multiply` preserve boxed Matrix results.
   Matrix literals and numeric-dimension `math.zeros` follow the instance's `matrix`
   setting. `math.size` returns a plain array of dimensions, as in mathjs 15.
+- Compatibility BigNumbers use exponential notation at decimal exponents of −7 and below or 21 and above. For example, `String(bignumber('1e21'))` returns `'1e+21'`. Use `toFixed()` for the full decimal expansion.
 - Unit readings use mathjs’s floating-point conversion order. For example, both
   `unit(0.75, 'inch')` and `evaluate('0.75 inch')` print `0.7499999999999999 inch`.
 - Named imports such as `unit` and `createUnit` share the default unit registry. Each

@@ -1,4 +1,5 @@
-import { BigNumber } from '@danielsimonjr/mathts-core';
+import { isBigNumber } from '@danielsimonjr/mathts-core';
+import { BigNumber } from './bignumber.js';
 import { evaluate, factory_mathjsCompat, runWithConfig } from '@danielsimonjr/mathts-functions';
 import { MATHJS_UNIT_CONSTANTS } from './parity-names.generated.js';
 
@@ -36,19 +37,20 @@ export function configuredMathjsConstant(
   name: keyof typeof mathConstants | 'Infinity' | 'NaN',
   value: number,
   config: Parameters<typeof runWithConfig>[0]
-): number | BigNumber {
+): number | import('@danielsimonjr/mathts-core').BigNumber {
   if (config.number !== 'BigNumber') return value;
-  if (name === 'Infinity' || name === 'NaN') return BigNumber.fromNumber(value);
+  if (name === 'Infinity' || name === 'NaN') return new BigNumber(value);
   const canonical = mathConstants[name];
   return runWithConfig(config, () => {
     // MathJS rounds each operation in (sqrt(5) + 1) / 2 at the configured precision.
-    if (canonical === 'phi') return BigNumber.fromNumber(5).sqrt().add(1).divide(2);
+    if (canonical === 'phi') return new BigNumber(5).sqrt().add(1).divide(2);
     const result: unknown = evaluate(canonical === 'tau' ? 'pi' : canonical);
-    if (!(result instanceof BigNumber)) {
+    if (!isBigNumber(result)) {
       throw new TypeError(`Expected a BigNumber constant for ${canonical}`);
     }
     // MathJS derives tau by doubling the already rounded pi.
-    return canonical === 'tau' ? result.multiply(2) : result;
+    const decimal = new BigNumber(result);
+    return canonical === 'tau' ? decimal.multiply(2) : decimal;
   });
 }
 
@@ -66,7 +68,7 @@ export function compatConstantReaders(
   for (const name of Object.keys(mathConstants) as (keyof typeof mathConstants)[]) {
     const number = surface[name] as number;
     let precision: number | undefined;
-    let precise: number | BigNumber | undefined;
+    let precise: ReturnType<typeof configuredMathjsConstant> | undefined;
     bind(name, () => {
       if (config.number !== 'BigNumber') return number;
       if (precise === undefined || precision !== config.precision) {
@@ -79,7 +81,7 @@ export function compatConstantReaders(
   for (const [name, number] of Object.entries(scalarConstants)) {
     if (!isDefault(name)) continue;
     bind(name as keyof typeof scalarConstants, () =>
-      config.number === 'BigNumber' ? BigNumber.fromNumber(number) : number
+      config.number === 'BigNumber' ? new BigNumber(number) : number
     );
   }
   for (const [name, value, units, decimalValue] of MATHJS_UNIT_CONSTANTS) {
@@ -97,7 +99,7 @@ export function compatConstantReaders(
       }
       if (precise === undefined || precision !== config.precision) {
         precise = runWithConfig(config, () => {
-          const magnitude = BigNumber.parse(
+          const magnitude = new BigNumber(
             decimalValue ?? String(value)
           ) as unknown as ConstructorParameters<typeof Unit>[0];
           const unit = new UnitClass(magnitude, units);
@@ -109,9 +111,7 @@ export function compatConstantReaders(
       return precise;
     });
   }
-  bind('Infinity', () =>
-    config.number === 'BigNumber' ? BigNumber.fromNumber(Infinity) : Infinity
-  );
-  bind('NaN', () => (config.number === 'BigNumber' ? BigNumber.fromNumber(NaN) : NaN));
+  bind('Infinity', () => (config.number === 'BigNumber' ? new BigNumber(Infinity) : Infinity));
+  bind('NaN', () => (config.number === 'BigNumber' ? new BigNumber(NaN) : NaN));
   return reads;
 }

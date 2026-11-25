@@ -3804,9 +3804,16 @@ export const factory_mathjsCompat = {
   /** Create a parser whose nodes compile with the expression bindings of one instance. */
   createScopedParse(
     mathWithTransform: Record<string, unknown>,
-    mathjsSyntax: boolean
+    mathjsSyntax: boolean,
+    decimalLiteral?: (value: unknown) => unknown
   ): ReturnType<typeof createParse> {
-    return createParse({ ..._parseScope, mathWithTransform, mathjsSyntax });
+    const parseNumeric = decimalLiteral
+      ? (value: string, type: string) => {
+          const parsed = numeric(value, type);
+          return type === 'BigNumber' ? decimalLiteral(parsed) : parsed;
+        }
+      : numeric;
+    return createParse({ ..._parseScope, numeric: parseNumeric, mathWithTransform, mathjsSyntax });
   },
   constructors: compatConstructors,
   checks,
