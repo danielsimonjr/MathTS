@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`docs/reports/`: archived parity and gap-analysis reports (2026-11-25):** the mathjs 15.3.0 parity gap analysis (issues #1549–#1589, tracker #1590) and the six-system parity review against NumPy, SciPy, PySR, Mathematica, Mathcad and MATLAB (issues #1592–#1713, tracker #1714), with per-reference deep reports and data tables. Index: [`docs/reports/README.md`](docs/reports/README.md). For numeric and symbolic correctness, the sources of truth are NumPy, SciPy, SymPy and PySR; Mathematica, Mathcad and MATLAB are feature references only.
+
 ### Changed
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
