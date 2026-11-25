@@ -53,8 +53,9 @@ export const createAcoth = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: function (x: number) {
-        if (Object.is(x, 0)) {
-          return new Complex(0, Math.PI / 2);
+        if (x === 0) {
+          // acoth(0) = atanh(±∞) = ±0 + iπ/2 (C99 / cmath). `-0` keeps the signed real zero.
+          return new Complex(1 / x, 0).atanh();
         }
         if (x >= 1 || x <= -1 || config.predictable) {
           return acothNumber(x);

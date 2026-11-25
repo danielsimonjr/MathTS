@@ -320,6 +320,36 @@ describe('Complex', () => {
       expect(atan.re).toBeCloseTo(Math.PI / 4);
       expect(atan.im).toBeCloseTo(0);
     });
+
+    it('asin/acos/atanh of infinities follow C99 / cmath (not Inf*0 NaN)', () => {
+      const asinPos = new Complex(Infinity, 0).asin();
+      expect(asinPos.re).toBeCloseTo(Math.PI / 2);
+      expect(asinPos.im).toBe(Infinity);
+
+      const asinNeg = new Complex(-Infinity, 0).asin();
+      expect(asinNeg.re).toBeCloseTo(-Math.PI / 2);
+      expect(asinNeg.im).toBe(Infinity);
+
+      const acosPos = new Complex(Infinity, 0).acos();
+      expect(acosPos.re).toBe(0);
+      expect(acosPos.im).toBe(-Infinity);
+
+      const atanhPos = new Complex(Infinity, 0).atanh();
+      expect(Object.is(atanhPos.re, 0) || atanhPos.re === 0).toBe(true);
+      expect(atanhPos.im).toBeCloseTo(Math.PI / 2);
+
+      const atanhNeg = new Complex(-Infinity, 0).atanh();
+      expect(Object.is(atanhNeg.re, -0)).toBe(true);
+      expect(atanhNeg.im).toBeCloseTo(Math.PI / 2);
+
+      const asec0 = new Complex(0, 0).asec();
+      expect(asec0.re).toBe(0);
+      expect(asec0.im).toBe(-Infinity);
+
+      const acsc0 = new Complex(0, 0).acsc();
+      expect(acsc0.re).toBeCloseTo(Math.PI / 2);
+      expect(acsc0.im).toBe(Infinity);
+    });
   });
 
   describe('utility methods', () => {
