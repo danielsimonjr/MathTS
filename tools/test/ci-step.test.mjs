@@ -26,6 +26,11 @@ test('control: a step with continue-on-error or an if is reported', () => {
   assert.match(ciStepProblem(CMD, job(gated)), /cannot fail/);
 });
 
+test('docs-only CI gate if is allowed', () => {
+  const steps = `      - name: X\n        if: needs.changes.outputs.docs_only != 'true'\n        run: ${CMD}`;
+  assert.equal(ciStepProblem(CMD, job(steps)), null);
+});
+
 test('a flag of the next step is not read as a flag of this step', () => {
   const steps = `      - name: X\n        run: ${CMD}\n      - name: Y\n        if: false\n        run: true`;
   assert.equal(ciStepProblem(CMD, job(steps)), null);
