@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Unit equality uses absolute SI, including affine offset (#1552):** `unitsEqual`, `unitCmp`, typed `compareNatural`/`compareUnits`, and `Unit.equals` compared scale-only `.value`, so `0 degC` was not equal to `32 degF` or `273.15 K`. They now compare `toSI().value` (exact for BigNumber and Fraction). Duck-typed units without `toSI` keep comparing `.value`. Number-valued unit ordering returns 0 when `coreEqual` is true, so `equal`/`compare`/`largerEq` agree on `0.1 m + 0.2 m` vs `0.3 m`. Root cause: `_normalize` applies multiplicative scale only; offset is applied in `to`/`toSI`. Compat still matches mathjs 15.3.0 (`false` for those pairs) through factory adapters.
+
+- **Typed Unit relational compares values, not references (#1552):** `functions/src/typed/collection-binary.ts#unitsEqual` used `===` on non-number unit values, so two Units with equal BigNumber values were never equal. It now uses `coreEqual` on the normalized values. `unitCmp` coerced every value to `number`, breaking BigNumber ordering and silently ordering Complex units via `valueOf`; comparison delegates to `unitValuesCompare` (typed `BigNumber`/`Fraction`/`bigint` paths and an explicit throw when either value is Complex).
+
+- **Unit equality and ordering on the compat instance (#1552):** `equal`, `unequal`, `equalScalar`, `deepEqual`, `compare`, `larger`, `smaller`, `largerEq`, and `smallerEq` route Unit–Unit pairs through the activated mathjs factories in `compat/src/unit-relational.ts` (for example `50cm == 0.5m` is true under `number: 'BigNumber'`, dimension mismatches throw `Cannot compare units with different base`, and `deepEqual` of two Units follows mathjs).
+
 ### Added
 
 - **`docs/reports/`: archived parity and gap-analysis reports (2026-11-25):** the mathjs 15.3.0 parity gap analysis (issues #1549–#1589, tracker #1590) and the six-system parity review against NumPy, SciPy, PySR, Mathematica, Mathcad and MATLAB (issues #1592–#1713, tracker #1714), with per-reference deep reports and data tables. Index: [`docs/reports/README.md`](docs/reports/README.md). For numeric and symbolic correctness, the sources of truth are NumPy, SciPy, SymPy and PySR; Mathematica, Mathcad and MATLAB are feature references only.
