@@ -8,6 +8,8 @@ describe('named compatibility expression imports', () => {
     expect(asMatrix(evaluate('[1, PI]'))).toEqual(asMatrix(oracle.evaluate('[1, PI]')));
     expect(evaluate(['x', 'x + 1'], new Map([['x', 4]]))).toEqual([4, 5]);
     expect(compile('cos(pi)').evaluate()).toBe(oracle.compile('cos(pi)').evaluate());
+    expect(parse(['1', '2']).map((node) => node.evaluate())).toEqual([1, 2]);
+    expect(parse.isDigit('4')).toBe(true);
     expect(parse('x+1').toString()).toBe(oracle.parse('x+1').toString());
   });
 

@@ -111,15 +111,11 @@ describe('dogfood mathjs parity (#889, #891, #892)', () => {
     }
   });
 
-  // Documented parity exception: a NaN number stays a real NaN through asin, acos and log
-  // (the staysReal* rule of the typed functions: NaN input is not a domain error). mathjs
-  // returns Complex NaN. The printed text is the same; only the result type differs.
-  it('#889 documented exception: asin, acos and log of NaN stay a real NaN', () => {
+  it('matches the mathjs result type for NaN in asin, acos and log', () => {
     const mt = create(all) as unknown as Lib;
     const mj = mjCreate(mjAll) as unknown as Lib;
     for (const fn of ['asin', 'acos', 'log'] as const) {
-      expect(mt[fn](NaN), fn).toBeNaN();
-      expect(typeof mt[fn](NaN), fn).toBe('number');
+      expect(mt.typeOf(mt[fn](NaN)), fn).toBe(mj.typeOf(mj[fn](NaN)));
       expect(String(mt[fn](NaN))).toBe(String(mj[fn](NaN)));
     }
   });

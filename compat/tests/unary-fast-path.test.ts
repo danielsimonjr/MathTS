@@ -28,7 +28,8 @@ vi.mock('@danielsimonjr/mathts-functions', async (importOriginal?: () => Promise
   const c: Counts = (gg.__fpCounts ??= { runWithConfig: 0, typed: {} });
   const out: Record<string, unknown> = { ...orig };
   for (const k of ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt', 'abs', 'exp', 'log']) {
-    out[k] = new Proxy(orig[k] as (...a: unknown[]) => unknown, {
+    const exported = k === 'abs' ? k : 'factory_' + k;
+    out[exported] = new Proxy(orig[exported] as (...a: unknown[]) => unknown, {
       apply(target, thisArg, args) {
         c.typed[k] = (c.typed[k] ?? 0) + 1;
         return Reflect.apply(target, thisArg, args);

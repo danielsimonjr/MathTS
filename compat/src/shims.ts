@@ -52,16 +52,16 @@ import {
   inv as _inv,
   pow as _pow,
   factory_pow as _factoryPow,
-  sqrt as _sqrt,
+  factory_sqrt as _sqrt,
   abs as _abs,
-  exp as _exp,
-  log as _log,
-  sin as _sin,
-  cos as _cos,
-  tan as _tan,
-  asin as _asin,
-  acos as _acos,
-  atan as _atan,
+  factory_exp as _exp,
+  factory_log as _log,
+  factory_sin as _sin,
+  factory_cos as _cos,
+  factory_tan as _tan,
+  factory_asin as _asin,
+  factory_acos as _acos,
+  factory_atan as _atan,
   atan2 as _atan2,
   sum as _sum,
   mean as _mean,
@@ -677,6 +677,7 @@ function filled(args: unknown[], value: 0 | 1, factory: (...a: unknown[]) => unk
   return factory(...args);
 }
 
+/** Return the dimensions of a scalar, string, array, or matrix. */
 export function size(value: unknown): number[] {
   return _size(value);
 }

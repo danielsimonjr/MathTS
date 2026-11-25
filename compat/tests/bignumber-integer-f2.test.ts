@@ -186,11 +186,11 @@ describe('#1097 integer functions through the expression language', () => {
     }
   });
 
-  it('#1097 permutations of collections on both paths', () => {
+  it('rejects collections in permutations on both expression paths', () => {
     for (const run of [ev, pv]) {
-      expect(toArr(run('permutations([5, 6], 2)'))).toEqual([20, 30]);
-      expect(toArr(run('permutations([5, 6])'))).toEqual([120, 720]);
-      expect(toArr(run('permutations(5, [1, 2])'))).toEqual([5, 20]);
+      expect(() => run('permutations([5, 6], 2)')).toThrow(TypeError);
+      expect(() => run('permutations([5, 6])')).toThrow(TypeError);
+      expect(() => run('permutations(5, [1, 2])')).toThrow(TypeError);
     }
   });
 });
@@ -426,6 +426,6 @@ describe('#1093 parse and evaluate run one implementation of the shared function
     expect(() => pv('xgcd(2^60, 3)')).toThrow(RangeError);
     // A Fraction is read as a number (mathjs throws a conversion error; the factory gave a BigNumber).
     expect(pv('combinations(fraction(5), fraction(2))')).toBe(10);
-    expect(pv('permutations(fraction(5))')).toBe(120);
+    expect(() => pv('permutations(fraction(5))')).toThrow('Cannot implicitly convert a Fraction');
   });
 });

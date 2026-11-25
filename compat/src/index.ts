@@ -560,10 +560,27 @@ export function create(
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
   const compatDefaultOverrides = {
+    acosh: mathFunctions.factory_acosh,
+    acot: mathFunctions.factory_acot,
+    acsc: mathFunctions.factory_acsc,
+    asec: mathFunctions.factory_asec,
+    asinh: mathFunctions.factory_asinh,
+    atanh: mathFunctions.factory_atanh,
+    cbrt: mathFunctions.factory_cbrt,
+    cosh: mathFunctions.factory_cosh,
+    cot: mathFunctions.factory_cot,
+    csc: mathFunctions.factory_csc,
+    cube: mathFunctions.factory_cube,
+    expm1: mathFunctions.factory_expm1,
+    sec: mathFunctions.factory_sec,
+    sinh: mathFunctions.factory_sinh,
+    square: mathFunctions.factory_square,
+    tanh: mathFunctions.factory_tanh,
     setUnion: namedSetUnion,
     compareText: namedCompareText,
     equalText: namedEqualText,
     toBest: namedToBest,
+    permutations: namedPermutations,
     lgamma: namedLgamma,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
@@ -591,7 +608,21 @@ export function create(
     expressionConstants.fraction = () => instance.fraction;
   }
   if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
-  for (const name of ['arg', 'conj', 'im', 're'] as const) {
+  for (const name of [
+    'arg',
+    'conj',
+    'im',
+    're',
+    'sin',
+    'cos',
+    'tan',
+    'asin',
+    'acos',
+    'atan',
+    'sqrt',
+    'exp',
+    'log',
+  ] as const) {
     if (originalSurface[name] === mathFunctions[name])
       expressionConstants[name] = () => instance[name];
   }
@@ -700,6 +731,7 @@ export function create(
     instance as Record<string, unknown>,
     currentConfig,
     flat.parser === functionsNamespace.parser,
+    flat.parse === functionsNamespace.parse && typeof flat.parse === 'function',
     expressionConstants,
     new Set(
       ['random', 'randomInt', 'pickRandom'].filter(
@@ -741,7 +773,9 @@ const defaultCompile = ((...args: unknown[]) =>
   )) as MathInstance['compile'];
 
 /** Parse an expression into a mathjs-compatible syntax tree. */
-const defaultParse: MathInstance['parse'] = (expression) => getDefaultInstance().parse(expression);
+const defaultParse: MathInstance['parse'] = /* #__PURE__ */ new Proxy(mathFunctions.parse, {
+  apply: (_target, receiver, args) => Reflect.apply(getDefaultInstance().parse, receiver, args),
+});
 
 /** Stateful expression parser for the default compatibility instance. */
 export const Parser = function Parser(options?: Parameters<MathInstance['parser']>[0]): object {
@@ -827,6 +861,8 @@ const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
   (left: string, right: string): boolean;
   (left: unknown, right: unknown): unknown;
 };
+const namedPermutations = mathFunctions.factory_mathjsCompat
+  .permutations as typeof mathFunctions.permutations;
 const namedLgamma = mathFunctions.factory_mathjsCompat.lgamma as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.lgamma>;
@@ -838,6 +874,7 @@ export {
   namedCompareText as compareText,
   namedEqualText as equalText,
   namedToBest as toBest,
+  namedPermutations as permutations,
   namedLgamma as lgamma,
 };
 
@@ -860,18 +897,18 @@ export { defaultTyped as typed };
 // Mathematical functions shared with the functions package.
 export {
   Help,
-  acosh,
-  acot,
+  factory_acosh as acosh,
+  factory_acot as acot,
   acoth,
-  acsc,
+  factory_acsc as acsc,
   acsch,
   addScalar,
   and,
   apply,
-  asec,
+  factory_asec as asec,
   asech,
-  asinh,
-  atanh,
+  factory_asinh as asinh,
+  factory_atanh as atanh,
   bellNumbers,
   bernoulli,
   bigint,
@@ -882,7 +919,7 @@ export {
   bitXor,
   boolean,
   catalan,
-  cbrt,
+  factory_cbrt as cbrt,
   clone,
   column,
   combinations,
@@ -892,16 +929,16 @@ export {
   composition,
   concat,
   corr,
-  cosh,
-  cot,
+  factory_cosh as cosh,
+  factory_cot as cot,
   coth,
   count,
   createUnit,
   cross,
-  csc,
+  factory_csc as csc,
   csch,
   ctranspose,
-  cube,
+  factory_cube as cube,
   cumsum,
   deepEqual,
   derivative,
@@ -918,7 +955,7 @@ export {
   equalScalar,
   erf,
   expm,
-  expm1,
+  factory_expm1 as expm1,
   factorial,
   fft,
   filter,
@@ -982,7 +1019,6 @@ export {
   oct,
   or,
   partitionSelect,
-  permutations,
   pinv,
   polynomialRoot,
   print,
@@ -1000,7 +1036,7 @@ export {
   rotationMatrix,
   row,
   schur,
-  sec,
+  factory_sec as sec,
   sech,
   setCartesian,
   setDifference,
@@ -1015,7 +1051,7 @@ export {
   simplify,
   simplifyConstant,
   simplifyCore,
-  sinh,
+  factory_sinh as sinh,
   slu,
   smaller,
   smallerEq,
@@ -1023,7 +1059,7 @@ export {
   sort,
   splitUnit,
   sqrtm,
-  square,
+  factory_square as square,
   squeeze,
   stirlingS2,
   string,
@@ -1031,7 +1067,7 @@ export {
   subtractScalar,
   sylvester,
   symbolicEqual,
-  tanh,
+  factory_tanh as tanh,
   to,
   trace,
   typeOf,

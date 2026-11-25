@@ -200,10 +200,13 @@ export const createParse = /* #__PURE__ */ factory(
     }: ParseDependencies,
     supplied
   ) => {
+    const explicitScope = supplied?.mathWithTransform;
     const runtimeMath =
-      supplied && typeof supplied.config === 'function' && typeof supplied.matrix === 'function'
-        ? expressionView(supplied)
-        : undefined;
+      explicitScope && typeof explicitScope === 'object'
+        ? expressionView(explicitScope as Record<string, unknown>)
+        : supplied && typeof supplied.config === 'function' && typeof supplied.matrix === 'function'
+          ? expressionView(supplied)
+          : undefined;
     /**
      * Parse an expression. Returns a node tree, which can be evaluated by
      * invoking node.evaluate() or transformed into a functional object via node.compile().

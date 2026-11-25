@@ -10,6 +10,7 @@
 
 import {
   createEvaluate,
+  type createParse,
   compileExpressionWithDeps as _compileExpression,
   EXPRESSION_SCOPE_OMIT,
 } from '@danielsimonjr/mathts-expression';
@@ -169,7 +170,8 @@ for (const key of scopeNames) {
  * Reuses the parse function built in index.ts to avoid duplicate
  * typed-function conversion registrations.
  */
-export const parse = factoryScope.parse as Parameters<typeof createEvaluate>[0];
+export const parse = factoryScope.parse as ReturnType<typeof createParse> &
+  Parameters<typeof createEvaluate>[0];
 
 // ---------------------------------------------------------------------------
 // Step 3: Create the evaluate function
@@ -667,10 +669,20 @@ export function createInstanceEvaluator(
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
+  parse: typeof parse;
 } {
   const hidden: ReadonlySet<string> = new Set(hiddenNames);
   const safeScope = buildScopedMathNamespace(importedExpressionScope, hidden);
   const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope, hidden);
+  // Node.compile uses the factory transforms (including one-based indexing).
+  // Overlay the same instance bindings without replacing its other operators.
+  const parseScope = omitEvaluateInternals({
+    ...(factoryScope.mathWithTransform as Record<string, unknown>),
+    ...scrubImportedExpressionScope(importedExpressionScope),
+  });
+  for (const key of hidden) {
+    if (!Object.hasOwn(importedExpressionScope, key)) delete parseScope[key];
+  }
   for (const [name, get] of Object.entries(constants)) {
     if (
       EVALUATE_SCOPE_OMIT.has(name) ||
@@ -682,6 +694,7 @@ export function createInstanceEvaluator(
     const descriptor = { enumerable: true, get };
     Object.defineProperty(safeScope, name, descriptor);
     Object.defineProperty(unsafeScope, name, descriptor);
+    Object.defineProperty(parseScope, name, descriptor);
   }
   if (matrixLiterals) {
     const key = Symbol.for('mathts.expression.matrixLiterals');
@@ -704,8 +717,13 @@ export function createInstanceEvaluator(
     return compileInScope(safeScope, unsafeScope, expr, options);
   }
 
+  let scopedParse: typeof parse;
   return {
     evaluate: evaluateBound as typeof evaluate,
     compile: compileBound as typeof compileExpr,
+    get parse() {
+      return (scopedParse ??=
+        activatedFactories.factory_mathjsCompat.createScopedParse(parseScope));
+    },
   };
 }

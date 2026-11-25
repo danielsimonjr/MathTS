@@ -133,13 +133,15 @@ function scrubDenylist(scope: Record<string, unknown>): void {
  * @param currentConfig - The live config object of the instance.
  * @param bindParser - When `true`, `instance.parser` becomes a parser that evaluates
  *   with the instance evaluator. Default: `false`.
+ * @param bindParse - Whether parsed nodes should evaluate in the instance scope.
  * @param constants - Live reads of the instance's configured expression bindings.
  * @param defaultRandom - Random functions supplied by the built-in namespace.
  */
 export function wireMathjsInstanceApi(
   instance: Record<string, unknown>,
   currentConfig: MathJSConfig,
-  bindParser = false,
+  bindParser: boolean,
+  bindParse: boolean,
   constants: Record<string, () => unknown> = {},
   defaultRandom: ReadonlySet<string> = new Set()
 ): WiredCompatInstance {
@@ -196,13 +198,7 @@ export function wireMathjsInstanceApi(
     importedFactories
   );
 
-  let evaluator = createInstanceEvaluator(
-    expressionLayers.mathWithTransform,
-    COMPAT_INTERNAL_NAMES,
-    true,
-    constants
-  );
-
+  let evaluator: InstanceEvaluator;
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
@@ -264,6 +260,12 @@ export function wireMathjsInstanceApi(
   instance.replacer = replacer;
 
   rebindEvaluator();
+  if (bindParse) {
+    instance.parse = new Proxy(instance.parse as (...args: unknown[]) => unknown, {
+      apply: (_target, receiver, args) =>
+        runWithConfig(currentConfig, () => Reflect.apply(evaluator.parse, receiver, args)),
+    });
+  }
 
   return {
     Parser: ParserClass,

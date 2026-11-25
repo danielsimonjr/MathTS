@@ -3735,6 +3735,10 @@ function compatFactoryExports(): {
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
   fractionPart,
+  /** Create a parser whose nodes compile with the expression bindings of one instance. */
+  createScopedParse(mathWithTransform: Record<string, unknown>): ReturnType<typeof createParse> {
+    return createParse({ ..._parseScope, mathWithTransform });
+  },
   constructors: compatConstructors,
   checks,
   factory,
@@ -3751,6 +3755,10 @@ export const factory_mathjsCompat = {
   conj,
   im,
   re,
+  permutations: createSelectedPermutations({
+    typed: createTyped(factoryScope),
+    factorial: factoryScope.factorial,
+  }),
   lgamma: createMathJSLgamma(factoryScope as Parameters<typeof createMathJSLgamma>[0]),
   fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),
   toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),
