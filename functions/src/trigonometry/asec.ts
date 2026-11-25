@@ -58,12 +58,12 @@ export const createAsec = /* #__PURE__ */ factory(
         if (x <= -1 || x >= 1 || config.predictable) {
           return asecNumber(x);
         }
-        // asec(x) = acos(1/x). The core Complex type has no asec method.
-        return new Complex(1 / x, 0).acos();
+        // asec(x) = acos(1/x), with the zero limit Infinity·i handled by Complex.asec.
+        return new Complex(x, 0).asec();
       },
 
       Complex: function (x: Complex) {
-        return x.inverse().acos();
+        return x.asec();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {

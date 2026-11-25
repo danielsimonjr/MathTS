@@ -56,12 +56,12 @@ export const createAcoth = /* #__PURE__ */ factory(
         if (x >= 1 || x <= -1 || config.predictable) {
           return acothNumber(x);
         }
-        // acoth(x) = atanh(1/x). The core Complex type has no acoth method.
-        return new Complex(1 / x, 0).atanh();
+        // acoth(x) = atanh(1/x), with the zero limit π/2·i handled by Complex.acoth.
+        return new Complex(x, 0).acoth();
       },
 
       Complex: function (x: Complex) {
-        return x.inverse().atanh();
+        return x.acoth();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
