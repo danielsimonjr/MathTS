@@ -492,7 +492,8 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: [changes, compile]
+    # Runs in parallel with Compile & Lint: this job builds everything it needs itself.
+    needs: [changes]
     timeout-minutes: 20
 
     strategy:
@@ -573,7 +574,8 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
-    needs: [changes, compile]
+    # Runs in parallel with Compile & Lint: this job builds everything it needs itself.
+    needs: [changes]
     timeout-minutes: 20
 
     steps:
@@ -609,9 +611,12 @@ jobs:
         if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
-      # The Bun-runtime suite. Every package script runs on Bun ([run] bun = true), so the
-      # result does not depend on a Node version and the suite runs here once, not on each
-      # Test leg (#1356). Node 22 is set up so that a tool that starts real Node sees the
+      # The Bun-runtime suite, ONCE: `bun run test:coverage` runs every package's suite
+      # with coverage and then the root vitest suites, so the same suite that the
+      # skip-budget parser reads is the one that produces the coverage reports (the suite
+      # used to run twice here — once plain for the parser's log, once with coverage).
+      # Every package script runs on Bun ([run] bun = true), so the result does not depend
+      # on a Node version. Node 22 is set up so that a tool that starts real Node sees the
       # runtime that the former Test (22.x) run of this step saw.
       - name: Setup Node.js 22
         if: needs.changes.outputs.docs_only != 'true'
@@ -620,28 +625,25 @@ jobs:
           node-version: 22.x
 
       # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
-      - name: Test (Bun runtime)
+      # TURBO_CONCURRENCY=2: ubuntu-latest (26.04) once aborted this job with SIGABRT /
+      # "Out of memory" (exit 137) when Turbo ran every package's coverage task at once.
+      - name: Test with coverage (Bun runtime, single run)
         if: needs.changes.outputs.docs_only != 'true'
         shell: bash
-        run: bun run test 2>&1 | tee test-output.log
+        run: bun run test:coverage 2>&1 | tee test-output.log
+        env:
+          TURBO_CONCURRENCY: '2'
 
       # Skipped tests pass silently: nine WASM-tier suites once skipped themselves on
       # every machine for months. Each suite's skip count is pinned in
-      # tools/test/skip-baseline.json and any change, up or down, fails here. The parser's
-      # own tests run first: Turbo formats its output differently here than in a terminal.
+      # tools/test/skip-baseline.json and any change, up or down, fails here. The parser
+      # reads the `test:coverage` tasks of the single run above (and still accepts a plain
+      # `bun run test` log): its own tests run first.
       - name: Skip budget
         if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-skip-budget.test.mjs
           node tools/test/check-skip-budget.mjs test-output.log
-
-      - name: Test with coverage
-        if: needs.changes.outputs.docs_only != 'true'
-        # ubuntu-latest (26.04) aborts this job with SIGABRT / "Out of memory"
-        # when Turbo runs every package's coverage task at once (exit 137).
-        run: bun run test:coverage
-        env:
-          TURBO_CONCURRENCY: '2'
 
       - name: Per-package coverage floors
         if: needs.changes.outputs.docs_only != 'true'
@@ -660,7 +662,8 @@ jobs:
     name: Browser (WebGPU smoke)
     # Noble package list in playwright-chromium-apt-packages.mjs; ubuntu-latest may be >24.04.
     runs-on: ubuntu-24.04
-    needs: [changes, compile]
+    # Runs in parallel with Compile & Lint: this job builds everything it needs itself.
+    needs: [changes]
     timeout-minutes: 20
 
     steps:
