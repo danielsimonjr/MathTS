@@ -16,7 +16,7 @@
  * @packageDocumentation
  */
 
-import { collectionBinaryRows } from './collection-binary.js';
+import { collectionBinary, collectionBinaryRows } from './collection-binary.js';
 import { mathTyped, Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
 import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { mapEachLeaf } from './f64-kernels.js';
@@ -223,11 +223,20 @@ export const xor = mathTyped('xor', {
  * nullish(false, 5)      // false
  * ```
  */
-export const nullish = mathTyped('nullish', {
-  // Collections: factory `createNullish` (element-wise, dimension checks) — same path as `??`.
-  ...collectionBinaryRows('nullish'),
 
-  // Scalars: preserve types; no `any, any` (mathjs throws TypeError on plain objects).
+/** Factory nullish when the first argument is a collection; omit reverse `any, Matrix` rows. */
+function nullishCollectionFirstRows(): Record<string, (a: unknown, b: unknown) => unknown> {
+  const call = (a: unknown, b: unknown): unknown => collectionBinary('nullish')(a, b);
+  return {
+    'Array, any': call,
+    'DenseMatrix, any': call,
+    'SparseMatrix, any': call,
+  };
+}
+
+export const nullish = mathTyped('nullish', {
+  // Scalars first so (Complex, number) does not fall into `any, DenseMatrix` collection rows.
+  // No `any, any` (mathjs throws TypeError on plain objects).
   'number, any': (a: number, _b: unknown): number => a,
   'bigint, any': (a: bigint, _b: unknown): bigint => a,
   'BigNumber, any': (a: BigNumber, _b: unknown): BigNumber => a,
@@ -238,6 +247,9 @@ export const nullish = mathTyped('nullish', {
   'string, any': (a: string, _b: unknown): string => a,
   'null, any': (_a: null, b: unknown): unknown => b,
   'undefined, any': (_a: undefined, b: unknown): unknown => b,
+
+  // Collections when the left operand is a collection (no `any, Array` rows — those break scalar pairs).
+  ...nullishCollectionFirstRows(),
 }) as {
   <Left, Right>(left: Left, right: Right): Left extends null | undefined ? Right : Left;
   readonly signatures: Readonly<Record<string, (...args: unknown[]) => unknown>>;
