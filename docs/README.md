@@ -311,3 +311,5 @@ Completed/superseded work, moved out of the active tree. See
 | [archive/superpowers-plans/](archive/superpowers-plans/) | 4 agent execution-note plans (2026-04).                       |
 | [archive/refactoring/](archive/refactoring/)             | 6 completed refactoring status/plan/summary reports.          |
 | [archive/sprints/](archive/sprints/)                     | 50 sprint TODO JSON files (Phases 1–10, all complete).        |
+
+<!-- CI proof: docs-only skip 2026-11-25 -->
