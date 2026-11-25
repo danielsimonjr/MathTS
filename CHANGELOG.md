@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Typed-package surface exports and decisions (#1567, #1568, #1569, #1570, #1571):** Exported canonical error/matrix/node classes, `docs`, lowercase constant aliases (`pi`, `e`, `tau`, `phi`, `i`), and 63 `create*` aliases; documented compat-only decisions for events, `all`/`expression`, and remaining factories in `docs/migration-guide.md`. `@danielsimonjr/mathts-core` exports `DimensionError` and `IndexError` (the single canonical identities — a dimension mismatch thrown anywhere in the monorepo is `instanceof` of that export) and the lowercase constant aliases; `@danielsimonjr/mathts-functions` exports `ArgumentsError`, `FibonacciHeap`, `ImmutableDenseMatrix`, `Spa`, and the mathjs-named `create*` aliases of its 63 `factory_*` factories (`createAbs === factory_abs`, …); `@danielsimonjr/mathts-expression` exports `docs` (every mathjs embedded-docs key plus MathTS extras), a canonical `ResultSet` class, the 16 Node classes, and the ready-made `Parser`. The typed elementwise dimension mismatches (`add([1, 2], [1, 2, 3])` and friends) now throw that canonical `DimensionError` instead of a bare `RangeError`, with the same message. Events (`on`/`off`/`once`/`emit`), the `all` bundle, the `expression` namespace, and the remaining 261 mathjs `create*` factories and 371 `*Dependencies` bundles stay compat-only, per the decisions recorded in `docs/migration-guide.md` (§ Typed packages and the mathjs instance).
+
 ### Changed
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.

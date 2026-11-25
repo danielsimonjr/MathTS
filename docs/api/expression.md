@@ -292,14 +292,18 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-expression` (81 exports).
+> `@danielsimonjr/mathts-expression` (100 exports).
 
 ### Functions (74)
 
 `compile`, `compileExpression`, `compileExpressionWithDeps`, `createAccessorNode`, `createAndTransform`, `createArrayNode`, `createAssignmentNode`, `createBitAndTransform`, `createBitOrTransform`, `createBlockNode`, `createColumnTransform`, `createConcatTransform`, `createConditionalNode`, `createConstantNode`, `createCumSumTransform`, `createDiffTransform`, `createEvaluate`, `createFilterTransform`, `createForEachTransform`, `createFunctionAssignmentNode`, `createFunctionNode`, `createHelpClass`, `createIndexNode`, `createIndexTransform`, `createMapSlicesTransform`, `createMapTransform`, `createMaxTransform`, `createMeanTransform`, `createMinTransform`, `createNode`, `createNullishTransform`, `createObjectNode`, `createOperatorNode`, `createOrTransform`, `createParenthesisNode`, `createParse`, `createParser`, `createParserClass`, `createPrintTransform`, `createQuantileSeqTransform`, `createRangeNode`, `createRangeTransform`, `createRelationalNode`, `createRowTransform`, `createScalarBuilder`, `createStdTransform`, `createSubsetTransform`, `createSumTransform`, `createSymbolNode`, `createVarianceTransform`, `enumerateScalars`, `escapeMathML`, `evaluate`, `forEachScalar`, `getAssociativity`, `getOperator`, `getPrecedence`, `getStringSubset`, `isAssociativeWith`, `mapScalar`, `mathMLDocument`, `mathMLError`, `parse`, `ScalarBuildError`, `scalarCanonical`, `scalarCanonicalKey`, `scalarComplexity`, `scalarDepth`, `scalarEquals`, `scalarGrammarAccepts`, `scalarSize`, `scalarSymbols`, `setStringSubset`, `toMathMLSymbol`
 
-### Constants & values (7)
+### Constants & values (8)
 
-`defaultMathScope`, `embeddedDocs`, `EXPRESSION_SCOPE_OMIT`, `keywords`, `properties`, `SCALAR_FUNCTION_LOWERING`, `SCALAR_FUNCTIONS`
+`defaultMathScope`, `docs`, `embeddedDocs`, `EXPRESSION_SCOPE_OMIT`, `keywords`, `properties`, `SCALAR_FUNCTION_LOWERING`, `SCALAR_FUNCTIONS`
+
+### Classes & types (18)
+
+`AccessorNode`, `ArrayNode`, `AssignmentNode`, `BlockNode`, `ConditionalNode`, `ConstantNode`, `FunctionAssignmentNode`, `FunctionNode`, `IndexNode`, `Node`, `ObjectNode`, `OperatorNode`, `ParenthesisNode`, `Parser`, `RangeNode`, `RelationalNode`, `ResultSet`, `SymbolNode`
 
 <!-- END GENERATED EXPORT INDEX -->

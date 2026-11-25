@@ -19,7 +19,7 @@ import { rejectBigNumberShift } from '../bitwise/rightLogShift.js';
  */
 
 import { collectionBinaryRows } from './collection-binary.js';
-import { mathTyped, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped, BigNumber, DimensionError } from '@danielsimonjr/mathts-core';
 import { mapEachLeaf } from './f64-kernels.js';
 import {
   bitAnd as bitAndOp,
@@ -151,7 +151,7 @@ function i32Binary(
   js: (a: Int32Array, b: Int32Array) => Int32Array
 ): Int32Array {
   if (a.length !== b.length) {
-    throw new RangeError(
+    throw new DimensionError(
       `Dimension mismatch (${a.length} != ${b.length}) in element-wise operation`
     );
   }
