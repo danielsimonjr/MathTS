@@ -2383,10 +2383,11 @@ const table = (rows) => rows.map((r) => `| ${r.join(' | ')} |`).join('\n');
 const rankedCandidates = [
   {
     rank: 1,
-    name: 'matmul (functions flat helper)',
-    backend: 'wasm (route through backendManager GEMM) + workpool (≥ 7M multiply-adds)',
-    gain: 'SIMD GEMM ≈ 2–4× vs the plain JS triple loop at flop count ≥ 13824 = 24³ (the matrix package ships and measures this path); pool fan-out ≤ 0.90× sequential at ≥ 192³ multiply-adds',
-    why: 'the public `matmul(a, aRows, aCols, b, bCols)` helper runs `matmulSequential` (functions/src/typed/arithmetic.ts:3668) while the SAME operation is wasm-accelerated one layer down (DenseMatrix.multiply → backendManager). Wiring is a delegation, not a kernel.',
+    name: 'DenseMatrix.multiply / functions matmul → backendManager GEMM',
+    backend:
+      'wasm (route public matrix product through backendManager) + workpool (≥ 7M multiply-adds)',
+    gain: 'SIMD GEMM ≈ 2–4× vs `gemmF64` / `matmulSequential` at flop count ≥ 13824 = 24³ (the matrix package ships and measures `backendManager.multiply`); pool fan-out ≤ 0.90× sequential at ≥ 192³ multiply-adds',
+    why: 'native `DenseMatrix.multiply` and the flat `matmul` helper stay on JS (`arithmetic.multiply → gemmF64` and `matmulSequential`, functions/src/typed/arithmetic.ts:3668; matrix/src/types/dense/arithmetic.ts:90). `backendManager.multiply` already accelerates `functions.multiply`, `functions.pow`, and `Tensor.matmul` — the public matrix API never calls it. Wiring is a delegation, not a kernel.',
   },
   {
     rank: 2,
