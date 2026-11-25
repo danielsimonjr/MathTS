@@ -211,7 +211,7 @@ export function sweepPool(): { labels: Set<string> } {
         }
         const c = outcome(compat, () => fnC.apply(compat, compatArgs));
         if (JSON.stringify(o) !== JSON.stringify(c)) {
-          labels.add(`${name}: (${poolArgs.map((x) => show(mathjs as never, x)).join(', ')})`);
+          labels.add(`${name}: (${poolArgs.map((x) => show(mathjs, x)).join(', ')})`);
         }
       };
       if (arity <= 1) {
