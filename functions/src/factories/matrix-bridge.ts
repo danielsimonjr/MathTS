@@ -33,11 +33,9 @@ import { DimensionError } from '../error/DimensionError.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
 import { BigNumber, Complex, Fraction } from '@danielsimonjr/mathts-core';
+import { nearlyEqualBigNumber } from '@danielsimonjr/mathts-core/internal';
+import { DEFAULT_CONFIG } from '../core/config.js';
 import { nearlyEqual } from '../utils/number.js';
-
-/** Default tolerances for sparse zero tests (mathjs `equalScalar(x, 0)`). */
-const SPARSE_ZERO_REL_TOL = 1e-12;
-const SPARSE_ZERO_ABS_TOL = 1e-15;
 
 // Do not call `backendManager.initialize()` at import time. That compiles and
 // instantiates the AssemblyScript module on every process that loads the
@@ -770,42 +768,41 @@ Object.defineProperty(MathJSDenseMatrix.prototype, 'type', {
 
 /**
  * True when a map result is a zero that a sparse matrix does not store.
- * Follows mathjs `equalScalar(value, 0)` for number, boolean, bigint, string, BigNumber, Complex
- * and Fraction values, with an exact zero test (mathjs also drops values below absTol).
+ * Matches mathjs `equalScalar(value, 0)`: number/Complex use `nearlyEqual` with
+ * `config.relTol`/`absTol`; BigNumber uses exact `eq` or `nearlyEqualBigNumber` (not
+ * `toNumber()`); Fraction is exact (`equals(0)` / `isZero()`). Do not call
+ * `Complex.isZero()` here: that is an exact (epsilon-0) test and would keep a
+ * sub-`absTol` complex entry that mathjs drops.
  */
 function isZeroScalar(value: unknown): boolean {
+  const relTol = DEFAULT_CONFIG.relTol;
+  const absTol = DEFAULT_CONFIG.absTol;
   if (typeof value === 'number') {
-    return nearlyEqual(value, 0, SPARSE_ZERO_REL_TOL, SPARSE_ZERO_ABS_TOL);
+    return nearlyEqual(value, 0, relTol, absTol);
   }
   if (typeof value === 'boolean') return value === false;
   if (typeof value === 'bigint') return value === 0n;
-  if (typeof value === 'string') return Number(value) === 0;
+  if (typeof value === 'string') return nearlyEqual(Number(value), 0, relTol, absTol);
   if (value !== null && typeof value === 'object') {
-    const v = value as {
-      isZero?: () => boolean;
-      isBigNumber?: boolean;
-      n?: unknown;
-      d?: unknown;
-      re?: number;
-      im?: number;
-      toNumber?: () => number;
-    };
     if (isBigNumberLike(value)) {
-      return (
-        (v as BigNumber).isZero() ||
-        nearlyEqual((v as BigNumber).toNumber(), 0, SPARSE_ZERO_REL_TOL, SPARSE_ZERO_ABS_TOL)
-      );
+      return value.isZero() || nearlyEqualBigNumber(value, BigNumber.fromNumber(0), relTol, absTol);
     }
-    if (typeof v.isZero === 'function') return v.isZero();
-    if ('re' in v && 'im' in v) {
-      return (
-        nearlyEqual(v.re ?? 0, 0, SPARSE_ZERO_REL_TOL, SPARSE_ZERO_ABS_TOL) &&
-        nearlyEqual(v.im ?? 0, 0, SPARSE_ZERO_REL_TOL, SPARSE_ZERO_ABS_TOL)
-      );
+    if (isComplexParts(value)) {
+      return nearlyEqual(value.re, 0, relTol, absTol) && nearlyEqual(value.im, 0, relTol, absTol);
     }
-    if ('n' in v && 'd' in v) return Number(v.n) === 0;
+    if (value instanceof Fraction) return value.isZero();
+    const maybeZero = value as { isZero?: () => boolean; n?: unknown };
+    if (typeof maybeZero.isZero === 'function') return maybeZero.isZero();
+    if ('n' in maybeZero) return Number(maybeZero.n) === 0;
   }
   return false;
+}
+
+function isComplexParts(value: object): value is { re: number; im: number } {
+  return (
+    typeof (value as { re?: unknown }).re === 'number' &&
+    typeof (value as { im?: unknown }).im === 'number'
+  );
 }
 
 function isBigNumberLike(value: unknown): value is BigNumber {

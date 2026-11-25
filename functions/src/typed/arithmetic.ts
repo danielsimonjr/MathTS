@@ -2258,11 +2258,11 @@ export const xgcd = mathTyped('xgcd', {
   'number, number': xgcdNumber,
   'bigint, bigint': (a: i64, b: i64): [i64, i64, i64] => xgcdBigIntMathjs(a, b),
   'bigint, number': (a: i64, b: f64) => {
-    if (!Number.isInteger(b)) throw new Error(XGCD_INTEGER_MESSAGE);
+    if (!Number.isInteger(b)) throw new Error(`xgcd: second argument ${b} not an integer`);
     return xgcdBigIntMathjs(a, BigInt(b));
   },
   'number, bigint': (a: f64, b: i64) => {
-    if (!Number.isInteger(a)) throw new Error(XGCD_INTEGER_MESSAGE);
+    if (!Number.isInteger(a)) throw new Error(`xgcd: first argument ${a} not an integer`);
     return xgcdBigIntMathjs(BigInt(a), b);
   },
   'BigNumber, BigNumber': xgcdBigNumber,

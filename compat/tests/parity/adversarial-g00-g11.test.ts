@@ -222,4 +222,64 @@ describe('sparse element-wise ops drop sub-absTol results, as mathjs 15.3.0 does
     expect(want._values?.length).toBe(0);
     expect(got._values?.length).toBe(0);
   });
+
+  it('dotMultiply(sparse Complex 1e-16, 1) stores no entry (equalScalar absTol, not Complex.isZero)', () => {
+    const mk = (l: L) => l.sparse([[l.complex(1e-16, 0), 0]] as unknown as number[][]);
+    const got = compat().dotMultiply(mk(compat()), 1) as { _values?: unknown[] };
+    const want = oracle.dotMultiply(mk(oracle), 1) as { _values?: unknown[] };
+    expect(want._values?.length).toBe(0);
+    expect(got._values?.length).toBe(0);
+  });
+
+  it('dotMultiply(sparse Fraction 1/1e16, 1) keeps the exact non-zero (Fraction equalScalar is exact)', () => {
+    const mk = (l: L) => l.sparse([[l.fraction(1, 10 ** 16), 0]] as unknown as number[][]);
+    const got = compat().dotMultiply(mk(compat()), 1) as { _values?: unknown[] };
+    const want = oracle.dotMultiply(mk(oracle), 1) as { _values?: unknown[] };
+    expect(want._values?.length).toBe(1);
+    expect(got._values?.length).toBe(want._values?.length);
+  });
+
+  it('dotMultiply(sparse BigNumber 1e-16, 1) stores no entry (BigNumber nearlyEqual absTol)', () => {
+    const mk = (l: L) => l.sparse([[l.bignumber('1e-16'), 0]] as unknown as number[][]);
+    const got = compat().dotMultiply(mk(compat()), 1) as { _values?: unknown[] };
+    const want = oracle.dotMultiply(mk(oracle), 1) as { _values?: unknown[] };
+    expect(want._values?.length).toBe(0);
+    expect(got._values?.length).toBe(0);
+  });
+});
+
+describe('G11 xgcd mixed bigint non-integer messages match mathjs 15.3.0', () => {
+  it('xgcd(3n, 11.5) throws the oracle message', () => {
+    let oracleMsg = '';
+    let compatMsg = '';
+    try {
+      oracle.xgcd(3n, 11.5);
+    } catch (e) {
+      oracleMsg = (e as Error).message;
+    }
+    try {
+      compat().xgcd(3n, 11.5);
+    } catch (e) {
+      compatMsg = (e as Error).message;
+    }
+    expect(oracleMsg).toBe('xgcd: second argument 11.5 not an integer');
+    expect(compatMsg).toBe(oracleMsg);
+  });
+
+  it('xgcd(3.5, 11n) throws the oracle message', () => {
+    let oracleMsg = '';
+    let compatMsg = '';
+    try {
+      oracle.xgcd(3.5, 11n);
+    } catch (e) {
+      oracleMsg = (e as Error).message;
+    }
+    try {
+      compat().xgcd(3.5, 11n);
+    } catch (e) {
+      compatMsg = (e as Error).message;
+    }
+    expect(oracleMsg).toBe('xgcd: first argument 3.5 not an integer');
+    expect(compatMsg).toBe(oracleMsg);
+  });
 });
