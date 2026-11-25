@@ -268,9 +268,10 @@ export function createComplexEigs({
   }
 
   /**
+   * Equalize the row and column taxicab norms of the matrix by powers of the
+   * radix, mathjs's balance pass; it modifies `arr` in place.
    * @param arr the matrix
    * @param N size of the matrix
-   * @param prec precision, anything lower will be considered zero
    * @param type data type of matrix elements
    * @param findVectors should we find eigenvectors?
    * @returns the diagonal row transformation matrix, or null
@@ -367,6 +368,9 @@ export function createComplexEigs({
 
   /**
    * @param arr the matrix to reduce
+   * Reduce the matrix to upper Hessenberg form (zero below the first
+   * subdiagonal) by Gaussian elimination with complete pivoting; it modifies
+   * `arr` and `R` in place.
    * @param N size of the matrix
    * @param prec precision, anything lower will be considered zero
    * @param type data type of matrix elements
@@ -457,6 +461,10 @@ export function createComplexEigs({
   }
 
   /**
+   * Iterate the shifted QR factorization until the matrix is block upper
+   * triangular, and collect the converged eigenvalues in descending order of
+   * discovery; see Press & Williams, Numerical Recipes, and the QR-algorithm
+   * page on Wikipedia.
    * @param A the Hessenberg-form matrix
    * @param N size of A
    * @param prec precision, anything lower will be considered zero
