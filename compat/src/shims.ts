@@ -48,6 +48,7 @@ import {
   add as _add,
   addScalar as _addScalar,
   subtract as _subtract,
+  factory_subtract as _factorySubtract,
   multiply as _multiply,
   multiplyScalar as _multiplyScalar,
   dotMultiply as _dotMultiply,
@@ -339,14 +340,22 @@ const applyArithmetic = (
   matrixFn: (a: unknown, b: unknown) => unknown,
   a: unknown,
   b: unknown,
-  elementwise: boolean
+  elementwise: boolean,
+  complexFn?: (a: unknown, b: unknown) => unknown
 ): unknown => {
   // Boxed operands carry the storage format and may hold non-double scalar types.
   // Keep them in the typed path rather than coercing them to the numeric backend.
   if (isBoxedMatrix(a) || isBoxedMatrix(b)) {
     const boxedA = Array.isArray(a) ? _factoryMatrix(a) : a;
     const boxedB = Array.isArray(b) ? _factoryMatrix(b) : b;
+    if (complexFn && (isComplex(boxedA) || isComplex(boxedB))) {
+      return compatDecimalResult(complexFn(boxedA, boxedB));
+    }
     return scalarFn(boxedA, boxedB);
+  }
+  // Riemann-sphere only for Complex scalars; number/BigNumber/bigint stay native.
+  if (complexFn && (isComplex(a) || isComplex(b))) {
+    return compatDecimalResult(complexFn(a, b));
   }
   if (isMatrixLike(a) || isMatrixLike(b)) {
     if (!matrixPackageCanTake(a, b, elementwise)) return unwrap(scalarFn(a, b));
@@ -366,7 +375,8 @@ const makeArithmetic =
     scalarFn: (a: unknown, b: unknown) => unknown,
     matrixFn: (a: unknown, b: unknown) => unknown,
     elementwise: boolean,
-    fastNumberPair?: (a: number, b: number) => number
+    fastNumberPair?: (a: number, b: number) => number,
+    complexFn?: (a: unknown, b: unknown) => unknown
   ) =>
   (...args: unknown[]): unknown => {
     if (args.length === 0) {
@@ -383,7 +393,9 @@ const makeArithmetic =
     ) {
       return fastNumberPair(args[0], args[1]);
     }
-    return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next, elementwise));
+    return args.reduce((acc, next) =>
+      applyArithmetic(scalarFn, matrixFn, acc, next, elementwise, complexFn)
+    );
   };
 
 /**
@@ -448,26 +460,31 @@ const _compatSubtract = withMathjsComplexBinary(_subtract as BinaryArithmetic, '
 const _compatMultiply = withMathjsComplexBinary(_multiply as BinaryArithmetic, 'mul');
 
 export const add = makeArithmetic(
-  withNumericText(_compatAdd, _addScalar),
+  withNumericText(_add as BinaryArithmetic, _addScalar),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
-  (a, b) => a + b
+  (a, b) => a + b,
+  _compatAdd
 ) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = makeArithmetic(
-  _compatSubtract as (a: unknown, b: unknown) => unknown,
+  _factorySubtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
-  true
+  true,
+  undefined,
+  _compatSubtract
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
-  withNumericText(_compatMultiply, _multiplyScalar),
+  withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
-  (a, b) => a * b
+  (a, b) => a * b,
+  _compatMultiply
 ) as NumericStringArithmetic & typeof _multiply;
-const compatDotMultiply = withMathjsComplexBinary(
-  _dotMultiply as BinaryArithmetic,
-  'mul'
-) as typeof _dotMultiply;
+const _dotMultiplyComplex = withMathjsComplexBinary(_dotMultiply as BinaryArithmetic, 'mul');
+const compatDotMultiply = withTypedSurface(function (a: unknown, b: unknown): unknown {
+  if (isComplex(a) || isComplex(b)) return _dotMultiplyComplex(a, b);
+  return _dotMultiply(a, b);
+}, _dotMultiply) as typeof _dotMultiply;
 /**
  * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
  * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed
@@ -483,7 +500,7 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
   if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
     return _matMultiply(a, _inv(b) as DenseMatrix);
   }
-  if (arguments.length === 2) {
+  if (arguments.length === 2 && (isComplex(a) || isComplex(b))) {
     return _compatDivideScalar(a, b);
   }
   return (_factoryDivide as unknown as (...args: unknown[]) => unknown).apply(

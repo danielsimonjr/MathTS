@@ -55,7 +55,7 @@
     "assembly/build/mathts-debug.wasm": 133381,
     "assembly/build/mathts-debug.js": 103537,
     "assembly/package.json": 2903,
-    "compat/dist/index.js": 194421,
+    "compat/dist/index.js": 195014,
     "compat/package.json": 2327,
     "gpu/dist/index.js": 18275,
     "gpu/package.json": 2189,
@@ -208,13 +208,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 2040129
+      "bytes": 2040311
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 2049448
+      "bytes": 2049630
     }
   ]
 }

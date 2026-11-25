@@ -266,8 +266,11 @@ describe('F4: zpk2tf known-gaps entries are stale, and the sweep masks it via co
 
   it('sweepDocs does not report a zpk2tf doc label that a clean per-config sweep does not', async () => {
     const { perName } = await docsExamples();
-    // The suite's own sweep, on the shared instances (order-dependent).
-    const { labels: shared } = sweepDocs(perName);
+    // Only `config` + `zpk2tf`: the leakage this test pins, without a 900-example full-surface sweep.
+    const subset = new Map(
+      [...perName.entries()].filter(([name]) => name === 'zpk2tf' || name === 'config')
+    );
+    const { labels: shared } = sweepDocs(subset);
     const sharedZpk = [...shared].filter((l) => l.startsWith('{') && l.includes('zpk2tf('));
     // A clean per-config sweep, which is what the harness means to measure.
     const clean = new Set<string>();
