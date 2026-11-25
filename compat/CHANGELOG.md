@@ -1,5 +1,17 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.25
+
+### Patch Changes
+
+- 1fa2ede: Add MathJS-compatible toVector, isFinite, and expm1 methods on complex numbers.
+  Add acot, asec, and acsc instance methods with the MathJS real-axis and origin conventions.
+- 1fa2ede: Support reading and replacing indexed subsets of sparse compatibility matrices while preserving sparse storage.
+- Updated dependencies [1fa2ede]
+- Updated dependencies [1fa2ede]
+  - @danielsimonjr/mathts-core@0.30.3
+  - @danielsimonjr/mathts-functions@0.89.22
+
 ## 0.7.24
 
 ### Patch Changes
