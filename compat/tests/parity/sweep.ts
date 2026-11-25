@@ -1,8 +1,7 @@
 import { create as createCompat, all as compatAll } from '@danielsimonjr/mathts-compat';
-import { create } from 'mathjs';
-import { pair, show } from './oracle.js';
+import { pair, show, type HarnessInstance } from './oracle.js';
 
-export type Lib = ReturnType<typeof create>;
+export type Lib = HarnessInstance;
 export type Outcome = { value: string } | { error: string; arity?: boolean };
 
 const ARITY_ERROR = /Too (few|many) arguments/;
@@ -55,14 +54,14 @@ const POOL: unknown[] = [
 function buildPool(L: Lib): unknown[] {
   return [
     ...POOL,
-    L.complex(1, 2),
-    L.bignumber(2),
-    L.bignumber(0.5),
-    L.fraction(1, 3),
-    L.unit('5 cm'),
-    L.unit('2 inch'),
-    L.matrix([1, 2]),
-    L.sparse([[0, 1]]),
+    (L.complex as (re: number, im: number) => unknown)(1, 2),
+    (L.bignumber as (v: unknown) => unknown)(2),
+    (L.bignumber as (v: unknown) => unknown)(0.5),
+    (L.fraction as (n: number, d: number) => unknown)(1, 3),
+    (L.unit as (v: string) => unknown)('5 cm'),
+    (L.unit as (v: string) => unknown)('2 inch'),
+    (L.matrix as (v: unknown) => unknown)([1, 2]),
+    (L.sparse as (v: unknown) => unknown)([[0, 1]]),
   ];
 }
 
@@ -179,12 +178,14 @@ export function sweepPool(): { labels: Set<string> } {
   const labels = new Set<string>();
   const { mathjs, compat } = pair({});
   const oraclePool = buildPool(mathjs);
-  const names = Object.keys(compat).filter(
-    (k) => typeof compat[k] === 'function' && !SKIP_FUNCTIONS.has(k) && !CLASS_NAMES.has(k)
+  const compatRecord = compat as unknown as Record<string, unknown>;
+  const oracleRecord = mathjs as unknown as Record<string, unknown>;
+  const names = Object.keys(compatRecord).filter(
+    (k) => typeof compatRecord[k] === 'function' && !SKIP_FUNCTIONS.has(k) && !CLASS_NAMES.has(k)
   );
   for (const name of names) {
-    const fnO = mathjs[name];
-    const fnC = compat[name];
+    const fnO = oracleRecord[name] as (...args: unknown[]) => unknown;
+    const fnC = compatRecord[name] as (...args: unknown[]) => unknown;
     if (typeof fnO !== 'function' || typeof fnC !== 'function') continue;
     const arity = Math.max(fnO.length ?? 0, 1);
     const maxWidth = Math.min(arity <= 1 ? 1 : 8, oraclePool.length);
@@ -200,7 +201,7 @@ export function sweepPool(): { labels: Set<string> } {
         const o = outcome(mathjs, () => fnO.apply(mathjs, args));
         // An arity rejection of the oracle is one divergence per function (#1587), not one
         // per argument combination.
-        if (o.error && o.arity) {
+        if ('error' in o && o.arity) {
           labels.add(`${name}: mathjs rejects ${args.length} argument(s) on the pool`);
           continue;
         }
@@ -266,6 +267,6 @@ export function sweepDocs(perName: Map<string, string[]>): {
 }
 
 export function compatFunctionNames(): string[] {
-  const compat = createCompat(compatAll, {});
+  const compat = createCompat(compatAll, {}) as unknown as Record<string, unknown>;
   return Object.keys(compat).filter((k) => typeof compat[k] === 'function');
 }

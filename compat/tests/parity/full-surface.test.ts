@@ -35,8 +35,9 @@ describe('full-surface differential harness (#1574)', () => {
     const oracle = create(all, {});
     for (const name of perName.keys()) {
       // Constants carry docs too; only functions are bound as callables.
-      if (typeof oracle[name] !== 'function') continue;
-      if (typeof compat[name] !== 'function') missing.push(name);
+      if (typeof (oracle as unknown as Record<string, unknown>)[name] !== 'function') continue;
+      if (typeof (compat as unknown as Record<string, unknown>)[name] !== 'function')
+        missing.push(name);
     }
     expect(missing, 'names with docs but no compat instance function').toEqual([]);
   });

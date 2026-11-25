@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import * as mathjs from 'mathjs';
+import { create, all, type MathJsInstance as OracleInstance } from 'mathjs';
 import { create as createCompat, all as compatAll } from '../../src/index.js';
 
 /**
@@ -10,9 +10,9 @@ import { create as createCompat, all as compatAll } from '../../src/index.js';
  * message prefix, with the oracle.
  */
 
-type Instance = ReturnType<typeof createCompat>;
+type Instance = ReturnType<typeof createCompat> & OracleInstance;
 
-const CASES: [string, (L: Instance & typeof mathjs.MathJsInstance) => unknown][] = [
+const CASES: [string, (L: Instance) => unknown][] = [
   ['#1563 multinomial(2, 3)', (L) => L.multinomial(2, 3)],
   ['#1563 multinomial([2, 0, 1])', (L) => L.multinomial([2, 0, 1])],
   ['#1563 multinomial(2)', (L) => L.multinomial(2)],
@@ -59,7 +59,7 @@ function show(
 describe('mathjs 15.3.0 behavior parity (G11)', () => {
   for (const [label, run] of CASES) {
     it(label, () => {
-      const oracle = mathjs.create(mathjs.all, {});
+      const oracle = create(all, {});
       const compat = createCompat(compatAll, {});
       const both = [oracle, compat] as const;
       const outcomes = both.map((L) => {

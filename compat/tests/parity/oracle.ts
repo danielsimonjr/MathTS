@@ -3,7 +3,13 @@ import { create as createCompat, all as compatAll } from '@danielsimonjr/mathts-
 
 export type OracleConfig = Record<string, unknown>;
 
-type MathJsInstance = ReturnType<typeof create>;
+/** The structural surface the harness needs from either library instance. */
+export interface HarnessInstance {
+  evaluate(expression: string): unknown;
+  format(value: unknown, options: { precision: number }): string;
+  typeOf(value: unknown): string;
+  [key: string]: unknown;
+}
 
 /**
  * One mathjs oracle instance and one compat instance, built with the same config. Every
@@ -11,12 +17,12 @@ type MathJsInstance = ReturnType<typeof create>;
  * (BigNumber, Fraction, `matrix: 'Array'`) shows up as a pair mismatch.
  */
 export function pair(config: OracleConfig = {}): {
-  mathjs: MathJsInstance;
-  compat: ReturnType<typeof createCompat>;
+  mathjs: HarnessInstance;
+  compat: HarnessInstance;
 } {
   return {
-    mathjs: create(all, config),
-    compat: createCompat(compatAll, config),
+    mathjs: create(all, config) as unknown as HarnessInstance,
+    compat: createCompat(compatAll, config) as unknown as HarnessInstance,
   };
 }
 
