@@ -10,6 +10,7 @@ import {
   createInstanceEvaluator,
   factory_mathjsCompat,
   EVALUATE_SCOPE_OMIT,
+  parse as functionsParse,
   parser as functionsParser,
   runWithConfig,
   type BridgeMatrix,
@@ -23,6 +24,7 @@ import {
   reviveInstanceValue,
 } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
+import { patchParseForMathjsToTex } from './totex-parity.js';
 
 type MathNamespace = Parameters<typeof importFactory>[2];
 type ImportableFactories = Parameters<typeof importFactory>[3];
@@ -208,6 +210,19 @@ export function wireMathjsInstanceApi(
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
+  function patchEvaluatorToTex(bound: InstanceEvaluator): void {
+    const unit = instance.Unit as { isValuelessUnit?: (name: string) => boolean } | undefined;
+    if (typeof unit?.isValuelessUnit !== 'function') return;
+    const boundParse = bound.parse.bind(bound);
+    const patched = patchParseForMathjsToTex(
+      boundParse,
+      instance as Record<string, unknown>,
+      unit as { isValuelessUnit: (name: string) => boolean }
+    );
+    Object.assign(patched, functionsParse);
+    bound.parse = patched as typeof bound.parse;
+  }
+
   function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
     evaluator = createInstanceEvaluator(
@@ -218,6 +233,7 @@ export function wireMathjsInstanceApi(
       true,
       compatDecimalResult
     );
+    patchEvaluatorToTex(evaluator);
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
         mapExpressions(expression, (text) => evaluator.evaluate(text, scope, options))

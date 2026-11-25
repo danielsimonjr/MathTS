@@ -34,6 +34,7 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
+import { wrapCompatUnitSources } from './mathjs-unit.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
@@ -417,10 +418,11 @@ export function create(
   const fullBundle =
     canonical ||
     Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
-  const localUnits =
+  const rawLocalUnits =
     config === moduleDefaults || !fullBundle
       ? undefined
       : mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig);
+  const localUnits = rawLocalUnits ? wrapCompatUnitSources(rawLocalUnits) : undefined;
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
@@ -622,7 +624,7 @@ export function create(
   const constantReaders = compatConstantReaders(
     flat,
     currentConfig,
-    localUnits?.Unit ?? instanceSymbols.Unit,
+    (localUnits?.Unit ?? instanceSymbols.Unit) as typeof instanceSymbols.Unit,
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};

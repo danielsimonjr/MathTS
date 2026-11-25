@@ -572,9 +572,9 @@ describe('scalar-node-bridge simplifyScalar', () => {
   });
 
   it('scalarToTex matches simplify(parse).toTex for sample formulas', () => {
-    expect(scalarToTex(simplifyScalar(divBc))).toBe('\\frac{ a\\cdot\\mathrm{c}}{\\mathrm{b}}');
+    expect(scalarToTex(simplifyScalar(divBc))).toBe('\\frac{ a\\cdot c}{ b}');
     expect((simplify(parse('a/(b/c)')) as { toTex(): string }).toTex()).toBe(
-      '\\frac{ a\\cdot\\mathrm{c}}{\\mathrm{b}}'
+      '\\frac{ a\\cdot c}{ b}'
     );
 
     const aa = scalar.op('*', [a, a]);
@@ -588,9 +588,6 @@ describe('scalar-node-bridge simplifyScalar', () => {
 });
 
 describe('scalar-node-bridge scalarToTex pins', () => {
-  // #1577: a symbol whose name is also a valueless unit (`b` barn, `c`) renders
-  // as `\mathrm{…}`, matching mathjs 15.3.0. The expected values below changed
-  // with that issue; the pinned trees did not.
   const a = scalar.symbol('a');
   const b = scalar.symbol('b');
   const c = scalar.symbol('c');
@@ -599,16 +596,13 @@ describe('scalar-node-bridge scalarToTex pins', () => {
   const table: Array<[ScalarNode, string]> = [
     [scalar.number(2), '2'],
     [x, ' x'],
-    [scalar.op('+', [a, b]), ' a+\\mathrm{b}'],
-    [scalar.op('*', [a, b]), ' a\\cdot\\mathrm{b}'],
-    [scalar.op('-', [a, b]), ' a-\\mathrm{b}'],
-    [scalar.op('/', [a, b]), '\\frac{ a}{\\mathrm{b}}'],
-    [scalar.op('^', [a, b]), '{ a}^{\\mathrm{b}}'],
-    [
-      scalar.op('^', [scalar.op('^', [a, b]), c]),
-      '{\\left({ a}^{\\mathrm{b}}\\right)}^{\\mathrm{c}}',
-    ],
-    [scalar.op('^', [a, scalar.op('^', [b, c])]), '{ a}^{{\\mathrm{b}}^{\\mathrm{c}}}'],
+    [scalar.op('+', [a, b]), ' a+ b'],
+    [scalar.op('*', [a, b]), ' a\\cdot b'],
+    [scalar.op('-', [a, b]), ' a- b'],
+    [scalar.op('/', [a, b]), '\\frac{ a}{ b}'],
+    [scalar.op('^', [a, b]), '{ a}^{ b}'],
+    [scalar.op('^', [scalar.op('^', [a, b]), c]), '{\\left({ a}^{ b}\\right)}^{ c}'],
+    [scalar.op('^', [a, scalar.op('^', [b, c])]), '{ a}^{{ b}^{ c}}'],
     [scalar.number(-5), '-5'],
     [scalar.call('sin', x), '\\sin\\left( x\\right)'],
     [scalar.call('abs', x), '\\left| x\\right|'],

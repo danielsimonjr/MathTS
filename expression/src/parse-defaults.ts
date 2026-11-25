@@ -94,8 +94,7 @@ export const parseDefaults: DefaultDependencies = (supplied, missing) => {
   /** A caller-supplied `SymbolNode` is shared with `FunctionNode`, so both use one class. */
   let symbolNode: unknown;
   const getSymbolNode = (): unknown =>
-    (symbolNode ??=
-      source.SymbolNode ?? createSymbolNode({ math, Unit: source.Unit, Node: getNode() }));
+    (symbolNode ??= source.SymbolNode ?? createSymbolNode({ math, Node: getNode() }));
 
   const builders: Record<string, () => unknown> = {
     typed: () => typed,

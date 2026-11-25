@@ -39,9 +39,15 @@ type LatexProperties = {
 const name = 'OperatorNode';
 const dependencies = ['Node'];
 
-// mathjs 15.3.0 joins the operator LaTeX and the operands with no added space:
-// symbol operands already carry their own leading space, and a boolean constant
-// prints bare (`true\wedgefalse`, `\negtrue` — #1578).
+/**
+ * Join the LaTeX of an operator and of its operand. A command (`\neg`, `\cdot`, `\wedge`)
+ * that meets a letter needs a space, or TeX reads one command (`\negtrue`): the TeX of `true`,
+ * `false` and `null` starts with a letter, and the TeX of a symbol carries its own leading space.
+ * A digit, a bracket or a command needs no space.
+ */
+function joinOperatorTex(op: string, operand: string): string {
+  return op + (/\\[A-Za-z]+$/.test(op) && /^[A-Za-z]/.test(operand) ? ' ' : '') + operand;
+}
 
 export const createOperatorNode = /* #__PURE__ */ factory(
   name,
@@ -853,7 +859,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
 
           if (assoc === 'right') {
             // prefix operator
-            return op + operand;
+            return joinOperatorTex(op, operand);
           } else if (assoc === 'left') {
             // postfix operator
             return operand + op;
@@ -901,7 +907,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
                 return lhsTex + '~' + rhsTex;
               }
           }
-          return lhsTex + op + rhsTex;
+          return lhsTex + joinOperatorTex(op, rhsTex);
         } else if (
           args.length > 2 &&
           (this.getIdentifier() === 'OperatorNode:add' ||
@@ -923,7 +929,7 @@ export const createOperatorNode = /* #__PURE__ */ factory(
             return texifiedArgs.join('~');
           }
 
-          return texifiedArgs.join(op);
+          return texifiedArgs.reduce((tex, arg) => tex + joinOperatorTex(op, arg));
         } else {
           // fall back to formatting as a function call
           // as this is a fallback, it doesn't use

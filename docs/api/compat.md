@@ -340,7 +340,10 @@ These cosmetic behaviors match mathjs 15.3.0 even where the result looks odd:
   `true\wedgefalse`, `not true` is `\negtrue`, and `true xor false` is
   `true\veebarfalse` — no space after the operator command (#1578). A symbol
   whose name is a valueless unit (`cm`, `b`, `A`) renders as `\mathrm{…}`, and
-  `deg` as `^\circ` (#1577).
+  `deg` as `^\circ` (#1577). Compat implements these with a thin `toTex` adapter
+  on instance `parse` and a mathjs-pinned `Unit.isValuelessUnit` / `Unit.UNITS`
+  surface (251 names); native `@danielsimonjr/mathts-expression` keeps its
+  existing output (including spaced `\neg true`).
 
 See [Migration Guide](../migration/guide.md) for complete details.
 

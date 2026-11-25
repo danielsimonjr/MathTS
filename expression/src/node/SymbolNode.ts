@@ -42,7 +42,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
      * @param name
      */
     function isValuelessUnit(name: string): boolean {
-      return ((math.Unit as UnitConstructor | undefined) ?? Unit)?.isValuelessUnit(name) === true;
+      return Unit ? Unit.isValuelessUnit(name) : false;
     }
 
     class SymbolNode extends Node {
@@ -226,11 +226,10 @@ export const createSymbolNode = /* #__PURE__ */ factory(
       }
 
       _toTex(_options?: StringOptions): string {
-        // A valueless unit name renders as `\mathrm{…}` even when the name is
-        // also a function on the instance (`b`, `A`): #1577. `deg` prints
-        // `^\circ`. The unit class resolves lazily so a scope that defines
-        // `Unit` after this node class was built is still seen.
-        const isUnit = isValuelessUnit(this.name);
+        let isUnit = false;
+        if (typeof math[this.name] === 'undefined' && isValuelessUnit(this.name)) {
+          isUnit = true;
+        }
         const symbol = toSymbol(this.name, isUnit);
         if (symbol[0] === '\\') {
           // no space needed if the symbol starts with '\'

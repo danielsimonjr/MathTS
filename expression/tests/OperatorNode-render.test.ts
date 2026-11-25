@@ -158,32 +158,29 @@ describe('OperatorNode - _toString (parenthesis & precedence)', () => {
 });
 
 describe('OperatorNode - _toTex', () => {
-  // #1577: a symbol whose name is also a valueless unit (`b` barn, `c`) renders
-  // as `\mathrm{…}` now, matching mathjs 15.3.0. These operator-structure cases
-  // use non-unit symbols (x, y, z) so the expectations stay about the operator.
   it('unary prefix', () => {
-    expect(parse('-x').toTex()).toBe('- x');
+    expect(parse('-a').toTex()).toBe('- a');
   });
   it('named unary uses latex op', () => {
-    expect(parse('not x').toTex()).toBe('\\neg x');
+    expect(parse('not a').toTex()).toBe('\\neg a');
   });
   it('postfix factorial', () => {
     expect(parse('5!').toTex()).toBe('5!');
   });
   it('add', () => {
-    expect(parse('x + y').toTex()).toBe(' x+ y');
+    expect(parse('a + b').toTex()).toBe(' a+ b');
   });
   it('subtract', () => {
-    expect(parse('x - y').toTex()).toBe(' x- y');
+    expect(parse('a - b').toTex()).toBe(' a- b');
   });
   it('divide uses \\frac', () => {
-    expect(parse('x / y').toTex()).toBe('\\frac{ x}{ y}');
+    expect(parse('a / b').toTex()).toBe('\\frac{ a}{ b}');
   });
   it('pow uses braces', () => {
-    expect(parse('x ^ y').toTex()).toBe('{ x}^{ y}');
+    expect(parse('a ^ b').toTex()).toBe('{ a}^{ b}');
   });
   it('divide inside pow gets \\left(\\right)', () => {
-    expect(parse('(x/y)^z').toTex()).toBe('{\\left(\\frac{ x}{ y}\\right)}^{ z}');
+    expect(parse('(a/b)^c').toTex()).toBe('{\\left(\\frac{ a}{ b}\\right)}^{ c}');
   });
   it('conditional base inside pow gets \\left(\\right)', () => {
     const tex = parse('(a > 0 ? 1 : 2)^2').toTex();
@@ -192,7 +189,7 @@ describe('OperatorNode - _toTex', () => {
     expect(tex).toContain('}^{2}');
   });
   it('multiply explicit uses \\cdot', () => {
-    expect(parse('x * y').toTex()).toBe(' x\\cdot y');
+    expect(parse('a * b').toTex()).toBe(' a\\cdot b');
   });
   it('implicit multiply uses ~', () => {
     expect(parse('2 x').toTex()).toBe('2~ x');
@@ -201,19 +198,19 @@ describe('OperatorNode - _toTex', () => {
     expect(parse('2 x').toTex({ implicit: 'show' })).toBe('2\\cdot x');
   });
   it('n-ary add joins with +', () => {
-    expect(parse('x + y + z').toTex()).toBe(' x+ y+ z');
+    expect(parse('a + b + c').toTex()).toBe(' a+ b+ c');
   });
   it('n-ary multiply joins with \\cdot', () => {
-    expect(parse('x * y * z').toTex()).toBe(' x\\cdot y\\cdot z');
+    expect(parse('a * b * c').toTex()).toBe(' a\\cdot b\\cdot c');
   });
   it('n-ary implicit multiply joins with ~', () => {
     expect(parse('2 x y').toTex()).toBe('2~ x~ y');
   });
   it('n-ary add parenthesis:all wraps left chain', () => {
-    expect(parse('x + y + z').toTex({ parenthesis: 'all' })).toBe('\\left( x+ y\\right)+ z');
+    expect(parse('a + b + c').toTex({ parenthesis: 'all' })).toBe('\\left( a+ b\\right)+ c');
   });
-  it('lower-precedence rhs parenthesized: x * (y + z)', () => {
-    expect(parse('x * (y + z)').toTex()).toBe(' x\\cdot\\left( y+ z\\right)');
+  it('lower-precedence rhs parenthesized: a * (b + c)', () => {
+    expect(parse('a * (b + c)').toTex()).toBe(' a\\cdot\\left( b+ c\\right)');
   });
   it('right-associative pow under parenthesis:all', () => {
     expect(parse('2 ^ 3 ^ 4').toTex({ parenthesis: 'all' })).toBe('{2}^{\\left({3}^{4}\\right)}');
