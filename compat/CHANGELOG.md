@@ -1,5 +1,21 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.20
+
+### Patch Changes
+
+- a46575c: Use the MathJS floating-point fraction approximation for the compatibility fraction factory.
+- a46575c: Support negative integer powers of invertible matrices through the MathJS compatibility entry points.
+- a46575c: Match MathJS text comparison dispatch for strings, arrays, and matrices in compatibility instances and named functions.
+- a46575c: Use the MathJS default engineering offset for toBest in compatibility entry points and dependency bundles.
+- a46575c: Match MathJS natural ordering of unit quantities by normalized value or unit name.
+- a46575c: Accept numeric strings in MathJS-compatible scalar addition and expressions.
+- Updated dependencies [a46575c]
+- Updated dependencies [a46575c]
+- Updated dependencies [a46575c]
+- Updated dependencies [a46575c]
+  - @danielsimonjr/mathts-functions@0.89.18
+
 ## 0.7.19
 
 ### Patch Changes
