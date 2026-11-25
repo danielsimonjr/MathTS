@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Documented intentional divergences from mathjs for `zeta`, `symbolicEqual`, and `range` (#1585):** compat keeps the more accurate values (`zeta(-3)` = 1/120, finite complex `zeta`, BigNumber `zeta(4)` closer to π⁴/90, `symbolicEqual('x*y','y*x')` true, BigNumber `range('4:10')` including 10); each is documented under `Intentional divergences` in `docs/api/compat.md` and pinned against the mathjs 15.3.0 value in `compat/tests/parity/g18-intentional.test.ts`. No source function changed.
+
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
 
 - **mathjs 15.3.0 G11 adversarial fixes (#1563–#1566, #1574):** mixed-type `mod`/`xgcd`/`invmod` and `stirlingS2` keep bigint results; compat `subtract` and `mod` bind mathjs factories; sparse `isZero` uses `equalScalar` tolerances; `sqrt`/`larger` refuse out-of-range bigint; `multinomial` overflow matches 15.3.0 (`NaN`).

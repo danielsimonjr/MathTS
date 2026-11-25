@@ -334,6 +334,43 @@ async function parallelSum(data) {
 
 See [Migration Guide](../migration/guide.md) for complete details.
 
+## Intentional divergences
+
+These are cases where `@danielsimonjr/mathts-compat` is deliberately **more
+accurate** than mathjs 15.3.0. They are pinned by
+`compat/tests/parity/g18-intentional.test.ts` and registered in the parity
+harness (`compat/tests/parity/intentional.ts`); copying the mathjs value would
+be a regression. Each entry quotes the mathjs 15.3.0 value it declines to match.
+
+### `zeta(-3)`
+
+Compat returns `0.0083333333333335`, which is the exact value `1/120` to full
+double precision. mathjs 15.3.0 returns `0.0083333345772996`, wrong in the 8th
+significant digit. (#1585)
+
+### `zeta(complex(1, 2))`
+
+Compat returns `0.59816556976239 - 0.35185474521785i`, finite. mathjs 15.3.0
+returns `NaN + NaNi` for complex arguments in the critical strip. (#1585)
+
+### `zeta(bignumber(4))`
+
+Compat returns `1.0823232337111`; π⁴/90 is `1.082323233711138…`, so the relative
+error is about 3e-14. mathjs 15.3.0 returns `1.0823232498396` (relative error
+about 1.5e-8). (#1585)
+
+### `symbolicEqual` under `number: 'BigNumber'`
+
+Compat `evaluate('symbolicEqual("x*y", "y*x")')` returns `true`: the two
+expressions are algebraically identical. mathjs 15.3.0 in BigNumber mode returns
+`false`. (#1585)
+
+### `range("4:10")` under `number: 'BigNumber'`
+
+Compat returns a matrix that includes the end value, `[4, 5, 6, 7, 8, 9, 10]`,
+matching mathjs's own number mode. mathjs 15.3.0 in BigNumber mode drops the
+inclusive end and returns `[4, 5, 6, 7, 8, 9]`. (#1585)
+
 ## Complete export index
 
 <!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->
