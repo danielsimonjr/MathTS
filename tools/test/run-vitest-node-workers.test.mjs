@@ -15,9 +15,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
- * `tools/test/run-vitest-node.mjs` runs up to RUN_VITEST_NODE_CONCURRENCY items at once and
- * shards `functions` into 4 vitest processes. Every item it spawns is a `vitest run` that,
- * without an explicit worker cap, starts `availableParallelism()` worker processes of its own.
+ * `tools/test/run-vitest-node.mjs` runs `functions` first with all CPUs, then up to
+ * RUN_VITEST_NODE_CONCURRENCY other items at once. Every other vitest it spawns is a
+ * `vitest run` that, without an explicit worker cap, starts `availableParallelism()`
+ * worker processes of its own.
  *
  * On the 4-vCPU GitHub runner that is 4 concurrent items x 4 workers = 16 workers on 4 cores
  * (and 4 `functions` shards x 4 workers = 16 more for that package alone). Measured on this
@@ -120,9 +121,8 @@ test('the runner bounds total vitest workers to the machine parallelism', async 
       .map((line) => JSON.parse(line));
 
     // One item per package, plus the root suite the runner always appends — no duplicates,
-    // no gaps. (The `functions` sharding is covered by the shard partition check: vitest's
-    // `--shard=k/N` splits the collected specs by path hash, so the four runs partition every
-    // test file exactly once.)
+    // no gaps. (`functions` is a single unsharded item in the real runner; this fixture has
+    // no package named functions, so every item here is a rest-phase spawn.)
     assert.equal(argvs.length, PACKAGES.length + 1, 'every fixture package plus the root must run');
 
     const cpus = availableParallelism();

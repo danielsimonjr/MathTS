@@ -9,17 +9,18 @@
  *
  * 1. `vitest run` in every workspace package that has a `vitest.config.ts`. The package config
  *    supplies the vitest equivalent of its Bun-only setup (`define` for `__PKG_VERSION__`, and
- *    a separate snapshot path in `plot`). The `functions` package — by far the slowest
- *    (316-499 s alone) — is split across FUNCTION_SHARDS concurrent runs with vitest
- *    `--shard=k/N`, so every test file still runs exactly once.
+ *    a separate snapshot path in `plot`). `functions` — the slowest package — runs first as
+ *    one unsharded process with `--maxWorkers` equal to machine parallelism (measured faster
+ *    than 4 shards × 1 worker on a 4-vCPU box). Every test file still runs exactly once.
  * 2. `vitest run` with the root `vitest.config.ts` (`tests/integration`, `tests/wasm`).
  * 3. The standalone Node test scripts of packages without a vitest config (`assembly`): every
  *    `node <file>` command in its `test` and `test:diff` scripts.
  *
- * Items run CONCURRENTLY, capped by RUN_VITEST_NODE_CONCURRENCY (default 4 on CI). Each vitest
- * child gets `--maxWorkers` so `concurrency × workers ≤ os.availableParallelism()`.
- * Each child's output is captured to a temp file and printed inside its `::group::` when the
- * batch completes, in item order, with stdout drain so CI pipes never truncate the summary.
+ * After `functions`, remaining items run CONCURRENTLY, capped by RUN_VITEST_NODE_CONCURRENCY
+ * (default 4 on CI). Those vitest children get `--maxWorkers` so
+ * `concurrency × workers ≤ os.availableParallelism()`. Each child's output is captured to a
+ * temp file and printed inside its `::group::` when the batch completes, in item order, with
+ * stdout drain so CI pipes never truncate the summary.
  *
  * Prerequisite: `bun run build:wasm && bun run build`.
  */
@@ -36,7 +37,6 @@ if (typeof globalThis.Bun !== 'undefined') {
 }
 
 const vitestBin = join(repoRoot, 'node_modules', 'vitest', 'vitest.mjs');
-const FUNCTION_SHARDS = 4;
 const concurrency = Math.max(
   1,
   Number.parseInt(process.env.RUN_VITEST_NODE_CONCURRENCY ?? '', 10) || 4
@@ -83,14 +83,12 @@ function collectItems() {
     const cwd = join(repoRoot, dir);
     if (existsSync(join(cwd, 'vitest.config.ts'))) {
       if (dir === 'functions') {
-        for (let shard = 1; shard <= FUNCTION_SHARDS; shard++) {
-          items.push({
-            label: `vitest ${dir} (shard ${shard}/${FUNCTION_SHARDS})`,
-            cwd,
-            args: [vitestBin, 'run', `--shard=${shard}/${FUNCTION_SHARDS}`, ...workerFlags],
-            isVitest: true,
-          });
-        }
+        items.push({
+          label: `vitest ${dir}`,
+          cwd,
+          args: [vitestBin, 'run', `--maxWorkers=${machineCpus}`],
+          isVitest: true,
+        });
       } else {
         items.push({
           label: `vitest ${dir}`,
@@ -179,17 +177,29 @@ const items = collectItems();
 const tempDir = mkdtempSync(join(tmpdir(), 'run-vitest-node-'));
 /** @type {{ label: string, ok: boolean, status: number | string, durationMs: number }[]} */
 const results = new Array(items.length);
-let next = 0;
+/**
+ * Two phases so `functions` can use every CPU without overlapping other vitest workers:
+ * 1. the `functions` item (unsharded, maxWorkers = machineCpus);
+ * 2. everything else at RUN_VITEST_NODE_CONCURRENCY with the per-item worker cap.
+ */
+const functionIdx = items.map((_, i) => i).filter((i) => items[i].label === 'vitest functions');
+const restIdx = items.map((_, i) => i).filter((i) => items[i].label !== 'vitest functions');
 
-async function worker() {
-  while (next < items.length) {
-    const i = next++;
-    const { status, durationMs } = await runItem(items[i], join(tempDir, `item-${i}.log`));
-    results[i] = { label: items[i].label, ok: status === 0, status, durationMs };
+async function runIndices(indices, phaseConcurrency) {
+  let next = 0;
+  async function worker() {
+    while (next < indices.length) {
+      const i = indices[next++];
+      const { status, durationMs } = await runItem(items[i], join(tempDir, `item-${i}.log`));
+      results[i] = { label: items[i].label, ok: status === 0, status, durationMs };
+    }
   }
+  const n = Math.min(phaseConcurrency, indices.length);
+  if (n > 0) await Promise.all(Array.from({ length: n }, () => worker()));
 }
 
-await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
+await runIndices(functionIdx, 1);
+await runIndices(restIdx, concurrency);
 
 for (let i = 0; i < items.length; i++) {
   await writeStdout(`\n::group::${items[i].label} (node ${process.version})\n`);
@@ -203,7 +213,9 @@ rmSync(tempDir, { recursive: true, force: true });
 const failed = results.filter((r) => !r.ok).length;
 const totalMs = results.reduce((sum, r) => sum + r.durationMs, 0);
 
-await writeStdout(`\nrun-vitest-node summary (node ${process.version}, wall ${formatDuration(totalMs)}):\n`);
+await writeStdout(
+  `\nrun-vitest-node summary (node ${process.version}, wall ${formatDuration(totalMs)}):\n`
+);
 const labelWidth = Math.max(...results.map((r) => r.label.length), 'label'.length);
 await writeStdout(`${'status'.padEnd(6)} ${'time'.padStart(8)}  ${'item'.padEnd(labelWidth)}\n`);
 await writeStdout(`${'-'.repeat(6)} ${'-'.repeat(8)}  ${'-'.repeat(labelWidth)}\n`);
