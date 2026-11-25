@@ -268,7 +268,7 @@ export function matrix(
 /**
  * Create a sparse matrix (mathjs-compatible)
  */
-export function sparse(data?: number[][]): CompatMatrixValue {
+export function sparse(data?: number[][]): BridgeMatrix {
   if (data === undefined) {
     return _factorySparse();
   }

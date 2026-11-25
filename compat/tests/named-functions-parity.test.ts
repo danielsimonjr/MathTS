@@ -7,12 +7,14 @@ import {
   cbrt,
   combinations,
   compareNatural,
+  compareNaturalDependencies,
   compareText,
   conj,
   create,
   derivative,
   equalText,
   erf,
+  format,
   fraction,
   fractionDependencies,
   im,
@@ -28,9 +30,112 @@ import {
   round,
   toBest,
   toBestDependencies,
+  typeOf,
+  typeOfDependencies,
 } from '../src/index.js';
 
 describe('named compatibility function imports', () => {
+  it('reports the MathJS matrix type names across compatibility entry points', () => {
+    const math = create(all);
+    const selected = create({ typeOfDependencies });
+    const data = [
+      [1, 0],
+      [0, 2],
+    ];
+    for (const storage of ['dense', 'sparse'] as const) {
+      const matrix = math.matrix(data, storage);
+      const expected = oracle.typeOf(oracle.matrix(data, storage));
+      expect(typeOf(matrix)).toBe(expected);
+      expect(math.typeOf(matrix)).toBe(expected);
+      expect(selected.typeOf(matrix)).toBe(expected);
+      expect(math.evaluate('typeOf(x)', { x: matrix })).toBe(expected);
+    }
+    expect(math.evaluate('typeOf(1:3)')).toBe(oracle.evaluate('typeOf(1:3)'));
+  });
+
+  it('naturally orders matrix values and uses storage type to break ties', () => {
+    const math = create(all);
+    const selected = create({ compareNaturalDependencies });
+    const array = [
+      [1, 0],
+      [0, 2],
+    ];
+    const dense = math.matrix(array, 'dense');
+    const sparse = math.matrix(array, 'sparse');
+    const referenceDense = oracle.matrix(array, 'dense');
+    const referenceSparse = oracle.matrix(array, 'sparse');
+    const larger = [
+      [1, 0],
+      [0, 3],
+    ];
+
+    expect(compareNatural(dense, array)).toBe(oracle.compareNatural(referenceDense, array));
+    expect(compareNatural([dense], [larger])).toBe(
+      oracle.compareNatural([referenceDense], [larger])
+    );
+    expect(math.compareNatural(sparse, larger)).toBe(
+      oracle.compareNatural(referenceSparse, larger)
+    );
+    expect(selected.compareNatural(dense, sparse)).toBe(
+      oracle.compareNatural(referenceDense, referenceSparse)
+    );
+    expect(math.evaluate('compareNatural(x, y)', { x: dense, y: sparse })).toBe(
+      oracle.compareNatural(referenceDense, referenceSparse)
+    );
+  });
+
+  it.each(['dense', 'sparse'] as const)('formats %s matrices with numeric options', (storage) => {
+    const math = create(all);
+    const data = [
+      [1.2345, 0],
+      [0, 2.3456],
+    ];
+    const matrix = math.matrix(data, storage);
+    const expected = oracle.matrix(data, storage);
+
+    expect(matrix.format(3)).toBe(oracle.format(expected, 3));
+    expect(format(matrix, 3)).toBe(oracle.format(expected, 3));
+    expect(math.format(matrix, { notation: 'fixed', precision: 2 })).toBe(
+      oracle.format(expected, { notation: 'fixed', precision: 2 })
+    );
+    expect(math.evaluate('format(x, 3)', { x: matrix })).toBe(oracle.format(expected, 3));
+    expect(matrix.toString()).toBe(expected.toString());
+  });
+
+  it.each(['dense', 'sparse'] as const)('swaps %s matrix rows in place', (storage) => {
+    const math = create(all);
+    const data = [
+      [1, 0, 3],
+      [0, 2, 4],
+      [5, 0, 0],
+    ];
+    const matrix = math.matrix(data, storage);
+    const expected = oracle.matrix(data, storage);
+
+    expect(matrix.swapRows(0, 1)).toBe(matrix);
+    expect(matrix.toArray()).toEqual(expected.swapRows(0, 1).toArray());
+    expect(matrix.swapRows(1, 1).toArray()).toEqual(expected.toArray());
+    expect(() => matrix.swapRows(1, 3)).toThrow('Index out of range');
+    expect(() => matrix.swapRows(0.5, 1)).toThrow('Row index must be positive integers');
+    expect(matrix.toArray()).toEqual(expected.toArray());
+  });
+
+  it('keeps sparse entries in their original columns when swapping with an empty row', () => {
+    const data = [
+      [1, 0, 3],
+      [0, 2, 0],
+      [0, 0, 0],
+    ];
+    for (const [i, j] of [
+      [1, 2],
+      [2, 1],
+    ]) {
+      const matrix = create(all).sparse(data);
+      const expected = oracle.sparse(data);
+      expect(matrix.swapRows(i, j).toArray()).toEqual(expected.swapRows(i, j).toArray());
+    }
+  });
+
   it('matches the upstream results across mathematical categories', () => {
     expect(combinations(12, 3)).toBe(oracle.combinations(12, 3));
     expect(log2(16)).toBe(oracle.log2(16));

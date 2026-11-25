@@ -21,6 +21,7 @@
  * @packageDocumentation
  */
 
+import { compareArrays, compareMatricesAndArrays } from '../relational/compare-collections.js';
 import { naturalSort } from '../relational/natural-sort.js';
 import {
   mathTyped,
@@ -33,6 +34,7 @@ import {
   isFraction,
   isUnit,
 } from '@danielsimonjr/mathts-core';
+import { isDenseMatrix, isSparseMatrix } from '../utils/is.js';
 import { nearlyEqual } from '../utils/number.js';
 import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
 
@@ -94,25 +96,10 @@ function typeNameOf(x: unknown): string {
   if (isFraction(x)) return 'Fraction';
   if (isUnit(x)) return 'Unit';
   if (Array.isArray(x)) return 'Array';
+  if (isDenseMatrix(x)) return 'DenseMatrix';
+  if (isSparseMatrix(x)) return 'SparseMatrix';
   if (typeof x === 'object') return 'Object';
   return typeof x;
-}
-
-/**
- * Compare two arrays element-by-element using a comparator.
- * Longer array wins if all shared prefix elements are equal.
- */
-function compareArrays(
-  cmp: (a: unknown, b: unknown) => number,
-  x: unknown[],
-  y: unknown[]
-): number {
-  const len = Math.min(x.length, y.length);
-  for (let i = 0; i < len; i++) {
-    const c = cmp(x[i], y[i]);
-    if (c !== 0) return c;
-  }
-  return x.length > y.length ? 1 : x.length < y.length ? -1 : 0;
 }
 
 /**
@@ -341,11 +328,10 @@ function _compareNatural(x: unknown, y: unknown): number {
     return naturalSort(typeX, typeY) as number;
   }
 
-  // Array types — element-by-element, then length, then type tiebreak
-  if (typeX === 'Array' || typeY === 'Array') {
-    const ax = Array.isArray(x) ? x : [x];
-    const ay = Array.isArray(y) ? y : [y];
-    const c = compareArrays(_compareNatural, ax, ay);
+  // Compare collection contents before using the storage type as a tiebreak.
+  const collectionTypes = ['Array', 'DenseMatrix', 'SparseMatrix'];
+  if (collectionTypes.includes(typeX) || collectionTypes.includes(typeY)) {
+    const c = compareMatricesAndArrays(_compareNatural, x, y);
     if (c !== 0) return c;
     return naturalSort(typeX, typeY) as number;
   }

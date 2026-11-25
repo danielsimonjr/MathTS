@@ -10,7 +10,7 @@ describe('intersect with matrices', () => {
 
     const res = intersect(w, x, y, z);
     expect(res).not.toBeNull();
-    expect(typeOf(res)).toBe('MathJSDenseMatrix');
+    expect(typeOf(res)).toBe('DenseMatrix');
 
     const plane = matrix([1, 1, 1, 6]);
     const xp = matrix([1, 0, 1]);
@@ -18,7 +18,7 @@ describe('intersect with matrices', () => {
 
     const res2 = intersect(xp, yp, plane);
     expect(res2).not.toBeNull();
-    expect(typeOf(res2)).toBe('MathJSDenseMatrix');
+    expect(typeOf(res2)).toBe('DenseMatrix');
   });
 
   it('should work with sparse matrices when supported', () => {

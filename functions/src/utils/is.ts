@@ -657,16 +657,18 @@ export function isChain(x: unknown): x is Chain {
 /**
  * Return the type name of `x`.
  *
- * For `null` the name is `'null'`, and for a BigNumber it is `'BigNumber'`. For another
- * object it is the constructor name, or `'Object'` if the constructor has no name. For a
- * primitive it is the `typeof` result, for example `'number'`.
+ * BigNumbers and matrices use their public type names. Other objects use the
+ * constructor name when available. Primitives use the `typeof` result, with a
+ * special case for `null`.
  */
 export function typeOf(x: unknown): string {
   const t = typeof x;
 
   if (t === 'object') {
     if (x === null) return 'null';
-    if (isBigNumber(x)) return 'BigNumber'; // Special: weird mashup with Decimal
+    if (isBigNumber(x)) return 'BigNumber';
+    if (isDenseMatrix(x)) return 'DenseMatrix';
+    if (isSparseMatrix(x)) return 'SparseMatrix';
     const obj = x as { constructor?: { name?: string } };
     if (obj.constructor && obj.constructor.name) return obj.constructor.name;
 
