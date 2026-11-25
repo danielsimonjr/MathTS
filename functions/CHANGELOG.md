@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.20
+
+### Patch Changes
+
+- f3ba0d6: Support unit operands in square roots, squares, and cubes, and complex operands in expm1.
+
 ## 0.89.19
 
 ### Patch Changes
