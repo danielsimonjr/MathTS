@@ -8,6 +8,7 @@
 
 // Arithmetic functions (includes parallel Float64Array support)
 export * from './arithmetic.js';
+export { num, den } from './fraction-parts.js';
 export { typedArithmetic } from './arithmetic.js';
 
 // Trigonometric functions (includes parallel Float64Array support)

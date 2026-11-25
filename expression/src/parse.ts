@@ -200,10 +200,14 @@ export const createParse = /* #__PURE__ */ factory(
     }: ParseDependencies,
     supplied
   ) => {
+    const mathjsSyntax = supplied?.mathjsSyntax === true;
+    const explicitScope = supplied?.mathWithTransform;
     const runtimeMath =
-      supplied && typeof supplied.config === 'function' && typeof supplied.matrix === 'function'
-        ? expressionView(supplied)
-        : undefined;
+      explicitScope && typeof explicitScope === 'object'
+        ? expressionView(explicitScope as Record<string, unknown>)
+        : supplied && typeof supplied.config === 'function' && typeof supplied.matrix === 'function'
+          ? expressionView(supplied)
+          : undefined;
     /**
      * Parse an expression. Returns a node tree, which can be evaluated by
      * invoking node.evaluate() or transformed into a functional object via node.compile().
@@ -484,14 +488,17 @@ export const createParse = /* #__PURE__ */ factory(
       const c2 = currentString(state, 2);
       const c3 = currentString(state, 3);
 
-      if (hasOwnProperty(RADICAL_SYMBOLS, c1) || hasOwnProperty(OPERATOR_SYMBOLS, c1)) {
+      if (
+        !mathjsSyntax &&
+        (hasOwnProperty(RADICAL_SYMBOLS, c1) || hasOwnProperty(OPERATOR_SYMBOLS, c1))
+      ) {
         state.tokenType = TOKENTYPE.DELIMITER;
         state.token = hasOwnProperty(OPERATOR_SYMBOLS, c1) ? OPERATOR_SYMBOLS[c1] : c1;
         next(state);
         return;
       }
 
-      if (isMathDigitPair(c2.charAt(0), c2.charAt(1))) {
+      if (!mathjsSyntax && isMathDigitPair(c2.charAt(0), c2.charAt(1))) {
         throw createSyntaxError(
           state,
           `Unicode mathematical digit "${c2}" is not allowed; use ASCII digits 0-9`
@@ -736,7 +743,7 @@ export const createParse = /* #__PURE__ */ factory(
      * @param c
      */
     parse.isValidLatinOrGreek = function isValidLatinOrGreek(c: string): boolean {
-      return isLatinOrGreekLetter(c) || c === '_' || c === '$';
+      return isLatinOrGreekLetter(c) || (mathjsSyntax && (c === '×' || c === '÷'));
     };
 
     /**
@@ -754,7 +761,7 @@ export const createParse = /* #__PURE__ */ factory(
      * @param low
      */
     parse.isValidMathSymbol = function isValidMathSymbol(high: string, low: string): boolean {
-      return isMathLetterPair(high, low);
+      return isMathLetterPair(high, low) || (mathjsSyntax && isMathDigitPair(high, low));
     };
 
     /**

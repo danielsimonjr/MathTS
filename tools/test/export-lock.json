@@ -1209,6 +1209,9 @@
       "createMap": {
         "kind": "function"
       },
+      "createMathjsUnitClass": {
+        "kind": "function"
+      },
       "createUnitClass": {
         "kind": "function"
       },
@@ -4066,6 +4069,9 @@
       "compareUnits": {
         "kind": "function"
       },
+      "compile": {
+        "kind": "function"
+      },
       "compileExpr": {
         "kind": "function"
       },
@@ -4319,6 +4325,9 @@
         "kind": "function"
       },
       "deleteNode": {
+        "kind": "function"
+      },
+      "den": {
         "kind": "function"
       },
       "derivative": {
@@ -5425,16 +5434,73 @@
       "irfft": {
         "kind": "function"
       },
+      "isAccessorNode": {
+        "kind": "function"
+      },
+      "isArray": {
+        "kind": "function"
+      },
+      "isArrayNode": {
+        "kind": "function"
+      },
+      "isAssignmentNode": {
+        "kind": "function"
+      },
+      "isBigInt": {
+        "kind": "function"
+      },
+      "isBigNumber": {
+        "kind": "function"
+      },
+      "isBlockNode": {
+        "kind": "function"
+      },
+      "isBoolean": {
+        "kind": "function"
+      },
       "isBounded": {
         "kind": "function"
       },
       "isCarmichael": {
         "kind": "function"
       },
+      "isChain": {
+        "kind": "function"
+      },
+      "isCollection": {
+        "kind": "function"
+      },
+      "isComplex": {
+        "kind": "function"
+      },
+      "isConditionalNode": {
+        "kind": "function"
+      },
       "isConnected": {
         "kind": "function"
       },
+      "isConstantNode": {
+        "kind": "function"
+      },
+      "isDate": {
+        "kind": "function"
+      },
+      "isDenseMatrix": {
+        "kind": "function"
+      },
       "isFinite": {
+        "kind": "function"
+      },
+      "isFraction": {
+        "kind": "function"
+      },
+      "isFunction": {
+        "kind": "function"
+      },
+      "isFunctionAssignmentNode": {
+        "kind": "function"
+      },
+      "isFunctionNode": {
         "kind": "function"
       },
       "isGpuChainSupported": {
@@ -5443,10 +5509,25 @@
       "isGpuEnabled": {
         "kind": "function"
       },
+      "isHelp": {
+        "kind": "function"
+      },
+      "isIndex": {
+        "kind": "function"
+      },
+      "isIndexNode": {
+        "kind": "function"
+      },
       "isInteger": {
         "kind": "function"
       },
       "isIsomorphic": {
+        "kind": "function"
+      },
+      "isMap": {
+        "kind": "function"
+      },
+      "isMatrix": {
         "kind": "function"
       },
       "isNaN": {
@@ -5455,7 +5536,34 @@
       "isNegative": {
         "kind": "function"
       },
+      "isNode": {
+        "kind": "function"
+      },
+      "isNull": {
+        "kind": "function"
+      },
+      "isNumber": {
+        "kind": "function"
+      },
       "isNumeric": {
+        "kind": "function"
+      },
+      "isObject": {
+        "kind": "function"
+      },
+      "isObjectNode": {
+        "kind": "function"
+      },
+      "isObjectWrappingMap": {
+        "kind": "function"
+      },
+      "isOperatorNode": {
+        "kind": "function"
+      },
+      "isParenthesisNode": {
+        "kind": "function"
+      },
+      "isPartitionedMap": {
         "kind": "function"
       },
       "isPerfect": {
@@ -5473,7 +5581,37 @@
       "isPrimePower": {
         "kind": "function"
       },
+      "isRange": {
+        "kind": "function"
+      },
+      "isRangeNode": {
+        "kind": "function"
+      },
+      "isRegExp": {
+        "kind": "function"
+      },
+      "isRelationalNode": {
+        "kind": "function"
+      },
+      "isResultSet": {
+        "kind": "function"
+      },
+      "isSparseMatrix": {
+        "kind": "function"
+      },
       "isSquarefree": {
+        "kind": "function"
+      },
+      "isString": {
+        "kind": "function"
+      },
+      "isSymbolNode": {
+        "kind": "function"
+      },
+      "isUndefined": {
+        "kind": "function"
+      },
+      "isUnit": {
         "kind": "function"
       },
       "isWasmLoaded": {
@@ -6173,6 +6311,9 @@
         "kind": "function"
       },
       "nullspace": {
+        "kind": "function"
+      },
+      "num": {
         "kind": "function"
       },
       "number": {

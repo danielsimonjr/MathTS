@@ -10,6 +10,7 @@
 
 import {
   createEvaluate,
+  type createParse,
   compileExpressionWithDeps as _compileExpression,
   EXPRESSION_SCOPE_OMIT,
 } from '@danielsimonjr/mathts-expression';
@@ -169,7 +170,8 @@ for (const key of scopeNames) {
  * Reuses the parse function built in index.ts to avoid duplicate
  * typed-function conversion registrations.
  */
-export const parse = factoryScope.parse as Parameters<typeof createEvaluate>[0];
+export const parse = factoryScope.parse as ReturnType<typeof createParse> &
+  Parameters<typeof createEvaluate>[0];
 
 // ---------------------------------------------------------------------------
 // Step 3: Create the evaluate function
@@ -266,10 +268,11 @@ function compileInScope(
   safeScope: ExpressionScope,
   unsafeScope: ExpressionScope,
   expr: string,
-  options: PhysicsEvaluateOptions | undefined
+  options: PhysicsEvaluateOptions | undefined,
+  parseExpression: typeof parse = parse
 ) {
   const compiled = _compileExpression(
-    parse,
+    parseExpression,
     options?.unsafe === true ? unsafeScope : safeScope,
     expr,
     options?.unsafe === true ? { unsafe: true } : undefined
@@ -658,19 +661,31 @@ function buildUnsafeScopedMathNamespace(
  *   name resolves even when it is in this list. Default: none.
  * @param matrixLiterals - Whether the host enables Matrix literals according to its live config.
  * @param constants - Optional live reads of the host's built-in constants.
+ * @param mathjsSyntax - Use the mathjs tokenizer for this instance.
  */
 export function createInstanceEvaluator(
   importedExpressionScope: Record<string, unknown>,
   hiddenNames: Iterable<string> = [],
   matrixLiterals = false,
-  constants: Readonly<Record<string, () => unknown>> = {}
+  constants: Readonly<Record<string, () => unknown>> = {},
+  mathjsSyntax = false
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
+  parse: typeof parse;
 } {
   const hidden: ReadonlySet<string> = new Set(hiddenNames);
   const safeScope = buildScopedMathNamespace(importedExpressionScope, hidden);
   const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope, hidden);
+  // Node.compile uses the factory transforms (including one-based indexing).
+  // Overlay the same instance bindings without replacing its other operators.
+  const parseScope = omitEvaluateInternals({
+    ...(factoryScope.mathWithTransform as Record<string, unknown>),
+    ...scrubImportedExpressionScope(importedExpressionScope),
+  });
+  for (const key of hidden) {
+    if (!Object.hasOwn(importedExpressionScope, key)) delete parseScope[key];
+  }
   for (const [name, get] of Object.entries(constants)) {
     if (
       EVALUATE_SCOPE_OMIT.has(name) ||
@@ -682,6 +697,7 @@ export function createInstanceEvaluator(
     const descriptor = { enumerable: true, get };
     Object.defineProperty(safeScope, name, descriptor);
     Object.defineProperty(unsafeScope, name, descriptor);
+    Object.defineProperty(parseScope, name, descriptor);
   }
   if (matrixLiterals) {
     const key = Symbol.for('mathts.expression.matrixLiterals');
@@ -689,8 +705,12 @@ export function createInstanceEvaluator(
     Object.defineProperty(safeScope, key, { value: enabled });
     Object.defineProperty(unsafeScope, key, { value: enabled });
   }
-  const safeEvaluate = createEvaluate(parse, safeScope, configFingerprint);
-  const unsafeEvaluate = createEvaluate(parse, unsafeScope, configFingerprint);
+  const scopedParse = activatedFactories.factory_mathjsCompat.createScopedParse(
+    parseScope,
+    mathjsSyntax
+  );
+  const safeEvaluate = createEvaluate(scopedParse, safeScope, configFingerprint);
+  const unsafeEvaluate = createEvaluate(scopedParse, unsafeScope, configFingerprint);
 
   function evaluateBound(
     exprOrExprs: string | string[],
@@ -701,11 +721,12 @@ export function createInstanceEvaluator(
   }
 
   function compileBound(expr: string, options?: PhysicsEvaluateOptions) {
-    return compileInScope(safeScope, unsafeScope, expr, options);
+    return compileInScope(safeScope, unsafeScope, expr, options, scopedParse);
   }
 
   return {
     evaluate: evaluateBound as typeof evaluate,
     compile: compileBound as typeof compileExpr,
+    parse: scopedParse,
   };
 }

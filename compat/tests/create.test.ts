@@ -1,16 +1,17 @@
+import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import * as oracle from 'mathjs';
 import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
 import { MATHJS_PARITY_NAMES } from '../src/parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES } from '../src/internal-names.generated.js';
 
-/**
- * EXPANSION_PLAN W5 — `compat` exposes the full functions surface.
- * `all` is the real @danielsimonjr/mathts-functions namespace (not an empty
- * placeholder) and `create(all)` surfaces it, with the compat shims overlaid.
- */
 describe('compat create(all)', () => {
-  it('all is the full functions namespace, not an empty placeholder', () => {
-    expect(Object.keys(all).length).toBeGreaterThan(100);
+  it('exports the same selectable factories as mathjs', () => {
+    expect(Object.keys(all).sort()).toEqual(Object.keys(oracle.all).sort());
+    const selected = create({ createPi: all.createPi });
+    expect(selected.pi).toBe(oracle.pi);
+    expect(selected.sin).toBeUndefined();
+    expect(create({ ...all }).add(2, 3)).toBe(5);
   });
 
   it('create(all) surfaces the full functions surface', () => {
@@ -85,7 +86,7 @@ describe('compat create(all) lazy wrapping', () => {
     };
     const before = names();
     const internal = new Set<string>(COMPAT_INTERNAL_NAMES);
-    for (const key of Object.keys(all)) {
+    for (const key of Object.keys(mathFunctions)) {
       if (!internal.has(key)) expect(before).toContain(key);
     }
     expect(before).toContain('config');

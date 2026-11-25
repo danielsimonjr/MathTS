@@ -1,3 +1,6 @@
+import { MAX_LOOP_ORDER } from '../utils/limits.js';
+import { product } from '../utils/product.js';
+import { fractionPart } from '../typed/fraction-parts.js';
 import FractionJS from 'fraction.js';
 import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
 import { createSelectedMultiply } from '../arithmetic/selectedMultiply.js';
@@ -82,7 +85,7 @@ import { createLog10 } from '../arithmetic/log10.js';
 import { createLog2 } from '../arithmetic/log2.js';
 import { createMultiplyScalar } from '../arithmetic/multiplyScalar.js';
 import { createSign } from '../arithmetic/sign.js';
-import { createSqrt } from '../arithmetic/sqrt.js';
+import { createMathjsSqrt, createSqrt } from '../arithmetic/sqrt.js';
 import { createSquare } from '../arithmetic/square.js';
 import { createSubtractScalar } from '../arithmetic/subtractScalar.js';
 import { createMathjsUnaryMinus, createUnaryMinus } from '../arithmetic/unaryMinus.js';
@@ -1244,7 +1247,11 @@ import {
   mathTyped as coreTyped,
   createMathTSTyped,
 } from '@danielsimonjr/mathts-core';
-import { createUnitClass, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import {
+  createMathjsUnitClass,
+  createUnitClass,
+  notSquareError,
+} from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
 import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMatrix.js';
 
@@ -1949,13 +1956,55 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+/** Accumulate the decimal binomial coefficient in mathjs order, rounding each operation. */
+function compatDecimalCombinations(n: CoreBigNumber, k: CoreBigNumber, replacement: boolean) {
+  const nativeCount = replacement ? typedCombinationsWithRep : typedCombinations;
+  if (
+    !n.isInteger() ||
+    !k.isInteger() ||
+    n.isNegative() ||
+    k.isNegative() ||
+    (replacement ? n.isZero() : k.gt(n))
+  )
+    return nativeCount(n, k);
+  const Decimal = n.constructor as typeof CoreBigNumber;
+  const other = replacement ? n.minus(1) : n.minus(k);
+  const [smaller, larger] = k.lt(other) ? [k, other] : [other, k];
+  const iterations = larger.toNumber();
+  if (smaller.isZero()) return new Decimal(1);
+  if (iterations > MAX_LOOP_ORDER) return nativeCount(n, k);
+  let result = new Decimal(1);
+  for (let i = 1; i <= iterations; i++) {
+    result = result.times(smaller.plus(i)).div(i);
+  }
+  return result;
+}
+
 const createSelectedCombinations = /* #__PURE__ */ factory(
   'combinations',
   ['typed'],
   ({ typed }: { typed: TypedBuilder }) =>
     typed('combinations', {
-      'number, number': typedCombinations.signatures['number,number'],
-      'BigNumber, BigNumber': typedCombinations.signatures['BigNumber,BigNumber'],
+      'number, number': (n: number, k: number) => {
+        if (!Number.isSafeInteger(n) || !Number.isInteger(k) || n < 0 || k < 0 || k > n) {
+          return typedCombinations(n, k);
+        }
+        const count = Math.min(k, n - k);
+        let result = 1;
+        let divisor = 2;
+        for (let i = 1; i <= count && Number.isFinite(result); i++) {
+          result *= n - count + i;
+          while (divisor <= count && result % divisor === 0) {
+            result /= divisor;
+            divisor++;
+          }
+        }
+        // Any product of 171 consecutive positive integers starting at 2 overflows.
+        const denominator = count - divisor >= 170 ? Infinity : product(divisor, count);
+        return result / denominator;
+      },
+      'BigNumber, BigNumber': (n: CoreBigNumber, k: CoreBigNumber) =>
+        compatDecimalCombinations(n, k, false),
     })
 );
 
@@ -1964,8 +2013,23 @@ const createSelectedCombinationsWithRep = /* #__PURE__ */ factory(
   ['typed'],
   ({ typed }: { typed: TypedBuilder }) =>
     typed('combinationsWithRep', {
-      'number, number': typedCombinationsWithRep.signatures['number,number'],
-      'BigNumber, BigNumber': typedCombinationsWithRep.signatures['BigNumber,BigNumber'],
+      'number, number': (n: number, k: number) => {
+        const last = n + k - 1;
+        if (
+          n < 1 ||
+          k < 0 ||
+          !Number.isInteger(n) ||
+          !Number.isInteger(k) ||
+          !Number.isSafeInteger(last)
+        ) {
+          return typedCombinationsWithRep(n, k);
+        }
+        const count = Math.min(n - 1, k);
+        if (count > 170) return NaN;
+        return product(last - count + 1, last) / product(1, count);
+      },
+      'BigNumber, BigNumber': (n: CoreBigNumber, k: CoreBigNumber) =>
+        compatDecimalCombinations(n, k, true),
     })
 );
 
@@ -1973,7 +2037,7 @@ const createSelectedParse: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createParse>
 > = /* #__PURE__ */ factory('parse', createParse.dependencies, (deps: Record<string, unknown>) => {
-  const parse = createParse(deps);
+  const parse = createParse(Object.assign(Object.create(deps), { mathjsSyntax: true }));
   const typed = deps.typed as typeof coreTyped;
   typed.addConversion(
     { from: 'string', to: 'Node', convert: (value) => parse(value as string) },
@@ -2392,7 +2456,10 @@ const createSelectedString = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self) => (value) => mapCollection(value, (v) => self(v))
       ),
-      any: String,
+      any: (value: unknown) => {
+        if (!coreIsBigNumber(value)) return String(value);
+        return value.e <= -7 || value.e >= 21 ? value.toExponential() : value.toFixed();
+      },
     })
 );
 
@@ -2536,7 +2603,7 @@ const compatConstructors: {
   Spa: _Spa,
   SparseMatrix: MathJSSparseMatrix,
   SymbolNode: _SymbolNode,
-  Unit: _Unit,
+  Unit: createMathjsUnitClass(factoryScope),
 };
 
 /** Construct the mathjs RNG functions with instance-local configuration and events. */
@@ -3438,7 +3505,7 @@ function compatFactoryExports(): {
     createRe,
     createSquare,
     createSubtractScalar,
-    createSqrt,
+    createSqrt: createMathjsSqrt,
     createUnaryMinus: createMathjsUnaryMinus,
     createFormat,
     createPrint,
@@ -3605,7 +3672,7 @@ function compatFactoryExports(): {
     createCross,
     createDotPow,
     createSlu,
-    createUnitClass,
+    createUnitClass: createMathjsUnitClass,
     createUnitFunction,
     createCreateUnit,
     createSymbolNode,
@@ -3733,15 +3800,43 @@ function compatFactoryExports(): {
 
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
+  fractionPart,
+  /** Create a parser whose nodes compile with the expression bindings of one instance. */
+  createScopedParse(
+    mathWithTransform: Record<string, unknown>,
+    mathjsSyntax: boolean
+  ): ReturnType<typeof createParse> {
+    return createParse({ ..._parseScope, mathWithTransform, mathjsSyntax });
+  },
   constructors: compatConstructors,
   checks,
   factory,
   attachEmitter,
   configFactory,
+  /** Build the unit constructor and registration functions for one compatibility instance. */
+  createCompatUnitSources(config: Parameters<typeof createMathjsUnitClass>[0]['config']) {
+    const listeners: ((current: typeof config, previous: typeof config) => void)[] = [];
+    const Unit = createMathjsUnitClass({
+      ...factoryScope,
+      config,
+      on: (_event: string, callback: (current: typeof config, previous: typeof config) => void) =>
+        listeners.push(callback),
+    });
+    const deps = { typed: factoryScope.typed, Unit };
+    return {
+      Unit,
+      unit: createUnitFunction(deps),
+      createUnit: createCreateUnit(deps),
+      update(current: typeof config, previous: typeof config) {
+        for (const listener of listeners) listener(current, previous);
+      },
+    };
+  },
   createCompatRandomSources,
   createCompatTyped,
   tryCreateFactoryBundle,
   compatFactoryExports,
+  string: createSelectedString({ typed: createTyped(factoryScope) }),
   setUnion: compatSetUnion,
   compareText,
   equalText,
@@ -3749,6 +3844,18 @@ export const factory_mathjsCompat = {
   conj,
   im,
   re,
+  combinationsWithRep: createSelectedCombinationsWithRep({ typed: createTyped(factoryScope) }),
+  combinations: createSelectedCombinations({ typed: createTyped(factoryScope) }),
+  xgcd: createSelectedXgcd({ ...factoryScope, typed: createTyped(factoryScope) } as Parameters<
+    typeof createSelectedXgcd
+  >[0]),
+  permutations: createSelectedPermutations({
+    typed: createTyped(factoryScope),
+    factorial: factoryScope.factorial,
+  }),
+  unit: createUnitFunction({ typed: factoryScope.typed, Unit: compatConstructors.Unit }),
+  createUnit: createCreateUnit({ typed: factoryScope.typed, Unit: compatConstructors.Unit }),
+  sqrt: createMathjsSqrt(factoryScope),
   lgamma: createMathJSLgamma(factoryScope as Parameters<typeof createMathJSLgamma>[0]),
   fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),
   toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),

@@ -1,3 +1,4 @@
+import { string as compatString, stringDependencies } from '../src/index.js';
 import { describe, expect, it } from 'vitest';
 import * as oracle from 'mathjs';
 import {
@@ -274,8 +275,16 @@ describe('named compatibility function imports', () => {
       Number(oracle.round(oracleValue, 2, oracleTarget).toNumeric('cm')),
       14
     );
-    expect(String(math.evaluate('round(3.241 cm, 2, cm)'))).toBe('3.24 cm');
-    expect(String(round([value, math.unit('2.178 cm'), 0], 2, target))).toBe('3.24 cm,2.18 cm,0');
+    expect(String(math.evaluate('round(3.241 cm, 2, cm)'))).toBe(
+      String(oracle.evaluate('round(3.241 cm, 2, cm)'))
+    );
+    expect(String(round([value, math.unit('2.178 cm'), 0], 2, target))).toBe(
+      String(
+        oracle.evaluate('round(values, 2, cm)', {
+          values: [oracleValue, oracle.unit('2.178 cm'), 0],
+        })
+      )
+    );
   });
 
   it('allows preferred units and an offset in toBest', () => {
@@ -365,7 +374,9 @@ describe('named compatibility function imports', () => {
     expect(String(math.toBest(value))).toBe(expected);
     expect(String(selected.toBest(value))).toBe(expected);
     expect(String(math.evaluate(expression))).toBe(expected);
-    expect(String(toBest(value, [], { offset: 0 }))).toBe('0.123 uA');
+    expect(String(toBest(value, [], { offset: 0 }))).toBe(
+      String(oracle.evaluate('toBest(unit(0.000000123, "A"), [], {offset: 0})'))
+    );
   });
 
   it('matches the MathJS approximation of floating-point fractions', () => {
@@ -452,4 +463,21 @@ describe('named compatibility function imports', () => {
     expect(actual.re).toBeCloseTo(expected.re, 14);
     expect(actual.im).toBeCloseTo(expected.im, 14);
   });
+});
+
+it('uses mathjs notation for numbers and BigNumbers in string conversions', () => {
+  const full = create(all);
+  const selected = create({ stringDependencies });
+  const values = ['0', '1e-7', '-1.25e-6', '1e20', '1e21', 'NaN', 'Infinity'];
+  for (const input of values) {
+    const value = full.bignumber(input);
+    const expected = oracle.string(oracle.bignumber(input));
+    expect(compatString(value)).toBe(expected);
+    expect(selected.string(value)).toBe(expected);
+    expect(full.string(value)).toBe(expected);
+    expect(full.evaluate('string(x)', { x: value })).toBe(expected);
+  }
+  for (const n of [1e-5, 1e6]) {
+    expect(compatString([n])).toEqual(oracle.string([n]));
+  }
 });

@@ -52,16 +52,15 @@ import {
   inv as _inv,
   pow as _pow,
   factory_pow as _factoryPow,
-  sqrt as _sqrt,
   abs as _abs,
-  exp as _exp,
-  log as _log,
-  sin as _sin,
-  cos as _cos,
-  tan as _tan,
-  asin as _asin,
-  acos as _acos,
-  atan as _atan,
+  factory_exp as _exp,
+  factory_log as _log,
+  factory_sin as _sin,
+  factory_cos as _cos,
+  factory_tan as _tan,
+  factory_asin as _asin,
+  factory_acos as _acos,
+  factory_atan as _atan,
   atan2 as _atan2,
   sum as _sum,
   mean as _mean,
@@ -78,7 +77,9 @@ import {
   sparse as _factorySparse,
   zeros as _factoryZeros,
   ones as _factoryOnes,
-  transpose as _transpose,
+  factory_transpose as _transpose,
+  det as _det,
+  size as _size,
   factory_mathjsCompat,
   bignumber as _bignumber,
   complex as _complex,
@@ -481,7 +482,7 @@ export const pow = withTypedSurface(function (base?: unknown, exponent?: unknown
 }, _pow) as TypedFunction;
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
-  _sqrt as (...args: unknown[]) => unknown,
+  factory_mathjsCompat.sqrt as (...args: unknown[]) => unknown,
   UNARY_NUMBER_FAST_PATH.sqrt
 ) as PublicSqrt;
 export const abs = makeUnaryFastPath(
@@ -605,126 +606,28 @@ export const arg = factory_mathjsCompat.arg as ComplexProjection;
 // Matrix-specific Shims
 // =============================================================================
 
-type TransposeScalar = number | bigint | BigNumber | Complex | Fraction;
+type MatrixScalar = number | bigint | boolean | string | null | BigNumber | Complex | Fraction;
 
-/**
- * Transpose a matrix or numeric scalar (mathjs-compatible). Nested arrays
- * return arrays, matrices retain their representation, and scalars retain their value.
- */
-export function transpose<T extends TransposeScalar>(m: T): T;
-export function transpose(m: CompatMatrixValue | number[][]): CompatMatrixValue | number[][];
-export function transpose(
-  m: CompatMatrixValue | number[][] | TransposeScalar
-): CompatMatrixValue | number[][] | TransposeScalar {
-  if (Array.isArray(m)) {
-    return DenseMatrix.fromArray(m).transpose().toArray();
-  }
-  if (isDenseMatrix(m) || isSparseMatrix(m)) {
-    return m.transpose();
-  }
-  if (isCompatBridgeMatrix(m)) {
-    // The factory transpose takes the dense and the sparse matrix of the factory layer.
-    return _transpose(m as unknown) as CompatMatrixValue;
-  }
-  if (
-    typeof m === 'number' ||
-    typeof m === 'bigint' ||
-    isBigNumber(m) ||
-    isComplex(m) ||
-    isFraction(m)
-  ) {
-    return _transpose(m) as TransposeScalar;
-  }
-  throw new TypeError('Expected matrix, 2D array, or numeric scalar');
+/** Transpose native matrices with their own backend and other values with the mathjs factory. */
+export function transpose<T extends MatrixScalar>(m: T): T;
+export function transpose<T>(m: T[]): T[];
+export function transpose(m: CompatMatrixValue): CompatMatrixValue;
+export function transpose(m: unknown): unknown {
+  if (isDenseMatrix(m) || isSparseMatrix(m)) return m.transpose();
+  return _transpose(m);
 }
 
-/**
- * Matrix determinant (mathjs-compatible)
- *
- * Computes the determinant using LU decomposition.
- */
-export function det(m: CompatMatrixValue | number[][]): number {
-  // The matrix-package SparseMatrix was rejected before this compat surface
-  // routed math.matrix/math.sparse through the factory bridge. mathjs det()
-  // accepts math.sparse() (that bridge matrix, converted below via toArray).
-  // The native class stays rejected so existing callers keep the same error.
-  if (isSparseMatrix(m)) {
-    throw new TypeError('Expected DenseMatrix or 2D array');
+/** Compute the determinant with typed scalar arithmetic, preserving fractional and complex values. */
+export function det(m: DenseMatrix | number[][]): number;
+export function det<T extends MatrixScalar>(m: T): T;
+export function det(m: unknown): ReturnType<typeof _det>;
+export function det(m: unknown): unknown {
+  if (isSparseMatrix(m)) throw new TypeError('Expected DenseMatrix or 2D array');
+  if (isDenseMatrix(m)) {
+    if (m.rows !== m.cols) throw notSquareError('Determinant requires a square matrix');
+    return _det(m.toArray());
   }
-  const matrix = compatToDenseMatrix(m);
-
-  if (matrix.rows !== matrix.cols) {
-    throw notSquareError('Determinant requires a square matrix');
-  }
-
-  const n = matrix.rows;
-
-  // Handle small cases directly
-  if (n === 0) return 1;
-  if (n === 1) return matrix.get(0, 0);
-  if (n === 2) {
-    return matrix.get(0, 0) * matrix.get(1, 1) - matrix.get(0, 1) * matrix.get(1, 0);
-  }
-  if (n === 3) {
-    const a = matrix.get(0, 0),
-      b = matrix.get(0, 1),
-      c = matrix.get(0, 2);
-    const d = matrix.get(1, 0),
-      e = matrix.get(1, 1),
-      f = matrix.get(1, 2);
-    const g = matrix.get(2, 0),
-      h = matrix.get(2, 1),
-      i = matrix.get(2, 2);
-    return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
-  }
-
-  // LU decomposition for larger matrices
-  const lu: number[][] = [];
-  for (let i = 0; i < n; i++) {
-    lu[i] = [];
-    for (let j = 0; j < n; j++) {
-      lu[i][j] = matrix.get(i, j);
-    }
-  }
-
-  let swaps = 0;
-  for (let k = 0; k < n - 1; k++) {
-    // Find pivot
-    let maxVal = Math.abs(lu[k][k]);
-    let maxRow = k;
-    for (let i = k + 1; i < n; i++) {
-      if (Math.abs(lu[i][k]) > maxVal) {
-        maxVal = Math.abs(lu[i][k]);
-        maxRow = i;
-      }
-    }
-
-    if (maxVal < 1e-12) {
-      return 0; // Singular matrix
-    }
-
-    // Swap rows if needed
-    if (maxRow !== k) {
-      [lu[k], lu[maxRow]] = [lu[maxRow], lu[k]];
-      swaps++;
-    }
-
-    // Eliminate column
-    for (let i = k + 1; i < n; i++) {
-      lu[i][k] /= lu[k][k];
-      for (let j = k + 1; j < n; j++) {
-        lu[i][j] -= lu[i][k] * lu[k][j];
-      }
-    }
-  }
-
-  // Product of diagonal
-  let result = 1;
-  for (let i = 0; i < n; i++) {
-    result *= lu[i][i];
-  }
-
-  return swaps % 2 === 0 ? result : -result;
+  return _det(m);
 }
 
 /**
@@ -773,14 +676,9 @@ function filled(args: unknown[], value: 0 | 1, factory: (...a: unknown[]) => unk
   return factory(...args);
 }
 
-/**
- * Matrix size (mathjs-compatible)
- */
-export function size(m: DenseMatrix | SparseMatrix | number[][]): [number, number] {
-  if (Array.isArray(m)) {
-    return [m.length, m[0]?.length ?? 0];
-  }
-  return [m.rows, m.cols];
+/** Return the dimensions of a scalar, string, array, or matrix. */
+export function size(value: unknown): number[] {
+  return _size(value);
 }
 
 // =============================================================================

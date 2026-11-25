@@ -90,9 +90,7 @@ function lgammaFactory(compatibility = false) {
      * @return {number | Complex}    The log gamma of `n`
      */
     return typed(name, {
-      Array: function (arr: unknown[]): unknown[] {
-        return arr.map((x) => evaluateReal(x as number));
-      },
+      ...(compatibility ? {} : { Array: (arr: number[]) => arr.map(evaluateReal) }),
 
       number: evaluateReal,
       Complex: lgammaComplex,

@@ -322,9 +322,8 @@ const dependencies = [
   'Fraction',
 ];
 
-export const createUnitClass = /* #__PURE__ */ factory(
-  name,
-  dependencies,
+const buildUnitClass =
+  (useExactScales: boolean) =>
   ({
     on,
     config,
@@ -1280,6 +1279,7 @@ export const createUnitClass = /* #__PURE__ */ factory(
      * @return The exact scale, or null
      */
     Unit.prototype.exactScale = function (this: UnitInstance): ExactScale | null {
+      if (!useExactScales) return null;
       let key = '';
       for (const component of this.units) {
         key += `${identityOf(component.unit)}:${identityOf(component.prefix)}^${component.power};`;
@@ -2254,7 +2254,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
         /* Need to adjust value by difference in offset to convert */
         // With exact scales on both units: value + scale_from × offset_from −
         // scale_to × offset_to, the shift exact and the sum rounded once.
-        const shift = exactOffsetShift(this.units[0].unit, other.units[0].unit);
+        const shift = useExactScales
+          ? exactOffsetShift(this.units[0].unit, other.units[0].unit)
+          : null;
         const exactSI = liveExactSI(this);
         if (shift !== null && exactSI) {
           const sum = addExactScales(exactSI, shift);
@@ -3054,6 +3056,9 @@ export const createUnitClass = /* #__PURE__ */ factory(
         value: row.imaginary ? imaginaryValue(scaled) : scaled,
         offset: roundExactScale(exactOffset),
       };
+      if (!useExactScales && row.base === 'TEMPERATURE' && row.scale === '5/9') {
+        def.value = new Fraction(5, 9);
+      }
       if (row.reciprocal) def.reciprocal = true;
       if (row.cycles) def.cycles = 1;
       if (row.logarithmic) def.logarithmic = row.logarithmic;
@@ -3675,6 +3680,17 @@ export const createUnitClass = /* #__PURE__ */ factory(
     Unit.UNITS = UNITS;
 
     return Unit;
-  },
+  };
+
+/** Build the native unit class with exact conversion scales. */
+export const createUnitClass = /* #__PURE__ */ factory(name, dependencies, buildUnitClass(true), {
+  isClass: true,
+});
+
+/** Build a mathjs-compatible unit class with floating-point conversion scales. */
+export const createMathjsUnitClass = /* #__PURE__ */ factory(
+  name,
+  dependencies,
+  buildUnitClass(false),
   { isClass: true }
 );

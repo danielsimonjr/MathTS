@@ -1,5 +1,6 @@
 import { isBigNumber, isFraction } from '@danielsimonjr/mathts-core';
 import {
+  factory_mathjsCompat,
   replacer as nativeReplacer,
   reviver as nativeReviver,
 } from '@danielsimonjr/mathts-functions';
@@ -19,10 +20,7 @@ export function compatReplacer(this: unknown, key: string, value: unknown): unkn
     };
   }
   if (isBigNumber(original)) {
-    const scientific = original.toExponential();
-    const exponent = Number(scientific.split('e')[1]);
-    const value = exponent > -7 && exponent < 21 ? original.toFixed() : scientific;
-    return { mathjs: 'BigNumber', value };
+    return { mathjs: 'BigNumber', value: factory_mathjsCompat.string(original) };
   }
   return nativeReplacer(key, value);
 }
@@ -38,6 +36,23 @@ export function reviveWithClasses(value: unknown, classes: Record<string, unknow
 
 /** Restore MathJS numeric values, ranges, indices, and expression nodes. */
 export function compatReviver(key: string, value: unknown): unknown {
+  return reviveInstanceValue(key, value, instanceSymbols.Unit);
+}
+
+/** Restore tagged units with the registry belonging to the receiving instance. */
+export function reviveInstanceValue(
+  key: string,
+  value: unknown,
+  Unit: typeof instanceSymbols.Unit
+): unknown {
+  if (
+    value &&
+    typeof value === 'object' &&
+    Object.hasOwn(value, 'mathjs') &&
+    Reflect.get(value, 'mathjs') === 'Unit'
+  ) {
+    return reviveWithClasses(value, { Unit });
+  }
   const numeric = nativeReviver(key, value);
   return numeric === value ? reviveWithClasses(value, instanceSymbols) : numeric;
 }

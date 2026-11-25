@@ -121,6 +121,7 @@ export type {
 // bundle, and a ready-instantiated class — for the functions package to adopt as it
 // retires its own copy (Unit-merge Phase 3). `CoreUnit` is the value export; the
 // `Unit` *type* continues to come from `is.js`.
+export { createMathjsUnitClass } from './types/unit/Unit.js';
 export { createUnitClass, unitDependencies, Unit as CoreUnit } from './types/unit/index.js';
 
 // Cold array/collection/map utilities (Bucket B slice 2), consolidated from the

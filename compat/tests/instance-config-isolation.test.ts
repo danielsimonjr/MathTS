@@ -3,7 +3,7 @@ import { create, all } from '../src/index.js';
 import {
   config as barrelConfig,
   evaluate as barrelEvaluate,
-  sin as barrelSin,
+  factory_sin as barrelSin,
   divide as barrelDivide,
   Interval,
 } from '@danielsimonjr/mathts-functions';
@@ -101,7 +101,7 @@ describe('create(all, config) instance isolation (#425)', () => {
     const math = create(all);
     type TypedFn = { name: string; length: number; signatures?: unknown };
 
-    // Independent oracle: the unwrapped functions-barrel `sin` / `divide`.
+    // Independent oracle: the unwrapped scalar sine factory and division function.
     expect((math.sin as TypedFn).name).toBe((barrelSin as TypedFn).name);
     expect((math.sin as TypedFn).length).toBe((barrelSin as TypedFn).length);
     expect((math.sin as TypedFn).signatures).toBe((barrelSin as TypedFn).signatures);

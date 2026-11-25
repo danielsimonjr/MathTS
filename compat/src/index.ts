@@ -19,6 +19,7 @@
 
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
+import * as allFactories from './all-factories.js';
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
@@ -106,6 +107,16 @@ function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig
 // Math Instance
 // =============================================================================
 
+const fullFactoryBundle = Symbol.for('mathts.compat.all');
+
+/** The complete mathjs factory bundle, identifiable across installed package copies. */
+const all: typeof allFactories = Object.freeze(
+  Object.assign(
+    Object.defineProperty(Object.create(null), fullFactoryBundle, { value: true }),
+    allFactories
+  )
+);
+
 type CompatFactoryInput = Record<string, unknown> | readonly unknown[];
 type CompatInstanceCreateInput = CompatFactoryInput | Partial<MathJSConfig>;
 
@@ -144,6 +155,7 @@ interface MathInstanceOverrides {
   subset: (...args: unknown[]) => unknown;
   index: (...args: unknown[]) => unknown;
   unit: typeof namedUnit;
+  xgcd: typeof namedXgcd;
 
   // Type creation
   complex: typeof shims.complex;
@@ -378,7 +390,10 @@ export function create(
   factories: CompatFactoryInput = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
-  if (factories !== all) {
+  const canonical =
+    factories === all ||
+    Object.getOwnPropertyDescriptor(factories, fullFactoryBundle)?.value === true;
+  if (!canonical) {
     const selected = mathFunctions.factory_mathjsCompat.tryCreateFactoryBundle(factories, config);
     if (selected !== undefined) return selected as MathInstance;
   }
@@ -399,10 +414,18 @@ export function create(
   let configGeneration = 0;
   let decidedGeneration = -1;
   let overlayNeeded = createdWithCustomConfig;
+  const fullBundle =
+    canonical ||
+    Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
+  const localUnits =
+    config === moduleDefaults || !fullBundle
+      ? undefined
+      : mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig);
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
       configGeneration += 1;
+      localUnits?.update(current, previous);
       if (current.number !== previous.number || current.precision !== previous.precision) {
         for (const [key, read] of Object.entries(constantReaders)) {
           if (!Object.isFrozen(instance)) instance[key] = read();
@@ -439,7 +462,16 @@ export function create(
     return create(input as CompatFactoryInput, options);
   }
 
-  const originalSurface = surfaceOf(factories);
+  // Mixed namespaces may extend a spread of all with ordinary functions or values.
+  const originalSurface: Record<string, unknown> = fullBundle
+    ? {
+        ...mathFunctions,
+        ...instanceSymbols,
+        ...Object.fromEntries(
+          canonical ? [] : Object.entries(factories).filter(([key]) => !Object.hasOwn(all, key))
+        ),
+      }
+    : surfaceOf(factories);
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
@@ -545,16 +577,40 @@ export function create(
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
   const compatDefaultOverrides = {
+    acosh: mathFunctions.factory_acosh,
+    acot: mathFunctions.factory_acot,
+    acsc: mathFunctions.factory_acsc,
+    asec: mathFunctions.factory_asec,
+    asinh: mathFunctions.factory_asinh,
+    atanh: mathFunctions.factory_atanh,
+    cbrt: mathFunctions.factory_cbrt,
+    cosh: mathFunctions.factory_cosh,
+    cot: mathFunctions.factory_cot,
+    csc: mathFunctions.factory_csc,
+    cube: mathFunctions.factory_cube,
+    expm1: mathFunctions.factory_expm1,
+    sec: mathFunctions.factory_sec,
+    sinh: mathFunctions.factory_sinh,
+    square: mathFunctions.factory_square,
+    tanh: mathFunctions.factory_tanh,
+    string: namedString,
     setUnion: namedSetUnion,
     compareText: namedCompareText,
     equalText: namedEqualText,
     toBest: namedToBest,
+    unit: localUnits?.unit ?? namedUnit,
+    createUnit: localUnits?.createUnit ?? namedCreateUnit,
+    combinations: namedCombinations,
+    combinationsWithRep: namedCombinationsWithRep,
+    xgcd: namedXgcd,
+    permutations: namedPermutations,
     lgamma: namedLgamma,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
   ) as (keyof typeof compatDefaultOverrides)[];
   for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
+  if (localUnits && flat.Unit === instanceSymbols.Unit) flat.Unit = localUnits.Unit;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
   );
@@ -564,6 +620,7 @@ export function create(
   const constantReaders = compatConstantReaders(
     flat,
     currentConfig,
+    localUnits?.Unit ?? instanceSymbols.Unit,
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
@@ -576,7 +633,21 @@ export function create(
     expressionConstants.fraction = () => instance.fraction;
   }
   if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
-  for (const name of ['arg', 'conj', 'im', 're'] as const) {
+  for (const name of [
+    'arg',
+    'conj',
+    'im',
+    're',
+    'sin',
+    'cos',
+    'tan',
+    'asin',
+    'acos',
+    'atan',
+    'sqrt',
+    'exp',
+    'log',
+  ] as const) {
     if (originalSurface[name] === mathFunctions[name])
       expressionConstants[name] = () => instance[name];
   }
@@ -685,6 +756,7 @@ export function create(
     instance as Record<string, unknown>,
     currentConfig,
     flat.parser === functionsNamespace.parser,
+    flat.parse === functionsNamespace.parse && typeof flat.parse === 'function',
     expressionConstants,
     new Set(
       ['random', 'randomInt', 'pickRandom'].filter(
@@ -701,10 +773,7 @@ export function create(
  *
  * Use with `create(all)` to get a fully-featured math instance.
  */
-export const all: Record<string, unknown> = {
-  ...(mathFunctions as unknown as Record<string, unknown>),
-  ...instanceSymbols,
-};
+export { all };
 
 // =============================================================================
 // Re-exports for direct use
@@ -729,7 +798,13 @@ const defaultCompile = ((...args: unknown[]) =>
   )) as MathInstance['compile'];
 
 /** Parse an expression into a mathjs-compatible syntax tree. */
-const defaultParse: MathInstance['parse'] = (expression) => getDefaultInstance().parse(expression);
+const defaultParse: MathInstance['parse'] = /* #__PURE__ */ new Proxy(mathFunctions.parse, {
+  get: (target, key, receiver) =>
+    typeof key === 'string' && key.startsWith('is')
+      ? Reflect.get(getDefaultInstance().parse, key)
+      : Reflect.get(target, key, receiver),
+  apply: (_target, receiver, args) => Reflect.apply(getDefaultInstance().parse, receiver, args),
+});
 
 /** Stateful expression parser for the default compatibility instance. */
 export const Parser = function Parser(options?: Parameters<MathInstance['parser']>[0]): object {
@@ -807,6 +882,7 @@ export {
 
 /** Union of two multisets in MathJS result order. */
 const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
+const namedString = mathFunctions.factory_mathjsCompat.string as typeof mathFunctions.string;
 const namedCompareText = mathFunctions.factory_mathjsCompat.compareText as {
   (left: string, right: string): number;
   (left: unknown, right: unknown): unknown;
@@ -815,6 +891,16 @@ const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
   (left: string, right: string): boolean;
   (left: unknown, right: unknown): unknown;
 };
+const namedCombinationsWithRep = mathFunctions.factory_mathjsCompat
+  .combinationsWithRep as typeof mathFunctions.combinationsWithRep;
+const namedCombinations = mathFunctions.factory_mathjsCompat
+  .combinations as typeof mathFunctions.combinations;
+const namedXgcd = mathFunctions.factory_mathjsCompat.xgcd as unknown as (
+  a: unknown,
+  b: unknown
+) => unknown[] | mathFunctions.BridgeMatrix;
+const namedPermutations = mathFunctions.factory_mathjsCompat
+  .permutations as typeof mathFunctions.permutations;
 const namedLgamma = mathFunctions.factory_mathjsCompat.lgamma as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.lgamma>;
@@ -822,10 +908,15 @@ const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.toBest>;
 export {
+  namedString as string,
   namedSetUnion as setUnion,
   namedCompareText as compareText,
   namedEqualText as equalText,
   namedToBest as toBest,
+  namedPermutations as permutations,
+  namedCombinations as combinations,
+  namedCombinationsWithRep as combinationsWithRep,
+  namedXgcd as xgcd,
   namedLgamma as lgamma,
 };
 
@@ -848,18 +939,18 @@ export { defaultTyped as typed };
 // Mathematical functions shared with the functions package.
 export {
   Help,
-  acosh,
-  acot,
+  factory_acosh as acosh,
+  factory_acot as acot,
   acoth,
-  acsc,
+  factory_acsc as acsc,
   acsch,
   addScalar,
   and,
   apply,
-  asec,
+  factory_asec as asec,
   asech,
-  asinh,
-  atanh,
+  factory_asinh as asinh,
+  factory_atanh as atanh,
   bellNumbers,
   bernoulli,
   bigint,
@@ -870,26 +961,23 @@ export {
   bitXor,
   boolean,
   catalan,
-  cbrt,
+  factory_cbrt as cbrt,
   clone,
   column,
-  combinations,
-  combinationsWithRep,
   compare,
   compareNatural,
   composition,
   concat,
   corr,
-  cosh,
-  cot,
+  factory_cosh as cosh,
+  factory_cot as cot,
   coth,
   count,
-  createUnit,
   cross,
-  csc,
+  factory_csc as csc,
   csch,
   ctranspose,
-  cube,
+  factory_cube as cube,
   cumsum,
   deepEqual,
   derivative,
@@ -906,7 +994,7 @@ export {
   equalScalar,
   erf,
   expm,
-  expm1,
+  factory_expm1 as expm1,
   factorial,
   fft,
   filter,
@@ -970,7 +1058,6 @@ export {
   oct,
   or,
   partitionSelect,
-  permutations,
   pinv,
   polynomialRoot,
   print,
@@ -988,7 +1075,7 @@ export {
   rotationMatrix,
   row,
   schur,
-  sec,
+  factory_sec as sec,
   sech,
   setCartesian,
   setDifference,
@@ -1003,7 +1090,7 @@ export {
   simplify,
   simplifyConstant,
   simplifyCore,
-  sinh,
+  factory_sinh as sinh,
   slu,
   smaller,
   smallerEq,
@@ -1011,15 +1098,14 @@ export {
   sort,
   splitUnit,
   sqrtm,
-  square,
+  factory_square as square,
   squeeze,
   stirlingS2,
-  string,
   subset,
   subtractScalar,
   sylvester,
   symbolicEqual,
-  tanh,
+  factory_tanh as tanh,
   to,
   trace,
   typeOf,
@@ -1028,7 +1114,6 @@ export {
   unequal,
   usolve,
   usolveAll,
-  xgcd,
   xor,
   zeta,
   zpk2tf,
@@ -1037,11 +1122,13 @@ export {
 type UnitMagnitude = number | ConfiguredBigNumber | Fraction;
 
 /** Construct or clone a unit using the MathJS scalar signatures. */
-const namedUnit = mathFunctions.unit as {
+const namedCreateUnit: typeof mathFunctions.createUnit =
+  mathFunctions.factory_mathjsCompat.createUnit;
+const namedUnit = mathFunctions.factory_mathjsCompat.unit as {
   (value: string | UnitMagnitude | UnitInstance): UnitInstance;
   (value: UnitMagnitude | Complex, unit: string | UnitInstance): UnitInstance;
 } & typeof mathFunctions.unit;
-export { namedUnit as unit };
+export { namedUnit as unit, namedCreateUnit as createUnit };
 
 // Re-export all shims for direct import
 export * from './shims.js';

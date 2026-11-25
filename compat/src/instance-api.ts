@@ -16,7 +16,11 @@ import {
 } from '@danielsimonjr/mathts-functions';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
-import { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+import {
+  compatReplacer as replacer,
+  compatReviver as reviver,
+  reviveInstanceValue,
+} from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
 
 type MathNamespace = Parameters<typeof importFactory>[2];
@@ -133,13 +137,15 @@ function scrubDenylist(scope: Record<string, unknown>): void {
  * @param currentConfig - The live config object of the instance.
  * @param bindParser - When `true`, `instance.parser` becomes a parser that evaluates
  *   with the instance evaluator. Default: `false`.
+ * @param bindParse - Whether parsed nodes should evaluate in the instance scope.
  * @param constants - Live reads of the instance's configured expression bindings.
  * @param defaultRandom - Random functions supplied by the built-in namespace.
  */
 export function wireMathjsInstanceApi(
   instance: Record<string, unknown>,
   currentConfig: MathJSConfig,
-  bindParser = false,
+  bindParser: boolean,
+  bindParse: boolean,
   constants: Record<string, () => unknown> = {},
   defaultRandom: ReadonlySet<string> = new Set()
 ): WiredCompatInstance {
@@ -184,6 +190,7 @@ export function wireMathjsInstanceApi(
   const UnitCtor = instance.Unit as { isValuelessUnit: (name: string) => boolean } | undefined;
   if (UnitCtor?.isValuelessUnit) {
     mathNs.Unit = UnitCtor;
+    expressionLayers.mathWithTransform.Unit = UnitCtor;
   }
 
   const importedFactories: ImportableFactories = {};
@@ -196,23 +203,18 @@ export function wireMathjsInstanceApi(
     importedFactories
   );
 
-  let evaluator = createInstanceEvaluator(
-    expressionLayers.mathWithTransform,
-    COMPAT_INTERNAL_NAMES,
-    true,
-    constants
-  );
-
+  let evaluator: InstanceEvaluator;
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
-  function rebindEvaluator(): void {
+  function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
     evaluator = createInstanceEvaluator(
       expressionLayers.mathWithTransform,
       COMPAT_INTERNAL_NAMES,
       true,
-      constants
+      constants,
+      true
     );
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
@@ -225,6 +227,7 @@ export function wireMathjsInstanceApi(
       })
     );
     instance.compileExpr = instance.compile;
+    return evaluator;
   }
 
   function mathImport(functions: unknown, options?: ImportOptions): void {
@@ -260,10 +263,17 @@ export function wireMathjsInstanceApi(
 
   instance.import = mathImport;
   instance.typed = instanceTyped;
-  instance.reviver = reviver;
+  instance.reviver = (key: string, value: unknown) =>
+    reviveInstanceValue(key, value, instance.Unit as typeof factory_mathjsCompat.constructors.Unit);
   instance.replacer = replacer;
 
-  rebindEvaluator();
+  const initialEvaluator = rebindEvaluator();
+  if (bindParse) {
+    instance.parse = new Proxy(initialEvaluator.parse, {
+      apply: (_target, receiver, args) =>
+        runWithConfig(currentConfig, () => Reflect.apply(evaluator.parse, receiver, args)),
+    });
+  }
 
   return {
     Parser: ParserClass,

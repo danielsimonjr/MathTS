@@ -1,0 +1,15 @@
+---
+'@danielsimonjr/mathts-compat': minor
+'@danielsimonjr/mathts-expression': patch
+'@danielsimonjr/mathts-core': patch
+'@danielsimonjr/mathts-functions': minor
+---
+
+Expose the mathjs factories through compat's `all` bundle for custom instances.
+Export `num`, `den`, `compile`, and the mathjs type predicates from the functions package.
+Use mathjs scalar signatures for trigonometric, exponential, and counting functions across named imports and instance expressions. Parsed nodes use the instance’s expression bindings. Compat also matches mathjs Unicode tokenization and complex square roots on the real axis.
+Compatibility units now normalize and format readings using the mathjs order of floating-point operations. Native MathTS units retain exact conversion scales.
+Each full compatibility instance keeps its own custom unit definitions for conversion, expressions, and JSON restoration.
+Compatibility combinations follow mathjs floating-point rounding for safe integer inputs. Compatibility xgcd uses mathjs coefficient arithmetic and the configured matrix output.
+Decimal combinations round each multiplication and division at the configured precision. Combinations with replacement use the mathjs range products for number inputs.
+BigNumber exponential and precision formatting now round the significand before choosing notation and account for carries into the next exponent.

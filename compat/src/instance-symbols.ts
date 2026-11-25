@@ -1,36 +1,15 @@
-import { BigNumber, Complex, Fraction, Range, mathTyped } from '@danielsimonjr/mathts-core';
+import { BigNumber, Complex, Fraction, Range } from '@danielsimonjr/mathts-core';
 import {
-  deepMap,
   DimensionError,
   IndexError,
   isObjectWrappingMap,
 } from '@danielsimonjr/mathts-core/internal';
-import { factory_mathjsCompat, Help } from '@danielsimonjr/mathts-functions';
+import { factory_mathjsCompat, Help, num, den } from '@danielsimonjr/mathts-functions';
 import { isDenseMatrix, isSparseMatrix, isMatrix } from '@danielsimonjr/mathts-matrix';
 import { complex } from './shims.js';
 import packageMetadata from '../package.json' with { type: 'json' };
 
 const { checks, constructors, factory } = factory_mathjsCompat;
-
-/** Build a typed numerator or denominator function for scalars and collections. */
-export function fractionPart(
-  name: 'num' | 'den',
-  key: 'numerator' | 'denominator',
-  typed: typeof mathTyped = mathTyped,
-  fraction: (value: BigNumber | number) => Fraction = (value) => new Fraction(value)
-) {
-  const read = (value: Fraction) =>
-    typeof value[key] === 'bigint' ? value[key] : new Fraction(String(value))[key];
-
-  return typed(name, {
-    Fraction: read,
-    BigNumber: (value: BigNumber) => read(fraction(value)),
-    boolean: (value: boolean) => read(fraction(Number(value))),
-    'Array | Matrix': typed.referToSelf(
-      (self) => (values: Parameters<typeof deepMap>[0]) => deepMap(values, (value) => self(value))
-    ),
-  });
-}
 
 /** Common base for testing whether a value is any supported matrix representation. */
 class Matrix {
@@ -70,8 +49,8 @@ type NativeCompatSymbols = {
   true: true;
   null: null;
   version: string;
-  num: ReturnType<typeof fractionPart>;
-  den: ReturnType<typeof fractionPart>;
+  num: typeof num;
+  den: typeof den;
   isDenseMatrix(value: unknown): boolean;
   isSparseMatrix(value: unknown): boolean;
   isCollection(value: unknown): boolean;
@@ -142,8 +121,8 @@ export const instanceSymbols: typeof factory_mathjsCompat.constructors &
   true: true,
   null: null,
   version: packageMetadata.version,
-  num: fractionPart('num', 'numerator'),
-  den: fractionPart('den', 'denominator'),
+  num,
+  den,
   ...compatChecks,
   isDenseMatrix: (value: unknown) => isDenseMatrix(value) || checks.isDenseMatrix(value),
   isSparseMatrix: (value: unknown) => isSparseMatrix(value) || checks.isSparseMatrix(value),

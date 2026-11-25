@@ -852,37 +852,21 @@ export class BigNumber implements MathTSValue {
    * Convert to exponential notation
    */
   toExponential(decimalPlaces?: number): string {
-    if (this._isNaN) return 'NaN';
-    if (this._isInfinite) return this._sign === 1 ? 'Infinity' : '-Infinity';
-    if (this._sign === 0) {
-      const dp = decimalPlaces ?? 0;
-      return dp > 0 ? '0.' + '0'.repeat(dp) + 'e+0' : '0e+0';
+    if (
+      decimalPlaces !== undefined &&
+      (!Number.isInteger(decimalPlaces) || decimalPlaces < 0 || decimalPlaces > 1e9)
+    ) {
+      throw new Error('[DecimalError] Invalid argument: ' + decimalPlaces);
     }
-
-    const sign = this._sign === -1 ? '-' : '';
-    const digits = this._coefficient.toString();
-    const exp = digits.length - 1 + this._exponent;
-    const expSign = exp >= 0 ? '+' : '';
-
-    if (decimalPlaces === undefined) {
-      if (digits.length === 1) {
-        return `${sign}${digits}e${expSign}${exp}`;
-      }
-      return `${sign}${digits[0]}.${digits.slice(1)}e${expSign}${exp}`;
-    }
-
-    if (decimalPlaces === 0) {
-      return `${sign}${digits[0]}e${expSign}${exp}`;
-    }
-
-    let decPart = digits.slice(1);
-    if (decPart.length < decimalPlaces) {
-      decPart += '0'.repeat(decimalPlaces - decPart.length);
-    } else {
-      decPart = decPart.slice(0, decimalPlaces);
-    }
-
-    return `${sign}${digits[0]}.${decPart}e${expSign}${exp}`;
+    const rounded = decimalPlaces === undefined ? this : this.roundToPrecision(decimalPlaces + 1);
+    if (!rounded.isFinite()) return rounded.toString();
+    const sign = rounded._sign === -1 ? '-' : '';
+    const digits = rounded._coefficient.toString();
+    const exponent = rounded.e;
+    const fraction =
+      decimalPlaces === undefined ? digits.slice(1) : digits.slice(1).padEnd(decimalPlaces, '0');
+    const mantissa = fraction ? digits[0] + '.' + fraction : digits[0];
+    return sign + mantissa + 'e' + (exponent >= 0 ? '+' : '') + exponent;
   }
 
   /**
@@ -893,21 +877,16 @@ export class BigNumber implements MathTSValue {
       return this.toString();
     }
 
-    if (this._isNaN) return 'NaN';
-    if (this._isInfinite) return this._sign === 1 ? 'Infinity' : '-Infinity';
-    if (this._sign === 0) {
-      return significantDigits > 1 ? '0.' + '0'.repeat(significantDigits - 1) : '0';
+    if (!Number.isInteger(significantDigits) || significantDigits < 1 || significantDigits > 1e9) {
+      throw new Error('[DecimalError] Invalid argument: ' + significantDigits);
     }
-
-    const digits = this._coefficient.toString();
-    const order = digits.length + this._exponent;
-
-    // Use exponential if exponent is very large or very small
-    if (order > significantDigits || order < -6) {
-      return this.toExponential(significantDigits - 1);
+    const rounded = this.roundToPrecision(significantDigits);
+    if (!rounded.isFinite()) return rounded.toString();
+    const exponent = rounded.e;
+    if (exponent >= significantDigits || exponent <= -7) {
+      return rounded.toExponential(significantDigits - 1);
     }
-
-    return this.toFixed(significantDigits - order);
+    return rounded.toFixed(significantDigits - exponent - 1);
   }
 
   /**
