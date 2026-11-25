@@ -404,7 +404,8 @@ jobs:
 
       - name: Documentation-only pull request
         if: needs.changes.outputs.docs_only == 'true'
-        run: echo "Documentation-only changes: skipping benchmark and wall-clock gates."
+        run: |
+          echo "Documentation-only changes: skipping benchmark and wall-clock gates."
 
       - name: Setup Bun
         if: needs.changes.outputs.docs_only != 'true'
@@ -508,7 +509,8 @@ jobs:
 
       - name: Documentation-only pull request
         if: needs.changes.outputs.docs_only == 'true'
-        run: echo "Documentation-only changes: skipping Node ${{ matrix.node-version }} test suite."
+        run: |
+          echo "Documentation-only changes: skipping Node ${{ matrix.node-version }} test suite."
 
       - name: Setup Bun
         if: needs.changes.outputs.docs_only != 'true'
@@ -570,7 +572,8 @@ jobs:
 
       - name: Documentation-only pull request
         if: needs.changes.outputs.docs_only == 'true'
-        run: echo "Documentation-only changes: skipping coverage suite."
+        run: |
+          echo "Documentation-only changes: skipping coverage suite."
 
       - name: Setup Bun
         if: needs.changes.outputs.docs_only != 'true'
@@ -656,7 +659,8 @@ jobs:
 
       - name: Documentation-only pull request
         if: needs.changes.outputs.docs_only == 'true'
-        run: echo "Documentation-only changes: skipping browser smoke tests."
+        run: |
+          echo "Documentation-only changes: skipping browser smoke tests."
 
       - name: Setup Bun
         if: needs.changes.outputs.docs_only != 'true'
