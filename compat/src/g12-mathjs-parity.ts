@@ -51,9 +51,20 @@ export function mapDivideBroadcastError(err: unknown, b: unknown): never {
   throw new RangeError(`Matrix must be square (size: [${size}])`);
 }
 
-/** True when a string expression is a multi-statement block (newline or semicolon). */
+/**
+ * True when a string expression is a multi-statement block (newline or top-level `;`).
+ * Matrix row separators (`[1,2;3,4]`) use `;` inside brackets and must not trigger wrapping.
+ */
 export function isMultiStatementExpression(expr: string): boolean {
-  return expr.includes('\n') || expr.includes(';');
+  if (expr.includes('\n')) return true;
+  let depth = 0;
+  for (let i = 0; i < expr.length; i++) {
+    const c = expr[i];
+    if (c === '(' || c === '[') depth++;
+    else if (c === ')' || c === ']') depth = Math.max(0, depth - 1);
+    else if (c === ';' && depth === 0) return true;
+  }
+  return false;
 }
 
 /** Wrap a plain block array in the compat instance's `ResultSet` constructor. */

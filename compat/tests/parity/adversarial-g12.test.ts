@@ -119,6 +119,12 @@ describe('F3 compat evaluate: multi-statement block returns a ResultSet like mat
       oracle.evaluate('1+1\n2+2') instanceof oracle.ResultSet
     );
   });
+
+  it('matrix row separators must not be wrapped as a ResultSet (#993)', () => {
+    const m = compat();
+    const expr = '[1,2;3,4]*[1;1]';
+    expect(m.isResultSet(m.evaluate(expr))).toBe(oracle.isResultSet(oracle.evaluate(expr)));
+  });
 });
 
 // ---------------------------------------------------------------------------
