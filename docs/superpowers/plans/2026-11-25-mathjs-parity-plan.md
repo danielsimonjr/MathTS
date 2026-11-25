@@ -14,7 +14,7 @@
 - Do not weaken, skip, or delete an existing test, timeout, or assertion. A test that encodes a non-mathjs result is updated only when the issue proves that result wrong, and the assertion stays (the expected value changes, with a comment that cites the issue).
 - No new runtime dependency. `mathjs` stays a devDependency of `compat`.
 - No force-push, amend, or rebase. Never delete a branch.
-- CHANGELOG bullets go newest-first under the existing `## [Unreleased]` heading of the root `CHANGELOG.md`. Insert the new bullet above the current first bullet. Never replace a heading. Package changelogs are owned by changesets: add a `.changeset/*.md` file; do not hand-edit a published version section.
+- Changelog bullets go into a `changelog-fragments/YYYY-MM-DD-<slug>.md` fragment (one `### Added|Changed|Fixed|…` heading plus the bullets; format in `changelog-fragments/README.md`). Do not hand-edit the root `CHANGELOG.md`: the release version PR assembles the fragments newest first, and parallel hand-edits of `[Unreleased]` conflict. A direct `CHANGELOG.md` edit is still accepted while in-flight PRs transition. Package changelogs are owned by changesets: add a `.changeset/*.md` file; do not hand-edit a published version section.
 - There is no `NOTES.md`. The root changelog bullet is the note. Do not create a second notes file.
 - Do not publish, tag, or set `RELEASES_ENABLED`.
 - Import extensions in `functions`, `expression`, `compat`, and `core` are `.js`.
@@ -143,7 +143,7 @@ export function show(
 
 Intentional divergences are a map `INTENTIONAL` in `compat/tests/parity/intentional.ts`, keyed by issue number, each entry a function that asserts the compat value and a comment that quotes the mathjs value. `expectSame` is not used for those cases. #1585 is the only functional entry. No other issue is added to that map without a new decision in `docs/api/compat.md`.
 
-The full harness from #1574 (every instance function × the 33-tuple pool, all 926 embedded-docs examples × default / `number:'BigNumber'` / `matrix:'Array'`, `toString` and `toTex`) lives in `compat/tests/parity/full-surface.test.ts`. It is added in G00 as a test that **fails the run** when a case is neither a match nor listed in `compat/tests/parity/known-gaps.json`. The JSON is an object `{ "1549": ["parser: x = 3", ...], ... }` seeded with the issue repro labels. Each group deletes its keys in the same commit as the fix. G21 fails CI if any key remains except `"1585"`. This file is new. It does not replace an existing test.
+The full harness from #1574 (every instance function × the 33-tuple pool, all 926 embedded-docs examples × default / `number:'BigNumber'` / `matrix:'Array'`, `toString` and `toTex`) lives in `compat/tests/parity/full-surface.test.ts`. It is added in G00 as a test that **fails the run** when a case is neither a match nor listed in `compat/tests/parity/known-gaps/` (one JSON file per issue group, `<issue>.json`, merged by `known-gaps/index.ts`; a PR appends labels only to its own issue's file, so parallel PRs do not conflict). The group files hold the issue repro labels. Each group deletes its keys in the same commit as the fix. G21 fails CI if any key remains except `"1585"`. This file is new. It does not replace an existing test.
 
 Embedded docs: read them from the mathjs package (`mathjs/lib/esm/expression/embeddedDocs` or the `docs` export). 926 examples is the tracker count. Assert the count in the test so a future mathjs that adds an example fails the oracle workflow rather than skipping it.
 
@@ -205,7 +205,7 @@ G00 oracle pin
 
 **Then:** G20, then G21.
 
-**Shared-file coordination note:** `functions/src/factories/index.ts` is touched by G02, G10, G12, and G15 (disjoint export blocks — merge sequentially or rebase cleanly). `docs/api/compat.md` (G01, G05, G14, G15, G16, G18, G19), `docs/migration-guide.md` (G01, G12), `compat/tests/parity/known-gaps.json`, and `CHANGELOG.md` are additive/disjoint-section edits.
+**Shared-file coordination note:** `functions/src/factories/index.ts` is touched by G02, G10, G12, and G15 (disjoint export blocks — merge sequentially or rebase cleanly). `docs/api/compat.md` (G01, G05, G14, G15, G16, G18, G19), `docs/migration-guide.md` (G01, G12), `compat/tests/parity/known-gaps/` (per-issue files), and `changelog-fragments/` are additive/disjoint-section edits.
 
 ---
 
@@ -220,11 +220,11 @@ G00 oracle pin
 - Modify: `compat/package.json` (the devDependency).
 - Modify: `compat/scripts/gen-parity-names.mjs` (the comment it writes).
 - Modify: `compat/src/parity-names.generated.ts` (regenerated).
-- Create: `compat/tests/parity/oracle.ts`, `differential.ts`, `intentional.ts`, `full-surface.test.ts`, `known-gaps.json`.
+- Create: `compat/tests/parity/oracle.ts`, `differential.ts`, `intentional.ts`, `full-surface.test.ts`, `known-gaps/` (per-issue JSON files + `index.ts` loader).
 - Create: `.github/workflows/mathjs-oracle.yml`.
 - Test: `compat/tests/parity/oracle-version.test.ts`.
 
-**Design:** S1 and S6. `known-gaps.json` starts with every issue id from #1549 to #1589 except #1574. Values are the repro labels copied from the issue bodies. #1585’s labels go to `intentional.ts` instead, not to the gap file.
+**Design:** S1 and S6. `known-gaps/` starts with one JSON file per issue id from #1549 to #1589 except #1574. Values are the repro labels copied from the issue bodies. #1585’s labels go to `intentional.ts` instead, not to the gap file.
 
 - [ ] **Step 1: Write `oracle-version.test.ts`.** It reads `compat/package.json` and asserts the mathjs devDependency is `15.3.0`. It imports `mathjs` and asserts `create(all).version === '15.3.0'`.
 
@@ -232,7 +232,7 @@ G00 oracle pin
 
 - [ ] **Step 3: Bump the pin, `bun install`, run `node compat/scripts/gen-parity-names.mjs`.** The generated header says 15.3.0. Run `node compat/scripts/gen-parity-names.mjs --check` and expect exit 0.
 
-- [ ] **Step 4: Add the harness and the workflow.** Seed `known-gaps.json` from the issue repro labels. The full-surface test’s first run will fail on real mismatches; those labels must be in the JSON or the test fails. Run `bunx vitest run compat/tests/parity/full-surface.test.ts` and expect PASS only because every current mismatch is listed. A label that already matches must not be in the JSON: the test fails if a listed label matches, so the list cannot rot. (That is the mutation check for the allowlist. Do not weaken it later.)
+- [ ] **Step 4: Add the harness and the workflow.** Seed the `known-gaps/<issue>.json` files from the issue repro labels. The full-surface test’s first run will fail on real mismatches; those labels must be in the group files or the test fails. Run `bunx vitest run compat/tests/parity/full-surface.test.ts` and expect PASS only because every current mismatch is listed. A label that already matches must not be in the JSON: the test fails if a listed label matches, so the list cannot rot. (That is the mutation check for the allowlist. Do not weaken it later.)
 
 - [ ] **Step 5: Run `bunx vitest run compat/tests`.** Failures outside the four 15.3.0 behavior changes go back into this step and get fixed without skipping. The four G11 files, if they fail, are updated in G11 in the next commits on this branch before the branch is considered green.
 
@@ -242,7 +242,7 @@ G00 oracle pin
 
 - [ ] `mathjs` devDependency is 15.3.0 and `--check` on the generator passes.
 - [ ] The workflow file exists and its `npm view` comparison is the dependency string.
-- [ ] `known-gaps.json` contains only labels that still differ, and a matching label fails the test.
+- [ ] `known-gaps/` contains only labels that still differ, and a matching label fails the test.
 - [ ] No existing assertion was deleted.
 
 ---
@@ -298,7 +298,7 @@ Resolution: `safe: true` or the typed default → run `validateAst` and `sanitiz
 
 - [ ] **Step 4: Run** the new test and `bunx vitest run expression/tests/security/sandbox.test.ts`. Both pass. Typed `evaluate('a = 2')` still throws. A one-line mutation that forces compat to call `validateAst` makes the new test fail; revert that mutation.
 
-- [ ] **Step 5: Delete** the G01 labels from `known-gaps.json`.
+- [ ] **Step 5: Delete** the G01 labels from the `known-gaps/` group files.
 
 - [ ] **Step 6: Changelog.** `### Changed`: `- **Compat expression policy matches mathjs by default (#1549, #1556, #1562, #1576, #1580):** Enabled assignment, function definitions, in-expression `simplify`/`derivative`/`parse`/`evaluate`/`compile`/`parser`/`help`/`config`, `ResultSet`block results, and declared function names on compat`create(all)`; opt-in hardening via `{ safe: true }`. Typed `evaluate`remains safe by default. BREAKING: compat`evaluate`/`parser`/`compile`no longer throw`Security:`by default (pass`{ safe: true }`to opt in), and multi-statement blocks return`ResultSet`on both compat and typed`evaluate`.` Changeset: `compat`, `expression`, `functions`.
 
@@ -346,7 +346,7 @@ BigNumber-config `erf(0.2)` throws in mathjs (`Unexpected type of argument … a
 
 - [ ] **Step 4: Run** `bunx vitest run compat/tests/parity/g02-factories.test.ts` and `bunx vitest run functions/tests/statistics` (or the package test that covers `std`). Existing tests that expect `std(complex)` to be a real magnitude get the expected value updated to the Complex, with a comment citing #1550. Do not delete the test.
 
-- [ ] **Step 5: Remove** the #1550, #1587, #1588, #1583 labels that now match from `known-gaps.json`.
+- [ ] **Step 5: Remove** the #1550, #1587, #1588, #1583 labels that now match from the `known-gaps/` group files.
 
 - [ ] **Step 6: Changelog.** `### Changed`: `- **Compat binds mathjs-shaped factories (#1550, #1583, #1587, #1588):** Bound `create(all)`and compat named exports to`functions` factories (`ceil`/`floor`/`fix`/`round`, `identity`, `ones`, `std`, `variance`, `mad`, `expm`, `count`) and aligned arity and Fraction-trig rejections with mathjs 15.3.0. BREAKING: extra/missing arguments and trig on Fractions now throw matching mathjs `TypeError`s; `ones(n)`and`expm(Array)`return`DenseMatrix`; `std`/`variance`of Complex return`Complex`.` Changesets: `compat`, `functions`, `matrix` if `expm` lives there.
 
@@ -796,7 +796,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 2: Run the test.** It should PASS on HEAD. That is the exception to “the test fails first”: this group pins current behavior. The mutation check is the opposite: temporarily make `zeta(-3)` return the mathjs number in a local edit, confirm the test fails, restore. Do not commit the mutation.
 
-- [ ] **Step 3: Register the cases** in `intentional.ts` and remove them from `known-gaps.json`.
+- [ ] **Step 3: Register the cases** in `intentional.ts` and remove them from the `known-gaps/` group files.
 
 - [ ] **Step 4: Changelog** under `### Fixed` is wrong for a non-change. Use one sentence in the #1590 tracker comment later, and a `### Changed` bullet only if the doc is considered user-facing: “Documented intentional divergences from mathjs for zeta, symbolicEqual, and range (#1585).” Changeset: `compat` (docs in the package README if the package README is the published place; the repo `docs/api/compat.md` is enough if the README links to it).
 
@@ -882,7 +882,7 @@ Do not publish. Do not set `RELEASES_ENABLED`. The changesets added by G00–G20
 
 - [ ] **Step 4: Run the unit test and `node tools/test/check-unpublished-surface.mjs` with the offline switch.** Then run it online once. If it fails because a package on HEAD has no changeset yet, the changesets from the earlier groups must name that package. Add the missing changeset. Do not silence the script.
 
-- [ ] **Step 5: Confirm `known-gaps.json` has only `1585`, or is empty of functional keys and `intentional.ts` holds #1585.** The full-surface test passes.
+- [ ] **Step 5: Confirm `known-gaps/` has only `1585.json`, or is empty of functional keys and `intentional.ts` holds #1585.** The full-surface test passes.
 
 - [ ] **Step 6: Changelog.** “CI fails when a package’s built exports differ from the published tarball at the same version and no changeset names the package (#1573).” `compat` / repo tooling; a changeset is optional for `tools/` if tools are not a package. The root changelog bullet is required.
 
