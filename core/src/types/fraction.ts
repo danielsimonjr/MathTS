@@ -36,6 +36,89 @@ export function isFraction(value: unknown): value is Fraction {
 
 const gcd = gcdBigInt;
 
+const MAX_RATIONAL_POW_BITS = 65536n;
+
+function bigIntBitLength(n: bigint): number {
+  return n.toString(2).length;
+}
+
+/**
+ * Exact integer `k`-th root of a non-negative integer (`k >= 2`), or `null` when
+ * `value` is not a perfect `k`-th power. Uses Newton's method so large primes
+ * never stall on trial division.
+ */
+function exactNthRoot(value: bigint, k: bigint): bigint | null {
+  if (value === 0n || value === 1n) return value;
+  const bits = bigIntBitLength(value);
+  if (BigInt(bits - 1) < k) return null;
+  const kNum = Number(k);
+  let x = 1n << BigInt(Math.ceil(bits / kNum));
+  const kMinus1 = k - 1n;
+  while (true) {
+    const next = (kMinus1 * x + value / x ** kMinus1) / k;
+    if (next >= x) break;
+    x = next;
+  }
+  return x ** k === value ? x : null;
+}
+
+/**
+ * Raise `value` (non-negative) to `num/den` (`gcd(num, den) === 1`, `num >= 0`, `den >= 2`)
+ * when the result is an integer within `MAX_RATIONAL_POW_BITS`. Returns `null` otherwise.
+ */
+function integerRationalPower(value: bigint, num: bigint, den: bigint): bigint | null {
+  if (value === 1n) return 1n;
+  if (value === 0n) return 0n;
+  const root = exactNthRoot(value, den);
+  if (root === null) return null;
+  if (root <= 1n) return root;
+  if (num * BigInt(bigIntBitLength(root)) > MAX_RATIONAL_POW_BITS) return null;
+  return root ** num;
+}
+
+/**
+ * Exact `base^exp` as a Fraction when the result is rational (and real).
+ * Returns `null` when the power is irrational, not real (even root of a negative),
+ * or exceeds the exact-BigInt bit budget.
+ */
+export function rationalPow(base: Fraction, exp: Fraction): Fraction | null {
+  if (exp.denominator === 1n) {
+    const absExp = exp.numerator < 0n ? -exp.numerator : exp.numerator;
+    const absNum = base.numerator < 0n ? -base.numerator : base.numerator;
+    if (absExp > 0n && (absNum > 1n || base.denominator > 1n)) {
+      const maxBits = Math.max(bigIntBitLength(absNum), bigIntBitLength(base.denominator));
+      if (absExp * BigInt(maxBits) > MAX_RATIONAL_POW_BITS) return null;
+    }
+    try {
+      return base.pow(exp.numerator);
+    } catch {
+      return null;
+    }
+  }
+  if (base.numerator === 0n) {
+    if (exp.numerator < 0n) return null;
+    return new Fraction(0n, 1n);
+  }
+  const negativeBase = base.numerator < 0n;
+  if (negativeBase && exp.denominator % 2n === 0n) return null;
+
+  const absPn = exp.numerator < 0n ? -exp.numerator : exp.numerator;
+  const absNum = negativeBase ? -base.numerator : base.numerator;
+  const rootedN = integerRationalPower(absNum, absPn, exp.denominator);
+  const rootedD = integerRationalPower(base.denominator, absPn, exp.denominator);
+  if (rootedN === null || rootedD === null) return null;
+
+  let n = rootedN;
+  let d = rootedD;
+  if (exp.numerator < 0n) {
+    const swapped = n;
+    n = d;
+    d = swapped;
+  }
+  if (negativeBase && absPn % 2n === 1n) n = -n;
+  return new Fraction(n, d);
+}
+
 /** Reduce `num/den` to lowest terms with a positive denominator. */
 function reducePair(num: bigint, den: bigint): [bigint, bigint] {
   if (den === 0n) {
