@@ -68,15 +68,27 @@ export function isMultiStatementExpression(expr: string): boolean {
   return false;
 }
 
-/** Wrap a plain block array in the compat instance's `ResultSet` constructor. */
+/**
+ * Wrap a native compiler block result as the instance `ResultSet`.
+ *
+ * G01 (#1731) will return `ResultSet` from `compileBlockNode` when
+ * `compatBlockResultSet` is set; this adapter is the same contract from the
+ * evaluate wrapper so either path is a no-op once the compiler already produced
+ * a ResultSet. Native typed `evaluate` is unchanged (still unwraps a single
+ * visible value and returns a plain array for several).
+ *
+ * A newline block is a plain array of visible values. A semicolon block with
+ * one visible statement is that value (number, matrix, …), not an array, so
+ * it is wrapped as `new ResultSet([value])` to match mathjs `evaluate('1; 2')`.
+ */
 export function wrapBlockArrayAsResultSet(
   value: unknown,
   expr: string,
   ResultSetCtor: new (entries?: unknown[]) => unknown
 ): unknown {
   if (!isMultiStatementExpression(expr)) return value;
-  if (!Array.isArray(value)) return value;
   const ctor = (value as { constructor?: { prototype?: { isResultSet?: boolean } } }).constructor;
   if (ctor?.prototype?.isResultSet === true) return value;
-  return new ResultSetCtor(value);
+  if (Array.isArray(value)) return new ResultSetCtor(value);
+  return new ResultSetCtor([value]);
 }

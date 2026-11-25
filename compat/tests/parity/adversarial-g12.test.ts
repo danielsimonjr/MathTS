@@ -125,6 +125,17 @@ describe('F3 compat evaluate: multi-statement block returns a ResultSet like mat
     const expr = '[1,2;3,4]*[1;1]';
     expect(m.isResultSet(m.evaluate(expr))).toBe(oracle.isResultSet(oracle.evaluate(expr)));
   });
+
+  it('evaluate("1; 2") is a ResultSet of [2], as in mathjs (semicolon, one visible)', () => {
+    const m = compat();
+    const ours = m.evaluate('1; 2');
+    const theirs = oracle.evaluate('1; 2');
+    expect(m.isResultSet(ours)).toBe(oracle.isResultSet(theirs));
+    expect(ours instanceof m.ResultSet).toBe(theirs instanceof oracle.ResultSet);
+    expect((ours as { entries: unknown[] }).entries).toEqual(
+      (theirs as { entries: unknown[] }).entries
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -164,5 +175,21 @@ describe('F5 compat docs map is exactly the mathjs 15.3.0 map', () => {
       (k) => JSON.stringify(ours[k]) !== JSON.stringify(theirs[k])
     );
     expect(mismatches).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Native isolation: creating a compat instance must not change typed-package
+// results (Daniel: critical libraries never change to match mathjs; quirks live
+// in compat adapters only).
+// ---------------------------------------------------------------------------
+describe('creating a compat instance leaves native typed results unchanged', () => {
+  it('functions.add of mismatched vectors is still RangeError after create(all)', async () => {
+    const { add } = await import('@danielsimonjr/mathts-functions');
+    const before = throwsWith(() => add([1, 2], [1, 2, 3] as unknown as number[]));
+    createCompat(compatAll);
+    const after = throwsWith(() => add([1, 2], [1, 2, 3] as unknown as number[]));
+    expect(after).toEqual(before);
+    expect(after.name).toBe('RangeError');
   });
 });

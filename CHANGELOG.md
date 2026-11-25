@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Compat `evaluate('1; 2')` ResultSet wrap (G12 F3, #1556 overlap with G01):** the evaluate adapter only wrapped a plain array, so a semicolon block whose one visible value is a scalar stayed a number. It now wraps that value as `ResultSet([value])`. Native `evaluate('1; 2')` stays `2`. Compatible with G01's `compatBlockResultSet` compiler gate (already-a-ResultSet is a no-op).
+
 - **G12 compat exact parity with mathjs 15.3.0 (#1567, #1571):** compat `add`/`divide` broadcast errors, multi-statement `evaluate` `ResultSet` wrapping, module/instance `DimensionError` identity, and the `docs` map match the pinned oracle (`compat/src/g12-mathjs-parity.ts`, `mathjs-docs-15.3.0.generated.json`).
 
 - **Native `ResultSet` guard (F6, root cause):** `isResultSet` / `type` were copied onto each instance as own data properties, so `'isResultSet' in x` passed but the typed guard reads the constructor prototype chain (as mathjs-style guards do). Moved them back to prototype getters on the canonical `expression/src/ResultSet.ts` class; block evaluation and `instanceof` against the package export agree again (coordinates with G01 compat-only block wrapping).

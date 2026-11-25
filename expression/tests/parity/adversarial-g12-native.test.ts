@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as mathjs from 'mathjs';
 import * as expression from '../../src/index.js';
+import { evaluate } from '../../src/default-instance.js';
 import { isResultSet } from '../../src/utils/is.js';
 
 /**
@@ -109,6 +110,14 @@ describe('F8 native expression: createParser() result is an instance of the expo
 // shows two extra keys), recorded because G12 introduced it. It is NOT requested above
 // to match mathjs — it is flagged as a native shape change.
 // ---------------------------------------------------------------------------
+describe('native evaluate of a semicolon block stays unwrapped (G01 compat-only ResultSet)', () => {
+  it('evaluate("1; 2") is the number 2, not a ResultSet (pre-G12 / G01 native)', () => {
+    const value = evaluate('1; 2');
+    expect(value).toBe(2);
+    expect(isResultSet(value)).toBe(false);
+  });
+});
+
 describe('F9 native expression: ResultSet own-key shape changed by G12', () => {
   it('a block result carries only "entries" as an own key (pre-G12 shape)', () => {
     const block = expression.parse('1+1\n2+2').compile().evaluate();

@@ -182,15 +182,16 @@ What the typed packages export, and what stays on `create(all)` from
 `@danielsimonjr/mathts-compat` (#1567–#1571):
 
 - **Error and matrix classes (#1567).** `DimensionError` and `IndexError` come
-  from `@danielsimonjr/mathts-core` (one class identity for the whole monorepo:
-  a mismatch thrown by `functions` or `expression` is `instanceof
-DimensionError` against that export). `ArgumentsError`, `FibonacciHeap`,
+  from `@danielsimonjr/mathts-core` (one class identity for the whole monorepo
+  when those classes are thrown). Axis/index errors that use `DimensionError`
+  are `instanceof DimensionError` against the core export. Native typed `add`
+  of mismatched vectors still throws `RangeError`; `create(all).add` maps that
+  to mathjs 15.3.0's plain `Error` and `shape mismatch` text (#G12).
+  `ArgumentsError`, `FibonacciHeap`,
   `ImmutableDenseMatrix` and `Spa` come from `@danielsimonjr/mathts-functions`;
   `ResultSet`, the 16 Node classes (`Node`, `ConstantNode`, `SymbolNode`, …)
   and `Parser` come from `@danielsimonjr/mathts-expression`, next to the
-  `create<X>` factories that build them with custom dependencies. Native typed
-  `add` of mismatched vectors still throws `RangeError`; `create(all).add` maps
-  that to mathjs 15.3.0's plain `Error` and `shape mismatch` text (#G12).
+  `create<X>` factories that build them with custom dependencies.
 - **Events are per instance (#1568).** The typed packages export functions, not
   an event emitter; `on`, `off`, `once`, and `emit` exist only on
   `create(all)` from `@danielsimonjr/mathts-compat`, where `config` and
