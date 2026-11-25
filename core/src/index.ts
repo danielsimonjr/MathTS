@@ -251,8 +251,25 @@ export type {
 // package's package.json version, so VERSION can never drift from the published
 // version. `declare` keeps tsc/eslint happy; the annotation keeps the emitted
 // .d.ts a plain `string`.
+//
+// Bun can still evaluate this file as source (root `tsconfig.json` `paths` map
+// `@danielsimonjr/mathts-core` → `core/src`, and `docs:functions` may load that
+// graph). Then `__PKG_VERSION__` is a free identifier: fall back to the global
+// that `bun-test-preload` / `docs:functions` set.
 declare const __PKG_VERSION__: string;
-export const VERSION: string = __PKG_VERSION__;
+export const VERSION: string = readDefinedPkgVersion();
+
+function readDefinedPkgVersion(): string {
+  try {
+    return __PKG_VERSION__;
+  } catch (error) {
+    if (error instanceof ReferenceError) {
+      const injected = (globalThis as { __PKG_VERSION__?: string }).__PKG_VERSION__;
+      if (typeof injected === 'string') return injected;
+    }
+    throw error;
+  }
+}
 
 // Numerically stable reduction primitives (pairwise / Neumaier summation, scaled 2-norm).
 // `sum`, `mean`, `std` and `norm` are only as good as how they accumulate.

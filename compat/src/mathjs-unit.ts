@@ -3,11 +3,9 @@
  * `Unit.isValuelessUnit` match the oracle, not native core's wider table (#1577).
  */
 
-import {
-  MATHJS_IS_VALUELESS_UNIT,
-  MATHJS_UNIT_NAMES,
-} from './mathjs-unit-names.generated.js';
+import { MATHJS_IS_VALUELESS_UNIT, MATHJS_UNIT_NAMES } from './mathjs-unit-names.generated.js';
 
+/** Per-instance unit constructor: `isValuelessUnit` plus the `UNITS` table. */
 export type CompatUnitConstructorLike = {
   isValuelessUnit(name: string): boolean;
   UNITS: Record<string, unknown>;
@@ -24,7 +22,8 @@ function mathjsCatalogOverrides(nativeUnits: Record<string, unknown>): Record<st
 
 /**
  * Pin `UNITS` keys and `isValuelessUnit` on a per-instance unit class to mathjs 15.3.0.
- * The native table stays attached for `createUnit` / parse; enumeration matches mathjs.
+ * `Base` is the class `createCompatUnitSources` just built for this instance, not the
+ * shared native constructor; `create(all)` must not rewrite `core` `Unit.UNITS`.
  */
 export function wrapCompatUnitClass<T extends CompatUnitConstructorLike>(
   Base: T,
@@ -100,16 +99,17 @@ type LocalUnitSources = {
   update: (current: unknown, previous: unknown) => void;
 };
 
-function rememberCreateUnitNames(
-  args: unknown[],
-  customValuelessUnits: Set<string>
-): void {
+function rememberCreateUnitNames(args: unknown[], customValuelessUnits: Set<string>): void {
   const head = args[0];
   if (typeof head === 'string') customValuelessUnits.add(head);
   else if (head && typeof head === 'object')
     for (const key of Object.keys(head as object)) customValuelessUnits.add(key);
 }
 
+/**
+ * Wrap one compatibility instance's unit constructor, `unit()`, and `createUnit()`.
+ * Pins `UNITS` keys and `isValuelessUnit` to mathjs 15.3.0 without changing native core.
+ */
 export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T {
   const customValuelessUnits = new Set<string>();
   const Unit = wrapCompatUnitClass(sources.Unit, customValuelessUnits);

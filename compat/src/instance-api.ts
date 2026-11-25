@@ -10,7 +10,6 @@ import {
   createInstanceEvaluator,
   factory_mathjsCompat,
   EVALUATE_SCOPE_OMIT,
-  parse as functionsParse,
   parser as functionsParser,
   runWithConfig,
   type BridgeMatrix,
@@ -213,13 +212,16 @@ export function wireMathjsInstanceApi(
   function patchEvaluatorToTex(bound: InstanceEvaluator): void {
     const unit = instance.Unit as { isValuelessUnit?: (name: string) => boolean } | undefined;
     if (typeof unit?.isValuelessUnit !== 'function') return;
-    const boundParse = bound.parse.bind(bound);
+    const originalParse = bound.parse;
     const patched = patchParseForMathjsToTex(
-      boundParse,
+      originalParse.bind(bound),
       instance as Record<string, unknown>,
       unit as { isValuelessUnit: (name: string) => boolean }
     );
-    Object.assign(patched, functionsParse);
+    // Copy `isValidLatinOrGreek` / other parse statics from the *scoped* parser
+    // (mathjsSyntax). Assigning `functionsParse` overwrote those with the typed
+    // namespace parser, so `compat.parse.isValidLatinOrGreek('×')` became false.
+    Object.assign(patched, originalParse);
     bound.parse = patched as typeof bound.parse;
   }
 

@@ -12,6 +12,7 @@ const COMPAT_DIR = resolve(dirname(SCRIPT_PATH), '..');
 const OUTPUT_PATH = resolve(COMPAT_DIR, 'src/mathjs-unit-names.generated.ts');
 
 /**
+ * Read mathjs 15.3.0 `Unit.UNITS` keys and `isValuelessUnit` results.
  * @returns Unit metadata from the installed mathjs devDependency.
  */
 export function mathjsUnitSurface() {
@@ -34,6 +35,7 @@ export function mathjsUnitSurface() {
 }
 
 /**
+ * Render `compat/src/mathjs-unit-names.generated.ts`.
  * @returns Generated TypeScript module text.
  */
 export function generate() {
@@ -63,9 +65,5 @@ export function generate() {
 }
 
 if (isEntryPoint(SCRIPT_PATH)) {
-  await runGenerator(
-    OUTPUT_PATH,
-    generate,
-    'node compat/scripts/gen-mathjs-unit-names.mjs'
-  );
+  await runGenerator(OUTPUT_PATH, generate, 'node compat/scripts/gen-mathjs-unit-names.mjs');
 }

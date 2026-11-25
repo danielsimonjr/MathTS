@@ -98,10 +98,10 @@ describe('G14 #1577: every mathjs unit name, bare and under every SI prefix', ()
     // (`c`, `d`, `u`, `G`, `M`, `P`, `Bq`, `Gy`, `Sv`, `kat`, `sr`, `cal`, `percent`, `ppm`,
     // `dB`, `lm`, `lx`, `ly`, `pc`, `au`, `Å`, `Ω`, …) must NOT become units in `toTex`,
     // because mathjs prints them as plain symbols.
-  /** Native core carries a wider table than mathjs; compat `Unit.UNITS` is already pinned. */
-  const coreOnly = (
-    Object.keys(factory_mathjsCompat.constructors.Unit.UNITS) as string[]
-  ).filter((n) => !UNIT_NAMES.includes(n));
+    /** Native core carries a wider table than mathjs; compat `Unit.UNITS` is already pinned. */
+    const coreOnly = (Object.keys(factory_mathjsCompat.constructors.Unit.UNITS) as string[]).filter(
+      (n) => !UNIT_NAMES.includes(n)
+    );
     expect(coreOnly.length).toBeGreaterThan(50);
     expect(mismatches(coreOnly.map((n) => `2 ${n}`))).toEqual([]);
   });
@@ -467,6 +467,34 @@ describe('G14: the toTex handler option', () => {
     expect(tex(compat(), '2 cm', { handler: symbolicHandler })).toBe(
       tex(oracle, '2 cm', { handler: symbolicHandler })
     );
+  });
+});
+
+describe('G14: creating a compat instance must not mutate native', () => {
+  it('does not change native expression toTex after create(all)', () => {
+    const beforeNot = nativeParse('not true').toTex();
+    const beforeCm = nativeParse('2 cm').toTex();
+    const beforeAnd = nativeParse('true and false').toTex();
+    createCompat(compatAll);
+    expect(nativeParse('not true').toTex()).toBe(beforeNot);
+    expect(nativeParse('2 cm').toTex()).toBe(beforeCm);
+    expect(nativeParse('true and false').toTex()).toBe(beforeAnd);
+    expect(beforeNot).toBe('\\neg true');
+    expect(beforeAnd).toBe('true\\wedge false');
+  });
+
+  it('does not rewrite native Unit.UNITS or isValuelessUnit', () => {
+    const NativeUnit = factory_mathjsCompat.constructors.Unit;
+    const keysBefore = Object.keys(NativeUnit.UNITS).sort();
+    const cBefore = NativeUnit.isValuelessUnit('c');
+    const tonBefore = NativeUnit.isValuelessUnit('ton');
+    const math = createCompat(compatAll);
+    expect(Object.keys(NativeUnit.UNITS).sort()).toEqual(keysBefore);
+    expect(NativeUnit.isValuelessUnit('c')).toBe(cBefore);
+    expect(NativeUnit.isValuelessUnit('ton')).toBe(tonBefore);
+    expect(math.Unit).not.toBe(NativeUnit);
+    expect(math.Unit.isValuelessUnit('c')).toBe(false);
+    expect(NativeUnit.isValuelessUnit('c')).toBe(true);
   });
 });
 
