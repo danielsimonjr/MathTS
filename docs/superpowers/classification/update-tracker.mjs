@@ -1,13 +1,18 @@
 #!/usr/bin/env node
+/**
+ * Edit only the #1714 body: insert or replace the classification index
+ * between PARITY_CLASSIFICATION_INDEX markers. Idempotent.
+ *
+ * Usage: node update-tracker.mjs [--dry-run]
+ */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { REPO, ghRetry, parseArgs } from './gh-util.mjs';
 
 const MARKER_START = '<!-- PARITY_CLASSIFICATION_INDEX_START -->';
 const MARKER_END = '<!-- PARITY_CLASSIFICATION_INDEX_END -->';
+const { dryRun } = parseArgs(process.argv);
 
-const classData = JSON.parse(
-  readFileSync(new URL('classification.json', import.meta.url), 'utf8'),
-);
+const classData = JSON.parse(readFileSync(new URL('classification.json', import.meta.url), 'utf8'));
 
 const byPkg = new Map();
 for (const e of classData.classifications) {
@@ -36,22 +41,47 @@ for (const pkg of pkgs) {
 }
 index += `${MARKER_END}\n`;
 
-const current = execSync(
-  'gh issue view 1714 --json body --jq .body',
-  { encoding: 'utf8' },
-);
+async function main() {
+  const current = await ghRetry([
+    'issue',
+    'view',
+    '1714',
+    '-R',
+    REPO,
+    '--json',
+    'body',
+    '--jq',
+    '.body',
+  ]);
 
-let body;
-if (current.includes(MARKER_START)) {
-  const re = new RegExp(
-    `${MARKER_START}[\\s\\S]*?${MARKER_END}\\n?`,
-    'm',
-  );
-  body = current.replace(re, index);
-} else {
-  body = `${current.trim()}\n\n${index}`;
+  let body;
+  if (current.includes(MARKER_START)) {
+    const re = new RegExp(`${MARKER_START}[\\s\\S]*?${MARKER_END}\\n?`, 'm');
+    if (!re.test(current)) {
+      throw new Error('Found start marker on #1714 but could not replace the block');
+    }
+    body = current.replace(re, index);
+  } else {
+    body = `${current.trim()}\n\n${index}`;
+  }
+
+  writeFileSync('/tmp/issue-1714-body.md', body);
+  if (dryRun) {
+    console.log('DRY RUN: wrote proposed #1714 body to /tmp/issue-1714-body.md (not applied).');
+    const start = body.indexOf(MARKER_START);
+    const end = body.indexOf(MARKER_END);
+    console.log(body.slice(start, end + MARKER_END.length));
+    return;
+  }
+
+  await ghRetry(['issue', 'edit', '1714', '-R', REPO, '--body-file', '/tmp/issue-1714-body.md'], {
+    isWrite: true,
+  });
+  console.log('Updated tracker #1714 classification index.');
 }
 
-writeFileSync('/tmp/issue-1714-body.md', body);
-execSync('gh issue edit 1714 --body-file /tmp/issue-1714-body.md');
-console.log('Updated tracker #1714 classification index.');
+main().catch((err) => {
+  console.error(err.stderr ? String(err.stderr) : err);
+  if (err.ghArgs) console.error('gh args:', err.ghArgs.join(' '));
+  process.exit(1);
+});
