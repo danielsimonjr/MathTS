@@ -97,6 +97,7 @@ import {
   multiply as _matMultiply,
 } from '@danielsimonjr/mathts-matrix';
 import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { mapDivideBroadcastError, mapElementwiseBroadcastError } from './g12-mathjs-parity.js';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -440,12 +441,22 @@ function withNumericText(arithmetic: BinaryArithmetic, scalar: BinaryArithmetic)
   };
 }
 
-export const add = makeArithmetic(
+const addCore = makeArithmetic(
   withNumericText(_add as BinaryArithmetic, _addScalar),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b
-) as NumericStringArithmetic & PublicAdd & OneArg;
+);
+export const add = withTypedSurface(function (...args: unknown[]): unknown {
+  try {
+    return addCore(...args);
+  } catch (err) {
+    if (args.length >= 2) {
+      mapElementwiseBroadcastError(err, args[0], args[1]);
+    }
+    throw err;
+  }
+}, _add) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
@@ -464,15 +475,19 @@ export const multiply = makeArithmetic(
  * function.
  */
 export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
-  if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
-    return _matMultiply(a, _inv(b) as DenseMatrix);
+  try {
+    if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
+      return _matMultiply(a, _inv(b) as DenseMatrix);
+    }
+    // The mathjs-shaped factory carries the 15.3.0 sparse semantics (a sparse result only
+    // when the image of zero is zero, #1565); the typed surface keeps its older sparse path.
+    return (_factoryDivide as unknown as (...args: unknown[]) => unknown).apply(
+      undefined,
+      arguments as unknown as unknown[]
+    );
+  } catch (err) {
+    mapDivideBroadcastError(err, b);
   }
-  // The mathjs-shaped factory carries the 15.3.0 sparse semantics (a sparse result only
-  // when the image of zero is zero, #1565); the typed surface keeps its older sparse path.
-  return (_factoryDivide as unknown as (...args: unknown[]) => unknown).apply(
-    undefined,
-    arguments as unknown as unknown[]
-  );
 }, _divide) as TypedFunction;
 export const pow = withTypedSurface(function (base?: unknown, exponent?: unknown): unknown {
   if (

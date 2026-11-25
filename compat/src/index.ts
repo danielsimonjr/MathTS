@@ -17,7 +17,7 @@
  * @packageDocumentation
  */
 
-import { embeddedDocs } from '@danielsimonjr/mathts-expression';
+import mathjsDocs1530 from './mathjs-docs-15.3.0.generated.json' with { type: 'json' };
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims } from './shims.js';
@@ -766,6 +766,8 @@ export function create(
       )
     )
   );
+  // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
+  instance.DimensionError = instanceSymbols.DimensionError;
 
   return instance as unknown as MathInstance;
 }
@@ -922,10 +924,8 @@ export {
   namedLgamma as lgamma,
 };
 
-/** Embedded documentation for names in the MathJS compatibility surface. */
-export const docs = /* #__PURE__ */ Object.fromEntries(
-  Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
-);
+/** Embedded documentation — byte-identical to mathjs 15.3.0 `create(all).docs` (#G12 F5). */
+export const docs = mathjsDocs1530 as Record<string, unknown>;
 
 export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
 
