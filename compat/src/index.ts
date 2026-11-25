@@ -21,6 +21,7 @@ import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims } from './shims.js';
+import { applyG08CompatOverrides } from './g08-inverse-hyperbolic-compat.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -576,13 +577,26 @@ export function create(
   // Internal names of the functions namespace (#1216) are not surfaced: not own, not
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const g08Overrides = applyG08CompatOverrides({
+    factory_asinh: mathFunctions.factory_asinh,
+    factory_acosh: mathFunctions.factory_acosh,
+    factory_atanh: mathFunctions.factory_atanh,
+    acoth: mathFunctions.acoth,
+    acsch: mathFunctions.acsch,
+    asech: mathFunctions.asech,
+    factory_acsc: mathFunctions.factory_acsc,
+    factory_asec: mathFunctions.factory_asec,
+  });
   const compatDefaultOverrides = {
-    acosh: mathFunctions.factory_acosh,
+    acosh: g08Overrides.acosh,
     acot: mathFunctions.factory_acot,
-    acsc: mathFunctions.factory_acsc,
-    asec: mathFunctions.factory_asec,
-    asinh: mathFunctions.factory_asinh,
-    atanh: mathFunctions.factory_atanh,
+    acoth: g08Overrides.acoth,
+    acsc: g08Overrides.acsc,
+    acsch: g08Overrides.acsch,
+    asec: g08Overrides.asec,
+    asech: g08Overrides.asech,
+    asinh: g08Overrides.asinh,
+    atanh: g08Overrides.atanh,
     cbrt: mathFunctions.factory_cbrt,
     cosh: mathFunctions.factory_cosh,
     cot: mathFunctions.factory_cot,

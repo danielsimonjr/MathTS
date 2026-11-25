@@ -831,102 +831,34 @@ export class Complex implements IComplex {
   /**
    * Inverse hyperbolic sine: asinh(z) = ln(z + √(z² + 1))
    */
-  /**
-   * Inverse hyperbolic sine, the algorithm of complex.js 2.4.2 (the library of
-   * mathjs), so the result equals mathjs bit for bit — including the branch cuts,
-   * where `log(z + √(z²+1))` propagates infinities differently (`asinh(+∞+0i)`
-   * is NaN + NaNi here, matching mathjs).
-   */
   asinh(): Complex {
-    const rotated = new Complex(this.im, -this.re);
-    const res = rotated.asin();
-    return new Complex(-res.im, res.re);
+    const one = new Complex(1, 0);
+    return this.add(this.multiply(this).add(one).sqrt()).log();
   }
 
   /**
-   * Inverse hyperbolic cosine, the algorithm of complex.js 2.4.2 (the library of
-   * mathjs): acosh(z) is the conjugate-managed swap of acos(z), so the real-axis
-   * branch cut and ±∞ land on mathjs's sheet (`acosh(-2+0i)` is `1.3169… + πi`,
-   * `acosh(+∞+0i)` is NaN + NaNi).
+   * Inverse hyperbolic cosine: acosh(z) = ln(z + √(z-1)·√(z+1))
+   *
+   * The principal value has non-negative real part (C99 Annex G / DLMF 4.37 /
+   * NumPy convention). Using the factored `√(z-1)·√(z+1)` rather than `√(z²-1)`
+   * selects the correct Riemann sheet for Re(z) < 0 and on the real-axis branch
+   * cuts (z < 1), where `√(z²-1)` lands on the wrong branch — the previous form
+   * returned a negative real part (e.g. acosh(-1+0.5i)) and the wrong sign of π
+   * on z < -1.
    */
   acosh(): Complex {
-    const res = this.acos();
-    if (res.im <= 0) {
-      return new Complex(-res.im, res.re);
-    }
-    return new Complex(res.im, -res.re);
+    const one = new Complex(1, 0);
+    const s = this.subtract(one).sqrt().multiply(this.add(one).sqrt());
+    return this.add(s).log();
   }
 
   /**
-   * Inverse hyperbolic tangent, the algorithm of complex.js 2.4.2 (the library of
-   * mathjs): the rational form keeps the signed real part of `(1+z)/(1-z)`, so
-   * `atanh(1+0i)` is `Infinity` and `atanh(-1+0i)` is `-Infinity` (logHypot(0, 0)
-   * is -∞), and `b === 0` with `a > 1` negates the imaginary part (noIM).
+   * Inverse hyperbolic tangent: atanh(z) = (1/2)·ln((1 + z)/(1 - z))
    */
   atanh(): Complex {
-    const a = this.re;
-    const b = this.im;
-    const noIM = a > 1 && b === 0;
-    const oneMinus = 1 - a;
-    const onePlus = 1 + a;
-    const d = oneMinus * oneMinus + b * b;
-    const x =
-      d !== 0
-        ? new Complex((onePlus * oneMinus - b * b) / d, (b * oneMinus + onePlus * b) / d)
-        : new Complex(a !== -1 ? a / 0 : 0, b !== 0 ? b / 0 : 0);
-    const temp = x.re;
-    const re = logHypot(x.re, x.im) / 2;
-    const im = Math.atan2(x.im, temp) / 2;
-    return new Complex(re, noIM ? -im : im);
-  }
-
-  /**
-   * Inverse hyperbolic cotangent, the algorithm of complex.js 2.4.2 (the library
-   * of mathjs): `acoth(0+0i)` is `π/2 · i`, and off zero it is atanh of the
-   * reciprocal `(a/d, -b/d)`.
-   */
-  acoth(): Complex {
-    const a = this.re;
-    const b = this.im;
-    if (a === 0 && b === 0) {
-      return new Complex(0, Math.PI / 2);
-    }
-    const d = a * a + b * b;
-    return new Complex(a / d, -b / d).atanh();
-  }
-
-  /**
-   * Inverse hyperbolic cosecant, the algorithm of complex.js 2.4.2 (the library
-   * of mathjs). On the real axis it is `ln(a + √(a²+1))` with `a === 0` mapped to
-   * `Infinity`; off the real axis it is asinh of the reciprocal — note this is
-   * asinh(a), not asinh(1/a), on the real axis, which is what mathjs returns
-   * (e.g. `acsch(2+0i)` is `1.4436…`, not `0.4812…`).
-   */
-  acsch(): Complex {
-    const a = this.re;
-    const b = this.im;
-    if (b === 0) {
-      return new Complex(a !== 0 ? Math.log(a + Math.sqrt(a * a + 1)) : Infinity, 0);
-    }
-    const d = a * a + b * b;
-    return new Complex(a / d, -b / d).asinh();
-  }
-
-  /**
-   * Inverse hyperbolic secant, the algorithm of complex.js 2.4.2 (the library of
-   * mathjs): `asech(0+0i)` is `Infinity + Infinity·i`, and off zero it is the
-   * complex.js acosh (the acos swap) of the reciprocal, which puts the real-axis
-   * branch cut on mathjs's sheet — `asech(2+0i)` is `+1.0472…i` and `asech(7.25)`
-   * formats as `-1.4324…i`.
-   */
-  asech(): Complex {
-    const a = this.re;
-    const b = this.im;
-    if (a === 0 && b === 0) {
-      return new Complex(Infinity, Infinity);
-    }
-    const d = a * a + b * b;
-    return new Complex(a / d, -b / d).acosh();
+    const one = new Complex(1, 0);
+    const half = new Complex(0.5, 0);
+    return one.add(this).divide(one.subtract(this)).log().multiply(half);
   }
 
   // ============================================================

@@ -57,12 +57,12 @@ export const createAcsc = /* #__PURE__ */ factory(
         if (x <= -1 || x >= 1 || config.predictable) {
           return acscNumber(x);
         }
-        // acsc(x) = asin(1/x), with the zero limit Infinity·i handled by Complex.acsc.
-        return new Complex(x, 0).acsc();
+        // acsc(x) = asin(1/x). The core Complex type has no acsc method.
+        return new Complex(1 / x, 0).asin();
       },
 
       Complex: function (x: Complex) {
-        return x.acsc();
+        return x.inverse().asin();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
