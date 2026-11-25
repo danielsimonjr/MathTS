@@ -13187,6 +13187,9 @@
       "compareTextDependencies": {
         "kind": "object"
       },
+      "compatVersion": {
+        "kind": "string"
+      },
       "compile": {
         "kind": "function"
       },

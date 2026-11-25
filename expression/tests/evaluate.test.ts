@@ -140,6 +140,10 @@ describe('createEvaluate', () => {
     expect(evaluate('x', { x: 42 })).toBe(42);
   });
 
+  it('should honour an explicit undefined binding over a math constant', () => {
+    expect(evaluate('pi', { pi: undefined })).toBeUndefined();
+  });
+
   it('should evaluate a function call', () => {
     expect(evaluate('sqrt(16)')).toBe(4);
   });

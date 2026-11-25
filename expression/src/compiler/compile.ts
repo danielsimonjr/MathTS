@@ -106,7 +106,6 @@ export function compile(node: MathNode, mathScope: Record<string, unknown>): Com
       'compile: expected a math scope; use compileExpression for the default scope'
     );
   }
-  // Pre-compile the node tree into a closure
   const evalFn = compileNode(node, mathScope, {}, 0);
 
   return {
@@ -213,9 +212,8 @@ function undefinedSymbol(name: string): Error {
 }
 
 function readScopedSymbol(scope: Scope, name: string): unknown {
-  const value = scope.get(name);
-  if (value === undefined) throw undefinedSymbol(name);
-  return value;
+  if (!scope.has(name)) throw undefinedSymbol(name);
+  return scope.get(name);
 }
 
 function compileSymbolNode(

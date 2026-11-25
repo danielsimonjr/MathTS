@@ -1,0 +1,1628 @@
+ref_name,area,mathts_status,mathts_location,option_gaps,priority,verified,notes
+linalg.LinAlgError,linalg,n/a-out-of-scope,,,P2,n/a,Python exception class; MathTS throws Error subclasses
+linalg.LinAlgWarning,linalg,n/a-out-of-scope,,,P2,n/a,Python warning class
+linalg.bandwidth,linalg,missing,,,P2,export+grep,no lower/upper bandwidth query
+linalg.block_diag,linalg,full,blockDiag,,P1,runtime,runtime 1/1 checks pass
+linalg.cdf2rdf,linalg,missing,,,P2,export+grep,
+linalg.cho_factor,linalg,partial,cholesky,"no (c, lower) factor/solve pair; cholesky returns L only",P1,runtime,runtime 1/1 checks pass
+linalg.cho_solve,linalg,partial,cholesky; linsolve,no solve-from-Cholesky-factor helper,P1,runtime,runtime 1/1 checks pass
+linalg.cho_solve_banded,linalg,missing,,,P2,export+grep,
+linalg.cholesky,linalg,full,cholesky,lower/upper flag (returns L),P0,runtime,runtime 1/1 checks pass
+linalg.cholesky_banded,linalg,missing,,,P2,export+grep,
+linalg.circulant,linalg,full,circulant,,P2,runtime,runtime 1/1 checks pass
+linalg.clarkson_woodruff_transform,linalg,missing,,,P2,export+grep,sketching
+linalg.companion,linalg,full,companion,,P2,runtime,runtime 1/1 checks pass
+linalg.convolution_matrix,linalg,missing,,,P2,export+grep,
+linalg.coshm,linalg,missing,,,P2,export+grep,
+linalg.cosm,linalg,full,cosm,,P2,runtime,returns complex matrix; runtime 1/1 checks pass
+linalg.cossin,linalg,missing,,,P2,export+grep,CS decomposition
+linalg.det,linalg,full,det,,P0,runtime,runtime 1/1 checks pass
+linalg.dft,linalg,full,dftMatrix,,P2,runtime,runtime 1/1 checks pass
+linalg.diagsvd,linalg,missing,,,P2,export+grep,trivially built from svd
+linalg.eig,linalg,partial,eig; generalizedEig,"left eigenvectors, generalized b= argument on same call, homogeneous_eigvals",P0,runtime,runtime 2/2 checks pass
+linalg.eig_banded,linalg,missing,,,P2,export+grep,
+linalg.eigh,linalg,partial,eig; eigsh,no dedicated Hermitian/symmetric dense solver with subset_by_index/subset_by_value; eig used,P0,runtime,runtime 1/1 checks pass
+linalg.eigh_tridiagonal,linalg,partial,eigvals; eig,"no (d, e) banded entry point; dense eig only; symTridiagEigenvalues is internal only (src, not exported)",P2,runtime,src-only symTridiagEigenvalue(s); runtime 1/1 checks pass
+linalg.eigvals,linalg,full,eigvals,,P0,runtime,runtime 2/2 checks pass
+linalg.eigvals_banded,linalg,missing,,,P2,export+grep,
+linalg.eigvalsh,linalg,partial,eigvals,no symmetric-specific variant,P1,runtime,runtime 1/1 checks pass
+linalg.eigvalsh_tridiagonal,linalg,partial,eigvals,"no (d, e) banded entry point; dense eigvals only; internal only",P2,runtime,src-only symTridiagEigenvalues; runtime 1/1 checks pass
+linalg.expm,linalg,full,expm; matrixExpm,,P0,runtime,runtime 2/2 checks pass
+linalg.expm_cond,linalg,missing,,,P2,export+grep,
+linalg.expm_frechet,linalg,missing,,,P2,export+grep,
+linalg.fiedler,linalg,full,fiedlerMatrix,,P2,runtime,runtime 1/1 checks pass
+linalg.fiedler_companion,linalg,missing,,,P2,export+grep,
+linalg.find_best_blas_type,linalg,n/a-out-of-scope,,,P2,n/a,BLAS plumbing
+linalg.fractional_matrix_power,linalg,full,fractionalMatrixPower,,P2,runtime,runtime 1/1 checks pass
+linalg.funm,linalg,full,funm,,P2,runtime,runtime 2/2 checks pass
+linalg.get_blas_funcs,linalg,n/a-out-of-scope,,,P2,n/a,BLAS plumbing
+linalg.get_lapack_funcs,linalg,n/a-out-of-scope,,,P2,n/a,LAPACK plumbing
+linalg.hadamard,linalg,full,hadamardMatrix,,P2,runtime,runtime 1/1 checks pass
+linalg.hankel,linalg,full,hankelMatrix,,P2,runtime,runtime 1/1 checks pass
+linalg.helmert,linalg,full,helmertMatrix,,P2,runtime,runtime 2/2 checks pass
+linalg.hessenberg,linalg,full,hessenbergForm,,P1,runtime,runtime 1/1 checks pass
+linalg.hilbert,linalg,full,hilbertMatrix,,P2,runtime,runtime 1/1 checks pass
+linalg.inv,linalg,full,inv,,P0,runtime,runtime 1/1 checks pass
+linalg.invhilbert,linalg,full,invHilbertMatrix,,P2,runtime,runtime 1/1 checks pass
+linalg.invpascal,linalg,missing,,,P2,export+grep,
+linalg.ishermitian,linalg,missing,,,P2,export+grep,isSymmetric is internal only
+linalg.issymmetric,linalg,missing,,,P2,export+grep,src-only isSymmetric; source-only (not exported): common.ts:isSymmetric
+linalg.khatri_rao,linalg,full,khatriRao,,P2,runtime,runtime 1/1 checks pass
+linalg.ldl,linalg,full,ldl,,P1,runtime,runtime 1/1 checks pass
+linalg.leslie,linalg,full,leslieMatrix,,P2,runtime,runtime 1/1 checks pass
+linalg.logm,linalg,full,matrixLogm,,P1,runtime,runtime 1/1 checks pass
+linalg.lstsq,linalg,partial,lstsq; leastSquares,"no residues/rank/singular values outputs, no cond cutoff",P0,runtime,runtime 1/1 checks pass
+linalg.lu,linalg,full,lu,,P0,runtime,runtime 1/1 checks pass
+linalg.lu_factor,linalg,partial,lu; lup,"no packed (lu, piv) object",P1,runtime,runtime 1/1 checks pass
+linalg.lu_solve,linalg,full,luSolve; lusolve,,P1,runtime,runtime 1/1 checks pass
+linalg.matmul_toeplitz,linalg,missing,,,P2,export+grep,
+linalg.matrix_balance,linalg,partial,balanceForEig,exported from matrix but returns balancing for eig only,P2,runtime,runtime 1/1 checks pass
+linalg.norm,linalg,full,norm; normFro,,P0,runtime,runtime 5/5 checks pass
+linalg.null_space,linalg,full,nullspace,,P1,runtime,runtime 1/1 checks pass
+linalg.ordqz,linalg,missing,,,P2,export+grep,
+linalg.orth,linalg,full,orth,,P1,runtime,runtime 1/1 checks pass
+linalg.orthogonal_procrustes,linalg,partial,procrustes,procrustes is the spatial (Procrustes analysis) variant; no orthogonal_procrustes R/scale return,P2,runtime,runtime 1/1 checks pass
+linalg.pascal,linalg,full,pascalMatrix,,P2,runtime,runtime 2/2 checks pass
+linalg.pinv,linalg,full,pinv,,P0,runtime,runtime 1/1 checks pass
+linalg.pinvh,linalg,partial,pinv,no Hermitian-specific variant,P2,runtime,runtime 1/1 checks pass
+linalg.polar,linalg,full,polarDecomposition,side='left' option,P2,runtime,runtime 2/2 checks pass
+linalg.qr,linalg,full,qr; qrPivoted,,P0,runtime,runtime 2/2 checks pass
+linalg.qr_delete,linalg,missing,,,P2,export+grep,
+linalg.qr_insert,linalg,missing,,,P2,export+grep,
+linalg.qr_multiply,linalg,missing,,,P2,export+grep,
+linalg.qr_update,linalg,missing,,,P2,export+grep,
+linalg.qz,linalg,full,qz,,P2,runtime,runtime 1/1 checks pass
+linalg.rq,linalg,full,rq,,P2,runtime,runtime 1/1 checks pass
+linalg.rsf2csf,linalg,missing,,,P2,export+grep,
+linalg.schur,linalg,full,schur; matrixSchur,output='complex' and sort= options,P1,runtime,runtime 2/2 checks pass
+linalg.signm,linalg,full,signm,,P2,runtime,runtime 1/1 checks pass
+linalg.sinhm,linalg,missing,,,P2,export+grep,
+linalg.sinm,linalg,full,sinm,,P2,runtime,runtime 1/1 checks pass
+linalg.solve,linalg,full,linsolve; lusolve,"assume_a= (sym/pos/her/banded) dispatch, transposed=",P0,runtime,runtime 2/2 checks pass
+linalg.solve_banded,linalg,full,solveBanded,,P1,runtime,runtime 1/2 checks pass [solveBanded needs pivot: error (solveBanded: zero pivot at row 0 (no pivoting is performed))]
+linalg.solve_circulant,linalg,missing,,,P2,export+grep,
+linalg.solve_continuous_are,linalg,full,care,e=/s= generalized options,P1,runtime,runtime 1/1 checks pass
+linalg.solve_discrete_are,linalg,full,dare,e=/s= generalized options,P1,runtime,runtime 1/1 checks pass
+linalg.solve_discrete_lyapunov,linalg,full,dlyap,,P1,runtime,runtime 1/1 checks pass
+linalg.solve_sylvester,linalg,full,sylvester,,P1,runtime,runtime 1/1 checks pass
+linalg.solve_toeplitz,linalg,full,toeplitzSolve,,P2,runtime,runtime 1/1 checks pass
+linalg.solve_triangular,linalg,full,lsolve; usolve,,P1,runtime,runtime 2/2 checks pass
+linalg.solveh_banded,linalg,missing,,,P2,export+grep,
+linalg.sqrtm,linalg,full,sqrtm; matrixSqrtm,,P1,runtime,runtime 1/1 checks pass
+linalg.subspace_angles,linalg,full,subspaceAngles,,P2,runtime,runtime 1/1 checks pass
+linalg.svd,linalg,full,svd,,P0,runtime,runtime 2/2 checks pass
+linalg.svdvals,linalg,full,singularValues,,P1,runtime,runtime 1/1 checks pass
+linalg.tanhm,linalg,missing,,,P2,export+grep,
+linalg.tanm,linalg,missing,,,P2,export+grep,
+linalg.toeplitz,linalg,full,toeplitz,,P1,runtime,runtime 1/1 checks pass
+linalg.solve_continuous_lyapunov,linalg,full,lyap,,P1,runtime,runtime 1/1 checks pass
+sparse.SparseEfficiencyWarning,sparse,n/a-out-of-scope,,,P2,n/a,Python warning class
+sparse.SparseWarning,sparse,n/a-out-of-scope,,,P2,n/a,Python warning class
+sparse.block_array,sparse,missing,,,P2,export+grep,no sparse block assembly
+sparse.block_diag,sparse,partial,blockDiag,"dense output only, no sparse result",P2,runtime,runtime 1/1 checks pass
+sparse.bmat,sparse,missing,,,P2,export+grep,
+sparse.bsr_array,sparse,missing,,,P2,export+grep,no BSR format
+sparse.bsr_matrix,sparse,missing,,,P2,export+grep,no BSR format
+sparse.coo_array,sparse,partial,SparseMatrix.fromCOO,COO is an input path only; storage is CSC,P1,runtime,runtime 1/1 checks pass
+sparse.coo_matrix,sparse,partial,SparseMatrix.fromCOO,COO is an input path only,P2,runtime,runtime 1/1 checks pass
+sparse.csc_array,sparse,full,SparseMatrix; sparse,,P0,runtime,mathjs-style CSC SparseMatrix; runtime 1/1 checks pass
+sparse.csc_matrix,sparse,full,SparseMatrix,,P2,runtime,legacy spmatrix API; runtime 1/1 checks pass
+sparse.csr_array,sparse,partial,SparseMatrix.getCSR,no CSR storage class; getCSR exports arrays from the CSC matrix,P0,runtime,runtime 1/1 checks pass
+sparse.csr_matrix,sparse,partial,SparseMatrix.getCSR,no CSR storage class,P2,runtime,runtime 1/1 checks pass
+sparse.dia_array,sparse,missing,,,P2,export+grep,
+sparse.dia_matrix,sparse,missing,,,P2,export+grep,
+sparse.diags,sparse,missing,,,P1,export+grep,no sparse diagonal constructor (diag gives dense)
+sparse.diags_array,sparse,missing,,,P1,export+grep,
+sparse.dok_array,sparse,missing,,,P2,export+grep,SparseMatrix.set gives element writes but no DOK format
+sparse.dok_matrix,sparse,missing,,,P2,export+grep,
+sparse.expand_dims,sparse,missing,,,P2,export+grep,
+sparse.eye,sparse,partial,SparseMatrix.identity,k-offset diagonal and format= options,P1,runtime,runtime 1/1 checks pass
+sparse.eye_array,sparse,partial,SparseMatrix.identity,"k-offset, format",P1,runtime,runtime 1/1 checks pass
+sparse.find,sparse,partial,SparseMatrix.entries,"returns entries iterator; no (row, col, val) triple arrays",P2,runtime,runtime 1/1 checks pass
+sparse.get_index_dtype,sparse,n/a-out-of-scope,,,P2,n/a,index dtype plumbing
+sparse.hstack,sparse,partial,concat,concat densifies? sparse-preserving hstack not confirmed,P1,runtime,runtime 1/1 checks pass
+sparse.identity,sparse,full,SparseMatrix.identity,,P1,runtime,runtime 1/1 checks pass
+sparse.issparse,sparse,full,isSparseMatrix,,P1,runtime,runtime 1/1 checks pass
+sparse.isspmatrix,sparse,full,isSparseMatrix,,P2,runtime,runtime 1/1 checks pass
+sparse.isspmatrix_bsr,sparse,n/a-out-of-scope,,,P2,n/a,format predicate for absent format
+sparse.isspmatrix_coo,sparse,n/a-out-of-scope,,,P2,n/a,format predicate for absent format
+sparse.isspmatrix_csc,sparse,full,isSparseMatrix,,P2,runtime,only CSC exists; runtime 1/1 checks pass
+sparse.isspmatrix_csr,sparse,n/a-out-of-scope,,,P2,n/a,format predicate for absent format
+sparse.isspmatrix_dia,sparse,n/a-out-of-scope,,,P2,n/a,format predicate for absent format
+sparse.isspmatrix_dok,sparse,n/a-out-of-scope,,,P2,n/a,format predicate for absent format
+sparse.isspmatrix_lil,sparse,n/a-out-of-scope,,,P2,n/a,format predicate for absent format
+sparse.kron,sparse,partial,kron,dense kron; no sparse-preserving kron,P1,runtime,runtime 1/1 checks pass
+sparse.kronsum,sparse,missing,,,P2,export+grep,
+sparse.lil_array,sparse,missing,,,P2,export+grep,
+sparse.lil_matrix,sparse,missing,,,P2,export+grep,
+sparse.load_npz,sparse,n/a-out-of-scope,,,P2,n/a,NumPy file I/O
+sparse.matrix_transpose,sparse,full,SparseMatrix.transpose,,P2,runtime,runtime 1/1 checks pass
+sparse.permute_dims,sparse,partial,SparseMatrix.transpose,2-D only,P2,runtime,runtime 1/1 checks pass
+sparse.rand,sparse,missing,,,P2,export+grep,no random sparse matrix generator
+sparse.random,sparse,missing,,,P2,export+grep,"no random sparse matrix generator; source-only (not exported): probability.ts:random, typed-operations.ts:random"
+sparse.random_array,sparse,missing,,,P2,export+grep,no random sparse matrix generator
+sparse.safely_cast_index_arrays,sparse,n/a-out-of-scope,,,P2,n/a,index dtype plumbing
+sparse.save_npz,sparse,n/a-out-of-scope,,,P2,n/a,NumPy file I/O
+sparse.sparray,sparse,full,SparseMatrix,,P1,runtime,base sparse class; runtime 1/1 checks pass
+sparse.spdiags,sparse,missing,,,P2,export+grep,
+sparse.spmatrix,sparse,full,SparseMatrix,,P2,runtime,runtime 1/1 checks pass
+sparse.swapaxes,sparse,partial,SparseMatrix.transpose,2-D only,P2,runtime,runtime 1/1 checks pass
+sparse.tril,sparse,partial,tril,dense only,P2,runtime,runtime 1/1 checks pass
+sparse.triu,sparse,partial,triu,dense only,P2,runtime,runtime 1/1 checks pass
+sparse.vstack,sparse,partial,concat,sparse-preserving vstack not confirmed,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.ArpackError,sparse.linalg,n/a-out-of-scope,,,P2,n/a,Python exception class
+sparse.linalg.ArpackNoConvergence,sparse.linalg,n/a-out-of-scope,,,P2,n/a,Python exception class
+sparse.linalg.LaplacianNd,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.LinearOperator,sparse.linalg,partial,cg; gmres,Krylov solvers accept a matvec callback (LinearOperatorInput) but there is no LinearOperator class/algebra,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.MatrixRankWarning,sparse.linalg,n/a-out-of-scope,,,P2,n/a,Python warning class
+sparse.linalg.SuperLU,sparse.linalg,partial,csLu,csLu returns L/U/pinv/q factors; no SuperLU object with solve(),P2,runtime,runtime 1/1 checks pass
+sparse.linalg.aslinearoperator,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.bicg,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.bicgstab,sparse.linalg,full,bicgstab,,P1,runtime,runtime 2/2 checks pass
+sparse.linalg.cg,sparse.linalg,full,cg,,P0,runtime,runtime 1/1 checks pass
+sparse.linalg.cgs,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.eigs,sparse.linalg,partial,eigs; eig,eigs is the mathjs dense eigen solver; no ARPACK-style k-largest on sparse/operator,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.eigsh,sparse.linalg,full,eigsh,,P1,runtime,Lanczos on matrix or operator; runtime 2/4 checks pass [eigsh k=3 largest (defaults): fail ([2]: got 6.425457167344153 want 6.425701370200969 (relerr 3.80e-5)); eigsh n=200 k=5 (defaults): fail ([0]: got 7.828208816645975 want 7.828222091501479 (relerr 1.70e-6))]
+sparse.linalg.expm,sparse.linalg,partial,expm,densifies; no sparse Padé,P2,runtime,runtime 2/2 checks pass
+sparse.linalg.expm_multiply,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.factorized,sparse.linalg,partial,csLu,no returned solve closure,P2,runtime,runtime 1/1 checks pass
+sparse.linalg.funm_multiply_krylov,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.gcrotmk,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.gmres,sparse.linalg,full,gmres,,P1,runtime,runtime 2/2 checks pass
+sparse.linalg.inv,sparse.linalg,partial,inv,densifies,P2,runtime,runtime 1/1 checks pass
+sparse.linalg.is_sptriangular,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.lgmres,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.lobpcg,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.lsmr,sparse.linalg,missing,,,P1,export+grep,no iterative sparse least squares
+sparse.linalg.lsqr,sparse.linalg,missing,,,P1,export+grep,no iterative sparse least squares
+sparse.linalg.matrix_power,sparse.linalg,partial,matrixPower,dense only,P2,runtime,runtime 1/1 checks pass
+sparse.linalg.minres,sparse.linalg,full,minres,,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.norm,sparse.linalg,partial,norm; SparseMatrix.norm,ord options on sparse,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.onenormest,sparse.linalg,missing,,,P2,runtime,"condest is the 1-norm condition estimate, not a norm estimator API; runtime 1/1 checks pass"
+sparse.linalg.qmr,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.spbandwidth,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.spilu,sparse.linalg,partial,incompleteLU,ILU(0) only; no drop_tol/fill_factor; dense input,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.splu,sparse.linalg,partial,csLu,no permc_spec options or SuperLU.solve object,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.spsolve,sparse.linalg,full,csSpsolve; lusolve,,P0,runtime,lusolve accepts SparseMatrix (mathjs path); runtime 1/1 checks pass
+sparse.linalg.spsolve_triangular,sparse.linalg,partial,lsolve; usolve,dense-path triangular solves,P2,runtime,runtime 2/2 checks pass
+sparse.linalg.svds,sparse.linalg,full,svds,,P1,runtime,runtime 1/1 checks pass
+sparse.linalg.tfqmr,sparse.linalg,missing,,,P2,export+grep,
+sparse.linalg.use_solver,sparse.linalg,n/a-out-of-scope,,,P2,n/a,UMFPACK switch
+sparse.csgraph.NegativeCycleError,sparse.csgraph,n/a-out-of-scope,,,P2,n/a,Python exception class
+sparse.csgraph.bellman_ford,sparse.csgraph,partial,bellmanFord,single source only; dense adjacency input,P1,runtime,runtime 2/2 checks pass
+sparse.csgraph.breadth_first_order,sparse.csgraph,partial,bfs,returns order only; no predecessors array; dense adjacency,P1,runtime,runtime 1/1 checks pass
+sparse.csgraph.breadth_first_tree,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.connected_components,sparse.csgraph,partial,connectedComponents; stronglyConnectedComponents,"returns component lists not (n, labels); dense adjacency",P1,runtime,runtime 2/2 checks pass
+sparse.csgraph.construct_dist_matrix,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.csgraph_from_dense,sparse.csgraph,n/a-out-of-scope,,,P2,n/a,graphs are dense adjacency arrays already
+sparse.csgraph.csgraph_from_masked,sparse.csgraph,n/a-out-of-scope,,,P2,n/a,NumPy masked arrays
+sparse.csgraph.csgraph_masked_from_dense,sparse.csgraph,n/a-out-of-scope,,,P2,n/a,NumPy masked arrays
+sparse.csgraph.csgraph_to_dense,sparse.csgraph,n/a-out-of-scope,,,P2,n/a,graphs are dense already
+sparse.csgraph.csgraph_to_masked,sparse.csgraph,n/a-out-of-scope,,,P2,n/a,NumPy masked arrays
+sparse.csgraph.depth_first_order,sparse.csgraph,partial,dfs,"order only, no predecessors",P1,runtime,runtime 1/1 checks pass
+sparse.csgraph.depth_first_tree,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.dijkstra,sparse.csgraph,partial,shortestPath; graphDistance,single source-target pair only; no all-sources/limit/min_only/predecessors,P1,runtime,runtime 1/1 checks pass
+sparse.csgraph.floyd_warshall,sparse.csgraph,full,floydWarshall,,P1,runtime,runtime 1/1 checks pass
+sparse.csgraph.johnson,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.laplacian,sparse.csgraph,full,laplacianMatrix,,P1,runtime,normalized option present; runtime 2/2 checks pass
+sparse.csgraph.maximum_bipartite_matching,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.maximum_flow,sparse.csgraph,full,maxFlow,,P2,runtime,runtime 1/1 checks pass
+sparse.csgraph.min_weight_full_bipartite_matching,sparse.csgraph,partial,hungarian,square dense cost only,P2,runtime,runtime 1/1 checks pass
+sparse.csgraph.minimum_spanning_tree,sparse.csgraph,full,minimumSpanningTree,,P1,runtime,runtime 1/1 checks pass
+sparse.csgraph.reconstruct_path,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.reverse_cuthill_mckee,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.shortest_path,sparse.csgraph,partial,shortestPath; floydWarshall; bellmanFord,no method= auto/D/BF/J dispatcher returning dist+predecessors,P1,runtime,runtime 1/1 checks pass
+sparse.csgraph.structural_rank,sparse.csgraph,missing,,,P2,export+grep,
+sparse.csgraph.yen,sparse.csgraph,missing,,,P2,export+grep,k-shortest paths
+optimize.BFGS,optimize,partial,bfgs,"HessianUpdateStrategy class form not provided; bfgs is a full optimizer, not a pluggable update strategy",P2,runtime,runtime 1/1 checks pass
+optimize.Bounds,optimize,partial,bfgs; minimizeConstrained,"bounds are plain [lo,hi] arrays, no Bounds class",P2,runtime,runtime 1/1 checks pass
+optimize.BroydenFirst,optimize,missing,,,P2,export+grep,
+optimize.HessianUpdateStrategy,optimize,missing,,,P2,export+grep,
+optimize.InverseJacobian,optimize,missing,,,P2,export+grep,
+optimize.KrylovJacobian,optimize,missing,,,P2,export+grep,
+optimize.LbfgsInvHessProduct,optimize,missing,,,P2,export+grep,
+optimize.LinearConstraint,optimize,partial,minimizeConstrained; linprog,"constraints given as closures/arrays, no LinearConstraint object with lb<=Ax<=ub",P2,runtime,runtime 1/1 checks pass
+optimize.NoConvergence,optimize,n/a-out-of-scope,,,P2,n/a,Python exception class
+optimize.NonlinearConstraint,optimize,partial,minimizeConstrained,"eq/ineq closures only (g(x)<=0); no lb/ub vector form, no jac/hess",P1,runtime,runtime 1/1 checks pass
+optimize.OptimizeResult,optimize,partial,bfgs; nelderMead,result objects exist per routine but shapes differ (minimize returns bare number[]),P1,runtime,runtime 1/1 checks pass
+optimize.OptimizeWarning,optimize,n/a-out-of-scope,,,P2,n/a,Python warning class
+optimize.RootResults,optimize,partial,findRoot,findRoot returns bare number; no iterations/converged/flag object,P2,runtime,runtime 1/1 checks pass
+optimize.SR1,optimize,missing,,,P2,export+grep,
+optimize.anderson,optimize,missing,,,P2,export+grep,Anderson mixing root solver
+optimize.approx_fprime,optimize,full,numericJacobian; gradient,,P1,runtime,runtime 1/1 checks pass
+optimize.basinhopping,optimize,partial,globalMinimize,globalMinimize does Nelder-Mead hops in a box; no basinhopping accept_test/take_step/T,P1,runtime,runtime 1/2 checks pass [globalMinimize rastrigin 2D |x*|: fail (: got 0.9949578521362537 want 0 (relerr 9.95e+299))]
+optimize.bisect,optimize,partial,findRoot,findRoot is Brent; no dedicated bisection,P2,runtime,runtime 1/1 checks pass
+optimize.bracket,optimize,missing,,,P2,export+grep,no downhill bracket search
+optimize.brent,optimize,full,minimizeScalar,,P2,runtime,Brent minimizer; runtime 1/1 checks pass
+optimize.brenth,optimize,partial,findRoot,Brent variant not offered,P2,runtime,runtime 1/1 checks pass
+optimize.brentq,optimize,full,findRoot,,P0,runtime,Brent root finder; runtime 1/1 checks pass
+optimize.broyden1,optimize,missing,,,P2,export+grep,
+optimize.broyden2,optimize,missing,,,P2,export+grep,
+optimize.brute,optimize,missing,,,P2,export+grep,
+optimize.check_grad,optimize,missing,,,P2,export+grep,
+optimize.curve_fit,optimize,partial,curvefit; levenbergMarquardt,"no pcov covariance, sigma/absolute_sigma weights, bounds, method= choice; returns params only",P0,runtime,runtime 1/1 checks pass
+optimize.diagbroyden,optimize,missing,,,P2,export+grep,
+optimize.differential_evolution,optimize,partial,differentialEvolution,"strategy variants, polish, constraints, integrality, workers",P1,runtime,runtime 1/1 checks pass
+optimize.direct,optimize,missing,,,P2,export+grep,DIRECT global optimizer
+optimize.dual_annealing,optimize,partial,simulatedAnnealing,classic SA only; no generalized SA + local search,P2,runtime,runtime 1/2 checks pass [simulatedAnnealing rastrigin 2D |x*| (scipy dual_annealing reaches 0): fail (: got 3.587354772203157 want 7.353763736333064e-9 (relerr 4.88e+8))]
+optimize.excitingmixing,optimize,missing,,,P2,export+grep,
+optimize.fixed_point,optimize,full,fixedPoint,,P2,runtime,scalar only (scipy accepts arrays); runtime 1/1 checks pass
+optimize.fmin,optimize,full,nelderMead; minimize,,P1,runtime,runtime 1/1 checks pass
+optimize.fmin_bfgs,optimize,full,bfgs,,P1,runtime,runtime 1/1 checks pass
+optimize.fmin_cg,optimize,missing,,,P2,export+grep,no nonlinear conjugate gradient
+optimize.fmin_cobyla,optimize,missing,,,P2,export+grep,
+optimize.fmin_l_bfgs_b,optimize,partial,bfgs,bfgs takes bounds by projection; no limited-memory L-BFGS-B,P1,runtime,runtime 1/1 checks pass
+optimize.fmin_ncg,optimize,missing,,,P2,export+grep,
+optimize.fmin_powell,optimize,missing,,,P2,export+grep,
+optimize.fmin_slsqp,optimize,partial,minimizeConstrained,"augmented-Lagrangian, not SQP",P1,runtime,runtime 1/1 checks pass
+optimize.fmin_tnc,optimize,missing,,,P2,export+grep,
+optimize.fminbound,optimize,full,minimizeScalar,,P1,runtime,runtime 1/1 checks pass
+optimize.fsolve,optimize,full,fsolve,,P0,runtime,damped Newton; no full_output/xtol/epsfcn options; runtime 1/1 checks pass
+optimize.golden,optimize,partial,minimizeScalar,Brent; no pure golden-section,P2,runtime,runtime 1/1 checks pass
+optimize.isotonic_regression,optimize,missing,,,P2,export+grep,
+optimize.least_squares,optimize,partial,levenbergMarquardt; lsqBounded,"no trf/dogbox, no robust loss (huber/soft_l1/cauchy), no bounds in nonlinear LM; leastSquares is linear only",P0,runtime,runtime 1/1 checks pass
+optimize.leastsq,optimize,full,levenbergMarquardt,,P1,runtime,runtime 1/1 checks pass
+optimize.line_search,optimize,missing,,,P2,export+grep,
+optimize.linear_sum_assignment,optimize,partial,hungarian,square cost matrices only? rectangular not confirmed; maximize flag,P1,runtime,runtime 1/1 checks pass
+optimize.linearmixing,optimize,missing,,,P2,export+grep,
+optimize.linprog,optimize,full,linprog,method= highs-ds/ipm choice; integrality (use milp),P0,runtime,runtime 2/2 checks pass
+optimize.linprog_verbose_callback,optimize,n/a-out-of-scope,,,P2,n/a,callback helper
+optimize.lsq_linear,optimize,partial,lsqBounded,"bvls method only (check), no trf, no sparse",P1,runtime,runtime 1/1 checks pass
+optimize.milp,optimize,missing,,,P1,export+grep,no mixed-integer LP
+optimize.minimize,optimize,partial,minimize; bfgs; nelderMead; minimizeConstrained,"Nelder-Mead only through minimize; no method= dispatcher, no L-BFGS-B/Powell/CG/Newton-CG/trust-*/TNC/COBYLA/SLSQP; returns number[] not OptimizeResult",P0,runtime,runtime 3/3 checks pass
+optimize.minimize_scalar,optimize,full,minimizeScalar,method= brent/bounded/golden choice,P0,runtime,runtime 2/2 checks pass
+optimize.newton,optimize,full,newton; secant; halley,,P0,runtime,scipy newton picks secant/halley by fprime args; MathTS has three functions; runtime 1/1 checks pass
+optimize.newton_krylov,optimize,missing,,,P2,export+grep,
+optimize.nnls,optimize,full,nnls,,P1,runtime,runtime 1/1 checks pass
+optimize.quadratic_assignment,optimize,missing,,,P2,export+grep,
+optimize.ridder,optimize,full,ridders,,P2,runtime,runtime 1/1 checks pass
+optimize.root,optimize,partial,root; fsolve,root = fsolve alias (damped Newton); no method= hybr/lm/broyden/krylov/df-sane,P0,runtime,runtime 1/1 checks pass
+optimize.root_scalar,optimize,partial,findRoot; newton; secant; halley; ridders,no method= dispatcher or RootResults,P1,runtime,runtime 1/1 checks pass
+optimize.rosen,optimize,missing,,,P2,export+grep,test function
+optimize.rosen_der,optimize,missing,,,P2,export+grep,test function
+optimize.rosen_hess,optimize,missing,,,P2,export+grep,test function
+optimize.rosen_hess_prod,optimize,missing,,,P2,export+grep,test function
+optimize.shgo,optimize,missing,,,P2,export+grep,
+optimize.show_options,optimize,n/a-out-of-scope,,,P2,n/a,doc helper
+optimize.toms748,optimize,missing,,,P2,export+grep,
+optimize.elementwise.bracket_minimum,optimize.elementwise,missing,,,P2,export+grep,
+optimize.elementwise.bracket_root,optimize.elementwise,missing,,,P2,export+grep,
+optimize.elementwise.find_minimum,optimize.elementwise,partial,minimizeScalar,not vectorised over many problems,P2,runtime,runtime 1/1 checks pass
+optimize.elementwise.find_root,optimize.elementwise,partial,findRoot,not vectorised over many problems,P2,runtime,runtime 1/1 checks pass
+integrate.BDF,integrate,full,solveODE,,P1,runtime,solveODE method:'BDF'; runtime 1/1 checks pass
+integrate.DOP853,integrate,missing,,,P1,export+grep,no 8th-order Dormand-Prince
+integrate.DenseOutput,integrate,missing,,,P1,export+grep,no dense_output interpolant
+integrate.IntegrationWarning,integrate,n/a-out-of-scope,,,P2,n/a,Python warning class
+integrate.LSODA,integrate,missing,,,P1,export+grep,no automatic stiff/non-stiff switching
+integrate.ODEintWarning,integrate,n/a-out-of-scope,,,P2,n/a,Python warning class
+integrate.OdeSolution,integrate,missing,,,P1,export+grep,no continuous solution object; source-only (not exported): numeric.ts:ODESolution
+integrate.OdeSolver,integrate,missing,,,P2,export+grep,no step-wise solver class API
+integrate.RK23,integrate,full,solveODE,,P1,runtime,method:'RK23'; runtime 1/1 checks pass
+integrate.RK45,integrate,full,solveODE; solveODESystem,,P0,runtime,method:'RK45'; runtime 1/1 checks pass
+integrate.Radau,integrate,full,solveODE,,P1,runtime,method:'Radau'; runtime 1/1 checks pass
+integrate.complex_ode,integrate,missing,,,P2,export+grep,
+integrate.cubature,integrate,missing,,,P2,export+grep,adaptive multidimensional cubature
+integrate.cumulative_simpson,integrate,missing,,,P2,export+grep,
+integrate.cumulative_trapezoid,integrate,full,cumtrapz,,P1,runtime,runtime 1/1 checks pass
+integrate.dblquad,integrate,full,dblquad,,P1,runtime,runtime 1/1 checks pass
+integrate.fixed_quad,integrate,partial,gaussQuad; gaussLegendre4,gaussQuad composite Gauss-Legendre; no single fixed-order call,P2,runtime,runtime 1/1 checks pass
+integrate.lebedev_rule,integrate,missing,,,P2,export+grep,
+integrate.newton_cotes,integrate,missing,,,P2,export+grep,
+integrate.nquad,integrate,missing,,,P2,export+grep,no general N-D nested quad
+integrate.nsum,integrate,missing,,,P2,export+grep,no infinite-series summation numeric
+integrate.ode,integrate,missing,,,P2,export+grep,legacy class-based ODE API
+integrate.odeint,integrate,partial,solveODE,"LSODA-based odeint semantics (tfirst, full_output) absent",P1,runtime,runtime 1/1 checks pass
+integrate.qmc_quad,integrate,missing,,,P2,export+grep,"monteCarloIntegrate is plain MC, no QMC"
+integrate.quad,integrate,partial,quad; nintegrate; tanhSinh,"no infinite limits (check), points=, weight= (cos/sin/alg/cauchy), limit=, full_output",P0,runtime,runtime 4/6 checks pass [quad infinite limits: error (quad: infinite limits are not supported); tanhSinh infinite: error (tanhSinh: infinite limits are not supported)]
+integrate.quad_vec,integrate,missing,,,P2,export+grep,
+integrate.romb,integrate,partial,romberg,romberg takes a function; no sample-array romb,P2,runtime,runtime 1/1 checks pass
+integrate.simpson,integrate,partial,simpson; simpsons,"simpson takes f(a,b,n); no sample-array y,x form",P0,runtime,runtime 1/1 checks pass
+integrate.solve_bvp,integrate,full,solveBVP,,P1,runtime,runtime 1/1 checks pass
+integrate.solve_ivp,integrate,partial,solveODE; solveODESystem,"no dense_output, events (eventDetection is separate), t_eval?, vectorized, DOP853/LSODA",P0,runtime,runtime 5/5 checks pass
+integrate.tanhsinh,integrate,full,tanhSinh,,P2,runtime,runtime 1/1 checks pass
+integrate.tplquad,integrate,full,tplquad,,P2,runtime,runtime 1/1 checks pass
+integrate.trapezoid,integrate,full,trapz,,P0,runtime,runtime 1/1 checks pass
+interpolate.AAA,interpolate,missing,,,P2,export+grep,
+interpolate.Akima1DInterpolator,interpolate,missing,,,P1,export+grep,
+interpolate.BPoly,interpolate,missing,,,P2,export+grep,
+interpolate.BSpline,interpolate,partial,bsplineEval; bspline,"bsplineEval evaluates (t,c,k) tuples; no BSpline object with derivative/antiderivative/integrate",P1,runtime,runtime 1/1 checks pass
+interpolate.BarycentricInterpolator,interpolate,missing,,,P2,runtime,lagrangeInterp exists but not barycentric; runtime 1/1 checks pass
+interpolate.BivariateSpline,interpolate,missing,,,P2,export+grep,
+interpolate.CloughTocher2DInterpolator,interpolate,missing,,,P2,export+grep,
+interpolate.CubicHermiteSpline,interpolate,full,hermiteInterp,,P2,runtime,runtime 0/1 checks pass [hermiteInterp (piecewise?): fail ([0]: got 0.29552020666740203 want 0.2952006675759775 (relerr 1.08e-3))]
+interpolate.CubicSpline,interpolate,partial,cubicSpline; cspline,"natural BC only; no bc_type clamped/not-a-knot/periodic, no derivative/integrate/roots methods",P0,runtime,runtime 2/4 checks pass [cubicSpline bc=not-a-knot: fail ([0]: got 0.2950539277750942 want 0.30326837300046355 (relerr 2.71e-2)); cubicSpline bc=clamped: fail ([0]: got 0.2950539277750942 want 0.1617872293328584 (relerr 8.24e-1))]
+interpolate.FloaterHormannInterpolator,interpolate,missing,,,P2,export+grep,
+interpolate.InterpolatedUnivariateSpline,interpolate,missing,,,P2,export+grep,
+interpolate.KroghInterpolator,interpolate,missing,,,P2,runtime,runtime 2/2 checks pass
+interpolate.LSQBivariateSpline,interpolate,missing,,,P2,export+grep,
+interpolate.LSQSphereBivariateSpline,interpolate,missing,,,P2,export+grep,
+interpolate.LSQUnivariateSpline,interpolate,partial,bsplineFit,bsplineFit is least-squares B-spline with knots? confirm,P2,runtime,runtime 0/1 checks pass [bsplineFit interior knots: fail ([0]: got 0.6438589831267313 want 0.6463026712713698 (relerr 3.78e-3))]
+interpolate.LinearNDInterpolator,interpolate,partial,griddata,griddata linear on scattered data; no reusable interpolator object,P1,runtime,runtime 0/1 checks pass [griddata (IDW) vs linear: fail (: got 0.6176470588235294 want 0.75 (relerr 1.76e-1))]
+interpolate.NdBSpline,interpolate,missing,,,P2,export+grep,
+interpolate.NdPPoly,interpolate,missing,,,P2,export+grep,
+interpolate.NearestNDInterpolator,interpolate,partial,griddata; kdTreeNearest,method nearest via griddata?,P2,runtime,runtime 1/1 checks pass
+interpolate.PPoly,interpolate,missing,,,P1,export+grep,no piecewise-polynomial class
+interpolate.PchipInterpolator,interpolate,partial,pchipInterp; pchip,function form only; no derivative/antiderivative; pchip (typed/numeric.ts:658) has wrong endpoint derivatives,P1,runtime,runtime 1/1 checks pass
+interpolate.RBFInterpolator,interpolate,full,rbfInterpolate,kernel/epsilon/smoothing/neighbors options to confirm,P1,runtime,runtime 0/2 checks pass [rbfInterpolate reproduce linear: fail ([0]: got 1.5172586007961208 want 1.5 (relerr 1.15e-2)); rbfInterpolate thinplate: fail ([0]: got 2.502177328589558 want 1.5 (relerr 6.68e-1))]
+interpolate.Rbf,interpolate,full,rbfInterpolate,,P2,runtime,legacy; runtime 0/1 checks pass [rbfInterpolate gaussian vs Rbf(gaussian): fail ([0]: got 1.8647203598817885 want 0.9576961096216969 (relerr 9.47e-1))]
+interpolate.RectBivariateSpline,interpolate,missing,,,P1,export+grep,
+interpolate.RectSphereBivariateSpline,interpolate,missing,,,P2,export+grep,
+interpolate.RegularGridInterpolator,interpolate,partial,interpn,method= linear only? reusable object absent,P1,runtime,runtime 1/1 checks pass
+interpolate.SmoothBivariateSpline,interpolate,missing,,,P2,export+grep,
+interpolate.SmoothSphereBivariateSpline,interpolate,missing,,,P2,export+grep,
+interpolate.UnivariateSpline,interpolate,missing,,,P1,export+grep,no smoothing spline with s=
+interpolate.barycentric_interpolate,interpolate,partial,lagrangeInterp,"Lagrange form, not barycentric (numerically different)",P2,runtime,runtime 1/1 checks pass
+interpolate.bisplev,interpolate,missing,,,P2,export+grep,
+interpolate.bisplrep,interpolate,missing,,,P2,export+grep,
+interpolate.generate_knots,interpolate,missing,,,P2,export+grep,
+interpolate.griddata,interpolate,full,griddata,,P1,runtime,runtime 0/1 checks pass [griddata linear (grid form): fail (: length 1 want 2)]
+interpolate.insert,interpolate,missing,,,P2,export+grep,
+interpolate.interp1d,interpolate,partial,interpolate; linearInterp; cubicSpline,"kind= nearest/previous/next/quadratic, fill_value/bounds_error, axis",P0,runtime,runtime 1/1 checks pass
+interpolate.interp2d,interpolate,n/a-out-of-scope,,,P2,n/a,removed in SciPy 1.14 (stub raises)
+interpolate.interpn,interpolate,full,interpn,,P1,runtime,runtime 1/1 checks pass
+interpolate.krogh_interpolate,interpolate,missing,,,P2,export+grep,
+interpolate.make_interp_spline,interpolate,partial,bsplineFit,degree-k interpolating B-spline with bc_type not confirmed,P1,runtime,runtime 1/1 checks pass
+interpolate.make_lsq_spline,interpolate,partial,bsplineFit,,P2,runtime,runtime 0/1 checks pass [bsplineFit with interior knots: fail ([0]: got 0.6438589831267313 want 0.6463026712713698 (relerr 3.78e-3))]
+interpolate.make_smoothing_spline,interpolate,missing,,,P2,export+grep,
+interpolate.make_splprep,interpolate,missing,,,P2,export+grep,
+interpolate.make_splrep,interpolate,missing,,,P2,export+grep,
+interpolate.pchip_interpolate,interpolate,full,pchipInterp,,P1,runtime,runtime 0/2 checks pass [pchip (typed/numeric.ts:658) vs scipy: fail ([0]: got 0.2265625 want 0.0859375 (relerr 1.64e+0)); pchip zigzag: fail ([0]: got 0.625 want 0.75 (relerr 1.67e-1))]
+interpolate.spalde,interpolate,missing,,,P2,export+grep,
+interpolate.splantider,interpolate,missing,,,P2,export+grep,
+interpolate.splder,interpolate,missing,,,P2,export+grep,
+interpolate.splev,interpolate,partial,bsplineEval,,P1,runtime,runtime 1/1 checks pass
+interpolate.splint,interpolate,missing,,,P2,export+grep,
+interpolate.splprep,interpolate,missing,,,P2,export+grep,
+interpolate.splrep,interpolate,partial,bsplineFit,no smoothing s=,P1,runtime,runtime 1/1 checks pass
+interpolate.sproot,interpolate,missing,,,P2,export+grep,
+signal.BadCoefficients,signal,n/a-out-of-scope,,,P2,n/a,Python warning class
+signal.CZT,signal,partial,chirpZTransform,"function only, no reusable CZT object",P2,runtime,runtime 1/1 checks pass
+signal.ShortTimeFFT,signal,partial,stft; istft,"function pair only; no ShortTimeFFT class (dual windows, scaling, spectrogram method)",P2,runtime,runtime 1/1 checks pass
+signal.StateSpace,signal,partial,tf2ss; ss2tf; cont2discrete,"plain {A,B,C,D} objects; no lti/dlti class algebra",P1,runtime,runtime 1/1 checks pass
+signal.TransferFunction,signal,partial,tf2zpk; zpk2tf,"plain (b,a); no class",P1,runtime,runtime 1/1 checks pass
+signal.ZerosPolesGain,signal,partial,tf2zpk; zpk2tf,"plain (z,p,k); no class",P2,runtime,runtime 1/1 checks pass
+signal.ZoomFFT,signal,missing,,,P2,export+grep,
+signal.abcd_normalize,signal,missing,,,P2,export+grep,
+signal.argrelextrema,signal,missing,,,P2,export+grep,findPeaks covers maxima only
+signal.argrelmax,signal,partial,findPeaks,findPeaks is not argrelmax (plateau and order= semantics differ),P2,runtime,runtime 1/1 checks pass
+signal.argrelmin,signal,missing,,,P2,export+grep,
+signal.band_stop_obj,signal,missing,,,P2,export+grep,
+signal.bessel,signal,missing,,,P1,export+grep,no Bessel/Thomson filter design
+signal.besselap,signal,missing,,,P2,export+grep,
+signal.bilinear,signal,full,bilinear,,P1,runtime,runtime 1/1 checks pass
+signal.bilinear_zpk,signal,missing,,,P2,export+grep,
+signal.bode,signal,missing,,,P1,export+grep,no Bode magnitude/phase helper
+signal.buttap,signal,missing,,,P2,export+grep,analog prototypes not exported
+signal.butter,signal,partial,butter,"digital only; no analog=, output='sos'/'zpk', fs=",P0,runtime,runtime 8/8 checks pass
+signal.buttord,signal,full,buttord,analog= and fs= options,P1,runtime,runtime 2/2 checks pass
+signal.cheb1ap,signal,missing,,,P2,export+grep,
+signal.cheb1ord,signal,missing,,,P1,export+grep,
+signal.cheb2ap,signal,missing,,,P2,export+grep,
+signal.cheb2ord,signal,missing,,,P1,export+grep,
+signal.cheby1,signal,partial,cheby1,"digital only; no output='sos'/'zpk', fs=",P1,runtime,runtime 4/4 checks pass
+signal.cheby2,signal,partial,cheby2,"digital only; no output='sos'/'zpk', fs=",P1,runtime,runtime 2/2 checks pass
+signal.check_COLA,signal,missing,,,P2,export+grep,
+signal.check_NOLA,signal,missing,,,P2,export+grep,
+signal.chirp,signal,full,chirp,,P1,runtime,runtime 3/3 checks pass
+signal.choose_conv_method,signal,n/a-out-of-scope,,,P2,n/a,performance helper
+signal.closest_STFT_dual_window,signal,missing,,,P2,export+grep,
+signal.coherence,signal,full,coherence,,P1,runtime,runtime 1/1 checks pass
+signal.cont2discrete,signal,full,cont2discrete,,P1,runtime,runtime 3/3 checks pass
+signal.convolve,signal,partial,convolve; conv2,mode= full only for 1-D convolve (no same/valid); method= auto/fft,P0,runtime,runtime 1/1 checks pass
+signal.convolve2d,signal,full,conv2,boundary= fill/wrap/symm options,P1,runtime,runtime 3/3 checks pass
+signal.correlate,signal,partial,correlate; crossCorrelation,mode= same/valid,P0,runtime,runtime 1/1 checks pass
+signal.correlate2d,signal,missing,,,P2,export+grep,
+signal.correlation_lags,signal,missing,,,P2,export+grep,
+signal.csd,signal,full,csd,,P1,runtime,runtime 1/1 checks pass
+signal.cspline1d,signal,missing,,,P2,export+grep,
+signal.cspline1d_eval,signal,missing,,,P2,export+grep,
+signal.cspline2d,signal,missing,,,P2,export+grep,
+signal.czt,signal,full,chirpZTransform,,P2,runtime,runtime 1/1 checks pass
+signal.czt_points,signal,missing,,,P2,export+grep,
+signal.dbode,signal,missing,,,P2,export+grep,
+signal.decimate,signal,partial,decimate,"no ftype= iir/fir, n=, zero_phase options",P1,runtime,"runtime 0/1 checks pass [decimate q=2 (IIR cheby1 8, zero phase): fail ([0]: got 1.0003852768740755 want 0.9931322324012526 (relerr 7.30e-3))]"
+signal.deconvolve,signal,full,deconvolve,,P1,runtime,runtime 1/1 checks pass
+signal.detrend,signal,partial,detrend,"no breakpoints bp=, axis",P1,runtime,runtime 2/2 checks pass
+signal.dfreqresp,signal,missing,,,P2,export+grep,
+signal.dimpulse,signal,partial,impulseResponse,"(b,a) input only",P2,runtime,runtime 1/1 checks pass
+signal.dlsim,signal,missing,,,P2,export+grep,
+signal.dlti,signal,missing,,,P2,export+grep,
+signal.dstep,signal,partial,stepResponse,"(b,a) input only",P2,runtime,runtime 1/1 checks pass
+signal.ellip,signal,partial,ellip,digital only; no output='sos',P1,runtime,runtime 4/4 checks pass
+signal.ellipap,signal,missing,,,P2,export+grep,
+signal.ellipord,signal,missing,,,P1,export+grep,
+signal.envelope,signal,missing,,,P1,export+grep,hilbertTransform gives magnitude-building blocks only
+signal.fftconvolve,signal,partial,convolve,no FFT path flag; modes,P1,runtime,runtime 1/1 checks pass
+signal.filtfilt,signal,partial,filtfilt,"no padtype/padlen/method='gust', axis",P0,runtime,runtime 1/1 checks pass
+signal.find_peaks,signal,partial,findPeaks,"height/distance/prominence only; no threshold, width, wlen, rel_height, plateau_size; no properties dict",P0,runtime,runtime 2/2 checks pass
+signal.find_peaks_cwt,signal,missing,,,P2,export+grep,
+signal.findfreqs,signal,missing,,,P2,export+grep,
+signal.firls,signal,full,firls,weight= and fs=,P1,runtime,runtime 1/1 checks pass
+signal.firwin,signal,partial,firwin; firwinBandpass,"lowpass only plus separate bandpass; no window=, pass_zero=, multiband, fs=",P0,runtime,"runtime 2/3 checks pass [firwinBandpass(21,[.2,.4]): fail ([1]: got -0.001317109411761862 want -0.0015609335118773452 (relerr 1.56e-1))]"
+signal.firwin2,signal,missing,,,P1,export+grep,
+signal.firwin_2d,signal,missing,,,P2,export+grep,
+signal.freqresp,signal,missing,,,P2,export+grep,
+signal.freqs,signal,missing,,,P1,export+grep,no analog frequency response
+signal.freqs_zpk,signal,missing,,,P2,export+grep,
+signal.freqz,signal,full,freqz,,P0,runtime,runtime 2/2 checks pass
+signal.freqz_sos,signal,missing,,,P1,export+grep,
+signal.freqz_zpk,signal,missing,,,P2,export+grep,
+signal.gammatone,signal,missing,,,P2,export+grep,
+signal.gauss_spline,signal,missing,,,P2,export+grep,
+signal.gausspulse,signal,full,gaussPulse,,P2,runtime,runtime 1/1 checks pass
+signal.get_window,signal,partial,getWindow; windowFunction,subset of window names (see signal.windows rows); no fftbins flag,P0,runtime,runtime 1/1 checks pass
+signal.group_delay,signal,full,groupDelay,,P1,runtime,runtime 1/1 checks pass
+signal.hilbert,signal,partial,hilbertTransform,returns imaginary part only? (analytic signal not returned),P1,runtime,runtime 1/1 checks pass
+signal.hilbert2,signal,missing,,,P2,export+grep,
+signal.iircomb,signal,missing,,,P2,export+grep,
+signal.iirdesign,signal,missing,,,P1,export+grep,
+signal.iirfilter,signal,missing,,,P1,export+grep,no generic iirfilter(ftype=) entry
+signal.iirnotch,signal,full,iirNotch,,P1,runtime,runtime 1/1 checks pass
+signal.iirpeak,signal,full,iirPeak,,P2,runtime,runtime 1/1 checks pass
+signal.impulse,signal,partial,impulseResponse,discrete only; no continuous lti impulse,P2,runtime,runtime 1/1 checks pass
+signal.invres,signal,missing,,,P2,export+grep,
+signal.invresz,signal,missing,,,P2,export+grep,
+signal.istft,signal,full,istft,,P1,runtime,runtime 1/1 checks pass
+signal.kaiser_atten,signal,missing,,,P2,export+grep,
+signal.kaiser_beta,signal,missing,,,P2,export+grep,
+signal.kaiserord,signal,missing,,,P2,export+grep,
+signal.lfilter,signal,partial,lfilter,"no zi= initial state / zf output, axis",P0,runtime,runtime 1/1 checks pass
+signal.lfilter_zi,signal,full,lfilterZi,,P1,runtime,runtime 1/1 checks pass
+signal.lfiltic,signal,missing,,,P2,export+grep,
+signal.lombscargle,signal,full,lombScargle,,P1,runtime,runtime 1/1 checks pass
+signal.lp2bp,signal,missing,,,P2,export+grep,
+signal.lp2bp_zpk,signal,missing,,,P2,export+grep,
+signal.lp2bs,signal,missing,,,P2,export+grep,
+signal.lp2bs_zpk,signal,missing,,,P2,export+grep,
+signal.lp2hp,signal,missing,,,P2,export+grep,
+signal.lp2hp_zpk,signal,missing,,,P2,export+grep,
+signal.lp2lp,signal,missing,,,P2,export+grep,
+signal.lp2lp_zpk,signal,missing,,,P2,export+grep,
+signal.lsim,signal,missing,,,P1,export+grep,no continuous-time LTI simulation
+signal.lti,signal,missing,,,P1,export+grep,
+signal.max_len_seq,signal,missing,,,P2,export+grep,
+signal.medfilt,signal,full,medfilt,,P1,runtime,runtime 1/1 checks pass
+signal.medfilt2d,signal,missing,,,P2,export+grep,
+signal.minimum_phase,signal,missing,,,P2,export+grep,
+signal.normalize,signal,missing,,,P2,export+grep,source-only (not exported): polynomial-ideal.ts:normalize
+signal.oaconvolve,signal,missing,,,P2,export+grep,
+signal.order_filter,signal,missing,,,P2,export+grep,
+signal.peak_prominences,signal,partial,findPeaks,prominence computed inside findPeaks only,P1,runtime,runtime 1/2 checks pass [findPeaks prominence filter (with plateau): fail (: length 2 want 3)]
+signal.peak_widths,signal,full,peakWidths,,P1,runtime,runtime 1/1 checks pass
+signal.periodogram,signal,partial,periodogram,"no fs=, scaling='spectrum', detrend, return_onesided",P1,runtime,runtime 1/2 checks pass [periodogram psd (scipy detrend=constant): fail ([0]: got 0.12378316566680068 want 0 (relerr 1.24e+299))]
+signal.place_poles,signal,missing,,,P2,export+grep,
+signal.qspline1d,signal,missing,,,P2,export+grep,
+signal.qspline1d_eval,signal,missing,,,P2,export+grep,
+signal.qspline2d,signal,missing,,,P2,export+grep,
+signal.remez,signal,full,remez,,P1,runtime,runtime 1/1 checks pass
+signal.resample,signal,partial,resample,rate-ratio resampler; scipy resample is FFT-based to num samples,P1,runtime,runtime 0/1 checks pass [resample 16->24 (FFT): fail ([1]: got -1.023470313747727 want -1.3376211273389012 (relerr 2.35e-1))]
+signal.resample_poly,signal,missing,,,P1,export+grep,
+signal.residue,signal,full,residue,,P2,runtime,runtime 1/1 checks pass
+signal.residuez,signal,missing,,,P2,export+grep,
+signal.savgol_coeffs,signal,missing,,,P2,export+grep,
+signal.savgol_filter,signal,partial,savgol,"no deriv=, delta=, mode= edge handling",P1,runtime,runtime 1/1 checks pass
+signal.sawtooth,signal,full,sawtooth,,P2,runtime,runtime 1/1 checks pass
+signal.sepfir2d,signal,missing,,,P2,export+grep,
+signal.sos2tf,signal,full,sos2tf,,P2,runtime,runtime 1/1 checks pass
+signal.sos2zpk,signal,missing,,,P2,export+grep,
+signal.sosfilt,signal,full,sosfilt,zi= state,P1,runtime,runtime 1/1 checks pass
+signal.sosfilt_zi,signal,missing,,,P2,export+grep,
+signal.sosfiltfilt,signal,missing,,,P1,export+grep,
+signal.sosfreqz,signal,missing,,,P2,export+grep,
+signal.spectrogram,signal,partial,spectrogram,"no fs=, nperseg/noverlap naming, scaling, mode=",P1,runtime,runtime 1/1 checks pass
+signal.spline_filter,signal,missing,,,P2,export+grep,
+signal.square,signal,full,squareWave,,P2,runtime,runtime 1/1 checks pass
+signal.ss2tf,signal,full,ss2tf,,P2,runtime,runtime 1/1 checks pass
+signal.ss2zpk,signal,missing,,,P2,export+grep,
+signal.step,signal,partial,stepResponse,discrete only,P2,runtime,runtime 1/1 checks pass
+signal.stft,signal,full,stft,,P1,runtime,runtime 0/1 checks pass [stft |Z| first frame: fail ([0]: got 0.8344341237483963 want 0.0962409849746102 (relerr 7.67e+0))]
+signal.sweep_poly,signal,full,sweepPoly,,P2,runtime,runtime 1/1 checks pass
+signal.symiirorder1,signal,missing,,,P2,export+grep,
+signal.symiirorder2,signal,missing,,,P2,export+grep,
+signal.tf2sos,signal,missing,,,P1,export+grep,tf2zpk + zpk2sos is the 2-step path
+signal.tf2ss,signal,full,tf2ss,,P2,runtime,runtime 2/2 checks pass
+signal.tf2zpk,signal,full,tf2zpk,,P1,runtime,runtime 1/1 checks pass
+signal.unique_roots,signal,missing,,,P2,export+grep,
+signal.unit_impulse,signal,full,unitImpulse,,P2,runtime,runtime 1/1 checks pass
+signal.upfirdn,signal,missing,,,P2,export+grep,
+signal.vectorstrength,signal,missing,,,P2,export+grep,
+signal.welch,signal,partial,welchPSD,"no fs=, nperseg naming, detrend, scaling, average='median'; returns PSD without frequency axis?",P0,runtime,runtime 1/2 checks pass [GAP welchPSD always detrends (vs detrend=False): fail ([0]: got 0.36610376146788354 want 0.7285148717382369 (relerr 4.97e-1))]
+signal.whittaker_henderson,signal,missing,,,P2,export+grep,
+signal.wiener,signal,full,wiener,,P2,runtime,runtime 1/1 checks pass
+signal.zoom_fft,signal,missing,,,P2,export+grep,
+signal.zpk2sos,signal,full,zpk2sos,,P1,runtime,runtime 1/1 checks pass
+signal.zpk2ss,signal,missing,,,P2,export+grep,
+signal.zpk2tf,signal,full,zpk2tf,,P1,runtime,runtime 1/1 checks pass
+signal.windows.barthann,signal.windows,missing,,,P2,export+grep,
+signal.windows.bartlett,signal.windows,full,getWindow; windowFunction,,P1,runtime,runtime 2/2 checks pass
+signal.windows.blackman,signal.windows,full,getWindow; windowFunction,,P1,runtime,runtime 2/2 checks pass
+signal.windows.blackmanharris,signal.windows,full,blackmanHarrisWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.bohman,signal.windows,full,bohmanWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.boxcar,signal.windows,full,getWindow,,P2,runtime,'rectangular'; runtime 2/2 checks pass
+signal.windows.chebwin,signal.windows,missing,,,P2,export+grep,
+signal.windows.cosine,signal.windows,full,cosineWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.dpss,signal.windows,missing,,,P2,export+grep,multiTaperPSD uses its own tapers internally
+signal.windows.exponential,signal.windows,full,exponentialWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.flattop,signal.windows,full,flattopWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.gaussian,signal.windows,full,gaussianWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.general_cosine,signal.windows,missing,,,P2,export+grep,
+signal.windows.general_gaussian,signal.windows,missing,,,P2,export+grep,
+signal.windows.general_hamming,signal.windows,missing,,,P2,export+grep,
+signal.windows.get_window,signal.windows,partial,getWindow,see signal.get_window,P1,runtime,runtime 1/1 checks pass
+signal.windows.hamming,signal.windows,full,getWindow; windowFunction,,P0,runtime,runtime 2/2 checks pass
+signal.windows.hann,signal.windows,full,getWindow; windowFunction,,P0,runtime,runtime 2/3 checks pass [hann periodic n=8: fail ([1]: got 0.1882550990706332 want 0.14644660940672627 (relerr 2.85e-1))]
+signal.windows.kaiser,signal.windows,full,kaiserWindow,,P1,runtime,runtime 3/3 checks pass
+signal.windows.kaiser_bessel_derived,signal.windows,missing,,,P2,export+grep,
+signal.windows.lanczos,signal.windows,missing,,,P2,export+grep,
+signal.windows.nuttall,signal.windows,full,nuttallWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.parzen,signal.windows,full,parzenWindow,,P2,runtime,runtime 2/2 checks pass
+signal.windows.taylor,signal.windows,missing,,,P2,export+grep,"name match 'taylor' is the Taylor-series function, not the window; source-only (not exported): cas.ts:taylor"
+signal.windows.triang,signal.windows,missing,,,P2,export+grep,bartlett is close but triang differs at the ends
+signal.windows.tukey,signal.windows,full,tukeyWindow,,P2,runtime,runtime 2/2 checks pass
+fft.dct,fft,partial,dct; idct,"type II only; no type I/III/IV, norm=, axis",P1,runtime,runtime 2/2 checks pass
+fft.dctn,fft,missing,,,P2,export+grep,
+fft.dst,fft,partial,dst,single type; no type/norm options,P2,runtime,runtime 0/1 checks pass [dst II ortho?: fail ([3]: got -1.4142135623730951 want -1.0000000000000002 (relerr 4.14e-1))]
+fft.dstn,fft,missing,,,P2,export+grep,
+fft.fft,fft,full,fft,n= padding and norm= options,P0,runtime,runtime 2/2 checks pass
+fft.fft2,fft,full,fft2d,,P1,runtime,runtime 1/2 checks pass [fft2d 2x3: fail ([0]: length 4 want 3)]
+fft.fftfreq,fft,full,fftfreq,,P0,runtime,runtime 2/2 checks pass
+fft.fftn,fft,partial,fftn,1-D/2-D overloads only,P1,runtime,runtime 1/1 checks pass
+fft.fftshift,fft,full,fftshift,,P0,runtime,runtime 1/1 checks pass
+fft.fht,fft,missing,,,P2,export+grep,Fast Hankel transform
+fft.fhtoffset,fft,missing,,,P2,export+grep,
+fft.get_workers,fft,n/a-out-of-scope,,,P2,n/a,threading plumbing
+fft.hfft,fft,missing,,,P2,export+grep,
+fft.hfft2,fft,missing,,,P2,export+grep,
+fft.hfftn,fft,missing,,,P2,export+grep,
+fft.idct,fft,partial,idct,type II inverse only,P1,runtime,runtime 1/1 checks pass
+fft.idctn,fft,missing,,,P2,export+grep,
+fft.idst,fft,partial,idst,single type,P2,runtime,runtime 1/2 checks pass [idst(dst(x)) roundtrip: fail ([0]: got 0.7928932188134515 want 1 (relerr 2.07e-1))]
+fft.idstn,fft,missing,,,P2,export+grep,
+fft.ifft,fft,full,ifft,,P0,runtime,runtime 1/1 checks pass
+fft.ifft2,fft,missing,,,P1,export+grep,ifft2 exists in source but is not exported (pass-1 finding reconfirmed); source-only (not exported): fft.ts:ifft2
+fft.ifftn,fft,missing,,,P2,export+grep,
+fft.ifftshift,fft,full,ifftshift,,P1,runtime,runtime 1/1 checks pass
+fft.ifht,fft,missing,,,P2,export+grep,
+fft.ihfft,fft,missing,,,P2,export+grep,
+fft.ihfft2,fft,missing,,,P2,export+grep,
+fft.ihfftn,fft,missing,,,P2,export+grep,
+fft.irfft,fft,full,irfft,,P0,runtime,runtime 1/1 checks pass
+fft.irfft2,fft,missing,,,P2,export+grep,
+fft.irfftn,fft,missing,,,P2,export+grep,
+fft.next_fast_len,fft,missing,,,P2,export+grep,
+fft.prev_fast_len,fft,missing,,,P2,export+grep,
+fft.register_backend,fft,n/a-out-of-scope,,,P2,n/a,backend plumbing
+fft.rfft,fft,full,rfft,,P0,runtime,runtime 1/1 checks pass
+fft.rfft2,fft,missing,,,P2,export+grep,
+fft.rfftfreq,fft,full,rfftfreq,,P1,runtime,runtime 1/1 checks pass
+fft.rfftn,fft,missing,,,P2,export+grep,
+fft.set_backend,fft,n/a-out-of-scope,,,P2,n/a,backend plumbing
+fft.set_global_backend,fft,n/a-out-of-scope,,,P2,n/a,backend plumbing
+fft.set_workers,fft,n/a-out-of-scope,,,P2,n/a,threading plumbing
+fft.skip_backend,fft,n/a-out-of-scope,,,P2,n/a,backend plumbing
+special.SpecialFunctionError,special,n/a-out-of-scope,,,P2,n/a,Python exception class
+special.SpecialFunctionWarning,special,n/a-out-of-scope,,,P2,n/a,Python warning class
+special.agm,special,missing,,,P2,export+grep,AGM used internally by ellipticK only
+special.ai_zeros,special,missing,,,P2,export+grep,
+special.airy,special,partial,airyAi; airyBi,"no derivatives Ai'/Bi', no 4-tuple, no complex argument",P1,runtime,"runtime 6/7 checks pass [airyAi(5.0,): fail (: got 0.00010834442807095002 want 0.00010834442813607433 (relerr 6.01e-10))]"
+special.airye,special,missing,,,P2,export+grep,
+special.assoc_laguerre,special,missing,,,P2,export+grep,laguerreL is order-0 only
+special.assoc_legendre_p,special,partial,ferrersP,"ferrersP(n,m,x) covers Ferrers P_n^m; no norm=/branch_cut=/diff_n=",P1,runtime,runtime 1/1 checks pass
+special.assoc_legendre_p_all,special,missing,,,P2,export+grep,
+special.bdtr,special,partial,binomialDist,"via binomialDist(n,p).cdf; no direct ufunc",P2,runtime,runtime 1/1 checks pass
+special.bdtrc,special,missing,,,P2,export+grep,no binomial survival function
+special.bdtri,special,missing,,,P2,export+grep,
+special.bdtrik,special,missing,,,P2,export+grep,
+special.bdtrin,special,missing,,,P2,export+grep,
+special.bei,special,full,kelvinBei,,P2,runtime,runtime 3/3 checks pass
+special.bei_zeros,special,missing,,,P2,export+grep,
+special.beip,special,missing,,,P2,export+grep,
+special.beip_zeros,special,missing,,,P2,export+grep,
+special.ber,special,full,kelvinBer,,P2,runtime,runtime 3/3 checks pass
+special.ber_zeros,special,missing,,,P2,export+grep,
+special.bernoulli,special,partial,bernoulli,returns the single B_n; scipy returns array B_0..B_n,P2,runtime,runtime 1/1 checks pass
+special.berp,special,missing,,,P2,export+grep,
+special.berp_zeros,special,missing,,,P2,export+grep,
+special.besselpoly,special,missing,,,P2,export+grep,
+special.beta,special,full,beta,,P0,runtime,runtime 3/3 checks pass
+special.betainc,special,full,betainc,,P0,runtime,"argument order (a,b,x) matches scipy; runtime 4/4 checks pass"
+special.betaincc,special,missing,,,P1,export+grep,no complementary regularized incomplete beta
+special.betainccinv,special,missing,,,P2,export+grep,
+special.betaincinv,special,partial,betaQuantile,"inverse of I_x(a,b) via betaQuantile(p,a,b)",P1,runtime,runtime 1/1 checks pass
+special.betaln,special,missing,,,P1,export+grep,no log-beta (beta overflows for large args)
+special.bi_zeros,special,missing,,,P2,export+grep,
+special.binom,special,partial,combinations,"integer n,k only; scipy binom is real-valued via gamma",P0,runtime,"runtime 2/3 checks pass [combinations_real(5.5, 2.0): error (Positive integer value expected in function combinations)]"
+special.boxcox,special,missing,,,P2,export+grep,
+special.boxcox1p,special,missing,,,P2,export+grep,
+special.btdtria,special,missing,,,P2,export+grep,
+special.btdtrib,special,missing,,,P2,export+grep,
+special.cbrt,special,full,cbrt,,P1,runtime,runtime 3/3 checks pass
+special.chdtr,special,full,chiSquaredCDF,,P1,runtime,runtime 2/2 checks pass
+special.chdtrc,special,full,chiSquaredSF,,P1,runtime,runtime 2/2 checks pass
+special.chdtri,special,partial,chiSquaredQuantile,chdtri is the inverse of the survival function (use quantile(1-p)),P2,runtime,runtime 1/1 checks pass
+special.chdtriv,special,missing,,,P2,export+grep,
+special.chebyc,special,missing,,,P2,export+grep,orthopoly1d object
+special.chebys,special,missing,,,P2,export+grep,orthopoly1d object
+special.chebyt,special,missing,,,P2,export+grep,orthopoly1d object (coefficients); evaluation exists as chebyshevT
+special.chebyu,special,missing,,,P2,export+grep,orthopoly1d object
+special.chndtr,special,full,noncentralChi2CDF,,P2,runtime,runtime 1/1 checks pass
+special.chndtridf,special,missing,,,P2,export+grep,
+special.chndtrinc,special,missing,,,P2,export+grep,
+special.chndtrix,special,missing,,,P2,export+grep,
+special.comb,special,partial,combinations; combinationsWithRep,exact=False float path and repetition= flag map; float large-n via gamma absent,P0,runtime,runtime 3/3 checks pass
+special.cosdg,special,missing,,,P2,export+grep,
+special.cosm1,special,missing,,,P2,export+grep,
+special.cotdg,special,missing,,,P2,export+grep,
+special.dawsn,special,full,dawson,,P2,runtime,runtime 3/3 checks pass
+special.diric,special,missing,,,P2,export+grep,name match dirichletEta is a different function
+special.ellip_harm,special,missing,,,P2,export+grep,
+special.ellip_harm_2,special,missing,,,P2,export+grep,
+special.ellip_normal,special,missing,,,P2,export+grep,
+special.ellipe,special,full,ellipticE,,P1,runtime,parameter m convention matches scipy; runtime 4/4 checks pass
+special.ellipeinc,special,full,ellipticEIncomplete,,P1,runtime,"runtime 1/2 checks pass [ellipticEIncomplete(1.2, 0.8): fail (: got 0.9988746397590534 want 0.9988746398384254 (relerr 7.95e-11))]"
+special.ellipj,special,full,jacobiSN; jacobiCN; jacobiDN,no amplitude ph output,P2,runtime,runtime 5/5 checks pass
+special.ellipk,special,full,ellipticK,,P1,runtime,parameter m convention matches scipy; runtime 4/4 checks pass
+special.ellipkinc,special,full,ellipticF,,P1,runtime,runtime 2/2 checks pass
+special.ellipkm1,special,missing,,,P2,export+grep,
+special.elliprc,special,full,carlsonRC,,P2,runtime,runtime 2/2 checks pass
+special.elliprd,special,full,carlsonRD,,P2,runtime,"runtime 0/1 checks pass [carlsonRD(1.0, 2.0, 3.0): fail (: got 0.2904602810184464 want 0.2904602810289907 (relerr 3.63e-11))]"
+special.elliprf,special,full,carlsonRF,,P2,runtime,runtime 2/2 checks pass
+special.elliprg,special,missing,,,P2,export+grep,
+special.elliprj,special,full,carlsonRJ,,P2,runtime,"runtime 0/1 checks pass [carlsonRJ(1.0, 2.0, 3.0, 4.0): fail (: got 0.2398480997390235 want 0.23984809974956783 (relerr 4.40e-11))]"
+special.entr,special,partial,entropy,entropy sums -p log p over a vector; no elementwise entr ufunc,P2,runtime,"runtime 0/1 checks pass [entropy([.2,.3,.5]): fail (: got 1.4854752972273344 want 1.0296530140645737 (relerr 4.43e-1))]"
+special.erf,special,full,erf,complex argument,P0,runtime,runtime 7/7 checks pass
+special.erf_zeros,special,missing,,,P2,export+grep,
+special.erfc,special,full,erfc,,P0,runtime,runtime 5/5 checks pass
+special.erfcinv,special,full,erfcinv,,P1,runtime,runtime 4/4 checks pass
+special.erfcx,special,full,erfcx,,P1,runtime,"runtime 3/4 checks pass [erfcx(30.0,): fail (: got 0.018795888861229584 want 0.018795888861416754 (relerr 9.96e-12))]"
+special.erfi,special,full,erfi,,P2,runtime,runtime 3/3 checks pass
+special.erfinv,special,full,erfinv,,P0,runtime,runtime 5/5 checks pass
+special.errstate,special,n/a-out-of-scope,,,P2,n/a,error-handling context manager
+special.euler,special,full,eulerNumbers,,P2,runtime,runtime 1/1 checks pass
+special.eval_chebyc,special,missing,,,P2,export+grep,
+special.eval_chebys,special,missing,,,P2,export+grep,
+special.eval_chebyt,special,full,chebyshevT,,P1,runtime,runtime 2/2 checks pass
+special.eval_chebyu,special,missing,,,P1,export+grep,only rootsChebyshevU is exported; no Chebyshev U evaluation
+special.eval_gegenbauer,special,full,gegenbauerC,,P2,runtime,runtime 2/2 checks pass
+special.eval_genlaguerre,special,missing,,,P2,export+grep,laguerreL has no alpha parameter
+special.eval_hermite,special,full,hermiteH,,P1,runtime,physicists' H_n; runtime 2/2 checks pass
+special.eval_hermitenorm,special,missing,,,P2,export+grep,no probabilists' He_n
+special.eval_jacobi,special,full,jacobiP,,P2,runtime,runtime 1/1 checks pass
+special.eval_laguerre,special,full,laguerreL,,P1,runtime,runtime 2/2 checks pass
+special.eval_legendre,special,full,legendreP,,P1,runtime,runtime 2/2 checks pass
+special.eval_sh_chebyt,special,missing,,,P2,export+grep,
+special.eval_sh_chebyu,special,missing,,,P2,export+grep,
+special.eval_sh_jacobi,special,missing,,,P2,export+grep,
+special.eval_sh_legendre,special,missing,,,P2,export+grep,
+special.exp1,special,full,expIntegralE1,,P1,runtime,runtime 3/3 checks pass
+special.exp10,special,missing,,,P2,export+grep,"pow(10,x) works but no dedicated exp10"
+special.exp2,special,missing,,,P2,export+grep,
+special.expi,special,full,expIntegralEi,,P1,runtime,runtime 4/4 checks pass
+special.expit,special,full,sigmoid,,P0,runtime,runtime 3/3 checks pass
+special.expm1,special,full,expm1,,P1,runtime,runtime 2/2 checks pass
+special.expn,special,full,expn,,P2,runtime,runtime 3/3 checks pass
+special.exprel,special,missing,,,P2,export+grep,
+special.factorial,special,full,factorial,exact= flag,P0,runtime,runtime 2/2 checks pass
+special.factorial2,special,full,doubleFactorial,,P2,runtime,runtime 2/2 checks pass
+special.factorialk,special,missing,,,P2,export+grep,
+special.fdtr,special,full,fCDF,,P1,runtime,runtime 1/1 checks pass
+special.fdtrc,special,full,fSF,,P1,runtime,runtime 1/1 checks pass
+special.fdtri,special,full,fQuantile,,P1,runtime,runtime 1/1 checks pass
+special.fdtridfd,special,missing,,,P2,export+grep,
+special.fresnel,special,full,fresnelS; fresnelC,returns S and C via two calls,P2,runtime,"runtime 4/6 checks pass [S(10.0,): fail (: got -9.977954194453338e+59 want 0.46816997858488224 (relerr 2.13e+60)); C(10.0,): fail (: got -6.38947183535466e+59 want 0.49989869420551575 (relerr 1.28e+60))]"
+special.fresnel_zeros,special,missing,,,P2,export+grep,
+special.fresnelc_zeros,special,missing,,,P2,export+grep,
+special.fresnels_zeros,special,missing,,,P2,export+grep,
+special.gamma,special,full,gamma,complex argument,P0,runtime,"runtime 7/8 checks pass [gamma_edge(171.5,): fail (: got Infinity want 9.483367566824803e+307 (relerr Infinity))]"
+special.gammainc,special,full,gammainc,,P0,runtime,"regularized lower P(a,x); runtime 4/4 checks pass"
+special.gammaincc,special,full,gammaincp,,P0,runtime,"naming: MathTS gammaincp is the UPPER Q(a,x) (scipy gammaincc); runtime 4/4 checks pass"
+special.gammainccinv,special,missing,,,P2,export+grep,
+special.gammaincinv,special,partial,gammaQuantile,inverse via gamma-distribution quantile,P1,runtime,runtime 1/1 checks pass
+special.gammaln,special,full,lgamma,,P0,runtime,runtime 5/5 checks pass
+special.gammasgn,special,missing,,,P2,export+grep,
+special.gdtr,special,partial,gammaCDF,"rate/shape parameterisation differs (gdtr(a,b,x) uses rate a)",P2,runtime,runtime 1/1 checks pass
+special.gdtrc,special,missing,,,P2,export+grep,
+special.gdtria,special,missing,,,P2,export+grep,
+special.gdtrib,special,missing,,,P2,export+grep,
+special.gdtrix,special,partial,gammaQuantile,,P2,runtime,runtime 1/1 checks pass
+special.gegenbauer,special,missing,,,P2,export+grep,orthopoly1d object
+special.genlaguerre,special,missing,,,P2,export+grep,orthopoly1d object
+special.geterr,special,n/a-out-of-scope,,,P2,n/a,error-handling config
+special.h1vp,special,missing,,,P2,export+grep,
+special.h2vp,special,missing,,,P2,export+grep,
+special.hankel1,special,full,hankelH1,,P1,runtime,runtime 2/2 checks pass
+special.hankel1e,special,missing,,,P2,export+grep,
+special.hankel2,special,full,hankelH2,,P1,runtime,runtime 2/2 checks pass
+special.hankel2e,special,missing,,,P2,export+grep,
+special.hermite,special,missing,,,P2,export+grep,orthopoly1d object
+special.hermitenorm,special,missing,,,P2,export+grep,orthopoly1d object
+special.huber,special,missing,,,P2,export+grep,
+special.hyp0f1,special,full,hyp0f1,,P2,runtime,runtime 2/2 checks pass
+special.hyp1f1,special,full,hyp1f1,,P1,runtime,runtime 3/3 checks pass
+special.hyp2f1,special,full,hyp2f1,,P1,runtime,runtime 3/3 checks pass
+special.hyperu,special,missing,,,P2,export+grep,Tricomi U absent
+special.i0,special,full,besselI,,P1,runtime,"via besselI(0,x); runtime 2/2 checks pass"
+special.i0e,special,missing,,,P2,export+grep,no exponentially scaled Bessel
+special.i1,special,full,besselI,,P1,runtime,"via besselI(1,x); runtime 2/2 checks pass"
+special.i1e,special,missing,,,P2,export+grep,
+special.inv_boxcox,special,missing,,,P2,export+grep,
+special.inv_boxcox1p,special,missing,,,P2,export+grep,
+special.it2i0k0,special,missing,,,P2,export+grep,
+special.it2j0y0,special,missing,,,P2,export+grep,
+special.it2struve0,special,missing,,,P2,export+grep,
+special.itairy,special,missing,,,P2,export+grep,
+special.iti0k0,special,missing,,,P2,export+grep,
+special.itj0y0,special,missing,,,P2,export+grep,
+special.itmodstruve0,special,missing,,,P2,export+grep,
+special.itstruve0,special,missing,,,P2,export+grep,
+special.iv,special,full,besselI,complex argument,P1,runtime,runtime 3/3 checks pass
+special.ive,special,missing,,,P2,export+grep,
+special.ivp,special,missing,,,P2,export+grep,no Bessel derivative helpers
+special.j0,special,full,besselJ0,,P1,runtime,runtime 3/3 checks pass
+special.j1,special,full,besselJ1,,P1,runtime,runtime 3/3 checks pass
+special.jacobi,special,missing,,,P2,export+grep,orthopoly1d object
+special.jn_zeros,special,full,besselJZeros,,P2,runtime,runtime 2/2 checks pass
+special.jnjnp_zeros,special,missing,,,P2,export+grep,
+special.jnp_zeros,special,missing,,,P2,export+grep,
+special.jnyn_zeros,special,missing,,,P2,export+grep,
+special.jve,special,missing,,,P2,export+grep,
+special.jvp,special,missing,,,P2,export+grep,
+special.k0,special,full,besselK,,P1,runtime,"via besselK(0,x); runtime 2/2 checks pass"
+special.k0e,special,missing,,,P2,export+grep,
+special.k1,special,full,besselK,,P1,runtime,runtime 2/2 checks pass
+special.k1e,special,missing,,,P2,export+grep,
+special.kei,special,missing,,,P2,export+grep,
+special.kei_zeros,special,missing,,,P2,export+grep,
+special.keip,special,missing,,,P2,export+grep,
+special.keip_zeros,special,missing,,,P2,export+grep,
+special.kelvin,special,partial,kelvinBer; kelvinBei,ber/bei only; no ker/kei or derivatives,P2,runtime,runtime 2/2 checks pass
+special.kelvin_zeros,special,missing,,,P2,export+grep,
+special.ker,special,missing,,,P2,export+grep,
+special.ker_zeros,special,missing,,,P2,export+grep,
+special.kerp,special,missing,,,P2,export+grep,
+special.kerp_zeros,special,missing,,,P2,export+grep,
+special.kl_div,special,partial,kldivergence,kldivergence is the summed distribution KL; no elementwise kl_div,P2,runtime,runtime 1/1 checks pass
+special.kn,special,full,besselK,,P2,runtime,runtime 2/2 checks pass
+special.kolmogi,special,missing,,,P2,export+grep,
+special.kolmogorov,special,missing,,,P2,export+grep,KS tests compute the distribution internally only
+special.kv,special,full,besselK,,P1,runtime,runtime 3/3 checks pass
+special.kve,special,missing,,,P2,export+grep,
+special.kvp,special,missing,,,P2,export+grep,
+special.laguerre,special,missing,,,P2,export+grep,orthopoly1d object
+special.lambertw,special,full,lambertW,branches other than 0/-1; complex argument,P1,runtime,runtime 6/6 checks pass
+special.legendre,special,missing,,,P2,export+grep,orthopoly1d object
+special.legendre_p,special,full,legendreP,diff_n= derivatives,P1,runtime,runtime 1/1 checks pass
+special.legendre_p_all,special,missing,,,P2,export+grep,
+special.lmbda,special,missing,,,P2,export+grep,
+special.log1p,special,full,log1p,,P1,runtime,runtime 2/2 checks pass
+special.log_expit,special,missing,,,P2,export+grep,
+special.log_ndtr,special,missing,,,P1,export+grep,no log of normal CDF (tail accuracy)
+special.log_softmax,special,partial,TapedTensor.logSoftmax,only on autograd tensors; no plain-array function,P2,export+grep,
+special.log_wright_bessel,special,missing,,,P2,export+grep,
+special.loggamma,special,partial,lgamma,real only; scipy loggamma is complex principal branch,P2,runtime,runtime 3/3 checks pass
+special.logit,special,missing,,,P1,export+grep,
+special.logsumexp,special,partial,logsumexp,"no b= weights, axis, return_sign",P0,runtime,runtime 1/1 checks pass
+special.lpmv,special,full,ferrersP,integer degree only,P2,runtime,runtime 2/2 checks pass
+special.lqmn,special,missing,,,P2,export+grep,
+special.lqn,special,missing,,,P2,export+grep,no Legendre Q
+special.mathieu_a,special,full,mathieuA,,P2,runtime,runtime 2/2 checks pass
+special.mathieu_b,special,full,mathieuB,,P2,runtime,runtime 2/2 checks pass
+special.mathieu_cem,special,partial,mathieuCe,no derivative output,P2,runtime,runtime 2/2 checks pass
+special.mathieu_even_coef,special,missing,,,P2,export+grep,
+special.mathieu_modcem1,special,missing,,,P2,export+grep,
+special.mathieu_modcem2,special,missing,,,P2,export+grep,
+special.mathieu_modsem1,special,missing,,,P2,export+grep,
+special.mathieu_modsem2,special,missing,,,P2,export+grep,
+special.mathieu_odd_coef,special,missing,,,P2,export+grep,
+special.mathieu_sem,special,partial,mathieuSe,no derivative output,P2,runtime,runtime 2/2 checks pass
+special.modfresnelm,special,missing,,,P2,export+grep,
+special.modfresnelp,special,missing,,,P2,export+grep,
+special.modstruve,special,full,struveL,,P2,runtime,runtime 2/2 checks pass
+special.multigammaln,special,missing,,,P2,export+grep,
+special.nbdtr,special,partial,negativeBinomialDist,via distribution cdf,P2,runtime,runtime 1/1 checks pass
+special.nbdtrc,special,missing,,,P2,export+grep,
+special.nbdtri,special,missing,,,P2,export+grep,
+special.nbdtrik,special,missing,,,P2,export+grep,
+special.nbdtrin,special,missing,,,P2,export+grep,
+special.ncfdtr,special,full,noncentralFCDF,,P2,runtime,runtime 1/1 checks pass
+special.ncfdtri,special,missing,,,P2,export+grep,
+special.ncfdtridfd,special,missing,,,P2,export+grep,
+special.ncfdtridfn,special,missing,,,P2,export+grep,
+special.ncfdtrinc,special,missing,,,P2,export+grep,
+special.nctdtr,special,full,noncentralTCDF,,P2,runtime,runtime 1/1 checks pass
+special.nctdtridf,special,missing,,,P2,export+grep,
+special.nctdtrinc,special,missing,,,P2,export+grep,
+special.nctdtrit,special,missing,,,P2,export+grep,
+special.ndtr,special,full,normalCDF,,P0,runtime,runtime 4/4 checks pass
+special.ndtri,special,full,normalQuantile,,P0,runtime,runtime 3/3 checks pass
+special.ndtri_exp,special,missing,,,P2,export+grep,
+special.nrdtrimn,special,missing,,,P2,export+grep,
+special.nrdtrisd,special,missing,,,P2,export+grep,
+special.obl_ang1,special,missing,,,P2,export+grep,only prolate spheroidal functions exist
+special.obl_ang1_cv,special,missing,,,P2,export+grep,
+special.obl_cv,special,missing,,,P2,export+grep,
+special.obl_cv_seq,special,missing,,,P2,export+grep,
+special.obl_rad1,special,missing,,,P2,export+grep,
+special.obl_rad1_cv,special,missing,,,P2,export+grep,
+special.obl_rad2,special,missing,,,P2,export+grep,
+special.obl_rad2_cv,special,missing,,,P2,export+grep,
+special.owens_t,special,full,owensT,,P2,runtime,runtime 3/3 checks pass
+special.pbdn_seq,special,missing,,,P2,export+grep,
+special.pbdv,special,partial,parabolicCylinderD,no derivative output,P2,runtime,runtime 3/3 checks pass
+special.pbdv_seq,special,missing,,,P2,export+grep,
+special.pbvv,special,missing,,,P2,export+grep,
+special.pbvv_seq,special,missing,,,P2,export+grep,
+special.pbwa,special,missing,,,P2,export+grep,
+special.pdtr,special,partial,poissonDist,via distribution cdf,P2,runtime,runtime 1/1 checks pass
+special.pdtrc,special,missing,,,P2,export+grep,
+special.pdtri,special,missing,,,P2,export+grep,
+special.pdtrik,special,missing,,,P2,export+grep,
+special.perm,special,full,permutations,,P1,runtime,runtime 2/2 checks pass
+special.poch,special,full,risingFactorial,,P1,runtime,runtime 2/2 checks pass
+special.polygamma,special,full,polygamma,,P1,runtime,runtime 3/3 checks pass
+special.powm1,special,missing,,,P2,export+grep,
+special.pro_ang1,special,full,spheroidalAngular,no derivative output,P2,runtime,"runtime 0/2 checks pass [spheroidalAngular(0, 0, 1.0, 0.5): fail (: got 0.9825671050551721 want 0.9606110837921175 (relerr 2.29e-2)); spheroidalAngular(1, 2, 2.0, 0.3): fail (: got -0.9052980864332917 want 0.8374625906386085 (relerr 2.08e+0))]"
+special.pro_ang1_cv,special,missing,,,P2,export+grep,
+special.pro_cv,special,full,spheroidalCharacteristic,,P2,runtime,runtime 2/2 checks pass
+special.pro_cv_seq,special,missing,,,P2,export+grep,
+special.pro_rad1,special,partial,spheroidalRadial,first kind only? derivative absent,P2,runtime,"runtime 0/2 checks pass [spheroidalRadial(0, 0, 1.0, 1.5): fail (: got 0.9334461213987245 want 0.758901313649158 (relerr 2.30e-1)); spheroidalRadial(1, 2, 2.0, 1.3): fail (: got 2.600460201465691 want 0.20800143088699186 (relerr 1.15e+1))]"
+special.pro_rad1_cv,special,missing,,,P2,export+grep,
+special.pro_rad2,special,missing,,,P2,export+grep,
+special.pro_rad2_cv,special,missing,,,P2,export+grep,
+special.pseudo_huber,special,missing,,,P2,export+grep,
+special.radian,special,missing,,,P2,export+grep,
+special.rel_entr,special,missing,,,P2,export+grep,
+special.rgamma,special,missing,,,P2,export+grep,
+special.riccati_jn,special,missing,,,P2,export+grep,
+special.riccati_yn,special,missing,,,P2,export+grep,
+special.round,special,full,round,,P2,runtime,"runtime 1/3 checks pass [round(2.5,): fail (: got 3 want 2 (relerr 5.00e-1)); round(-2.5,): fail (: got -3 want -2 (relerr 5.00e-1))]"
+special.seterr,special,n/a-out-of-scope,,,P2,n/a,error-handling config
+special.sh_chebyt,special,missing,,,P2,export+grep,
+special.sh_chebyu,special,missing,,,P2,export+grep,
+special.sh_jacobi,special,missing,,,P2,export+grep,
+special.sh_legendre,special,missing,,,P2,export+grep,
+special.shichi,special,full,sinhIntegral; coshIntegral,,P2,runtime,runtime 4/4 checks pass
+special.sici,special,full,sinIntegral; cosIntegral,,P1,runtime,"runtime 4/6 checks pass [Si(30.0,): fail (: got 1.5667605382022791 want 1.5667565400303511 (relerr 2.55e-6)); Ci(30.0,): fail (: got -0.033028823233827165 want -0.03303241728207114 (relerr 1.09e-4))]"
+special.sinc,special,full,sinc,,P1,runtime,normalised sin(pi x)/(pi x) - checked at runtime; runtime 3/3 checks pass
+special.sindg,special,missing,,,P2,export+grep,
+special.smirnov,special,missing,,,P2,export+grep,
+special.smirnovi,special,missing,,,P2,export+grep,
+special.softmax,special,partial,softmax,no axis argument,P0,runtime,runtime 1/1 checks pass
+special.softplus,special,missing,,,P2,export+grep,
+special.spence,special,partial,polylog,"spence(z) = Li2(1-z) via polylog(2, 1-z)",P2,runtime,"runtime 1/2 checks pass [polylog(2.0,): error (polylog: only |z| < 1 is supported (analytic continuation not implemented))]"
+special.sph_harm_y,special,full,sphericalHarmonic,,P1,runtime,"argument order (l,m,theta,phi); runtime 2/2 checks pass"
+special.sph_harm_y_all,special,missing,,,P2,export+grep,
+special.sph_legendre_p,special,missing,,,P2,export+grep,
+special.sph_legendre_p_all,special,missing,,,P2,export+grep,
+special.spherical_in,special,full,sphericalBesselI,derivative= flag,P2,runtime,runtime 2/2 checks pass
+special.spherical_jn,special,full,sphericalBesselJ,derivative= flag,P1,runtime,runtime 3/3 checks pass
+special.spherical_kn,special,full,sphericalBesselK,derivative= flag,P2,runtime,runtime 2/2 checks pass
+special.spherical_yn,special,full,sphericalBesselY,derivative= flag,P1,runtime,runtime 2/2 checks pass
+special.stdtr,special,full,studentTCDF,,P1,runtime,runtime 2/2 checks pass
+special.stdtridf,special,missing,,,P2,export+grep,
+special.stdtrit,special,full,studentTQuantile,,P1,runtime,runtime 2/2 checks pass
+special.stirling2,special,full,stirlingS2,,P2,runtime,runtime 2/2 checks pass
+special.struve,special,full,struveH,,P2,runtime,runtime 3/3 checks pass
+special.tandg,special,missing,,,P2,export+grep,
+special.tklmbda,special,missing,,,P2,export+grep,
+special.voigt_profile,special,missing,,,P2,export+grep,
+special.wofz,special,missing,,,P1,export+grep,"Faddeeva function absent (needed for Voigt, complex erf)"
+special.wright_bessel,special,missing,,,P2,export+grep,
+special.wrightomega,special,missing,,,P2,export+grep,
+special.xlog1py,special,missing,,,P2,export+grep,
+special.xlogy,special,missing,,,P1,export+grep,
+special.y0,special,full,besselY0,,P1,runtime,runtime 2/2 checks pass
+special.y0_zeros,special,missing,,,P2,export+grep,
+special.y1,special,full,besselY1,,P1,runtime,runtime 2/2 checks pass
+special.y1_zeros,special,missing,,,P2,export+grep,
+special.y1p_zeros,special,missing,,,P2,export+grep,
+special.yn,special,full,besselY,,P1,runtime,runtime 2/2 checks pass
+special.yn_zeros,special,missing,,,P2,export+grep,
+special.ynp_zeros,special,missing,,,P2,export+grep,
+special.yv,special,full,besselY,,P1,runtime,runtime 4/4 checks pass
+special.yve,special,missing,,,P2,export+grep,
+special.yvp,special,missing,,,P2,export+grep,
+special.zeta,special,full,zeta; hurwitzZeta,,P1,runtime,"zeta(x,q) Hurwitz form is hurwitzZeta; runtime 7/7 checks pass"
+special.zetac,special,missing,,,P2,export+grep,
+special.roots_chebyc,special,missing,,,P2,export+grep,
+special.roots_gegenbauer,special,missing,,,P2,export+grep,
+special.psi,special,full,digamma,,P1,runtime,runtime 5/5 checks pass
+special.roots_hermite,special,full,rootsHermite,,P2,runtime,runtime 1/1 checks pass
+special.roots_hermitenorm,special,missing,,,P2,export+grep,
+special.roots_jacobi,special,full,rootsJacobi,,P2,runtime,runtime 1/1 checks pass
+special.jv,special,full,besselJ,complex argument,P0,runtime,runtime 5/5 checks pass
+special.roots_sh_jacobi,special,missing,,,P2,export+grep,
+special.roots_laguerre,special,full,rootsLaguerre,,P2,runtime,runtime 1/1 checks pass
+special.roots_genlaguerre,special,missing,,,P2,export+grep,
+special.roots_legendre,special,full,rootsLegendre,,P1,runtime,runtime 1/1 checks pass
+special.roots_sh_legendre,special,missing,,,P2,export+grep,
+special.roots_chebys,special,missing,,,P2,export+grep,
+special.roots_chebyt,special,full,rootsChebyshevT,,P2,runtime,runtime 1/1 checks pass
+special.roots_chebyu,special,full,rootsChebyshevU,,P2,runtime,runtime 1/1 checks pass
+special.roots_sh_chebyt,special,missing,,,P2,export+grep,
+special.roots_sh_chebyu,special,missing,,,P2,export+grep,
+stats.Binomial,stats.distributions,partial,binomialDist,new-infrastructure class; MathTS object has pdf/cdf/quantile/mean/variance/sample only,P2,runtime,runtime 1/1 checks pass
+stats.BootstrapMethod,stats.classes,missing,,,P2,export+grep,resampling config object
+stats.CensoredData,stats.classes,missing,,,P2,export+grep,
+stats.ConstantInputWarning,stats.descriptive,n/a-out-of-scope,,,P2,n/a,Python warning class
+stats.Covariance,stats.classes,missing,,,P2,export+grep,
+stats.DegenerateDataWarning,stats.descriptive,n/a-out-of-scope,,,P2,n/a,Python warning class
+stats.FitError,stats.descriptive,n/a-out-of-scope,,,P2,n/a,Python exception class
+stats.Logistic,stats.distributions,partial,logisticPDF; logisticCDF; logisticQuantile,"function trio, no object",P2,runtime,runtime 1/1 checks pass
+stats.Mixture,stats.distributions,missing,,,P2,export+grep,no mixture distribution
+stats.MonteCarloMethod,stats.classes,missing,,,P2,export+grep,
+stats.NearConstantInputWarning,stats.descriptive,n/a-out-of-scope,,,P2,n/a,Python warning class
+stats.Normal,stats.distributions,partial,normalDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,new-infrastructure class; runtime 1/1 checks pass
+stats.PermutationMethod,stats.classes,missing,,,P2,export+grep,
+stats.Uniform,stats.distributions,partial,uniformDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P2,runtime,runtime 1/1 checks pass
+stats.abs,stats.descriptive,missing,,,P2,export+grep,"distribution transform abs(X) (new infrastructure); name match is elementwise abs; source-only (not exported): shims.ts:abs, scalar.ts:abs, arithmetic.ts:abs"
+stats.alexandergovern,stats.tests,missing,,,P2,export+grep,
+stats.alpha,stats.distributions,missing,,,P2,export+grep,
+stats.anderson,stats.tests,partial,andersonDarlingTest,"normal only; no dist= choice (expon, logistic, gumbel...)",P1,runtime,runtime 1/1 checks pass
+stats.anderson_ksamp,stats.tests,missing,,,P2,export+grep,
+stats.anglit,stats.distributions,missing,,,P2,export+grep,
+stats.ansari,stats.tests,missing,,,P2,export+grep,
+stats.arcsine,stats.distributions,missing,,,P2,export+grep,
+stats.argus,stats.distributions,missing,,,P2,export+grep,
+stats.barnard_exact,stats.tests,missing,,,P2,export+grep,
+stats.bartlett,stats.tests,full,bartlettTest,,P1,runtime,runtime 2/2 checks pass
+stats.bayes_mvs,stats.descriptive,missing,,,P2,export+grep,
+stats.bernoulli,stats.distributions,partial,bernoulliPMF; bernoulli,PMF only,P1,runtime,runtime 2/2 checks pass
+stats.beta,stats.distributions,partial,betaDist; betaPDF; betaCDF; betaQuantile,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,"runtime 17/18 checks pass [betaDist(0.5,0.5).quantile(1e-08) tail: fail (: got 1e-15 want 2.4674011002723397e-16 (relerr 3.05e+0))]"
+stats.betabinom,stats.distributions,missing,,,P2,export+grep,
+stats.betanbinom,stats.distributions,missing,,,P2,export+grep,
+stats.betaprime,stats.distributions,missing,,,P2,export+grep,
+stats.binned_statistic,stats.descriptive,missing,,,P1,export+grep,histogram gives counts only
+stats.binned_statistic_2d,stats.descriptive,missing,,,P2,export+grep,
+stats.binned_statistic_dd,stats.descriptive,missing,,,P2,export+grep,
+stats.binom,stats.distributions,partial,binomialDist; binomialPMF,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,runtime 12/12 checks pass
+stats.binomtest,stats.tests,partial,binomialTest,"no alternative=, no proportion_ci method",P1,runtime,runtime 1/1 checks pass
+stats.boltzmann,stats.distributions,missing,,,P2,export+grep,name match boltzmann is the physical constant; source-only (not exported): index.ts:boltzmann
+stats.bootstrap,stats.tests,partial,bootstrapCI,"one-sample only, percentile/BCa? method coverage to confirm",P1,runtime,runtime 1/1 checks pass
+stats.boschloo_exact,stats.tests,missing,,,P2,export+grep,
+stats.boxcox,stats.descriptive,missing,,,P1,export+grep,
+stats.boxcox_llf,stats.descriptive,missing,,,P2,export+grep,
+stats.boxcox_normmax,stats.descriptive,missing,,,P2,export+grep,
+stats.boxcox_normplot,stats.descriptive,missing,,,P2,export+grep,
+stats.bradford,stats.distributions,missing,,,P2,export+grep,
+stats.brunnermunzel,stats.tests,missing,,,P2,export+grep,
+stats.burr,stats.distributions,missing,,,P2,export+grep,
+stats.burr12,stats.distributions,missing,,,P2,export+grep,
+stats.bws_test,stats.tests,missing,,,P2,export+grep,
+stats.cauchy,stats.distributions,partial,cauchyPDF; cauchyCDF; cauchyQuantile,"function trio only, no object/sampling",P1,runtime,runtime 6/6 checks pass
+stats.chatterjeexi,stats.tests,missing,,,P2,export+grep,
+stats.chi,stats.distributions,missing,,,P2,export+grep,
+stats.chi2,stats.distributions,partial,chiSquaredDist; chiSquaredCDF; chiSquaredSF; chiSquaredQuantile,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale (chiSquaredSF exists as a function),P0,runtime,"runtime 19/26 checks pass [chiSquaredDist(3).quantile(0.05): fail (: got 3963327.2976060137 want 0.35184631774927144 (relerr 1.13e+7)); chiSquaredQuantile(0.05, 3): fail (: got 3963327.2976060137 want 0.35184631774927144 (relerr 1.13e+7)); chiSquaredDist(3).quantile(0.001) tail: fail (: got 79266.54595212027 want 0.024297585815692732 (relerr 3.26e+6))]"
+stats.chi2_contingency,stats.tests,full,chi2Contingency,,P0,runtime,runtime 4/4 checks pass
+stats.chisquare,stats.tests,full,chiSquareTest; powerDivergence,ddof=,P0,runtime,runtime 2/2 checks pass
+stats.circmean,stats.descriptive,full,circmean,,P2,runtime,runtime 1/1 checks pass
+stats.circstd,stats.descriptive,full,circstd,,P2,runtime,runtime 1/1 checks pass
+stats.circvar,stats.descriptive,full,circvar,,P2,runtime,runtime 1/1 checks pass
+stats.combine_pvalues,stats.tests,missing,,,P2,export+grep,
+stats.cosine,stats.distributions,missing,,,P2,export+grep,
+stats.cramervonmises,stats.tests,missing,,,P2,export+grep,
+stats.cramervonmises_2samp,stats.tests,missing,,,P2,export+grep,
+stats.crystalball,stats.distributions,missing,,,P2,export+grep,
+stats.cumfreq,stats.descriptive,missing,,,P2,export+grep,
+stats.describe,stats.descriptive,full,describe,ddof/bias flags,P0,runtime,runtime 1/1 checks pass
+stats.dgamma,stats.distributions,missing,,,P2,export+grep,
+stats.differential_entropy,stats.descriptive,missing,,,P2,export+grep,
+stats.directional_stats,stats.descriptive,missing,,,P2,export+grep,
+stats.dirichlet,stats.distributions,partial,dirichletPdf; dirichletSample,pdf + sampling only; no mean/var/entropy/logpdf,P1,runtime,runtime 1/1 checks pass
+stats.dirichlet_multinomial,stats.distributions,missing,,,P2,export+grep,
+stats.dlaplace,stats.distributions,missing,,,P2,export+grep,
+stats.dpareto_lognorm,stats.distributions,missing,,,P2,export+grep,
+stats.dunnett,stats.tests,missing,,,P2,export+grep,
+stats.dweibull,stats.distributions,missing,,,P2,export+grep,
+stats.ecdf,stats.descriptive,partial,ecdf,returns step function points; no confidence_interval/ECDFResult,P1,runtime,runtime 1/1 checks pass
+stats.energy_distance,stats.descriptive,full,energyDistance,weights,P2,runtime,runtime 1/1 checks pass
+stats.entropy,stats.descriptive,partial,entropy; kldivergence,base= and qk= (relative entropy) via kldivergence,P1,runtime,runtime 2/3 checks pass [entropy (base e?): fail (: got 1.4854752972273344 want 1.0296530140645737 (relerr 4.43e-1))]
+stats.epps_singleton_2samp,stats.tests,missing,,,P2,export+grep,
+stats.erlang,stats.distributions,partial,gammaDist,integer-shape gamma,P2,runtime,runtime 1/1 checks pass
+stats.estimated_cdf,stats.descriptive,missing,,,P2,export+grep,
+stats.exp,stats.descriptive,missing,,,P2,export+grep,"distribution transform exp(X); source-only (not exported): shims.ts:exp, arithmetic.ts:exp, typed-operations.ts:exp"
+stats.expectile,stats.descriptive,missing,,,P2,export+grep,
+stats.expon,stats.distributions,partial,exponentialDist; exponentialPDF; exponentialCDF,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,runtime 14/14 checks pass
+stats.exponnorm,stats.distributions,missing,,,P2,export+grep,
+stats.exponpow,stats.distributions,missing,,,P2,export+grep,
+stats.exponweib,stats.distributions,missing,,,P2,export+grep,
+stats.f,stats.distributions,partial,fDist; fCDF; fSF; fQuantile,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,"runtime 17/18 checks pass [fDist(1,1).quantile(0.99) tail: fail (: got 999.9999999999995 want 4052.1806954768217 (relerr 7.53e-1))]"
+stats.f_oneway,stats.tests,full,anova,,P0,runtime,runtime 2/2 checks pass
+stats.false_discovery_control,stats.tests,full,multipleTest,,P1,runtime,via method 'bh'/'by'; runtime 1/2 checks pass [multipleTest fdr_by: fail ([0]: got 0.04 want 0.08333333333333333 (relerr 5.20e-1))]
+stats.fatiguelife,stats.distributions,missing,,,P2,export+grep,
+stats.fisher_exact,stats.tests,partial,fisherExact,2x2 only; no alternative=; scipy supports R x C,P1,runtime,runtime 2/2 checks pass
+stats.fisk,stats.distributions,missing,,,P2,export+grep,
+stats.fit,stats.descriptive,partial,fitDistribution,"5 distributions by name; no generic MLE over any distribution, no bounds",P1,runtime,runtime 1/1 checks pass
+stats.fligner,stats.tests,missing,,,P2,export+grep,
+stats.foldcauchy,stats.distributions,missing,,,P2,export+grep,
+stats.foldnorm,stats.distributions,missing,,,P2,export+grep,
+stats.friedmanchisquare,stats.tests,full,friedmanTest,,P1,runtime,runtime 2/2 checks pass
+stats.gamma,stats.distributions,partial,gammaDist; gammaPDF; gammaCDF; gammaQuantile,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,"runtime 16/18 checks pass [gammaDist(0.3,1).quantile(0.0001) tail: fail (: got 3.410605131648481e-13 want 3.236440226603645e-14 (relerr 9.54e+0)); gammaDist(0.3,1).quantile(0.01) tail: fail (: got 1.502224904470495e-7 want 1.5022226552360407e-7 (relerr 1.50e-6))]"
+stats.gausshyper,stats.distributions,missing,,,P2,export+grep,
+stats.gaussian_kde,stats.classes,full,gaussianKDE,,P1,runtime,runtime 1/2 checks pass [gaussianKDE bandwidth (Scott) : fail (: got 0.7062467648880038 want 0.7847186276533376 (relerr 1.00e-1))]
+stats.genexpon,stats.distributions,missing,,,P2,export+grep,
+stats.genextreme,stats.distributions,partial,gevPDF; gevCDF,pdf/cdf only; sign convention of shape c must be checked against scipy (c = -xi),P1,runtime,runtime 4/4 checks pass
+stats.gengamma,stats.distributions,missing,,,P2,export+grep,
+stats.genhalflogistic,stats.distributions,missing,,,P2,export+grep,
+stats.genhyperbolic,stats.distributions,missing,,,P2,export+grep,
+stats.geninvgauss,stats.distributions,missing,,,P2,export+grep,
+stats.genlogistic,stats.distributions,missing,,,P2,export+grep,
+stats.gennorm,stats.distributions,missing,,,P2,export+grep,
+stats.genpareto,stats.distributions,missing,,,P1,export+grep,no generalized Pareto (peaks-over-threshold)
+stats.geom,stats.distributions,partial,geometricPMF,PMF only,P1,runtime,runtime 2/2 checks pass
+stats.gibrat,stats.distributions,missing,,,P2,export+grep,
+stats.gmean,stats.descriptive,full,gmean,weights=,P1,runtime,runtime 1/1 checks pass
+stats.gompertz,stats.distributions,missing,,,P2,export+grep,
+stats.goodness_of_fit,stats.tests,missing,,,P2,export+grep,
+stats.gstd,stats.descriptive,full,gstd,,P2,runtime,runtime 2/2 checks pass
+stats.gumbel_l,stats.distributions,missing,,,P2,export+grep,
+stats.gumbel_r,stats.distributions,partial,gumbelDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,runtime 10/10 checks pass
+stats.gzscore,stats.descriptive,full,gzscore,,P2,runtime,runtime 1/2 checks pass [GAP gzscore default ddof=1 (scipy ddof=0): fail ([0]: got -0.9985888963922764 want -1.0675364344390283 (relerr 6.46e-2))]
+stats.halfcauchy,stats.distributions,missing,,,P2,export+grep,
+stats.halfgennorm,stats.distributions,missing,,,P2,export+grep,
+stats.halflogistic,stats.distributions,missing,,,P2,export+grep,
+stats.halfnorm,stats.distributions,missing,,,P1,export+grep,
+stats.hmean,stats.descriptive,full,hmean,weights=,P1,runtime,runtime 1/1 checks pass
+stats.hypergeom,stats.distributions,partial,hypergeometricDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,runtime 10/10 checks pass
+stats.hypsecant,stats.distributions,missing,,,P2,export+grep,
+stats.invgamma,stats.distributions,partial,inverseGammaPDF; inverseGammaCDF,pdf/cdf only,P1,runtime,runtime 4/4 checks pass
+stats.invgauss,stats.distributions,partial,invGaussDist,"no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale; parameterisation (mu, lambda) differs from scipy (mu, scale)",P2,runtime,runtime 10/10 checks pass
+stats.invweibull,stats.distributions,missing,,,P2,export+grep,
+stats.invwishart,stats.distributions,missing,,,P2,export+grep,
+stats.iqr,stats.descriptive,partial,iqr,"no rng=, scale=, interpolation= options",P1,runtime,runtime 1/1 checks pass
+stats.irwinhall,stats.distributions,missing,,,P2,export+grep,
+stats.jarque_bera,stats.tests,full,jarqueBera,,P1,runtime,runtime 2/2 checks pass
+stats.jf_skew_t,stats.distributions,missing,,,P2,export+grep,
+stats.johnsonsb,stats.distributions,missing,,,P2,export+grep,
+stats.johnsonsu,stats.distributions,missing,,,P2,export+grep,
+stats.kappa3,stats.distributions,missing,,,P2,export+grep,
+stats.kappa4,stats.distributions,missing,,,P2,export+grep,
+stats.kendalltau,stats.tests,full,kendalltau; kendallTauTest,"variant= b/c, alternative=",P0,runtime,runtime 3/7 checks pass [kendalltau n=30 pValue: fail (: got 1 want 0.45698072495792497 (relerr 1.19e+0)); kendalltau exact p n=12 discordant=6: fail (: got 0.00004413346427235316 want 0.000044129288920955584 (relerr 9.46e-5)); kendalltau exact p n=20 discordant=60: fail (: got 0.050679876745129825 want 0.02373449564495179 (relerr 1.14e+0))]
+stats.kruskal,stats.tests,full,kruskalWallis,,P0,runtime,runtime 2/2 checks pass
+stats.ks_1samp,stats.tests,full,kolmogorovSmirnovTest,,P1,runtime,runtime 1/2 checks pass [kolmogorovSmirnovTest(custom cdf) n=60 pValue: fail (: got 0.9087780227844955 want 0.8973526937317129 (relerr 1.27e-2))]
+stats.ks_2samp,stats.tests,full,kolmogorovSmirnov2Test,,P1,runtime,runtime 4/4 checks pass
+stats.ksone,stats.distributions,missing,,,P2,export+grep,
+stats.kstat,stats.descriptive,missing,,,P2,export+grep,
+stats.kstatvar,stats.descriptive,missing,,,P2,export+grep,
+stats.kstest,stats.tests,full,kolmogorovSmirnovTest; kolmogorovSmirnov2Test,,P0,runtime,"runtime 1/3 checks pass [kolmogorovSmirnovTest(a,normal) pValue: fail (: got 1.9276822023651124e-9 want 7.627006329354343e-16 (relerr 2.53e+6)); kolmogorovSmirnovTest pValue vs scipy asymp: fail (: got 1.9276822023651124e-9 want 1.2788963775744951e-8 (relerr 8.49e-1))]"
+stats.kstwo,stats.distributions,missing,,,P2,export+grep,
+stats.kstwobign,stats.distributions,missing,,,P2,export+grep,
+stats.kurtosis,stats.descriptive,full,kurtosis,,P0,runtime,fisher/bias flags present; runtime 2/2 checks pass
+stats.kurtosistest,stats.tests,missing,,,P2,export+grep,
+stats.landau,stats.distributions,missing,,,P2,export+grep,
+stats.laplace,stats.distributions,partial,laplacePDF; laplaceCDF; laplaceQuantile,"function trio, no object/sampling",P1,runtime,runtime 6/6 checks pass
+stats.laplace_asymmetric,stats.distributions,missing,,,P2,export+grep,
+stats.levene,stats.tests,full,leveneTest,center='trimmed',P1,runtime,runtime 4/4 checks pass
+stats.levy,stats.distributions,missing,,,P2,export+grep,
+stats.levy_l,stats.distributions,missing,,,P2,export+grep,
+stats.levy_stable,stats.distributions,missing,,,P2,export+grep,
+stats.linregress,stats.tests,full,linregress,,P0,runtime,runtime 6/6 checks pass
+stats.lmoment,stats.descriptive,missing,,,P2,export+grep,
+stats.log,stats.descriptive,missing,,,P2,export+grep,"distribution transform log(X); source-only (not exported): shims.ts:log, arithmetic.ts:log, typed-operations.ts:log"
+stats.loggamma,stats.distributions,missing,,,P2,export+grep,
+stats.logistic,stats.distributions,partial,logisticPDF; logisticCDF; logisticQuantile,"function trio, no object/sampling",P1,runtime,runtime 6/6 checks pass
+stats.loglaplace,stats.distributions,missing,,,P2,export+grep,
+stats.lognorm,stats.distributions,partial,logNormalDist,"no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale; parameterised by (mu, sigma) of log, scipy uses (s, scale=exp(mu))",P0,runtime,runtime 10/10 checks pass
+stats.logrank,stats.descriptive,missing,,,P2,export+grep,survival analysis
+stats.logser,stats.distributions,missing,,,P2,export+grep,
+stats.loguniform,stats.distributions,missing,,,P2,export+grep,
+stats.lomax,stats.distributions,missing,,,P2,export+grep,
+stats.make_distribution,stats.descriptive,missing,,,P2,export+grep,
+stats.mannwhitneyu,stats.tests,partial,mannWhitneyTest,"no alternative=, method= exact/asymptotic choice",P0,runtime,runtime 4/4 checks pass
+stats.matrix_normal,stats.distributions,missing,,,P2,export+grep,
+stats.matrix_t,stats.distributions,missing,,,P2,export+grep,
+stats.maxwell,stats.distributions,missing,,,P2,export+grep,
+stats.median_abs_deviation,stats.descriptive,partial,mad,no scale='normal' option,P1,runtime,runtime 1/1 checks pass
+stats.median_test,stats.tests,full,moodMedianTest,,P2,runtime,runtime 3/3 checks pass
+stats.mielke,stats.distributions,missing,,,P2,export+grep,
+stats.mode,stats.descriptive,full,mode,,P0,runtime,runtime 1/1 checks pass
+stats.moment,stats.descriptive,full,moment,,P1,runtime,runtime 3/3 checks pass
+stats.monte_carlo_test,stats.tests,missing,,,P2,export+grep,
+stats.mood,stats.tests,missing,,,P2,export+grep,scipy mood is the scale test (moodMedianTest is median_test)
+stats.moyal,stats.distributions,missing,,,P2,export+grep,
+stats.multinomial,stats.distributions,partial,multinomial,multinomial is the coefficient; no pmf/rvs distribution,P1,runtime,runtime 1/1 checks pass
+stats.multiscale_graphcorr,stats.tests,missing,,,P2,export+grep,
+stats.multivariate_hypergeom,stats.distributions,missing,,,P2,export+grep,
+stats.multivariate_normal,stats.distributions,partial,multivariateNormal; mvnPdf; mvnSample,pdf + mean/cov + sampling; no cdf/logpdf/entropy/fit,P0,runtime,runtime 2/2 checks pass
+stats.multivariate_t,stats.distributions,missing,,,P2,export+grep,
+stats.mvsdist,stats.descriptive,missing,,,P2,export+grep,
+stats.nakagami,stats.distributions,partial,nakagamiPDF,pdf only,P2,runtime,runtime 2/2 checks pass
+stats.nbinom,stats.distributions,partial,negativeBinomialDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,runtime 10/10 checks pass
+stats.ncf,stats.distributions,partial,noncentralFCDF,cdf only,P2,runtime,runtime 2/2 checks pass
+stats.nchypergeom_fisher,stats.distributions,missing,,,P2,export+grep,
+stats.nchypergeom_wallenius,stats.distributions,missing,,,P2,export+grep,
+stats.nct,stats.distributions,partial,noncentralTCDF,cdf only,P2,runtime,runtime 3/3 checks pass
+stats.ncx2,stats.distributions,partial,noncentralChi2PDF; noncentralChi2CDF,pdf/cdf only,P2,runtime,runtime 4/4 checks pass
+stats.nhypergeom,stats.distributions,missing,,,P2,export+grep,
+stats.norm,stats.distributions,partial,normalDist; normalPDF; normalCDF; normalQuantile,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,runtime 16/16 checks pass
+stats.normal_inverse_gamma,stats.distributions,missing,,,P2,export+grep,
+stats.normaltest,stats.tests,full,dagostinoTest,,P1,runtime,runtime 2/2 checks pass
+stats.norminvgauss,stats.distributions,missing,,,P2,export+grep,
+stats.obrientransform,stats.descriptive,missing,,,P2,export+grep,
+stats.order_statistic,stats.descriptive,missing,,,P2,export+grep,
+stats.ortho_group,stats.distributions,missing,,,P2,export+grep,
+stats.page_trend_test,stats.tests,missing,,,P2,export+grep,
+stats.pareto,stats.distributions,partial,paretoDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,runtime 10/10 checks pass
+stats.pearson3,stats.distributions,missing,,,P2,export+grep,
+stats.pearsonr,stats.tests,full,pearsonr,"alternative=, confidence_interval",P0,runtime,runtime 2/2 checks pass
+stats.percentileofscore,stats.descriptive,missing,,,P1,export+grep,
+stats.permutation_test,stats.tests,partial,permutationTest,two-sample independent only; no paired/samples permutation_type,P1,runtime,runtime 1/1 checks pass
+stats.planck,stats.distributions,missing,,,P2,export+grep,name match is the Planck constant family
+stats.pmean,stats.descriptive,full,pmean,,P2,runtime,runtime 2/2 checks pass
+stats.pointbiserialr,stats.tests,missing,,,P2,export+grep,pearsonr on 0/1 data is equivalent
+stats.poisson,stats.distributions,partial,poissonDist; poissonPMF,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,runtime 12/12 checks pass
+stats.poisson_binom,stats.distributions,missing,,,P2,export+grep,
+stats.poisson_means_test,stats.tests,missing,,,P2,export+grep,
+stats.power,stats.tests,partial,tTestPower,t-test power only; scipy.stats.power is simulation-based for any test,P2,runtime,runtime 2/2 checks pass
+stats.power_divergence,stats.tests,full,powerDivergence,,P2,runtime,runtime 8/8 checks pass
+stats.powerlaw,stats.distributions,missing,,,P2,export+grep,
+stats.powerlognorm,stats.distributions,missing,,,P2,export+grep,
+stats.powernorm,stats.distributions,missing,,,P2,export+grep,
+stats.ppcc_max,stats.descriptive,missing,,,P2,export+grep,
+stats.ppcc_plot,stats.descriptive,missing,,,P2,export+grep,
+stats.probplot,stats.descriptive,missing,,,P2,export+grep,
+stats.quantile,stats.descriptive,partial,quantileSeq,method= set (numpy quantile methods supported via NumpyQuantileMethod) needs scipy's 'harrell-davis'/'round_*' options,P0,runtime,runtime 2/2 checks pass
+stats.quantile_test,stats.tests,missing,,,P2,export+grep,
+stats.randint,stats.distributions,partial,discreteUniformDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,runtime 10/10 checks pass
+stats.random_correlation,stats.distributions,missing,,,P2,export+grep,
+stats.random_table,stats.distributions,missing,,,P2,export+grep,
+stats.rankdata,stats.descriptive,partial,rankdata,method= average only? (min/max/dense/ordinal),P0,runtime,runtime 1/1 checks pass
+stats.ranksums,stats.tests,missing,,,P2,export+grep,"mannWhitneyTest is equivalent in statistic, not the ranksums z"
+stats.rayleigh,stats.distributions,partial,rayleighDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,runtime 10/10 checks pass
+stats.rdist,stats.distributions,missing,,,P2,export+grep,
+stats.recipinvgauss,stats.distributions,missing,,,P2,export+grep,
+stats.reciprocal,stats.distributions,missing,,,P2,export+grep,
+stats.rel_breitwigner,stats.distributions,missing,,,P2,export+grep,
+stats.relfreq,stats.descriptive,missing,,,P2,export+grep,
+stats.rice,stats.distributions,partial,ricePDF,pdf only,P2,runtime,runtime 2/2 checks pass
+stats.rv_continuous,stats.classes,missing,,,P1,export+grep,no subclassable generic continuous distribution base (custom pdf -> cdf/ppf/rvs)
+stats.rv_discrete,stats.classes,missing,,,P2,export+grep,
+stats.rv_histogram,stats.classes,missing,,,P2,export+grep,
+stats.scoreatpercentile,stats.descriptive,partial,quantileSeq,,P2,runtime,runtime 1/1 checks pass
+stats.sem,stats.descriptive,full,sem,ddof=,P1,runtime,runtime 1/1 checks pass
+stats.semicircular,stats.distributions,missing,,,P2,export+grep,
+stats.shapiro,stats.tests,full,shapiroWilkTest,,P0,runtime,runtime 4/4 checks pass
+stats.siegelslopes,stats.tests,full,siegelSlopes,,P2,runtime,runtime 2/2 checks pass
+stats.sigmaclip,stats.descriptive,missing,,,P2,export+grep,
+stats.skellam,stats.distributions,partial,skellamPMF,pmf only,P2,runtime,runtime 2/2 checks pass
+stats.skew,stats.descriptive,full,skewness,,P0,runtime,runtime 2/2 checks pass
+stats.skewcauchy,stats.distributions,missing,,,P2,export+grep,
+stats.skewnorm,stats.distributions,partial,skewNormalPDF; skewNormalCDF,pdf/cdf only,P1,runtime,runtime 4/4 checks pass
+stats.skewtest,stats.tests,missing,,,P2,export+grep,
+stats.sobol_indices,stats.descriptive,missing,,,P2,export+grep,
+stats.somersd,stats.tests,missing,,,P2,export+grep,
+stats.spearmanr,stats.tests,full,spearmanr,,P0,runtime,runtime 2/2 checks pass
+stats.spearmanrho,stats.tests,missing,,,P2,export+grep,
+stats.special_ortho_group,stats.distributions,missing,,,P2,export+grep,
+stats.studentized_range,stats.distributions,partial,studentizedRangeCDF; studentizedRangeQuantile,cdf/quantile only,P2,runtime,runtime 4/4 checks pass
+stats.t,stats.distributions,partial,tDist; studentTPDF; studentTCDF; studentTQuantile,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,runtime 26/28 checks pass [tDist(1).quantile(0.0001) tail: fail (: got -999.9999999999995 want -3183.0987571181513 (relerr 6.86e-1)); tDist(1).quantile(0.9999) tail: fail (: got 999.9999999999995 want 3183.098757118502 (relerr 6.86e-1))]
+stats.theilslopes,stats.tests,full,theilSen,,P2,runtime,runtime 2/2 checks pass
+stats.tiecorrect,stats.descriptive,missing,,,P2,export+grep,
+stats.tmax,stats.descriptive,missing,,,P2,export+grep,
+stats.tmean,stats.descriptive,missing,,,P2,export+grep,
+stats.tmin,stats.descriptive,missing,,,P2,export+grep,
+stats.trapezoid,stats.distributions,missing,,,P2,export+grep,
+stats.triang,stats.distributions,partial,triangularDist,"no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale; (a,c,b) parameterisation vs scipy (c, loc, scale)",P2,runtime,runtime 10/10 checks pass
+stats.trim1,stats.descriptive,missing,,,P2,export+grep,
+stats.trim_mean,stats.descriptive,full,trimmedMean,,P1,runtime,runtime 2/2 checks pass
+stats.trimboth,stats.descriptive,missing,,,P2,export+grep,
+stats.truncate,stats.descriptive,missing,,,P2,export+grep,distribution transform
+stats.truncexpon,stats.distributions,missing,,,P2,export+grep,
+stats.truncnorm,stats.distributions,partial,truncatedNormalPDF; truncatedNormalCDF; truncatedNormalMean,pdf/cdf/mean only,P1,runtime,runtime 6/6 checks pass
+stats.truncpareto,stats.distributions,missing,,,P2,export+grep,
+stats.truncweibull_min,stats.distributions,missing,,,P2,export+grep,
+stats.tsem,stats.descriptive,missing,,,P2,export+grep,
+stats.tstd,stats.descriptive,missing,,,P2,export+grep,
+stats.ttest_1samp,stats.tests,full,studentTTest,alternative=,P0,runtime,runtime 2/2 checks pass
+stats.ttest_ind,stats.tests,partial,studentTTest,"equal_var choice (Welch vs Student), alternative=, trim=",P0,runtime,runtime 3/3 checks pass
+stats.ttest_ind_from_stats,stats.tests,missing,,,P2,export+grep,
+stats.ttest_rel,stats.tests,full,studentTTestPaired,alternative=,P0,runtime,runtime 2/2 checks pass
+stats.tukey_hsd,stats.tests,full,tukeyHSD,,P1,runtime,runtime 1/1 checks pass
+stats.tukeylambda,stats.distributions,missing,,,P2,export+grep,
+stats.tvar,stats.descriptive,missing,,,P2,export+grep,
+stats.uniform,stats.distributions,partial,uniformDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P0,runtime,runtime 10/10 checks pass
+stats.uniform_direction,stats.distributions,missing,,,P2,export+grep,
+stats.unitary_group,stats.distributions,missing,,,P2,export+grep,
+stats.variation,stats.descriptive,full,variation,,P2,runtime,runtime 1/1 checks pass
+stats.vonmises,stats.distributions,partial,vonMisesPDF,pdf only,P1,runtime,runtime 2/2 checks pass
+stats.vonmises_fisher,stats.distributions,missing,,,P2,export+grep,
+stats.vonmises_line,stats.distributions,missing,,,P2,export+grep,
+stats.wald,stats.distributions,partial,invGaussDist,wald = invgauss(mu=1),P2,runtime,runtime 1/1 checks pass
+stats.wasserstein_distance,stats.descriptive,full,wassersteinDistance,,P1,runtime,runtime 2/2 checks pass
+stats.wasserstein_distance_nd,stats.descriptive,missing,,,P2,export+grep,
+stats.weibull_max,stats.distributions,missing,,,P2,export+grep,
+stats.weibull_min,stats.distributions,partial,weibullDist,no sf/isf/logpdf/logcdf/entropy/median/interval/fit; no generic loc/scale,P1,runtime,runtime 10/10 checks pass
+stats.weightedtau,stats.tests,missing,,,P2,export+grep,
+stats.wilcoxon,stats.tests,partial,wilcoxon,"no alternative=, zero_method=, correction=",P0,runtime,runtime 4/4 checks pass
+stats.wishart,stats.distributions,partial,wishartSample,sampling only,P2,runtime,runtime 1/1 checks pass
+stats.wrapcauchy,stats.distributions,missing,,,P2,export+grep,
+stats.yeojohnson,stats.descriptive,missing,,,P2,export+grep,
+stats.yeojohnson_llf,stats.descriptive,missing,,,P2,export+grep,
+stats.yeojohnson_normmax,stats.descriptive,missing,,,P2,export+grep,
+stats.yeojohnson_normplot,stats.descriptive,missing,,,P2,export+grep,
+stats.yulesimon,stats.distributions,missing,,,P2,export+grep,
+stats.zipf,stats.distributions,partial,zipfPMF,pmf only,P2,runtime,runtime 1/1 checks pass
+stats.zipfian,stats.distributions,missing,,,P2,runtime,runtime 2/2 checks pass
+stats.zmap,stats.descriptive,missing,,,P2,export+grep,
+stats.zscore,stats.descriptive,full,zscore,ddof= flag,P0,runtime,runtime 1/1 checks pass
+stats.qmc.Halton,stats.qmc,missing,,,P1,export+grep,no quasi-Monte Carlo engines
+stats.qmc.LatinHypercube,stats.qmc,missing,,,P1,export+grep,
+stats.qmc.MultinomialQMC,stats.qmc,missing,,,P2,export+grep,
+stats.qmc.MultivariateNormalQMC,stats.qmc,missing,,,P2,export+grep,
+stats.qmc.PoissonDisk,stats.qmc,missing,,,P2,export+grep,
+stats.qmc.QMCEngine,stats.qmc,missing,,,P2,export+grep,
+stats.qmc.Sobol,stats.qmc,missing,,,P1,export+grep,
+stats.qmc.discrepancy,stats.qmc,missing,,,P2,export+grep,
+stats.qmc.geometric_discrepancy,stats.qmc,missing,,,P2,export+grep,
+stats.qmc.scale,stats.qmc,missing,,,P2,export+grep,source-only (not exported): arithmetic.ts:scale
+stats.qmc.update_discrepancy,stats.qmc,missing,,,P2,export+grep,
+stats.contingency.association,stats.contingency,missing,,,P2,export+grep,Cramer's V / Tschuprow / Pearson contingency coefficient
+stats.contingency.chi2_contingency,stats.contingency,full,chi2Contingency,,P0,runtime,runtime 1/1 checks pass
+stats.contingency.crosstab,stats.contingency,missing,,,P2,export+grep,
+stats.contingency.expected_freq,stats.contingency,partial,chi2Contingency,expected table returned inside chi2Contingency result,P2,runtime,runtime 1/1 checks pass
+stats.contingency.margins,stats.contingency,missing,,,P2,export+grep,
+stats.contingency.odds_ratio,stats.contingency,partial,fisherExact,sample odds ratio from fisherExact; no conditional MLE or CI,P2,runtime,runtime 1/1 checks pass
+stats.contingency.relative_risk,stats.contingency,missing,,,P2,export+grep,
+spatial.ConvexHull,spatial,partial,convexHull; convexHull2D; convexHull3D,"2-D/3-D only; no N-D, no equations/area/volume attributes, no incremental",P0,runtime,runtime 3/3 checks pass
+spatial.Delaunay,spatial,partial,delaunay; delaunayTriangulation,2-D only? no find_simplex/neighbors/transform; no N-D,P0,runtime,runtime 2/2 checks pass
+spatial.HalfspaceIntersection,spatial,full,halfspaceIntersection,,P2,runtime,runtime 1/1 checks pass
+spatial.KDTree,spatial,partial,kdTree; kdTreeKNN; kdTreeNearest; kdTreeRadius,"free functions rebuild per query; no tree object with query(k, p, distance_upper_bound), query_pairs, sparse_distance_matrix, count_neighbors",P0,runtime,runtime 2/2 checks pass
+spatial.QhullError,spatial,n/a-out-of-scope,,,P2,n/a,Python exception class
+spatial.Rectangle,spatial,missing,,,P2,export+grep,
+spatial.SphericalVoronoi,spatial,full,sphericalVoronoi,"sort_vertices_of_regions, calculate_areas",P2,runtime,runtime 1/1 checks pass
+spatial.Voronoi,spatial,partial,voronoi; voronoiDiagram,2-D only; no ridge_points/ridge_vertices/regions layout parity,P1,runtime,runtime 1/1 checks pass
+spatial.cKDTree,spatial,partial,kdTree; kdTreeKNN,see KDTree,P1,runtime,runtime 1/1 checks pass
+spatial.convex_hull_plot_2d,spatial,n/a-out-of-scope,,,P2,n/a,matplotlib plotting
+spatial.delaunay_plot_2d,spatial,n/a-out-of-scope,,,P2,n/a,matplotlib plotting
+spatial.geometric_slerp,spatial,full,slerp; quaternionSlerp,,P2,runtime,runtime 1/1 checks pass
+spatial.procrustes,spatial,full,procrustes,,P2,runtime,runtime 1/1 checks pass
+spatial.voronoi_plot_2d,spatial,n/a-out-of-scope,,,P2,n/a,matplotlib plotting
+spatial.distance.braycurtis,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.canberra,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.cdist,spatial.distance,missing,,,P0,export+grep,no pairwise distance between two point sets
+spatial.distance.chebyshev,spatial.distance,full,chebyshevDistance,,P1,runtime,runtime 1/1 checks pass
+spatial.distance.cityblock,spatial.distance,full,manhattanDistance,,P1,runtime,runtime 1/1 checks pass
+spatial.distance.correlation,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.cosine,spatial.distance,missing,,,P1,export+grep,array_cosine_similarity exists only in WASM source
+spatial.distance.dice,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.directed_hausdorff,spatial.distance,partial,hausdorffDistance,symmetric Hausdorff only; no directed version or index outputs,P2,runtime,runtime 1/1 checks pass
+spatial.distance.euclidean,spatial.distance,full,distance; distanceND,,P0,runtime,runtime 1/1 checks pass
+spatial.distance.hamming,spatial.distance,missing,,,P1,export+grep,
+spatial.distance.is_valid_dm,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.is_valid_y,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.jaccard,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.jensenshannon,spatial.distance,full,jsDivergence,scipy returns the distance sqrt(JS divergence); base=,P2,runtime,runtime 1/1 checks pass
+spatial.distance.mahalanobis,spatial.distance,full,mahalanobis,,P1,runtime,runtime 1/1 checks pass
+spatial.distance.minkowski,spatial.distance,full,minkowskiDistance,w= weights,P1,runtime,runtime 1/1 checks pass
+spatial.distance.num_obs_dm,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.num_obs_y,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.pdist,spatial.distance,partial,distanceMatrix,"Euclidean square matrix only (async); no condensed form, no metric= choice",P0,runtime,runtime 1/1 checks pass
+spatial.distance.rogerstanimoto,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.russellrao,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.seuclidean,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.sokalsneath,spatial.distance,missing,,,P2,export+grep,
+spatial.distance.sqeuclidean,spatial.distance,missing,,,P1,export+grep,
+spatial.distance.squareform,spatial.distance,missing,,,P1,export+grep,
+spatial.distance.yule,spatial.distance,missing,,,P2,export+grep,
+spatial.transform.RigidTransform,spatial.transform,partial,mat4Compose; mat4Decompose,"4x4 matrix helpers only; no RigidTransform class (composition, inverse, apply, from_dual_quat)",P2,export+grep,
+spatial.transform.Rotation,spatial.transform,partial,quaternionFromEuler; quaternionToEuler; quaternionFromRotationMatrix; quaternionToRotationMatrix; quaternionFromAxisAngle; rotationMatrix,"no Rotation class: from/as_rotvec, as_mrp, all 12 euler sequences?, align_vectors, mean, random, apply to point arrays",P1,runtime,runtime 4/4 checks pass
+spatial.transform.RotationSpline,spatial.transform,missing,,,P2,export+grep,
+spatial.transform.Slerp,spatial.transform,full,quaternionSlerp,,P2,runtime,runtime 1/1 checks pass
+ndimage.affine_transform,ndimage,missing,,,P1,export+grep,
+ndimage.binary_closing,ndimage,missing,,,P2,export+grep,
+ndimage.binary_dilation,ndimage,missing,,,P1,export+grep,
+ndimage.binary_erosion,ndimage,missing,,,P1,export+grep,
+ndimage.binary_fill_holes,ndimage,missing,,,P2,export+grep,
+ndimage.binary_hit_or_miss,ndimage,missing,,,P2,export+grep,
+ndimage.binary_opening,ndimage,missing,,,P2,export+grep,
+ndimage.binary_propagation,ndimage,missing,,,P2,export+grep,
+ndimage.black_tophat,ndimage,missing,,,P2,export+grep,
+ndimage.center_of_mass,ndimage,missing,,,P1,export+grep,
+ndimage.convolve,ndimage,partial,conv2,"2-D only, modes full/same/valid; no N-D, no boundary mode= reflect/nearest/mirror/wrap, no origin",P1,runtime,runtime 1/1 checks pass
+ndimage.convolve1d,ndimage,partial,convolve,no boundary modes,P2,runtime,runtime 1/1 checks pass
+ndimage.correlate,ndimage,missing,,,P1,export+grep,name match correlate is 1-D signal correlation; no N-D image correlate; source-only (not exported): signal.ts:correlate
+ndimage.correlate1d,ndimage,partial,correlate,no boundary modes,P2,runtime,runtime 1/1 checks pass
+ndimage.distance_transform_bf,ndimage,missing,,,P2,export+grep,
+ndimage.distance_transform_cdt,ndimage,missing,,,P2,export+grep,
+ndimage.distance_transform_edt,ndimage,missing,,,P1,export+grep,
+ndimage.extrema,ndimage,missing,,,P2,export+grep,"name match extrema is array min/max, not labeled extrema; source-only (not exported): stable.ts:Extrema, stable.ts:extrema"
+ndimage.find_objects,ndimage,missing,,,P2,export+grep,
+ndimage.fourier_ellipsoid,ndimage,missing,,,P2,export+grep,
+ndimage.fourier_gaussian,ndimage,missing,,,P2,export+grep,
+ndimage.fourier_shift,ndimage,missing,,,P2,export+grep,
+ndimage.fourier_uniform,ndimage,missing,,,P2,export+grep,
+ndimage.gaussian_filter,ndimage,missing,,,P0,export+grep,no N-D Gaussian filter
+ndimage.gaussian_filter1d,ndimage,missing,,,P1,export+grep,
+ndimage.gaussian_gradient_magnitude,ndimage,missing,,,P2,export+grep,
+ndimage.gaussian_laplace,ndimage,missing,,,P2,export+grep,
+ndimage.generate_binary_structure,ndimage,missing,,,P2,export+grep,
+ndimage.generic_filter,ndimage,missing,,,P2,export+grep,
+ndimage.generic_filter1d,ndimage,missing,,,P2,export+grep,
+ndimage.generic_gradient_magnitude,ndimage,missing,,,P2,export+grep,
+ndimage.generic_laplace,ndimage,missing,,,P2,export+grep,
+ndimage.geometric_transform,ndimage,missing,,,P2,export+grep,
+ndimage.grey_closing,ndimage,missing,,,P2,export+grep,
+ndimage.grey_dilation,ndimage,missing,,,P2,export+grep,
+ndimage.grey_erosion,ndimage,missing,,,P2,export+grep,
+ndimage.grey_opening,ndimage,missing,,,P2,export+grep,
+ndimage.histogram,ndimage,missing,,,P2,export+grep,"labeled histogram; name match is plain histogram; source-only (not exported): descriptive-stats.ts:histogram, histogram.ts:histogram"
+ndimage.iterate_structure,ndimage,missing,,,P2,export+grep,
+ndimage.label,ndimage,missing,,,P0,export+grep,no connected-component labeling of arrays
+ndimage.labeled_comprehension,ndimage,missing,,,P2,export+grep,
+ndimage.laplace,ndimage,missing,,,P2,export+grep,name match laplace is the Laplace transform; source-only (not exported): cas.ts:laplace
+ndimage.map_coordinates,ndimage,missing,,,P1,export+grep,
+ndimage.maximum,ndimage,missing,,,P2,export+grep,labeled reduction
+ndimage.maximum_filter,ndimage,missing,,,P1,export+grep,
+ndimage.maximum_filter1d,ndimage,missing,,,P2,export+grep,
+ndimage.maximum_position,ndimage,missing,,,P2,export+grep,
+ndimage.mean,ndimage,missing,,,P2,export+grep,"labeled reduction; name match is plain mean; source-only (not exported): shims.ts:mean, arithmetic.ts:mean, typed-operations.ts:mean"
+ndimage.median,ndimage,missing,,,P2,export+grep,labeled reduction; source-only (not exported): index.ts:median
+ndimage.median_filter,ndimage,partial,medfilt,1-D only,P1,runtime,runtime 1/1 checks pass
+ndimage.minimum,ndimage,missing,,,P2,export+grep,labeled reduction
+ndimage.minimum_filter,ndimage,missing,,,P1,export+grep,
+ndimage.minimum_filter1d,ndimage,missing,,,P2,export+grep,
+ndimage.minimum_position,ndimage,missing,,,P2,export+grep,
+ndimage.morphological_gradient,ndimage,missing,,,P2,export+grep,
+ndimage.morphological_laplace,ndimage,missing,,,P2,export+grep,
+ndimage.percentile_filter,ndimage,missing,,,P2,export+grep,
+ndimage.prewitt,ndimage,missing,,,P2,export+grep,
+ndimage.rank_filter,ndimage,missing,,,P2,export+grep,
+ndimage.rotate,ndimage,missing,,,P1,export+grep,"name match rotate is matrix/vector rotation, not image resampling; source-only (not exported): index.ts:rotate"
+ndimage.shift,ndimage,missing,,,P2,export+grep,
+ndimage.sobel,ndimage,missing,,,P1,export+grep,
+ndimage.spline_filter,ndimage,missing,,,P2,export+grep,
+ndimage.spline_filter1d,ndimage,missing,,,P2,export+grep,
+ndimage.standard_deviation,ndimage,missing,,,P2,export+grep,labeled reduction
+ndimage.sum,ndimage,missing,,,P2,export+grep,"labeled reduction; source-only (not exported): shims.ts:sum, arithmetic.ts:sum, typed-operations.ts:sum"
+ndimage.sum_labels,ndimage,missing,,,P2,export+grep,
+ndimage.uniform_filter,ndimage,missing,,,P1,export+grep,
+ndimage.uniform_filter1d,ndimage,partial,movingAverage,1-D moving average; no boundary modes,P2,runtime,runtime 1/1 checks pass
+ndimage.value_indices,ndimage,missing,,,P2,export+grep,
+ndimage.variance,ndimage,missing,,,P2,export+grep,"labeled reduction; source-only (not exported): shims.ts:variance, arithmetic.ts:variance"
+ndimage.vectorized_filter,ndimage,missing,,,P2,export+grep,
+ndimage.watershed_ift,ndimage,missing,,,P2,export+grep,
+ndimage.white_tophat,ndimage,missing,,,P2,export+grep,
+ndimage.zoom,ndimage,missing,,,P1,export+grep,
+cluster.vq.ClusterError,cluster.vq,n/a-out-of-scope,,,P2,n/a,Python exception class
+cluster.vq.kmeans,cluster.vq,partial,kmeans,"no seeding options (k-means++ etc.), no thresh/iter restarts, no seed parameter",P0,runtime,runtime 1/1 checks pass
+cluster.vq.kmeans2,cluster.vq,partial,kmeans,"minit= choices, missing= handling",P1,runtime,runtime 1/1 checks pass
+cluster.vq.py_vq,cluster.vq,missing,,,P2,export+grep,
+cluster.vq.vq,cluster.vq,missing,,,P1,runtime,no code-book assignment helper; runtime 1/1 checks pass
+cluster.vq.whiten,cluster.vq,missing,,,P2,export+grep,
+cluster.hierarchy.ClusterNode,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.ClusterWarning,cluster.hierarchy,n/a-out-of-scope,,,P2,n/a,Python warning class
+cluster.hierarchy.DisjointSet,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.average,cluster.hierarchy,missing,,,P1,export+grep,no hierarchical clustering at all
+cluster.hierarchy.centroid,cluster.hierarchy,missing,,,P2,export+grep,name match 'centroid' is the polygon centroid; source-only (not exported): geometry.ts:centroid
+cluster.hierarchy.complete,cluster.hierarchy,missing,,,P1,export+grep,
+cluster.hierarchy.cophenet,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.correspond,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.cut_tree,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.dendrogram,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.fcluster,cluster.hierarchy,missing,,,P1,export+grep,
+cluster.hierarchy.fclusterdata,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.from_mlab_linkage,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.inconsistent,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.is_isomorphic,cluster.hierarchy,missing,,,P2,export+grep,name match isIsomorphic is graph isomorphism; source-only (not exported): community-coloring.ts:isIsomorphic
+cluster.hierarchy.is_monotonic,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.is_valid_im,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.is_valid_linkage,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.leaders,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.leaves_list,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.linkage,cluster.hierarchy,missing,,,P0,export+grep,no agglomerative linkage
+cluster.hierarchy.maxRstat,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.maxdists,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.maxinconsts,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.median,cluster.hierarchy,missing,,,P2,export+grep,name match median is the statistic; source-only (not exported): index.ts:median
+cluster.hierarchy.num_obs_linkage,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.optimal_leaf_ordering,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.set_link_color_palette,cluster.hierarchy,n/a-out-of-scope,,,P2,n/a,plotting config
+cluster.hierarchy.single,cluster.hierarchy,missing,,,P1,export+grep,
+cluster.hierarchy.to_mlab_linkage,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.to_tree,cluster.hierarchy,missing,,,P2,export+grep,
+cluster.hierarchy.ward,cluster.hierarchy,missing,,,P1,export+grep,
+cluster.hierarchy.weighted,cluster.hierarchy,missing,,,P2,export+grep,
+differentiate.derivative,differentiate,full,derivativeAt; derivative,,P1,runtime,derivativeAt is numeric (forward-mode AD); scipy is adaptive finite differences; runtime 1/1 checks pass
+differentiate.hessian,differentiate,full,hessian,,P1,runtime,runtime 1/1 checks pass
+differentiate.jacobian,differentiate,full,jacobian; numericJacobian,,P1,runtime,runtime 1/1 checks pass
+constants.Avogadro,constants,full,avogadro,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.Boltzmann,constants,full,boltzmann,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.Btu,constants,full,unit:BTU,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.Btu_th,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit Btu_th -> J: error (no MathTS unit for Btu_th)]"
+constants.ConstantWarning,constants,n/a-out-of-scope,,,P2,n/a,Python warning class
+constants.G,constants,full,gravitationConstant,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.Julian_year,constants,full,unit:year,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.Planck,constants,full,planckConstant,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.R,constants,full,gasConstant,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.Rydberg,constants,full,rydberg,,P2,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.Stefan_Boltzmann,constants,full,stefanBoltzmann,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.Wien,constants,full,wienDisplacement,,P2,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.acre,constants,full,unit:acre,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.alpha,constants,full,fineStructure,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 2/2 checks pass
+constants.angstrom,constants,full,unit:angstrom,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.arcmin,constants,full,unit:arcmin,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.arcsec,constants,full,unit:arcsec,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.astronomical_unit,constants,full,unit:au,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.atm,constants,full,unit:atm,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.atomic_mass,constants,full,atomicMass,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.atto,constants,partial,unit:am,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.bar,constants,full,unit:bar,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.barrel,constants,missing,,,P2,runtime,"no unit named barrel; MathTS bbl is a 31-gal barrel, not the 42-gal oil barrel; runtime 0/1 checks pass [unit barrel -> m^3: error (no MathTS unit for barrel)]"
+constants.bbl,constants,partial,unit:bbl,definition differs,P2,runtime,MathTS bbl = 117.35 L (31 US gal); scipy bbl = oil barrel 158.99 L; runtime 0/1 checks pass [unit barrel -> m^3: fail (: got 0.117347765304 want 0.15898729492799998 (relerr 2.62e-1))]
+constants.blob,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit blob -> kg: error (no MathTS unit for blob)]"
+constants.c,constants,full,speedOfLight,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.calorie,constants,full,unit:cal,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.calorie_IT,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit calorie_IT -> J: error (no MathTS unit for calorie_IT)]"
+constants.carat,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit carat -> kg: error (no MathTS unit for carat)]"
+constants.centi,constants,partial,unit:cm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.convert_temperature,constants,partial,unit,via Unit conversion (degC/degF/K/degR); no array helper,P1,runtime,runtime 2/2 checks pass
+constants.day,constants,full,unit:day,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.deci,constants,partial,unit:dm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.degree,constants,full,unit:deg,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.degree_Fahrenheit,constants,full,unit:,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.deka,constants,partial,unit:dam,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.dyn,constants,full,unit:dyn,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.e,constants,full,elementaryCharge,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.eV,constants,full,unit:eV,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.electron_mass,constants,full,electronMass,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.epsilon_0,constants,full,electricConstant,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.erg,constants,full,unit:erg,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.exa,constants,partial,unit:Em,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.exbi,constants,partial,unit:EiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.femto,constants,partial,unit:fm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.fermi,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit fermi -> m: error (no MathTS unit for fermi)]"
+constants.find,constants,missing,,,P2,export+grep,no CODATA lookup API (physical_constants dict accessors)
+constants.fluid_ounce,constants,full,unit:fluidounce,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.fluid_ounce_imp,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit fluid_ounce_imp -> m^3: error (no MathTS unit for fluid_ounce_imp)]"
+constants.foot,constants,full,unit:ft,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.g,constants,full,gravity,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.gallon,constants,full,unit:gallon,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.gallon_imp,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit gallon_imp -> m^3: error (no MathTS unit for gallon_imp)]"
+constants.gibi,constants,partial,unit:GiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.giga,constants,partial,unit:Gm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.golden,constants,full,unit:phi (compat export phi),,P2,runtime,compat package; runtime 0/1 checks pass [phi: error (X is not defined)]
+constants.grain,constants,full,unit:grain,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.gram,constants,full,unit:g,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.hbar,constants,full,reducedPlanckConstant,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.hectare,constants,full,unit:hectare,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.hecto,constants,partial,unit:hm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.horsepower,constants,full,unit:hp,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.hour,constants,full,unit:h,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.inch,constants,full,unit:inch,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.kgf,constants,full,unit:kgf,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.kibi,constants,partial,unit:KiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.kilo,constants,partial,unit:km,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.kmh,constants,full,unit:km/h,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.knot,constants,full,unit:knot,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.lambda2nu,constants,missing,,,P2,runtime,no helper; trivial as speedOfLight/x; runtime 1/1 checks pass
+constants.lb,constants,full,unit:lb,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.lbf,constants,full,unit:lbf,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.light_year,constants,full,unit:lightyear,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.liter,constants,full,unit:L,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.long_ton,constants,full,unit:long_ton,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.m_n,constants,full,neutronMass,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.m_p,constants,full,protonMass,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.mach,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit mach -> m/s: error (no MathTS unit for mach)]"
+constants.mebi,constants,partial,unit:MiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.mega,constants,partial,unit:Mm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.metric_ton,constants,full,unit:tonne,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.micro,constants,partial,unit:um,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.micron,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit micron -> m: error (no MathTS unit for micron)]"
+constants.mil,constants,full,unit:mil,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.mile,constants,full,unit:mi,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.milli,constants,partial,unit:mm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.minute,constants,full,unit:min,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.mmHg,constants,partial,unit:mmHg,definition differs,P2,runtime,MathTS mmHg = 133.322387415 Pa (conventional); scipy mmHg = torr = 101325/760; runtime 0/1 checks pass [unit mmHg -> Pa: fail (: got 133.322387415 want 133.32236842105263 (relerr 1.42e-7))]
+constants.mph,constants,full,unit:mi/h,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.mu_0,constants,full,magneticConstant,,P1,runtime,Unit-valued constant (call .toNumber(unit)); runtime 1/1 checks pass
+constants.nano,constants,partial,unit:nm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.nautical_mile,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit nautical_mile -> m: error (no MathTS unit for nautical_mile)]"
+constants.nu2lambda,constants,missing,,,P2,export+grep,no helper; trivial as speedOfLight/x
+constants.ounce,constants,full,unit:oz,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.parsec,constants,full,unit:parsec,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.pebi,constants,partial,unit:PiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.peta,constants,partial,unit:Pm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.physical_constants,constants,partial,speedOfLight; planckConstant; bohrRadius; faraday; hartreeEnergy,"~50 named CODATA Unit constants vs 445 keyed entries; no (value, unit, uncertainty) table",P1,runtime,27 sampled entries runtime-checked; runtime 27/27 checks pass
+constants.pi,constants,full,unit:pi (compat package export pi),,P1,runtime,"exported by @danielsimonjr/mathts-compat (pi), not functions; runtime 0/1 checks pass [pi: error (X is not defined)]"
+constants.pico,constants,partial,unit:pm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.point,constants,full,unit:point,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.precision,constants,missing,,,P2,export+grep,no CODATA lookup API (physical_constants dict accessors)
+constants.psi,constants,full,unit:psi,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.quecto,constants,partial,unit:qm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.quetta,constants,partial,unit:Qm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.ronna,constants,partial,unit:Rm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.ronto,constants,partial,unit:rm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.short_ton,constants,full,unit:ton,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.slug,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit slug -> kg: error (no MathTS unit for slug)]"
+constants.stone,constants,full,unit:stone,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.survey_foot,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit survey_foot -> m: error (no MathTS unit for survey_foot)]"
+constants.survey_mile,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit survey_mile -> m: error (no MathTS unit for survey_mile)]"
+constants.tebi,constants,partial,unit:TiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.tera,constants,partial,unit:Tm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.ton_TNT,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit ton_TNT -> J: error (no MathTS unit for ton_TNT)]"
+constants.troy_ounce,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit troy_ounce -> kg: error (no MathTS unit for troy_ounce)]"
+constants.troy_pound,constants,missing,,,P2,runtime,"no MathTS unit with this name (tried F.unit(1,name)); runtime 0/1 checks pass [unit troy_pound -> kg: error (no MathTS unit for troy_pound)]"
+constants.unit,constants,missing,,,P2,export+grep,"no CODATA lookup API (physical_constants dict accessors); source-only (not exported): is.ts:Unit, unit.ts:Unit, index.ts:Unit"
+constants.value,constants,missing,,,P2,export+grep,no CODATA lookup API (physical_constants dict accessors)
+constants.week,constants,full,unit:week,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.yard,constants,full,unit:yd,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.year,constants,partial,unit:year,definition differs,P2,runtime,MathTS year = Julian year (365.25 d); scipy year = 365 d; runtime 0/1 checks pass [unit year -> s: fail (: got 31557600 want 31536000 (relerr 6.85e-4))]
+constants.yobi,constants,partial,unit:YiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.yocto,constants,partial,unit:ym,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.yotta,constants,partial,unit:Ym,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.zebi,constants,partial,unit:ZiB,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.zepto,constants,partial,unit:zm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+constants.zero_Celsius,constants,full,unit:,,P2,runtime,via Unit system; runtime 1/1 checks pass
+constants.zetta,constants,partial,unit:Zm,"only as a unit prefix, no numeric constant",P2,runtime,runtime 1/1 checks pass
+stats.rv_continuous.cdf,stats.distribution-methods,full,normalDist,,P0,runtime,present on all MathTS *Dist objects; runtime 1/1 checks pass
+stats.rv_continuous.entropy,stats.distribution-methods,missing,,,P1,export+grep,no entropy method on distribution objects; source-only (not exported): distributions.ts:entropy
+stats.rv_continuous.expect,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_continuous.fit,stats.distribution-methods,partial,fitDistribution,MLE fit for normal/exponential/lognormal/poisson/gamma only,P1,runtime,runtime 1/1 checks pass
+stats.rv_continuous.fit_loc_scale,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_continuous.interval,stats.distribution-methods,missing,,,P1,export+grep,"source-only (not exported): interval.ts:Interval, interval.ts:interval"
+stats.rv_continuous.isf,stats.distribution-methods,missing,,,P1,export+grep,
+stats.rv_continuous.logcdf,stats.distribution-methods,missing,,,P1,export+grep,
+stats.rv_continuous.logpdf,stats.distribution-methods,missing,,,P0,export+grep,no log-density on distribution objects (likelihood work)
+stats.rv_continuous.logsf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_continuous.mean,stats.distribution-methods,full,normalDist,,P0,runtime,runtime 1/1 checks pass
+stats.rv_continuous.median,stats.distribution-methods,missing,,,P1,export+grep,quantile(0.5) is the workaround; source-only (not exported): index.ts:median
+stats.rv_continuous.moment,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): descriptive-stats.ts:moment
+stats.rv_continuous.nnlf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_continuous.pdf,stats.distribution-methods,full,normalDist,,P0,runtime,runtime 1/1 checks pass
+stats.rv_continuous.ppf,stats.distribution-methods,full,normalDist,,P0,runtime,named quantile; runtime 1/1 checks pass
+stats.rv_continuous.rvs,stats.distribution-methods,full,normalDist,,P0,runtime,sample/sampleN (seedable via seedProbabilityRng); runtime 1/1 checks pass
+stats.rv_continuous.sf,stats.distribution-methods,missing,,,P0,export+grep,no survival function on objects (only chiSquaredSF/fSF functions)
+stats.rv_continuous.stats,stats.distribution-methods,missing,,,P2,export+grep,no skew/kurtosis moments
+stats.rv_continuous.std,stats.distribution-methods,partial,normalDist,variance only; std = sqrt(variance),P2,runtime,runtime 1/1 checks pass
+stats.rv_continuous.support,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_continuous.var,stats.distribution-methods,full,normalDist,,P0,runtime,named variance; runtime 1/1 checks pass
+stats.rv_discrete.cdf,stats.distribution-methods,full,poissonDist,,P0,runtime,runtime 1/1 checks pass
+stats.rv_discrete.entropy,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): distributions.ts:entropy
+stats.rv_discrete.expect,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_discrete.interval,stats.distribution-methods,missing,,,P2,export+grep,"source-only (not exported): interval.ts:Interval, interval.ts:interval"
+stats.rv_discrete.isf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_discrete.logcdf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_discrete.logpmf,stats.distribution-methods,missing,,,P1,export+grep,
+stats.rv_discrete.logsf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_discrete.mean,stats.distribution-methods,full,poissonDist,,P0,runtime,runtime 1/1 checks pass
+stats.rv_discrete.median,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): index.ts:median
+stats.rv_discrete.moment,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): descriptive-stats.ts:moment
+stats.rv_discrete.nnlf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_discrete.pmf,stats.distribution-methods,full,poissonDist,,P0,runtime,exposed as pdf on discrete objects; runtime 1/1 checks pass
+stats.rv_discrete.ppf,stats.distribution-methods,full,poissonDist,,P0,runtime,quantile; runtime 1/1 checks pass
+stats.rv_discrete.rvs,stats.distribution-methods,full,poissonDist,,P0,runtime,runtime 1/1 checks pass
+stats.rv_discrete.sf,stats.distribution-methods,missing,,,P1,export+grep,
+stats.rv_discrete.stats,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_discrete.std,stats.distribution-methods,partial,poissonDist,variance only,P2,runtime,runtime 1/1 checks pass
+stats.rv_discrete.support,stats.distribution-methods,missing,,,P2,export+grep,
+stats.rv_discrete.var,stats.distribution-methods,full,poissonDist,,P0,runtime,runtime 1/1 checks pass
+stats.UnivariateDistribution.cache_policy,stats.distribution-methods,n/a-out-of-scope,,,P2,n/a,caching config
+stats.UnivariateDistribution.ccdf,stats.distribution-methods,missing,,,P1,export+grep,
+stats.UnivariateDistribution.cdf,stats.distribution-methods,full,normalDist,,P1,runtime,runtime 1/1 checks pass
+stats.UnivariateDistribution.entropy,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): distributions.ts:entropy
+stats.UnivariateDistribution.iccdf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.icdf,stats.distribution-methods,full,normalDist,,P1,runtime,quantile; runtime 1/1 checks pass
+stats.UnivariateDistribution.ilogccdf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.ilogcdf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.kurtosis,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): descriptive-stats.ts:kurtosis
+stats.UnivariateDistribution.lmoment,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.logccdf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.logcdf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.logentropy,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.logpdf,stats.distribution-methods,missing,,,P1,export+grep,
+stats.UnivariateDistribution.logpmf,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.mean,stats.distribution-methods,full,normalDist,,P1,runtime,runtime 1/1 checks pass
+stats.UnivariateDistribution.median,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): index.ts:median
+stats.UnivariateDistribution.mode,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): index.ts:mode
+stats.UnivariateDistribution.moment,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): descriptive-stats.ts:moment
+stats.UnivariateDistribution.pdf,stats.distribution-methods,full,normalDist,,P1,runtime,runtime 1/1 checks pass
+stats.UnivariateDistribution.plot,stats.distribution-methods,n/a-out-of-scope,,,P2,n/a,matplotlib plotting
+stats.UnivariateDistribution.pmf,stats.distribution-methods,full,poissonDist,,P1,runtime,runtime 1/1 checks pass
+stats.UnivariateDistribution.reset_cache,stats.distribution-methods,n/a-out-of-scope,,,P2,n/a,caching config
+stats.UnivariateDistribution.sample,stats.distribution-methods,full,normalDist,,P1,runtime,runtime 1/1 checks pass
+stats.UnivariateDistribution.skewness,stats.distribution-methods,missing,,,P2,export+grep,source-only (not exported): descriptive-stats.ts:skewness
+stats.UnivariateDistribution.standard_deviation,stats.distribution-methods,partial,normalDist,variance only,P2,runtime,runtime 1/1 checks pass
+stats.UnivariateDistribution.support,stats.distribution-methods,missing,,,P2,export+grep,
+stats.UnivariateDistribution.tol,stats.distribution-methods,n/a-out-of-scope,,,P2,n/a,numeric tolerance config
+stats.UnivariateDistribution.validation_policy,stats.distribution-methods,n/a-out-of-scope,,,P2,n/a,validation config
+stats.UnivariateDistribution.variance,stats.distribution-methods,full,normalDist,,P1,runtime,runtime 1/1 checks pass

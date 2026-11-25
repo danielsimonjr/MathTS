@@ -158,29 +158,36 @@ Snapshot of the codebase surface. See the staleness banner on the summary.
 ships — completed proposals double as the source-of-truth for any deferred
 items they still track.
 
+Independent reviews and gap analyses archived on 2026-11-25 live under
+[`reports/`](reports/README.md). For numeric and symbolic correctness, the
+sources of truth are NumPy, SciPy, SymPy and PySR; Mathematica, Mathcad and
+MATLAB are feature references only. See
+[reports/README.md — Sources of truth](reports/README.md#sources-of-truth).
+
 ### Active ✅
 
-| Doc                                                                                                      | What it covers                                                                                                  |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                                                          |
-| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                                                    |
-| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                                                           |
-| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                                                                 |
-| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).                                                 |
-| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                                                      |
-| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                                                          |
-| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                                                         |
-| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                                                              |
-| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                                                        |
-| [roadmap/GAP_ANALYSIS_2026-11-04.md](roadmap/GAP_ANALYSIS_2026-11-04.md)                                 | 2026-11-04 SciPy/NumPy/SymPy/mathjs/MATLAB gap analysis — all 32 items shipped in `functions@0.72.0` (PR #590). |
-| [roadmap/CLONES_REMAINING.md](roadmap/CLONES_REMAINING.md)                                               | Remaining clone pairs after Sprint 2R.                                                                          |
-| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                                                              |
-| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                                                                |
-| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                                             |
-| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                                 |
-| [audit/2026-10-22-codebase-audit.md](audit/2026-10-22-codebase-audit.md)                                 | Whole-codebase audit: duplicates, dead code, reuse map for scalar-search milestones, open issues.               |
-| [audit/2026-10-22-issues-final.md](audit/2026-10-22-issues-final.md)                                     | Final issue texts for the 2026-10-22 audit (I-1 … I-18).                                                        |
-| [audit/2026-11-04-optimization-completion-audit.md](audit/2026-11-04-optimization-completion-audit.md)   | Optimization and completion audit of every package (2026-11-04), with the implemented fixes.                    |
+| Doc                                                                                                      | What it covers                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| [reports/README.md](reports/README.md)                                                                   | Index of archived independent reviews (mathjs 15.3.0 parity; six-system parity vs NumPy/SciPy/PySR/Mathematica/Mathcad/MATLAB). |
+| [roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md](roadmap/GAP_ANALYSIS_BRIDGES_AND_MATH_FUNCTIONS.md) | Monorepo bridge/function gap analysis.                                                                                          |
+| [roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md](roadmap/GAP_ANALYSIS_WASM_CANDIDATES.md)                       | WASM-candidate gap analysis.                                                                                                    |
+| [roadmap/REMAINING_ACCELERATION_CANDIDATES.md](roadmap/REMAINING_ACCELERATION_CANDIDATES.md)             | Remaining acceleration triage + plan.                                                                                           |
+| [roadmap/ACCELERATION_BENCHMARKS.md](roadmap/ACCELERATION_BENCHMARKS.md)                                 | Acceleration benchmark records.                                                                                                 |
+| [roadmap/BUN_MIGRATION.md](roadmap/BUN_MIGRATION.md)                                                     | Bun package-manager / script-runner migration (Phase 1 landed).                                                                 |
+| [roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md](roadmap/DOMAIN_FUNCTION_GAP_ANALYSIS_2026-06-30.md) | Domain function gap analysis (2026-06-30).                                                                                      |
+| [roadmap/EXPORT_TRIAGE.md](roadmap/EXPORT_TRIAGE.md)                                                     | Export surface triage.                                                                                                          |
+| [roadmap/ORACLE_COVERAGE_MATRIX.md](roadmap/ORACLE_COVERAGE_MATRIX.md)                                   | Oracle coverage matrix.                                                                                                         |
+| [roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md](roadmap/ORACLE_GAP_INVENTORY_2026-07-15.md)                 | Oracle gap inventory (2026-07-15).                                                                                              |
+| [roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md](roadmap/SCIENTIFIC_LIBRARY_ROADMAP_2026-07-02.md)     | Scientific library roadmap (2026-07-02).                                                                                        |
+| [roadmap/GAP_ANALYSIS_2026-11-04.md](roadmap/GAP_ANALYSIS_2026-11-04.md)                                 | 2026-11-04 SciPy/NumPy/SymPy/mathjs/MATLAB gap analysis — all 32 items shipped in `functions@0.72.0` (PR #590).                 |
+| [roadmap/CLONES_REMAINING.md](roadmap/CLONES_REMAINING.md)                                               | Remaining clone pairs after Sprint 2R.                                                                                          |
+| [roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md](roadmap/STATISTICS_GAP_AUDIT_2026-07-06.md)                 | Statistics gap audit (2026-07-06).                                                                                              |
+| [roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md](roadmap/UPSTREAM_FIX_AUDIT_2026-07-05.md)                     | Upstream fix audit (2026-07-05).                                                                                                |
+| [roadmap/TYPED_FUNCTION_IMPROVEMENTS.md](roadmap/TYPED_FUNCTION_IMPROVEMENTS.md)                         | Typed-function improvement backlog.                                                                                             |
+| [roadmap/WORKERPOOL_IMPROVEMENTS.md](roadmap/WORKERPOOL_IMPROVEMENTS.md)                                 | WorkerPool improvement backlog.                                                                                                 |
+| [audit/2026-10-22-codebase-audit.md](audit/2026-10-22-codebase-audit.md)                                 | Whole-codebase audit: duplicates, dead code, reuse map for scalar-search milestones, open issues.                               |
+| [audit/2026-10-22-issues-final.md](audit/2026-10-22-issues-final.md)                                     | Final issue texts for the 2026-10-22 audit (I-1 … I-18).                                                                        |
+| [audit/2026-11-04-optimization-completion-audit.md](audit/2026-11-04-optimization-completion-audit.md)   | Optimization and completion audit of every package (2026-11-04), with the implemented fixes.                                    |
 
 ### Completed / superseded (kept in place — still cross-linked) 🗄️
 
