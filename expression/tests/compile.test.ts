@@ -158,9 +158,18 @@ describe('compile - SymbolNode', () => {
     expect(result).toBe(3);
   });
 
-  it('should resolve an explicit undefined binding over a math constant', () => {
+  it('should throw when a scope key shadows a constant with undefined (native semantics)', () => {
     const node = symbolNode('pi');
-    expect(compile(node, mathScope).evaluate({ pi: undefined })).toBeUndefined();
+    expect(() => compile(node, mathScope).evaluate({ pi: undefined })).toThrow(
+      'Undefined symbol "pi"'
+    );
+  });
+
+  it('should resolve an explicit undefined binding over a math constant when mathjsScopedSymbols is set', () => {
+    const node = symbolNode('pi');
+    expect(
+      compile(node, mathScope, { mathjsScopedSymbols: true }).evaluate({ pi: undefined })
+    ).toBeUndefined();
   });
 
   it('should throw for undefined symbols', () => {

@@ -240,6 +240,8 @@ const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint
 
 type EvaluateRunner = ReturnType<typeof createEvaluate>;
 type ExpressionScope = Parameters<typeof _compileExpression>[1];
+/** Compat instance evaluate sets {@link EvaluateOptions.mathjsScopedSymbols} via this internal option. */
+type EvaluateCallOptions = PhysicsEvaluateOptions & { mathjsScopedSymbols?: boolean };
 
 /**
  * Evaluate with the safe or the unsafe runner of one scope pair. The module-level `evaluate`
@@ -250,11 +252,17 @@ function runEvaluate(
   unsafeRunner: EvaluateRunner,
   exprOrExprs: string | string[],
   scope: Record<string, unknown> | Scope | undefined,
-  options: PhysicsEvaluateOptions | undefined
+  options: EvaluateCallOptions | undefined
 ): unknown {
   const physics = assertPhysicsOptions(options);
   const bound = physics === undefined ? scope : physicsScope(scope, physics);
-  const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
+  const inner =
+    options?.unsafe === true || options?.mathjsScopedSymbols === true
+      ? {
+          ...(options?.unsafe === true ? { unsafe: true as const } : {}),
+          ...(options?.mathjsScopedSymbols === true ? { mathjsScopedSymbols: true as const } : {}),
+        }
+      : undefined;
   const runner = options?.unsafe === true ? unsafeRunner : safeRunner;
   if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
   return runner(exprOrExprs, bound, inner);
@@ -268,14 +276,19 @@ function compileInScope(
   safeScope: ExpressionScope,
   unsafeScope: ExpressionScope,
   expr: string,
-  options: PhysicsEvaluateOptions | undefined,
+  options: EvaluateCallOptions | undefined,
   parseExpression: typeof parse = parse
 ) {
   const compiled = _compileExpression(
     parseExpression,
     options?.unsafe === true ? unsafeScope : safeScope,
     expr,
-    options?.unsafe === true ? { unsafe: true } : undefined
+    options?.unsafe === true || options?.mathjsScopedSymbols === true
+      ? {
+          ...(options?.unsafe === true ? { unsafe: true as const } : {}),
+          ...(options?.mathjsScopedSymbols === true ? { mathjsScopedSymbols: true as const } : {}),
+        }
+      : undefined
   );
   const physics = assertPhysicsOptions(options);
   if (physics === undefined) return compiled;
@@ -715,16 +728,35 @@ export function createInstanceEvaluator(
   const safeEvaluate = createEvaluate(scopedParse, safeScope, configFingerprint);
   const unsafeEvaluate = createEvaluate(scopedParse, unsafeScope, configFingerprint);
 
+  function withMathjsScopeOptions(
+    options?: PhysicsEvaluateOptions
+  ): EvaluateCallOptions | undefined {
+    if (!mathjsSyntax) return options;
+    return options ? { ...options, mathjsScopedSymbols: true } : { mathjsScopedSymbols: true };
+  }
+
   function evaluateBound(
     exprOrExprs: string | string[],
     scope?: Record<string, unknown> | Scope,
     options?: PhysicsEvaluateOptions
   ): unknown | unknown[] {
-    return runEvaluate(safeEvaluate, unsafeEvaluate, exprOrExprs, scope, options);
+    return runEvaluate(
+      safeEvaluate,
+      unsafeEvaluate,
+      exprOrExprs,
+      scope,
+      withMathjsScopeOptions(options)
+    );
   }
 
   function compileBound(expr: string, options?: PhysicsEvaluateOptions) {
-    return compileInScope(safeScope, unsafeScope, expr, options, scopedParse);
+    return compileInScope(
+      safeScope,
+      unsafeScope,
+      expr,
+      withMathjsScopeOptions(options),
+      scopedParse
+    );
   }
 
   return {
