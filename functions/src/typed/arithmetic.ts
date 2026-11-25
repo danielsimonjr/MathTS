@@ -109,7 +109,12 @@ import { modWithFloor } from '../arithmetic/mod-with-floor.js';
 import { pNormSumInRange } from '../utils/bignumber-hypot.js';
 import { divideInverse } from './divide-inverse.js';
 import { assertInnerDimensions, sparseProduct } from './sparse-product.js';
-import { collectionBinaryRows, unitsEqual } from './collection-binary.js';
+import {
+  collectionBinaryRows,
+  unitSiValue,
+  unitValuesCompare,
+  unitsEqual,
+} from './collection-binary.js';
 import { exactReductions } from './exact-reductions.js';
 import {
   ROUND_DECIMALS_NOT_INTEGER,
@@ -775,6 +780,7 @@ interface UnitLike {
   _exactSI?: unknown;
   equalBase(other: unknown): boolean;
   clone(): UnitLike;
+  toSI(): UnitLike;
   multiply(other: unknown): unknown;
   divide(other: unknown): unknown;
   divideInto(numerator: unknown): unknown;
@@ -793,9 +799,7 @@ function unitCmp(a: Unit, b: Unit): i32 {
   if (!unitSameDimension(a, b)) {
     throw new Error('Cannot compare units with different dimensions');
   }
-  const va = asUnit(a).value as number;
-  const vb = asUnit(b).value as number;
-  return va > vb ? 1 : va < vb ? -1 : 0;
+  return unitValuesCompare(unitSiValue(a), unitSiValue(b));
 }
 
 /**
