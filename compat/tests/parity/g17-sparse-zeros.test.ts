@@ -95,10 +95,10 @@ describe('sparse structural zeros of BigNumber, Fraction and Unit (#1582)', () =
     it(label, () => {
       const oracle = create(all, {});
       const compat = createCompat(compatAll, {});
-      const both = [oracle, compat] as const;
+      const both: Instance[] = [oracle as unknown as Instance, compat as unknown as Instance];
       const outcomes = both.map((L) => {
         try {
-          return { value: show(L as never, run(L as never)) };
+          return { value: show(L, run(L)) };
         } catch (e) {
           return {
             error: (e as Error).name,

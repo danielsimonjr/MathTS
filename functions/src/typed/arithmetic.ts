@@ -486,7 +486,7 @@ function getFactoryCscAdd(): (a: unknown, b: unknown) => unknown {
     matrix: factoryScope.matrix,
     addScalar: factoryScope.addScalar,
     DenseMatrix: factoryScope.DenseMatrix,
-  } as never) as (a: unknown, b: unknown) => unknown;
+  } as Parameters<typeof createSelectedAdd>[0]) as (a: unknown, b: unknown) => unknown;
   return factoryCscAdd;
 }
 
@@ -496,7 +496,7 @@ function getFactoryCscSubtract(): (a: unknown, b: unknown) => unknown {
     matrix: factoryScope.matrix,
     subtractScalar: factoryScope.subtractScalar,
     DenseMatrix: factoryScope.DenseMatrix,
-  } as never) as (a: unknown, b: unknown) => unknown;
+  } as Parameters<typeof createMathjsSubtract>[0]) as (a: unknown, b: unknown) => unknown;
   return factoryCscSubtract;
 }
 
@@ -508,7 +508,7 @@ function getFactoryCscMultiply(): (a: unknown, b: unknown) => unknown {
     multiplyScalar: factoryScope.multiplyScalar,
     isZero: factoryScope.isZero,
     dot: factoryScope.dot,
-  } as never) as (a: unknown, b: unknown) => unknown;
+  } as Parameters<typeof createSelectedMultiply>[0]) as (a: unknown, b: unknown) => unknown;
   return factoryCscMultiply;
 }
 
