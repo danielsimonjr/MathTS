@@ -586,14 +586,33 @@ export const fix = withTypedSurface(function (...args: unknown[]): unknown {
 /**
  * mathjs prints whole Fractions as `n/1` in `format` (native MathTS uses `n` only, #1579).
  */
-export function format(value: unknown, options?: unknown): string {
-  if (isFraction(value)) {
-    const opts = options as { fraction?: string } | undefined;
-    if (!opts || opts.fraction !== 'decimal') {
-      return `${value.numerator}/${value.denominator}`;
+function mathjsRatioFraction(value: Fraction): string {
+  return `${value.numerator}/${value.denominator}`;
+}
+
+function formatMathjsTree(value: unknown, options?: unknown): string {
+  const opts = options as { fraction?: string } | undefined;
+  const useRatio = !opts || typeof opts !== 'object' || opts.fraction !== 'decimal';
+  if (isFraction(value) && useRatio) return mathjsRatioFraction(value);
+  if (Array.isArray(value)) {
+    return `[${value.map((entry) => formatMathjsTree(entry, options)).join(', ')}]`;
+  }
+  const storage = (value as { storage?: unknown }).storage;
+  const sparseStorage =
+    isSparseMatrix(value) ||
+    (typeof storage === 'function' && (storage as () => string).call(value) === 'sparse');
+  if (sparseStorage) return _format(value, options);
+  if (isCompatBridgeMatrix(value)) {
+    const matrix = value as { toArray?: () => unknown };
+    if (typeof matrix.toArray === 'function') {
+      return formatMathjsTree(matrix.toArray(), options);
     }
   }
   return _format(value, options);
+}
+
+export function format(value: unknown, options?: unknown): string {
+  return formatMathjsTree(value, options);
 }
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(

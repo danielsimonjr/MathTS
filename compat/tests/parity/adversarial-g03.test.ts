@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { create, all } from 'mathjs';
+import { Fraction, Unit as CoreUnit } from '@danielsimonjr/mathts-core';
+import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import { create as createCompat, all as compatAll } from '../../src/index.js';
 
 /**
@@ -205,5 +207,50 @@ describe('F4: the source-scan guard catches multi-line Fraction signatures', () 
     expect(scanFractionFieldReads(blockBody).length).toBeGreaterThan(0);
     expect(scanFractionFieldReads(arrowBody).length).toBeGreaterThan(0);
     expect(scanFractionFieldReads(bracketRead).length).toBeGreaterThan(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Isolation — patching a compat instance must not mutate native Unit converters
+// ---------------------------------------------------------------------------
+describe('compat Unit converter patch does not mutate native Unit', () => {
+  const third = new Fraction(1n, 3n);
+  const nativeShared = factory_mathjsCompat.constructors.Unit as {
+    typeConverters: { BigNumber: (x: unknown) => unknown };
+  };
+
+  function converterThrows(convert: (x: unknown) => unknown): boolean {
+    try {
+      convert(third);
+      return false;
+    } catch {
+      return true;
+    }
+  }
+
+  it('leaves core Unit.typeConverters.BigNumber identity and throw-on-Fraction unchanged', () => {
+    const before = CoreUnit.typeConverters.BigNumber;
+    const threwBefore = converterThrows(before);
+    createCompat(compatAll);
+    expect(CoreUnit.typeConverters.BigNumber).toBe(before);
+    expect(converterThrows(CoreUnit.typeConverters.BigNumber)).toBe(threwBefore);
+  });
+
+  it('leaves functions factory_mathjsCompat Unit converters unchanged', () => {
+    const before = nativeShared.typeConverters.BigNumber;
+    const convertersBefore = nativeShared.typeConverters;
+    const threwBefore = converterThrows(before);
+    createCompat(compatAll);
+    expect(nativeShared.typeConverters).toBe(convertersBefore);
+    expect(nativeShared.typeConverters.BigNumber).toBe(before);
+    expect(converterThrows(nativeShared.typeConverters.BigNumber)).toBe(threwBefore);
+  });
+
+  it('compat instance converter still matches mathjs after isolation', () => {
+    const run = (l: L) =>
+      l.Unit.typeConverters.BigNumber(
+        l.fraction(1, 3) as unknown as Parameters<typeof l.Unit.typeConverters.BigNumber>[0]
+      );
+    expect(outcome(compat(), run)).toEqual(outcome(oracle, run));
   });
 });

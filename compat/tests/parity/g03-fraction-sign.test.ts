@@ -50,6 +50,18 @@ const CASES: [string, (L: Instance) => unknown][] = [
     '#1551 isInteger([fraction(2), fraction(-7,2)])',
     (L) => L.isInteger([L.fraction(2), L.fraction(-7, 2)]),
   ],
+  ['#1551 fix(fraction(7,2))', (L) => L.fix(L.fraction(7, 2))],
+  ['#1551 fix(fraction(-7,2))', (L) => L.fix(L.fraction(-7, 2))],
+  [
+    '#1551 fix([fraction(-7,2), fraction(7,2)])',
+    (L) => L.fix([L.fraction(-7, 2), L.fraction(7, 2)]),
+  ],
+  [
+    '#1551 fix(matrix of fractions)',
+    (L) => L.fix(L.matrix([[L.fraction(-7, 2), L.fraction(7, 2)]])),
+  ],
+  ['#1551 format(fraction(2)) prints n/1', (L) => L.format(L.fraction(2))],
+  ['#1551 format(fraction(1,3))', (L) => L.format(L.fraction(1, 3))],
 ];
 
 describe('G03 fraction sign predicates (#1551)', () => {
