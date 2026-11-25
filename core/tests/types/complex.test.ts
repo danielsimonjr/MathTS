@@ -345,6 +345,10 @@ describe('Complex', () => {
       const acsc0 = new Complex(0, 0).acsc();
       expect(acsc0.re).toBeCloseTo(Math.PI / 2);
       expect(acsc0.im).toBe(Infinity);
+
+      const asec0 = new Complex(0, 0).asec();
+      expect(asec0.re).toBe(0);
+      expect(asec0.im).toBe(-Infinity);
     });
   });
 
