@@ -25,7 +25,10 @@ type UnitSiLike = {
  * exact for BigNumber and Fraction (no round-trip through `number`).
  */
 export function unitSiValue(u: unknown): unknown {
-  return (u as UnitSiLike).toSI().value;
+  const unit = u as UnitSiLike;
+  // Duck-typed units in tests (and compareUnits) may only expose `.value`.
+  if (typeof unit.toSI === 'function') return unit.toSI().value;
+  return unit.value;
 }
 
 /**
