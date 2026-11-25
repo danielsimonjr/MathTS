@@ -120,6 +120,22 @@ describe('named compatibility function imports', () => {
     expect(matrix.toArray()).toEqual(expected.toArray());
   });
 
+  it('keeps sparse entries in their original columns when swapping with an empty row', () => {
+    const data = [
+      [1, 0, 3],
+      [0, 2, 0],
+      [0, 0, 0],
+    ];
+    for (const [i, j] of [
+      [1, 2],
+      [2, 1],
+    ]) {
+      const matrix = create(all).sparse(data);
+      const expected = oracle.sparse(data);
+      expect(matrix.swapRows(i, j).toArray()).toEqual(expected.swapRows(i, j).toArray());
+    }
+  });
+
   it('matches the upstream results across mathematical categories', () => {
     expect(combinations(12, 3)).toBe(oracle.combinations(12, 3));
     expect(log2(16)).toBe(oracle.log2(16));
