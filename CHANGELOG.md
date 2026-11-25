@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Compat `isValuelessUnit('d')` is instance-local (#1557):** `create(all)` wraps a real per-instance `Unit` constructor (`wrapCompatUnitConstructor`) instead of rewriting `Unit.isValuelessUnit` on the shared core class. Native `Unit` / `evaluate` stay bit-identical after compat loads. G14 PR #1730 owns the `Unit.UNITS` catalog helper.
+
 - **Fraction sign predicates and `fix` (#1551):** `isPositive` / `isNegative` compared `x.s` / `x.n` (fraction.js fields). MathTS `Fraction` stores `numerator` / `denominator`, so every Fraction looked non-positive (`isPositive(fraction(2))` was `false`). They now call `Fraction.isPositive()` / `Fraction.isNegative()`. `fix` of a Fraction used the same `x.s` test; it now uses `isNegative()` so `fix(fraction(-3, 2))` is `-1`.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.

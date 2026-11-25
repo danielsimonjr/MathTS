@@ -27,6 +27,7 @@ import {
   createMathjsExpressionBindings,
   type CompatExpressionApi,
 } from './mathjs-expression-bindings.js';
+import { wrapCompatUnitConstructor, type CompatUnitConstructorLike } from './mathjs-unit.js';
 
 /** Compat instance evaluate options: adds `{ safe: true }` mathjs opt-in (#1549). */
 export type CompatEvaluateOptions = PhysicsEvaluateOptions & { safe?: boolean };
@@ -201,20 +202,11 @@ export function wireMathjsInstanceApi(
     }
   }
 
-  const UnitCtor = instance.Unit as
-    (((...args: never[]) => unknown) & { isValuelessUnit: (name: string) => boolean }) | undefined;
+  const UnitCtor = instance.Unit as CompatUnitConstructorLike | undefined;
   if (typeof UnitCtor === 'function' && typeof UnitCtor.isValuelessUnit === 'function') {
-    const baseIsValuelessUnit = UnitCtor.isValuelessUnit.bind(UnitCtor);
-    // Keep the constructor callable (`new math.Unit(...)`). Replacing it with
-    // Object.create(UnitCtor) made `instance.Unit` a plain object, so unit
-    // symbols (`cm`, `deg`, …) and `new instance.Unit` failed.
-    UnitCtor.isValuelessUnit = (name: string): boolean => {
-      // mathjs 15.3.0: bare `d` is not a valueless unit in expressions (#1557).
-      if (name === 'd') return false;
-      return baseIsValuelessUnit(name);
-    };
-    mathNs.Unit = UnitCtor;
-    expressionLayers.mathWithTransform.Unit = UnitCtor;
+    const mathjsUnit = wrapCompatUnitConstructor(UnitCtor);
+    mathNs.Unit = mathjsUnit;
+    expressionLayers.mathWithTransform.Unit = mathjsUnit;
   }
 
   const importedFactories: ImportableFactories = {};
