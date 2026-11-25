@@ -201,18 +201,20 @@ export function wireMathjsInstanceApi(
     }
   }
 
-  const UnitCtor = instance.Unit as { isValuelessUnit: (name: string) => boolean } | undefined;
-  if (UnitCtor?.isValuelessUnit) {
+  const UnitCtor = instance.Unit as
+    (((...args: never[]) => unknown) & { isValuelessUnit: (name: string) => boolean }) | undefined;
+  if (typeof UnitCtor === 'function' && typeof UnitCtor.isValuelessUnit === 'function') {
     const baseIsValuelessUnit = UnitCtor.isValuelessUnit.bind(UnitCtor);
-    const mathjsUnit = Object.assign(Object.create(UnitCtor) as typeof UnitCtor, UnitCtor, {
-      isValuelessUnit(name: string): boolean {
-        // mathjs 15.3.0: bare `d` is not a valueless unit in expressions (#1557).
-        if (name === 'd') return false;
-        return baseIsValuelessUnit(name);
-      },
-    });
-    mathNs.Unit = mathjsUnit;
-    expressionLayers.mathWithTransform.Unit = mathjsUnit;
+    // Keep the constructor callable (`new math.Unit(...)`). Replacing it with
+    // Object.create(UnitCtor) made `instance.Unit` a plain object, so unit
+    // symbols (`cm`, `deg`, …) and `new instance.Unit` failed.
+    UnitCtor.isValuelessUnit = (name: string): boolean => {
+      // mathjs 15.3.0: bare `d` is not a valueless unit in expressions (#1557).
+      if (name === 'd') return false;
+      return baseIsValuelessUnit(name);
+    };
+    mathNs.Unit = UnitCtor;
+    expressionLayers.mathWithTransform.Unit = UnitCtor;
   }
 
   const importedFactories: ImportableFactories = {};
@@ -309,11 +311,7 @@ export function wireMathjsInstanceApi(
   ): ReturnType<typeof functionsParser> {
     const made = functionsParser(options);
     made.evaluate = (expr: string): unknown =>
-      (instance.evaluate as WiredCompatInstance['evaluate'])(
-        expr,
-        made.scope,
-        policyOptions(options)
-      );
+      (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
     return Object.assign(this, made);
   }
   const ParserClass = Parser as unknown as WiredCompatInstance['Parser'];

@@ -1401,8 +1401,12 @@
     "acsc: mathjs rejects 2 argument(s) on the pool",
     "asec: mathjs rejects 2 argument(s) on the pool"
   ],
-  "1559": ["asech: mathjs rejects 2 argument(s) on the pool"],
-  "1560": ["acsch: mathjs rejects 2 argument(s) on the pool"],
+  "1559": [
+    "asech: mathjs rejects 2 argument(s) on the pool"
+  ],
+  "1560": [
+    "acsch: mathjs rejects 2 argument(s) on the pool"
+  ],
   "1561": [
     "eigs: (Array [[1, 2], [3, 4]], number -0.5)",
     "eigs: (Array [[1, 2], [3, 4]], number -3)",
@@ -1530,7 +1534,9 @@
     "multinomial: (bigint 2, number 3)",
     "multinomial: mathjs rejects 2 argument(s) on the pool"
   ],
-  "1564": ["catalan: mathjs rejects 2 argument(s) on the pool"],
+  "1564": [
+    "catalan: mathjs rejects 2 argument(s) on the pool"
+  ],
   "1565": [
     "divide: (BigNumber 0.5, number -0.5)",
     "divide: (BigNumber 0.5, number -3)",
@@ -1974,7 +1980,9 @@
     "stirlingS2: (BigNumber 2, number 1)",
     "stirlingS2: (BigNumber 2, number 2)"
   ],
-  "1588": ["expm: mathjs rejects 2 argument(s) on the pool"],
+  "1588": [
+    "expm: mathjs rejects 2 argument(s) on the pool"
+  ],
   "unassigned": [
     "abs: mathjs rejects 2 argument(s) on the pool",
     "acos: mathjs rejects 2 argument(s) on the pool",
@@ -4929,6 +4937,7 @@
     "{\"matrix\":\"Array\"} pickRandom([1, 3, 1, 6])",
     "{\"matrix\":\"Array\"} pickRandom([1, 3, 1, 6], 2)",
     "{\"matrix\":\"Array\"} pickRandom([1, 3, 1, 6], 2, [2, 3, 2, 1])",
+    "{\"matrix\":\"Array\"} pickRandom([1, 3, 1, 6], [2, 3, 2, 1])",
     "{\"matrix\":\"Array\"} pickRandom([1, 3, 1, 6], [2, 3, 2, 1], 2)",
     "{\"matrix\":\"Array\"} pinv(4)",
     "{\"matrix\":\"Array\"} pinv([1, 2; 3, 4])",
@@ -4959,6 +4968,7 @@
     "{\"matrix\":\"Array\"} rotate(matrix([1, 0, 0]), unit(\"90deg\"), matrix([0, 0, 1]))",
     "{\"matrix\":\"Array\"} rotate(matrix([1, 0]), unit(\"35deg\"))",
     "{\"matrix\":\"Array\"} rotationMatrix(unit(\"45deg\"), [0, 0, 1])",
+    "{\"matrix\":\"Array\"} schur([[1, 0], [-4, 3]])",
     "{\"matrix\":\"Array\"} scope = {a: 3, b: 4}",
     "{\"matrix\":\"Array\"} sec(2)",
     "{\"matrix\":\"Array\"} sech(2)",
@@ -5153,6 +5163,7 @@
     "{\"number\":\"BigNumber\"} lgamma(1/2)",
     "{\"number\":\"BigNumber\"} lgamma(4)",
     "{\"number\":\"BigNumber\"} lgamma(complex(1.1, 2))",
+    "{\"number\":\"BigNumber\"} lyap([[-2, 0], [1, -4]], [[3, 1], [1, 3]])",
     "{\"number\":\"BigNumber\"} mad(10, 20, 30)",
     "{\"number\":\"BigNumber\"} mad([1, 2, 3])",
     "{\"number\":\"BigNumber\"} map([1, 2, 3], square)",
@@ -5218,6 +5229,7 @@
     "{\"number\":\"BigNumber\"} random([2, 3])",
     "{\"number\":\"BigNumber\"} randomInt(10, 20)",
     "{\"number\":\"BigNumber\"} randomInt([2, 3], 10)",
+    "{\"number\":\"BigNumber\"} range(\"4:10\")",
     "{\"number\":\"BigNumber\"} range(0, 12, 2)",
     "{\"number\":\"BigNumber\"} range(1m, 1m, 3m)",
     "{\"number\":\"BigNumber\"} range(3, 7)",
@@ -5225,10 +5237,13 @@
     "{\"number\":\"BigNumber\"} reshape([[1, 2], [3, 4]], [1, 4])",
     "{\"number\":\"BigNumber\"} reshape([[1, 2], [3, 4]], [4])",
     "{\"number\":\"BigNumber\"} rotate([1, 0, 0], unit(\"90deg\"), [0, 0, 1])",
+    "{\"number\":\"BigNumber\"} rotate([1, 0], pi / 2)",
     "{\"number\":\"BigNumber\"} rotate(matrix([1, 0, 0]), unit(\"90deg\"), matrix([0, 0, 1]))",
     "{\"number\":\"BigNumber\"} rotate(matrix([1, 0]), unit(\"35deg\"))",
     "{\"number\":\"BigNumber\"} rotationMatrix(1, matrix([0, 0, 1]), \"sparse\")",
+    "{\"number\":\"BigNumber\"} rotationMatrix(pi / 2)",
     "{\"number\":\"BigNumber\"} rotationMatrix(unit(\"45deg\"), [0, 0, 1])",
+    "{\"number\":\"BigNumber\"} schur([[1, 0], [-4, 3]])",
     "{\"number\":\"BigNumber\"} scope = {a: 3, b: 4}",
     "{\"number\":\"BigNumber\"} sec(2)",
     "{\"number\":\"BigNumber\"} sech(2)",
@@ -5261,6 +5276,7 @@
     "{\"number\":\"BigNumber\"} sum(2, 3, 4, 1)",
     "{\"number\":\"BigNumber\"} sum([2, 3, 4, 1])",
     "{\"number\":\"BigNumber\"} sum([2, 5; 4, 3])",
+    "{\"number\":\"BigNumber\"} sylvester([[-1, -2], [1, 1]], [[-2, 1], [-1, 2]], [[-3, 2], [3, 0]])",
     "{\"number\":\"BigNumber\"} symbolicEqual(\"x*y\",\"y*x\")",
     "{\"number\":\"BigNumber\"} tan(0.5)",
     "{\"number\":\"BigNumber\"} tan(45 deg)",
@@ -5487,6 +5503,7 @@
     "{} rotate(matrix([1, 0, 0]), unit(\"90deg\"), matrix([0, 0, 1]))",
     "{} rotate(matrix([1, 0]), unit(\"35deg\"))",
     "{} rotationMatrix(unit(\"45deg\"), [0, 0, 1])",
+    "{} schur([[1, 0], [-4, 3]])",
     "{} scope = {a: 3, b: 4}",
     "{} sec(2)",
     "{} sech(2)",
