@@ -1,5 +1,7 @@
 ---
+'@danielsimonjr/mathts-core': patch
+'@danielsimonjr/mathts-functions': patch
 '@danielsimonjr/mathts-compat': patch
 ---
 
-Compat layer: `isPositive`, `isNegative`, `isInteger`, and `fix` on Fraction values use the MathTS `Fraction` API; `pow` with Fraction operands matches mathjs 15.3.0 exact roots and `predictable` throws; `Unit.typeConverters.BigNumber` converts Fraction magnitudes; `format` prints whole fractions as `n/1` (#1551).
+Fix Fraction field reads (`isPositive`/`isNegative`/`isInteger`/`fix`, Unit BigNumber converter) to use `numerator`/`denominator`, and exact rational `pow` via `rationalPow` (#1551). Compat still prints whole fractions as `n/1`.

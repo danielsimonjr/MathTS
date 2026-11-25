@@ -36,6 +36,91 @@ export function isFraction(value: unknown): value is Fraction {
 
 const gcd = gcdBigInt;
 
+const PRIME_WHEEL_STEPS = [2n, 4n, 2n, 4n, 6n, 2n, 6n] as const;
+
+/** Prime factorization of a positive integer (`n ≥ 1`). */
+function primeFactorExponents(n: bigint): Map<bigint, bigint> {
+  const factors = new Map<bigint, bigint>();
+  const add = (p: bigint) => factors.set(p, (factors.get(p) ?? 0n) + 1n);
+  let num = n;
+  while (num % 2n === 0n) {
+    add(2n);
+    num /= 2n;
+  }
+  while (num % 3n === 0n) {
+    add(3n);
+    num /= 3n;
+  }
+  while (num % 5n === 0n) {
+    add(5n);
+    num /= 5n;
+  }
+  let p = 7n;
+  let stepIdx = 0;
+  while (p * p <= num) {
+    while (num % p === 0n) {
+      add(p);
+      num /= p;
+    }
+    p += PRIME_WHEEL_STEPS[stepIdx]!;
+    stepIdx = (stepIdx + 1) % PRIME_WHEEL_STEPS.length;
+  }
+  if (num > 1n) add(num);
+  return factors;
+}
+
+/**
+ * Raise each prime power in `value` by `num/den` when every exponent is divisible by `den`.
+ * `num` is non-negative. Returns `null` when the result is not an integer.
+ */
+function integerRationalPower(value: bigint, num: bigint, den: bigint): bigint | null {
+  if (value === 1n) return 1n;
+  if (value === 0n) return 0n;
+  let out = 1n;
+  for (const [prime, count] of primeFactorExponents(value)) {
+    const e = count * num;
+    if (e % den !== 0n) return null;
+    out *= prime ** (e / den);
+  }
+  return out;
+}
+
+/**
+ * Exact `base^exp` as a Fraction when the result is rational (and real).
+ * Returns `null` when the power is irrational or not real (even root of a negative).
+ */
+export function rationalPow(base: Fraction, exp: Fraction): Fraction | null {
+  if (exp.denominator === 1n) {
+    try {
+      return base.pow(exp.numerator);
+    } catch {
+      return null;
+    }
+  }
+  if (base.numerator === 0n) {
+    if (exp.numerator < 0n) return null;
+    return new Fraction(0n, 1n);
+  }
+  const negativeBase = base.numerator < 0n;
+  if (negativeBase && exp.denominator % 2n === 0n) return null;
+
+  const absPn = exp.numerator < 0n ? -exp.numerator : exp.numerator;
+  const absNum = negativeBase ? -base.numerator : base.numerator;
+  const rootedN = integerRationalPower(absNum, absPn, exp.denominator);
+  const rootedD = integerRationalPower(base.denominator, absPn, exp.denominator);
+  if (rootedN === null || rootedD === null) return null;
+
+  let n = rootedN;
+  let d = rootedD;
+  if (exp.numerator < 0n) {
+    const swapped = n;
+    n = d;
+    d = swapped;
+  }
+  if (negativeBase && absPn % 2n === 1n) n = -n;
+  return new Fraction(n, d);
+}
+
 /** Reduce `num/den` to lowest terms with a positive denominator. */
 function reducePair(num: bigint, den: bigint): [bigint, bigint] {
   if (den === 0n) {

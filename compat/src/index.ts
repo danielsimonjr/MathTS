@@ -34,7 +34,6 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
-import { patchCompatUnitTypeConverters } from './patch-unit-converters.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
@@ -500,10 +499,10 @@ export function create(
     divide: shims.divide,
     pow: bindShim(createCompatPow(() => Boolean(currentConfig.predictable))),
     format: shims.format,
-    isPositive: bindShim(shims.isPositive),
-    isNegative: bindShim(shims.isNegative),
-    isInteger: bindShim(shims.isInteger),
-    fix: bindShim(shims.fix),
+    isPositive: mathFunctions.isPositive,
+    isNegative: mathFunctions.isNegative,
+    isInteger: mathFunctions.isInteger,
+    fix: mathFunctions.fix,
     sqrt: shims.sqrt,
     abs: shims.abs,
     exp: shims.exp,
@@ -775,14 +774,6 @@ export function create(
       )
     )
   );
-
-  if (localUnits?.Unit) {
-    patchCompatUnitTypeConverters(localUnits.Unit);
-  }
-  const instanceUnit = (instance as { Unit?: { typeConverters?: Record<string, unknown> } }).Unit;
-  if (instanceUnit && instanceUnit !== localUnits?.Unit && instanceUnit.typeConverters) {
-    patchCompatUnitTypeConverters(instanceUnit as { typeConverters: Record<string, unknown> });
-  }
 
   return instance as unknown as MathInstance;
 }

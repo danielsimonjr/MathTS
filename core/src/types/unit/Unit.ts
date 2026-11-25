@@ -3201,7 +3201,7 @@ const buildUnitClass =
       BigNumber: function (x: Numeric): Numeric {
         const fx = x as FractionValue;
         if (fx?.isFraction) {
-          return new BigNumber(String(fx.n)).div(String(fx.d)).times(String(fx.s));
+          return new BigNumber(String(fx.numerator)).div(String(fx.denominator));
         }
         // `+ ''` stringifies via ToPrimitive exactly as before; the cast is
         // type-only (operand may be number/BigNumber at runtime).
