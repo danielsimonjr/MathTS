@@ -23,7 +23,7 @@ describe('G16 — the version is visible on every path mathjs exposes it', () =>
   // module-level `evaluate` of `@danielsimonjr/mathts-functions`, whose scope has no
   // `version` binding, so the same example renders `Error: Undefined symbol "version"`.
   // The value now matches on the instance and `evaluate`, but the `help` rendering still
-  // diverges, and no `known-gaps.json` label records it (the doc-example sweep evaluates the
+  // diverges, and no `known-gaps/` label records it (the doc-example sweep evaluates the
   // example text directly, never through `Help.toString()`).
   it('help("version") renders the version value, as mathjs does', () => {
     expect(String(compat().help('version'))).toBe(String(oracle.help('version')));
