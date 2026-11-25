@@ -17,7 +17,8 @@
  */
 
 import { collectionBinaryRows } from './collection-binary.js';
-import { mathTyped, Complex, BigNumber } from '@danielsimonjr/mathts-core';
+import { mathTyped, Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
+import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { mapEachLeaf } from './f64-kernels.js';
 
 // =============================================================================
@@ -209,6 +210,14 @@ export const nullish = mathTyped('nullish', {
   'bigint, any': (a: bigint, _b: unknown): bigint => a,
   'BigNumber, any': (a: BigNumber, _b: unknown): BigNumber => a,
   'Complex, any': (a: Complex, _b: unknown): Complex => a,
+
+  // Fraction must be returned as a Fraction: without a concrete signature the
+  // typed-function conversion table converts Fraction to Complex before 'any, any'
+  // (#1555). nullish never converts its non-nullish first argument.
+  'Fraction, any': (a: Fraction, _b: unknown): Fraction => a,
+
+  // Same for Unit: a non-nullish Unit is returned unchanged.
+  'Unit, any': (a: Unit, _b: unknown): Unit => a,
 
   // Explicit boolean: return a as-is (false is NOT nullish)
   // Must be declared before 'any,any' to prevent boolean→number conversion
