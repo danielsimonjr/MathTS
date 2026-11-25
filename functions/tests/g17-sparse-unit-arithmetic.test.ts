@@ -10,7 +10,7 @@ describe('#1582 Unit CSC sparse add/multiply', () => {
   it('add of two sparse Unit matrices does not pair Unit with numeric implicit zeros', () => {
     const a = sparse([[unit('1 cm'), unit('0 cm')]]);
     const b = sparse([[unit('0 cm'), unit('1 cm')]]);
-    const s = add(a, b) as { density(): number; storage(): string };
+    const s = add(a, b) as unknown as { density(): number; storage(): string };
     expect(s.storage()).toBe('sparse');
     expect(s.density()).toBe(1);
   });
