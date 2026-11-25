@@ -7,6 +7,7 @@ import {
   cbrt,
   combinations,
   compareNatural,
+  compareNaturalDependencies,
   compareText,
   conj,
   create,
@@ -28,9 +29,94 @@ import {
   round,
   toBest,
   toBestDependencies,
+  typeOf,
+  typeOfDependencies,
 } from '../src/index.js';
 
 describe('named compatibility function imports', () => {
+  it('reports the MathJS matrix type names across compatibility entry points', () => {
+    const math = create(all);
+    const selected = create({ typeOfDependencies });
+    for (const storage of ['dense', 'sparse'] as const) {
+      const matrix = math.matrix(
+        [
+          [1, 0],
+          [0, 2],
+        ],
+        storage
+      );
+      const expected = oracle.typeOf(
+        oracle.matrix(
+          [
+            [1, 0],
+            [0, 2],
+          ],
+          storage
+        )
+      );
+      expect(typeOf(matrix)).toBe(expected);
+      expect(math.typeOf(matrix)).toBe(expected);
+      expect(selected.typeOf(matrix)).toBe(expected);
+      expect(math.evaluate('typeOf(x)', { x: matrix })).toBe(expected);
+    }
+    expect(math.evaluate('typeOf(1:3)')).toBe(oracle.evaluate('typeOf(1:3)'));
+  });
+
+  it('naturally orders matrix values and uses storage type to break ties', () => {
+    const math = create(all);
+    const selected = create({ compareNaturalDependencies });
+    const dense = math.matrix(
+      [
+        [1, 0],
+        [0, 2],
+      ],
+      'dense'
+    );
+    const sparse = math.matrix(
+      [
+        [1, 0],
+        [0, 2],
+      ],
+      'sparse'
+    );
+    const referenceDense = oracle.matrix(
+      [
+        [1, 0],
+        [0, 2],
+      ],
+      'dense'
+    );
+    const referenceSparse = oracle.matrix(
+      [
+        [1, 0],
+        [0, 2],
+      ],
+      'sparse'
+    );
+    const array = [
+      [1, 0],
+      [0, 2],
+    ];
+    const larger = [
+      [1, 0],
+      [0, 3],
+    ];
+
+    expect(compareNatural(dense, array)).toBe(oracle.compareNatural(referenceDense, array));
+    expect(compareNatural([dense], [larger])).toBe(
+      oracle.compareNatural([referenceDense], [larger])
+    );
+    expect(math.compareNatural(sparse, larger)).toBe(
+      oracle.compareNatural(referenceSparse, larger)
+    );
+    expect(selected.compareNatural(dense, sparse)).toBe(
+      oracle.compareNatural(referenceDense, referenceSparse)
+    );
+    expect(math.evaluate('compareNatural(x, y)', { x: dense, y: sparse })).toBe(
+      oracle.compareNatural(referenceDense, referenceSparse)
+    );
+  });
+
   it('matches the upstream results across mathematical categories', () => {
     expect(combinations(12, 3)).toBe(oracle.combinations(12, 3));
     expect(log2(16)).toBe(oracle.log2(16));
