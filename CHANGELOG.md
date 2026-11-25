@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Unit equality and ordering on the compat instance (#1552):** `equal`, `unequal`, `equalScalar`, `deepEqual`, `compare`, `larger`, `smaller`, `largerEq`, and `smallerEq` route Unit–Unit pairs through the activated mathjs factories in `compat/src/unit-relational.ts` (for example `50cm == 0.5m` is true under `number: 'BigNumber'`, dimension mismatches throw `Cannot compare units with different base`, and `deepEqual` of two Units follows mathjs). Native critical libraries are unchanged; integral Fractions in `format` use an `n/1` suffix via `compat/src/format-parity.ts` so compare results match the oracle.
+- **Typed Unit relational compares values, not references (#1552):** `functions/src/typed/collection-binary.ts#unitsEqual` used `===` on non-number unit values, so two Units with equal BigNumber values were never equal. It now uses `coreEqual` on the normalized values. `unitCmp` coerced every value to `number`, breaking BigNumber ordering and silently ordering Complex units via `valueOf`; comparison delegates to `unitValuesCompare` (typed `BigNumber`/`Fraction`/`bigint` paths and an explicit throw when either value is Complex).
+
+- **Unit equality and ordering on the compat instance (#1552):** `equal`, `unequal`, `equalScalar`, `deepEqual`, `compare`, `larger`, `smaller`, `largerEq`, and `smallerEq` route Unit–Unit pairs through the activated mathjs factories in `compat/src/unit-relational.ts` (for example `50cm == 0.5m` is true under `number: 'BigNumber'`, dimension mismatches throw `Cannot compare units with different base`, and `deepEqual` of two Units follows mathjs). Integral Fractions in `format` use an `n/1` suffix via `compat/src/format-parity.ts` so compare results match the oracle.
 
 ### Changed
 

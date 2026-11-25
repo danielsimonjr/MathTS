@@ -2,7 +2,16 @@
  * The typed binary functions use the factories' existing collection algorithms for their
  * Array and Matrix signatures. Scalar signatures continue to dispatch directly.
  */
-import { equal as coreEqual } from '@danielsimonjr/mathts-core';
+import {
+  BigNumber,
+  Fraction,
+  equal as coreEqual,
+  isBigNumber,
+  isComplex,
+  isFraction,
+  number as scalarNumber,
+  type NumericScalar,
+} from '@danielsimonjr/mathts-core';
 
 /**
  * True when two Units measure one quantity: one dimension, and values that are equal under the
@@ -17,9 +26,45 @@ export function unitsEqual(a: unknown, b: unknown): boolean {
   const x = a as { equalBase(o: unknown): boolean; value: unknown };
   const y = b as { value: unknown };
   if (!x.equalBase(b)) return false;
-  return typeof x.value === 'number' && typeof y.value === 'number'
-    ? coreEqual(x.value, y.value)
-    : x.value === y.value;
+  return coreEqual(x.value as NumericScalar, y.value as NumericScalar);
+}
+
+const COMPLEX_ORDER_ERR = 'No ordering relation is defined for complex numbers';
+
+/**
+ * Ordering sign for two Unit values in the same dimension (after `equalBase`).
+ * Throws when either value is Complex — ordering complex scalars is undefined.
+ */
+export function unitValuesCompare(va: unknown, vb: unknown): -1 | 0 | 1 {
+  if (isComplex(va) || isComplex(vb)) {
+    throw new Error(COMPLEX_ORDER_ERR);
+  }
+  if (isFraction(va) && isFraction(vb)) {
+    const c = Fraction.compare(va, vb);
+    return c < 0 ? -1 : c > 0 ? 1 : 0;
+  }
+  if (typeof va === 'bigint' && typeof vb === 'bigint') {
+    return va > vb ? 1 : va < vb ? -1 : 0;
+  }
+  if (isBigNumber(va) && isBigNumber(vb)) {
+    if (va.isNaN() && vb.isNaN()) return 0;
+    if (va.isNaN()) return 1;
+    if (vb.isNaN()) return -1;
+    const c = BigNumber.compare(va, vb);
+    return c < 0 ? -1 : c > 0 ? 1 : 0;
+  }
+  if (typeof va === 'number' && typeof vb === 'number') {
+    if (Number.isNaN(va) && Number.isNaN(vb)) return 0;
+    if (Number.isNaN(va)) return 1;
+    if (Number.isNaN(vb)) return -1;
+    return va > vb ? 1 : va < vb ? -1 : 0;
+  }
+  const nx = scalarNumber(va as NumericScalar);
+  const ny = scalarNumber(vb as NumericScalar);
+  if (Number.isNaN(nx) && Number.isNaN(ny)) return 0;
+  if (Number.isNaN(nx)) return 1;
+  if (Number.isNaN(ny)) return -1;
+  return nx > ny ? 1 : nx < ny ? -1 : 0;
 }
 
 /** A binary operation. */
