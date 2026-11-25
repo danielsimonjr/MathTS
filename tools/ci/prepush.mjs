@@ -17,7 +17,7 @@
  * confusing "in the budget but not built" list.
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -28,12 +28,35 @@ const repoRoot = join(fileURLToPath(import.meta.url), '..', '..', '..');
  * @typedef {{ name: string, args: string[] }} Step
  */
 
+/**
+ * Is a binary on the PATH a child spawn would resolve?
+ * @param {string} bin
+ */
+function binaryAvailable(bin) {
+  return spawnSync(bin, ['--version'], { stdio: 'ignore' }).error === undefined;
+}
+
 /** @type {Step[]} */
 const steps = [
   { name: 'lint (oxlint --deny-warnings)', args: ['bun', 'run', 'lint'] },
   { name: 'format:check (prettier)', args: ['bun', 'run', 'format:check'] },
-  { name: 'code-docs check', args: ['node', 'tools/test/check-code-docs.mjs'] },
 ];
+
+// The code-docs check shells out to the `repo-tools` global binary (see
+// tools/test/code-docs-gate.json). CI installs it in the Architecture docs job; a machine
+// without it gets a skip with the install hint instead of a confusing ENOENT failure. The
+// version in the hint is read from the pin in ci.yml, so there is one source of truth.
+if (binaryAvailable('repo-tools')) {
+  steps.push({ name: 'code-docs check', args: ['node', 'tools/test/check-code-docs.mjs'] });
+} else {
+  const pin = readFileSync(join(repoRoot, '.github/workflows/ci.yml'), 'utf8').match(
+    /^\s*REPO_TOOLS_VERSION: (\S+)/m
+  )?.[1];
+  console.log(
+    'prepush: skipping the code-docs check — the `repo-tools` global binary is not installed.\n' +
+      `  CI runs it (Architecture docs job); to run it locally: npm install --global @danielsimonjr/repo-tools@${pin ?? '<version pinned in .github/workflows/ci.yml>'}`
+  );
+}
 
 const distMarker = join(repoRoot, 'core', 'dist', 'index.js');
 if (!existsSync(distMarker)) {
