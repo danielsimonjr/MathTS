@@ -6,6 +6,9 @@ import { isFraction, type Fraction } from '@danielsimonjr/mathts-core';
 
 type FormatFn = (value: unknown, options?: Record<string, unknown>) => string | string[];
 
+/**
+ * Wrap a `format` implementation so integral {@link Fraction}s render as `n/1` (mathjs 15.3.0).
+ */
 export function wrapFractionFormatParity(native: FormatFn): FormatFn {
   return (value: unknown, options?: Record<string, unknown>) => {
     const out = native(value, options);

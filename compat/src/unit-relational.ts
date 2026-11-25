@@ -47,6 +47,7 @@ function assertValueTypesComparable(ux: UnitLike, uy: UnitLike): void {
   }
 }
 
+/** Relational helpers on a compat instance before {@link applyUnitRelationalParity} runs. */
 export type UnitRelationalOps = {
   equal: (...args: unknown[]) => unknown;
   unequal: (...args: unknown[]) => unknown;
