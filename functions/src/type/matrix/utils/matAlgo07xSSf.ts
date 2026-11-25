@@ -142,8 +142,8 @@ export const createMatAlgo07xSSf = /* #__PURE__ */ factory(
 
           // invoke callback
           const cij: MatrixValue = cf(va, vb);
-          // Store all non-zero and true values (typed zeros use isZero, not `!== 0`)
-          if (!isZ(cij)) {
+          // Store non-zero and true values (typed zeros use isZero, not `!== 0`)
+          if (cij !== false && !isZ(cij)) {
             cindex.push(i); // row index
             cvalues.push(cij); // computed value
             nonZeroCount++;
