@@ -4,13 +4,25 @@
  * (the typecheck script) enforces this file.
  */
 import { describe, it, expect, expectTypeOf } from 'vitest';
-import { create, all, type MathInstance } from '../src/index.js';
+import type { UnitInstance } from '@danielsimonjr/mathts-core';
+import { create, all, sqrt, unit, unitDependencies, type MathInstance } from '../src/index.js';
 
 describe('MathInstance type (#737)', () => {
   it('add(1, 2) is a number', () => {
     const math = create(all);
     const n: number = math.add(1, 2);
     expect(n).toBe(3);
+  });
+
+  it('infers scalar units through named, instance, and selected calls', () => {
+    const math = create(all);
+    const selected = create({ unitDependencies });
+    const distance: UnitInstance = sqrt(unit('9 cm^2'));
+    const converted: UnitInstance = math.unit(3, unit('cm'));
+    const selectedUnit: UnitInstance = selected.unit('3 cm');
+    expect(distance.formatUnits()).toBe('cm');
+    expect(converted.equals(distance)).toBe(true);
+    expect(selectedUnit.equals(distance)).toBe(true);
   });
 
   it('has no string index signature', () => {

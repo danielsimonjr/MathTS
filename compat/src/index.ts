@@ -26,7 +26,12 @@ import { createPrototypeLevels, definePrototypeAccessor } from './instance-layou
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { createChain, type Chain } from './chain.js';
 import { compatConstantReaders, type CompatConstantName } from './instance-constants.js';
-import type { BigNumber as ConfiguredBigNumber } from '@danielsimonjr/mathts-core';
+import type {
+  BigNumber as ConfiguredBigNumber,
+  Complex,
+  Fraction,
+  UnitInstance,
+} from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
@@ -138,7 +143,7 @@ interface MathInstanceOverrides {
   replacer: (key: string, value: unknown) => unknown;
   subset: (...args: unknown[]) => unknown;
   index: (...args: unknown[]) => unknown;
-  unit: (...args: unknown[]) => unknown;
+  unit: typeof namedUnit;
 
   // Type creation
   complex: typeof shims.complex;
@@ -1021,7 +1026,6 @@ export {
   unaryMinus,
   unaryPlus,
   unequal,
-  unit,
   usolve,
   usolveAll,
   xgcd,
@@ -1029,6 +1033,15 @@ export {
   zeta,
   zpk2tf,
 } from '@danielsimonjr/mathts-functions';
+
+type UnitMagnitude = number | ConfiguredBigNumber | Fraction;
+
+/** Construct or clone a unit using the MathJS scalar signatures. */
+const namedUnit = mathFunctions.unit as {
+  (value: string | UnitMagnitude | UnitInstance): UnitInstance;
+  (value: UnitMagnitude | Complex, unit: string | UnitInstance): UnitInstance;
+} & typeof mathFunctions.unit;
+export { namedUnit as unit };
 
 // Re-export all shims for direct import
 export * from './shims.js';

@@ -136,6 +136,19 @@ describe('named compatibility function imports', () => {
     }
   });
 
+  it('matches MathJS fraction negation and exact representations', () => {
+    for (const value of ['0', '3', '-2/3', '7/3', '-7/3', '355/113']) {
+      const actual = fraction(value);
+      const expected = oracle.fraction(value);
+      expect(actual.neg().toFraction()).toBe(expected.neg().toFraction());
+      expect(actual.toFraction()).toBe(expected.toFraction());
+      expect(actual.toFraction(true)).toBe(expected.toFraction(true));
+      expect(actual.toLatex()).toBe(expected.toLatex());
+      expect(actual.toLatex(true)).toBe(expected.toLatex(true));
+      expect(actual.toContinued()).toEqual(expected.toContinued());
+    }
+  });
+
   it('matches the upstream results across mathematical categories', () => {
     expect(combinations(12, 3)).toBe(oracle.combinations(12, 3));
     expect(log2(16)).toBe(oracle.log2(16));

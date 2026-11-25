@@ -406,12 +406,38 @@ export class Fraction implements IFraction {
     return sign + intPart.toString() + '.' + decPart;
   }
 
+  /** Format the exact ratio, optionally as a mixed number. */
+  toFraction(showMixed = false): string {
+    if (this.denominator === 1n) return this.numerator.toString();
+    if (showMixed) {
+      const { whole, numerator } = this.toMixed();
+      if (whole !== 0n) return `${whole} ${numerator}/${this.denominator}`;
+    }
+    return `${this.numerator}/${this.denominator}`;
+  }
+
+  /** Continued-fraction coefficients of the absolute value. */
+  toContinued(): bigint[] {
+    let numerator = this.numerator < 0n ? -this.numerator : this.numerator;
+    let denominator = this.denominator;
+    const coefficients: bigint[] = [];
+    while (denominator !== 0n) {
+      coefficients.push(numerator / denominator);
+      [numerator, denominator] = [denominator, numerator % denominator];
+    }
+    return coefficients;
+  }
+
   /**
    * Convert to LaTeX string
    */
-  toLatex(): string {
+  toLatex(showMixed = false): string {
     if (this.denominator === 1n) {
       return this.numerator.toString();
+    }
+    if (showMixed) {
+      const { whole, numerator } = this.toMixed();
+      if (whole !== 0n) return `${whole}\\frac{${numerator}}{${this.denominator}}`;
     }
     const sign = this.numerator < 0n ? '-' : '';
     const absNum = this.numerator < 0n ? -this.numerator : this.numerator;
@@ -528,6 +554,10 @@ export class Fraction implements IFraction {
    */
   negate(): Fraction {
     return Fraction.fromReduced(-this.numerator, this.denominator);
+  }
+
+  neg(): Fraction {
+    return this.negate();
   }
 
   /**
@@ -775,17 +805,7 @@ export class Fraction implements IFraction {
    * Get continued fraction representation
    */
   toContinuedFraction(): bigint[] {
-    const result: bigint[] = [];
-    let num = this.numerator < 0n ? -this.numerator : this.numerator;
-    let den = this.denominator;
-
-    while (den !== 0n) {
-      result.push(num / den);
-      const temp = num % den;
-      num = den;
-      den = temp;
-    }
-
+    const result = this.toContinued();
     if (this.numerator < 0n && result.length > 0) {
       result[0] = -result[0];
     }
