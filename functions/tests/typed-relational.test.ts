@@ -347,6 +347,13 @@ describe('compareUnits', () => {
     expect(compareUnits(a, b)).toBe(0);
   });
 
+  it('duck-typed units without toSI still compare .value', () => {
+    const a = makeUnit(5, 'length');
+    const b = makeUnit(4, 'length');
+    expect('toSI' in a).toBe(false);
+    expect(compareUnits(a, b)).toBe(1);
+  });
+
   it('different bases throws', () => {
     const a = makeUnit(5, 'length');
     const b = makeUnit(5, 'mass');
