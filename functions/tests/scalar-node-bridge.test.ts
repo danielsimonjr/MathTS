@@ -555,6 +555,13 @@ describe('scalar-node-bridge simplifyScalar', () => {
     expect(() => simplifyScalar(scalar.call('log', scalar.number(-1)))).toThrow(/scalar bridge:/);
   });
 
+  it('keeps an exact odd root of a negative in the real scalar subset', () => {
+    const third = scalar.op('/', [scalar.number(1), scalar.number(3)]);
+    const tree = scalar.op('^', [scalar.number(-8), third]);
+    expect(() => simplifyScalar(tree)).not.toThrow();
+    expect(evaluateScalar(simplifyScalar(tree), {})).toBe(-2);
+  });
+
   it('identities x^-1, 1*x, x+0, x/x', () => {
     expect(simplifyScalar(scalar.op('^', [a, scalar.number(-1)]))).toMatchObject({
       kind: 'op',
