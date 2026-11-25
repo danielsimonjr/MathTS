@@ -3046,8 +3046,10 @@ const createSelectedMultinomial = /* #__PURE__ */ factory(
     }
 
     return typed('multinomial', {
-      '...number | BigNumber | bigint | Fraction': (values: unknown[]) => multinomialOf(values),
+      // 'Array | Matrix' first: an array argument is the count list, not the first of
+      // several scalar arguments (mathjs 15.3.0 #3790, #1563).
       'Array | Matrix': (a: unknown) => multinomialOf(a),
+      '...number | BigNumber | bigint | Fraction': (values: unknown[]) => multinomialOf(values),
     });
   }
 );

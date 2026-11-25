@@ -163,8 +163,8 @@ describe('multinomial', () => {
     expect(multinomial([2, 3, 1])).toBe(60);
   });
 
-  it('throws TypeError for zero element', () => {
-    expect(() => multinomial([0, 1])).toThrow(TypeError);
+  it('accepts a zero element (mathjs 15.3.0 #3790, #1563)', () => {
+    expect(multinomial([0, 1])).toBe(1);
   });
 
   it('throws TypeError for non-integer element', () => {

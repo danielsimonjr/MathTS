@@ -397,7 +397,9 @@ function collectMultinomialParts(value: unknown, parts: (number | BigNumber)[]):
     ? entry.isInteger() && entry.greaterThanOrEqual(0)
     : typeof entry === 'number' && Number.isInteger(entry) && entry >= 0;
   if (!valid) {
-    throw new TypeError('Positive integer value expected in function multinomial');
+    throw new TypeError(
+      'Nonnegative integer value expected in function multinomial, but got ' + String(entry)
+    );
   }
   parts.push(entry as number | BigNumber);
 }

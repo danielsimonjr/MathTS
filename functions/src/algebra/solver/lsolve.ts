@@ -72,7 +72,15 @@ const dependencies = [
 export const createLsolve = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, divideScalar, multiplyScalar, subtractScalar, DenseMatrix }: Dependencies) => {
+  ({
+    typed,
+    matrix,
+    divideScalar,
+    multiplyScalar,
+    subtractScalar,
+    DenseMatrix,
+    isZero,
+  }: Dependencies) => {
     const solveValidation = createSolveValidation({
       DenseMatrix,
     } as unknown as Parameters<
@@ -180,10 +188,10 @@ export const createLsolve = /* #__PURE__ */ factory(
         if (bj !== 0) {
           const vjj = mdata[j][j];
           if (vjj === 0) {
-            // Only an exactly zero diagonal entry is singular (#1169): the tolerance of `equalScalar`
+            // Only an exactly zero diagonal entry is singular (#1169): the tolerance of `isZero`
             // is absolute. A zero diagonal entry is a degenerate row for a right side that is zero within
             // the tolerance (a rounding residue). Any other right side has no solution.
-            if (!bj) {
+            if (!isZero(bj)) {
               throw new Error('Linear system cannot be solved since matrix is singular');
             }
             x[j] = [0];
@@ -252,7 +260,7 @@ export const createLsolve = /* #__PURE__ */ factory(
           const vjj = mdata[j][j];
 
           if (isZeroEntry(vjj)) {
-            if (bj === 0) {
+            if (typeof bj === 'number' && isZero(bj)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];
               continue;
@@ -331,7 +339,7 @@ export const createLsolve = /* #__PURE__ */ factory(
 
           // at this point we must have a value in vjj
           if (isZeroEntry(vjj)) {
-            if (bj === 0) {
+            if (typeof bj === 'number' && isZero(bj)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];
               continue;

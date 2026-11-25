@@ -672,39 +672,42 @@ describe('#1093 multinomial', () => {
 
   it('#1093 multinomial of booleans (mathjs: true is 1, false is 0)', () => {
     expect(fn('multinomial')([true, true])).toBe(2);
-    expect(() => fn('multinomial')([false, true])).toThrow(
-      'Positive integer value expected in function multinomial'
-    );
+    // mathjs 15.3.0 (#3790, #1563) reads a boolean as its 0/1 number, so a false entry is
+    // a valid zero count.
+    expect(fn('multinomial')([false, true])).toBe(1);
     expect(str(fn('multinomial')([true, bn(2)]))).toBe('3');
   });
 
   it('#1093 multinomial of numbers is unchanged', () => {
     expect(fn('multinomial')([2, 1, 1])).toBe(12);
     expect(fn('multinomial')([1, 2, 3])).toBe(60);
-    expect(
+    // mathjs 15.3.0 (#3790, #1563) rejects a multidimensional input.
+    expect(() =>
       fn('multinomial')([
         [1, 2],
         [3, 4],
       ])
-    ).toBe(12600);
+    ).toThrow(RangeError);
     expect(fn('multinomial')(f.matrix([1, 2, 1]))).toBe(12);
     expect(fn('multinomial')([1000, 1000])).toBe(Infinity);
   });
 
-  it('#1093 multinomial of a hole, a non-integer or a string throws the positive-integer error', () => {
-    const msg = 'Positive integer value expected in function multinomial';
+  it('#1093 multinomial of a hole, a non-integer or a string throws the nonnegative-integer error', () => {
+    // mathjs 15.3.0 (#3790, #1563) reworded the entry error and reports the value.
+    const msg = 'Nonnegative integer value expected in function multinomial';
     // eslint-disable-next-line no-sparse-arrays -- a hole is the tested input
     expect(() => fn('multinomial')([1, , 2])).toThrow(msg);
     expect(() => fn('multinomial')([1, 2.5])).toThrow(msg);
-    expect(() => fn('multinomial')([0, 1])).toThrow(msg);
+    // A zero entry is a valid empty group since mathjs 15.3.0 (#3790, #1563).
+    expect(fn('multinomial')([0, 1])).toBe(1);
     expect(() => fn('multinomial')([bn(2.5), bn(1)])).toThrow(msg);
-    expect(() => fn('multinomial')([bn(0), bn(1)])).toThrow(msg);
+    expect(str(fn('multinomial')([bn(0), bn(1)]))).toBe('1');
     expect(() =>
       fn('multinomial')([
         [1, 2],
         [3, -1],
       ])
-    ).toThrow(msg);
+    ).toThrow(RangeError);
   });
 });
 
