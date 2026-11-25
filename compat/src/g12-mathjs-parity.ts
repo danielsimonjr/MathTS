@@ -3,6 +3,7 @@
  * without changing the critical typed libraries (#G12 adversarial F1–F3).
  */
 
+import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 import { isMatrix } from '@danielsimonjr/mathts-matrix';
 
 function vectorLength(value: unknown): number | undefined {
@@ -48,7 +49,7 @@ export function mapDivideBroadcastError(err: unknown, b: unknown): never {
   if (!err.message.includes('Vectors must have')) throw err;
   const len = vectorLength(b);
   const size = len !== undefined ? len : 3;
-  throw new RangeError(`Matrix must be square (size: [${size}])`);
+  throw notSquareError(`Matrix must be square (size: [${size}])`);
 }
 
 /**
