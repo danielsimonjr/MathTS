@@ -36,9 +36,9 @@ describe('rationalPow (#1551)', () => {
 
   it('handles zero and negative exponents', () => {
     expect(rationalPow(new Fraction(0n), new Fraction(0n))?.equals(new Fraction(1n))).toBe(true);
-    expect(
-      rationalPow(new Fraction(0n), new Fraction(1n, 3n))?.equals(new Fraction(0n))
-    ).toBe(true);
+    expect(rationalPow(new Fraction(0n), new Fraction(1n, 3n))?.equals(new Fraction(0n))).toBe(
+      true
+    );
     expect(rationalPow(new Fraction(0n), new Fraction(-1n, 3n))).toBeNull();
     expect(rationalPow(new Fraction(0n), new Fraction(-1n))).toBeNull();
     expect(
