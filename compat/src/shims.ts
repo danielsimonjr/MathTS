@@ -83,7 +83,6 @@ import {
   size as _size,
   factory_mathjsCompat,
   complex as _complex,
-  format as _format,
   config,
   isPositive as _isPositive,
   isNegative as _isNegative,
@@ -518,41 +517,6 @@ export const isNegative = _isNegative as unknown as TypedFunction;
 export const isInteger = _isInteger as unknown as TypedFunction;
 export const fix = _fix as unknown as TypedFunction;
 
-/**
- * mathjs prints whole Fractions as `n/1` in `format` (native MathTS uses `n` only, #1579).
- */
-function mathjsRatioFraction(value: Fraction): string {
-  return `${value.numerator}/${value.denominator}`;
-}
-
-function formatMathjsTree(value: unknown, options?: unknown): string {
-  const opts = options as { fraction?: string } | undefined;
-  const useRatio = !opts || typeof opts !== 'object' || opts.fraction !== 'decimal';
-  if (isFraction(value) && useRatio) return mathjsRatioFraction(value);
-  if (Array.isArray(value)) {
-    return `[${value.map((entry) => formatMathjsTree(entry, options)).join(', ')}]`;
-  }
-  if (value == null || (typeof value !== 'object' && typeof value !== 'function')) {
-    return _format(value, options);
-  }
-  const storage = (value as { storage?: unknown }).storage;
-  const sparseStorage =
-    isSparseMatrix(value) ||
-    (typeof storage === 'function' && (storage as () => string).call(value) === 'sparse');
-  if (sparseStorage) return _format(value, options);
-  if (isCompatBridgeMatrix(value)) {
-    const matrix = value as { toArray?: () => unknown };
-    if (typeof matrix.toArray === 'function') {
-      return formatMathjsTree(matrix.toArray(), options);
-    }
-  }
-  return _format(value, options);
-}
-
-/** mathjs-compatible `format`: whole Fractions print as `n/1`. */
-export function format(value: unknown, options?: unknown): string {
-  return formatMathjsTree(value, options);
-}
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
   factory_mathjsCompat.sqrt as (...args: unknown[]) => unknown,
@@ -846,7 +810,6 @@ const _shims = {
   multiply,
   divide,
   pow,
-  format,
   isPositive,
   isNegative,
   isInteger,

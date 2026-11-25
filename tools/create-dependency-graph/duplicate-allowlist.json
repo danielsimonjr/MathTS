@@ -369,13 +369,8 @@
     },
     {
       "names": ["format"],
-      "filesGlob": [
-        "core/src/number.ts",
-        "core/src/bignumber-formatter.ts",
-        "core/src/string.ts",
-        "compat/src/shims.ts"
-      ],
-      "reason": "type-specific formatters within core, not copies: core/src/number.ts formats a number, core/src/bignumber-formatter.ts formats a BigNumber (arbitrary precision), core/src/string.ts is the generic value dispatcher over them. Different input types; functions/src/typed/string.ts is the auto-tagged DISPATCH_VARIANT over the same. compat/src/shims.ts's format is the mathjs-compat surface (prints whole Fractions as n/1, #1551/#1579); pinned in compat/tests/parity. 2026-07 dedup campaign, closing tail slice."
+      "filesGlob": ["core/src/number.ts", "core/src/bignumber-formatter.ts", "core/src/string.ts"],
+      "reason": "type-specific formatters within core, not copies: core/src/number.ts formats a number, core/src/bignumber-formatter.ts formats a BigNumber (arbitrary precision), core/src/string.ts is the generic value dispatcher over them. Different input types; functions/src/typed/string.ts is the auto-tagged DISPATCH_VARIANT over the same. 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["toEngineering", "toExponential", "toFixed"],
