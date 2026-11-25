@@ -25,10 +25,7 @@ const LICENSE_LIKE = new Set([
   'TRADEMARK',
 ]);
 
-/**
- * @param {string} filePath
- * @returns {boolean}
- */
+/** Return whether a changed path counts as documentation-only for CI skipping. */
 export function isDocsOnlyPath(filePath) {
   const path = filePath.replace(/\\/g, '/').trim();
   if (!path) return true;
@@ -41,10 +38,7 @@ export function isDocsOnlyPath(filePath) {
   return false;
 }
 
-/**
- * @param {string[]} paths
- * @returns {boolean}
- */
+/** Return whether every changed path in the pull request is documentation-only. */
 export function isDocsOnlyChange(paths) {
   const files = paths.map((p) => p.trim()).filter(Boolean);
   if (files.length === 0) return false;

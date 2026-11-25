@@ -99,7 +99,7 @@ jobs:
         if: needs.changes.outputs.docs_only == 'true'
         run: |
           echo "Documentation-only changes: skipping build, typecheck, packaging, and consumer checks."
-          echo "Heavy jobs (Test, Coverage, Benchmark baseline, Browser) are skipped."
+          echo "Required jobs still run; heavy steps in Test, Coverage, and Browser no-op."
 
       # `typecheck`, `test` and `test:coverage` read `dist/` of the package they check and of the
       # packages that its tests import or compile. A missing Turbo edge lets the `build` of such a
@@ -390,7 +390,6 @@ jobs:
     name: Benchmark baseline
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.docs_only != 'true'
     timeout-minutes: 45
     permissions:
       contents: read
@@ -403,20 +402,28 @@ jobs:
           # The A/B step builds the pull request base commit in a worktree, so it needs the history.
           fetch-depth: 0
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: echo "Documentation-only changes: skipping benchmark and wall-clock gates."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Setup Node.js 22
+        if: needs.changes.outputs.docs_only != 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22.x
 
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun install --frozen-lockfile
 
       - name: Build functions, matrix and compat (pulls core + wasm)
+        if: needs.changes.outputs.docs_only != 'true'
         run: >-
           bunx turbo build
           --filter=@danielsimonjr/mathts-functions
@@ -424,6 +431,7 @@ jobs:
           --filter=@danielsimonjr/mathts-compat
 
       - name: Sprint baseline fingerprints
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/sprint-baseline.test.mjs
           node tools/benchmarks/sprint-baseline.mjs --check
@@ -432,6 +440,7 @@ jobs:
       # A/A control (it must measure a ratio of about 1). It runs before the gates, so a broken
       # harness shows first.
       - name: Wall-clock perf gate tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/wall-clock-perf-gate.test.mjs
 
       # Plain `node`: under `bun run` the name `node` resolves to Bun, and a gate would time Bun.
@@ -440,6 +449,7 @@ jobs:
       # bound reaches the limit. A gate that reaches its round cap with the limit still inside
       # the interval fails when its median is at or above the limit.
       - name: Wall-clock perf gates
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/run-wall-clock-gates.mjs
 
       # The gates above compare the candidate with a fixed reference implementation. Each limit
@@ -453,17 +463,17 @@ jobs:
       # tools/benchmark/ab/allowed-output-changes.json lists the case with its pull request and
       # reason.
       - name: Build every package for the A/B
-        if: github.event_name == 'pull_request'
+        if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'pull_request'
         run: bun run build
 
       - name: Build the base tree
-        if: github.event_name == 'pull_request'
+        if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node tools/benchmark/ab/make-base.mjs --ref "$BASE_SHA"
 
       - name: Base-against-head perf gate
-        if: github.event_name == 'pull_request'
+        if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'pull_request'
         run: >-
           node tools/benchmark/ab/run.mjs --slow-only --slow-limit 1.25 --engine node
           --only "median n = 100,000"
@@ -475,7 +485,6 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: [changes, compile]
-    if: needs.changes.outputs.docs_only != 'true'
     timeout-minutes: 20
 
     strategy:
@@ -497,25 +506,34 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: echo "Documentation-only changes: skipping Node ${{ matrix.node-version }} test suite."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Check Bun matches the packageManager pin
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-bun-version.mjs
 
       - name: Setup Node.js ${{ matrix.node-version }}
+        if: needs.changes.outputs.docs_only != 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun install --frozen-lockfile
 
       # npm 10 (bundled with Node 22) cannot install a package that has a git
       # dependency, so every published manifest must use registry specs only.
       - name: Published manifests use registry dependencies only
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-published-deps.mjs
 
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
@@ -523,23 +541,25 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
       # Every package's tests under vitest on the matrix Node, plus the root suites
       # and the assembly Node test scripts. Prints a `[runtime-probe]` line.
       - name: Test on Node ${{ matrix.node-version }} (vitest)
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/run-vitest-node.mjs
 
       # Import each published package by name (Node resolves its `exports`) and call
       # one representative function from the built dist.
       - name: Smoke test dist on Node ${{ matrix.node-version }}
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/smoke-dist-node.mjs
 
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
     needs: [changes, compile]
-    if: needs.changes.outputs.docs_only != 'true'
     timeout-minutes: 20
 
     steps:
@@ -548,15 +568,22 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: echo "Documentation-only changes: skipping coverage suite."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Check Bun matches the packageManager pin
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-bun-version.mjs
 
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun install --frozen-lockfile
 
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
@@ -564,6 +591,7 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
       # The Bun-runtime suite. Every package script runs on Bun ([run] bun = true), so the
@@ -571,12 +599,14 @@ jobs:
       # Test leg (#1356). Node 22 is set up so that a tool that starts real Node sees the
       # runtime that the former Test (22.x) run of this step saw.
       - name: Setup Node.js 22
+        if: needs.changes.outputs.docs_only != 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22.x
 
       # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
       - name: Test (Bun runtime)
+        if: needs.changes.outputs.docs_only != 'true'
         shell: bash
         run: bun run test 2>&1 | tee test-output.log
 
@@ -585,11 +615,13 @@ jobs:
       # tools/test/skip-baseline.json and any change, up or down, fails here. The parser's
       # own tests run first: Turbo formats its output differently here than in a terminal.
       - name: Skip budget
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-skip-budget.test.mjs
           node tools/test/check-skip-budget.mjs test-output.log
 
       - name: Test with coverage
+        if: needs.changes.outputs.docs_only != 'true'
         # ubuntu-latest (26.04) aborts this job with SIGABRT / "Out of memory"
         # when Turbo runs every package's coverage task at once (exit 137).
         run: bun run test:coverage
@@ -597,11 +629,13 @@ jobs:
           TURBO_CONCURRENCY: '2'
 
       - name: Per-package coverage floors
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-coverage-floors.test.mjs
           node tools/test/check-coverage-floors.mjs
 
       - name: Upload coverage to Codecov
+        if: needs.changes.outputs.docs_only != 'true'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -612,7 +646,6 @@ jobs:
     # Noble package list in playwright-chromium-apt-packages.mjs; ubuntu-latest may be >24.04.
     runs-on: ubuntu-24.04
     needs: [changes, compile]
-    if: needs.changes.outputs.docs_only != 'true'
     timeout-minutes: 20
 
     steps:
@@ -621,21 +654,30 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: echo "Documentation-only changes: skipping browser smoke tests."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Check Bun matches the packageManager pin
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-bun-version.mjs
 
       - name: Install Mesa lavapipe (software Vulkan adapter for WebGPU)
+        if: needs.changes.outputs.docs_only != 'true'
         run: sudo bash tools/ci/apt-install.sh install mesa-vulkan-drivers libegl1
 
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun install --frozen-lockfile
 
       - name: Install Playwright OS dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           pkg_file=$(mktemp)
           node tools/ci/playwright-chromium-apt-packages.mjs >"$pkg_file"
@@ -644,6 +686,7 @@ jobs:
           sudo bash tools/ci/apt-install.sh install "${pw_pkgs[@]}"
 
       - name: Install Playwright browsers
+        if: needs.changes.outputs.docs_only != 'true'
         run: bunx --bun playwright install chromium
 
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
@@ -651,9 +694,11 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build (required for workspace package resolution)
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
       - name: Browser smoke tests (WebGPU)
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run test:browser
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
