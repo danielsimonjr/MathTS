@@ -466,12 +466,25 @@ export const add = makeArithmetic(
   (a, b) => a + b,
   _compatAdd
 ) as NumericStringArithmetic & PublicAdd & OneArg;
+function isProtoSparseMatrix(x: unknown): boolean {
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    (Object.getPrototypeOf(x) as { isSparseMatrix?: boolean } | null)?.isSparseMatrix === true
+  );
+}
+
+const subtractPair = (a: unknown, b: unknown): unknown => {
+  if (isComplex(a) || isComplex(b)) return _compatSubtract(a, b);
+  if (isProtoSparseMatrix(a) || isProtoSparseMatrix(b)) return _factorySubtract(a, b);
+  if (typeof a === 'bigint' || typeof b === 'bigint') return _factorySubtract(a, b);
+  return _subtract(a, b);
+};
+
 export const subtract = makeArithmetic(
-  _factorySubtract as (a: unknown, b: unknown) => unknown,
+  subtractPair,
   _matSubtract as (a: unknown, b: unknown) => unknown,
-  true,
-  undefined,
-  _compatSubtract
+  true
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
   withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),

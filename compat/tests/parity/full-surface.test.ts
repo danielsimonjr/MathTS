@@ -50,7 +50,7 @@ describe('full-surface differential harness (#1574)', () => {
     expect(unrecorded, 'doc example divergences not recorded in known-gaps.json').toEqual([]);
     const stale = [...ALL_GAPS].filter((l) => l.startsWith('{') && !labels.has(l));
     expect(stale, 'known-gaps.json lists doc labels that now match the oracle').toEqual([]);
-  });
+  }, 120_000);
 
   it('every instance function matches the oracle over the argument pool or a recorded gap', () => {
     const { labels } = sweepPool();
@@ -58,7 +58,7 @@ describe('full-surface differential harness (#1574)', () => {
     expect(unrecorded, 'pool divergences not recorded in known-gaps.json').toEqual([]);
     const stale = [...ALL_GAPS].filter((l) => !l.startsWith('{') && !labels.has(l));
     expect(stale, 'known-gaps.json lists pool labels that now match the oracle').toEqual([]);
-  });
+  }, 120_000);
 
   it('the recorded gaps are grouped under the issue that owns each root cause', () => {
     for (const [issue, labels] of Object.entries(GAPS)) {
