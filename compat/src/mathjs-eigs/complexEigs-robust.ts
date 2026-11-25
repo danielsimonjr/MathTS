@@ -1,12 +1,29 @@
 import { isBigNumber } from '@danielsimonjr/mathts-core';
-import { clone } from '../../utils/object.js';
-import { realScale } from '../../utils/real-scale.js';
-import seedrandom from 'seedrandom';
+import { clone } from '@danielsimonjr/mathts-core/internal';
+import { realScale } from './real-scale.js';
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
 
-/** Deterministic pseudo-random stream for inverse iteration (#1561 compat mathjs port). */
-const eigsRobustRng = seedrandom('mathts-eigs-robust-v1');
+/** Deterministic PRNG (mulberry32) — no new dependency; compat-only mathjs port. */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashSeed(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+const eigsRobustRng = mulberry32(hashSeed('mathts-eigs-robust-v1'));
 
 /** Scalar types supported by complex eigenvalue computation */
 type Scalar = number | BigNumber | Complex;

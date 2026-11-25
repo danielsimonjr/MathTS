@@ -1521,8 +1521,7 @@ factoryScope.eigs = factoryEigs;
 // The mathjs factory `eigs` returns WRONG eigenvalues for every non-symmetric
 // matrix (even triangular ones). Route the public `eigs` through the native
 // orthes/hqr2 solver, which is correct for symmetric/non-symmetric/complex spectra;
-// non-numeric inputs delegate to the factory. Compat copies mathjs #1561 behaviour
-// via a thin adapter (`compat/src/eigs-mathjs.ts`), not by changing this export.
+// non-numeric inputs delegate to the factory. Internal consumers keep factoryScope.
 export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean; matricize?: boolean }) => {
   const factoryFn = factoryEigs as unknown as (x: unknown, o?: unknown) => unknown;
   return coreIsMatrix(m)
@@ -1547,8 +1546,6 @@ export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean; matricize?: b
     (value: unknown, options?: unknown): SpectralResult<BridgeMatrix | ScalarValue[]>;
   }
 >;
-/** Mathjs 15.3.0-shaped `eigs` for `@danielsimonjr/mathts-compat` only (#1561). */
-export const eigsMathjsFactory = factoryEigs;
 
 export const lusolve = createLusolve(factoryScope as Parameters<typeof createLusolve>[0]);
 factoryScope.lusolve = lusolve;

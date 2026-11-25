@@ -51,6 +51,21 @@ describe('G10 eigs precision and vector scale (#1561)', () => {
     );
   });
 
+  it('removed known-gaps precision 1/2.5/3 match the oracle (B6)', () => {
+    for (const p of [1, 2.5, 3]) {
+      expectSame(`eigs values at precision ${p}`, {}, (L) =>
+        valuesOf(
+          L,
+          [
+            [1, 2],
+            [3, 4],
+          ],
+          p
+        )
+      );
+    }
+  });
+
   it('eigs([[4,1],[2,3]]) has the oracle eigenvector scale', () => {
     expectSame('eigs eigenvector at index 1', {}, (L) =>
       vectorAt(

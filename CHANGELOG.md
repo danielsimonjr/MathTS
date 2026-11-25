@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **`eigs` mathjs 15.3.0 quirks live in compat only (#1561):** Restored the public native `eigs` export (`correctEigs` / matrix `eig`) in `@danielsimonjr/mathts-functions`. The mathjs 15.3.0 factory port (precision, non-unit eigenvector scale, magnitude-ordered values) lives in `compat/src/mathjs-eigs/` and is lazy-loaded from `compat/src/eigs-mathjs.ts` so the functions eager entry stays at main. BREAKING (compat): instance `eigs` matches mathjs 15.3.0 including loose `precision`; native `eigs` keeps unit-normalized vectors and the real-part value order.
+- **`eigs` mathjs 15.3.0 quirks live in compat only (#1561):** Public native `eigs` stays `correctEigs` (matrix `eig`). The mathjs 15.3.0 factory port lives in `compat/src/mathjs-eigs/` and is bound on `create(all)` so `@danielsimonjr/mathts-functions` is not the home of mathjs quirks. BREAKING (compat): instance `eigs` matches mathjs 15.3.0 including loose `precision`; native `eigs` keeps unit-normalized vectors and the real-part value order.
 
 - **Compat `version` reports the emulated mathjs version (#1581):** `version` is `"15.3.0"` on the compat instance, the named export, and the expression scope, and a `compatVersion` named export carries the compat package version; `help('version')` and other doc examples evaluate through the instance evaluator. BREAKING: code reading the compat package version from `math.version` must read `compatVersion`.
 

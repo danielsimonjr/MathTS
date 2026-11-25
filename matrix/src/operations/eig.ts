@@ -884,13 +884,30 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
   // the tridiagonal [[2,-1,0],[-1,2,-1],[0,-1,2]] gave [19.05, 2, 0.94]
   // (sum 22 ≠ trace 6) instead of [0.586, 2, 3.414]. hqr2 is correct for
   // symmetric input too (verified vs numpy), so the buggy fast path is removed.
-  const result = eigGeneral(A, computeVectors || symmetric, symmetric, maxIterations);
-  if (symmetric) refineSymmetricEigenvaluesRayleigh(A, result);
-  if (!computeVectors) {
+  // Rayleigh refinement needs eigenvectors. Only pay that cost when the matrix
+  // already spans many orders of magnitude (the 1e15 / small-eigenvalue case).
+  const needRayleigh = symmetric && matrixHasHugeDynamicRange(A);
+  const result = eigGeneral(A, computeVectors || needRayleigh, symmetric, maxIterations);
+  if (needRayleigh) refineSymmetricEigenvaluesRayleigh(A, result);
+  if (!computeVectors && needRayleigh) {
     result.vectors = eye(n);
     result.vectorsIm = Array.from({ length: n }, () => new Array<number>(n).fill(0));
   }
   return result;
+}
+
+/** True when |entries| span ≥ 1e6 and the largest is ≥ 1e6 (G1 1e15 case). */
+function matrixHasHugeDynamicRange(A: number[][]): boolean {
+  let maxAbs = 0;
+  let minAbs = Infinity;
+  for (const row of A) {
+    for (const x of row) {
+      const a = Math.abs(x);
+      if (a > maxAbs) maxAbs = a;
+      if (a > 0 && a < minAbs) minAbs = a;
+    }
+  }
+  return maxAbs >= 1e6 && Number.isFinite(minAbs) && maxAbs / minAbs >= 1e6;
 }
 
 /**
