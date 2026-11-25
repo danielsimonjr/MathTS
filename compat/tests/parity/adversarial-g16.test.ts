@@ -7,8 +7,8 @@ import { create as createCompat, all as compatAll } from '../../src/index.js';
  *
  * The change makes `version` report the emulated mathjs version (`"15.3.0"`) on the
  * instance, the named export, and the expression scope, and adds a `compatVersion` named
- * export. These cases probe the version-visible paths the change does *not* cover, against
- * the pinned 15.3.0 oracle. Each `it` below fails on the PR head; none is skipped.
+ * export. These cases pin the version-visible help and undefined-scope paths against the
+ * pinned 15.3.0 oracle. None is skipped.
  */
 
 type L = ReturnType<typeof createCompat> & ReturnType<typeof create>;

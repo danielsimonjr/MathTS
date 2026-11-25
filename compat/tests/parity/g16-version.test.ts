@@ -60,4 +60,72 @@ describe('G16: version is the emulated mathjs version (#1581)', () => {
     const compat = createCompat(compatAll, {});
     expect(compat.version).toBe(version);
   });
+
+  it('compatVersion is absent from the instance and from all, as in mathjs', () => {
+    const mathjs = create(all, {});
+    const compat = createCompat(compatAll, {});
+    expect(Object.hasOwn(compat, 'compatVersion')).toBe(Object.hasOwn(mathjs, 'compatVersion'));
+    expect(Object.hasOwn(compatAll, 'compatVersion')).toBe(Object.hasOwn(all, 'compatVersion'));
+    expect(compat.compatVersion).toBeUndefined();
+    expect(mathjs.compatVersion).toBeUndefined();
+  });
+
+  it('version is "15.3.0" under create(all, configs) that the parity harness uses', () => {
+    for (const config of [{}, { number: 'BigNumber' }, { matrix: 'Array' }] as const) {
+      const mathjs = create(all, config);
+      const compat = createCompat(compatAll, config);
+      expect(compat.version).toBe(mathjs.version);
+      expect(compat.evaluate('version')).toBe(mathjs.evaluate('version'));
+    }
+  });
+
+  it('help() of constants matches the mathjs 15.3.0 oracle', () => {
+    const names = [
+      'version',
+      'pi',
+      'e',
+      'i',
+      'phi',
+      'tau',
+      'true',
+      'false',
+      'null',
+      'Infinity',
+      'NaN',
+      'LN2',
+      'LN10',
+      'LOG2E',
+      'LOG10E',
+      'SQRT1_2',
+      'SQRT2',
+    ] as const;
+    const mathjs = create(all, {});
+    const compat = createCompat(compatAll, {});
+    for (const name of names) {
+      expect(String(compat.help(name))).toBe(String(mathjs.help(name)));
+    }
+  });
+
+  it('scope bindings of undefined, null, and a real value match mathjs on evaluate/compile/parser', () => {
+    const mathjs = create(all, {});
+    const compat = createCompat(compatAll, {});
+    const scopes: Record<string, unknown>[] = [
+      { version: undefined },
+      { version: null },
+      { version: 'x' },
+      { pi: undefined },
+      { pi: null },
+      { pi: 3 },
+    ];
+    for (const scope of scopes) {
+      const expr = Object.keys(scope)[0] as string;
+      expect(compat.evaluate(expr, scope)).toBe(mathjs.evaluate(expr, scope));
+      expect(compat.compile(expr).evaluate(scope)).toBe(mathjs.compile(expr).evaluate(scope));
+      const cParser = compat.parser();
+      const oParser = mathjs.parser();
+      cParser.set(expr, scope[expr]);
+      oParser.set(expr, scope[expr]);
+      expect(cParser.evaluate(expr)).toBe(oParser.evaluate(expr));
+    }
+  });
 });

@@ -240,7 +240,11 @@ const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint
 
 type EvaluateRunner = ReturnType<typeof createEvaluate>;
 type ExpressionScope = Parameters<typeof _compileExpression>[1];
-/** Compat instance evaluate sets {@link EvaluateOptions.mathjsScopedSymbols} via this internal option. */
+/**
+ * Internal evaluate option. Compat instance evaluate may set
+ * {@link EvaluateOptions.mathjsScopedSymbols}; the public typed `evaluate` /
+ * `compileExpr` and `createInstanceEvaluator` never set it.
+ */
 type EvaluateCallOptions = PhysicsEvaluateOptions & { mathjsScopedSymbols?: boolean };
 
 /**
@@ -728,35 +732,16 @@ export function createInstanceEvaluator(
   const safeEvaluate = createEvaluate(scopedParse, safeScope, configFingerprint);
   const unsafeEvaluate = createEvaluate(scopedParse, unsafeScope, configFingerprint);
 
-  function withMathjsScopeOptions(
-    options?: PhysicsEvaluateOptions
-  ): EvaluateCallOptions | undefined {
-    if (!mathjsSyntax) return options;
-    return options ? { ...options, mathjsScopedSymbols: true } : { mathjsScopedSymbols: true };
-  }
-
   function evaluateBound(
     exprOrExprs: string | string[],
     scope?: Record<string, unknown> | Scope,
     options?: PhysicsEvaluateOptions
   ): unknown | unknown[] {
-    return runEvaluate(
-      safeEvaluate,
-      unsafeEvaluate,
-      exprOrExprs,
-      scope,
-      withMathjsScopeOptions(options)
-    );
+    return runEvaluate(safeEvaluate, unsafeEvaluate, exprOrExprs, scope, options);
   }
 
   function compileBound(expr: string, options?: PhysicsEvaluateOptions) {
-    return compileInScope(
-      safeScope,
-      unsafeScope,
-      expr,
-      withMathjsScopeOptions(options),
-      scopedParse
-    );
+    return compileInScope(safeScope, unsafeScope, expr, options, scopedParse);
   }
 
   return {

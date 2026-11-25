@@ -91,7 +91,7 @@ const compatIsSymbolNode: (typeof instanceSymbols)['isSymbolNode'] = instanceSym
 const compatIsUndefined: (typeof instanceSymbols)['isUndefined'] = instanceSymbols.isUndefined;
 const compatIsUnit: (typeof instanceSymbols)['isUnit'] = instanceSymbols.isUnit;
 const compatNum: (typeof instanceSymbols)['num'] = instanceSymbols.num;
-const compatVersionExport: (typeof instanceSymbols)['version'] = instanceSymbols.version;
+const mathjsVersionExport: (typeof instanceSymbols)['version'] = instanceSymbols.version;
 
 export {
   compatAccessorNode as AccessorNode,
@@ -162,6 +162,6 @@ export {
   compatIsUndefined as isUndefined,
   compatIsUnit as isUnit,
   compatNum as num,
-  compatVersionExport as version,
+  mathjsVersionExport as version,
   compatVersion,
 };

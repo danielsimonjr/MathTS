@@ -64,6 +64,13 @@ interface CompatEvaluate {
   ): BridgeMatrix;
 }
 
+/** Extra evaluate option forwarded through functions into expression compile (compat-only). */
+type CompatInstanceEvaluateOptions = PhysicsEvaluateOptions & { mathjsScopedSymbols?: boolean };
+
+function withMathjsScopedSymbols(options?: PhysicsEvaluateOptions): CompatInstanceEvaluateOptions {
+  return options ? { ...options, mathjsScopedSymbols: true } : { mathjsScopedSymbols: true };
+}
+
 function mapExpressions(expression: unknown, operation: (expression: string) => unknown): unknown {
   function run(value: unknown): unknown {
     if (typeof value !== 'string') throw new TypeError('Expression must be a string');
@@ -251,11 +258,20 @@ export function wireMathjsInstanceApi(
     );
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
-        mapExpressions(expression, (text) => evaluator.evaluate(text, scope, options))
+        mapExpressions(expression, (text) =>
+          evaluator.evaluate(
+            text,
+            scope,
+            withMathjsScopedSymbols(options) as PhysicsEvaluateOptions
+          )
+        )
     );
     instance.compile = runBound((expression: unknown, options?: PhysicsEvaluateOptions) =>
       mapExpressions(expression, (text) => {
-        const compiled = evaluator.compile(text, options);
+        const compiled = evaluator.compile(
+          text,
+          withMathjsScopedSymbols(options) as PhysicsEvaluateOptions
+        );
         return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
       })
     );
