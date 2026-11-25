@@ -4,13 +4,36 @@
  *
  * **Owner:** G14 PR #1730 (`wrapCompatUnitClass` / `wrapCompatUnitSources`).
  * G01 PR #1731 also needed `isValuelessUnit('d') === false` (#1557). That name is
- * absent from {@link MATHJS_IS_VALUELESS_UNIT} (mathjs has no `d` key), so the
- * catalog already returns false. Do not wrap `isValuelessUnit` again in
- * `instance-api.ts`: a second `if (name === 'd')` adapter double-patches this
- * helper and is redundant. Never assign onto `factory_mathjsCompat.constructors.Unit`.
+ * not a mathjs `Unit.UNITS` key, so {@link isMathjsValuelessUnitName} is false.
+ * Extra core names stay on the closed-over table (so `createUnit` override and
+ * `_findUnit` still see them) but are hidden from `Object.keys` and from
+ * `isValuelessUnit`. Do not wrap `isValuelessUnit` again in `instance-api.ts`.
+ * Never assign onto `factory_mathjsCompat.constructors.Unit`.
  */
 
-import { MATHJS_IS_VALUELESS_UNIT, MATHJS_UNIT_NAMES } from './mathjs-unit-names.generated.js';
+import {
+  MATHJS_PREFIX_GROUPS,
+  MATHJS_UNIT_NAMES,
+  MATHJS_UNIT_PREFIX_GROUP,
+} from './mathjs-unit-names.generated.js';
+
+const MATHJS_UNIT_NAME_SET = new Set(MATHJS_UNIT_NAMES);
+const MATHJS_PREFIX_GROUP_SETS = new Map(
+  Object.entries(MATHJS_PREFIX_GROUPS).map(([group, prefixes]) => [group, new Set(prefixes)])
+);
+const MATHJS_UNITS_LONGEST_FIRST = [...MATHJS_UNIT_NAMES].sort((a, b) => b.length - a.length);
+
+/** True when `name` is a mathjs 15.3.0 valueless unit (base or allowed `prefix+base`). */
+export function isMathjsValuelessUnitName(name: string): boolean {
+  if (MATHJS_UNIT_NAME_SET.has(name)) return true;
+  for (const unit of MATHJS_UNITS_LONGEST_FIRST) {
+    if (name.length <= unit.length || !name.endsWith(unit)) continue;
+    const group = MATHJS_UNIT_PREFIX_GROUP[unit];
+    const prefixes = group === undefined ? undefined : MATHJS_PREFIX_GROUP_SETS.get(group);
+    if (prefixes?.has(name.slice(0, name.length - unit.length))) return true;
+  }
+  return false;
+}
 
 /** Per-instance unit constructor: `isValuelessUnit` plus the `UNITS` table. */
 export type CompatUnitConstructorLike = {
@@ -18,60 +41,58 @@ export type CompatUnitConstructorLike = {
   UNITS: Record<string, unknown>;
 };
 
-function mathjsCatalogOverrides(nativeUnits: Record<string, unknown>): Record<string, unknown> {
-  const catalog: Record<string, unknown> = {};
+function mathjsMissingStubs(units: Record<string, unknown>): void {
   for (const name of MATHJS_UNIT_NAMES) {
-    if (Object.hasOwn(nativeUnits, name)) catalog[name] = nativeUnits[name];
-    else catalog[name] = Object.freeze({ baseName: name });
+    if (Object.hasOwn(units, name)) continue;
+    units[name] = Object.freeze({
+      name,
+      value: 1,
+      dimensions: [],
+      prefixes: Object.freeze({ '': Object.freeze({ name: '', value: 1, scientific: true }) }),
+      offset: 0,
+    });
   }
-  return catalog;
 }
 
 /**
- * Pin `UNITS` keys and `isValuelessUnit` on a per-instance unit class to mathjs 15.3.0.
- * `Base` is the class `createCompatUnitSources` just built for this instance, not the
- * shared native constructor; `create(all)` must not rewrite `core` `Unit.UNITS`.
+ * Pin `UNITS` enumeration and `isValuelessUnit` on a per-instance unit class to
+ * mathjs 15.3.0. The proxy target is the table the class closed over, so
+ * `createUnit` / `_findUnit` keep working. `Base` is from `createCompatUnitSources`
+ * for this instance; `create(all)` must not rewrite `core` `Unit.UNITS`.
  */
 export function wrapCompatUnitClass<T extends CompatUnitConstructorLike>(
   Base: T,
-  customValuelessUnits: Set<string>
+  registeredNames: Set<string>
 ): T {
-  const nativeUnits = Object.assign(Object.create(null), Base.UNITS) as Record<string, unknown>;
-  const compatCatalog = mathjsCatalogOverrides(nativeUnits);
-  const customRegistry = new Map<string, unknown>();
+  const units = Base.UNITS;
+  const originalKeys = new Set(Object.keys(units));
+  mathjsMissingStubs(units);
+
+  const isVisibleKey = (prop: string): boolean =>
+    MATHJS_UNIT_NAME_SET.has(prop) || !originalKeys.has(prop) || registeredNames.has(prop);
 
   Base.isValuelessUnit = (name: string): boolean =>
-    MATHJS_IS_VALUELESS_UNIT[name] === true || customValuelessUnits.has(name);
+    isMathjsValuelessUnitName(name) ||
+    registeredNames.has(name) ||
+    (Object.hasOwn(units, name) && !originalKeys.has(name));
 
-  const resolve = (prop: string): unknown => {
-    if (customRegistry.has(prop)) return customRegistry.get(prop);
-    if (Object.hasOwn(compatCatalog, prop)) return compatCatalog[prop];
-    if (Object.hasOwn(nativeUnits, prop)) return nativeUnits[prop];
-    return undefined;
-  };
-
-  Base.UNITS = new Proxy(compatCatalog, {
-    get(_target, prop, receiver) {
-      if (typeof prop !== 'string') return Reflect.get(_target, prop, receiver);
-      return resolve(prop);
+  Base.UNITS = new Proxy(units, {
+    get(target, prop, receiver) {
+      return Reflect.get(target, prop, receiver);
     },
-    set(_target, prop, value, receiver) {
-      if (typeof prop !== 'string') return Reflect.set(_target, prop, value, receiver);
-      nativeUnits[prop] = value;
-      if (MATHJS_UNIT_NAMES.includes(prop)) compatCatalog[prop] = value;
-      else customRegistry.set(prop, value);
-      return true;
+    set(target, prop, value, receiver) {
+      return Reflect.set(target, prop, value, receiver);
     },
-    has(_target, prop) {
-      return typeof prop === 'string' && resolve(prop) !== undefined;
+    has(target, prop) {
+      return Reflect.has(target, prop);
     },
-    ownKeys() {
-      return [...MATHJS_UNIT_NAMES, ...customRegistry.keys()];
+    ownKeys(target) {
+      return Reflect.ownKeys(target).filter((key) => typeof key !== 'string' || isVisibleKey(key));
     },
-    getOwnPropertyDescriptor(_target, prop) {
-      if (typeof prop !== 'string') return undefined;
-      if (!MATHJS_UNIT_NAMES.includes(prop) && !customRegistry.has(prop)) return undefined;
-      return { configurable: true, enumerable: true, writable: true, value: resolve(prop) };
+    getOwnPropertyDescriptor(target, prop) {
+      const desc = Reflect.getOwnPropertyDescriptor(target, prop);
+      if (desc === undefined || typeof prop !== 'string') return desc;
+      return { ...desc, enumerable: isVisibleKey(prop) };
     },
   }) as Record<string, unknown>;
 
@@ -106,20 +127,20 @@ type LocalUnitSources = {
   update: (current: unknown, previous: unknown) => void;
 };
 
-function rememberCreateUnitNames(args: unknown[], customValuelessUnits: Set<string>): void {
-  const head = args[0];
-  if (typeof head === 'string') customValuelessUnits.add(head);
-  else if (head && typeof head === 'object')
-    for (const key of Object.keys(head as object)) customValuelessUnits.add(key);
-}
-
 /**
  * Wrap one compatibility instance's unit constructor, `unit()`, and `createUnit()`.
  * Pins `UNITS` keys and `isValuelessUnit` to mathjs 15.3.0 without changing native core.
  */
+function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>): void {
+  const head = args[0];
+  if (typeof head === 'string') registeredNames.add(head);
+  else if (head && typeof head === 'object')
+    for (const key of Object.keys(head as object)) registeredNames.add(key);
+}
+
 export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T {
-  const customValuelessUnits = new Set<string>();
-  const Unit = wrapCompatUnitClass(sources.Unit, customValuelessUnits);
+  const registeredNames = new Set<string>();
+  const Unit = wrapCompatUnitClass(sources.Unit, registeredNames);
   const { unit, createUnit, update } = sources;
   const wrappedUnit = (...args: unknown[]) => {
     if (args.length >= 2 && typeof args[1] === 'string') {
@@ -130,7 +151,7 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
   };
   const wrappedCreateUnit = (...args: unknown[]) => {
     const result = createUnit(...args);
-    rememberCreateUnitNames(args, customValuelessUnits);
+    rememberCreateUnitNames(args, registeredNames);
     return result;
   };
 
