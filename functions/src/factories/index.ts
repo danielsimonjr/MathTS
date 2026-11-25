@@ -2453,6 +2453,10 @@ const createSelectedString = /* #__PURE__ */ factory(
       '': () => '',
       number: formatNumber,
       'null | boolean | string': String,
+      // #1579: a Fraction prints through its own toString (the mathjs `any` arm).
+      // Without this arm the Fraction→number conversion fires first and the value
+      // prints as a float (`string(fraction(1,3))` was '0.3333333333333333').
+      Fraction: (value: unknown) => String(value),
       'Array | Matrix': typed.referToSelf(
         (self) => (value) => mapCollection(value, (v) => self(v))
       ),

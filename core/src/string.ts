@@ -105,7 +105,8 @@ function _format(value: unknown, options?: unknown): string {
   // form (mathjs 'decimal' output), so the ratio default is written here.
   if (isCoreFraction(value)) {
     if (!options || (options as { fraction?: string }).fraction !== 'decimal') {
-      if (value.denominator === 1n) return `${value.numerator}`;
+      // mathjs prints every Fraction as a ratio, including integral values
+      // (`format(fraction(2))` is '2/1') — #1579.
       return `${value.numerator}/${value.denominator}`;
     }
     return value.toString();

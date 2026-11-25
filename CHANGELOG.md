@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Fraction `format`, `string`, and `ConstantNode.toString` parity (#1579, #1586):** Formatted integral Fractions as `n/1`, routed `string(fraction)` through `Fraction.toString()`, and matched mathjs Fraction-config `ConstantNode.toString()`. BREAKING: `format(fraction(2))` is now `"2/1"`, `string(fraction(1, 3))` is `"0.(3)"`, and Fraction-config `parse('1/3 + 1/4').toString()` is `"1/1 / 3/1 + 1/1 / 4/1"`.
+
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
 
 - **mathjs 15.3.0 G11 adversarial fixes (#1563–#1566, #1574):** mixed-type `mod`/`xgcd`/`invmod` and `stirlingS2` keep bigint results; compat `subtract` and `mod` bind mathjs factories; sparse `isZero` uses `equalScalar` tolerances; `sqrt`/`larger` refuse out-of-range bigint; `multinomial` overflow matches 15.3.0 (`NaN`).
