@@ -15,7 +15,8 @@ interface BigNumberType {
 }
 
 interface FractionType {
-  isPositive(): boolean;
+  s: bigint;
+  n: bigint;
 }
 
 interface UnitType {
@@ -77,9 +78,7 @@ export const createIsPositive = /* #__PURE__ */ factory(
 
       bigint: (x: bigint): boolean => x > 0n,
 
-      // MathTS Fraction stores numerator/denominator, not the fraction.js fields
-      // .s/.n (#1551); the sign comes from the Fraction's own API.
-      Fraction: (x: FractionType): boolean => x.isPositive(),
+      Fraction: (x: FractionType): boolean => x.s > 0n && x.n > 0n,
 
       Unit: typed.referToSelf(
         (self: TypedFunction) =>

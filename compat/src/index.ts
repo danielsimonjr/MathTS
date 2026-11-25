@@ -20,7 +20,7 @@
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
-import { shims } from './shims.js';
+import { shims, createCompatPow } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -34,6 +34,7 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
+import { patchCompatUnitTypeConverters } from './patch-unit-converters.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
@@ -170,6 +171,7 @@ interface MathInstanceOverrides {
   multiply: typeof shims.multiply;
   divide: typeof shims.divide;
   pow: typeof shims.pow;
+  format: typeof shims.format;
   compareText: typeof namedCompareText;
   equalText: typeof namedEqualText;
   toBest: typeof namedToBest;
@@ -494,7 +496,12 @@ export function create(
     subtract: mathFunctions.factory_subtract,
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
-    pow: shims.pow,
+    pow: bindShim(createCompatPow(() => Boolean(currentConfig.predictable))),
+    format: shims.format,
+    isPositive: bindShim(shims.isPositive),
+    isNegative: bindShim(shims.isNegative),
+    isInteger: bindShim(shims.isInteger),
+    fix: bindShim(shims.fix),
     sqrt: shims.sqrt,
     abs: shims.abs,
     exp: shims.exp,
@@ -766,6 +773,13 @@ export function create(
       )
     )
   );
+
+  const UnitCtor = (
+    instance as { Unit?: { typeConverters: Record<string, (x: unknown) => unknown> } }
+  ).Unit;
+  if (UnitCtor?.typeConverters) {
+    patchCompatUnitTypeConverters(UnitCtor);
+  }
 
   return instance as unknown as MathInstance;
 }

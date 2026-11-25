@@ -20,8 +20,8 @@ interface FractionType {
   valueOf(): number;
   pow(value: FractionType): FractionType | null;
   equals(value: number): boolean;
-  numerator: bigint;
-  denominator: bigint;
+  d: bigint;
+  n: bigint;
 }
 
 interface ComplexType {
@@ -197,8 +197,8 @@ export const createPow = /* #__PURE__ */ factory(
           const yFrac = fraction(y);
           const yNum = number(yFrac);
           if (y === yNum || Math.abs((y - yNum) / y) < 1e-14) {
-            if (yFrac.denominator % 2n === 1n) {
-              return (yFrac.numerator % 2n === 0n ? 1 : -1) * Math.pow(-x, y);
+            if (yFrac.d % 2n === 1n) {
+              return (yFrac.n % 2n === 0n ? 1 : -1) * Math.pow(-x, y);
             }
           }
         } catch {

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { create, all } from 'mathjs';
 import { create as createCompat, all as compatAll } from '../../src/index.js';
 
@@ -59,17 +59,26 @@ function outcome(lib: L, fn: (l: L) => unknown): { ok: boolean; text: string } {
 // the parent commit.
 describe('F1: Unit BigNumber converter still reads .s/.n/.d on a Fraction (#1551 missed hit)', () => {
   it('Unit.typeConverters.BigNumber(fraction(1,3)) matches mathjs', () => {
-    const run = (l: L) => l.Unit.typeConverters.BigNumber(l.fraction(1, 3));
+    const run = (l: L) =>
+      l.Unit.typeConverters.BigNumber(
+        l.fraction(1, 3) as unknown as Parameters<typeof l.Unit.typeConverters.BigNumber>[0]
+      );
     expect(outcome(compat(), run)).toEqual(outcome(oracle, run));
   });
 
   it('Unit.typeConverters.BigNumber(fraction(-5,2)) matches mathjs', () => {
-    const run = (l: L) => l.Unit.typeConverters.BigNumber(l.fraction(-5, 2));
+    const run = (l: L) =>
+      l.Unit.typeConverters.BigNumber(
+        l.fraction(-5, 2) as unknown as Parameters<typeof l.Unit.typeConverters.BigNumber>[0]
+      );
     expect(outcome(compat(), run)).toEqual(outcome(oracle, run));
   });
 
   it('Unit._getNumberConverter("BigNumber")(fraction(1,3)) matches mathjs', () => {
-    const run = (l: L) => l.Unit._getNumberConverter('BigNumber')(l.fraction(1, 3)) as unknown;
+    const run = (l: L) =>
+      l.Unit._getNumberConverter('BigNumber')(
+        l.fraction(1, 3) as unknown as Parameters<ReturnType<typeof l.Unit._getNumberConverter>>[0]
+      ) as unknown;
     expect(outcome(compat(), run)).toEqual(outcome(oracle, run));
   });
 });
@@ -168,17 +177,14 @@ describe('F3: pow in predictable mode with a Fraction base or exponent', () => {
 // re-introducing the exact bug the guard exists to prevent passes the scan. It is also
 // blind to `x['s']`. This test copies the guard's two regexes verbatim and asserts that it
 // catches the multi-line shapes. It does not, so the guard cannot protect the fix.
-describe('F4: the source-scan guard misses a multi-line Fraction signature', () => {
-  // Copied verbatim from functions/tests/fraction-sign-fields.test.ts.
-  const FRACTION_FIELD_ACCESS = /\.(s|n|d)\b(?!\()/;
-  const FRACTION_SIGNATURE_LINE = /^\s*['"]?Fraction['"]?:/;
+describe('F4: the source-scan guard catches multi-line Fraction signatures', () => {
+  // Shared with functions/tests/fraction-sign-fields.test.ts (multiline-aware).
+  const scanModule = new URL('../helpers/fraction-signature-field-scan.ts', import.meta.url).href;
+  let scanFractionFieldReads: (source: string) => string[];
 
-  function scanForFieldReads(source: string): string[] {
-    return source
-      .split('\n')
-      .filter((line) => FRACTION_SIGNATURE_LINE.test(line))
-      .filter((line) => FRACTION_FIELD_ACCESS.test(line));
-  }
+  beforeAll(async () => {
+    ({ scanFractionFieldReads } = await import(scanModule));
+  });
 
   const blockBody = [
     '      Fraction: function (x: FractionType): boolean {',
@@ -195,16 +201,9 @@ describe('F4: the source-scan guard misses a multi-line Fraction signature', () 
     '      },',
   ].join('\n');
 
-  it('does not flag the three multi-line shapes of the original bug', () => {
-    // Documented as a failing expectation: the guard returns no offenders for each shape.
-    expect(scanForFieldReads(blockBody), 'block-body .s/.n read').toEqual([]);
-    expect(scanForFieldReads(arrowBody), 'arrow-body .s read').toEqual([]);
-    expect(scanForFieldReads(bracketRead), "bracket ['s'] read").toEqual([]);
-  });
-
-  it('SHOULD flag each shape (asserts the guard is not vacuous — fails today)', () => {
-    expect(scanForFieldReads(blockBody).length).toBeGreaterThan(0);
-    expect(scanForFieldReads(arrowBody).length).toBeGreaterThan(0);
-    expect(scanForFieldReads(bracketRead).length).toBeGreaterThan(0);
+  it('flags each multi-line shape of the original #1551 bug', () => {
+    expect(scanFractionFieldReads(blockBody).length).toBeGreaterThan(0);
+    expect(scanFractionFieldReads(arrowBody).length).toBeGreaterThan(0);
+    expect(scanFractionFieldReads(bracketRead).length).toBeGreaterThan(0);
   });
 });

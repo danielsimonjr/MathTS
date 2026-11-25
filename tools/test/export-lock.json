@@ -13430,6 +13430,9 @@
       "createCompareText": {
         "kind": "function"
       },
+      "createCompatPow": {
+        "kind": "function"
+      },
       "createCompile": {
         "kind": "function"
       },

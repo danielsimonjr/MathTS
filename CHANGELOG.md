@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Fraction sign predicates (#1551):** `isPositive` and `isNegative` now call `Fraction.isPositive()` / `Fraction.isNegative()` instead of reading undefined `fraction.js` fields `.s`/`.n`. The same field-name reads on Fraction values in `isInteger` (`.d`), `fix` (`.s`) and the `predictable`-mode `pow` fraction shortcut (`.d`/`.n`) now use the Fraction's own API (`isInteger()`, `isNegative()`, `numerator`/`denominator`), so `isInteger(fraction(2))` is `true` and `fix(fraction(-5, 2))` takes the mathjs ceil-for-negative rule.
+- **Fraction sign fields and compat rational pow (#1551):** Compat instance shims route `isPositive`, `isNegative`, `isInteger`, `fix`, and Fraction×Fraction `pow` through the MathTS `Fraction` API; patch `Unit.typeConverters.BigNumber`; compat `format` prints whole fractions as `n/1` like mathjs 15.3.0. Native `core` / `functions` behavior is unchanged.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 
