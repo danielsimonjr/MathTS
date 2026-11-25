@@ -75,10 +75,7 @@ export function checkLcovAgainstFloor(lcovPath, floor) {
   return { ok: true, measured };
 }
 
-/**
- * Classifies a package `test:coverage` script by runner for floor enforcement.
- * @param {string} script
- */
+/** Classifies a `test:coverage` script by what it measures: `vitest`, `bun`, or `script`. */
 export function runnerForScript(script) {
   // `--coverage` is what every measured runner passes (bun test --coverage, vitest run
   // --coverage). A script without it runs the suite but measures nothing (assembly's node
