@@ -241,14 +241,39 @@ if (success && workbook) {
 
 ### Functions (24)
 
-`addCell`, `buildDependencyGraph`, `createExecutor`, `detectCellType`, `detectCycles`, `editCell`, `formatResult`, `getAncestors`, `getDependents`, `handleRequest`, `mathMLToSVG`, `moveCell`, `parseWorkbook`, `removeCell`, `renameCell`, `runWorkbookWithTimeout`, `serializeWorkbook`, `setMetadata`, `stripOutputs`, `toDOT`, `toMermaid`, `topologicalSort`, `toTeX`, `WorkbookTimeoutError`
+`addCell`
+`buildDependencyGraph`
+`createExecutor`
+`detectCellType`
+`detectCycles`
+`editCell`
+`formatResult`
+`getAncestors`
+`getDependents`
+`handleRequest`
+`mathMLToSVG`
+`moveCell`
+`parseWorkbook`
+`removeCell`
+`renameCell`
+`runWorkbookWithTimeout`
+`serializeWorkbook`
+`setMetadata`
+`stripOutputs`
+`toDOT`
+`toMermaid`
+`topologicalSort`
+`toTeX`
+`WorkbookTimeoutError`
 
 ### Constants & values (2)
 
-`SCHEMA_VERSION`, `VERSION`
+`SCHEMA_VERSION`
+`VERSION`
 
 ### Classes & types (2)
 
-`Session`, `WorkbookExecutor`
+`Session`
+`WorkbookExecutor`
 
 <!-- END GENERATED EXPORT INDEX -->

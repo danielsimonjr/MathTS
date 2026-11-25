@@ -296,10 +296,89 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 
 ### Functions (74)
 
-`compile`, `compileExpression`, `compileExpressionWithDeps`, `createAccessorNode`, `createAndTransform`, `createArrayNode`, `createAssignmentNode`, `createBitAndTransform`, `createBitOrTransform`, `createBlockNode`, `createColumnTransform`, `createConcatTransform`, `createConditionalNode`, `createConstantNode`, `createCumSumTransform`, `createDiffTransform`, `createEvaluate`, `createFilterTransform`, `createForEachTransform`, `createFunctionAssignmentNode`, `createFunctionNode`, `createHelpClass`, `createIndexNode`, `createIndexTransform`, `createMapSlicesTransform`, `createMapTransform`, `createMaxTransform`, `createMeanTransform`, `createMinTransform`, `createNode`, `createNullishTransform`, `createObjectNode`, `createOperatorNode`, `createOrTransform`, `createParenthesisNode`, `createParse`, `createParser`, `createParserClass`, `createPrintTransform`, `createQuantileSeqTransform`, `createRangeNode`, `createRangeTransform`, `createRelationalNode`, `createRowTransform`, `createScalarBuilder`, `createStdTransform`, `createSubsetTransform`, `createSumTransform`, `createSymbolNode`, `createVarianceTransform`, `enumerateScalars`, `escapeMathML`, `evaluate`, `forEachScalar`, `getAssociativity`, `getOperator`, `getPrecedence`, `getStringSubset`, `isAssociativeWith`, `mapScalar`, `mathMLDocument`, `mathMLError`, `parse`, `ScalarBuildError`, `scalarCanonical`, `scalarCanonicalKey`, `scalarComplexity`, `scalarDepth`, `scalarEquals`, `scalarGrammarAccepts`, `scalarSize`, `scalarSymbols`, `setStringSubset`, `toMathMLSymbol`
+`compile`
+`compileExpression`
+`compileExpressionWithDeps`
+`createAccessorNode`
+`createAndTransform`
+`createArrayNode`
+`createAssignmentNode`
+`createBitAndTransform`
+`createBitOrTransform`
+`createBlockNode`
+`createColumnTransform`
+`createConcatTransform`
+`createConditionalNode`
+`createConstantNode`
+`createCumSumTransform`
+`createDiffTransform`
+`createEvaluate`
+`createFilterTransform`
+`createForEachTransform`
+`createFunctionAssignmentNode`
+`createFunctionNode`
+`createHelpClass`
+`createIndexNode`
+`createIndexTransform`
+`createMapSlicesTransform`
+`createMapTransform`
+`createMaxTransform`
+`createMeanTransform`
+`createMinTransform`
+`createNode`
+`createNullishTransform`
+`createObjectNode`
+`createOperatorNode`
+`createOrTransform`
+`createParenthesisNode`
+`createParse`
+`createParser`
+`createParserClass`
+`createPrintTransform`
+`createQuantileSeqTransform`
+`createRangeNode`
+`createRangeTransform`
+`createRelationalNode`
+`createRowTransform`
+`createScalarBuilder`
+`createStdTransform`
+`createSubsetTransform`
+`createSumTransform`
+`createSymbolNode`
+`createVarianceTransform`
+`enumerateScalars`
+`escapeMathML`
+`evaluate`
+`forEachScalar`
+`getAssociativity`
+`getOperator`
+`getPrecedence`
+`getStringSubset`
+`isAssociativeWith`
+`mapScalar`
+`mathMLDocument`
+`mathMLError`
+`parse`
+`ScalarBuildError`
+`scalarCanonical`
+`scalarCanonicalKey`
+`scalarComplexity`
+`scalarDepth`
+`scalarEquals`
+`scalarGrammarAccepts`
+`scalarSize`
+`scalarSymbols`
+`setStringSubset`
+`toMathMLSymbol`
 
 ### Constants & values (7)
 
-`defaultMathScope`, `embeddedDocs`, `EXPRESSION_SCOPE_OMIT`, `keywords`, `properties`, `SCALAR_FUNCTION_LOWERING`, `SCALAR_FUNCTIONS`
+`defaultMathScope`
+`embeddedDocs`
+`EXPRESSION_SCOPE_OMIT`
+`keywords`
+`properties`
+`SCALAR_FUNCTION_LOWERING`
+`SCALAR_FUNCTIONS`
 
 <!-- END GENERATED EXPORT INDEX -->

@@ -179,6 +179,17 @@ const math = create(all);
 math.add(1, 2); // delegates to @danielsimonjr/mathts-core types + operations
 ```
 
+**Conflict-resistant export surface.** `compat/src/index.ts` is wiring only: the big
+function re-export list lives in `compat/src/function-reexports.ts` (one name per
+line, sorted — insert a new function at its sorted position), and the
+default-instance and named parity wrappers live in
+`compat/src/named-instance-exports.ts` (add a new wrapper group as its own file
+and re-export it from `index.ts`). Parallel PRs that each add an export used to
+conflict on the shared `index.ts` lines. `compat/tests/parity/known-gaps/` holds
+one JSON file per issue group (`known-gaps/index.ts` merges them) for the same
+reason: append gap labels only to the issue's own file. The surface is pinned by
+`tools/test/export-lock.json`, the packed-consumer checks and the parity harness.
+
 ### Workbook Runtime
 
 Headless runtime for YAML notebooks (`.mtsw` files). Code/test cells evaluate
@@ -297,6 +308,8 @@ The **active graph** (everything reachable from each package's `src/index.ts`) i
 ## Versioning
 
 Uses [Changesets](https://github.com/changesets/changesets) for version management. Config in `.changeset/config.json` with `"access": "public"`.
+
+**Changelog fragments, not hand-edited `CHANGELOG.md`.** Every PR that changes release-relevant code adds one `changelog-fragments/YYYY-MM-DD-<slug>.md` file (one `### Added|Changed|Fixed|…` heading plus its bullets; format in `changelog-fragments/README.md`). Do not hand-edit the root `CHANGELOG.md` `[Unreleased]` section: its top line is where every parallel PR used to insert a bullet, so those edits conflict and force re-merges and full CI reruns. The version PR assembles the pending fragments into `CHANGELOG.md` newest first and deletes them (`bun run version-packages` runs `tools/release/assemble-changelog.mjs` after `changeset version`). The CI gate `tools/test/check-changelog-fragment.mjs` (Compile & Lint, pull_request only) requires a fragment for any PR whose changed files are not all docs-only (markdown, `docs/`, `.changeset/`, `changelog-fragments/`, `.github/`, repo metadata dotfiles); a direct `CHANGELOG.md` edit is still accepted while in-flight PRs transition, and the assembler leaves such edits in place. Package `CHANGELOG.md` files stay changeset-owned, as before.
 
 Tagging, GitHub Releases, and npm publish do not run unless the repository Actions variable `RELEASES_ENABLED` is exactly the string `true` (unset means off). The Release workflow still opens or updates the “chore: release packages” version PR; leave that PR unmerged; do not set `RELEASES_ENABLED` as part of this work; do not tag or publish by hand. Re-enable tagging and publish by setting `RELEASES_ENABLED=true`; do not delete the workflows. `.github/workflows/publish.yml` checks the same variable on `workflow_call`, `workflow_dispatch`, and `release: published`.
 

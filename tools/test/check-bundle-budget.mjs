@@ -19,8 +19,18 @@
  *     inlined (not external). `functions/evaluate` resolves any function name in an expression,
  *     so it needs the whole function table; its size equals the barrel's within 1 percent
  *     (dogfood #930), and the compat shim carries the same table. Each case lists its import
- *     line, platform and bytes in the budget file; `--write` keeps the list and refreshes the bytes.
+ *     line, platform and ceiling in the budget file; `--write` keeps the list and refreshes it.
  * `--root <dir>`, `--budget <file>` and `--lock <file>` point it at a fixture.
+ *
+ * The budget is a per-entry CEILING, not an exact byte count. Two parallel PRs that each touch
+ * output sizes used to regenerate this file with exact bytes and conflict on every such edit;
+ * a ceiling leaves headroom, so ordinary size wiggles change no line and PRs rarely touch the
+ * file at all. `ceilingFor` rounds the measured size up to the next multiple of a step that
+ * scales with the size (2% rounded to a power of two, at least 256 bytes), so the guaranteed
+ * detection threshold of a growth stays near 2% + one step and a real regression still fails
+ * CI. A shrink never fails: a smaller output is an improvement, and pinning it would put the
+ * exact-byte conflict back. The structural checks keep their strength: a file that appears or
+ * disappears, a tree-shake flip and a sentinel returning all fail, in both directions.
  */
 import { buildSync } from 'esbuild';
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -29,18 +39,75 @@ import { fileURLToPath } from 'node:url';
 import { staticImports } from './dist-node-imports.mjs';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 
-const TOLERANCE = { bytes: 512, ratio: 0.01 };
 const TREE_SHAKE_RATIO = 0.8;
 const SENTINELS = { '@danielsimonjr/mathts-core': 'kilogram' };
 
 /**
- * Is true when the actual size differs from the budget by more than the tolerance.
- * @param {number} budget
- * @param {number} actual
- * @param {{ bytes: number, ratio: number }} tolerance
+ * The byte ceiling recorded for a measured size: the next multiple of a step
+ * strictly above the size, where the step is 2% of the size rounded to a power
+ * of two (at least 256 bytes). `ceiling - bytes` is between 1 and one step, so
+ * a growth beyond the ceiling always fails and the recorded value survives
+ * ordinary wiggle.
+ * @param {number} bytes
+ * @returns {number}
  */
-export function exceedsTolerance(budget, actual, tolerance) {
-  return Math.abs(actual - budget) > Math.max(tolerance.bytes, budget * tolerance.ratio);
+export function ceilingFor(bytes) {
+  const scaled = Math.max(bytes * 0.02, 1);
+  const step = Math.max(256, 2 ** Math.round(Math.log2(scaled)));
+  return Math.ceil((bytes + 1) / step) * step;
+}
+
+/**
+ * Is true when the actual size no longer fits the ceiling.
+ * @param {number} ceiling
+ * @param {number} actual
+ */
+export function exceedsCeiling(ceiling, actual) {
+  return actual > ceiling;
+}
+
+/** Largest shrink ratio between implied recorded size and live size before a ceiling is rejected as hand-loosened. */
+const MAX_IMPLIED_SHRINK_RATIO = 10;
+
+/**
+ * Smallest byte size whose {@link ceilingFor} value equals `ceiling`.
+ * @param {number} ceiling
+ * @returns {number}
+ */
+export function minimumBytesForCeiling(ceiling) {
+  let lo = 0;
+  let hi = ceiling;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (ceilingFor(mid) < ceiling) lo = mid + 1;
+    else hi = mid;
+  }
+  while (lo > 0 && ceilingFor(lo - 1) === ceiling) lo--;
+  return lo;
+}
+
+/**
+ * Returns a failure message when `maxBytes` is not `ceilingFor` of the size it was written from.
+ * @param {string} label
+ * @param {number} maxBytes
+ * @param {number} actual
+ * @returns {string | null}
+ */
+export function loosenedCeilingFailure(label, maxBytes, actual) {
+  if (actual > maxBytes) return null;
+  const tight = ceilingFor(actual);
+  if (maxBytes <= tight) return null;
+  const recorded = minimumBytesForCeiling(maxBytes);
+  if (ceilingFor(recorded) !== maxBytes) {
+    if (maxBytes / tight > MAX_IMPLIED_SHRINK_RATIO) {
+      return `${label}: ceiling ${maxBytes} looser than ceilingFor(${actual})=${tight}`;
+    }
+    return null;
+  }
+  if (recorded <= actual) {
+    return `${label}: ceiling ${maxBytes} must be ceilingFor(${actual})=${tight}`;
+  }
+  return null;
 }
 
 /**
@@ -209,7 +276,9 @@ export function duplicateInstalls(root, inputs) {
     const byVersion = new Map();
     for (const dir of dirs) {
       const manifest = join(root, dir, 'package.json');
-      const version = existsSync(manifest) ? String(JSON.parse(readFileSync(manifest, 'utf8')).version) : '?';
+      const version = existsSync(manifest)
+        ? String(JSON.parse(readFileSync(manifest, 'utf8')).version)
+        : '?';
       byVersion.set(version, [...(byVersion.get(version) ?? []), dir]);
     }
     for (const [version, list] of byVersion) {
@@ -266,21 +335,22 @@ export function measureBudget(root, lock, bundleCases = []) {
 /**
  * List how a fresh measurement differs from the committed budget.
  * @param {ReturnType<typeof measureBudget>} live
- * @param {{ tolerance: { bytes: number, ratio: number }, files: Record<string, number>, entries: Record<string, any> }} budget
+ * @param {{ files: Record<string, number>, entries: Record<string, any>, bundles?: { label: string, maxBytes: number }[] }} budget
  * @returns {string[]} empty when they agree
  */
 export function compareBudget(live, budget) {
   /** @type {string[]} */
   const failures = [];
-  if (JSON.stringify(budget.tolerance) !== JSON.stringify(TOLERANCE)) {
-    failures.push(`tolerance must stay ${JSON.stringify(TOLERANCE)}`);
-  }
 
-  for (const [file, expected] of Object.entries(budget.files)) {
+  for (const [file, ceiling] of Object.entries(budget.files)) {
     const actual = live.files[file];
     if (actual === undefined) failures.push(`${file}: in the budget but not built`);
-    else if (exceedsTolerance(expected, actual, budget.tolerance)) {
-      failures.push(`${file}: ${actual} bytes, budget ${expected}`);
+    else {
+      if (exceedsCeiling(ceiling, actual)) {
+        failures.push(`${file}: ${actual} bytes, ceiling ${ceiling}`);
+      }
+      const loosened = loosenedCeilingFailure(file, ceiling, actual);
+      if (loosened) failures.push(loosened);
     }
   }
   for (const file of Object.keys(live.files)) {
@@ -306,13 +376,31 @@ export function compareBudget(live, budget) {
     if (!(file in budget.entries)) failures.push(`${file}: measured but not in the budget`);
   }
 
-  const liveBundles = new Map((live.bundles ?? []).map((b) => [b.label, b.bytes]));
+  const liveBundles = new Map((live.bundles ?? []).map((b) => [b.label, b]));
+  const budgetBundleLabels = new Set();
   for (const expected of budget.bundles ?? []) {
-    const actual = liveBundles.get(expected.label);
-    if (actual === undefined)
+    budgetBundleLabels.add(expected.label);
+    const liveBundle = liveBundles.get(expected.label);
+    if (!liveBundle)
       failures.push(`bundle ${expected.label}: in the budget but not measured`);
-    else if (exceedsTolerance(expected.bytes, actual, budget.tolerance)) {
-      failures.push(`bundle ${expected.label}: ${actual} bytes, budget ${expected.bytes}`);
+    else if (expected.maxBytes === undefined) {
+      failures.push(`bundle ${expected.label}: missing maxBytes ceiling`);
+    } else {
+      const actual = liveBundle.bytes;
+      if (exceedsCeiling(expected.maxBytes, actual)) {
+        failures.push(`bundle ${expected.label}: ${actual} bytes, ceiling ${expected.maxBytes}`);
+      }
+      const loosened = loosenedCeilingFailure(
+        `bundle ${expected.label}`,
+        expected.maxBytes,
+        actual
+      );
+      if (loosened) failures.push(loosened);
+    }
+  }
+  for (const liveBundle of live.bundles ?? []) {
+    if (!budgetBundleLabels.has(liveBundle.label)) {
+      failures.push(`bundle ${liveBundle.label}: measured but not in the budget`);
     }
   }
   return failures;
@@ -353,9 +441,17 @@ export function main(args) {
 
   if (args.includes('--write')) {
     const budget = {
-      note: 'Bytes of bun run build output, before build:prod: each exports[].import file plus the files it statically imports. A change beyond the tolerance updates this file in the same PR.',
-      tolerance: TOLERANCE,
-      ...live,
+      note: 'Per-entry byte ceilings of bun run build output, before build:prod: each exports[].import file plus the files it statically imports. A growth past a ceiling updates this file in the same PR; ordinary size wiggle changes no line (see ceilingFor).',
+      files: Object.fromEntries(
+        Object.entries(live.files).map(([file, bytes]) => [file, ceilingFor(bytes)])
+      ),
+      entries: live.entries,
+      bundles: live.bundles.map(({ label, import: line, platform, bytes }) => ({
+        label,
+        import: line,
+        platform,
+        maxBytes: ceilingFor(bytes),
+      })),
     };
     writeFileSync(budgetPath, `${JSON.stringify(budget, null, 2)}\n`);
     console.log(`Wrote ${budgetPath}`);
