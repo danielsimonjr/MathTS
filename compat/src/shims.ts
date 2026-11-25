@@ -464,7 +464,7 @@ export const multiply = makeArithmetic(
   false,
   (a, b) => a * b
 ) as NumericStringArithmetic & typeof _multiply;
-export const dotMultiply: typeof _dotMultiply = withMathjsComplexBinary(
+const compatDotMultiply = withMathjsComplexBinary(
   _dotMultiply as BinaryArithmetic,
   'mul'
 ) as typeof _dotMultiply;
@@ -873,4 +873,4 @@ export const shims: Omit<typeof _shims, 'add' | 'sin'> & {
   add: NumericStringArithmetic & PublicAdd;
   sin: PublicSin;
   dotMultiply: typeof _dotMultiply;
-} = { ..._shims, dotMultiply };
+} = { ..._shims, dotMultiply: compatDotMultiply };

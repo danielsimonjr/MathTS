@@ -3,8 +3,8 @@
  */
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { Complex, mathTyped } from '@danielsimonjr/mathts-core';
-import { createFreqz } from './all-factories.js';
-import { withMathjsComplexBinary } from './mathjs-complex.js';
+import { createFreqz, createZpk2tf } from './all-factories.js';
+import { withMathjsComplexBinary, wrapZpk2tfGainTypes } from './mathjs-complex.js';
 
 const compatAdd = withMathjsComplexBinary(
   mathFunctions.add as (a: unknown, b: unknown) => unknown,
@@ -29,6 +29,14 @@ const signalScope = {
   divide: compatDivide,
 };
 
+/** `freqz` factory wired with complex.js add/multiply/divide. */
 export const compatFreqz = createFreqz(
   signalScope as Parameters<typeof createFreqz>[0]
 ) as typeof mathFunctions.freqz;
+
+/** `zpk2tf` factory wired with complex.js add/multiply; gain types match mathjs. */
+export const compatZpk2tf = wrapZpk2tfGainTypes(
+  createZpk2tf(
+    signalScope as Parameters<typeof createZpk2tf>[0]
+  ) as unknown as typeof mathFunctions.zpk2tf
+) as unknown as typeof mathFunctions.zpk2tf;

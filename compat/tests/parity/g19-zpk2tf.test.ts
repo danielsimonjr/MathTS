@@ -31,4 +31,18 @@ describe('zpk2tf parity (#1589)', () => {
       (L.zpk2tf as (z: unknown, p: unknown, k?: unknown) => unknown)([1, 2], [-1, -2], 1)
     );
   });
+
+  for (const config of [{}, { number: 'BigNumber' }, { number: 'Fraction' }] as const) {
+    const tag = JSON.stringify(config);
+    it(`1-D zpk2tf matches the oracle under ${tag}`, () => {
+      expectSame(`zpk2tf([1,2],[-1,-2],1) ${tag}`, config, (L) =>
+        (L.zpk2tf as (z: unknown, p: unknown, k?: unknown) => unknown)([1, 2], [-1, -2], 1)
+      );
+    });
+    it(`evaluate('zpk2tf([1, 2], [-1, -2], 1)') matches under ${tag}`, () => {
+      expectSame(`evaluate zpk2tf ${tag}`, config, (L) =>
+        (L.evaluate as (s: string) => unknown)('zpk2tf([1, 2], [-1, -2], 1)')
+      );
+    });
+  }
 });

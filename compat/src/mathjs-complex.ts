@@ -3,7 +3,6 @@
  * Native `@danielsimonjr/mathts-core` `Complex` keeps IEEE semantics.
  */
 import { Complex, isComplex, isBigNumber, isFraction } from '@danielsimonjr/mathts-core';
-import type { TypedFunction } from '@danielsimonjr/mathts-core';
 
 function riemannNonFinite(re: number, im: number): boolean {
   return !Number.isFinite(re) || !Number.isFinite(im);
@@ -21,7 +20,7 @@ function asComplex(value: unknown): Complex | null {
 }
 
 /** complex.js `add` for two Complex operands. */
-export function complexJsAdd(a: Complex, b: Complex): Complex {
+function complexJsAdd(a: Complex, b: Complex): Complex {
   const tInf = riemannNonFinite(a.re, a.im);
   const zInf = riemannNonFinite(b.re, b.im);
   if (tInf || zInf) {
@@ -31,7 +30,8 @@ export function complexJsAdd(a: Complex, b: Complex): Complex {
   return new Complex(a.re + b.re, a.im + b.im);
 }
 
-export function complexJsSubtract(a: Complex, b: Complex): Complex {
+/** complex.js `sub` for two Complex operands. */
+function complexJsSubtract(a: Complex, b: Complex): Complex {
   const tInf = riemannNonFinite(a.re, a.im);
   const zInf = riemannNonFinite(b.re, b.im);
   if (tInf || zInf) {
@@ -41,7 +41,8 @@ export function complexJsSubtract(a: Complex, b: Complex): Complex {
   return new Complex(a.re - b.re, a.im - b.im);
 }
 
-export function complexJsMultiply(a: Complex, b: Complex): Complex {
+/** complex.js `mul` for two Complex operands. */
+function complexJsMultiply(a: Complex, b: Complex): Complex {
   const tInf = riemannNonFinite(a.re, a.im);
   const zInf = riemannNonFinite(b.re, b.im);
   const tZero = riemannZero(a.re, a.im);
@@ -52,7 +53,8 @@ export function complexJsMultiply(a: Complex, b: Complex): Complex {
   return new Complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
 }
 
-export function complexJsDivide(a: Complex, b: Complex): Complex {
+/** complex.js `div` for two Complex operands. */
+function complexJsDivide(a: Complex, b: Complex): Complex {
   const tInf = riemannNonFinite(a.re, a.im);
   const zInf = riemannNonFinite(b.re, b.im);
   const tZero = riemannZero(a.re, a.im);
@@ -84,7 +86,12 @@ export function withMathjsComplexBinary(
   };
 }
 
-export function wrapZpk2tfGainTypes<T extends TypedFunction>(zpk2tf: T): T {
+/**
+ * mathjs `zpk2tf` rejects BigNumber/Fraction gain (typed `number` only). Wrap so the
+ * TypeError text matches the oracle without changing native `functions` signatures.
+ */
+export function wrapZpk2tfGainTypes<T>(zpk2tf: T): T {
+  const impl = zpk2tf as (...a: unknown[]) => unknown;
   const wrapped = function (this: unknown, ...args: unknown[]): unknown {
     if (args.length >= 3 && (isBigNumber(args[2]) || isFraction(args[2]))) {
       const actual = isBigNumber(args[2]) ? 'BigNumber' : 'Fraction';
@@ -92,11 +99,11 @@ export function wrapZpk2tfGainTypes<T extends TypedFunction>(zpk2tf: T): T {
         `Unexpected type of argument in function zpk2tf (expected: number or bigint or string or boolean, actual: ${actual}, index: 2)`
       );
     }
-    return (zpk2tf as (...a: unknown[]) => unknown).apply(this, args);
+    return impl.apply(this, args);
   };
-  for (const key of Reflect.ownKeys(zpk2tf)) {
+  for (const key of Reflect.ownKeys(zpk2tf as object)) {
     if (key === 'prototype') continue;
-    const desc = Object.getOwnPropertyDescriptor(zpk2tf, key);
+    const desc = Object.getOwnPropertyDescriptor(zpk2tf as object, key);
     if (desc) Object.defineProperty(wrapped, key, desc);
   }
   return wrapped as T;
