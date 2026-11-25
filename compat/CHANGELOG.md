@@ -1,5 +1,18 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.21
+
+### Patch Changes
+
+- 55d5ee9: Match the MathJS log-gamma domain for negative real values and infinite inputs.
+- 55d5ee9: Accept numeric text in multiplication and beside array and matrix operands in addition and multiplication.
+- 55d5ee9: Use MathJS dispatch for arg, conj, im, and re with real values, fractions, and collections.
+- 55d5ee9: Accept MathJS mixed, repeating, and colon notation when parsing fraction strings.
+- Updated dependencies [55d5ee9]
+- Updated dependencies [55d5ee9]
+- Updated dependencies [55d5ee9]
+  - @danielsimonjr/mathts-functions@0.89.19
+
 ## 0.7.20
 
 ### Patch Changes

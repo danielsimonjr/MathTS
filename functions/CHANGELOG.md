@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.19
+
+### Patch Changes
+
+- 55d5ee9: Match the MathJS log-gamma domain for negative real values and infinite inputs.
+- 55d5ee9: Use MathJS dispatch for arg, conj, im, and re with real values, fractions, and collections.
+- 55d5ee9: Accept MathJS mixed, repeating, and colon notation when parsing fraction strings.
+
 ## 0.89.18
 
 ### Patch Changes
