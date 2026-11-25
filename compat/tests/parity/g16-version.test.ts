@@ -66,8 +66,8 @@ describe('G16: version is the emulated mathjs version (#1581)', () => {
     const compat = createCompat(compatAll, {});
     expect(Object.hasOwn(compat, 'compatVersion')).toBe(Object.hasOwn(mathjs, 'compatVersion'));
     expect(Object.hasOwn(compatAll, 'compatVersion')).toBe(Object.hasOwn(all, 'compatVersion'));
-    expect(compat.compatVersion).toBeUndefined();
-    expect(mathjs.compatVersion).toBeUndefined();
+    expect('compatVersion' in compat).toBe(false);
+    expect('compatVersion' in mathjs).toBe(false);
   });
 
   it('version is "15.3.0" under create(all, configs) that the parity harness uses', () => {
@@ -101,8 +101,11 @@ describe('G16: version is the emulated mathjs version (#1581)', () => {
     ] as const;
     const mathjs = create(all, {});
     const compat = createCompat(compatAll, {});
+    const helpOf = (help: (search: string) => unknown, name: string): string => String(help(name));
     for (const name of names) {
-      expect(String(compat.help(name))).toBe(String(mathjs.help(name)));
+      expect(helpOf(compat.help as unknown as (search: string) => unknown, name)).toBe(
+        helpOf(mathjs.help as unknown as (search: string) => unknown, name)
+      );
     }
   });
 
