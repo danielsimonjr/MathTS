@@ -35,6 +35,7 @@ import type {
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import { compatMathjsEigs } from './eigs-mathjs.js';
 
 // =============================================================================
 // Configuration
@@ -562,6 +563,9 @@ export function create(
     Infinity: shims.Infinity,
     NaN: shims.NaN,
 
+    // #1561 — mathjs 15.3.0 eigs (precision, vector scale, value order); native solver stays in functions.
+    eigs: compatMathjsEigs,
+
     // Placeholder; rebound below once `instance` exists so chain methods can
     // resolve against the full surfaced namespace.
     chain: (() => {
@@ -928,6 +932,7 @@ export const docs = /* #__PURE__ */ Object.fromEntries(
 );
 
 export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+export { compatMathjsEigs as eigs };
 
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';
@@ -991,7 +996,6 @@ export {
   dotDivide,
   dotMultiply,
   dotPow,
-  eigs,
   equal,
   equalScalar,
   erf,

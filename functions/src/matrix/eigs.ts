@@ -749,6 +749,7 @@ export const createEigs = /* #__PURE__ */ factory(
           block.forEach((row, i) => {
             vector[row] = (pair.vector as Scalar[])[i];
           });
+          let blockVectorComplete = true;
           for (const anc of ancestors) {
             // (A_jj − λ)·x = −(coupling into the solved coordinates)
             const rows: number[] = blocks[anc]!;
@@ -778,18 +779,17 @@ export const createEigs = /* #__PURE__ */ factory(
             }
             const x = solveSmallBlock(M, rhs, prec, zero as Scalar);
             if (x === null) {
-              // The coupled coordinates cannot be completed for this
-              // eigenvalue: keep the block's own vector (zeros outside) and
-              // let the soundness check decide — a coupling that cancels to
-              // rounding keeps the pair, a genuine defect sends the whole
-              // result to the robust solver.
-              continue;
+              // A genuine defect: no consistent back-coupling for this
+              // eigenvalue. Omit the direction instead of fabricating a vector
+              // outside the block (#1561, dogfood-1242).
+              blockVectorComplete = false;
+              break;
             }
             rows.forEach((r, i) => {
               vector[r] = x[i]!;
             });
           }
-          eigenvectors.push({ value: lambda, vector });
+          if (blockVectorComplete) eigenvectors.push({ value: lambda, vector });
         }
       }
       const sorted = sortScalars(values);

@@ -63,7 +63,7 @@ describe('eigs keeps a complex pair at every matrix scale (#1186)', () => {
     }
   );
 
-  it.each([1e-150, 1, 1e20])(
+  it.each([1e-150, 1e-20, 1, 1e20])(
     'a near-real pair (relative imaginary part 1e-8) at scale %s stays complex',
     (s) => {
       const A = [
@@ -77,21 +77,6 @@ describe('eigs keeps a complex pair at every matrix scale (#1186)', () => {
       }
     }
   );
-
-  it('a near-real pair (relative imaginary part 1e-8) at scale 1e-20 (#1561)', () => {
-    // #1561 removed the native solver, whose balanced solve kept this pair
-    // complex at the 1e-20 scale. The mathjs factory iteration — the public
-    // `eigs` since #1561, and the mathjs 15.3.0 oracle alike — rounds the pair
-    // to the repeated real value 1e-20 there; the same pair stays complex at
-    // the scales above. The assertion pins the factory (and oracle) behavior.
-    const s = 1e-20;
-    const A = [
-      [s, -1e-8 * s],
-      [1e-8 * s, s],
-    ];
-    const r = eigsOf(A);
-    expect(r.values.map((v) => asC(v).re)).toEqual([s, s]);
-  });
 
   it.each([1e-150, 1e-20, 1, 1e20, 1e150])('a defective real block at scale %s stays real', (s) => {
     const A = [
@@ -164,31 +149,24 @@ describe('eigs keeps a genuine near-real pair and rounds only rounding noise (#1
       [1, -1e-12],
       [1e-12, 1],
     ]);
-    // #1561: the pair comes from the factory's 2x2 solve, whose members are
-    // [tr/2 + sqrt/2, tr/2 - sqrt/2] — the +i member first, as in mathjs. The
-    // former native order (the -i member first) belonged to the removed
-    // bypass.
     expect(r.values.map(asC)).toEqual([
-      { re: 1, im: 1e-12 },
       { re: 1, im: -1e-12 },
+      { re: 1, im: 1e-12 },
     ]);
   });
 
-  it('a similarity-transformed Jordan block that splits into a pair (#1561)', () => {
-    // P * [[1, 1], [0, 1]] * inv(P): an ill-conditioned double eigenvalue whose
-    // true spectrum is 1 +- 2.1e-8i. The native solver split it; the mathjs
-    // factory iteration — the public `eigs` since #1561, and the mathjs 15.3.0
-    // oracle alike — rounds it to the repeated real value 1. The eigenvalue
-    // stays 1 and the eigenvector keeps a small residual.
+  it('a similarity-transformed Jordan block that splits into a pair stays a pair', () => {
+    // P * [[1, 1], [0, 1]] * inv(P): the solver splits the defective 1 into 1 +- 2.1e-8i.
     const A = [
       [2.3013132018361397, -1.2122386417804276],
       [1.3969329065322387, -0.30131320183613985],
     ];
     const r = eigsOf(A);
     for (const v of r.values) {
-      expect(asC(v).re).toBeCloseTo(1, 12);
+      expect(typeof v).not.toBe('number');
+      expect(Math.abs(asC(v).im)).toBeGreaterThan(1e-9);
     }
-    for (const p of r.eigenvectors) expect(relResidual(A, p.value, p.vector)).toBeLessThan(1e-9);
+    for (const p of r.eigenvectors) expect(relResidual(A, p.value, p.vector)).toBeLessThan(1e-14);
   });
 
   it('a repeated real eigenvalue whose copies come out as a noise pair is real, with independent vectors', () => {
@@ -200,13 +178,7 @@ describe('eigs keeps a genuine near-real pair and rounds only rounding noise (#1
     ];
     const r = eigsOf(A);
     for (const v of r.values) expect(typeof v).toBe('number');
-    // #1561: the third eigenvalue carries the factory's shifted-QR rounding
-    // (measured 2.000000000000003); the native bypass returned an exact 2.
-    expect(r.values as number[]).toEqual([
-      expect.closeTo(1, 12),
-      expect.closeTo(1, 12),
-      expect.closeTo(2, 12),
-    ]);
+    expect(r.values as number[]).toEqual([expect.closeTo(1, 12), expect.closeTo(1, 12), 2]);
     expect((eigs(A, { eigenvectors: false }) as { values: unknown[] }).values).toEqual(r.values);
     expect(rank(r.eigenvectors.map((p) => p.vector))).toBe(3);
     for (const p of r.eigenvectors) expect(relResidual(A, p.value, p.vector)).toBeLessThan(1e-14);

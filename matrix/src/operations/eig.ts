@@ -793,6 +793,41 @@ function eigGeneral(
 }
 
 /**
+ * For a symmetric matrix whose spectrum spans many orders of magnitude, hqr2 can
+ * return an eigenvalue that is slightly off even when the eigenvector is accurate.
+ * A Rayleigh quotient on the computed eigenvector recovers the correct eigenvalue
+ * (#1561 / mpmath ground truth at 1e15 scale).
+ */
+function refineSymmetricEigenvaluesRayleigh(A: number[][], result: EigResult): void {
+  const n = A.length;
+  let maxAbs = 0;
+  for (const v of result.values) {
+    maxAbs = Math.max(maxAbs, Math.hypot(v.re, v.im));
+  }
+  if (maxAbs < 1e6) return;
+  let minRe = Infinity;
+  for (const v of result.values) {
+    if (v.im === 0) minRe = Math.min(minRe, Math.abs(v.re));
+  }
+  if (!Number.isFinite(minRe) || maxAbs / minRe < 1e6) return;
+  for (let j = 0; j < result.values.length; j++) {
+    const val = result.values[j]!;
+    if (val.im !== 0) continue;
+    if (Math.abs(val.re) > maxAbs * 1e-6) continue;
+    const vr = result.vectors[j]!;
+    let num = 0;
+    let den = 0;
+    for (let i = 0; i < n; i++) {
+      let av = 0;
+      for (let k = 0; k < n; k++) av += A[i]![k]! * vr[k]!;
+      num += vr[i]! * av;
+      den += vr[i]! * vr[i]!;
+    }
+    if (den > 0) result.values[j] = { re: num / den, im: 0 };
+  }
+}
+
+/**
  * Compute eigenvalues and eigenvectors of a square matrix
  * Uses QR algorithm with implicit shifts
  *
@@ -849,7 +884,13 @@ export function eig(matrix: DecompositionMatrixInput, options: EigOptions = {}):
   // the tridiagonal [[2,-1,0],[-1,2,-1],[0,-1,2]] gave [19.05, 2, 0.94]
   // (sum 22 ≠ trace 6) instead of [0.586, 2, 3.414]. hqr2 is correct for
   // symmetric input too (verified vs numpy), so the buggy fast path is removed.
-  return eigGeneral(A, computeVectors, symmetric, maxIterations);
+  const result = eigGeneral(A, computeVectors || symmetric, symmetric, maxIterations);
+  if (symmetric) refineSymmetricEigenvaluesRayleigh(A, result);
+  if (!computeVectors) {
+    result.vectors = eye(n);
+    result.vectorsIm = Array.from({ length: n }, () => new Array<number>(n).fill(0));
+  }
+  return result;
 }
 
 /**

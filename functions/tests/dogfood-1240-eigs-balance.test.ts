@@ -176,11 +176,7 @@ describe('eigs of seeded block-triangular matrices in a random order (#1240)', (
       if (close && complexCount(r) === truth.filter((v) => v.im !== 0).length) right++;
       if (worstResidual(B, r) <= 1e-12 * frobenius(B)) residualOk++;
     }
-    // #1561 removed the native orthes/hqr2 bypass. The factory path decomposes
-    // a block-triangular pattern into its strongly-connected components and
-    // solves each one, which keeps 195 of the 200 spectra here (the mathjs
-    // 15.3.0 oracle keeps 161 of the same 200; the native era kept all 200).
-    expect(right).toBe(195);
+    expect(right).toBe(200);
     expect(residualOk).toBe(200);
   });
 });

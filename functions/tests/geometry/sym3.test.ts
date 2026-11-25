@@ -140,13 +140,8 @@ describe('eigSym3', () => {
       const { values, vectors } = run(m);
       const ref = eigsValues(rowsFromUpper(m));
       const scale = Math.max(1, ...ref.values.map(Math.abs));
-      // Since #1561 the public `eigs` is the mathjs factory, whose values are
-      // sorted by absolute value, not ascending as eigSym3's are; compare the
-      // sorted lists.
-      const valuesSorted = [...values].sort((a, b) => a - b);
-      const refSorted = [...ref.values].sort((a, b) => a - b);
       for (let i = 0; i < 3; i++)
-        expect(Math.abs(valuesSorted[i]! - refSorted[i]!)).toBeLessThanOrEqual(1e-12 * scale);
+        expect(Math.abs(values[i]! - ref.values[i]!)).toBeLessThanOrEqual(1e-12 * scale);
       expectAscending(values);
       expectBasis(vectors);
       expectReconstruct(m, values, vectors);
@@ -155,10 +150,7 @@ describe('eigSym3', () => {
           ...[0, 1, 2].filter((j) => j !== i).map((j) => Math.abs(values[i]! - values[j]!))
         );
         if (gap > 1e-6 * scale) {
-          // Since #1561 the eigs values are sorted by absolute value, so match
-          // the reference eigenvector by eigenvalue, not by index.
-          const j = ref.values.findIndex((x) => Math.abs(x - values[i]!) <= 1e-12 * scale);
-          expect(Math.abs(dot(col(vectors, i), ref.vectors[j]!))).toBeGreaterThanOrEqual(1 - 1e-10);
+          expect(Math.abs(dot(col(vectors, i), ref.vectors[i]!))).toBeGreaterThanOrEqual(1 - 1e-10);
         }
       }
     }

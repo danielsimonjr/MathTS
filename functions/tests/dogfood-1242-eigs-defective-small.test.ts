@@ -151,30 +151,21 @@ describe('eigs of a matrix with a diagonalizable double eigenvalue (#1242)', () 
 });
 
 describe('eigs of a defective block beside a huge entry (#1242)', () => {
-  it('BigNumber [[1e20,0,0],[0,1,1],[0,0,1]] keeps the block eigenvector and the defect (#1561)', () => {
+  it('BigNumber [[1e20,0,0],[0,1,1],[0,0,1]] has two eigenvectors', () => {
     const A = [
       [1e20, 0, 0],
       [0, 1, 1],
       [0, 0, 1],
     ];
     const r = run(A.map((row) => row.map((x) => bignumber(x))));
-    // The block [[1,1],[0,1]] is defective: the native bypass detected the
-    // defect and returned one eigenvector for it (#1561 removed that
-    // detection with the bypass). The block-decomposed factory path returns
-    // the block's planted direction e1 and the coordinate direction e2, whose
-    // residual sits at the coupling 1 over the matrix scale 1e20 — within the
-    // same scale-relative bound this test already applies.
-    expect(r.eigenvectors).toHaveLength(3);
+    expect(r.eigenvectors).toHaveLength(2);
     const huge = r.eigenvectors.filter((p) => toRi(p.value).re > 1e10);
     const small = r.eigenvectors.filter((p) => toRi(p.value).re < 1e10);
     expect(huge).toHaveLength(1);
-    expect(small).toHaveLength(2);
+    expect(small).toHaveLength(1);
     expect(residual(A, huge[0].value, huge[0].vector, 1e20)).toBeLessThan(1e-10);
-    for (const p of small) {
-      // the block has the scale 1
-      expect(residual(A, p.value, p.vector, 1)).toBeLessThan(1.5);
-      expect(residual(A, p.value, p.vector, 1e20)).toBeLessThan(1e-10);
-    }
+    // the block has the scale 1
+    expect(residual(A, small[0].value, small[0].vector, 1)).toBeLessThan(1e-10);
   });
 
   it('the identity matrix and diag(1,1,2) keep all their eigenvectors', () => {

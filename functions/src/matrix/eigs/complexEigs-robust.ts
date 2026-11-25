@@ -1,8 +1,12 @@
 import { isBigNumber } from '@danielsimonjr/mathts-core';
 import { clone } from '../../utils/object.js';
 import { realScale } from '../../utils/real-scale.js';
+import seedrandom from 'seedrandom';
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
+
+/** Deterministic pseudo-random stream for inverse iteration (#1561 compat mathjs port). */
+const eigsRobustRng = seedrandom('mathts-eigs-robust-v1');
 
 /** Scalar types supported by complex eigenvalue computation */
 type Scalar = number | BigNumber | Complex;
@@ -1221,7 +1225,7 @@ export function createComplexEigsRobust({
     // generate random vector with the correct type
     let v: Scalar[] = Array(N)
       .fill(0)
-      .map(() => 2 * Math.random() - 1);
+      .map(() => 2 * eigsRobustRng() - 1);
     if (big) {
       v = v.map((n) => bignumber(n as number));
     }

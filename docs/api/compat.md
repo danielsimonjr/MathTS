@@ -80,6 +80,10 @@ const math = create(all, {
 math.config({ precision: 128 });
 ```
 
+### `eigs` (#1561)
+
+On `create(all)`, `eigs` is the mathjs 15.3.0 factory (precision options, non-unit eigenvector scale, magnitude-ordered values). The native `@danielsimonjr/mathts-functions` export keeps the corrected orthes/hqr2 solver with unit-normalized vectors and ignores a numeric-only `precision` knob; compat loads the mathjs port from `@danielsimonjr/mathts-functions/eigs-mathjs` via `compat/src/eigs-mathjs.ts`.
+
 ---
 
 ## MathInstance API

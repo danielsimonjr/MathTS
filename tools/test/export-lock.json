@@ -4495,6 +4495,9 @@
       "eigs": {
         "kind": "function"
       },
+      "eigsMathjsFactory": {
+        "kind": "function"
+      },
       "eigsh": {
         "kind": "function"
       },
@@ -7816,6 +7819,11 @@
         "kind": "function"
       },
       "reviver": {
+        "kind": "function"
+      }
+    },
+    "./eigs-mathjs": {
+      "eigsMathjsFactory": {
         "kind": "function"
       }
     }
