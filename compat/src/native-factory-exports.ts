@@ -1,9 +1,7 @@
-import {
-  factory_mathjsCompat,
-  help as nativeHelp,
-  replacer,
-} from '@danielsimonjr/mathts-functions';
+import { factory_mathjsCompat, help as nativeHelp } from '@danielsimonjr/mathts-functions';
 import { fractionPart, instanceSymbols } from './instance-symbols.js';
+
+import { compatReplacer as replacer, reviveWithClasses } from './serialization.js';
 
 const factory: typeof factory_mathjsCompat.factory = factory_mathjsCompat.factory;
 const factories = /* #__PURE__ */ factory_mathjsCompat.compatFactoryExports();
@@ -3466,15 +3464,8 @@ const createReviver: ConstructorFactory<(_key: string, value: unknown) => unknow
     'reviver',
     ['classes'],
     ({ classes }: { classes: Record<string, unknown> }) =>
-      (_key: string, value: unknown): unknown => {
-        if (typeof value !== 'object' || value === null || !Object.hasOwn(value, 'mathjs')) {
-          return value;
-        }
-        const tag = Reflect.get(value, 'mathjs');
-        if (typeof tag !== 'string' || !Object.hasOwn(classes, tag)) return value;
-        const constructor = classes[tag] as { fromJSON?: (input: unknown) => unknown } | undefined;
-        return typeof constructor?.fromJSON === 'function' ? constructor.fromJSON(value) : value;
-      }
+      (_key: string, value: unknown): unknown =>
+        reviveWithClasses(value, classes)
   );
 const reviverDependencies: { createReviver: typeof createReviver } = { createReviver };
 

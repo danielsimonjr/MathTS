@@ -267,4 +267,15 @@ describe('named compatibility function imports', () => {
     expect(math.evaluate('lgamma(-0.5)')).toBeNaN();
     expect(lgamma(math.complex(-0.5, 0))).toMatchObject({ re: NaN, im: 0 });
   });
+
+  it('handles units in roots and powers and complex values in expm1', () => {
+    const math = create(all);
+    for (const expression of ['sqrt(9 cm^2)', 'square(2 m)', 'cube(2 m)']) {
+      expect(String(math.evaluate(expression))).toBe(String(oracle.evaluate(expression)));
+    }
+    const actual = math.evaluate('expm1(2i)') as { re: number; im: number };
+    const expected = oracle.evaluate('expm1(2i)') as { re: number; im: number };
+    expect(actual.re).toBeCloseTo(expected.re, 14);
+    expect(actual.im).toBeCloseTo(expected.im, 14);
+  });
 });

@@ -1481,6 +1481,7 @@ export const pow = mathTyped('pow', {
  * Square root. The Float64Array signature is synchronous.
  */
 export const sqrt = mathTyped('sqrt', {
+  Unit: (a: Unit): Unit => (factoryScope.sqrt as (value: Unit) => Unit)(a),
   number: (a: f64): f64 | Complex => sqrtReal(a),
   Complex: (a: Complex): Complex => a.sqrt(),
   BigNumber: (a: BigNumber): BigNumber | Complex => sqrtBigNumberWith(a, isPredictableMode()),
@@ -1498,6 +1499,7 @@ export const sqrt = mathTyped('sqrt', {
  * Square. The Float64Array signature is synchronous.
  */
 export const square = mathTyped('square', {
+  Unit: (a: Unit): Unit => (factoryScope.square as (value: Unit) => Unit)(a),
   number: (a: f64): f64 => a * a,
   bigint: (a: i64): i64 => a * a,
   Complex: (a: Complex): Complex => a.multiply(a),
@@ -1514,6 +1516,7 @@ export const square = mathTyped('square', {
  * Cube
  */
 export const cube = mathTyped('cube', {
+  Unit: (a: Unit): Unit => (factoryScope.cube as (value: Unit) => Unit)(a),
   number: (a: f64): f64 => a * a * a,
   bigint: (a: i64): i64 => a * a * a,
   Complex: (a: Complex): Complex => a.multiply(a).multiply(a),
@@ -1847,6 +1850,7 @@ export const log1p = mathTyped('log1p', {
  * exp(x) - 1 with higher precision for small x
  */
 export const expm1 = mathTyped('expm1', {
+  Complex: (a: Complex): Complex => (factoryScope.expm1 as (value: Complex) => Complex)(a),
   number: (a: f64): f64 => Math.expm1(a),
   // The method keeps a small argument: exp(x) - 1 rounds it to 0 (#1166).
   BigNumber: (a: BigNumber): BigNumber => a.expm1(),

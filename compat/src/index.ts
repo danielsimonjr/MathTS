@@ -829,6 +829,8 @@ export const docs = /* #__PURE__ */ Object.fromEntries(
   Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
 );
 
+export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';
 export * from './constant-factory-exports.js';
@@ -972,11 +974,9 @@ export {
   quantileSeq,
   range,
   rationalize,
-  replacer,
   reshape,
   resize,
   resolve,
-  reviver,
   rightArithShift,
   rightLogShift,
   rotate,

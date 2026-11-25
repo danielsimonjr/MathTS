@@ -451,6 +451,45 @@ describe('native compatibility dependency bundles', () => {
     expect(serialize(actual)).toBe(serialize(expected));
   });
 
+  it('serializes fractions and large and tiny BigNumbers in MathJS format', () => {
+    const math = create(compat.all);
+    const selected = create({ replacerDependencies: compat.replacerDependencies });
+    const inputs = [
+      compat.fraction('-3/7'),
+      ...['1e+100', '1e-7', '1.25e-8', '0.000001', '-2.34e+21'].map(compat.bignumber),
+    ];
+    const expected = JSON.stringify(
+      [
+        oracle.fraction('-3/7'),
+        ...['1e+100', '1e-7', '1.25e-8', '0.000001', '-2.34e+21'].map((x) => oracle.bignumber(x)),
+      ],
+      oracle.replacer
+    );
+    for (const replacer of [compat.replacer, math.replacer, selected.replacer]) {
+      expect(JSON.stringify(inputs, replacer)).toBe(expected);
+    }
+  });
+
+  it('revives MathJS ranges, indices, and complete expression trees by default', () => {
+    const math = create(compat.all);
+    const upstream = [
+      Reflect.construct(Reflect.get(oracle, 'Range'), [1, 10, 2]),
+      oracle.index(1, 2),
+      oracle.parse('x[2] + 3'),
+    ];
+    const serialized = JSON.stringify(upstream, oracle.replacer);
+    for (const reviver of [compat.reviver, math.reviver]) {
+      const [range, index, expression] = JSON.parse(serialized, reviver);
+      expect(compat.isRange(range)).toBe(true);
+      expect(range.toArray()).toEqual([1, 3, 5, 7, 9]);
+      expect(compat.isIndex(index)).toBe(true);
+      expect(index.size()).toEqual([1, 1]);
+      expect(expression).toBeInstanceOf(compat.OperatorNode);
+      expect(expression.toString()).toBe('x[2] + 3');
+      expect(JSON.stringify([range, index, expression], math.replacer)).toBe(serialized);
+    }
+  });
+
   it('extracts selected fraction parts from fractions and nested collections', () => {
     const actual = create({
       numDependencies: compat.numDependencies,
