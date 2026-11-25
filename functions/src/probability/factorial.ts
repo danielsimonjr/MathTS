@@ -1,3 +1,4 @@
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import { deepMap } from '../utils/collection.js';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -50,14 +51,17 @@ export const createFactorial = /* #__PURE__ */ factory(
      * @param {number | BigNumber | Array | Matrix} n   An integer number
      * @return {number | BigNumber | Array | Matrix}    The factorial of `n`
      */
-    return typed(name, {
-      number: function (n: number): number {
-        if (n < 0) {
-          throw new Error('Value must be non-negative');
-        }
+    function factorialNumber(n: number): number {
+      if (n < 0) {
+        throw new Error('Value must be non-negative');
+      }
 
-        return gamma(n + 1) as number;
-      },
+      return gamma(n + 1) as number;
+    }
+
+    return typed(name, {
+      number: factorialNumber,
+      bigint: (n: bigint): number => factorialNumber(bigintToNumber(n)),
 
       BigNumber: function (n: BigNumberType): unknown {
         if (n.isNegative()) {

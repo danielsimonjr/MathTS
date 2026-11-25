@@ -1,3 +1,4 @@
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import { factory } from '../utils/factory.js';
 import { gammaG, gammaNumber, gammaP } from '../plain/number/index.js';
 import { cosPiScalar, sinPiScalar } from '../wasm/special/scalars.js';
@@ -173,6 +174,7 @@ export const createGamma = /* #__PURE__ */ factory(
 
     return typed(name, {
       number: gammaNumber,
+      bigint: (n: bigint): number => gammaNumber(bigintToNumber(n)),
       Complex: gammaComplex,
       BigNumber: function (n: BigNumberType): BigNumberType {
         if (n.isNaN()) return n;

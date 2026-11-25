@@ -174,14 +174,22 @@ const SKIP_FUNCTIONS = new Set([
   'pickRandom',
 ]);
 
-export function sweepPool(): { labels: Set<string> } {
+export function sweepPool(options?: { only?: string[] }): {
+  labels: Set<string>;
+  arities: Map<string, Set<number>>;
+} {
   const labels = new Set<string>();
+  const arities = new Map<string, Set<number>>();
   const { mathjs, compat } = pair({});
   const oraclePool = buildPool(mathjs);
   const compatRecord = compat as unknown as Record<string, unknown>;
   const oracleRecord = mathjs as unknown as Record<string, unknown>;
   const names = Object.keys(compatRecord).filter(
-    (k) => typeof compatRecord[k] === 'function' && !SKIP_FUNCTIONS.has(k) && !CLASS_NAMES.has(k)
+    (k) =>
+      typeof compatRecord[k] === 'function' &&
+      !SKIP_FUNCTIONS.has(k) &&
+      !CLASS_NAMES.has(k) &&
+      (!options?.only || options.only.includes(k))
   );
   for (const name of names) {
     const fnO = oracleRecord[name] as (...args: unknown[]) => unknown;
@@ -190,6 +198,8 @@ export function sweepPool(): { labels: Set<string> } {
     const declared = fnO.length ?? 0;
     const widths = new Set<number>([Math.max(declared, 1)]);
     if (declared > 1) widths.add(1);
+    const seen = new Set<number>();
+    arities.set(name, seen);
     for (let a = 0; a < oraclePool.length; a++) {
       const calls: unknown[][] = [];
       for (const width of widths) {
@@ -203,6 +213,7 @@ export function sweepPool(): { labels: Set<string> } {
         if (ALLOCATING.has(name) && args.some((x) => typeof x === 'number' && Math.abs(x) > 1000)) {
           continue;
         }
+        seen.add(args.length);
         const o = outcome(mathjs, () => fnO.apply(mathjs, args));
         // An arity rejection of the oracle is one divergence per function (#1587), not one
         // per argument combination.
@@ -217,7 +228,7 @@ export function sweepPool(): { labels: Set<string> } {
       }
     }
   }
-  return { labels };
+  return { labels, arities };
 }
 
 export const DOC_CONFIGS: Record<string, unknown>[] = [

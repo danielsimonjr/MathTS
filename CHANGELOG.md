@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`gamma` / `lgamma` / `factorial` of a bigint followed the BigNumber path:** same missing-`bigint` signature as `zeta`. Typed-function conversion prefers `bigint → BigNumber` when both `number` and `BigNumber` rows exist, so `gamma(2n)` was a `BigNumber` while `gamma(2)` was a number. Each now calls its number implementation through `bigintToNumber` (out-of-range bigints throw). `erf` already had no BigNumber row and already returned a number.
+
 - **`zeta(bigint)` returned a BigNumber in default number config (#1585):** with no `bigint` signature, typed-function conversion sent safe integers to the BigNumber path, so `zeta(2n)` was a `BigNumber` while `zeta(2)` was a number. Root cause: missing `bigint` dispatch. `functions/src/special/zeta.ts` now calls `zetaNumber(bigintToNumber(s))`; out-of-range bigints throw as elsewhere.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
