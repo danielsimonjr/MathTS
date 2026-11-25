@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Unit equality and ordering on the compat instance (#1552):** `equal`, `unequal`, `equalScalar`, `deepEqual`, `compare`, `larger`, `smaller`, `largerEq`, and `smallerEq` route Unit–Unit pairs through the activated mathjs factories in `compat/src/unit-relational.ts` (for example `50cm == 0.5m` is true under `number: 'BigNumber'`, dimension mismatches throw `Cannot compare units with different base`, and `deepEqual` of two Units follows mathjs). Native critical libraries are unchanged; integral Fractions in `format` use an `n/1` suffix via `compat/src/format-parity.ts` so compare results match the oracle.
+
 ### Changed
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.

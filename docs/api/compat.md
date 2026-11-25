@@ -323,6 +323,24 @@ async function parallelSum(data) {
 
 ---
 
+## Unit equality and ordering (#1552)
+
+`create(all)` routes **Unit–Unit** comparisons for `equal`, `unequal`, `equalScalar`,
+`deepEqual`, `compare`, `larger`, `smaller`, `largerEq`, and `smallerEq` through thin
+adapters in `compat/src/unit-relational.ts`. They delegate to the activated mathjs
+factories in `@danielsimonjr/mathts-functions` so results match mathjs 15.3.0 (for
+example `50cm == 0.5m` under `number: 'BigNumber'`, dimension mismatches throw
+`Cannot compare units with different base`, and `deepEqual` of two Units follows
+mathjs’s `valueOf` + `equal` path). Native `@danielsimonjr/mathts-core` / `functions`
+Unit behavior is unchanged. Expression evaluation uses the same instance methods via the
+expression scope.
+
+Integral Fraction values shown by `format` use an `n/1` suffix on the compat instance
+(`format-parity.ts`) so compare results such as `Fraction 1/1` match the oracle; full
+Fraction formatting parity is #1579 (G15).
+
+---
+
 ## API Differences from mathjs
 
 | mathjs                         | @danielsimonjr/mathts-compat                      |
