@@ -13,7 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **G12 compat exact parity with mathjs 15.3.0 (#1567, #1571):** compat `add`/`divide` broadcast errors, multi-statement `evaluate` `ResultSet` wrapping, module/instance `DimensionError` identity, and the `docs` map match the pinned oracle (`compat/src/g12-mathjs-parity.ts`, `mathjs-docs-15.3.0.generated.json`). `@danielsimonjr/mathts-expression` restores `ResultSet.isResultSet` on the prototype and wires default `parse()`/`createParser()` through the exported node/`Parser` classes (**good idea**: `instanceof` on parsed trees works for native callers).
+- **G12 compat exact parity with mathjs 15.3.0 (#1567, #1571):** compat `add`/`divide` broadcast errors, multi-statement `evaluate` `ResultSet` wrapping, module/instance `DimensionError` identity, and the `docs` map match the pinned oracle (`compat/src/g12-mathjs-parity.ts`, `mathjs-docs-15.3.0.generated.json`).
+
+- **Native `ResultSet` guard (F6, root cause):** `isResultSet` / `type` were copied onto each instance as own data properties, so `'isResultSet' in x` passed but the typed guard reads the constructor prototype chain (as mathjs-style guards do). Moved them back to prototype getters on the canonical `expression/src/ResultSet.ts` class; block evaluation and `instanceof` against the package export agree again (coordinates with G01 compat-only block wrapping).
+
+- **Native parse/`Parser` identity (F7–F8, root cause):** default `parse()` built nodes from `createNode()` closures while the package exported separate `expression/src/node/classes.ts` constructors, and `createParser()` instantiated a fresh `createParserClass()` type instead of the exported `Parser`. Default scopes now use the exported node classes and the exported `Parser` singleton so `instanceof` matches public exports (**good idea** for tooling and tests).
 
 ### Changed
 

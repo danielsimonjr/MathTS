@@ -10,8 +10,8 @@
     "packages/workerpool/dist/index.js": 58963,
     "packages/workerpool/dist/worker.js": 26149,
     "packages/workerpool/package.json": 2745,
-    "core/dist/index.js": 268164,
-    "core/dist/internal.js": 269780,
+    "core/dist/index.js": 270321,
+    "core/dist/internal.js": 269908,
     "core/package.json": 2024,
     "matrix/dist/index.js": 242144,
     "matrix/package.json": 2569,
@@ -20,11 +20,11 @@
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 74477,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2359674,
-    "functions/dist/subpath-evaluate.js": 1583011,
+    "functions/dist/index.js": 2364112,
+    "functions/dist/subpath-evaluate.js": 1585387,
     "functions/package.json": 3741,
     "functions/dist/wasm/mathts-as.wasm": 69718,
-    "expression/dist/index.js": 369701,
+    "expression/dist/index.js": 372598,
     "expression/package.json": 2208,
     "parser/dist/index.js": 541,
     "parser/package.json": 2382,
@@ -55,7 +55,7 @@
     "assembly/build/mathts-debug.wasm": 133381,
     "assembly/build/mathts-debug.js": 103537,
     "assembly/package.json": 2903,
-    "compat/dist/index.js": 188496,
+    "compat/dist/index.js": 295532,
     "compat/package.json": 2327,
     "gpu/dist/index.js": 18275,
     "gpu/package.json": 2189,
@@ -95,7 +95,7 @@
       "treeShake": true
     },
     "functions/dist/index.js": {
-      "export": "Chain",
+      "export": "ArgumentsError",
       "treeShake": true
     },
     "functions/dist/subpath-evaluate.js": {
@@ -103,7 +103,7 @@
       "treeShake": false
     },
     "expression/dist/index.js": {
-      "export": "ScalarBuildError",
+      "export": "AccessorNode",
       "treeShake": true
     },
     "parser/dist/index.js": {
@@ -184,37 +184,37 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1405743
+      "bytes": 1408068
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1406114
+      "bytes": 1408439
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1414308
+      "bytes": 1416636
     },
     {
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "bytes": 277032
+      "bytes": 280068
     },
     {
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 2037378
+      "bytes": 2042023
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 2046697
+      "bytes": 2051342
     }
   ]
 }
