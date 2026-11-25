@@ -157,7 +157,24 @@ await renderToFile(svg, 'chart.png');
 
 ### Functions (18)
 
-`area`, `bar`, `contour`, `curve3d`, `errorbar`, `heatmap`, `histogram`, `line`, `overlay`, `plot`, `quiver`, `scatter`, `scatter3d`, `step`, `surface`, `toTikZ`, `update`, `viridis`
+`area`
+`bar`
+`contour`
+`curve3d`
+`errorbar`
+`heatmap`
+`histogram`
+`line`
+`overlay`
+`plot`
+`quiver`
+`scatter`
+`scatter3d`
+`step`
+`surface`
+`toTikZ`
+`update`
+`viridis`
 
 ### Constants & values (1)
 

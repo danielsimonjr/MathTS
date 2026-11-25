@@ -222,6 +222,25 @@ test('reference-index counts the named categories and leaves out the catch-all g
   );
 });
 
+test('reference-index reads one backtick-name per line after the group heading', () => {
+  const text = [
+    '## Complete export index',
+    '(3 exports)',
+    '### Functions by category',
+    '**A** (2):',
+    '`add`',
+    '`sub`',
+    '',
+    '**B** (1):',
+    '`mean`',
+  ].join('\n');
+  const parsed = parseReferenceIndex(text);
+  assert.equal(parsed.exportTotal, 3);
+  assert.equal(parsed.categoryCount, 2);
+  assert.deepEqual(parsed.domains.get('A'), ['add', 'sub']);
+  assert.deepEqual(parsed.domains.get('B'), ['mean']);
+});
+
 test('the generated reference writes the catch-all label that the readers match', () => {
   const generator = readFileSync(join(REPO, 'tools', 'generate-functions-reference.mjs'), 'utf8');
   assert.match(generator, /import \{ UNCATEGORIZED as OTHER \} from '\.\/reference-index\.mjs'/);
