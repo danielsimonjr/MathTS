@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`docs/reports/`: archived parity and gap-analysis reports (2026-11-25):** the mathjs 15.3.0 parity gap analysis (issues #1549–#1589, tracker #1590) and the six-system parity review against NumPy, SciPy, PySR, Mathematica, Mathcad and MATLAB (issues #1592–#1713, tracker #1714), with per-reference deep reports and data tables. Index: [`docs/reports/README.md`](docs/reports/README.md). For numeric and symbolic correctness, the sources of truth are NumPy, SciPy, SymPy and PySR; Mathematica, Mathcad and MATLAB are feature references only.
+
 ### Changed
+
+- **Compat `version` reports the emulated mathjs version (#1581):** `version` is `"15.3.0"` on the compat instance, the named export, and the expression scope, and a `compatVersion` named export carries the compat package version; `help('version')` and other doc examples evaluate through the instance evaluator. BREAKING: code reading the compat package version from `math.version` must read `compatVersion`.
 
 - **Documentation-only pull requests skip heavy CI steps:** A `Detect changes` job classifies pull request diffs; when every changed file is markdown, under `docs/`, a `.changeset/*.md` file, or a license-like basename, required jobs (Compile & Lint, Test 22.x/24.x, Coverage, Browser WebGPU smoke) still run and report success, but their heavy steps no-op so branch protection never stalls on pending contexts. Test (22.x) still runs `tools/ci/run-docs-only-tests.mjs` (README fences, async samples, examples smoke, export indexes, docs/reference sync, compat embedded-docs parity, README stats sync, and `docs:functions:check`). `tools/test/docs-only-ci-guard.test.mjs` fails when a new test reads Markdown at runtime but is missing from `tools/ci/docs-only-manifest.json`. Pushes to `main`, scheduled runs, and `workflow_dispatch` always run the full suite.
 
@@ -18,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **mathjs 15.3.0 behavior parity (#1563, #1564, #1565, #1566):** Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`.
 
 ### Fixed
+
+- **Expression compile uses `scope.has`, not `get === undefined` (#1581):** a Map-like scope documents `has`/`get`/`set`. Native compile treated `get(name) === undefined` as a missing symbol, so `evaluate('pi', { pi: undefined })` threw `Undefined symbol "pi"` even when `has('pi')` was true (an explicit binding, including `Map.set('pi', undefined)`). Lookup now follows the Map contract: missing keys throw; a present key whose value is `undefined` returns `undefined`. This is a native correctness fix, not a mathjs-parity shim. Compat no longer injects a `mathjsScopedSymbols` flag.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 

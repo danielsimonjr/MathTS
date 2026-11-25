@@ -10,6 +10,15 @@ import { isDenseMatrix, isSparseMatrix, isMatrix } from '@danielsimonjr/mathts-m
 import { complex } from './shims.js';
 import packageMetadata from '../package.json' with { type: 'json' };
 
+/**
+ * The mathjs version the compat instance emulates (#1581). Bump it only in the same
+ * commit that moves the `mathjs` devDependency (the oracle pin, S1 of the parity plan).
+ */
+export const MATHJS_PARITY_VERSION = '15.3.0';
+
+/** The compat package's own version, under a name mathjs does not use (#1581). */
+export const compatVersion: string = packageMetadata.version;
+
 const { checks, constructors, factory } = factory_mathjsCompat;
 
 /** Common base for testing whether a value is any supported matrix representation. */
@@ -121,7 +130,7 @@ export const instanceSymbols: typeof factory_mathjsCompat.constructors &
   false: false,
   true: true,
   null: null,
-  version: packageMetadata.version,
+  version: MATHJS_PARITY_VERSION,
   num,
   den,
   ...compatChecks,
