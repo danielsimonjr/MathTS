@@ -829,9 +829,9 @@ export class Complex implements IComplex {
     return result;
   }
 
-  /** Arc secant. `asec(0) = acos(+∞) = −i∞` (C99 / `cmath`). */
+  /** Arc secant. */
   asec(): Complex {
-    if (this.isZero()) return new Complex(0, -Infinity);
+    if (this.isZero()) return new Complex(0, Infinity);
     return this.inverse().acos();
   }
 
