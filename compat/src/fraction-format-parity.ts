@@ -4,8 +4,6 @@
  * {@link @danielsimonjr/mathts-core} Fraction formatting is unchanged.
  */
 import { isFraction, isUnit, type Fraction } from '@danielsimonjr/mathts-core';
-import { isMatrix } from '@danielsimonjr/mathts-core/internal';
-import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import type { StringOptions } from '@danielsimonjr/mathts-expression';
 import Frac from 'fraction.js';
 
@@ -20,6 +18,18 @@ function promoteUnitMagnitudeRatio(rendered: string): string {
     return rendered;
   }
   return `${match[1]}/1${match[2]}`;
+}
+
+function arrayContainsFraction(value: unknown[]): boolean {
+  for (const entry of value) {
+    if (isFraction(entry)) {
+      return true;
+    }
+    if (Array.isArray(entry) && arrayContainsFraction(entry)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function fractionOptionsUseDecimal(options: unknown): boolean {
@@ -40,6 +50,9 @@ function formatCompatArray(
   options: unknown,
   nativeFormat: (value: unknown, options?: unknown) => string
 ): string {
+  if (!arrayContainsFraction(array)) {
+    return nativeFormat(array, options);
+  }
   const parts: string[] = [];
   for (let i = 0; i < array.length; i++) {
     if (i !== 0) {
@@ -61,18 +74,14 @@ function formatCompatValue(
   if (Array.isArray(value)) {
     return formatCompatArray(value, options, nativeFormat);
   }
-  if (isMatrix(value)) {
-    return formatCompatValue(
-      (value as { toArray: () => unknown[] }).toArray(),
-      options,
-      nativeFormat
-    );
-  }
   if (isUnit(value)) {
-    const unit = value as { format?: (opts?: unknown) => string };
+    const unit = value as { format?: (opts?: unknown) => string; value?: unknown };
     if (typeof unit.format === 'function') {
       const rendered = unit.format(options);
-      return promoteUnitMagnitudeRatio(rendered);
+      if (isFraction(unit.value)) {
+        return promoteUnitMagnitudeRatio(rendered);
+      }
+      return rendered;
     }
     return nativeFormat(value, options);
   }
@@ -93,10 +102,10 @@ function stringCompatValue(value: unknown, nativeString: NativeString): string {
     return mathjsFractionDecimalString(value.numerator, value.denominator);
   }
   if (Array.isArray(value)) {
+    if (!arrayContainsFraction(value)) {
+      return nativeString(value);
+    }
     return `[${value.map((entry) => stringCompatValue(entry, nativeString)).join(', ')}]`;
-  }
-  if (isMatrix(value)) {
-    return stringCompatValue((value as { toArray: () => unknown[] }).toArray(), nativeString);
   }
   return nativeString(value);
 }
@@ -108,39 +117,28 @@ export function createCompatString(nativeString: NativeString): NativeString {
 
 type PrintFn = (template: string, values: unknown, options?: unknown) => string;
 
-/** Wrap `print` so typed signatures and error text match mathjs (#1579). */
+/** Wrap `print` so the wrong-first-arg error text matches mathjs (#1579). */
 export function createCompatPrint(nativePrint: PrintFn): PrintFn {
-  const typed = factory_mathjsCompat.createCompatTyped();
-  const printImpl: PrintFn = (template, values, options) => nativePrint(template, values, options);
-  const bound = typed('print', {
-    string: () => {
-      throw new TypeError(
-        'Too few arguments in function print (expected: Array or Object or Matrix, index: 1)'
-      );
-    },
-    'string, Object | Array': printImpl,
-    'string, Object | Array, number | Object': printImpl,
-    boolean: () => {
-      throw new TypeError(
-        'Too few arguments in function print (expected: Array or Object or Matrix, index: 1)'
-      );
-    },
-    'boolean, Object | Array': printImpl,
-    'boolean, Object | Array, number | Object': printImpl,
-  }) as PrintFn;
-  return ((...args: unknown[]) => {
+  const invoke = (...args: unknown[]): string =>
+    (nativePrint as (...a: unknown[]) => string)(...args);
+  const wrapped = Object.assign((...args: unknown[]) => {
     try {
-      return (bound as (...a: unknown[]) => string)(...args);
+      return invoke(...args);
     } catch (error) {
       if (
         error instanceof TypeError &&
-        error.message.includes('function print (expected: boolean or string')
+        error.message.includes('function print') &&
+        error.message.includes('expected: string') &&
+        !error.message.includes('string or boolean')
       ) {
-        throw new TypeError(error.message.replace('boolean or string', 'string or boolean'));
+        throw new TypeError(
+          error.message.replace(/\bexpected: string\b/, 'expected: string or boolean')
+        );
       }
       throw error;
     }
-  }) as PrintFn;
+  }, nativePrint);
+  return wrapped as PrintFn;
 }
 
 /** {@link StringOptions} for Fraction-config ConstantNode ratio output (#1586). */
