@@ -1,5 +1,5 @@
 {
-  "note": "Line hits / line found from coverage/lcov.info after bun run test:coverage. Integer floor is the measured percent rounded down, minus 1. Bun and vitest numbers are not comparable across packages. assembly has no test:coverage script (AssemblyScript; covered by test:wasm and tests/wasm/, not this gate).",
+  "note": "Line hits / line found from coverage/lcov.info after bun run test:coverage. Integer floor is the measured percent rounded down, minus 1. Bun and vitest numbers are not comparable across packages. A `script` runner (assembly) has a test:coverage script that runs the suite without a coverage reporter, so no lcov is measured: the gate only pins that the script exists and runs in the single Coverage job.",
   "packages": {
     "typed-function": {
       "runner": "bun",
@@ -92,6 +92,9 @@
     "plot": {
       "runner": "bun",
       "floor": 91
+    },
+    "assembly": {
+      "runner": "script"
     }
   }
 }
