@@ -66,6 +66,50 @@ export function exceedsCeiling(ceiling, actual) {
   return actual > ceiling;
 }
 
+/** Largest shrink ratio between implied recorded size and live size before a ceiling is rejected as hand-loosened. */
+const MAX_IMPLIED_SHRINK_RATIO = 10;
+
+/**
+ * Smallest byte size whose {@link ceilingFor} value equals `ceiling`.
+ * @param {number} ceiling
+ * @returns {number}
+ */
+export function minimumBytesForCeiling(ceiling) {
+  let lo = 0;
+  let hi = ceiling;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (ceilingFor(mid) < ceiling) lo = mid + 1;
+    else hi = mid;
+  }
+  while (lo > 0 && ceilingFor(lo - 1) === ceiling) lo--;
+  return lo;
+}
+
+/**
+ * Returns a failure message when `maxBytes` is not `ceilingFor` of the size it was written from.
+ * @param {string} label
+ * @param {number} maxBytes
+ * @param {number} actual
+ * @returns {string | null}
+ */
+export function loosenedCeilingFailure(label, maxBytes, actual) {
+  if (actual > maxBytes) return null;
+  const tight = ceilingFor(actual);
+  if (maxBytes <= tight) return null;
+  const recorded = minimumBytesForCeiling(maxBytes);
+  if (ceilingFor(recorded) !== maxBytes) {
+    if (maxBytes / tight > MAX_IMPLIED_SHRINK_RATIO) {
+      return `${label}: ceiling ${maxBytes} looser than ceilingFor(${actual})=${tight}`;
+    }
+    return null;
+  }
+  if (recorded <= actual) {
+    return `${label}: ceiling ${maxBytes} must be ceilingFor(${actual})=${tight}`;
+  }
+  return null;
+}
+
 /**
  * Files an entry loads statically: itself and everything it reaches by relative import.
  * @param {string} entry absolute path of a `.js` entry
@@ -301,8 +345,12 @@ export function compareBudget(live, budget) {
   for (const [file, ceiling] of Object.entries(budget.files)) {
     const actual = live.files[file];
     if (actual === undefined) failures.push(`${file}: in the budget but not built`);
-    else if (exceedsCeiling(ceiling, actual)) {
-      failures.push(`${file}: ${actual} bytes, ceiling ${ceiling}`);
+    else {
+      if (exceedsCeiling(ceiling, actual)) {
+        failures.push(`${file}: ${actual} bytes, ceiling ${ceiling}`);
+      }
+      const loosened = loosenedCeilingFailure(file, ceiling, actual);
+      if (loosened) failures.push(loosened);
     }
   }
   for (const file of Object.keys(live.files)) {
@@ -328,13 +376,31 @@ export function compareBudget(live, budget) {
     if (!(file in budget.entries)) failures.push(`${file}: measured but not in the budget`);
   }
 
-  const liveBundles = new Map((live.bundles ?? []).map((b) => [b.label, b.bytes]));
+  const liveBundles = new Map((live.bundles ?? []).map((b) => [b.label, b]));
+  const budgetBundleLabels = new Set();
   for (const expected of budget.bundles ?? []) {
-    const actual = liveBundles.get(expected.label);
-    if (actual === undefined)
+    budgetBundleLabels.add(expected.label);
+    const liveBundle = liveBundles.get(expected.label);
+    if (!liveBundle)
       failures.push(`bundle ${expected.label}: in the budget but not measured`);
-    else if (exceedsCeiling(expected.maxBytes, actual)) {
-      failures.push(`bundle ${expected.label}: ${actual} bytes, ceiling ${expected.maxBytes}`);
+    else if (expected.maxBytes === undefined) {
+      failures.push(`bundle ${expected.label}: missing maxBytes ceiling`);
+    } else {
+      const actual = liveBundle.bytes;
+      if (exceedsCeiling(expected.maxBytes, actual)) {
+        failures.push(`bundle ${expected.label}: ${actual} bytes, ceiling ${expected.maxBytes}`);
+      }
+      const loosened = loosenedCeilingFailure(
+        `bundle ${expected.label}`,
+        expected.maxBytes,
+        actual
+      );
+      if (loosened) failures.push(loosened);
+    }
+  }
+  for (const liveBundle of live.bundles ?? []) {
+    if (!budgetBundleLabels.has(liveBundle.label)) {
+      failures.push(`bundle ${liveBundle.label}: measured but not in the budget`);
     }
   }
   return failures;

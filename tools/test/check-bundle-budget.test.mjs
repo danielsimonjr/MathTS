@@ -10,7 +10,9 @@ import {
   compareBudget,
   duplicateInstalls,
   exceedsCeiling,
+  loosenedCeilingFailure,
   measureBudget,
+  minimumBytesForCeiling,
   staticClosure,
 } from './check-bundle-budget.mjs';
 
@@ -67,6 +69,53 @@ test('exceedsCeiling is one-sided: any growth past the ceiling fails, a shrink n
   assert.equal(exceedsCeiling(10_000, 10_000), false);
   assert.equal(exceedsCeiling(10_000, 10_001), true);
   assert.equal(exceedsCeiling(10_000, 5_000), false);
+});
+
+test('minimumBytesForCeiling inverts ceilingFor for representative sizes', () => {
+  for (const bytes of [1, 255, 256, 10_000, 100_000, 2_359_674]) {
+    const ceiling = ceilingFor(bytes);
+    const recorded = minimumBytesForCeiling(ceiling);
+    assert.equal(ceilingFor(recorded), ceiling, `${bytes}: recorded ${recorded}`);
+    assert.ok(recorded <= bytes, `${bytes}: recorded must be at most the measured size`);
+  }
+});
+
+test('a loosened ceiling in the budget file fails', () => {
+  const live = { files: { 'core/dist/index.js': 270_000 }, entries: {}, bundles: [] };
+  const budget = { files: { 'core/dist/index.js': 27_000_000 }, entries: {}, bundles: [] };
+  const failures = compareBudget(live, budget);
+  assert.ok(
+    failures.some((f) => /core\/dist\/index\.js/.test(f)),
+  );
+  assert.ok(loosenedCeilingFailure('core/dist/index.js', 27_000_000, 270_000) !== null);
+});
+
+test('a bundle case removed from the budget fails the check', () => {
+  const live = {
+    files: {},
+    entries: {},
+    bundles: [
+      { label: 'functions barrel evaluate', bytes: 1_500_000, import: 'x', platform: 'node' },
+    ],
+  };
+  const budget = { files: {}, entries: {}, bundles: [] };
+  const failures = compareBudget(live, budget);
+  assert.ok(failures.some((f) => /functions barrel evaluate/.test(f)));
+});
+
+test('a bundle case with no recorded ceiling fails instead of being unenforced', () => {
+  const live = {
+    files: {},
+    entries: {},
+    bundles: [{ label: 'compat create(all)', bytes: 9_000_000, import: 'x', platform: 'node' }],
+  };
+  const budget = {
+    files: {},
+    entries: {},
+    bundles: [{ label: 'compat create(all)', import: 'x', platform: 'node' }],
+  };
+  const failures = compareBudget(live, budget);
+  assert.ok(failures.length > 0);
 });
 
 test('an entry is sized together with the chunk it imports', () => {
