@@ -5,7 +5,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
+import { Complex, BigNumber, Fraction, Unit } from '@danielsimonjr/mathts-core';
+import { create, all } from '@danielsimonjr/mathts-compat';
 import { and, or, xor, not, nullish, typedLogical } from '../src/typed/logical.js';
 import * as math from '../src/index.js';
 
@@ -657,6 +658,39 @@ describe('nullish', () => {
     it('nullish is element-wise on arrays', () => {
       expect(nullish([1, null, 2], [9, 8, 7])).toEqual([1, 8, 2]);
     });
+
+    it('fills null and undefined cells against a scalar', () => {
+      expect(nullish([null, 1, null], 7)).toEqual([7, 1, 7]);
+      expect(nullish([undefined, 1], 7)).toEqual([7, 1]);
+    });
+
+    it('fills nested arrays', () => {
+      expect(nullish([[null, 1]], 9)).toEqual([[9, 1]]);
+    });
+
+    it('throws Dimension mismatch for unequal collection shapes', () => {
+      expect(() => nullish([null, 1], [7])).toThrow(/Dimension mismatch/);
+    });
+
+    it('is element-wise on dense matrices', () => {
+      const a = math.matrix([[null, 1]]);
+      const out = nullish(a, 7) as { toArray(): unknown };
+      expect(out.toArray()).toEqual([[7, 1]]);
+    });
+
+    it('does not densify a sparse left operand against a scalar (implicit zeros stay implicit)', () => {
+      const s = math.sparse([[1, 0]]);
+      const out = nullish(s, 7) as { type?: string; toArray(): unknown };
+      expect(out.type).toBe('SparseMatrix');
+      expect(out.toArray()).toEqual([[1, 0]]);
+    });
+  });
+
+  describe('plain object (native any, any is deliberate)', () => {
+    it('nullish({}, 2) returns the object: a non-nullish left value is kept', () => {
+      const o = {};
+      expect(nullish(o, 2)).toBe(o);
+    });
   });
 });
 
@@ -670,6 +704,64 @@ describe('Unit truthiness (not object presence)', () => {
     expect(and(z, nz)).toBe(false);
     expect(or(z, nz)).toBe(true);
     expect(xor(z, nz)).toBe(true);
+  });
+
+  it('mixed Unit and number uses the unit value, not object presence', () => {
+    expect(and(unit('0 cm'), 1)).toBe(false);
+    expect(or(unit('0 cm'), 0)).toBe(false);
+    expect(xor(unit('0 cm'), 1)).toBe(true);
+  });
+
+  it('0 degC is a zero reading (stored value is 0, not 273.15 K)', () => {
+    const z = new Unit(0, 'degC');
+    expect(z.value).toBe(0);
+    expect(not(z)).toBe(true);
+    expect(not(new Unit(0, 'K'))).toBe(true);
+    expect(not(new Unit(273.15, 'K'))).toBe(false);
+  });
+
+  it('zero Units with BigNumber, Fraction, and Complex values are falsy', () => {
+    expect(not(new Unit(BigNumber.fromNumber(0), 'm'))).toBe(true);
+    expect(not(new Unit(new Fraction(0n, 1n), 'm'))).toBe(true);
+    expect(not(new Unit(new Complex(0, 0), 'm'))).toBe(true);
+    expect(not(new Unit(BigNumber.fromNumber(1), 'm'))).toBe(false);
+    expect(not(new Unit(new Fraction(1n, 2n), 'm'))).toBe(false);
+    expect(not(new Unit(new Complex(0, 1), 'm'))).toBe(false);
+  });
+});
+
+describe('Fraction truthiness (exact numerator, not toNumber)', () => {
+  it('not(0/1) is true and not(1/3) is false', () => {
+    expect(not(new Fraction(0, 1))).toBe(true);
+    expect(not(new Fraction(1, 3))).toBe(false);
+  });
+
+  it('and/or/xor of Fractions do not convert to Complex', () => {
+    const z = new Fraction(0, 1);
+    const n = new Fraction(2, 3);
+    expect(and(z, n)).toBe(false);
+    expect(or(z, n)).toBe(true);
+    expect(xor(z, n)).toBe(true);
+    expect(and(n, 1)).toBe(true);
+    expect(and(z, 1)).toBe(false);
+  });
+});
+
+describe('creating a compat instance does not change native logical results', () => {
+  it('typed nullish/not stay the same after create(all)', () => {
+    const f = new Fraction(1, 3);
+    const before = {
+      frac: nullish(f, 2),
+      obj: nullish({}, 2),
+      zUnit: not(unit('0 cm')),
+      arr: nullish([null, 1], 7),
+    };
+    create(all);
+    expect(nullish(f, 2)).toBe(before.frac);
+    expect(nullish({}, 2)).toEqual({});
+    expect(not(unit('0 cm'))).toBe(true);
+    expect(nullish([null, 1], 7)).toEqual(before.arr);
+    expect(before.obj).toEqual({});
   });
 });
 

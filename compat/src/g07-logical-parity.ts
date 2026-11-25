@@ -1,9 +1,10 @@
 /**
  * G07 (#1555): mathjs 15.3.0 logical/nullish parity on the compat instance only.
  *
- * Native `@danielsimonjr/mathts-functions` typed logical functions are unchanged; compat
- * binds the mathjs-shaped factory implementations (element-wise `nullish`, Unit value
- * truthiness, TypeError on plain objects).
+ * Native typed logical functions have their own Fraction/Unit/collection rows. Compat
+ * additionally binds the mathjs-shaped factories so `create(all)` throws on
+ * `nullish({}, 2)` and matches mathjs 15.3.0 instance dispatch. The native `any, any`
+ * row (keep a non-nullish left value, including a plain object) is unchanged.
  */
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';

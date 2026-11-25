@@ -9,10 +9,8 @@ import { pair } from './oracle.js';
  *
  * F3 (Fraction `format` / `2/1`) is owned by G15 (#1721); those rows live there, not here.
  *
- * Native finding (not asserted here): `@danielsimonjr/mathts-functions` typed `nullish` still
- * converts a non-nullish Fraction to Complex and uses loose `any, any`; typed logical ops treat
- * Units as object-truthy. Left unchanged per critical-library policy — compat factory bindings
- * supply mathjs parity.
+ * Native typed logical is asserted in `functions/tests/typed-logical.test.ts`. Compat
+ * `create(all)` is the mathjs 15.3.0 surface (F1/F2/F4). F3 is G15.
  *
  *  F1  `math.nullish` must be element-wise on collections (same implementation as `??`).
  *  F2  `not`/`and`/`or`/`xor` must read a `Unit` by value, not JS object truthiness.

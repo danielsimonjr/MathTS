@@ -2,21 +2,32 @@
  * Typed Logical Functions
  *
  * Polymorphic logical operations using typed-function for runtime dispatch.
- * Supports number, bigint, BigNumber, and Complex types.
+ * Supports number, bigint, BigNumber, Fraction, Complex, and Unit types.
  *
  * Truthiness rules (a value is FALSY if):
  *   - number:    === 0 or NaN
  *   - bigint:    === 0n
  *   - BigNumber: .isZero() || .isNaN()
  *   - Complex:   re === 0 && im === 0
- *   - Unit:      numeric `value` is falsy when zero/NaN (not mere object presence)
- *   - any:       JS-falsy (null, undefined, '', false, 0, 0n, NaN)
+ *   - Fraction:  numerator === 0n (exact; never via toNumber)
+ *   - Unit:      stored `value` is falsy in that value's type (not object presence).
+ *                Offset units (degC) store the displayed magnitude, so 0 degC is 0.
+ *   - any:       the matching rule above, else JS-falsy
  *
  * @packageDocumentation
  */
 
 import { collectionBinaryRows } from './collection-binary.js';
-import { mathTyped, Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
+import {
+  mathTyped,
+  Complex,
+  BigNumber,
+  Fraction,
+  isBigNumber,
+  isComplex,
+  isFraction,
+  isUnitValue,
+} from '@danielsimonjr/mathts-core';
 import type { UnitInstance as Unit } from '@danielsimonjr/mathts-core';
 import { mapEachLeaf } from './f64-kernels.js';
 
@@ -39,20 +50,30 @@ function isTruthyComplex(x: Complex): boolean {
   return x.re !== 0 || x.im !== 0;
 }
 
-/** Return true when an arbitrary value is logically truthy (JS semantics) */
-function isTruthy(x: unknown): boolean {
-  return !!x;
+/** Return true when a Fraction is logically truthy (nonzero numerator). */
+function isTruthyFraction(x: Fraction): boolean {
+  return x.numerator !== 0n;
 }
 
 /** Truthiness of a Unit: the stored numeric value, not object presence. */
 function isTruthyUnit(x: Unit): boolean {
-  const v = x.value;
-  if (v === null || v === undefined) return false;
-  if (typeof v === 'number') return isTruthyNumber(v);
-  if (typeof v === 'bigint') return v !== 0n;
-  if (v instanceof BigNumber) return isTruthyBigNumber(v);
-  if (v instanceof Complex) return isTruthyComplex(v);
-  return isTruthy(v);
+  return isTruthy(x.value);
+}
+
+/**
+ * Type-aware truthiness. `!!x` is wrong for boxed numeric types: a zero Unit,
+ * Fraction, Complex, or BigNumber is a non-null object and would be truthy.
+ */
+function isTruthy(x: unknown): boolean {
+  if (x === null || x === undefined) return false;
+  if (typeof x === 'number') return isTruthyNumber(x);
+  if (typeof x === 'bigint') return x !== 0n;
+  if (typeof x === 'boolean') return x;
+  if (isUnitValue(x)) return isTruthy((x as { value: unknown }).value);
+  if (isFraction(x)) return isTruthyFraction(x);
+  if (isComplex(x)) return isTruthyComplex(x);
+  if (isBigNumber(x)) return isTruthyBigNumber(x);
+  return !!x;
 }
 
 // =============================================================================
@@ -78,6 +99,9 @@ export const not = mathTyped('not', {
 
   Complex: (x: Complex): boolean => !isTruthyComplex(x),
 
+  Fraction: (x: Fraction): boolean => !isTruthyFraction(x),
+
+  // Before `any`: a Unit is a non-null object, so `!!unit` is always true.
   Unit: (x: Unit): boolean => !isTruthyUnit(x),
 
   any: (x: unknown): boolean => !isTruthy(x),
@@ -111,6 +135,13 @@ export const and = mathTyped('and', {
     isTruthyBigNumber(a) && isTruthyBigNumber(b),
 
   'Complex, Complex': (a: Complex, b: Complex): boolean => isTruthyComplex(a) && isTruthyComplex(b),
+
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean =>
+    isTruthyFraction(a) && isTruthyFraction(b),
+
+  'Fraction, number': (a: Fraction, b: number): boolean => isTruthyFraction(a) && isTruthyNumber(b),
+
+  'number, Fraction': (a: number, b: Fraction): boolean => isTruthyNumber(a) && isTruthyFraction(b),
 
   'Unit, Unit': (a: Unit, b: Unit): boolean => isTruthyUnit(a) && isTruthyUnit(b),
 
@@ -150,6 +181,13 @@ export const or = mathTyped('or', {
 
   'Complex, Complex': (a: Complex, b: Complex): boolean => isTruthyComplex(a) || isTruthyComplex(b),
 
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean =>
+    isTruthyFraction(a) || isTruthyFraction(b),
+
+  'Fraction, number': (a: Fraction, b: number): boolean => isTruthyFraction(a) || isTruthyNumber(b),
+
+  'number, Fraction': (a: number, b: Fraction): boolean => isTruthyNumber(a) || isTruthyFraction(b),
+
   'Unit, Unit': (a: Unit, b: Unit): boolean => isTruthyUnit(a) || isTruthyUnit(b),
 
   // Variadic: reduce-or over three or more arbitrary values.
@@ -188,6 +226,15 @@ export const xor = mathTyped('xor', {
 
   'Complex, Complex': (a: Complex, b: Complex): boolean =>
     isTruthyComplex(a) !== isTruthyComplex(b),
+
+  'Fraction, Fraction': (a: Fraction, b: Fraction): boolean =>
+    isTruthyFraction(a) !== isTruthyFraction(b),
+
+  'Fraction, number': (a: Fraction, b: number): boolean =>
+    isTruthyFraction(a) !== isTruthyNumber(b),
+
+  'number, Fraction': (a: number, b: Fraction): boolean =>
+    isTruthyNumber(a) !== isTruthyFraction(b),
 
   'Unit, Unit': (a: Unit, b: Unit): boolean => isTruthyUnit(a) !== isTruthyUnit(b),
 
