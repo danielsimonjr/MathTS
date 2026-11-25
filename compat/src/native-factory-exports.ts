@@ -1,9 +1,10 @@
 import { factory_mathjsCompat, help as nativeHelp } from '@danielsimonjr/mathts-functions';
-import { fractionPart, instanceSymbols } from './instance-symbols.js';
+import { instanceSymbols } from './instance-symbols.js';
 
 import { compatReplacer as replacer, reviveWithClasses } from './serialization.js';
 
 const factory: typeof factory_mathjsCompat.factory = factory_mathjsCompat.factory;
+const fractionPart: typeof factory_mathjsCompat.fractionPart = factory_mathjsCompat.fractionPart;
 const factories = /* #__PURE__ */ factory_mathjsCompat.compatFactoryExports();
 type ConstructorFactory<T> = ReturnType<typeof factory<Record<string, unknown>, T>>;
 type CompatFactoryExports = ReturnType<typeof factory_mathjsCompat.compatFactoryExports>;

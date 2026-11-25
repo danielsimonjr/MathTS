@@ -19,6 +19,7 @@
 
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
+import * as all from './all-factories.js';
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
@@ -439,7 +440,21 @@ export function create(
     return create(input as CompatFactoryInput, options);
   }
 
-  const originalSurface = surfaceOf(factories);
+  // Mixed namespaces may extend a spread of all with ordinary functions or values.
+  const fullBundle =
+    factories === all ||
+    Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
+  const originalSurface: Record<string, unknown> = fullBundle
+    ? {
+        ...mathFunctions,
+        ...instanceSymbols,
+        ...Object.fromEntries(
+          factories === all
+            ? []
+            : Object.entries(factories).filter(([key]) => !Object.hasOwn(all, key))
+        ),
+      }
+    : surfaceOf(factories);
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
@@ -701,10 +716,7 @@ export function create(
  *
  * Use with `create(all)` to get a fully-featured math instance.
  */
-export const all: Record<string, unknown> = {
-  ...(mathFunctions as unknown as Record<string, unknown>),
-  ...instanceSymbols,
-};
+export { all };
 
 // =============================================================================
 // Re-exports for direct use

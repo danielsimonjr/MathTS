@@ -1,3 +1,4 @@
+import { fractionPart } from '../typed/fraction-parts.js';
 import FractionJS from 'fraction.js';
 import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
 import { createSelectedMultiply } from '../arithmetic/selectedMultiply.js';
@@ -3733,6 +3734,7 @@ function compatFactoryExports(): {
 
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
+  fractionPart,
   constructors: compatConstructors,
   checks,
   factory,
