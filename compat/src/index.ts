@@ -40,6 +40,14 @@ import {
   createCompatString,
 } from './fraction-format-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import {
+  applyUnitRelationalParity,
+  factoryMaxUnits,
+  factoryMinUnits,
+  factorySignUnits,
+  wrapUnitExtrema,
+  type UnitRelationalOps,
+} from './unit-relational.js';
 
 // =============================================================================
 // Configuration
@@ -477,11 +485,35 @@ export function create(
         ),
       }
     : surfaceOf(factories);
+  const unitRelationalBase: UnitRelationalOps = {
+    equal: mathFunctions.equal as UnitRelationalOps['equal'],
+    unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
+    equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
+    deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
+    compare: mathFunctions.compare as UnitRelationalOps['compare'],
+    larger: mathFunctions.larger as UnitRelationalOps['larger'],
+    smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
+    largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
+    smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
+  };
+  const unitRelational = applyUnitRelationalParity(unitRelationalBase);
+
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...originalSurface,
     create: createSibling,
+
+    // G04: mathjs unit equality / ordering through activated factories (#1552).
+    equal: unitRelational.equal,
+    unequal: unitRelational.unequal,
+    equalScalar: unitRelational.equalScalar,
+    deepEqual: unitRelational.deepEqual,
+    compare: unitRelational.compare,
+    larger: unitRelational.larger,
+    smaller: unitRelational.smaller,
+    largerEq: unitRelational.largerEq,
+    smallerEq: unitRelational.smallerEq,
 
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
@@ -519,8 +551,9 @@ export function create(
     mean: shims.mean,
     std: shims.std,
     variance: shims.variance,
-    min: shims.min,
-    max: shims.max,
+    min: wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
+    max: wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
+    sign: wrapUnitExtrema(mathFunctions.sign as (...args: unknown[]) => unknown, factorySignUnits),
 
     // Number theory
     gcd: shims.gcd,
@@ -644,6 +677,19 @@ export function create(
     expressionConstants.fraction = () => instance.fraction;
   }
   if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
+  for (const name of [
+    'equal',
+    'unequal',
+    'equalScalar',
+    'deepEqual',
+    'compare',
+    'larger',
+    'smaller',
+    'largerEq',
+    'smallerEq',
+  ] as const) {
+    expressionConstants[name] = () => instance[name];
+  }
   for (const name of [
     'arg',
     'conj',
@@ -955,6 +1001,19 @@ const defaultTyped: MathInstance['typed'] =
   /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatTyped();
 export { defaultTyped as typed };
 
+/** G04 named exports — same unit-relational adapters as `create(all)` (#1552). */
+const namedUnitRelational = applyUnitRelationalParity({
+  equal: mathFunctions.equal as UnitRelationalOps['equal'],
+  unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
+  equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
+  deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
+  compare: mathFunctions.compare as UnitRelationalOps['compare'],
+  larger: mathFunctions.larger as UnitRelationalOps['larger'],
+  smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
+  largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
+  smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
+});
+
 // Mathematical functions shared with the functions package.
 export {
   Help,
@@ -983,7 +1042,6 @@ export {
   factory_cbrt as cbrt,
   clone,
   column,
-  compare,
   compareNatural,
   composition,
   concat,
@@ -998,7 +1056,6 @@ export {
   ctranspose,
   factory_cube as cube,
   cumsum,
-  deepEqual,
   derivative,
   diag,
   diff,
@@ -1009,8 +1066,6 @@ export {
   dotMultiply,
   dotPow,
   eigs,
-  equal,
-  equalScalar,
   erf,
   expm,
   factory_expm1 as expm1,
@@ -1043,8 +1098,6 @@ export {
   isZero,
   kldivergence,
   kron,
-  larger,
-  largerEq,
   leafCount,
   leftShift,
   log10,
@@ -1109,8 +1162,6 @@ export {
   simplifyCore,
   factory_sinh as sinh,
   slu,
-  smaller,
-  smallerEq,
   solveODE,
   sort,
   splitUnit,
@@ -1128,13 +1179,24 @@ export {
   typeOf,
   unaryMinus,
   unaryPlus,
-  unequal,
   usolve,
   usolveAll,
   xor,
   zeta,
   zpk2tf,
 } from '@danielsimonjr/mathts-functions';
+
+export const {
+  equal,
+  unequal,
+  equalScalar,
+  deepEqual,
+  compare,
+  larger,
+  smaller,
+  largerEq,
+  smallerEq,
+} = namedUnitRelational;
 
 type UnitMagnitude = number | ConfiguredBigNumber | Fraction;
 
