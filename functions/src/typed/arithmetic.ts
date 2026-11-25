@@ -97,6 +97,10 @@ import {
   denseOfSize,
   sparseOfSize,
 } from '../factories/matrix-bridge.js';
+import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
+import { createMathjsSubtract } from '../arithmetic/subtract.js';
+import { createSelectedMultiply } from '../arithmetic/selectedMultiply.js';
+import { isUnit } from '../utils/is.js';
 import { arraySize, broadcastTo } from '../utils/array.js';
 
 import { computePool, ComputePool, matmulSequential } from '@danielsimonjr/mathts-parallel';
@@ -408,8 +412,14 @@ function elementwiseMatrixNumber(
   fallback: ScalarOp,
   a: unknown,
   b: unknown,
-  scalarKeepsSparse: boolean | 'left' = false
+  scalarKeepsSparse: boolean | 'left' = false,
+  factoryCscOp?: 'add' | 'subtract'
 ): MathJSDenseMatrix | MathJSSparseMatrix | SparseMatrix {
+  if (factoryCscOp && factoryCscHasUnitPair(a, b)) {
+    const routed =
+      factoryCscOp === 'add' ? getFactoryCscAdd()(a, b) : getFactoryCscSubtract()(a, b);
+    return routed as MathJSDenseMatrix | MathJSSparseMatrix;
+  }
   const data = elementwiseNumber(tf, fallback, toNested(a), toNested(b)) as unknown[][];
   const size = elementwiseSize(a, b);
   const sparseA = isSparseStorage(a);
@@ -457,6 +467,58 @@ function isSparseStorage(m: unknown): boolean {
   if (isSparseMatrix(m)) return true;
   const s = (m as { storage?: () => string }).storage;
   return typeof s === 'function' && s.call(m) === 'sparse';
+}
+
+/** Factory CSC sparse matrix (not the public CSR `SparseMatrix`). */
+function isFactoryCsc(m: unknown): boolean {
+  return isSparseStorage(m) && !isSparseMatrix(m);
+}
+
+/** Whether CSC `_values` holds a Unit (implicit `toArray()` zeros are numbers). */
+function cscStoresUnits(m: unknown): boolean {
+  const vals = (m as { _values?: unknown[] | null })._values;
+  if (!Array.isArray(vals)) return false;
+  return vals.some((v) => isUnit(v));
+}
+
+let factoryCscAdd: ((a: unknown, b: unknown) => unknown) | undefined;
+let factoryCscSubtract: ((a: unknown, b: unknown) => unknown) | undefined;
+let factoryCscMultiply: ((a: unknown, b: unknown) => unknown) | undefined;
+
+function getFactoryCscAdd(): (a: unknown, b: unknown) => unknown {
+  factoryCscAdd ??= createSelectedAdd({
+    typed: factoryScope.typed,
+    matrix: factoryScope.matrix,
+    addScalar: factoryScope.addScalar,
+    DenseMatrix: factoryScope.DenseMatrix,
+  } as Parameters<typeof createSelectedAdd>[0]) as (a: unknown, b: unknown) => unknown;
+  return factoryCscAdd;
+}
+
+function getFactoryCscSubtract(): (a: unknown, b: unknown) => unknown {
+  factoryCscSubtract ??= createMathjsSubtract({
+    typed: factoryScope.typed,
+    matrix: factoryScope.matrix,
+    subtractScalar: factoryScope.subtractScalar,
+    DenseMatrix: factoryScope.DenseMatrix,
+  } as Parameters<typeof createMathjsSubtract>[0]) as (a: unknown, b: unknown) => unknown;
+  return factoryCscSubtract;
+}
+
+function getFactoryCscMultiply(): (a: unknown, b: unknown) => unknown {
+  factoryCscMultiply ??= createSelectedMultiply({
+    typed: factoryScope.typed,
+    matrix: factoryScope.matrix,
+    addScalar: factoryScope.addScalar,
+    multiplyScalar: factoryScope.multiplyScalar,
+    isZero: factoryScope.isZero,
+    dot: factoryScope.dot,
+  } as Parameters<typeof createSelectedMultiply>[0]) as (a: unknown, b: unknown) => unknown;
+  return factoryCscMultiply;
+}
+
+function factoryCscHasUnitPair(a: unknown, b: unknown): boolean {
+  return isFactoryCsc(a) && isFactoryCsc(b) && (cscStoresUnits(a) || cscStoresUnits(b));
 }
 
 /** The product of two matrix operands of any storage, as nested numbers. */
@@ -612,6 +674,12 @@ function vectorProduct(
  * `[n]`): the result of {@link vectorProduct} on their nested data, a scalar or an Array.
  */
 function matrixVectorProduct(a: unknown, b: unknown): unknown {
+  if (isFactoryCsc(a) && cscStoresUnits(a)) {
+    return getFactoryCscMultiply()(a, b);
+  }
+  if (isFactoryCsc(b) && cscStoresUnits(b)) {
+    return getFactoryCscMultiply()(a, b);
+  }
   const na = toNested(a) as unknown[];
   const nb = toNested(b) as unknown[];
   return vectorProduct(na, nb, collectionSize(a), collectionSize(b));
@@ -906,9 +974,9 @@ export const add = withBinaryScalarGuards(
     // Element-wise matrix addition (mathjs parity). Sparse⊕sparse stays sparse so
     // the CSparse algebra factories (csAmd's C = A + A', etc.) get CSC output.
     'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b, false, 'add'),
     'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
+      elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b, false, 'add'),
     'DenseMatrix, number': (a: unknown, b: f64): unknown =>
       elementwiseMatrixNumber(addForNumberPath.fn!, addCollectionOp, a, b),
     'number, DenseMatrix': (a: f64, b: unknown): unknown =>
@@ -1013,9 +1081,9 @@ export const subtract = mathTyped('subtract', {
   // Element-wise matrix subtraction (mathjs parity). Sparse⊖sparse stays sparse so
   // the CSparse algebra factories get CSC output, as they do for `add`.
   'DenseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown =>
-    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b, false, 'subtract'),
   'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
+    elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b, false, 'subtract'),
   'DenseMatrix, number': (a: unknown, b: f64): unknown =>
     elementwiseMatrixNumber(subtractForNumberPath.fn!, subOp, a, b),
   'number, DenseMatrix': (a: f64, b: unknown): unknown =>
@@ -1139,10 +1207,13 @@ export const multiply = withBinaryScalarGuards(
     // A 2-D matrix product with a sparse operand returns sparse storage in either order.
     // For two sparse operands, read only stored entries (#1271). A sparse matrix has two axes,
     // so a vector case comes from the dense operand only.
-    'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      sparseProduct(a, b, addOp, mulOp),
+    'SparseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => {
+      if (factoryCscHasUnitPair(a, b)) return getFactoryCscMultiply()(a, b);
+      return sparseProduct(a, b, addOp, mulOp);
+    },
     // A sparse matrix times a 1-D dense matrix is a sparse column of size [r, 1] (mathjs).
     'SparseMatrix, DenseMatrix': (a: unknown, b: unknown): unknown => {
+      if (isFactoryCsc(a) && cscStoresUnits(a)) return getFactoryCscMultiply()(a, b);
       if (!isNotTwoDimensional(b)) return mixedSparseMatrixProduct(a, b);
       const column = (matrixVectorProduct(a, b) as unknown[]).map((x) => [x]);
       const size = [column.length, 1];
@@ -1150,8 +1221,10 @@ export const multiply = withBinaryScalarGuards(
     },
     // A 1-D dense matrix times a sparse matrix is a dense vector of size [c]. mathjs throws
     // here; the product is defined, so MathTS returns it.
-    'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown =>
-      isNotTwoDimensional(a) ? denseVectorProduct(a, b) : mixedSparseMatrixProduct(a, b),
+    'DenseMatrix, SparseMatrix': (a: unknown, b: unknown): unknown => {
+      if (isFactoryCsc(b) && cscStoresUnits(b)) return getFactoryCscMultiply()(a, b);
+      return isNotTwoDimensional(a) ? denseVectorProduct(a, b) : mixedSparseMatrixProduct(a, b);
+    },
 
     'number, Complex': (a: f64, b: Complex): Complex => b.multiply(Complex.fromNumber(a)),
     'Complex, number': (a: Complex, b: f64): Complex => a.multiply(Complex.fromNumber(b)),
@@ -1438,6 +1511,8 @@ export const pow = mathTyped('pow', {
   'Complex, number': (a: Complex, b: f64): Complex => corePow(a, b) as Complex,
   'Complex, Complex': (a: Complex, b: Complex): Complex => corePow(a, b) as Complex,
   'Fraction, number': (a: Fraction, b: f64): Fraction | f64 => corePow(a, b) as Fraction | f64,
+  'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction | f64 =>
+    corePow(a, b) as Fraction | f64,
   // A BigNumber base takes the BigNumber kernel shared with the factory `pow` (mathjs rules).
   'BigNumber, number': (a: BigNumber, b: f64): BigNumber | Complex =>
     powBigNumberWith(a, mathTyped.convert(b, 'BigNumber') as BigNumber, isPredictableMode()),

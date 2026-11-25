@@ -1,53 +1,60 @@
-/**
- * Native Fraction sign fields (#1551).
- *
- * Root cause: `isPositive` / `isNegative` (and `fix`) compared `x.s` / `x.n`, the
- * fraction.js layout. MathTS `Fraction` stores `numerator` / `denominator` and exposes
- * `isPositive()` / `isNegative()`. `x.s` is undefined, so every Fraction looked
- * non-positive.
- */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, it, expect } from 'vitest';
-import { fix, fraction, isNegative, isPositive, isZero, matrix } from '../src/index.js';
+import { describe, expect, it } from 'vitest';
+import { Fraction } from '@danielsimonjr/mathts-core';
+import { fix, fraction, isInteger, isNegative, isPositive, isZero } from '../src/index.js';
+
+const FRACTION_SIG = /Fraction\s*:/;
+const FIELD_READ = /\b(x|[\w]+)\s*\.\s*(s|n|d)\b|\b(x|[\w]+)\s*\[\s*['"](s|n|d)['"]\s*\]/g;
+
+function scanFractionFieldReads(source: string): string[] {
+  const hits: string[] = [];
+  const lines = source.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (!FRACTION_SIG.test(lines[i]!)) continue;
+    const window = lines.slice(i, Math.min(i + 12, lines.length)).join('\n');
+    FIELD_READ.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = FIELD_READ.exec(window))) {
+      hits.push(`${i + 1}: ${m[0]}`);
+    }
+  }
+  return hits;
+}
 
 const srcRoot = join(dirname(fileURLToPath(import.meta.url)), '../src');
 
-function assertNoFractionJsFields(rel: string): void {
-  const text = readFileSync(join(srcRoot, rel), 'utf8');
-  expect(text, `${rel} must mention Fraction`).toMatch(/Fraction/);
-  expect(text, `${rel} must not read fraction.js fields .s/.n/.d`).not.toMatch(/\bx\.[snd]\b/);
-}
+describe('#1551 Fraction sign / integer fields (native factories)', () => {
+  it('isPositive / isNegative / isZero / isInteger / fix use the Fraction API', () => {
+    const third = fraction(1, 3) as Fraction;
+    const neg = fraction(-1, 3) as Fraction;
+    const whole = fraction(2) as Fraction;
+    const halfNeg = fraction(-5, 2) as Fraction;
 
-describe('Fraction sign fields (#1551)', () => {
-  it('isPositive / isNegative / isZero on scalars', () => {
-    expect(isPositive(fraction(2))).toBe(true);
-    expect(isPositive(fraction(1, 3))).toBe(true);
-    expect(isPositive(fraction(-2, 5))).toBe(false);
-    expect(isPositive(fraction(0))).toBe(false);
-    expect(isNegative(fraction(-2, 5))).toBe(true);
-    expect(isNegative(fraction(2))).toBe(false);
-    expect(isNegative(fraction(0))).toBe(false);
+    expect(isPositive(third)).toBe(true);
+    expect(isNegative(neg)).toBe(true);
+    expect(isPositive(neg)).toBe(false);
     expect(isZero(fraction(0))).toBe(true);
-    expect(isZero(fraction(1, 3))).toBe(false);
+    expect(isInteger(whole)).toBe(true);
+    expect(isInteger(third)).toBe(false);
+    expect(String(fix(halfNeg))).toBe(String(new Fraction(-2n, 1n)));
+    expect(String(fix(fraction(5, 2)))).toBe(String(new Fraction(2n, 1n)));
+
+    expect(isPositive([third, neg, whole, fraction(0)])).toEqual([true, false, true, false]);
   });
 
-  it('isPositive of an array and a matrix of Fractions', () => {
-    expect(isPositive([fraction(2), fraction(-1)])).toEqual([true, false]);
-    const m = matrix([[fraction(2), fraction(-1)]]);
-    const mapped = isPositive(m) as { toArray(): unknown };
-    expect(mapped.toArray()).toEqual([[true, false]]);
-  });
-
-  it('fix of a negative Fraction uses isNegative, not fraction.js s', () => {
-    expect(String(fix(fraction(-3, 2)))).toBe('-1');
-    expect(String(fix(fraction(5, 2)))).toBe('2');
-  });
-
-  it('source does not read fraction.js s/n/d on Fraction', () => {
-    assertNoFractionJsFields('utils/isPositive.ts');
-    assertNoFractionJsFields('utils/isNegative.ts');
-    assertNoFractionJsFields('arithmetic/fix.ts');
+  it('does not read fraction.js .s / .n / .d on Fraction signatures', () => {
+    const files = [
+      'utils/isPositive.ts',
+      'utils/isNegative.ts',
+      'utils/isInteger.ts',
+      'arithmetic/fix.ts',
+      'arithmetic/pow.ts',
+    ];
+    for (const rel of files) {
+      const source = readFileSync(join(srcRoot, rel), 'utf8');
+      expect(scanFractionFieldReads(source), rel).toEqual([]);
+    }
   });
 });

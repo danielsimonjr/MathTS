@@ -24,7 +24,7 @@ import { nearlyEqual, roundNumberWide } from '../number.js';
 import { ROUND_DECIMALS_NOT_INTEGER, roundBigNumberDecimals } from './round-bignumber.js';
 import { BigNumber, isBigNumber } from '../types/bignumber.js';
 import { Complex, isComplex } from '../types/complex.js';
-import { Fraction, isFraction } from '../types/fraction.js';
+import { Fraction, isFraction, rationalPow } from '../types/fraction.js';
 
 /** Any scalar core can do arithmetic on. */
 export type NumericScalar = number | bigint | Complex | Fraction | BigNumber;
@@ -147,6 +147,14 @@ export function pow(base: NumericScalar, exp: NumericScalar): NumericScalar {
   assertNumericScalar(base, 'pow');
   assertNumericScalar(exp, 'pow');
   if (isComplex(base)) return base.pow(isComplex(exp) ? exp : number(exp));
+  if (isFraction(base) && isFraction(exp)) {
+    const exact = rationalPow(base, exp);
+    if (exact != null) return exact;
+    const x = number(base);
+    const y = number(exp);
+    if (x < 0 && !Number.isInteger(y)) return new Complex(x, 0).pow(y);
+    return Math.pow(x, y);
+  }
   if (isBigNumber(base) || isFraction(base)) {
     const n = typeof exp === 'bigint' ? exp : number(exp);
     if (typeof n === 'bigint' || Number.isInteger(n)) return base.pow(n);

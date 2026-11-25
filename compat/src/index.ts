@@ -20,7 +20,7 @@
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
-import { shims } from './shims.js';
+import { shims, createCompatPow } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -430,10 +430,12 @@ export function create(
   const fullBundle =
     canonical ||
     Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
-  const localUnits =
-    config === moduleDefaults || !fullBundle
-      ? undefined
-      : mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig);
+  // Always give a full-bundle `create(all)` its own Unit class. Patching
+  // `typeConverters` on `instanceSymbols.Unit` would mutate the shared native
+  // constructor that functions/core use (#1551).
+  const localUnits = fullBundle
+    ? mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig)
+    : undefined;
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
@@ -531,7 +533,11 @@ export function create(
     subtract: mathFunctions.factory_subtract,
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
-    pow: shims.pow,
+    pow: bindShim(createCompatPow(() => Boolean(currentConfig.predictable))),
+    isPositive: mathFunctions.isPositive,
+    isNegative: mathFunctions.isNegative,
+    isInteger: mathFunctions.isInteger,
+    fix: mathFunctions.fix,
     sqrt: shims.sqrt,
     abs: shims.abs,
     exp: shims.exp,
@@ -647,12 +653,14 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    diag: mathFunctions.diag,
+    rotationMatrix: mathFunctions.rotationMatrix,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
   ) as (keyof typeof compatDefaultOverrides)[];
   for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
-  if (localUnits && flat.Unit === instanceSymbols.Unit) flat.Unit = localUnits.Unit;
+  if (localUnits) flat.Unit = localUnits.Unit;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
   );

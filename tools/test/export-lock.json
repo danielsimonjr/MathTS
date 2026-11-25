@@ -832,6 +832,9 @@
       "ratioExactScale": {
         "kind": "function"
       },
+      "rationalPow": {
+        "kind": "function"
+      },
       "readScaleExpression": {
         "kind": "function"
       },
@@ -13449,6 +13452,9 @@
         "kind": "function"
       },
       "createCompareText": {
+        "kind": "function"
+      },
+      "createCompatPow": {
         "kind": "function"
       },
       "createCompile": {
