@@ -127,10 +127,7 @@ type LocalUnitSources = {
   update: (current: unknown, previous: unknown) => void;
 };
 
-/**
- * Wrap one compatibility instance's unit constructor, `unit()`, and `createUnit()`.
- * Pins `UNITS` keys and `isValuelessUnit` to mathjs 15.3.0 without changing native core.
- */
+/** Record names `createUnit` just registered so `isValuelessUnit` can see overrides. */
 function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>): void {
   const head = args[0];
   if (typeof head === 'string') registeredNames.add(head);
@@ -138,6 +135,10 @@ function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>):
     for (const key of Object.keys(head as object)) registeredNames.add(key);
 }
 
+/**
+ * Wrap one compatibility instance's unit constructor, `unit()`, and `createUnit()`.
+ * Pins `UNITS` keys and `isValuelessUnit` to mathjs 15.3.0 without changing native core.
+ */
 export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T {
   const registeredNames = new Set<string>();
   const Unit = wrapCompatUnitClass(sources.Unit, registeredNames);
