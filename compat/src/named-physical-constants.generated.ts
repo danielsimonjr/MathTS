@@ -13,180 +13,180 @@ function createUnitConstant([
   return unit;
 }
 
-/** MathJS 15.2.0 value of atomicMass, expressed in kg. */
+/** MathJS 15.3.0 value of atomicMass, expressed in kg. */
 const mathjsAtomicMass: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[0]);
-/** MathJS 15.2.0 value of avogadro, expressed in mol^-1. */
+/** MathJS 15.3.0 value of avogadro, expressed in mol^-1. */
 const mathjsAvogadro: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[1]);
-/** MathJS 15.2.0 value of bohrMagneton, expressed in J / T. */
+/** MathJS 15.3.0 value of bohrMagneton, expressed in J / T. */
 const mathjsBohrMagneton: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[2]
 );
-/** MathJS 15.2.0 value of bohrRadius, expressed in m. */
+/** MathJS 15.3.0 value of bohrRadius, expressed in m. */
 const mathjsBohrRadius: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[3]);
-/** MathJS 15.2.0 value of boltzmann, expressed in J / K. */
+/** MathJS 15.3.0 value of boltzmann, expressed in J / K. */
 const mathjsBoltzmann: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[4]);
-/** MathJS 15.2.0 value of classicalElectronRadius, expressed in m. */
+/** MathJS 15.3.0 value of classicalElectronRadius, expressed in m. */
 const mathjsClassicalElectronRadius: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[5]
 );
-/** MathJS 15.2.0 value of conductanceQuantum, expressed in S. */
+/** MathJS 15.3.0 value of conductanceQuantum, expressed in S. */
 const mathjsConductanceQuantum: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[6]
 );
-/** MathJS 15.2.0 value of coulomb, expressed in (N m^2) / C^2. */
+/** MathJS 15.3.0 value of coulomb, expressed in (N m^2) / C^2. */
 const mathjsCoulomb: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[7]);
-/** MathJS 15.2.0 value of coulombConstant, expressed in (N m^2) / C^2. */
+/** MathJS 15.3.0 value of coulombConstant, expressed in (N m^2) / C^2. */
 const mathjsCoulombConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[8]
 );
-/** MathJS 15.2.0 value of deuteronMass, expressed in kg. */
+/** MathJS 15.3.0 value of deuteronMass, expressed in kg. */
 const mathjsDeuteronMass: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[9]
 );
-/** MathJS 15.2.0 value of electricConstant, expressed in F / m. */
+/** MathJS 15.3.0 value of electricConstant, expressed in F / m. */
 const mathjsElectricConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[10]
 );
-/** MathJS 15.2.0 value of electronMass, expressed in kg. */
+/** MathJS 15.3.0 value of electronMass, expressed in kg. */
 const mathjsElectronMass: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[11]
 );
-/** MathJS 15.2.0 value of elementaryCharge, expressed in C. */
+/** MathJS 15.3.0 value of elementaryCharge, expressed in C. */
 const mathjsElementaryCharge: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[12]
 );
-/** MathJS 15.2.0 value of faraday, expressed in C / mol. */
+/** MathJS 15.3.0 value of faraday, expressed in C / mol. */
 const mathjsFaraday: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[13]);
-/** MathJS 15.2.0 value of fermiCoupling, expressed in GeV^-2. */
+/** MathJS 15.3.0 value of fermiCoupling, expressed in GeV^-2. */
 const mathjsFermiCoupling: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[14]
 );
-/** MathJS 15.2.0 value of firstRadiation, expressed in W m^2. */
+/** MathJS 15.3.0 value of firstRadiation, expressed in W m^2. */
 const mathjsFirstRadiation: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[15]
 );
-/** MathJS 15.2.0 value of gasConstant, expressed in J / (K mol). */
+/** MathJS 15.3.0 value of gasConstant, expressed in J / (K mol). */
 const mathjsGasConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[16]
 );
-/** MathJS 15.2.0 value of gravitationConstant, expressed in m^3 / (kg s^2). */
+/** MathJS 15.3.0 value of gravitationConstant, expressed in m^3 / (kg s^2). */
 const mathjsGravitationConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[17]
 );
-/** MathJS 15.2.0 value of gravity, expressed in m / s^2. */
+/** MathJS 15.3.0 value of gravity, expressed in m / s^2. */
 const mathjsGravity: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[18]);
-/** MathJS 15.2.0 value of hartreeEnergy, expressed in J. */
+/** MathJS 15.3.0 value of hartreeEnergy, expressed in J. */
 const mathjsHartreeEnergy: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[19]
 );
-/** MathJS 15.2.0 value of inverseConductanceQuantum, expressed in ohm. */
+/** MathJS 15.3.0 value of inverseConductanceQuantum, expressed in ohm. */
 const mathjsInverseConductanceQuantum: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[20]
 );
-/** MathJS 15.2.0 value of klitzing, expressed in ohm. */
+/** MathJS 15.3.0 value of klitzing, expressed in ohm. */
 const mathjsKlitzing: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[21]);
-/** MathJS 15.2.0 value of loschmidt, expressed in m^-3. */
+/** MathJS 15.3.0 value of loschmidt, expressed in m^-3. */
 const mathjsLoschmidt: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[22]);
-/** MathJS 15.2.0 value of magneticConstant, expressed in N / A^2. */
+/** MathJS 15.3.0 value of magneticConstant, expressed in N / A^2. */
 const mathjsMagneticConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[23]
 );
-/** MathJS 15.2.0 value of magneticFluxQuantum, expressed in Wb. */
+/** MathJS 15.3.0 value of magneticFluxQuantum, expressed in Wb. */
 const mathjsMagneticFluxQuantum: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[24]
 );
-/** MathJS 15.2.0 value of molarMass, expressed in kg / mol. */
+/** MathJS 15.3.0 value of molarMass, expressed in kg / mol. */
 const mathjsMolarMass: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[25]);
-/** MathJS 15.2.0 value of molarMassC12, expressed in kg / mol. */
+/** MathJS 15.3.0 value of molarMassC12, expressed in kg / mol. */
 const mathjsMolarMassC12: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[26]
 );
-/** MathJS 15.2.0 value of molarPlanckConstant, expressed in (J s) / mol. */
+/** MathJS 15.3.0 value of molarPlanckConstant, expressed in (J s) / mol. */
 const mathjsMolarPlanckConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[27]
 );
-/** MathJS 15.2.0 value of molarVolume, expressed in m^3 / mol. */
+/** MathJS 15.3.0 value of molarVolume, expressed in m^3 / mol. */
 const mathjsMolarVolume: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[28]
 );
-/** MathJS 15.2.0 value of neutronMass, expressed in kg. */
+/** MathJS 15.3.0 value of neutronMass, expressed in kg. */
 const mathjsNeutronMass: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[29]
 );
-/** MathJS 15.2.0 value of nuclearMagneton, expressed in J / T. */
+/** MathJS 15.3.0 value of nuclearMagneton, expressed in J / T. */
 const mathjsNuclearMagneton: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[30]
 );
-/** MathJS 15.2.0 value of planckCharge, expressed in C. */
+/** MathJS 15.3.0 value of planckCharge, expressed in C. */
 const mathjsPlanckCharge: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[31]
 );
-/** MathJS 15.2.0 value of planckConstant, expressed in J s. */
+/** MathJS 15.3.0 value of planckConstant, expressed in J s. */
 const mathjsPlanckConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[32]
 );
-/** MathJS 15.2.0 value of planckLength, expressed in m. */
+/** MathJS 15.3.0 value of planckLength, expressed in m. */
 const mathjsPlanckLength: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[33]
 );
-/** MathJS 15.2.0 value of planckMass, expressed in kg. */
+/** MathJS 15.3.0 value of planckMass, expressed in kg. */
 const mathjsPlanckMass: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[34]
 );
-/** MathJS 15.2.0 value of planckTemperature, expressed in K. */
+/** MathJS 15.3.0 value of planckTemperature, expressed in K. */
 const mathjsPlanckTemperature: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[35]
 );
-/** MathJS 15.2.0 value of planckTime, expressed in s. */
+/** MathJS 15.3.0 value of planckTime, expressed in s. */
 const mathjsPlanckTime: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[36]
 );
-/** MathJS 15.2.0 value of protonMass, expressed in kg. */
+/** MathJS 15.3.0 value of protonMass, expressed in kg. */
 const mathjsProtonMass: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[37]
 );
-/** MathJS 15.2.0 value of quantumOfCirculation, expressed in m^2 / s. */
+/** MathJS 15.3.0 value of quantumOfCirculation, expressed in m^2 / s. */
 const mathjsQuantumOfCirculation: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[38]
 );
-/** MathJS 15.2.0 value of reducedPlanckConstant, expressed in J s. */
+/** MathJS 15.3.0 value of reducedPlanckConstant, expressed in J s. */
 const mathjsReducedPlanckConstant: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[39]
 );
-/** MathJS 15.2.0 value of rydberg, expressed in m^-1. */
+/** MathJS 15.3.0 value of rydberg, expressed in m^-1. */
 const mathjsRydberg: UnitInstance = /* #__PURE__ */ createUnitConstant(MATHJS_UNIT_CONSTANTS[40]);
-/** MathJS 15.2.0 value of secondRadiation, expressed in m K. */
+/** MathJS 15.3.0 value of secondRadiation, expressed in m K. */
 const mathjsSecondRadiation: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[41]
 );
-/** MathJS 15.2.0 value of speedOfLight, expressed in m / s. */
+/** MathJS 15.3.0 value of speedOfLight, expressed in m / s. */
 const mathjsSpeedOfLight: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[42]
 );
-/** MathJS 15.2.0 value of stefanBoltzmann, expressed in W / (m^2 K^4). */
+/** MathJS 15.3.0 value of stefanBoltzmann, expressed in W / (m^2 K^4). */
 const mathjsStefanBoltzmann: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[43]
 );
-/** MathJS 15.2.0 value of thomsonCrossSection, expressed in m^2. */
+/** MathJS 15.3.0 value of thomsonCrossSection, expressed in m^2. */
 const mathjsThomsonCrossSection: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[44]
 );
-/** MathJS 15.2.0 value of vacuumImpedance, expressed in ohm. */
+/** MathJS 15.3.0 value of vacuumImpedance, expressed in ohm. */
 const mathjsVacuumImpedance: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[45]
 );
-/** MathJS 15.2.0 value of wienDisplacement, expressed in m K. */
+/** MathJS 15.3.0 value of wienDisplacement, expressed in m K. */
 const mathjsWienDisplacement: UnitInstance = /* #__PURE__ */ createUnitConstant(
   MATHJS_UNIT_CONSTANTS[46]
 );
 
-/** MathJS 15.2.0 value of the dimensionless constant efimovFactor. */
+/** MathJS 15.3.0 value of the dimensionless constant efimovFactor. */
 const mathjsEfimovFactor = 22.7;
-/** MathJS 15.2.0 value of the dimensionless constant fineStructure. */
+/** MathJS 15.3.0 value of the dimensionless constant fineStructure. */
 const mathjsFineStructure = 0.0072973525693;
-/** MathJS 15.2.0 value of the dimensionless constant sackurTetrode. */
+/** MathJS 15.3.0 value of the dimensionless constant sackurTetrode. */
 const mathjsSackurTetrode = -1.16487052358;
-/** MathJS 15.2.0 value of the dimensionless constant weakMixingAngle. */
+/** MathJS 15.3.0 value of the dimensionless constant weakMixingAngle. */
 const mathjsWeakMixingAngle = 0.2229;
 
 export {

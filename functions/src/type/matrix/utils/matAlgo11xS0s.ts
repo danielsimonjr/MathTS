@@ -3,7 +3,6 @@ import type {
   DataType,
   MatrixValue,
   MatrixCallback,
-  EqualScalarFunction,
   TypedFunction,
   SparseMatrixConstructorData,
 } from '../types.js';
@@ -19,20 +18,21 @@ interface SparseMatrix {
   _size: [number, number];
   _datatype?: DataType;
   createSparseMatrix(data: SparseMatrixConstructorData): SparseMatrix;
+  /** The zero value of the matrix's datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero?: MatrixValue;
+  /** The zero test for the matrix's datatype. */
+  isZero(value: MatrixValue): boolean;
+  /** The full typed-function `isZero`, whatever the matrix datatype. */
+  isZero_Full(value: MatrixValue): boolean;
 }
 
 const name = 'matAlgo11xS0s';
-const dependencies = ['typed', 'equalScalar'];
+const dependencies = ['typed'];
 
 export const createMatAlgo11xS0s = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, equalScalar }: { typed: TypedFunction; equalScalar: EqualScalarFunction }) => {
-    let _dtCache: DataType | undefined;
-    let _cbCache: MatrixCallback | undefined;
-    let _eqCache: EqualScalarFunction | undefined;
-    let _cfCache: MatrixCallback | undefined;
-
+  ({ typed }: { typed: TypedFunction }) => {
     /**
      * Iterates over SparseMatrix S nonzero items and invokes the callback function f(Sij, b).
      * Callback function invoked NZ times (number of nonzero items in S).
@@ -76,10 +76,8 @@ export const createMatAlgo11xS0s = /* #__PURE__ */ factory(
 
       // datatype
       let dt: DataType;
-      // equal signature to use
-      let eq: EqualScalarFunction = equalScalar;
-      // zero value
-      let zero: MatrixValue = 0;
+      // isZero signature to use
+      let isZ: (value: MatrixValue) => boolean = (v) => s.isZero(v);
       // callback signature to use
       let cf: MatrixCallback = callback;
 
@@ -87,28 +85,12 @@ export const createMatAlgo11xS0s = /* #__PURE__ */ factory(
       if (typeof adt === 'string') {
         // datatype
         dt = adt;
-        if (dt === _dtCache && callback === _cbCache) {
-          eq = _eqCache!;
-          cf = _cfCache!;
-        } else {
-          // find signature that matches (dt, dt)
-          eq =
-            (typed.find(equalScalar as unknown as Parameters<typeof typed.find>[0], [
-              dt,
-              dt,
-            ]) as EqualScalarFunction) || equalScalar;
-          // callback
-          cf = (typed.find(callback, [dt, dt]) as unknown as MatrixCallback) || callback;
-
-          _dtCache = dt;
-          _cbCache = callback;
-          _eqCache = eq;
-          _cfCache = cf;
-        }
-        // convert 0 to the same datatype
-        zero = typed.convert(0, dt);
-        // convert b to the same datatype
-        b = typed.convert(b, dt);
+        // resolve the callback against the scalar zero of the matrix datatype
+        cf = (inverse
+          ? typed.resolve(callback as never, [b, s.zero])
+          : typed.resolve(callback as never, [s.zero, b])
+        )?.implementation as unknown as MatrixCallback;
+        if (cf === undefined || cf === null) cf = callback;
       }
 
       // result arrays
@@ -127,7 +109,7 @@ export const createMatAlgo11xS0s = /* #__PURE__ */ factory(
           // invoke callback
           const v = inverse ? cf(b, avalues[k]) : cf(avalues[k], b);
           // check value is zero
-          if (!eq(v, zero)) {
+          if (!isZ(v)) {
             // push index & value
             cindex.push(i);
             cvalues.push(v);

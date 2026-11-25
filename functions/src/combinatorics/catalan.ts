@@ -1,7 +1,7 @@
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
-import { assertLoopOrder } from '../utils/limits.js';
+import { assertLoopOrder, MAX_LOOP_ORDER } from '../utils/limits.js';
 import { roundedCatalan } from '../probability/rounded-loop.js';
 import type { BigNumber as CoreBigNumber } from '@danielsimonjr/mathts-core';
 
@@ -14,6 +14,18 @@ interface CatalanDependencies {
   typed: TypedFunction;
   isNegative: (x: NumericValue) => boolean;
   isInteger: (x: NumericValue) => boolean;
+
+  multiplyScalar: TypedFunction;
+
+  divideScalar: TypedFunction;
+
+  number: TypedFunction;
+
+  typeOf: TypedFunction;
+
+  bignumber: TypedFunction;
+
+  bigint: TypedFunction;
 }
 
 /**
@@ -40,7 +52,17 @@ function catalanNumber(n: number): number {
 }
 
 const name = 'catalan';
-const dependencies = ['typed', 'isNegative', 'isInteger'];
+const dependencies = [
+  'typed',
+  'multiplyScalar',
+  'divideScalar',
+  'isNegative',
+  'isInteger',
+  'number',
+  'typeOf',
+  '?bignumber',
+  '?bigint',
+];
 
 export const createCatalan = /* #__PURE__ */ factory(
   name,
@@ -68,14 +90,29 @@ export const createCatalan = /* #__PURE__ */ factory(
      * @return {Number | BigNumber}     Cn(n)
      */
     return typed(name, {
-      'number | BigNumber': function (n: NumericValue): NumericValue {
-        if (!isInteger(n) || isNegative(n)) {
+      'number | BigNumber | bigint': function (
+        n: number | BigNumberType | bigint
+      ): number | BigNumberType | bigint {
+        if (!isInteger(n as NumericValue) || isNegative(n as NumericValue)) {
           throw new TypeError('Non-negative integer value expected in function catalan');
         }
 
         if (typeof n === 'number') return catalanNumber(n);
+        // A bigint input stays exact: the recurrence C(i+1) = C(i) * 2 * (2i+1) / (i+2)
+        // divides exactly at every step, so the bigint result is the exact Catalan
+        // number (mathjs 15.3.0, #3781; #1564).
+        if (typeof n === 'bigint') {
+          if (n > BigInt(MAX_LOOP_ORDER)) {
+            throw new RangeError(
+              `catalan: n = ${n} exceeds the supported maximum of ${MAX_LOOP_ORDER}`
+            );
+          }
+          let c = 1n;
+          for (let k = 0n; k < n; k++) c = (c * (4n * k + 2n)) / (k + 2n);
+          return c;
+        }
         // A working-precision loop with a rounding proof, or the exact bigint loop (#1164).
-        assertLoopOrder('catalan', 'n', n.toNumber());
+        assertLoopOrder('catalan', 'n', (n as unknown as CoreBigNumber).toNumber());
         return roundedCatalan(
           (n as unknown as CoreBigNumber).toBigInt()
         ) as unknown as BigNumberType;

@@ -491,7 +491,7 @@ export function create(
 
     // Arithmetic
     add: bindShim(shims.add),
-    subtract: bindShim(shims.subtract),
+    subtract: mathFunctions.factory_subtract,
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
     pow: shims.pow,
@@ -604,6 +604,7 @@ export function create(
     combinations: namedCombinations,
     combinationsWithRep: namedCombinationsWithRep,
     xgcd: namedXgcd,
+    mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
   };

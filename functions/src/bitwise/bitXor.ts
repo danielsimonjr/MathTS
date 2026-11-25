@@ -13,24 +13,23 @@ interface BitXorDependencies {
   typed: TypedFunction;
   matrix: (data: unknown[]) => unknown;
   DenseMatrix: new (data: unknown) => unknown;
-  concat: TypedFunction;
+
   SparseMatrix: new (data: unknown) => unknown;
 }
 
 const name = 'bitXor';
-const dependencies = ['typed', 'matrix', 'DenseMatrix', 'concat', 'SparseMatrix'];
+const dependencies = ['typed', 'matrix', 'DenseMatrix', 'SparseMatrix'];
 
 export const createBitXor = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, DenseMatrix, concat, SparseMatrix }: BitXorDependencies) => {
+  ({ typed, matrix, DenseMatrix, SparseMatrix }: BitXorDependencies) => {
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

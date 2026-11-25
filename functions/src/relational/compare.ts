@@ -40,11 +40,10 @@ interface CompareDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
   matrix: MatrixFactory;
-  equalScalar: TypedFunction;
+
   BigNumber: BigNumberConstructor;
   Fraction: FractionConstructor;
   DenseMatrix: DenseMatrixConstructor;
-  concat: TypedFunction;
 }
 
 interface CompareNumberDependencies {
@@ -53,37 +52,18 @@ interface CompareNumberDependencies {
 }
 
 const name = 'compare';
-const dependencies = [
-  'typed',
-  'config',
-  'matrix',
-  'equalScalar',
-  'BigNumber',
-  'Fraction',
-  'DenseMatrix',
-  'concat',
-];
+const dependencies = ['typed', 'config', 'matrix', 'BigNumber', 'Fraction', 'DenseMatrix'];
 
 export const createCompare = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    config,
-    equalScalar,
-    matrix,
-    BigNumber,
-    Fraction,
-    DenseMatrix,
-    concat,
-  }: CompareDependencies) => {
+  ({ typed, config, matrix, BigNumber, Fraction, DenseMatrix }: CompareDependencies) => {
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
-    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
     const compareUnits = createCompareUnits({ typed });
 

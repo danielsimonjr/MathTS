@@ -4,7 +4,6 @@ import type { AlgorithmFunction } from '../type/matrix/types.js';
 import { createMatAlgo02xDS0 } from '../type/matrix/utils/matAlgo02xDS0.js';
 import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
 import { createMatAlgo07xSSf } from '../type/matrix/utils/matAlgo07xSSf.js';
-import { createMatAlgo11xS0s } from '../type/matrix/utils/matAlgo11xS0s.js';
 import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
@@ -12,23 +11,15 @@ import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithm
 interface DotDivideDependencies {
   typed: TypedFunction;
   matrix: TypedFunction;
-  equalScalar: TypedFunction;
+
   divideScalar: TypedFunction;
   DenseMatrix: unknown;
-  concat: TypedFunction;
+
   SparseMatrix: unknown;
 }
 
 const name = 'dotDivide';
-const dependencies = [
-  'typed',
-  'matrix',
-  'equalScalar',
-  'divideScalar',
-  'DenseMatrix',
-  'concat',
-  'SparseMatrix',
-];
+const dependencies = ['typed', 'matrix', 'divideScalar', 'DenseMatrix', 'SparseMatrix'];
 
 export const createDotDivide = /* #__PURE__ */ factory(
   name,
@@ -36,21 +27,17 @@ export const createDotDivide = /* #__PURE__ */ factory(
   ({
     typed,
     matrix,
-    equalScalar,
     divideScalar,
     DenseMatrix,
-    concat,
     SparseMatrix,
   }: DotDivideDependencies): TypedFunction => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**
@@ -92,7 +79,7 @@ export const createDotDivide = /* #__PURE__ */ factory(
         SS: matAlgo07xSSf as unknown as AlgorithmFunction,
         DS: matAlgo03xDSf as unknown as AlgorithmFunction,
         SD: matAlgo02xDS0 as unknown as AlgorithmFunction,
-        Ss: matAlgo11xS0s as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
         sS: matAlgo12xSfs as unknown as AlgorithmFunction,
       })
     ) as TypedFunction;

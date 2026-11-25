@@ -38,8 +38,26 @@ export function stringToNumber(s: unknown): number {
 /** Convert a boolean to 1 or 0. */
 export const booleanToNumber = (b: unknown): number => (b ? 1 : 0);
 
-/** Convert a bigint to the nearest number. */
-export const bigintToNumber = (n: unknown): number => Number(n as bigint);
+/**
+ * Convert a bigint to the nearest number, as mathjs 15.3.0 (#3803): values outside the
+ * safe-integer range refuse the implicit conversion instead of silently rounding or
+ * overflowing (#1566).
+ *
+ * @param n - The bigint.
+ * @returns The number.
+ * @throws A `TypeError` when the value is outside `Number.MIN_SAFE_INTEGER` .. `Number.MAX_SAFE_INTEGER`.
+ */
+export function bigintToNumber(n: unknown): number {
+  const v = n as bigint;
+  if (v < BigInt(Number.MIN_SAFE_INTEGER) || v > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new TypeError(
+      v < 0n
+        ? `Cannot implicitly convert bigint to number: value is below the min safe integer value (value: ${v})`
+        : `Cannot implicitly convert bigint to number: value exceeds the max safe integer value (value: ${v})`
+    );
+  }
+  return Number(v);
+}
 
 /** Convert a core Fraction to the nearest number. */
 export const fractionToNumber = (f: unknown): number => (f as { toNumber(): number }).toNumber();

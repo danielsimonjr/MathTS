@@ -37,26 +37,24 @@ interface MatrixType {
 interface NthRootDependencies {
   typed: TypedFunction;
   matrix: (data: unknown) => MatrixType;
-  equalScalar: TypedFunction;
+
   BigNumber: BigNumberConstructor;
-  concat: TypedFunction;
 }
 
 const name = 'nthRoot';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'BigNumber', 'concat'];
+const dependencies = ['typed', 'matrix', 'BigNumber'];
 
 export const createNthRoot = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, BigNumber, concat }: NthRootDependencies): TypedFunction => {
+  ({ typed, matrix, BigNumber }: NthRootDependencies): TypedFunction => {
     const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
-    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
+    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     const referTo = typed.referTo;

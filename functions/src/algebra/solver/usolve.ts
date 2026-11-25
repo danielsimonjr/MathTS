@@ -53,8 +53,10 @@ interface Dependencies {
   divideScalar: ScalarFunction;
   multiplyScalar: ScalarFunction;
   subtractScalar: ScalarFunction;
-  equalScalar: ScalarFunction;
+
   DenseMatrix: DenseMatrixConstructor;
+
+  isZero: TypedFunction;
 }
 
 const name = 'usolve';
@@ -64,22 +66,14 @@ const dependencies = [
   'divideScalar',
   'multiplyScalar',
   'subtractScalar',
-  'equalScalar',
+  'isZero',
   'DenseMatrix',
 ];
 
 export const createUsolve = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({
-    typed,
-    matrix,
-    divideScalar,
-    multiplyScalar,
-    subtractScalar,
-    equalScalar,
-    DenseMatrix,
-  }: Dependencies) => {
+  ({ typed, matrix, divideScalar, multiplyScalar, subtractScalar, DenseMatrix }: Dependencies) => {
     const solveValidation = createSolveValidation({
       DenseMatrix,
     } as unknown as Parameters<
@@ -90,7 +84,6 @@ export const createUsolve = /* #__PURE__ */ factory(
       divideScalar,
       multiplyScalar,
       subtractScalar,
-      equalScalar,
     });
 
     function matrixAllNumbers(data: unknown[][]): boolean {
@@ -252,11 +245,11 @@ export const createUsolve = /* #__PURE__ */ factory(
         let xj: unknown;
 
         const vjj = mdata[j][j];
-        if (isZeroEntry(vjj, equalScalar)) {
+        if (isZeroEntry(vjj)) {
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 
-        if (!isZeroEntry(bj, equalScalar)) {
+        if (!isZeroEntry(bj)) {
           xj = divideScalar(bj, vjj);
 
           // loop rows
@@ -325,11 +318,11 @@ export const createUsolve = /* #__PURE__ */ factory(
           }
         }
 
-        if (isZeroEntry(vjj, equalScalar)) {
+        if (isZeroEntry(vjj)) {
           throw new Error(LUSOLVE_SINGULAR_MESSAGE);
         }
 
-        if (!isZeroEntry(bj, equalScalar)) {
+        if (!isZeroEntry(bj)) {
           const xj = divideScalar(bj, vjj);
 
           for (let k = 0, lastIndex = jIndices.length; k < lastIndex; k++) {

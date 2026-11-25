@@ -30,25 +30,23 @@ interface Matrix {
 interface OrDependencies {
   typed: TypedFunction;
   matrix: (data: unknown[]) => Matrix;
-  equalScalar: TypedFunction;
+
   DenseMatrix: new (data: unknown) => Matrix;
-  concat: TypedFunction;
 }
 
 const name = 'or';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
+const dependencies = ['typed', 'matrix', 'DenseMatrix'];
 
 export const createOr = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, DenseMatrix, concat }: OrDependencies) => {
+  ({ typed, matrix, DenseMatrix }: OrDependencies) => {
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
-    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

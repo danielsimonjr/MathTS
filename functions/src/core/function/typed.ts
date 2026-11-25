@@ -37,6 +37,7 @@
  */
 
 import { Fraction as CoreFraction } from '@danielsimonjr/mathts-core';
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import typedFunction from 'typed-function';
 import { factory } from '../../utils/factory.js';
 import {
@@ -340,16 +341,8 @@ export const createTyped = /* #__PURE__ */ factory(
         from: 'bigint',
         to: 'number',
         convert: function (x: bigint): number {
-          if (x > Number.MAX_SAFE_INTEGER) {
-            throw new TypeError(
-              'Cannot implicitly convert bigint to number: ' +
-                'value exceeds the max safe integer value (value: ' +
-                x +
-                ')'
-            );
-          }
-
-          return Number(x);
+          // The safe-range guard is the one implementation in core (#3803, #1566).
+          return bigintToNumber(x);
         },
       },
       {

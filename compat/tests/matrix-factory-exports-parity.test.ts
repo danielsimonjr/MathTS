@@ -43,7 +43,8 @@ describe('native matrix factory bundles', () => {
     const expected = upstream('atan2Dependencies');
     expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
     expect(actual.atan2(1, -1)).toBeCloseTo(expected.atan2(1, -1), 14);
-    expect(actual.concat([1], [2])).toEqual(expected.concat([1], [2]));
+    // mathjs 15.3.0 (#3806) dropped the concat dependency of atan2, so the bundle no
+    // longer carries a concat function on either side.
     const y = [1, 0];
     const x = [0, 1];
     const actualAtan2 = actual.atan2 as (y: unknown, x: unknown) => unknown;

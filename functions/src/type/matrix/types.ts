@@ -171,6 +171,16 @@ export interface TypedFunction {
   ): ((...args: unknown[]) => unknown) | null;
 
   /**
+   * Resolve a specific signature of a typed function against concrete argument
+   * values. Returns the signature record with its implementation, or `null`
+   * when no signature matches.
+   */
+  resolve(
+    fn: (...args: unknown[]) => unknown,
+    args: unknown[]
+  ): { implementation: (...args: unknown[]) => unknown; params: string[] } | null;
+
+  /**
    * Convert a value to a specific datatype.
    * @param value - Value to convert (any type)
    * @param datatype - Target datatype string (e.g., 'number', 'BigNumber')

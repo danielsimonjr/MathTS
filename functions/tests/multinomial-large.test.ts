@@ -1,6 +1,6 @@
 /**
  * #1001: multinomial is exact for every result that fits a double, and returns
- * Infinity in a bounded number of steps for every result that does not.
+ * NaN in a bounded number of steps when the partial product leaves the double range (mathjs 15.3.0).
  *
  * Expected values come from mathjs 15.2.0 where mathjs is finite, and from a BigInt
  * oracle where mathjs returns NaN. The step counts of the exact kernel pin the work
@@ -39,12 +39,13 @@ describe('multinomial equals mathjs 15.2.0 where mathjs is finite', () => {
     expect(multinomial([20, 20])).toBe(137846528820);
     expect(multinomial([2.0, 3])).toBe(10);
     expect(multinomial([3, 5, 7, 11])).toBe(2784199017600);
-    expect(
+    // mathjs 15.3.0 (#3790, #1563) rejects a multidimensional multinomial input.
+    expect(() =>
       multinomial([
         [1, 2],
         [3, 4],
       ])
-    ).toBe(12600);
+    ).toThrow(RangeError);
   });
 
   it('is 1 for the empty array, as in mathjs', () => {
@@ -70,17 +71,18 @@ describe('multinomial is exact where mathjs returns NaN (deliberate difference)'
   });
 });
 
-describe('multinomial overflow returns Infinity', () => {
-  it('returns Infinity when the exact value rounds to Infinity', () => {
-    expect(multinomial([1e7, 1e7])).toBe(Infinity);
-    expect(multinomial([1e9, 1e9])).toBe(Infinity);
-    expect(multinomial([1e300, 1e300])).toBe(Infinity);
-    expect(multinomial([1e308, 1e308])).toBe(Infinity);
+// mathjs 15.3.0 (#3790): overflow in the binomial product chain yields NaN, not Infinity.
+describe('multinomial overflow matches mathjs 15.3.0 (NaN)', () => {
+  it('returns NaN when the exact kernel aborts on an out-of-range partial product', () => {
+    expect(multinomial([1e7, 1e7])).toBeNaN();
+    expect(multinomial([1e9, 1e9])).toBeNaN();
+    expect(multinomial([1e300, 1e300])).toBeNaN();
+    expect(multinomial([1e308, 1e308])).toBeNaN();
   });
 
   it('the boundary is between [514,514] and [515,515]', () => {
     expect(multinomial([514, 514])).toBe(7.156051054877897e307);
-    expect(multinomial([515, 515])).toBe(Infinity);
+    expect(multinomial([515, 515])).toBeNaN();
   });
 });
 
@@ -104,8 +106,8 @@ describe('parse() gives the same result as the typed function (#1001)', () => {
   };
 
   it('plain-number entries use the exact kernel', () => {
-    expect(both('multinomial([1e9, 1e9])')).toStrictEqual([Infinity, Infinity]);
-    expect(both('multinomial([1e7, 1e7])')).toStrictEqual([Infinity, Infinity]);
+    expect(both('multinomial([1e9, 1e9])')).toStrictEqual([NaN, NaN]);
+    expect(both('multinomial([1e7, 1e7])')).toStrictEqual([NaN, NaN]);
     expect(both('multinomial([100, 100])')).toStrictEqual([
       9.054851465610328e58, 9.054851465610328e58,
     ]);
@@ -122,29 +124,26 @@ describe('parse() gives the same result as the typed function (#1001)', () => {
     expect(p('multinomial([true, true])')).toBe(2);
   });
 
-  it('rejects a zero entry', () => {
-    expect(() => both('multinomial([1e9, 0])')).toThrow(TypeError);
+  it('accepts a zero entry (mathjs 15.3.0 #3790, #1563)', () => {
+    expect(both('multinomial([1e9, 0])')).toStrictEqual([1, 1]);
   });
 });
 
 describe('multinomial rejects entries that are not positive integers, as mathjs does', () => {
-  const msg = 'Positive integer value expected in function multinomial';
-
-  it('throws for zero, negative, fraction, NaN and Infinity entries', () => {
-    expect(() => multinomial([0, 1])).toThrow(TypeError);
+  it('throws for negative, fraction, NaN and Infinity entries (zero is valid since 15.3.0)', () => {
     expect(() => multinomial([-1, 2])).toThrow(TypeError);
     expect(() => multinomial([1.5, 1])).toThrow(TypeError);
     expect(() => multinomial([NaN, 1])).toThrow(TypeError);
     expect(() => multinomial([Infinity, 1])).toThrow(TypeError);
   });
 
-  it('throws even when an earlier entry would overflow', () => {
-    expect(() => multinomial([1e9, 0])).toThrow(TypeError);
+  it('validates later entries even when an earlier entry would overflow', () => {
     expect(() => multinomial([1e9, 1.5])).toThrow(TypeError);
-    expect(() => multinomial([1e308, 1e308, 0])).toThrow(TypeError);
   });
 
-  it('uses the mathjs message', () => {
-    expect(() => multinomial([0, 1])).toThrow(msg);
+  it('uses the mathjs 15.3.0 message', () => {
+    expect(() => multinomial([0.5, 1])).toThrow(
+      'Nonnegative integer value expected in function multinomial, but got 0.5'
+    );
   });
 });

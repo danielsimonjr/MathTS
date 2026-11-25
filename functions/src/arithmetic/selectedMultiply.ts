@@ -14,7 +14,7 @@ interface SelectedMultiplyDependencies {
   matrix: TypedFunction;
   addScalar: TypedFunction;
   multiplyScalar: TypedFunction;
-  equalScalar: TypedFunction;
+  isZero: TypedFunction;
   dot: TypedFunction;
 }
 
@@ -46,18 +46,9 @@ function validateProductSize(a: number[], b: number[]): void {
 
 export const createSelectedMultiply = /* #__PURE__ */ factory(
   'multiply',
-  ['typed', 'matrix', 'addScalar', 'multiplyScalar', 'equalScalar', 'dot'],
-  ({
-    typed,
-    matrix,
-    addScalar,
-    multiplyScalar,
-    equalScalar,
-    dot,
-  }: SelectedMultiplyDependencies) => {
-    const scaleSparse = createMatAlgo11xS0s({ typed, equalScalar } as Parameters<
-      typeof createMatAlgo11xS0s
-    >[0]);
+  ['typed', 'matrix', 'addScalar', 'multiplyScalar', 'isZero', 'dot'],
+  ({ typed, matrix, addScalar, multiplyScalar, isZero, dot }: SelectedMultiplyDependencies) => {
+    const scaleSparse = createMatAlgo11xS0s({ typed } as Parameters<typeof createMatAlgo11xS0s>[0]);
     const scaleDense = createMatAlgo14xDs({ typed } as Parameters<typeof createMatAlgo14xDs>[0]);
     const toMatrix = (value: unknown[], storage?: string) =>
       matrix(value, ...(storage === undefined ? [] : [storage])) as Matrix;
@@ -91,7 +82,7 @@ export const createSelectedMultiply = /* #__PURE__ */ factory(
           const accumulators = new Map<number, unknown>();
           for (let k = 0; k < denseRows; k++) {
             const cell = denseColumns === undefined ? denseData[k] : denseData[k][col];
-            if (equalScalar(cell, 0)) continue;
+            if (isZero(cell)) continue;
             for (let p = sparse._ptr[k]; p < sparse._ptr[k + 1]; p++) {
               const row = sparse._index[p];
               const term = multiplyScalar(cell, sparseValues[p]);
@@ -114,7 +105,7 @@ export const createSelectedMultiply = /* #__PURE__ */ factory(
                 multiplyScalar(denseData[row][sparse._index[p]], sparseValues[p])
               );
             }
-            if (!equalScalar(sum, 0)) {
+            if (!isZero(sum)) {
               index.push(row);
               values.push(sum);
             }

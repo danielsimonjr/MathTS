@@ -22,28 +22,26 @@ interface MatrixConstructor {
 interface Atan2Dependencies {
   typed: TypedFunction;
   matrix: MatrixConstructor;
-  equalScalar: TypedFunction;
+
   BigNumber: BigNumberConstructor;
   DenseMatrix: new (data: unknown) => unknown;
-  concat: TypedFunction;
 }
 
 const name = 'atan2';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'BigNumber', 'DenseMatrix', 'concat'];
+const dependencies = ['typed', 'matrix', 'BigNumber', 'DenseMatrix'];
 
 export const createAtan2 = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, BigNumber, DenseMatrix, concat }: Atan2Dependencies) => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+  ({ typed, matrix, BigNumber, DenseMatrix }: Atan2Dependencies) => {
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
-    const matAlgo09xS0Sf = createMatAlgo09xS0Sf({ typed, equalScalar });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo09xS0Sf = createMatAlgo09xS0Sf({ typed });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

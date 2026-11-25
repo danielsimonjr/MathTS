@@ -32,6 +32,10 @@ import {
 import { DimensionError } from '../error/DimensionError.js';
 import { assertAllocSize } from '../utils/limits.js';
 import { DenseMatrix, backendManager } from '@danielsimonjr/mathts-matrix';
+import { BigNumber, Complex, Fraction } from '@danielsimonjr/mathts-core';
+import { nearlyEqualBigNumber } from '@danielsimonjr/mathts-core/internal';
+import { DEFAULT_CONFIG } from '../core/config.js';
+import { nearlyEqual } from '../utils/number.js';
 
 // Do not call `backendManager.initialize()` at import time. That compiles and
 // instantiates the AssemblyScript module on every process that loads the
@@ -764,20 +768,71 @@ Object.defineProperty(MathJSDenseMatrix.prototype, 'type', {
 
 /**
  * True when a map result is a zero that a sparse matrix does not store.
- * Follows mathjs `equalScalar(value, 0)` for number, boolean, bigint, string, BigNumber, Complex
- * and Fraction values, with an exact zero test (mathjs also drops values below absTol).
+ * Matches mathjs `equalScalar(value, 0)`: number/Complex use `nearlyEqual` with
+ * `config.relTol`/`absTol`; BigNumber uses exact `eq` or `nearlyEqualBigNumber` (not
+ * `toNumber()`); Fraction is exact (`equals(0)` / `isZero()`). Do not call
+ * `Complex.isZero()` here: that is an exact (epsilon-0) test and would keep a
+ * sub-`absTol` complex entry that mathjs drops.
  */
 function isZeroScalar(value: unknown): boolean {
-  if (typeof value === 'number') return value === 0;
+  const relTol = DEFAULT_CONFIG.relTol;
+  const absTol = DEFAULT_CONFIG.absTol;
+  if (typeof value === 'number') {
+    return nearlyEqual(value, 0, relTol, absTol);
+  }
   if (typeof value === 'boolean') return value === false;
   if (typeof value === 'bigint') return value === 0n;
-  if (typeof value === 'string') return Number(value) === 0;
+  if (typeof value === 'string') return nearlyEqual(Number(value), 0, relTol, absTol);
   if (value !== null && typeof value === 'object') {
-    const v = value as { isZero?: () => boolean; n?: unknown; d?: unknown };
-    if (typeof v.isZero === 'function') return v.isZero();
-    if ('n' in v && 'd' in v) return Number(v.n) === 0;
+    if (isBigNumberLike(value)) {
+      return value.isZero() || nearlyEqualBigNumber(value, BigNumber.fromNumber(0), relTol, absTol);
+    }
+    if (isComplexParts(value)) {
+      return nearlyEqual(value.re, 0, relTol, absTol) && nearlyEqual(value.im, 0, relTol, absTol);
+    }
+    if (value instanceof Fraction) return value.isZero();
+    const maybeZero = value as { isZero?: () => boolean; n?: unknown };
+    if (typeof maybeZero.isZero === 'function') return maybeZero.isZero();
+    if ('n' in maybeZero) return Number(maybeZero.n) === 0;
   }
   return false;
+}
+
+function isComplexParts(value: object): value is { re: number; im: number } {
+  return (
+    typeof (value as { re?: unknown }).re === 'number' &&
+    typeof (value as { im?: unknown }).im === 'number'
+  );
+}
+
+function isBigNumberLike(value: unknown): value is BigNumber {
+  return value !== null && typeof value === 'object' && (value as BigNumber).isBigNumber === true;
+}
+
+/**
+ * The zero value of a datatype, as mathjs `typed.convert(0, datatype)` produces for the
+ * datatypes a sparse matrix stores (mathjs 15.3.0 exposes it as the matrix `zero`).
+ */
+function sparseZeroFor(datatype: string | undefined): unknown {
+  if (!datatype) return 0;
+  switch (datatype) {
+    case 'number':
+      return 0;
+    case 'BigNumber':
+      return new BigNumber(0);
+    case 'Fraction':
+      return new Fraction(0);
+    case 'Complex':
+      return new Complex(0, 0);
+    case 'boolean':
+      return false;
+    case 'bigint':
+      return 0n;
+    case 'string':
+      return '0';
+    default:
+      return 0;
+  }
 }
 
 /**
@@ -795,11 +850,13 @@ function isZeroScalar(value: unknown): boolean {
 export class MathJSSparseMatrix {
   /** The matrix flag. The prototype holds the value (see `Object.defineProperty` below). */
   declare readonly isMatrix: boolean;
-  _values: unknown[] | null;
-  _index: number[];
-  _ptr: number[];
-  _size: number[];
+  _values!: unknown[] | null;
+  _index!: number[];
+  _ptr!: number[];
+  _size!: number[];
   _datatype: string | undefined;
+  /** The zero value of the matrix datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero: unknown;
 
   constructor(
     data?:
@@ -819,6 +876,28 @@ export class MathJSSparseMatrix {
           _datatype?: string;
         }
   ) {
+    this._construct(data);
+    this.zero = sparseZeroFor(this._datatype);
+  }
+
+  private _construct(
+    data?:
+      | unknown[][]
+      | MathJSDenseMatrix
+      | {
+          values?: unknown[] | null;
+          index?: number[];
+          ptr?: number[];
+          _values?: unknown[] | null;
+          _index?: number[];
+          _ptr?: number[];
+          size?: number[];
+          _size?: number[];
+          data?: unknown[][];
+          datatype?: string;
+          _datatype?: string;
+        }
+  ): void {
     // A string is a datatype in mathjs (`sparse('number')`): it builds the empty matrix
     if (data === undefined || data === null || typeof (data as unknown) === 'string') {
       // Empty matrix
@@ -1216,6 +1295,21 @@ export class MathJSSparseMatrix {
    */
   getDataType(): string {
     return this._datatype ?? (getArrayDataType(this._values ?? [], typeOf) as string);
+  }
+
+  /**
+   * The full zero test, whatever the matrix datatype (mathjs 15.3.0 stores the
+   * typed-function `isZero` here).
+   */
+  isZero_Full(value: unknown): boolean {
+    return isZeroScalar(value);
+  }
+
+  /**
+   * The zero test for the matrix datatype (mathjs 15.3.0 SparseMatrix API).
+   */
+  isZero(value: unknown): boolean {
+    return isZeroScalar(value);
   }
 
   /**

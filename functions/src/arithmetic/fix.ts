@@ -45,8 +45,9 @@ interface FixNumberDependencies {
 
 interface FixDependencies extends FixNumberDependencies {
   Complex: ComplexConstructor;
+  isZero: TypedFunction;
   matrix: (data: unknown[]) => Matrix;
-  equalScalar: TypedFunction;
+
   zeros: (size: number[], storage?: string) => Matrix;
   DenseMatrix: new (data: unknown) => Matrix;
 }
@@ -58,7 +59,7 @@ const dependencies = [
   'matrix',
   'ceil',
   'floor',
-  'equalScalar',
+  'isZero',
   'zeros',
   'DenseMatrix',
 ];
@@ -82,7 +83,7 @@ export const createFixNumber = /* #__PURE__ */ factory(
 export const createFix = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, Complex, matrix, ceil, floor, equalScalar, zeros, DenseMatrix }: FixDependencies) => {
+  ({ typed, Complex, matrix, ceil, floor, zeros, DenseMatrix, isZero }: FixDependencies) => {
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
@@ -248,7 +249,7 @@ export const createFix = /* #__PURE__ */ factory(
       'number | Complex | Fraction | BigNumber, Matrix': typed.referToSelf(
         (self: TypedFunction) =>
           (x: number | ComplexType | FractionType | BigNumberType, y: Matrix): Matrix => {
-            if (equalScalar(x, 0)) return zeros(y.size(), y.storage());
+            if (isZero(x)) return zeros(y.size(), y.storage());
             if (y.storage() === 'dense') {
               return matAlgo14xDs(
                 y as unknown as Parameters<typeof matAlgo14xDs>[0],

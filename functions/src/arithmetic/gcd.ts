@@ -5,9 +5,9 @@ import type { TypedFunction } from '../core/function/typed.js';
 import type { AlgorithmFunction } from '../type/matrix/types.js';
 import type { ConfigOptions } from '../core/config.js';
 import { createMod } from './mod.js';
-import { createMatAlgo01xDSid } from '../type/matrix/utils/matAlgo01xDSid.js';
-import { createMatAlgo04xSidSid } from '../type/matrix/utils/matAlgo04xSidSid.js';
-import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
+import { createMatAlgo03xDSf } from '../type/matrix/utils/matAlgo03xDSf.js';
+import { createMatAlgo05xSfSf } from '../type/matrix/utils/matAlgo05xSfSf.js';
+import { createMatAlgo12xSfs } from '../type/matrix/utils/matAlgo12xSfs.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
 
 // Type definitions for gcd
@@ -31,11 +31,13 @@ interface GcdDependencies {
   config: ConfigOptions;
   round: TypedFunction;
   matrix: TypedFunction;
-  equalScalar: TypedFunction;
+
   zeros: TypedFunction;
   BigNumber: BigNumberConstructor;
   DenseMatrix: unknown;
   concat: TypedFunction;
+
+  isZero: TypedFunction;
 }
 
 const name = 'gcd';
@@ -44,7 +46,7 @@ const dependencies = [
   'config',
   'round',
   'matrix',
-  'equalScalar',
+  'isZero',
   'zeros',
   'BigNumber',
   'DenseMatrix',
@@ -66,29 +68,28 @@ export const createGcd = /* #__PURE__ */ factory(
     matrix,
     config,
     round,
-    equalScalar,
     zeros,
     BigNumber,
     DenseMatrix,
     concat,
+    isZero,
   }: GcdDependencies): TypedFunction => {
     const mod = createMod({
       typed,
       config,
       round,
       matrix,
-      equalScalar,
+      isZero,
       zeros,
       DenseMatrix,
       concat,
-    }) as TypedFunction;
-    const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
-    const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed, equalScalar });
-    const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
+    } as never) as TypedFunction;
+    const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed });
+    const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**
@@ -124,9 +125,11 @@ export const createGcd = /* #__PURE__ */ factory(
         'Fraction, Fraction': fractionGcd,
       },
       matrixAlgorithmSuite({
-        SS: matAlgo04xSidSid as unknown as AlgorithmFunction,
-        DS: matAlgo01xDSid as unknown as AlgorithmFunction,
-        Ss: matAlgo10xSids as unknown as AlgorithmFunction,
+        // gcd(x, 0) is abs(x), not x, so the result can differ from both
+        // operands wherever one of them is zero
+        SS: matAlgo05xSfSf as unknown as AlgorithmFunction,
+        DS: matAlgo03xDSf as unknown as AlgorithmFunction,
+        Ss: matAlgo12xSfs as unknown as AlgorithmFunction,
       }),
       {
         [gcdManyTypesSignature]: typed.referToSelf(

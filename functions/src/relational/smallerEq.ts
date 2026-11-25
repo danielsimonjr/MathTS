@@ -36,7 +36,7 @@ interface SmallerEqDependencies {
   config: ConfigOptions;
   matrix: MatrixFactory;
   DenseMatrix: DenseMatrixConstructor;
-  concat: TypedFunction;
+
   SparseMatrix: SparseMatrixConstructor;
 }
 
@@ -46,19 +46,18 @@ interface SmallerEqNumberDependencies {
 }
 
 const name = 'smallerEq';
-const dependencies = ['typed', 'config', 'matrix', 'DenseMatrix', 'concat', 'SparseMatrix'];
+const dependencies = ['typed', 'config', 'matrix', 'DenseMatrix', 'SparseMatrix'];
 
 export const createSmallerEq = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, matrix, DenseMatrix, concat, SparseMatrix }: SmallerEqDependencies) => {
+  ({ typed, config, matrix, DenseMatrix, SparseMatrix }: SmallerEqDependencies) => {
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
     const matAlgo07xSSf = createMatAlgo07xSSf({ typed, SparseMatrix });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
     const compareUnits = createCompareUnits({ typed });
 

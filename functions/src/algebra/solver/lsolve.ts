@@ -52,8 +52,10 @@ interface Dependencies {
   divideScalar: ScalarFunction;
   multiplyScalar: ScalarFunction;
   subtractScalar: ScalarFunction;
-  equalScalar: ScalarFunction;
+
   DenseMatrix: DenseMatrixConstructor;
+
+  isZero: TypedFunction;
 }
 
 const name = 'lsolve';
@@ -63,7 +65,7 @@ const dependencies = [
   'divideScalar',
   'multiplyScalar',
   'subtractScalar',
-  'equalScalar',
+  'isZero',
   'DenseMatrix',
 ];
 
@@ -76,8 +78,8 @@ export const createLsolve = /* #__PURE__ */ factory(
     divideScalar,
     multiplyScalar,
     subtractScalar,
-    equalScalar,
     DenseMatrix,
+    isZero,
   }: Dependencies) => {
     const solveValidation = createSolveValidation({
       DenseMatrix,
@@ -89,7 +91,6 @@ export const createLsolve = /* #__PURE__ */ factory(
       divideScalar,
       multiplyScalar,
       subtractScalar,
-      equalScalar,
     });
 
     function matrixAllNumbers(data: unknown[][]): boolean {
@@ -187,10 +188,10 @@ export const createLsolve = /* #__PURE__ */ factory(
         if (bj !== 0) {
           const vjj = mdata[j][j];
           if (vjj === 0) {
-            // Only an exactly zero diagonal entry is singular (#1169): the tolerance of `equalScalar`
+            // Only an exactly zero diagonal entry is singular (#1169): the tolerance of `isZero`
             // is absolute. A zero diagonal entry is a degenerate row for a right side that is zero within
             // the tolerance (a rounding residue). Any other right side has no solution.
-            if (!ops.equalScalar(bj, 0)) {
+            if (!isZero(bj)) {
               throw new Error('Linear system cannot be solved since matrix is singular');
             }
             x[j] = [0];
@@ -253,13 +254,13 @@ export const createLsolve = /* #__PURE__ */ factory(
         const bj = bdata[j][0] || 0;
         let xj: unknown;
 
-        if (!isZeroEntry(bj, equalScalar)) {
+        if (!isZeroEntry(bj)) {
           // non-degenerate row, find solution
 
           const vjj = mdata[j][j];
 
-          if (isZeroEntry(vjj, equalScalar)) {
-            if (typeof bj === 'number' && equalScalar(bj, 0)) {
+          if (isZeroEntry(vjj)) {
+            if (typeof bj === 'number' && isZero(bj)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];
               continue;
@@ -310,7 +311,7 @@ export const createLsolve = /* #__PURE__ */ factory(
       for (let j = 0; j < columns; j++) {
         const bj = bdata[j][0] || 0;
 
-        if (!isZeroEntry(bj, equalScalar)) {
+        if (!isZeroEntry(bj)) {
           // non-degenerate row, find solution
 
           let vjj: unknown = 0;
@@ -337,8 +338,8 @@ export const createLsolve = /* #__PURE__ */ factory(
           }
 
           // at this point we must have a value in vjj
-          if (isZeroEntry(vjj, equalScalar)) {
-            if (typeof bj === 'number' && equalScalar(bj, 0)) {
+          if (isZeroEntry(vjj)) {
+            if (typeof bj === 'number' && isZero(bj)) {
               // rounding residue on a zero diagonal: a degenerate row
               x[j] = [0];
               continue;

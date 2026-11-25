@@ -74,7 +74,7 @@ interface Dependencies {
   zeros: ZerosFunction;
   identity: IdentityFunction;
   isZero: TypedFunction;
-  equal: TypedFunction;
+
   sign: TypedFunction;
   sqrt: TypedFunction;
   conj: TypedFunction;
@@ -96,7 +96,6 @@ const dependencies = [
   'zeros',
   'identity',
   'isZero',
-  'equal',
   'sign',
   'sqrt',
   'conj',
@@ -117,7 +116,6 @@ export const createQr = /* #__PURE__ */ factory(
     zeros,
     identity,
     isZero,
-    equal,
     sign,
     sqrt,
     conj,
@@ -157,7 +155,7 @@ export const createQr = /* #__PURE__ */ factory(
      * precision and a reflection built from it is not orthogonal.
      */
     function zeroPivot(pivot: unknown, plain: boolean): boolean {
-      return plain ? (equal(pivot, 0) as boolean) : isExactZero(pivot);
+      return plain ? (isZero(pivot) as boolean) : isExactZero(pivot);
     }
 
     function negligibleNorm(alpha: unknown, alphaSquared: unknown, plain: boolean): boolean {
@@ -190,7 +188,7 @@ export const createQr = /* #__PURE__ */ factory(
 
       for (let k = kStart; k < limit; ++k) {
         const pivot = Rdata[k][k];
-        const sgn = unaryMinus(equal(pivot, 0) ? 1 : sign(pivot));
+        const sgn = unaryMinus(isZero(pivot) ? 1 : sign(pivot));
         const conjSgn = conj(sgn);
 
         let alphaSquared: unknown = 0;

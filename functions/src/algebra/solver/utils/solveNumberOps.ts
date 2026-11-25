@@ -2,14 +2,11 @@ import { findTypedImpl } from '../../../utils/typed-impl.js';
 import type { TypedFunction } from '../../../core/function/typed.js';
 
 type NumberBin = (a: number, b: number) => number;
-type NumberEqual = (a: number, b: number) => boolean;
-
 /** The `number, number` implementations a triangular solver calls in its number fast path. */
 export type SolveNumberOps = {
   div: NumberBin;
   mul: NumberBin;
   sub: NumberBin;
-  equalScalar: NumberEqual;
 };
 
 /** The scalar factory dependencies that `createSolveNumberOps` resolves. */
@@ -17,7 +14,6 @@ export interface SolveScalarDependencies {
   divideScalar: unknown;
   multiplyScalar: unknown;
   subtractScalar: unknown;
-  equalScalar: unknown;
 }
 
 /**
@@ -37,9 +33,8 @@ export interface SolveScalarDependencies {
  *   divideScalar,
  *   multiplyScalar,
  *   subtractScalar,
- *   equalScalar,
  * });
- * const ops = getSolveNumberOps(); // { div, mul, sub, equalScalar } or null
+ * const ops = getSolveNumberOps(); // { div, mul, sub } or null
  * ```
  */
 export function createSolveNumberOps(
@@ -54,9 +49,7 @@ export function createSolveNumberOps(
       const div = findTypedImpl<[number, number], number>(typed, scalars.divideScalar, nn);
       const mul = findTypedImpl<[number, number], number>(typed, scalars.multiplyScalar, nn);
       const sub = findTypedImpl<[number, number], number>(typed, scalars.subtractScalar, nn);
-      const equalNum = findTypedImpl<[number, number], boolean>(typed, scalars.equalScalar, nn);
-      cachedSolveOps =
-        div && mul && sub && equalNum ? { div, mul, sub, equalScalar: equalNum } : null;
+      cachedSolveOps = div && mul && sub ? { div, mul, sub } : null;
     }
     return cachedSolveOps;
   };

@@ -51,6 +51,9 @@ function buildXgcd({ typed, config, matrix, BigNumber }: XgcdDependencies): Type
 
   return typed(name, {
     'number, number': wrap,
+    'bigint, bigint': wrap,
+    'number, bigint': wrap,
+    'bigint, number': wrap,
     'BigNumber, BigNumber': wrap,
     ...(!BigNumber && { 'Fraction, Fraction': wrap }),
   }) as TypedFunction;
@@ -89,6 +92,12 @@ export const createSelectedXgcd = /* #__PURE__ */ factory(
     const wrap = (values: unknown[]) => (config.matrix === 'Array' ? values : matrix(values));
     return typed(name, {
       'number, number': (a: number, b: number) => wrap(mathjsXgcdNumber(a, b)),
+      'bigint, bigint': (a: bigint, b: bigint) =>
+        wrap((typedXgcd as (x: unknown, y: unknown) => unknown[])(a, b)),
+      'number, bigint': (a: number, b: bigint) =>
+        wrap((typedXgcd as (x: unknown, y: unknown) => unknown[])(a, b)),
+      'bigint, number': (a: bigint, b: number) =>
+        wrap((typedXgcd as (x: unknown, y: unknown) => unknown[])(a, b)),
       'BigNumber, BigNumber': (a: Decimal, b: Decimal) => {
         if (!a.isInteger() || !b.isInteger())
           throw new Error('Parameters in function xgcd must be integer numbers');

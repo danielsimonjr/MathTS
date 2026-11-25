@@ -39,12 +39,14 @@ interface NormDependencies {
   conj: TypedFunction;
   sqrt: TypedFunction;
   multiply: TypedFunction;
-  equalScalar: TypedFunction;
+
   larger: (a: number | BigNumberType, b: number | BigNumberType) => boolean;
   smaller: (a: number | BigNumberType, b: number | BigNumberType) => boolean;
   matrix: (data: unknown) => MatrixType;
   ctranspose: TypedFunction;
   eigs: (x: MatrixType) => EigsResult;
+
+  isZero: TypedFunction;
 }
 
 const name = 'norm';
@@ -56,7 +58,7 @@ const dependencies = [
   'conj',
   'sqrt',
   'multiply',
-  'equalScalar',
+  'isZero',
   'larger',
   'smaller',
   'matrix',
@@ -75,12 +77,12 @@ export const createNorm = /* #__PURE__ */ factory(
     conj,
     sqrt,
     multiply,
-    equalScalar,
     larger,
     smaller,
     matrix,
     ctranspose,
     eigs,
+    isZero,
   }: NormDependencies): TypedFunction => {
     /**
      * Calculate the norm of a number, vector or matrix.
@@ -307,7 +309,7 @@ export const createNorm = /* #__PURE__ */ factory(
       }
       if (typeof p === 'number' && !isNaN(p)) {
         // check p != 0
-        if (!equalScalar(p, 0)) {
+        if (!isZero(p)) {
           // norm(x, p) = sum(abs(xi) ^ p) ^ 1/p
           let n: number | BigNumberType = 0;
           // skip zeros since abs(0) === 0

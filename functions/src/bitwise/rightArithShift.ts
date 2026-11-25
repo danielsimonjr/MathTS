@@ -7,7 +7,8 @@ import { createMatAlgo10xSids } from '../type/matrix/utils/matAlgo10xSids.js';
 import { createMatAlgo08xS0Sid } from '../type/matrix/utils/matAlgo08xS0Sid.js';
 import { factory } from '../utils/factory.js';
 import { createMatrixAlgorithmSuite } from '../type/matrix/utils/matrixAlgorithmSuite.js';
-import { createUseMatrixForArrayScalar } from './useMatrixForArrayScalar.js';
+import { createMatAlgo15xAs } from '../type/matrix/utils/matAlgo15xAs.js';
+import { clone, deepMap } from '../utils/array.js';
 import { rightArithShiftNumber } from '../plain/number/index.js';
 import type { BigNumber } from '../type/bignumber/BigNumber.js';
 import type { TypedFunction } from '../core/function/typed.js';
@@ -23,34 +24,31 @@ interface Matrix {
 interface RightArithShiftDependencies {
   typed: TypedFunction;
   matrix: (data: unknown[]) => Matrix;
-  equalScalar: TypedFunction;
+
   zeros: (size: number[], storage?: string) => Matrix;
   DenseMatrix: new (data: unknown) => Matrix;
-  concat: TypedFunction;
+
+  isZero: TypedFunction;
 }
 
 const name = 'rightArithShift';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'zeros', 'DenseMatrix', 'concat'];
+const dependencies = ['typed', 'matrix', 'isZero', 'zeros', 'DenseMatrix'];
 
 export const createRightArithShift = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, zeros, DenseMatrix, concat }: RightArithShiftDependencies) => {
+  ({ typed, matrix, zeros, DenseMatrix, isZero }: RightArithShiftDependencies) => {
     const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
-    const matAlgo08xS0Sid = createMatAlgo08xS0Sid({ typed, equalScalar });
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
+    const matAlgo08xS0Sid = createMatAlgo08xS0Sid({ typed });
     const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
-    const useMatrixForArrayScalar = createUseMatrixForArrayScalar({
-      typed,
-      matrix,
-    });
+    const matAlgo15xAs = createMatAlgo15xAs({});
 
     /**
      * Bitwise right arithmetic shift of a value x by y number of bits, `x >> y`.
@@ -88,7 +86,7 @@ export const createRightArithShift = /* #__PURE__ */ factory(
           (self: TypedFunction) =>
             (x: Matrix, y: number | BigNumber): Matrix => {
               // check scalar
-              if (equalScalar(y, 0)) {
+              if (isZero(y)) {
                 return x.clone();
               }
               return matAlgo11xS0s(
@@ -104,7 +102,7 @@ export const createRightArithShift = /* #__PURE__ */ factory(
           (self: TypedFunction) =>
             (x: Matrix, y: number | BigNumber): Matrix => {
               // check scalar
-              if (equalScalar(y, 0)) {
+              if (isZero(y)) {
                 return x.clone();
               }
               return matAlgo14xDs(
@@ -120,7 +118,7 @@ export const createRightArithShift = /* #__PURE__ */ factory(
           (self: TypedFunction) =>
             (x: number | BigNumber, y: Matrix): Matrix => {
               // check scalar
-              if (equalScalar(x, 0)) {
+              if (isZero(x)) {
                 return zeros(y.size(), y.storage());
               }
               return matAlgo10xSids(
@@ -136,7 +134,7 @@ export const createRightArithShift = /* #__PURE__ */ factory(
           (self: TypedFunction) =>
             (x: number | BigNumber, y: Matrix): Matrix => {
               // check scalar
-              if (equalScalar(x, 0)) {
+              if (isZero(x)) {
                 return zeros(y.size(), y.storage());
               }
               return matAlgo14xDs(
@@ -147,8 +145,29 @@ export const createRightArithShift = /* #__PURE__ */ factory(
               ) as unknown as Matrix;
             }
         ),
+
+        'Array, number | BigNumber': typed.referToSelf(
+          (self: TypedFunction) =>
+            (x: unknown[], y: number | BigNumber): unknown[] => {
+              // check scalar
+              if (isZero(y)) {
+                return clone(x) as unknown as unknown[];
+              }
+              return matAlgo15xAs(x, y, self as never, false) as unknown[];
+            }
+        ),
+
+        'number | BigNumber, Array': typed.referToSelf(
+          (self: TypedFunction) =>
+            (x: number | BigNumber, y: unknown[]): unknown[] => {
+              // check scalar
+              if (isZero(x)) {
+                return deepMap(y, () => x) as unknown[];
+              }
+              return matAlgo15xAs(y, x, self as never, true) as unknown[];
+            }
+        ),
       },
-      useMatrixForArrayScalar,
       matrixAlgorithmSuite({
         SS: matAlgo08xS0Sid as unknown as AlgorithmFunction,
         DS: matAlgo01xDSid as unknown as AlgorithmFunction,

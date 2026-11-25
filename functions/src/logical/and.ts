@@ -35,27 +35,24 @@ type ScalarValue = number | BigNumber | bigint | Complex | Unit;
 interface AndDependencies {
   typed: TypedFunction;
   matrix: (data: unknown[]) => Matrix;
-  equalScalar: TypedFunction;
   zeros: (size: number[], storage?: string) => Matrix;
   not: TypedFunction;
-  concat: TypedFunction;
 }
 
 const name = 'and';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'zeros', 'not', 'concat'];
+const dependencies = ['typed', 'matrix', 'zeros', 'not'];
 
 export const createAnd = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, zeros, not, concat }: AndDependencies) => {
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
-    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed, equalScalar });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+  ({ typed, matrix, zeros, not }: AndDependencies) => {
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
+    const matAlgo06xS0S0 = createMatAlgo06xS0S0({ typed });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**

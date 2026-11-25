@@ -26,7 +26,7 @@ import {
   type TypedBuilder,
 } from './scope.js';
 import { replacer } from '../utils/json-replacer.js';
-import { deepForEach } from '../utils/collection.js';
+import { DimensionError } from '../error/DimensionError.js';
 import { format as formatNumber } from '../utils/number.js';
 import { createMap as createScopeMap } from '../utils/map.js';
 import * as checks from '../utils/is.js';
@@ -2667,11 +2667,14 @@ function tryCreateFactoryBundle(
 function selectedTransform<TResult>(
   transform: (deps: Record<string, unknown>) => TResult,
   base: FactoryFunction,
-  extraDependencies: string[] = []
+  extraDependencies: string[] = [],
+  // mathjs transform factories declare the full dependency list of the raw function they
+  // wrap; the selected transform pins that list so its `.dependencies` matches the oracle.
+  transformDependencies?: string[]
 ): FactoryFunction<Record<string, unknown>, TResult> {
   return factory(
     base.fn,
-    [...base.dependencies, ...extraDependencies],
+    transformDependencies ?? [...base.dependencies, ...extraDependencies],
     (deps: Record<string, unknown>) => transform({ ...deps, [base.fn]: base(deps) }),
     { ...base.meta, isTransformFunction: true }
   );
@@ -2695,27 +2698,52 @@ const createSelectedForEachTransform: FactoryFunction<
 const createSelectedMinTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createMinTransform>
-> = /* #__PURE__ */ selectedTransform(createMinTransform, createMin);
+> = /* #__PURE__ */ selectedTransform(
+  createMinTransform,
+  createMin,
+  [],
+  ['typed', 'config', 'numeric', 'smaller', 'isNaN']
+);
 
 const createSelectedMaxTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createMaxTransform>
-> = /* #__PURE__ */ selectedTransform(createMaxTransform, createMax);
+> = /* #__PURE__ */ selectedTransform(
+  createMaxTransform,
+  createMax,
+  [],
+  ['typed', 'config', 'numeric', 'larger', 'isNaN']
+);
 
 const createSelectedSumTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createSumTransform>
-> = /* #__PURE__ */ selectedTransform(createSumTransform, createMathjsSum);
+> = /* #__PURE__ */ selectedTransform(
+  createSumTransform,
+  createMathjsSum,
+  [],
+  ['typed', 'config', 'add', 'numeric']
+);
 
 const createSelectedCumSumTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createCumSumTransform>
-> = /* #__PURE__ */ selectedTransform(createCumSumTransform, createCumSum);
+> = /* #__PURE__ */ selectedTransform(
+  createCumSumTransform,
+  createCumSum,
+  [],
+  ['typed', 'add', 'unaryPlus']
+);
 
 const createSelectedMapSlicesTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createMapSlicesTransform>
-> = /* #__PURE__ */ selectedTransform(createMapSlicesTransform, createMathjsMapSlices);
+> = /* #__PURE__ */ selectedTransform(
+  createMapSlicesTransform,
+  createMathjsMapSlices,
+  [],
+  ['typed', 'isInteger']
+);
 
 const createSelectedMeanTransform: FactoryFunction<
   Record<string, unknown>,
@@ -2725,61 +2753,112 @@ const createSelectedMeanTransform: FactoryFunction<
 const createSelectedOrTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createOrTransform>
-> = /* #__PURE__ */ selectedTransform(createOrTransform, createOr);
+> = /* #__PURE__ */ selectedTransform(
+  createOrTransform,
+  createOr,
+  [],
+  ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat']
+);
 
 const createSelectedBitOrTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createBitOrTransform>
-> = /* #__PURE__ */ selectedTransform(createBitOrTransform, createBitOr);
+> = /* #__PURE__ */ selectedTransform(
+  createBitOrTransform,
+  createBitOr,
+  [],
+  ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat']
+);
 
 const createSelectedNullishTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createNullishTransform>
-> = /* #__PURE__ */ selectedTransform(createNullishTransform, createNullish);
+> = /* #__PURE__ */ selectedTransform(
+  createNullishTransform,
+  createNullish,
+  [],
+  ['typed', 'matrix', 'size', 'flatten', 'deepEqual']
+);
 
 const createSelectedColumnTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createColumnTransform>
-> = /* #__PURE__ */ selectedTransform(createColumnTransform, createColumn);
+> = /* #__PURE__ */ selectedTransform(
+  createColumnTransform,
+  createColumn,
+  [],
+  ['typed', 'Index', 'matrix', 'range']
+);
 
 const createSelectedRowTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createRowTransform>
-> = /* #__PURE__ */ selectedTransform(createRowTransform, createRow);
+> = /* #__PURE__ */ selectedTransform(
+  createRowTransform,
+  createRow,
+  [],
+  ['typed', 'Index', 'matrix', 'range']
+);
 
 const createSelectedConcatTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createConcatTransform>
-> = /* #__PURE__ */ selectedTransform(createConcatTransform, createConcat);
+> = /* #__PURE__ */ selectedTransform(
+  createConcatTransform,
+  createConcat,
+  [],
+  ['typed', 'matrix', 'isInteger']
+);
 
 const createSelectedAndTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createAndTransform>
-> = /* #__PURE__ */ selectedTransform(createAndTransform, createAnd, ['add']);
+> = /* #__PURE__ */ selectedTransform(
+  createAndTransform,
+  createAnd,
+  [],
+  ['typed', 'matrix', 'zeros', 'add', 'equalScalar', 'isZero', 'not', 'concat']
+);
 
 const createSelectedBitAndTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createBitAndTransform>
-> = /* #__PURE__ */ selectedTransform(createBitAndTransform, createBitAnd, ['add', 'not', 'zeros']);
+> = /* #__PURE__ */ selectedTransform(
+  createBitAndTransform,
+  createBitAnd,
+  [],
+  ['typed', 'matrix', 'zeros', 'add', 'equalScalar', 'isZero', 'not', 'concat']
+);
 
 const createSelectedDiffTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createDiffTransform>
-> = /* #__PURE__ */ selectedTransform(createDiffTransform, createDiff, ['bignumber']);
+> = /* #__PURE__ */ selectedTransform(
+  createDiffTransform,
+  createDiff,
+  [],
+  ['typed', 'matrix', 'subtract', 'number', 'bignumber']
+);
 
 const createSelectedSubsetTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createSubsetTransform>
-> = /* #__PURE__ */ selectedTransform(createSubsetTransform, createSubset);
+> = /* #__PURE__ */ selectedTransform(
+  createSubsetTransform,
+  createSubset,
+  [],
+  ['typed', 'matrix', 'zeros', 'add']
+);
 
 const createSelectedPrintTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createPrintTransform>
-> = /* #__PURE__ */ selectedTransform(createPrintTransform, createPrint, [
-  'add',
-  'matrix',
-  'zeros',
-]);
+> = /* #__PURE__ */ selectedTransform(
+  createPrintTransform,
+  createPrint,
+  [],
+  ['typed', 'matrix', 'zeros', 'add']
+);
 
 const createSelectedRangeTransform: FactoryFunction<
   Record<string, unknown>,
@@ -2809,74 +2888,170 @@ const createSelectedCatalan = /* #__PURE__ */ factory(
   'catalan',
   [
     'typed',
-    'addScalar',
-    'combinations',
-    'divideScalar',
-    'isInteger',
-    'isNegative',
     'multiplyScalar',
+    'divideScalar',
+    'isNegative',
+    'isInteger',
+    'number',
+    'typeOf',
+    '?bignumber',
+    '?bigint',
   ],
   ({
     typed,
-    addScalar,
-    combinations,
-    divideScalar,
-    isInteger,
-    isNegative,
     multiplyScalar,
+    divideScalar,
+    isNegative,
+    isInteger,
+    number,
+    typeOf,
+    bignumber,
+    bigint,
   }: {
     typed: TypedBuilder;
-    addScalar: CountingOperation;
-    combinations: CountingOperation;
-    divideScalar: CountingOperation;
-    isInteger: CountingOperation;
-    isNegative: CountingOperation;
     multiplyScalar: CountingOperation;
-  }) =>
-    typed('catalan', {
-      'number | BigNumber': (value: unknown) => {
-        if (!isInteger(value) || isNegative(value)) {
+    divideScalar: CountingOperation;
+    isNegative: (value: unknown) => boolean;
+    isInteger: (value: unknown) => boolean;
+    number: (value: unknown) => number;
+    typeOf: (value: unknown) => string;
+    bignumber?: (value: unknown) => unknown;
+    bigint?: (value: unknown) => bigint;
+  }) => {
+    // Exact Catalan numbers C(0)..C(30) as strings: C(30) is the largest exactly
+    // representable double, so the number path seeds from this table and only iterates
+    // approximately beyond it (mathjs 15.3.0, #3781, #1564).
+    const exactCatalans = [
+      '1',
+      '1',
+      '2',
+      '5',
+      '14',
+      '42',
+      '132',
+      '429',
+      '1430',
+      '4862',
+      '16796',
+      '58786',
+      '208012',
+      '742900',
+      '2674440',
+      '9694845',
+      '35357670',
+      '129644790',
+      '477638700',
+      '1767263190',
+      '6564120420',
+      '24466267020',
+      '91482563640',
+      '343059613650',
+      '1289904147324',
+      '4861946401452',
+      '18367353072152',
+      '69533550916004',
+      '263747951750360',
+      '1002242216651368',
+      '3814986502092304',
+    ];
+    const caches: Record<string, unknown[]> = { number: [], bignumber: [], bigint: [] };
+
+    return typed('catalan', {
+      'number | BigNumber | bigint': function (n: unknown): unknown {
+        if (!isInteger(n) || isNegative(n)) {
           throw new TypeError('Non-negative integer value expected in function catalan');
         }
-        return divideScalar(combinations(multiplyScalar(value, 2), value), addScalar(value, 1));
+        let cache = caches.number;
+        let make = number as (v: unknown) => unknown;
+        const inputType = typeOf(n);
+        if (inputType === 'bigint') {
+          cache = caches.bigint;
+          make = bigint as (v: unknown) => unknown;
+        } else if (inputType === 'BigNumber') {
+          cache = caches.bignumber;
+          make = bignumber as (v: unknown) => unknown;
+        }
+        const index = number(n);
+        if (cache.length === 0) {
+          for (const value of exactCatalans) cache.push(make(value));
+        }
+        // C(i+1) = C(i) * 2 * (2i+1) / (i+2): every step divides exactly, so the bigint
+        // and BigNumber paths stay exact.
+        const two = make(2);
+        for (let i = cache.length - 1; i < index; i++) {
+          cache.push(
+            divideScalar(
+              multiplyScalar(multiplyScalar(cache[i], two), make(2 * i + 1)),
+              make(i + 2)
+            )
+          );
+        }
+        return cache[index];
       },
-    })
+    });
+  }
 );
 
 const createSelectedMultinomial = /* #__PURE__ */ factory(
   'multinomial',
-  ['typed', 'add', 'divide', 'factorial', 'isInteger', 'isPositive', 'multiply'],
+  ['typed', 'add', 'multiply', 'combinations', 'isInteger', 'isNegative', 'size'],
   ({
     typed,
     add,
-    divide,
-    factorial,
-    isInteger,
-    isPositive,
     multiply,
+    combinations,
+    isInteger,
+    isNegative,
+    size,
   }: {
     typed: TypedBuilder;
     add: CountingOperation;
-    divide: CountingOperation;
-    factorial: CountingOperation;
-    isInteger: CountingOperation;
-    isPositive: CountingOperation;
     multiply: CountingOperation;
-  }) =>
-    typed('multinomial', {
-      'Array | Matrix': (values: Parameters<typeof deepForEach>[0]) => {
-        let total: unknown = 0;
-        let divisor: unknown = 1;
-        deepForEach(values, (value) => {
-          if (!isInteger(value) || !isPositive(value)) {
-            throw new TypeError('Positive integer value expected in function multinomial');
-          }
-          total = add(total, value);
-          divisor = multiply(divisor, factorial(value));
-        });
-        return divide(factorial(total), divisor);
-      },
-    })
+    combinations: CountingOperation;
+    isInteger: (value: unknown) => boolean;
+    isNegative: (value: unknown) => boolean;
+    size: (value: unknown) => number[];
+  }) => {
+    function nonnegativeInteger(ai: unknown): unknown {
+      if (!isInteger(ai) || isNegative(ai)) {
+        throw new TypeError(
+          'Nonnegative integer value expected in function multinomial, but got ' + String(ai)
+        );
+      }
+      return ai;
+    }
+
+    function multinomialOf(a: unknown): unknown {
+      const dimensions = size(a);
+      if (dimensions.length !== 1) {
+        throw new DimensionError(dimensions.length, 1);
+      }
+      // like combinations(0, 0), the empty product is the number 1
+      if (dimensions[0] === 0) {
+        return 1;
+      }
+      const entries = (a as { valueOf(): unknown }).valueOf() as unknown[];
+      // (a1 + ... + an)! / (a1! ... an!) is the product of the binomial coefficients
+      // combinations(a1 + ... + ai, ai) — every step is an exact integer (mathjs 15.3.0,
+      // #3790, #1563). The product starts from combinations(a1, a1), so it keeps the type
+      // of the entries.
+      let sum = nonnegativeInteger(entries[0]);
+      let result = combinations(sum, sum);
+      for (let i = 1; i < entries.length; i++) {
+        const ai = nonnegativeInteger(entries[i]);
+        sum = add(sum, ai);
+        result = multiply(result, combinations(sum, ai));
+      }
+      return result;
+    }
+
+    return typed('multinomial', {
+      // 'Array | Matrix' first: an array argument is the count list, not the first of
+      // several scalar arguments (mathjs 15.3.0 #3790, #1563).
+      'Array | Matrix': (a: unknown) => multinomialOf(a),
+      '...number | BigNumber | bigint | Fraction': (values: unknown[]) => multinomialOf(values),
+    });
+  }
 );
 
 const createSelectedSqrtm: typeof createSqrtm = /* #__PURE__ */ factory(
@@ -2976,21 +3151,43 @@ const createSelectedQuantileSeq: typeof createQuantileSeq = /* #__PURE__ */ fact
 const createSelectedVarianceTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createVarianceTransform>
-> = /* #__PURE__ */ selectedTransform(createVarianceTransform, createSelectedVariance);
+> = /* #__PURE__ */ selectedTransform(
+  createVarianceTransform,
+  createSelectedVariance,
+  [],
+  ['typed', 'add', 'subtract', 'multiply', 'divide', 'mapSlices', 'isNaN']
+);
 
 const createSelectedStdTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createStdTransform>
-> = /* #__PURE__ */ selectedTransform(createStdTransform, createSelectedStd);
+> = /* #__PURE__ */ selectedTransform(
+  createStdTransform,
+  createSelectedStd,
+  [],
+  ['typed', 'map', 'sqrt', 'variance']
+);
 
 const createSelectedQuantileSeqTransform: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createQuantileSeqTransform>
 > = /* #__PURE__ */ factory(
   'quantileSeq',
-  createSelectedQuantileSeq.dependencies.map((dependency) =>
-    dependency === '?bignumber' ? 'bignumber' : dependency
-  ),
+  [
+    'typed',
+    'bignumber',
+    'add',
+    'subtract',
+    'divide',
+    'multiply',
+    'partitionSelect',
+    'compare',
+    'isInteger',
+    'smaller',
+    'smallerEq',
+    'larger',
+    'mapSlices',
+  ],
   (deps: Record<string, unknown>) =>
     createQuantileSeqTransform({
       ...deps,
@@ -3001,7 +3198,7 @@ const createSelectedQuantileSeqTransform: FactoryFunction<
 
 const createSelectedEigs: typeof createEigs = /* #__PURE__ */ factory(
   'eigs',
-  [...createEigs.dependencies, 'equal', 'larger', 'smaller', 'usolveAll'],
+  createEigs.dependencies,
   (deps: Record<string, unknown>) => createEigs(deps)
 );
 

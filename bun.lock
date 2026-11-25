@@ -68,8 +68,8 @@
       "name": "@danielsimonjr/mathts-autograd",
       "version": "0.7.1",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.30.0",
-        "@danielsimonjr/mathts-tensor": "^0.5.2",
+        "@danielsimonjr/mathts-core": "^0.30.1",
+        "@danielsimonjr/mathts-tensor": "^0.5.3",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -82,16 +82,16 @@
       "name": "@danielsimonjr/mathts-compat",
       "version": "0.7.25",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.30.1",
-        "@danielsimonjr/mathts-expression": "^0.14.4",
-        "@danielsimonjr/mathts-functions": "^0.89.13",
+        "@danielsimonjr/mathts-core": "^0.30.3",
+        "@danielsimonjr/mathts-expression": "^0.14.5",
+        "@danielsimonjr/mathts-functions": "^0.89.22",
         "@danielsimonjr/mathts-matrix": "^0.13.1",
         "@danielsimonjr/mathts-parallel": "^0.12.2",
         "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
-        "mathjs": "15.2.0",
+        "mathjs": "15.3.0",
         "tsdown": "^0.23.0",
         "typescript": "^7.0.2",
         "vitest": "^5.0.0",
@@ -143,8 +143,8 @@
       "name": "@danielsimonjr/mathts-functions",
       "version": "0.89.22",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.30.1",
-        "@danielsimonjr/mathts-expression": "^0.14.4",
+        "@danielsimonjr/mathts-core": "^0.30.3",
+        "@danielsimonjr/mathts-expression": "^0.14.5",
         "@danielsimonjr/mathts-gpu": "^0.4.1",
         "@danielsimonjr/mathts-matrix": "^0.13.1",
         "@danielsimonjr/mathts-parallel": "^0.12.2",
@@ -326,8 +326,8 @@
       "name": "@danielsimonjr/mathts-tensor",
       "version": "0.5.3",
       "dependencies": {
-        "@danielsimonjr/mathts-core": "^0.30.0",
-        "@danielsimonjr/mathts-matrix": "^0.13.0",
+        "@danielsimonjr/mathts-core": "^0.30.1",
+        "@danielsimonjr/mathts-matrix": "^0.13.1",
       },
       "devDependencies": {
         "@types/node": "^26.4.0",
@@ -865,7 +865,7 @@
 
     "magicast": ["magicast@0.5.5", "", { "dependencies": { "@babel/parser": "^7.29.7", "@babel/types": "^7.29.7", "source-map-js": "^1.2.1" } }, "sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA=="],
 
-    "mathjs": ["mathjs@15.2.0", "", { "dependencies": { "@babel/runtime": "^7.26.10", "complex.js": "^2.2.5", "decimal.js": "^10.4.3", "escape-latex": "^1.2.0", "fraction.js": "^5.2.1", "javascript-natural-sort": "^0.7.1", "seedrandom": "^3.0.5", "tiny-emitter": "^2.1.0", "typed-function": "^4.2.1" }, "bin": { "mathjs": "bin/cli.js" } }, "sha512-UAQzSVob9rNLdGpqcFMYmSu9dkuLYy7Lr2hBEQS5SHQdknA9VppJz3cy2KkpMzTODunad6V6cNv+5kOLsePLow=="],
+    "mathjs": ["mathjs@15.3.0", "", { "dependencies": { "@babel/runtime": "^7.26.10", "complex.js": "2.4.2", "decimal.js": "^10.6.0", "escape-latex": "^1.2.0", "fraction.js": "5.2.1", "javascript-natural-sort": "^0.7.1", "seedrandom": "^3.0.5", "tiny-emitter": "^2.1.0", "typed-function": "4.2.1" }, "bin": { "mathjs": "bin/cli.js" } }, "sha512-btNnlM9hAaxg02qO6om/PxVHLHmI9r3xGoORaUQmMIxJ6JbmG54UFnZYh//ThofM/pHvbqDA+f5LaA6QSNO1hg=="],
 
     "ml-array-max": ["ml-array-max@2.0.0", "", { "dependencies": { "is-any-array": "^3.0.0" } }, "sha512-QQZ4kENwpWmyNb98UXRDFXrmtIXuXtt1+bSbda/2KA85+F+rrJP8hZk6QOkCQXM2Th9mUDYdq/PNByPdT9ID4A=="],
 
@@ -977,7 +977,11 @@
 
     "@jridgewell/trace-mapping/@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
-    "mathjs/typed-function": ["typed-function@4.2.2", "", {}, "sha512-VwaXim9Gp1bngi/q3do8hgttYn2uC3MoT/gfuMWylnj1IeZBUAyPddHZlo1K05BDoj8DYPpMdiHqH1dDYdJf2A=="],
+    "mathjs/complex.js": ["complex.js@2.4.2", "", {}, "sha512-qtx7HRhPGSCBtGiST4/WGHuW+zeaND/6Ld+db6PbrulIB1i2Ev/2UPiqcmpQNPSyfBKraC0EOvOKCB5dGZKt3g=="],
+
+    "mathjs/fraction.js": ["fraction.js@5.2.1", "", {}, "sha512-Ah6t/7YCYjrPUFUFsOsRLMXAdnYM+aQwmojD2Ayb/Ezr82SwES0vuyQ8qZ3QO8n9j7W14VJuVZZet8U3bhSdQQ=="],
+
+    "mathjs/typed-function": ["typed-function@4.2.1", "", {}, "sha512-EGjWssW7Tsk4DGfE+5yluuljS1OGYWiI1J6e8puZz9nTMM51Oug8CD5Zo4gWMsOhq5BI+1bF+rWTm4Vbj3ivRA=="],
 
     "tsdown/obug": ["obug@2.1.4", "", {}, "sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA=="],
 

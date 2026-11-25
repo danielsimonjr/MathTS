@@ -5,7 +5,6 @@ import type {
   MatrixValue,
   MatrixArray,
   MatrixCallback,
-  EqualScalarFunction,
   TypedFunction,
   SparseMatrixConstructorData,
 } from '../types.js';
@@ -35,15 +34,21 @@ interface SparseMatrix {
   _datatype?: DataType;
   getDataType(): string;
   createSparseMatrix(config: SparseMatrixConstructorData): SparseMatrix;
+  /** The zero value of the matrix's datatype (mathjs 15.3.0 SparseMatrix API). */
+  zero?: MatrixValue;
+  /** The zero test for the matrix's datatype. */
+  isZero(value: MatrixValue): boolean;
+  /** The full typed-function `isZero`, whatever the matrix datatype. */
+  isZero_Full(value: MatrixValue): boolean;
 }
 
 const name = 'matAlgo02xDS0';
-const dependencies = ['typed', 'equalScalar'];
+const dependencies = ['typed'];
 
 export const createMatAlgo02xDS0 = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, equalScalar }: { typed: TypedFunction; equalScalar: EqualScalarFunction }) => {
+  ({ typed }: { typed: TypedFunction }) => {
     /**
      * Iterates over SparseMatrix nonzero items and invokes the callback function f(Dij, Sij).
      * Callback function invoked NNZ times (number of nonzero items in SparseMatrix).
@@ -107,10 +112,8 @@ export const createMatAlgo02xDS0 = /* #__PURE__ */ factory(
 
       // datatype
       let dt: DataType;
-      // equal signature to use
-      let eq: EqualScalarFunction = equalScalar;
-      // zero value
-      let zero: MatrixValue = 0;
+      // isZero signature to use
+      let isZ: (value: MatrixValue) => boolean = (v) => sparseMatrix.isZero_Full(v);
       // callback signature to use
       let cf: MatrixCallback = callback;
 
@@ -118,12 +121,21 @@ export const createMatAlgo02xDS0 = /* #__PURE__ */ factory(
       if (typeof adt === 'string' && adt === bdt && adt !== 'mixed') {
         // datatype
         dt = adt;
-        // find signature that matches (dt, dt)
-        eq = typed.find(equalScalar, [dt, dt]) as EqualScalarFunction;
-        // convert 0 to the same datatype
-        zero = typed.convert(0, dt);
-        // callback
-        cf = typed.find(callback, [dt, dt]) as unknown as MatrixCallback;
+      }
+      // find a callback signature if possible
+      if (
+        typeof adt === 'string' &&
+        adt !== 'mixed' &&
+        typeof bdt === 'string' &&
+        bdt !== 'mixed'
+      ) {
+        cf = (inverse
+          ? typed.find(callback, [bdt, adt])
+          : typed.find(callback, [adt, bdt])) as unknown as MatrixCallback;
+      }
+      // find an isZero signature if possible
+      if (dt && dt === sparseMatrix._datatype) {
+        isZ = (v) => sparseMatrix.isZero(v);
       }
 
       // result (SparseMatrix)
@@ -144,7 +156,7 @@ export const createMatAlgo02xDS0 = /* #__PURE__ */ factory(
             ? cf(bvalues[k], adata[i][j])
             : cf(adata[i][j], bvalues[k]);
           // check for nonzero
-          if (!eq(cij, zero)) {
+          if (!isZ(cij)) {
             // push i & v
             cindex.push(i);
             cvalues.push(cij);

@@ -1,5 +1,6 @@
 import type { BigNumber } from '@danielsimonjr/mathts-core';
 import { factory } from '../utils/factory.js';
+import { isInteger } from '@danielsimonjr/mathts-core/internal';
 import { createFloor } from './floor.js';
 import { flooredModSnappedBigNumber } from '../utils/bignumber/floored-mod.js';
 import { modWithFloor } from './mod-with-floor.js';
@@ -26,46 +27,37 @@ interface ModDependencies {
   config: ConfigOptions;
   round: TypedFunction;
   matrix: TypedFunction;
-  equalScalar: TypedFunction;
+
   zeros: TypedFunction;
   DenseMatrix: unknown;
-  concat: TypedFunction;
+
+  isZero: TypedFunction;
 }
 
 const name = 'mod';
-const dependencies = [
-  'typed',
-  'config',
-  'round',
-  'matrix',
-  'equalScalar',
-  'zeros',
-  'DenseMatrix',
-  'concat',
-];
+const dependencies = ['typed', 'config', 'round', 'matrix', 'isZero', 'zeros', 'DenseMatrix'];
 
 export const createMod = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, round, matrix, equalScalar, zeros, DenseMatrix, concat }: ModDependencies) => {
+  ({ typed, config, round, matrix, zeros, DenseMatrix, isZero }: ModDependencies) => {
     const floor = createFloor({
       typed,
       config,
       round,
       matrix,
-      equalScalar,
+      isZero,
       zeros,
       DenseMatrix,
-    }) as TypedFunction;
-    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed, equalScalar });
+    } as never) as TypedFunction;
+    const matAlgo02xDS0 = createMatAlgo02xDS0({ typed });
     const matAlgo03xDSf = createMatAlgo03xDSf({ typed });
-    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed, equalScalar });
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+    const matAlgo05xSfSf = createMatAlgo05xSfSf({ typed });
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**
@@ -111,17 +103,17 @@ export const createMod = /* #__PURE__ */ factory(
         'BigNumber, BigNumber': (x: BigNumber, y: BigNumber): BigNumber =>
           flooredModSnappedBigNumber(x, y, (q) => floor(q) as BigNumber),
 
-        'bigint, bigint': function (x: bigint, y: bigint): bigint {
-          if (y === 0n) {
-            return x;
-          }
+        'bigint, bigint': _modBigint,
 
-          if (x < 0) {
-            const m = x % y;
-            return m === 0n ? m : m + y;
-          }
+        'number, bigint': function (n: number, b: bigint): bigint | number {
+          // prefer bigint when number is an integer
+          if (isInteger(n)) return _modBigint(BigInt(n), b);
+          return _modNumber(n, Number(b));
+        },
 
-          return x % y;
+        'bigint, number': function (b: bigint, n: number): bigint | number {
+          if (isInteger(n)) return _modBigint(b, BigInt(n));
+          return _modNumber(Number(b), n);
         },
 
         'Fraction, Fraction': function (x: FractionType, y: FractionType): FractionType {
@@ -148,6 +140,16 @@ export const createMod = /* #__PURE__ */ factory(
      */
     function _modNumber(x: number, y: number): number {
       return modWithFloor(x, y, (v) => floor(v) as number);
+    }
+
+    function _modBigint(x: bigint, y: bigint): bigint {
+      if (y === 0n) {
+        return x;
+      }
+      const m = x % y;
+      // Ensure result m is always in desired range: 0 <= m < y for y positive,
+      // y < m <= 0 for y negative (#3710)
+      return m !== 0n && m < 0n !== y < 0n ? m + y : m;
     }
   }
 );

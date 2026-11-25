@@ -46,30 +46,24 @@ interface RoundDependencies {
   typed: TypedFunction;
   config: ConfigOptions;
   matrix: (data: unknown) => Matrix;
-  equalScalar: TypedFunction;
+
   zeros: (size: number[], storage?: string) => Matrix;
   BigNumber: BigNumberConstructor;
   DenseMatrix: unknown;
+
+  isZero: TypedFunction;
 }
 
 const NO_INT = ROUND_DECIMALS_NOT_INTEGER;
 
 const name = 'round';
-const dependencies = [
-  'typed',
-  'config',
-  'matrix',
-  'equalScalar',
-  'zeros',
-  'BigNumber',
-  'DenseMatrix',
-];
+const dependencies = ['typed', 'config', 'matrix', 'isZero', 'zeros', 'BigNumber', 'DenseMatrix'];
 
 export const createRound = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, config, matrix, equalScalar, zeros, BigNumber, DenseMatrix }: RoundDependencies) => {
-    const matAlgo11xS0s = createMatAlgo11xS0s({ typed, equalScalar });
+  ({ typed, config, matrix, zeros, BigNumber, DenseMatrix, isZero }: RoundDependencies) => {
+    const matAlgo11xS0s = createMatAlgo11xS0s({ typed });
     const matAlgo12xSfs = createMatAlgo12xSfs({ typed, DenseMatrix });
     const matAlgo14xDs = createMatAlgo14xDs({ typed });
 
@@ -283,7 +277,7 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: number | ComplexType | BigNumberType | FractionType, n: Matrix): Matrix => {
             // check scalar is zero
-            if (equalScalar(x, 0)) {
+            if (isZero(x)) {
               // do not execute algorithm, result will be a zero matrix
               return zeros(n.size(), n.storage());
             }
@@ -300,7 +294,7 @@ export const createRound = /* #__PURE__ */ factory(
         (self: TypedFunction) =>
           (x: number | ComplexType | BigNumberType | FractionType, n: Matrix): Matrix => {
             // check scalar is zero
-            if (equalScalar(x, 0)) {
+            if (isZero(x)) {
               // do not execute algorithm, result will be a zero matrix
               return zeros(n.size(), n.storage());
             }

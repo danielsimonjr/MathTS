@@ -113,6 +113,16 @@ interface Dependencies {
   re: TypedFunction<number | BigNumber>;
   matrixFromColumns: TypedFunction<Scalar[][]>;
   dot: TypedFunction<Scalar>;
+
+  equalScalar: TypedFunction;
+
+  isZero: TypedFunction;
+
+  larger: TypedFunction;
+
+  usolveAll: TypedFunction;
+
+  smaller: TypedFunction;
 }
 
 const name = 'eigs';
@@ -145,6 +155,8 @@ const dependencies = [
   'typed',
   'matrix',
   'addScalar',
+  'equalScalar',
+  'isZero',
   'subtract',
   'abs',
   'atan',
@@ -156,6 +168,7 @@ const dependencies = [
   'bignumber',
   'multiply',
   'add',
+  'larger',
   'column',
   'flatten',
   'number',
@@ -166,8 +179,10 @@ const dependencies = [
   'reshape',
   'qr',
   'usolve',
+  'usolveAll',
   'im',
   're',
+  'smaller',
   'matrixFromColumns',
   'dot',
 ];

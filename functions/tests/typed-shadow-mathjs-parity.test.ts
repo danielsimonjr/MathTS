@@ -56,9 +56,9 @@ describe('collection reductions', () => {
     expect(f.gcd([12, 18, 24])).toBe(6);
     expect(f.gcd([1, 2, 3])).toBe(1);
   });
-  it('multinomial flattens a nested array and a matrix', () => {
-    expect(f.multinomial(N())).toBe(12600);
-    expect(f.multinomial(D())).toBe(12600);
+  it('multinomial rejects the nested array and the matrix (mathjs 15.3.0 #3790, #1563)', () => {
+    expect(() => f.multinomial(N())).toThrow(RangeError);
+    expect(() => f.multinomial(D())).toThrow(RangeError);
   });
 });
 

@@ -363,15 +363,24 @@ describe('solveODE with Array and Matrix vectors', () => {
       solveODE(f, inputTime, inputState, {}),
     ]) {
       const { t, y } = result as ODEMatrixSolution;
-      const gotTimes = t.toArray() as number[];
-      const gotStates = y.toArray() as number[][];
-      const expectedTimes = expected.t.toArray() as number[];
-      const expectedStates = expected.y.toArray() as number[][];
+      // mathjs 15.3.0 (#3734 collection changes): the tspan decides the container, so a
+      // Matrix y0 with an Array tspan gives array outputs on both sides.
+      const asRows = (v: unknown): unknown =>
+        typeof (v as { toArray?: () => unknown }).toArray === 'function'
+          ? (v as { toArray(): unknown }).toArray()
+          : v;
+      const gotTimes = asRows(t) as number[];
+      const gotStates = asRows(y) as number[][];
+      const expectedTimes = asRows(expected.t) as number[];
+      const expectedStates = asRows(expected.y) as number[][];
       expect(gotTimes[0]).toBe(expectedTimes[0]);
       expect(gotTimes.at(-1)).toBe(expectedTimes.at(-1));
       expect(gotStates[0]).toEqual(expectedStates[0]);
       for (let i = 0; i < initial.length; i++) {
-        expect(gotStates.at(-1)![i]).toBeCloseTo(expectedStates.at(-1)![i], 3);
+        expect((gotStates.at(-1) as number[])[i]).toBeCloseTo(
+          (expectedStates.at(-1) as number[])[i],
+          3
+        );
       }
     }
   });

@@ -1514,7 +1514,7 @@ export function radauSolve(
   return { t: tOut, y: yOut };
 }
 
-/** Solution when the time span or state is a `Matrix`: both outputs are matrices. */
+/** Solution when the time span is a `Matrix`: both outputs are matrices. */
 export interface ODEMatrixSolution {
   t: Matrix;
   y: Matrix;
@@ -2133,11 +2133,18 @@ export const createSolveODE = /* #__PURE__ */ factory(
     const solveODE = typed('solveODE', {
       'function, Array, Array, Object': _solveODE,
       'function, Matrix, Array | Matrix, Object': _matrixSolveODE,
-      'function, Array, Matrix, Object': _matrixSolveODE,
+      // A Matrix y0 with an Array tspan gives array outputs, as in mathjs 15.3.0
+      // (the tspan decides the container, #3734 via the 15.3.0 collection changes).
+      'function, Array, Matrix, Object': (
+        f: ForcingFunction,
+        T: unknown[],
+        y0: Matrix
+      ): SolveODESolution => _solveODE(f, T, y0.toArray() as unknown[], {}),
       'function, Array, Array': (f: ForcingFunction, T: unknown[], y0: unknown[]) =>
         _solveODE(f, T, y0, {}),
       'function, Matrix, Array | Matrix': _matrixSolveODE,
-      'function, Array, Matrix': _matrixSolveODE,
+      'function, Array, Matrix': (f: ForcingFunction, T: unknown[], y0: Matrix) =>
+        _solveODE(f, T, y0.toArray() as unknown[], {}),
       'function, Array, number | BigNumber | Unit': (
         f: ForcingFunction,
         T: unknown[],

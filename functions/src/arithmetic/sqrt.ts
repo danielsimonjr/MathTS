@@ -2,6 +2,7 @@ import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
 import type { BigNumber, Complex } from '@danielsimonjr/mathts-core';
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import { sqrtBigNumberWith, sqrtNumberWith } from '../typed/complex-promotion.js';
 
 interface UnitType {
@@ -49,6 +50,8 @@ function sqrtFactory(normalizeImaginaryZero: boolean) {
        *            Returns the square root of `x`
        */
       return typed('sqrt', {
+        bigint: (x: bigint): number | Complex =>
+          sqrtNumberWith(bigintToNumber(x), config.predictable, ComplexClass),
         number: (x: number): number | Complex =>
           sqrtNumberWith(x, config.predictable, ComplexClass),
 

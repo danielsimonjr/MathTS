@@ -28,7 +28,8 @@ export function multinomialExact(parts: readonly number[], stats?: MultinomialSt
     for (let i = 1n; i <= j; i++) {
       if (stats !== undefined) stats.steps++;
       binom = (binom * (n - j + i)) / i;
-      if (result * binom >= MULTINOMIAL_LIMIT) return Infinity;
+      // mathjs 15.3.0 (#3790): the product overflows to NaN once a binomial step is out of range.
+      if (result * binom >= MULTINOMIAL_LIMIT) return NaN;
     }
     result *= binom;
     total = n;

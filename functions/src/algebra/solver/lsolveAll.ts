@@ -48,10 +48,6 @@ interface ScalarFunction {
   (a: ScalarValue, b: ScalarValue): ScalarValue;
 }
 
-interface EqualScalarFunction {
-  (a: ScalarValue, b: ScalarValue): boolean;
-}
-
 interface SolveValidationFunction {
   (
     matrix: DenseMatrix | SparseMatrix,
@@ -66,8 +62,10 @@ interface Dependencies {
   divideScalar: ScalarFunction;
   multiplyScalar: ScalarFunction;
   subtractScalar: ScalarFunction;
-  equalScalar: EqualScalarFunction;
+
   DenseMatrix: DenseMatrixConstructor;
+
+  isZero: TypedFunction;
 }
 
 const name = 'lsolveAll';
@@ -77,22 +75,14 @@ const dependencies = [
   'divideScalar',
   'multiplyScalar',
   'subtractScalar',
-  'equalScalar',
+  'isZero',
   'DenseMatrix',
 ] as const;
 
 export const createLsolveAll = /* #__PURE__ */ factory(
   name,
-  dependencies as unknown as string[],
-  ({
-    typed,
-    matrix,
-    divideScalar,
-    multiplyScalar,
-    subtractScalar,
-    equalScalar,
-    DenseMatrix,
-  }: Dependencies) => {
+  [...dependencies],
+  ({ typed, matrix, divideScalar, multiplyScalar, subtractScalar, DenseMatrix }: Dependencies) => {
     const solveValidation = createSolveValidation({
       DenseMatrix,
     } as unknown as Parameters<
@@ -176,7 +166,7 @@ export const createLsolveAll = /* #__PURE__ */ factory(
         for (let k = 0; k < L; k++) {
           const b = B[k];
 
-          if (!isZeroEntry(M[i][i], equalScalar)) {
+          if (!isZeroEntry(M[i][i])) {
             // non-singular row
 
             b[i] = divideScalar(b[i], M[i][i]);
@@ -185,9 +175,7 @@ export const createLsolveAll = /* #__PURE__ */ factory(
               // b[j] -= b[i] * M[j,i]
               b[j] = subtractScalar(b[j], multiplyScalar(b[i], M[j][i]));
             }
-          } else if (
-            !(typeof b[i] === 'number' ? equalScalar(b[i], 0) : isZeroEntry(b[i], equalScalar))
-          ) {
+          } else if (!(b[i] === 0)) {
             // singular row, nonzero RHS
 
             if (k === 0) {
@@ -269,7 +257,7 @@ export const createLsolveAll = /* #__PURE__ */ factory(
             }
           }
 
-          if (!isZeroEntry(Mii, equalScalar)) {
+          if (!isZeroEntry(Mii)) {
             // non-singular row
 
             b[i] = divideScalar(b[i], Mii);
@@ -278,9 +266,7 @@ export const createLsolveAll = /* #__PURE__ */ factory(
               const J = iIndices[j];
               b[J] = subtractScalar(b[J], multiplyScalar(b[i], iValues[j]));
             }
-          } else if (
-            !(typeof b[i] === 'number' ? equalScalar(b[i], 0) : isZeroEntry(b[i], equalScalar))
-          ) {
+          } else if (!(b[i] === 0)) {
             // singular row, nonzero RHS
 
             if (k === 0) {

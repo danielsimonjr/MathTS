@@ -12,25 +12,23 @@ import type { AlgorithmFunction } from '../type/matrix/types.js';
 interface BitOrDependencies {
   typed: TypedFunction;
   matrix: (data: unknown[]) => unknown;
-  equalScalar: TypedFunction;
+
   DenseMatrix: new (data: unknown) => unknown;
-  concat: TypedFunction;
 }
 
 const name = 'bitOr';
-const dependencies = ['typed', 'matrix', 'equalScalar', 'DenseMatrix', 'concat'];
+const dependencies = ['typed', 'matrix', 'DenseMatrix'];
 
 export const createBitOr = /* #__PURE__ */ factory(
   name,
   dependencies,
-  ({ typed, matrix, equalScalar, DenseMatrix, concat }: BitOrDependencies) => {
+  ({ typed, matrix, DenseMatrix }: BitOrDependencies) => {
     const matAlgo01xDSid = createMatAlgo01xDSid({ typed });
-    const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed, equalScalar });
+    const matAlgo04xSidSid = createMatAlgo04xSidSid({ typed });
     const matAlgo10xSids = createMatAlgo10xSids({ typed, DenseMatrix });
     const matrixAlgorithmSuite = createMatrixAlgorithmSuite({
       typed,
       matrix,
-      concat,
     });
 
     /**
