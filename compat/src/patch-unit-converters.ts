@@ -15,6 +15,7 @@ function convertFractionToBigNumber(x: Numeric, previous: (x: Numeric) => Numeri
   return previous(x);
 }
 
+/** Patch one compat instance's Unit converters; never the shared native Unit class. */
 export function patchCompatUnitTypeConverters(Unit: {
   typeConverters: Record<string, unknown>;
   _getNumberConverter?: (type: string) => (x: never) => Numeric;

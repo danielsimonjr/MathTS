@@ -216,12 +216,12 @@ describe('F4: the source-scan guard catches multi-line Fraction signatures', () 
 describe('compat Unit converter patch does not mutate native Unit', () => {
   const third = new Fraction(1n, 3n);
   const nativeShared = factory_mathjsCompat.constructors.Unit as {
-    typeConverters: { BigNumber: (x: unknown) => unknown };
+    typeConverters: { BigNumber: (x: never) => unknown };
   };
 
-  function converterThrows(convert: (x: unknown) => unknown): boolean {
+  function converterThrows(convert: (x: never) => unknown): boolean {
     try {
-      convert(third);
+      convert(third as never);
       return false;
     } catch {
       return true;

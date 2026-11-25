@@ -516,6 +516,7 @@ function powWithFractionOperands(base: unknown, exponent: unknown, predictable: 
   return _factoryPow(base, exponent);
 }
 
+/** Per-instance `pow` shim that uses the instance `predictable` flag (mathjs 15.3.0). */
 export function createCompatPow(predictable: () => boolean): TypedFunction {
   return withTypedSurface(function (base?: unknown, exponent?: unknown): unknown {
     if (
@@ -611,6 +612,7 @@ function formatMathjsTree(value: unknown, options?: unknown): string {
   return _format(value, options);
 }
 
+/** mathjs-compatible `format`: whole Fractions print as `n/1`. */
 export function format(value: unknown, options?: unknown): string {
   return formatMathjsTree(value, options);
 }
