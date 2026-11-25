@@ -224,20 +224,16 @@ describe('PARITY: the docs sweep must compare each example on a fresh instance',
     ).toEqual([]);
   });
 
-  it('FINDING #1551: isPositive(fraction(2)) — native functions gap, not G01 compat', () => {
-    // `functions` may read Fraction fields mathjs uses that MathTS does not; compat must match
-    // mathjs 15.3.0. This test only pins that the public compat call succeeds alongside the oracle.
+  it('isPositive(fraction(2)) is true (#1551 native Fraction sign fields)', () => {
     const run = (l: AnyInstance): unknown =>
       (l.isPositive as (x: unknown) => unknown)((l.fraction as (n: number) => unknown)(2));
     const c = outcome(compat(), run);
     const o = outcome(oracle, run);
     expect(c.ok && o.ok, 'compat and oracle both evaluate isPositive(fraction(2))').toBe(true);
-    // FINDING (critical lib `functions`, not fixed in G01 / policy forbids it here):
-    // native `isPositive(fraction(2))` is false; mathjs 15.3.0 is true (#1551 / G03).
-    expect(o.text, 'mathjs 15.3.0 oracle').toBe('boolean true');
-    expect(c.text, 'compat currently follows native functions, not the oracle').toBe(
-      'boolean false'
-    );
+    if (c.ok && o.ok) {
+      expect(c.text).toBe('boolean true');
+      expect(o.text).toBe('boolean true');
+    }
   });
 
   it('known-gaps.json does not record a divergence that matches on a fresh instance', () => {
