@@ -1381,12 +1381,8 @@
     "acsc: mathjs rejects 2 argument(s) on the pool",
     "asec: mathjs rejects 2 argument(s) on the pool"
   ],
-  "1559": [
-    "asech: mathjs rejects 2 argument(s) on the pool"
-  ],
-  "1560": [
-    "acsch: mathjs rejects 2 argument(s) on the pool"
-  ],
+  "1559": ["asech: mathjs rejects 2 argument(s) on the pool"],
+  "1560": ["acsch: mathjs rejects 2 argument(s) on the pool"],
   "1561": [
     "eigs: (Array [[1, 2], [3, 4]], number -0.5)",
     "eigs: (Array [[1, 2], [3, 4]], number -3)",
@@ -1514,9 +1510,7 @@
     "multinomial: (bigint 2, number 3)",
     "multinomial: mathjs rejects 2 argument(s) on the pool"
   ],
-  "1564": [
-    "catalan: mathjs rejects 2 argument(s) on the pool"
-  ],
+  "1564": ["catalan: mathjs rejects 2 argument(s) on the pool"],
   "1565": [
     "divide: (BigNumber 0.5, number -0.5)",
     "divide: (BigNumber 0.5, number -3)",
@@ -1960,9 +1954,7 @@
     "stirlingS2: (BigNumber 2, number 1)",
     "stirlingS2: (BigNumber 2, number 2)"
   ],
-  "1588": [
-    "expm: mathjs rejects 2 argument(s) on the pool"
-  ],
+  "1588": ["expm: mathjs rejects 2 argument(s) on the pool"],
   "unassigned": [
     "abs: mathjs rejects 2 argument(s) on the pool",
     "acos: mathjs rejects 2 argument(s) on the pool",

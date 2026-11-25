@@ -264,9 +264,7 @@ describe('F4: zpk2tf known-gaps entries are stale, and the sweep masks it via co
     );
   });
 
-  it(
-    'sweepDocs does not report a zpk2tf doc label that a clean per-config sweep does not',
-    async () => {
+  it('sweepDocs does not report a zpk2tf doc label that a clean per-config sweep does not', async () => {
     const { perName } = await docsExamples();
     // The suite's own sweep, on the shared instances (order-dependent).
     const { labels: shared } = sweepDocs(perName);
@@ -287,7 +285,5 @@ describe('F4: zpk2tf known-gaps entries are stale, and the sweep masks it via co
       phantom,
       'sweepDocs reports zpk2tf labels a clean sweep does not (config() leakage)'
     ).toEqual([]);
-    },
-    120_000
-  );
+  }, 120_000);
 });
