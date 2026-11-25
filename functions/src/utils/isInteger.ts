@@ -9,7 +9,7 @@ interface BigNumberType {
 }
 
 interface FractionType {
-  d: bigint;
+  isInteger(): boolean;
 }
 
 interface IsIntegerDependencies {
@@ -60,7 +60,7 @@ export const createIsInteger = /* #__PURE__ */ factory(
 
       bigint: (_b: bigint): boolean => true,
 
-      Fraction: (r: FractionType): boolean => r.d === 1n,
+      Fraction: (r: FractionType): boolean => r.isInteger(),
 
       'Array | Matrix': typed.referToSelf(
         (self: TypedFunction) =>

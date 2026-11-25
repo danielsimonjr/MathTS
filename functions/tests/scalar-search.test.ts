@@ -2597,48 +2597,31 @@ describe('searchScalars: simplify', () => {
   });
 
   it('a ScalarBuildError from simplifyScalar keeps the unsimplified tree', async () => {
-    // (-8)^(1/3) simplifies into the complex numbers, which the bridge refuses with
-    // ScalarBuildError; the search must keep the unsimplified tree and score it.
-    const third = b.op('/', [b.number(1), b.number(3)]);
-    const complexSeed = b.op('+', [b.op('^', [b.number(-8), third]), X]);
-    expect(() => simplifyScalar(complexSeed)).toThrow(ScalarBuildError);
-    const grammar: ScalarGrammar = {
-      variables: ['x'],
-      binary: ['+', '^', '/'],
-      unary: [],
-      literals: [-8, 1, 3],
-      maxSize: 7,
-    };
-    const problem: ScalarSearchProblem = {
-      variables: ['x'],
-      columns: [xs],
-      // The seed itself is invalid on every row (a negative base to a fractional
-      // power is NaN), so 'penalize' keeps it on the front at one penalty a row.
-      observed: new Float64Array(xs.length),
-    };
-    const { progress, result } = await runSearch(problem, {
-      grammar,
-      seeds: [complexSeed],
-      rng: createSeededRng(7),
-      maxEvaluations: 1,
-      optimizeProbability: 0,
-      invalidRows: 'penalize',
-      simplify: 'algebraic',
+    // The search must keep the unsimplified tree when algebraic simplify leaves
+    // the real scalar subset (ScalarBuildError). Drive the throw with a spy so
+    // the pin does not depend on which folds produce Complex: log(-1) still
+    // does; an exact odd root of a negative no longer does.
+    const factories = await import('../src/factories/index.js');
+    const spy = vi.spyOn(factories, 'simplifyScalar').mockImplementation(() => {
+      throw new ScalarBuildError('scalar bridge: Complex');
     });
-    expect(result.front).toHaveLength(1);
-    expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(complexSeed));
-    expect(Object.is(result.front[0]!.loss, xs.length * 1e8)).toBe(true);
-    // The unsimplified tree scores exactly as it would without the option.
-    const plain = await runSearch(problem, {
-      grammar,
-      seeds: [complexSeed],
-      rng: createSeededRng(7),
-      maxEvaluations: 1,
-      optimizeProbability: 0,
-      invalidRows: 'penalize',
-    });
-    expect(progress).toHaveLength(plain.progress.length);
-    expect(Object.is(result.front[0]!.loss, plain.result.front[0]!.loss)).toBe(true);
+    try {
+      expect(simplifyCandidateForTest(seed23x, 'algebraic')).toEqual(seed23x);
+      const { progress, result } = await runSearch(constProblem, {
+        ...constSeed,
+        simplify: 'algebraic',
+      });
+      expect(result.front).toHaveLength(1);
+      expect(scalarCanonicalKey(result.front[0]!.item)).toBe(scalarCanonicalKey(seed23x));
+      expect(result.simplifyFallbacks).toBe(1);
+      const plain = await runSearch(constProblem, {
+        ...constSeed,
+      });
+      expect(progress).toHaveLength(plain.progress.length);
+      expect(Object.is(result.front[0]!.loss, plain.result.front[0]!.loss)).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('admit can keep the unsimplified seed when the simplified shape is rejected', async () => {

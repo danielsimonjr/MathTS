@@ -20,7 +20,7 @@
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
-import { shims } from './shims.js';
+import { shims, createCompatPow } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -40,6 +40,14 @@ import {
   createCompatString,
 } from './fraction-format-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import {
+  applyUnitRelationalParity,
+  factoryMaxUnits,
+  factoryMinUnits,
+  factorySignUnits,
+  wrapUnitExtrema,
+  type UnitRelationalOps,
+} from './unit-relational.js';
 
 // =============================================================================
 // Configuration
@@ -422,10 +430,12 @@ export function create(
   const fullBundle =
     canonical ||
     Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
-  const localUnits =
-    config === moduleDefaults || !fullBundle
-      ? undefined
-      : mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig);
+  // Always give a full-bundle `create(all)` its own Unit class. Patching
+  // `typeConverters` on `instanceSymbols.Unit` would mutate the shared native
+  // constructor that functions/core use (#1551).
+  const localUnits = fullBundle
+    ? mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig)
+    : undefined;
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
@@ -477,11 +487,35 @@ export function create(
         ),
       }
     : surfaceOf(factories);
+  const unitRelationalBase: UnitRelationalOps = {
+    equal: mathFunctions.equal as UnitRelationalOps['equal'],
+    unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
+    equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
+    deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
+    compare: mathFunctions.compare as UnitRelationalOps['compare'],
+    larger: mathFunctions.larger as UnitRelationalOps['larger'],
+    smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
+    largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
+    smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
+  };
+  const unitRelational = applyUnitRelationalParity(unitRelationalBase);
+
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
     ...originalSurface,
     create: createSibling,
+
+    // G04: mathjs unit equality / ordering through activated factories (#1552).
+    equal: unitRelational.equal,
+    unequal: unitRelational.unequal,
+    equalScalar: unitRelational.equalScalar,
+    deepEqual: unitRelational.deepEqual,
+    compare: unitRelational.compare,
+    larger: unitRelational.larger,
+    smaller: unitRelational.smaller,
+    largerEq: unitRelational.largerEq,
+    smallerEq: unitRelational.smallerEq,
 
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
@@ -499,7 +533,11 @@ export function create(
     subtract: mathFunctions.factory_subtract,
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
-    pow: shims.pow,
+    pow: bindShim(createCompatPow(() => Boolean(currentConfig.predictable))),
+    isPositive: mathFunctions.isPositive,
+    isNegative: mathFunctions.isNegative,
+    isInteger: mathFunctions.isInteger,
+    fix: mathFunctions.fix,
     sqrt: shims.sqrt,
     abs: shims.abs,
     exp: shims.exp,
@@ -519,8 +557,9 @@ export function create(
     mean: shims.mean,
     std: shims.std,
     variance: shims.variance,
-    min: shims.min,
-    max: shims.max,
+    min: wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
+    max: wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
+    sign: wrapUnitExtrema(mathFunctions.sign as (...args: unknown[]) => unknown, factorySignUnits),
 
     // Number theory
     gcd: shims.gcd,
@@ -614,12 +653,14 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    diag: mathFunctions.diag,
+    rotationMatrix: mathFunctions.rotationMatrix,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
   ) as (keyof typeof compatDefaultOverrides)[];
   for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
-  if (localUnits && flat.Unit === instanceSymbols.Unit) flat.Unit = localUnits.Unit;
+  if (localUnits) flat.Unit = localUnits.Unit;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
   );
@@ -642,6 +683,19 @@ export function create(
     expressionConstants.fraction = () => instance.fraction;
   }
   if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
+  for (const name of [
+    'equal',
+    'unequal',
+    'equalScalar',
+    'deepEqual',
+    'compare',
+    'larger',
+    'smaller',
+    'largerEq',
+    'smallerEq',
+  ] as const) {
+    expressionConstants[name] = () => instance[name];
+  }
   for (const name of [
     'arg',
     'conj',
@@ -953,6 +1007,19 @@ const defaultTyped: MathInstance['typed'] =
   /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatTyped();
 export { defaultTyped as typed };
 
+/** G04 named exports — same unit-relational adapters as `create(all)` (#1552). */
+const namedUnitRelational = applyUnitRelationalParity({
+  equal: mathFunctions.equal as UnitRelationalOps['equal'],
+  unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
+  equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
+  deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
+  compare: mathFunctions.compare as UnitRelationalOps['compare'],
+  larger: mathFunctions.larger as UnitRelationalOps['larger'],
+  smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
+  largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
+  smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
+});
+
 // Mathematical functions shared with the functions package.
 export {
   Help,
@@ -981,7 +1048,6 @@ export {
   factory_cbrt as cbrt,
   clone,
   column,
-  compare,
   compareNatural,
   composition,
   concat,
@@ -996,7 +1062,6 @@ export {
   ctranspose,
   factory_cube as cube,
   cumsum,
-  deepEqual,
   derivative,
   diag,
   diff,
@@ -1007,8 +1072,6 @@ export {
   dotMultiply,
   dotPow,
   eigs,
-  equal,
-  equalScalar,
   erf,
   expm,
   factory_expm1 as expm1,
@@ -1041,8 +1104,6 @@ export {
   isZero,
   kldivergence,
   kron,
-  larger,
-  largerEq,
   leafCount,
   leftShift,
   log10,
@@ -1107,8 +1168,6 @@ export {
   simplifyCore,
   factory_sinh as sinh,
   slu,
-  smaller,
-  smallerEq,
   solveODE,
   sort,
   splitUnit,
@@ -1126,13 +1185,24 @@ export {
   typeOf,
   unaryMinus,
   unaryPlus,
-  unequal,
   usolve,
   usolveAll,
   xor,
   zeta,
   zpk2tf,
 } from '@danielsimonjr/mathts-functions';
+
+export const {
+  equal,
+  unequal,
+  equalScalar,
+  deepEqual,
+  compare,
+  larger,
+  smaller,
+  largerEq,
+  smallerEq,
+} = namedUnitRelational;
 
 type UnitMagnitude = number | ConfiguredBigNumber | Fraction;
 
