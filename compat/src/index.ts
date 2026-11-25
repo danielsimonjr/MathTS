@@ -156,6 +156,7 @@ interface MathInstanceOverrides {
   compareText: typeof namedCompareText;
   equalText: typeof namedEqualText;
   toBest: typeof namedToBest;
+  lgamma: typeof namedLgamma;
   sqrt: typeof shims.sqrt;
   abs: typeof shims.abs;
   exp: typeof shims.exp;
@@ -543,6 +544,7 @@ export function create(
     compareText: namedCompareText,
     equalText: namedEqualText,
     toBest: namedToBest,
+    lgamma: namedLgamma,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
@@ -562,10 +564,17 @@ export function create(
   const expressionConstants: Record<string, () => unknown> = {};
   for (const name of overriddenNames) expressionConstants[name] = () => instance[name];
   if (originalSurface.add === mathFunctions.add) expressionConstants.add = () => instance.add;
+  if (originalSurface.multiply === mathFunctions.multiply) {
+    expressionConstants.multiply = () => instance.multiply;
+  }
   if (originalSurface.fraction === mathFunctions.fraction) {
     expressionConstants.fraction = () => instance.fraction;
   }
   if (originalSurface.pow === mathFunctions.pow) expressionConstants.pow = () => instance.pow;
+  for (const name of ['arg', 'conj', 'im', 're'] as const) {
+    if (originalSurface[name] === mathFunctions[name])
+      expressionConstants[name] = () => instance[name];
+  }
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
@@ -801,6 +810,9 @@ const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
   (left: string, right: string): boolean;
   (left: unknown, right: unknown): unknown;
 };
+const namedLgamma = mathFunctions.factory_mathjsCompat.lgamma as (
+  ...args: unknown[]
+) => ReturnType<typeof mathFunctions.lgamma>;
 const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.toBest>;
@@ -809,6 +821,7 @@ export {
   namedCompareText as compareText,
   namedEqualText as equalText,
   namedToBest as toBest,
+  namedLgamma as lgamma,
 };
 
 /** Embedded documentation for names in the MathJS compatibility surface. */
@@ -921,7 +934,6 @@ export {
   largerEq,
   leafCount,
   leftShift,
-  lgamma,
   log10,
   log1p,
   log2,

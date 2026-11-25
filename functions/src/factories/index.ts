@@ -117,7 +117,7 @@ import {
   multinomial as typedMultinomial,
   permutations as typedPermutations,
 } from '../typed/probability.js';
-import { createLgamma } from '../probability/lgamma.js';
+import { createLgamma, createMathJSLgamma } from '../probability/lgamma.js';
 import { createPickRandom } from '../probability/pickRandom.js';
 import { createRandom } from '../probability/random.js';
 
@@ -2145,15 +2145,25 @@ const createSelectedBignumber = /* #__PURE__ */ factory(
 const createSelectedFraction = /* #__PURE__ */ factory(
   'fraction',
   ['typed', 'Fraction'],
-  ({ typed, Fraction }: { typed: TypedBuilder; Fraction: typeof CoreFraction }) =>
-    typed('fraction', {
+  ({ typed, Fraction }: { typed: TypedBuilder; Fraction: typeof CoreFraction }) => {
+    const fromMathJSNotation = (value: string | number): CoreFraction => {
+      const { s, n, d } = new FractionJS(value);
+      return new Fraction(s * n, d);
+    };
+
+    return typed('fraction', {
       number: (value: number) => {
         if (!Number.isFinite(value))
           throw new Error(`${value} cannot be represented as a fraction`);
-        const { s, n, d } = new FractionJS(value);
-        return new Fraction(s * n, d);
+        return fromMathJSNotation(value);
       },
-      string: (value: string) => new Fraction(value),
+      string: (value: string) => {
+        try {
+          return new Fraction(value);
+        } catch {
+          return fromMathJSNotation(value);
+        }
+      },
       'number, number': (numerator: number, denominator: number) =>
         new Fraction(numerator, denominator),
       'bigint, bigint': (numerator: bigint, denominator: bigint) =>
@@ -2184,7 +2194,8 @@ const createSelectedFraction = /* #__PURE__ */ factory(
       'Array | Matrix': typed.referToSelf(
         (self) => (value: unknown) => mapCollection(value, (entry) => self(entry))
       ),
-    })
+    });
+  }
 );
 
 const createSelectedComplex = /* #__PURE__ */ factory(
@@ -3419,7 +3430,7 @@ function compatFactoryExports(): {
     createIsNumeric,
     createIsPositive,
     createIsPrime,
-    createLgamma,
+    createLgamma: createMathJSLgamma,
     createLog10,
     createLog2,
     createMultiplyScalar,
@@ -3734,6 +3745,11 @@ export const factory_mathjsCompat = {
   setUnion: compatSetUnion,
   compareText,
   equalText,
+  arg,
+  conj,
+  im,
+  re,
+  lgamma: createMathJSLgamma(factoryScope as Parameters<typeof createMathJSLgamma>[0]),
   fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),
   toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),
 };

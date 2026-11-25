@@ -37,10 +37,12 @@ interface LgammaDependencies {
 const name = 'lgamma';
 const dependencies = ['Complex', 'typed'];
 
-export const createLgamma = /* #__PURE__ */ factory(
-  name,
-  dependencies,
-  ({ Complex, typed }: LgammaDependencies) => {
+function lgammaFactory(compatibility = false) {
+  const evaluateReal = compatibility
+    ? (value: number): number =>
+        value < 0 ? NaN : value === Infinity ? Infinity : lgammaNumber(value)
+    : lgammaNumber;
+  return factory(name, dependencies, ({ Complex, typed }: LgammaDependencies) => {
     // Stirling series is non-convergent, we need to use the recurrence `lgamma(z) = lgamma(z+1) - log z` to get
     // sufficient accuracy.
     //
@@ -89,10 +91,10 @@ export const createLgamma = /* #__PURE__ */ factory(
      */
     return typed(name, {
       Array: function (arr: unknown[]): unknown[] {
-        return arr.map((x) => lgammaNumber(x as number));
+        return arr.map((x) => evaluateReal(x as number));
       },
 
-      number: lgammaNumber,
+      number: evaluateReal,
       Complex: lgammaComplex,
       BigNumber: function () {
         throw new Error(
@@ -108,8 +110,8 @@ export const createLgamma = /* #__PURE__ */ factory(
 
       if (n.isNaN()) {
         return new Complex(NaN, NaN);
-      } else if (n.im === 0 && (n.re >= 0 || Number.isInteger(n.re))) {
-        return new Complex(lgammaNumber(n.re), 0);
+      } else if (n.im === 0 && (compatibility || n.re >= 0 || Number.isInteger(n.re))) {
+        return new Complex(evaluateReal(n.re), 0);
       } else if (n.re >= SMALL_RE || Math.abs(n.im) >= SMALL_IM) {
         return lgammaStirling(n);
       } else if (n.re <= REFLECTION) {
@@ -181,5 +183,11 @@ export const createLgamma = /* #__PURE__ */ factory(
         .sub(shiftprod.log())
         .sub(new Complex(0, signflips * 2 * Math.PI * 1));
     }
-  }
-);
+  });
+}
+
+/** Create the native logarithm of the gamma magnitude. */
+export const createLgamma = /* #__PURE__ */ lgammaFactory();
+
+/** Create the MathJS real and complex log-gamma function. */
+export const createMathJSLgamma = /* #__PURE__ */ lgammaFactory(true);

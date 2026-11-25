@@ -3,21 +3,28 @@ import * as oracle from 'mathjs';
 import {
   add,
   all,
+  arg,
   cbrt,
   combinations,
   compareNatural,
   compareText,
+  conj,
   create,
   derivative,
   equalText,
   erf,
   fraction,
   fractionDependencies,
+  im,
+  lgamma,
+  lgammaDependencies,
   log1p,
   log2,
   median,
+  multiply,
   norm,
   pow,
+  re,
   round,
   toBest,
   toBestDependencies,
@@ -199,5 +206,65 @@ describe('named compatibility function imports', () => {
     expect(String(math.evaluate('fraction(sqrt(10))'))).toBe(
       oracle.fraction(Math.sqrt(10)).toFraction()
     );
+  });
+
+  it('converts numeric strings in multiplication and alongside collections', () => {
+    const math = create(all);
+    const product: number = multiply('5', '2');
+    const sum: number = add('2', 3, '4');
+    const instanceSum: number = math.add('2', 3, '4');
+    expect(product).toBe(10);
+    expect(sum).toBe(9);
+    expect(instanceSum).toBe(sum);
+    expect(multiply('5', 2, '3')).toBe(30);
+    expect(math.multiply('5', 2)).toBe(10);
+    expect(math.evaluate('"5" * "2"')).toBe(10);
+    expect(add([1, 2], '3')).toEqual([4, 5]);
+    expect(multiply([1, 2], '3')).toEqual([3, 6]);
+    expect(() => multiply('abc', '2')).toThrow(/Cannot convert "abc" to a number/);
+  });
+
+  it('accepts MathJS mixed, repeating, and colon fraction notation', () => {
+    const math = create(all);
+    const selected = create({ fractionDependencies });
+    for (const text of ['2 1/3', '-2 1/3', "1.2'34'", '2:3']) {
+      const expected = oracle.fraction(text);
+      const evaluated = math.evaluate(`fraction("${text}")`) as ReturnType<typeof fraction>;
+      for (const actual of [fraction(text), selected.fraction(text), evaluated]) {
+        expect(actual.numerator).toBe(expected.s * expected.n);
+        expect(actual.denominator).toBe(expected.d);
+      }
+    }
+    expect(fraction('1e4').numerator).toBe(10000n);
+  });
+
+  it('dispatches complex projections over real numbers and collections', () => {
+    const math = create(all);
+    expect(conj(5)).toBe(oracle.conj(5));
+    expect(arg(-5)).toBe(oracle.arg(-5));
+    expect(re([1, math.complex(2, 3)])).toEqual([1, 2]);
+    expect(im([1, math.complex(2, 3)])).toEqual([0, 3]);
+    expect(String(math.conj(math.fraction('1/3')))).toBe(
+      String(oracle.evaluate("conj(fraction('1/3'))"))
+    );
+    for (const name of ['arg', 'conj', 'im', 're']) {
+      const expression = `${name}([1, -2, 2+3i])`;
+      const actual = math.evaluate(expression) as { toArray(): unknown[] };
+      const expected = oracle.evaluate(expression) as { toArray(): unknown[] };
+      expect(actual.toArray().map(String)).toEqual(expected.toArray().map(String));
+    }
+  });
+
+  it('matches the MathJS real-axis log-gamma domain', () => {
+    const math = create(all);
+    const selected = create({ lgammaDependencies });
+    for (const value of [-Infinity, -3, -0.5, -0, 0, Infinity, NaN]) {
+      const expected = oracle.lgamma(value);
+      for (const actual of [lgamma(value), math.lgamma(value), selected.lgamma(value)]) {
+        expect(actual).toBe(expected);
+      }
+    }
+    expect(math.evaluate('lgamma(-0.5)')).toBeNaN();
+    expect(lgamma(math.complex(-0.5, 0))).toMatchObject({ re: NaN, im: 0 });
   });
 });

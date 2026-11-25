@@ -46,6 +46,8 @@ import {
   addScalar as _addScalar,
   subtract as _subtract,
   multiply as _multiply,
+  multiplyScalar as _multiplyScalar,
+  number as _number,
   divide as _divide,
   inv as _inv,
   pow as _pow,
@@ -406,29 +408,48 @@ function withTypedSurface<T extends object>(shim: T, typedFn: object): T {
 }
 
 type OneArg = <T>(value: T) => T;
+type BinaryArithmetic = (left: unknown, right: unknown) => unknown;
+type NumericStringArithmetic = (
+  left: string | number,
+  right: string | number,
+  ...rest: (string | number)[]
+) => number;
+
+function withNumericText(arithmetic: BinaryArithmetic, scalar: BinaryArithmetic): BinaryArithmetic {
+  return (left, right) => {
+    if (typeof left !== 'string' && typeof right !== 'string') return arithmetic(left, right);
+    if (
+      Array.isArray(left) ||
+      Array.isArray(right) ||
+      isCompatBridgeMatrix(left) ||
+      isCompatBridgeMatrix(right)
+    ) {
+      return arithmetic(
+        typeof left === 'string' ? _number(left) : left,
+        typeof right === 'string' ? _number(right) : right
+      );
+    }
+    return scalar(left, right);
+  };
+}
+
 export const add = makeArithmetic(
-  (a, b) =>
-    typeof a === 'string' || typeof b === 'string'
-      ? _addScalar(a, b)
-      : (_add as (left: unknown, right: unknown) => unknown)(a, b),
+  withNumericText(_add as BinaryArithmetic, _addScalar),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b
-) as PublicAdd &
-  OneArg & {
-    (left: string | number, right: string | number, ...rest: (string | number)[]): number;
-  };
+) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = makeArithmetic(
   _subtract as (a: unknown, b: unknown) => unknown,
   _matSubtract as (a: unknown, b: unknown) => unknown,
   true
 ) as typeof _subtract;
 export const multiply = makeArithmetic(
-  _multiply as (a: unknown, b: unknown) => unknown,
+  withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
   (a, b) => a * b
-) as typeof _multiply;
+) as NumericStringArithmetic & typeof _multiply;
 /**
  * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
  * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed
@@ -557,43 +578,28 @@ export const ceil: TypedFunction = _ceil;
 // Complex-specific Shims
 // =============================================================================
 
-/**
- * Complex conjugate (mathjs-compatible)
- */
-export function conj(c: Complex): Complex {
-  if (!isComplex(c)) {
-    throw new TypeError('Expected Complex number');
-  }
-  return c.conjugate();
-}
+type ComplexProjection = {
+  (value: Complex | number): number;
+  (value: readonly unknown[]): unknown[];
+  (value: unknown): unknown;
+};
 
-/**
- * Real part (mathjs-compatible)
- */
-export function re(c: Complex | number): number {
-  if (typeof c === 'number') return c;
-  if (isComplex(c)) return c.re;
-  throw new TypeError('Expected Complex or number');
-}
+/** Complex conjugate applied elementwise to collections. */
+export const conj = factory_mathjsCompat.conj as {
+  (value: Complex): Complex;
+  (value: number): number;
+  (value: readonly unknown[]): unknown[];
+  (value: unknown): unknown;
+};
 
-/**
- * Imaginary part (mathjs-compatible)
- */
-export function im(c: Complex | number): number {
-  if (typeof c === 'number') return 0;
-  if (isComplex(c)) return c.im;
-  throw new TypeError('Expected Complex or number');
-}
+/** Real part applied elementwise to collections. */
+export const re = factory_mathjsCompat.re as ComplexProjection;
 
-/**
- * Argument (phase) of complex number (mathjs-compatible)
- */
-export function arg(c: Complex): number {
-  if (!isComplex(c)) {
-    throw new TypeError('Expected Complex number');
-  }
-  return c.arg();
-}
+/** Imaginary part applied elementwise to collections. */
+export const im = factory_mathjsCompat.im as ComplexProjection;
+
+/** Complex phase applied elementwise to collections. */
+export const arg = factory_mathjsCompat.arg as ComplexProjection;
 
 // =============================================================================
 // Matrix-specific Shims
@@ -937,5 +943,7 @@ const _shims = {
   NaN: NaN_,
 };
 
-export const shims: Omit<typeof _shims, 'add' | 'sin'> & { add: PublicAdd; sin: PublicSin } =
-  _shims;
+export const shims: Omit<typeof _shims, 'add' | 'sin'> & {
+  add: NumericStringArithmetic & PublicAdd;
+  sin: PublicSin;
+} = _shims;
