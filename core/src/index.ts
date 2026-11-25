@@ -52,6 +52,7 @@ export { PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E } from './con
 // Fractions (exact rationals)
 export {
   Fraction,
+  rationalPow,
   isFraction,
   FRACTION_ZERO,
   FRACTION_ONE,
