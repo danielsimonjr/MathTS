@@ -10,6 +10,7 @@ import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { createAnd, createNot, createNullish, createOr, createXor } from './all-factories.js';
 
+/** Factory-bound logical/nullish callables used on the compat instance (mathjs 15.3.0). */
 export type G07LogicalFns = {
   nullish: (...args: unknown[]) => unknown;
   not: (...args: unknown[]) => unknown;
