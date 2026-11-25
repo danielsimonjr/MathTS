@@ -145,6 +145,7 @@ interface MathInstanceOverrides {
   subset: (...args: unknown[]) => unknown;
   index: (...args: unknown[]) => unknown;
   unit: typeof namedUnit;
+  xgcd: typeof namedXgcd;
 
   // Type creation
   complex: typeof shims.complex;
@@ -587,6 +588,8 @@ export function create(
     toBest: namedToBest,
     unit: localUnits?.unit ?? namedUnit,
     createUnit: localUnits?.createUnit ?? namedCreateUnit,
+    combinations: namedCombinations,
+    xgcd: namedXgcd,
     permutations: namedPermutations,
     lgamma: namedLgamma,
   };
@@ -874,6 +877,12 @@ const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
   (left: string, right: string): boolean;
   (left: unknown, right: unknown): unknown;
 };
+const namedCombinations = mathFunctions.factory_mathjsCompat
+  .combinations as typeof mathFunctions.combinations;
+const namedXgcd = mathFunctions.factory_mathjsCompat.xgcd as unknown as (
+  a: unknown,
+  b: unknown
+) => unknown[] | mathFunctions.BridgeMatrix;
 const namedPermutations = mathFunctions.factory_mathjsCompat
   .permutations as typeof mathFunctions.permutations;
 const namedLgamma = mathFunctions.factory_mathjsCompat.lgamma as (
@@ -888,6 +897,8 @@ export {
   namedEqualText as equalText,
   namedToBest as toBest,
   namedPermutations as permutations,
+  namedCombinations as combinations,
+  namedXgcd as xgcd,
   namedLgamma as lgamma,
 };
 
@@ -935,7 +946,6 @@ export {
   factory_cbrt as cbrt,
   clone,
   column,
-  combinations,
   combinationsWithRep,
   compare,
   compareNatural,
@@ -1088,7 +1098,6 @@ export {
   unequal,
   usolve,
   usolveAll,
-  xgcd,
   xor,
   zeta,
   zpk2tf,

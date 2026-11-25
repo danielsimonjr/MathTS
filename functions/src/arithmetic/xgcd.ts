@@ -1,3 +1,4 @@
+import type { BigNumber as Decimal } from '@danielsimonjr/mathts-core';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
@@ -56,8 +57,57 @@ function buildXgcd({ typed, config, matrix, BigNumber }: XgcdDependencies): Type
 }
 
 export const createXgcd = /* #__PURE__ */ factory(name, dependencies, buildXgcd);
+/** Extended Euclid using the floating-point operations of mathjs. */
+function mathjsXgcdNumber(a: number, b: number): number[] {
+  if (!Number.isInteger(a) || !Number.isInteger(b)) {
+    throw new Error('Parameters in function xgcd must be integer numbers');
+  }
+  let x = 1;
+  let nextX = 0;
+  let y = 0;
+  let nextY = 1;
+  while (b) {
+    const quotient = Math.floor(a / b);
+    [a, b] = [b, a - quotient * b];
+    [x, nextX] = [nextX, x - quotient * nextX];
+    [y, nextY] = [nextY, y - quotient * nextY];
+  }
+  return a < 0 ? [-a, -x, -y] : [a, a ? x : 0, y];
+}
+
 export const createSelectedXgcd = /* #__PURE__ */ factory(
   name,
   [...dependencies, 'BigNumber'],
-  buildXgcd
+  ({
+    typed,
+    config,
+    matrix,
+    BigNumber,
+  }: Omit<XgcdDependencies, 'BigNumber'> & {
+    BigNumber: new (value: number) => Decimal;
+  }) => {
+    const wrap = (values: unknown[]) => (config.matrix === 'Array' ? values : matrix(values));
+    return typed(name, {
+      'number, number': (a: number, b: number) => wrap(mathjsXgcdNumber(a, b)),
+      'BigNumber, BigNumber': (a: Decimal, b: Decimal) => {
+        if (!a.isInteger() || !b.isInteger())
+          throw new Error('Parameters in function xgcd must be integer numbers');
+        let x = new BigNumber(1),
+          nextX = new BigNumber(0);
+        let y = new BigNumber(0),
+          nextY = new BigNumber(1);
+        while (!b.isZero()) {
+          const quotient = a.div(b).floor();
+          let remainder = a.mod(b);
+          if (remainder.isNegative() && !remainder.isZero()) remainder = remainder.plus(b.abs());
+          [a, b] = [b, remainder];
+          [x, nextX] = [nextX, x.minus(quotient.times(nextX))];
+          [y, nextY] = [nextY, y.minus(quotient.times(nextY))];
+        }
+        return wrap(
+          a.isNegative() && !a.isZero() ? [a.neg(), x.neg(), y.neg()] : [a, a.isZero() ? 0 : x, y]
+        );
+      },
+    });
+  }
 );

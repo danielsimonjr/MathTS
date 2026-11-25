@@ -10,3 +10,4 @@ Export `num`, `den`, `compile`, and the mathjs type predicates from the function
 Use mathjs scalar signatures for trigonometric, exponential, and counting functions across named imports and instance expressions. Parsed nodes use the instance’s expression bindings. Compat also matches mathjs Unicode tokenization and complex square roots on the real axis.
 Compatibility units now normalize and format readings using the mathjs order of floating-point operations. Native MathTS units retain exact conversion scales.
 Each full compatibility instance keeps its own custom unit definitions for conversion, expressions, and JSON restoration.
+Compatibility combinations follow mathjs floating-point rounding for safe integer inputs. Compatibility xgcd uses mathjs coefficient arithmetic and the configured matrix output.

@@ -1,3 +1,4 @@
+import { product } from '../utils/product.js';
 import { fractionPart } from '../typed/fraction-parts.js';
 import FractionJS from 'fraction.js';
 import { createSelectedAdd } from '../arithmetic/selectedAdd.js';
@@ -1959,7 +1960,24 @@ const createSelectedCombinations = /* #__PURE__ */ factory(
   ['typed'],
   ({ typed }: { typed: TypedBuilder }) =>
     typed('combinations', {
-      'number, number': typedCombinations.signatures['number,number'],
+      'number, number': (n: number, k: number) => {
+        if (!Number.isSafeInteger(n) || !Number.isInteger(k) || n < 0 || k < 0 || k > n) {
+          return typedCombinations(n, k);
+        }
+        const count = Math.min(k, n - k);
+        let result = 1;
+        let divisor = 2;
+        for (let i = 1; i <= count && Number.isFinite(result); i++) {
+          result *= n - count + i;
+          while (divisor <= count && result % divisor === 0) {
+            result /= divisor;
+            divisor++;
+          }
+        }
+        // Any product of 171 consecutive positive integers starting at 2 overflows.
+        const denominator = count - divisor >= 170 ? Infinity : product(divisor, count);
+        return result / denominator;
+      },
       'BigNumber, BigNumber': typedCombinations.signatures['BigNumber,BigNumber'],
     })
 );
@@ -3751,6 +3769,7 @@ export const factory_mathjsCompat = {
   factory,
   attachEmitter,
   configFactory,
+  /** Build the unit constructor and registration functions for one compatibility instance. */
   createCompatUnitSources(config: Parameters<typeof createMathjsUnitClass>[0]['config']) {
     const listeners: ((current: typeof config, previous: typeof config) => void)[] = [];
     const Unit = createMathjsUnitClass({
@@ -3780,6 +3799,10 @@ export const factory_mathjsCompat = {
   conj,
   im,
   re,
+  combinations: createSelectedCombinations({ typed: createTyped(factoryScope) }),
+  xgcd: createSelectedXgcd({ ...factoryScope, typed: createTyped(factoryScope) } as Parameters<
+    typeof createSelectedXgcd
+  >[0]),
   permutations: createSelectedPermutations({
     typed: createTyped(factoryScope),
     factorial: factoryScope.factorial,

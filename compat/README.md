@@ -47,8 +47,8 @@ math.complex(2, 3); // 2 + 3i
   setting. `math.size` returns a plain array of dimensions, as in mathjs 15.
 - Unit readings use mathjs’s floating-point conversion order. For example, both
   `unit(0.75, 'inch')` and `evaluate('0.75 inch')` print `0.7499999999999999 inch`.
-- Direct named imports (`add`, `matrix`, …) come from `compat/src/shims.ts`. There is
-  no package-level named `import` / `createUnit` / `config` export (use the instance).
+- Named imports such as `unit` and `createUnit` share the default unit registry. Each
+  `create(all)` instance keeps its own registry. Use `math.config` to configure that instance.
 - Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions`
   operations. See the
   [compat API index](https://github.com/danielsimonjr/MathTS/blob/main/docs/api/compat.md)

@@ -5,12 +5,19 @@
  * `permutations`, `combinations` and `xgcd`. The typed-function rows (direct API calls) are in
  * `functions/tests/bignumber-integer-f2.test.ts`.
  *
- * Oracle: mathjs 15.2.0 (the container of `xgcd` is a DenseMatrix on the parse path and an Array
- * in compat `evaluate`; both give the same entries).
+ * Oracle: mathjs 15.2.0.
  */
 import { afterEach, describe, it, expect } from 'vitest';
+import * as oracle from 'mathjs';
 import { BigNumber } from '@danielsimonjr/mathts-core';
-import { create, all } from '../src/index.js';
+import {
+  create,
+  all,
+  combinations,
+  xgcd,
+  xgcdDependencies,
+  combinationsDependencies,
+} from '../src/index.js';
 
 interface Loose {
   evaluate(expr: string): unknown;
@@ -61,7 +68,7 @@ afterEach(() => {
 describe('#1164 integer functions of BigNumbers through the expression language', () => {
   it('#1164 xgcd of the issue operands is exact on both paths', () => {
     const e = `xgcd(bignumber("${X}"), bignumber("${Y}"))`;
-    for (const res of [ev(e), toArr(pv(e))]) {
+    for (const res of [toArr(ev(e)), toArr(pv(e))]) {
       expect((res as BigNumber[]).map(big)).toEqual([
         '3',
         '5330323120803',
@@ -83,11 +90,11 @@ describe('#1164 integer functions of BigNumbers through the expression language'
     expect(ev('isPrime(bignumber("3317044064679887385961981"))')).toBe(false);
   });
 
-  it('#1164 xgcd(8, 12) is a matrix on the parse path and an Array in evaluate', () => {
+  it('#1164 xgcd(8, 12) uses the configured matrix container on both paths', () => {
     const parsed = pv('xgcd(8, 12)') as { isMatrix?: boolean; toArray(): number[] };
     expect(parsed.isMatrix).toBe(true);
     expect(parsed.toArray()).toEqual([4, -1, 1]);
-    expect(ev('xgcd(8, 12)')).toEqual([4, -1, 1]);
+    expect(ev('xgcd(8, 12)')).toMatchObject({ isMatrix: true });
   });
 
   it('#1164 invmod keeps its values after xgcd moved to one implementation', () => {
@@ -414,18 +421,46 @@ describe('#1093 parse and evaluate run one implementation of the shared function
   }
 
   it('#1093 the accepted changes of the parse path (named in the pull request)', () => {
-    // Correctly rounded values in place of the last-digit errors of the mathjs loop.
-    expect(pv('combinations(200, 100)')).toBe(9.054851465610328e58);
-    expect(pv('combinations(200, 171)')).toBe(7.187398333721542e34);
+    expect(pv('combinations(200, 100)')).toBe(oracle.combinations(200, 100));
+    expect(pv('combinations(200, 171)')).toBe(oracle.combinations(200, 171));
     // A value in place of the RangeError of the factory.
     expect(pv('combinations(1e20, 2)')).toBe(5e39);
     expect(pv('permutations(1e20, 2)')).toBe(1e40);
     expect(pv('permutations(2^53, 2)')).toBe(8.112963841460667e31);
-    // A coefficient above 2^53 is not a safe integer: a RangeError in place of a wrong triple
-    // (the factory and mathjs give [3, 0, 1]).
-    expect(() => pv('xgcd(2^60, 3)')).toThrow(RangeError);
-    // A Fraction is read as a number (mathjs throws a conversion error; the factory gave a BigNumber).
-    expect(pv('combinations(fraction(5), fraction(2))')).toBe(10);
+    expect(toArr(pv('xgcd(2^60, 3)'))).toEqual(toArr(oracle.xgcd(2 ** 60, 3)));
+    expect(() => pv('combinations(fraction(5), fraction(2))')).toThrow(
+      'Cannot implicitly convert a Fraction'
+    );
     expect(() => pv('permutations(fraction(5))')).toThrow('Cannot implicitly convert a Fraction');
   });
+});
+
+it('matches mathjs counting and Bezout results across named, configured, and selected calls', () => {
+  const selected = create({ xgcdDependencies, combinationsDependencies }, { matrix: 'Array' });
+  const configured = create(all, { matrix: 'Array' });
+  for (const [n, k] of [
+    [200, 100],
+    [200, 171],
+    [400, 190],
+    [2000, 1000],
+  ] as const) {
+    for (const count of [combinations, configured.combinations, selected.combinations]) {
+      expect(count(n, k)).toBe(oracle.combinations(n, k));
+    }
+  }
+  expect(toArr(xgcd(2 ** 60, 3))).toEqual(toArr(oracle.xgcd(2 ** 60, 3)));
+  for (const math of [configured, selected]) {
+    expect(math.xgcd(2 ** 60, 3)).toEqual(toArr(oracle.xgcd(2 ** 60, 3)));
+    for (const [a, b] of [
+      [12, -8],
+      [-12, 8],
+      [-7, 0],
+      [0, 0],
+    ] as const) {
+      const expected = oracle.xgcd(oracle.bignumber(a), oracle.bignumber(b));
+      expect(
+        (math.xgcd(configured.bignumber(a), configured.bignumber(b)) as unknown[]).map(String)
+      ).toEqual((toArr(expected) as unknown[]).map(String));
+    }
+  }
 });
