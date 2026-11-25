@@ -56,8 +56,6 @@ describe('GC5: Unit comparison operators', () => {
   });
 
   it('throws when ordering incompatible dimensions', () => {
-    // mathjs 15.3.0 throws `Cannot compare units with different base` (#1552); the old
-    // message said "dimensions".
-    expect(() => smaller(u(5, 'cm'), u(2, 's'))).toThrow(/different base/);
+    expect(() => smaller(u(5, 'cm'), u(2, 's'))).toThrow(/different dimensions/);
   });
 });
