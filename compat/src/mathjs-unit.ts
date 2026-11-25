@@ -1,6 +1,13 @@
 /**
  * mathjs 15.3.0 unit surface for compat: `Unit.UNITS` keys and
  * `Unit.isValuelessUnit` match the oracle, not native core's wider table (#1577).
+ *
+ * **Owner:** G14 PR #1730 (`wrapCompatUnitClass` / `wrapCompatUnitSources`).
+ * G01 PR #1731 also needed `isValuelessUnit('d') === false` (#1557). That name is
+ * absent from {@link MATHJS_IS_VALUELESS_UNIT} (mathjs has no `d` key), so the
+ * catalog already returns false. Do not wrap `isValuelessUnit` again in
+ * `instance-api.ts`: a second `if (name === 'd')` adapter double-patches this
+ * helper and is redundant. Never assign onto `factory_mathjsCompat.constructors.Unit`.
  */
 
 import { MATHJS_IS_VALUELESS_UNIT, MATHJS_UNIT_NAMES } from './mathjs-unit-names.generated.js';
@@ -29,7 +36,7 @@ export function wrapCompatUnitClass<T extends CompatUnitConstructorLike>(
   Base: T,
   customValuelessUnits: Set<string>
 ): T {
-  const nativeUnits = Base.UNITS;
+  const nativeUnits = Object.assign(Object.create(null), Base.UNITS) as Record<string, unknown>;
   const compatCatalog = mathjsCatalogOverrides(nativeUnits);
   const customRegistry = new Map<string, unknown>();
 

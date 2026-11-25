@@ -486,15 +486,37 @@ describe('G14: creating a compat instance must not mutate native', () => {
   it('does not rewrite native Unit.UNITS or isValuelessUnit', () => {
     const NativeUnit = factory_mathjsCompat.constructors.Unit;
     const keysBefore = Object.keys(NativeUnit.UNITS).sort();
+    const unitsObjectBefore = NativeUnit.UNITS;
+    const isValuelessBefore = NativeUnit.isValuelessUnit;
+    const protoBefore = NativeUnit.prototype;
     const cBefore = NativeUnit.isValuelessUnit('c');
+    const dBefore = NativeUnit.isValuelessUnit('d');
     const tonBefore = NativeUnit.isValuelessUnit('ton');
     const math = createCompat(compatAll);
+    expect(NativeUnit.UNITS).toBe(unitsObjectBefore);
+    expect(NativeUnit.isValuelessUnit).toBe(isValuelessBefore);
+    expect(NativeUnit.prototype).toBe(protoBefore);
     expect(Object.keys(NativeUnit.UNITS).sort()).toEqual(keysBefore);
     expect(NativeUnit.isValuelessUnit('c')).toBe(cBefore);
+    expect(NativeUnit.isValuelessUnit('d')).toBe(dBefore);
     expect(NativeUnit.isValuelessUnit('ton')).toBe(tonBefore);
     expect(math.Unit).not.toBe(NativeUnit);
+    expect(math.Unit.prototype).not.toBe(NativeUnit.prototype);
+    expect(math.Unit.isValuelessUnit).not.toBe(NativeUnit.isValuelessUnit);
     expect(math.Unit.isValuelessUnit('c')).toBe(false);
+    expect(math.Unit.isValuelessUnit('d')).toBe(false);
+    expect(oracle.Unit.isValuelessUnit('d')).toBe(false);
     expect(NativeUnit.isValuelessUnit('c')).toBe(true);
+    expect(NativeUnit.isValuelessUnit('d')).toBe(true);
+  });
+
+  it('does not leak a UNITS write on the compat instance into native', () => {
+    const NativeUnit = factory_mathjsCompat.constructors.Unit;
+    expect(Object.hasOwn(NativeUnit.UNITS, '__g14_probe__')).toBe(false);
+    const math = createCompat(compatAll);
+    math.Unit.UNITS.__g14_probe__ = { probe: true };
+    expect(Object.hasOwn(NativeUnit.UNITS, '__g14_probe__')).toBe(false);
+    expect(math.Unit.UNITS.__g14_probe__).toEqual({ probe: true });
   });
 });
 
