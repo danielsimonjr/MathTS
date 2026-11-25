@@ -124,19 +124,19 @@ describe('sparse structural zeros of BigNumber, Fraction and Unit (#1582)', () =
 
   it('creating a compat instance does not change native number-sparse results', async () => {
     const { sparse: nativeSparse } = await import('@danielsimonjr/mathts-functions');
-    const before = (
+    const before = densityOf(
       nativeSparse([
         [3, 0],
         [5, 0],
-      ]) as { density(): number }
-    ).density();
+      ])
+    );
     createCompat(compatAll, {});
-    const after = (
+    const after = densityOf(
       nativeSparse([
         [3, 0],
         [5, 0],
-      ]) as { density(): number }
-    ).density();
+      ])
+    );
     expect(before).toBe(0.5);
     expect(after).toBe(0.5);
   });
