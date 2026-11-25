@@ -46,10 +46,16 @@ function makeFixture() {
     writeFileSync(join(root, 'tools', 'test', script), 'process.exit(0);\n');
   }
 
-  // `bun run <step>` is spawned by name, so a PATH entry shadows the real Bun.
-  const bun = join(root, 'stubbin', 'bun');
+  // `bun run <step>` is spawned by name, so a PATH entry shadows the real Bun. `node` gets a
+  // shim that execs the real Node, so the fixture controls the WHOLE PATH and `repo-tools`
+  // is absent no matter what the host machine has installed globally.
+  const stubbin = join(root, 'stubbin');
+  const bun = join(stubbin, 'bun');
   writeFileSync(bun, '#!/bin/sh\nexit 0\n');
   chmodSync(bun, 0o755);
+  const node = join(stubbin, 'node');
+  writeFileSync(node, `#!/bin/sh\nexec "${process.execPath}" "$@"\n`);
+  chmodSync(node, 0o755);
 
   return { root, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
@@ -60,8 +66,9 @@ test('prepush does not claim every gate passed when a gate was skipped', () => {
     const result = spawnSync(process.execPath, [join(root, 'tools', 'ci', 'prepush.mjs')], {
       cwd: root,
       encoding: 'utf8',
-      // `stubbin` first (the stub `bun`), then the real PATH for `node`.
-      env: { ...process.env, PATH: `${join(root, 'stubbin')}:${process.env.PATH ?? ''}` },
+      // The fixture's stubbin holds everything the script spawns by name, so the real
+      // PATH is dropped entirely and `repo-tools` cannot leak in from the host.
+      env: { ...process.env, PATH: join(root, 'stubbin') },
     });
     const out = `${result.stdout ?? ''}${result.stderr ?? ''}`;
 
