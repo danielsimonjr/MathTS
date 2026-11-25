@@ -1,5 +1,11 @@
 # @danielsimonjr/mathts-core
 
+## 0.30.2
+
+### Patch Changes
+
+- ba839d1: Support fraction negation and exact ratio, mixed-number, and continued-fraction representations through the MathJS instance methods.
+
 ## 0.30.1
 
 ### Patch Changes
