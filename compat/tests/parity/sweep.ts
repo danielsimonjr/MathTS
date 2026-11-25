@@ -187,12 +187,17 @@ export function sweepPool(): { labels: Set<string> } {
     const fnO = oracleRecord[name] as (...args: unknown[]) => unknown;
     const fnC = compatRecord[name] as (...args: unknown[]) => unknown;
     if (typeof fnO !== 'function' || typeof fnC !== 'function') continue;
-    const arity = Math.max(fnO.length ?? 0, 1);
-    const maxWidth = Math.min(arity <= 1 ? 1 : 8, oraclePool.length);
+    const declared = fnO.length ?? 0;
+    const widths = new Set<number>([Math.max(declared, 1)]);
+    if (declared > 1) widths.add(1);
     for (let a = 0; a < oraclePool.length; a++) {
-      const calls: unknown[][] = arity <= 1 ? [[oraclePool[a]]] : [];
-      if (arity > 1) {
-        for (let b = 0; b < maxWidth; b++) calls.push([oraclePool[a], oraclePool[b]]);
+      const calls: unknown[][] = [];
+      for (const width of widths) {
+        const maxWidth = Math.min(width <= 1 ? 1 : 8, oraclePool.length);
+        if (width <= 1) calls.push([oraclePool[a]]);
+        else {
+          for (let b = 0; b < maxWidth; b++) calls.push([oraclePool[a], oraclePool[b]]);
+        }
       }
       for (const args of calls) {
         if (ALLOCATING.has(name) && args.some((x) => typeof x === 'number' && Math.abs(x) > 1000)) {

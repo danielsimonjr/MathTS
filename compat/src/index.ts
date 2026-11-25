@@ -21,6 +21,11 @@ import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims } from './shims.js';
+import {
+  createMathjsRange,
+  createMathjsSymbolicEqual,
+  createMathjsZeta,
+} from './mathjs-parity-1585.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -35,6 +40,32 @@ import type {
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+
+const compatParityTyped = mathFunctions.factory_mathjsCompat.createCompatTyped();
+const parityIsBounded = Reflect.get(mathFunctions, 'isBounded') as (x: unknown) => boolean;
+const parityIsNegative = Reflect.get(mathFunctions, 'isNegative') as (x: unknown) => boolean;
+
+function mathjsZetaDeps(config: () => MathJSConfig) {
+  return {
+    typed: compatParityTyped,
+    config,
+    multiply: mathFunctions.multiply as never,
+    pow: mathFunctions.pow as never,
+    divide: mathFunctions.divide as never,
+    factorial: mathFunctions.factorial as never,
+    equal: mathFunctions.equal,
+    smallerEq: mathFunctions.smallerEq,
+    isBounded: parityIsBounded,
+    isNegative: parityIsNegative,
+    gamma: mathFunctions.gamma as never,
+    sin: mathFunctions.sin as never,
+    subtract: mathFunctions.subtract as never,
+    add: mathFunctions.add as never,
+    Complex: instanceSymbols.Complex,
+    BigNumber: instanceSymbols.BigNumber,
+    pi: instanceSymbols.PI,
+  };
+}
 
 // =============================================================================
 // Configuration
@@ -607,6 +638,12 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    zeta: createMathjsZeta(mathjsZetaDeps(() => currentConfig)),
+    symbolicEqual: createMathjsSymbolicEqual({ typed: compatParityTyped }),
+    range: createMathjsRange({
+      nativeRange: mathFunctions.range as (...args: unknown[]) => unknown,
+      config: () => currentConfig,
+    }),
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
@@ -906,6 +943,12 @@ const namedPermutations = mathFunctions.factory_mathjsCompat
 const namedLgamma = mathFunctions.factory_mathjsCompat.lgamma as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.lgamma>;
+const namedZeta = createMathjsZeta(mathjsZetaDeps(() => mathFunctions.config() as MathJSConfig));
+const namedSymbolicEqual = createMathjsSymbolicEqual({ typed: compatParityTyped });
+const namedMathjsRange = createMathjsRange({
+  nativeRange: mathFunctions.range as (...args: unknown[]) => unknown,
+  config: () => mathFunctions.config() as MathJSConfig,
+});
 const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.toBest>;
@@ -920,6 +963,9 @@ export {
   namedCombinationsWithRep as combinationsWithRep,
   namedXgcd as xgcd,
   namedLgamma as lgamma,
+  namedZeta as zeta,
+  namedSymbolicEqual as symbolicEqual,
+  namedMathjsRange as range,
 };
 
 /** Embedded documentation for names in the MathJS compatibility surface. */
@@ -1066,7 +1112,6 @@ export {
   prod,
   qr,
   quantileSeq,
-  range,
   rationalize,
   reshape,
   resize,
@@ -1106,7 +1151,6 @@ export {
   subset,
   subtractScalar,
   sylvester,
-  symbolicEqual,
   factory_tanh as tanh,
   to,
   trace,
@@ -1117,7 +1161,6 @@ export {
   usolve,
   usolveAll,
   xor,
-  zeta,
   zpk2tf,
 } from '@danielsimonjr/mathts-functions';
 

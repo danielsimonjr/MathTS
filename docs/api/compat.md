@@ -334,42 +334,43 @@ async function parallelSum(data) {
 
 See [Migration Guide](../migration/guide.md) for complete details.
 
-## Intentional divergences
+## Native MathTS differences (compat matches mathjs)
 
-These are cases where `@danielsimonjr/mathts-compat` is deliberately **more
-accurate** than mathjs 15.3.0. They are pinned by
-`compat/tests/parity/g18-intentional.test.ts` and registered in the parity
-harness (`compat/tests/parity/intentional.ts`); copying the mathjs value would
-be a regression. Each entry quotes the mathjs 15.3.0 value it declines to match.
+`create(all)` on `@danielsimonjr/mathts-compat` matches mathjs 15.3.0 for
+`zeta`, `symbolicEqual`, and `range` (including mathjs quirks), via adapters in
+`compat/src/mathjs-parity-1585.ts`. Importing the same names from
+`@danielsimonjr/mathts-functions` keeps the more accurate MathTS behavior.
+Pinned by `compat/tests/parity/g18-parity.test.ts`. (#1585)
 
 ### `zeta(-3)`
 
-Compat returns `0.0083333333333335`, which is the exact value `1/120` to full
-double precision. mathjs 15.3.0 returns `0.0083333345772996`, wrong in the 8th
-significant digit. (#1585)
+Compat matches mathjs `0.0083333345772996`. Native MathTS returns
+`0.0083333333333335`, much closer to the exact value `1/120`.
 
 ### `zeta(complex(1, 2))`
 
-Compat returns `0.59816556976239 - 0.35185474521785i`, finite. mathjs 15.3.0
-returns `NaN + NaNi` for complex arguments in the critical strip. (#1585)
+Compat matches mathjs `NaN + NaNi` on the line `Re(s) = 1`. Native MathTS
+returns a finite value on the critical strip (for example `zeta(0.5 + 2i)` is
+finite in both libraries; only `zeta(1 + 2i)` is NaN in mathjs).
 
 ### `zeta(bignumber(4))`
 
-Compat returns `1.0823232337111`; π⁴/90 is `1.082323233711138…`, so the relative
-error is about 3e-14. mathjs 15.3.0 returns `1.0823232498396` (relative error
-about 1.5e-8). (#1585)
+Compat matches mathjs `1.0823232498396`. Native MathTS returns
+`1.0823232337111`, closer to π⁴/90.
 
-### `symbolicEqual` under `number: 'BigNumber'`
+### `symbolicEqual`
 
-Compat `evaluate('symbolicEqual("x*y", "y*x")')` returns `true`: the two
-expressions are algebraically identical. mathjs 15.3.0 in BigNumber mode returns
-`false`. (#1585)
+Compat uses mathjs’s simplify-only equality (no exact-polynomial shortcuts).
+Native MathTS also proves many polynomial identities that mathjs rejects (for
+example `(x+y)^2` versus `x^2+2*x*y+y^2` in default number mode). In BigNumber
+config, compat matches mathjs’s `false` for `symbolicEqual("x*y", "y*x")`.
 
-### `range("4:10")` under `number: 'BigNumber'`
+### `range`
 
-Compat returns a matrix that includes the end value, `[4, 5, 6, 7, 8, 9, 10]`,
-matching mathjs's own number mode. mathjs 15.3.0 in BigNumber mode drops the
-inclusive end and returns `[4, 5, 6, 7, 8, 9]`. (#1585)
+Under `number: 'BigNumber'`, compat matches mathjs: `range('4:10')` and
+`evaluate('range("4:10")')` return `[4,…,9]`, and the string form ignores
+`includeEnd` (mathjs passes it to `_out`, not `_range`). Native MathTS range
+honours `includeEnd` on those paths.
 
 ## Complete export index
 

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Documented intentional divergences from mathjs for `zeta`, `symbolicEqual`, and `range` (#1585):** compat keeps the more accurate values (`zeta(-3)` = 1/120, finite complex `zeta`, BigNumber `zeta(4)` closer to π⁴/90, `symbolicEqual('x*y','y*x')` true, BigNumber `range('4:10')` including 10); each is documented under `Intentional divergences` in `docs/api/compat.md` and pinned against the mathjs 15.3.0 value in `compat/tests/parity/g18-intentional.test.ts`. No source function changed.
+- **Compat matches mathjs on `zeta`, `symbolicEqual`, and `range` (#1585):** `create(all)` uses mathjs 15.3.0 adapters in `compat/src/mathjs-parity-1585.ts` (mathjs zeta quirks, simplify-only `symbolicEqual`, BigNumber `range` string/`includeEnd` behavior). Native `@danielsimonjr/mathts-functions` stays more accurate; `docs/api/compat.md` documents the split. Parity is pinned in `compat/tests/parity/g18-parity.test.ts` and `compat/tests/parity/adversarial-g18.test.ts`; the pool sweep probes unary `zeta`.
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
 
@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **mathjs 15.3.0 behavior parity (#1563, #1564, #1565, #1566):** Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`.
 
 ### Fixed
+
+- **`zeta(bigint)` returned a BigNumber in default number config (#1585):** with no `bigint` signature, typed-function conversion sent safe integers to the BigNumber path, so `zeta(2n)` was a `BigNumber` while `zeta(2)` was a number. Root cause: missing `bigint` dispatch. `functions/src/special/zeta.ts` now calls `zetaNumber(bigintToNumber(s))`; out-of-range bigints throw as elsewhere.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 

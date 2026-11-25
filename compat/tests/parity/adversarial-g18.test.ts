@@ -1,0 +1,112 @@
+import { readFileSync } from 'node:fs';
+import { describe, it, expect } from 'vitest';
+import { create as createCompat, all as compatAll } from '@danielsimonjr/mathts-compat';
+import { create, all } from 'mathjs';
+import { zeta as nativeZeta, bignumber as nativeBignumber } from '@danielsimonjr/mathts-functions';
+import { INTENTIONAL } from './intentional.js';
+import { expectSame } from './differential.js';
+import { show } from './oracle.js';
+
+/**
+ * Adversarial probes for G18 / #1585 under the Nov 25 policy: compat must match
+ * mathjs 15.3.0; native MathTS keeps higher accuracy where it diverges.
+ */
+
+const arr = (v: unknown): string =>
+  JSON.stringify((v as { toArray(): unknown[] }).toArray().map(String));
+
+describe('g18 adversarial: zeta and symbolicEqual parity', () => {
+  it('F1: docs do not claim false "full double precision" for zeta(-3) in compat', () => {
+    const doc = readFileSync(new URL('../../../docs/api/compat.md', import.meta.url), 'utf8');
+    expect(doc).not.toMatch(/exact value `1\/120` to full\s+double precision/);
+    const L = createCompat(compatAll, {});
+    const O = create(all, {});
+    expect(show(L as never, L.zeta(-3))).toBe(show(O as never, O.zeta(-3)));
+  });
+
+  it('F2: pool sweep probes unary zeta (harness fix; no full sweep)', () => {
+    const O = create(all, {});
+    const L = createCompat(compatAll, {});
+    expect(O.zeta.length).toBe(2);
+    expect(show(L as never, L.zeta(-3))).toBe(show(O as never, O.zeta(-3)));
+    const sweepSrc = readFileSync(new URL('./sweep.ts', import.meta.url), 'utf8');
+    expect(sweepSrc).toMatch(/if \(declared > 1\) widths\.add\(1\)/);
+  });
+
+  it('F3: symbolicEqual matches mathjs on polynomial identities (number config)', () => {
+    expectSame('F3 poly', {}, (lib) => lib.evaluate('symbolicEqual("(x+y)^2", "x^2+2*x*y+y^2")'));
+    expectSame('F3 poly2', {}, (lib) => lib.evaluate('symbolicEqual("x^2-y^2", "(x-y)*(x+y)")'));
+  });
+
+  it('F4: zeta(Fraction) throws on compat like mathjs', () => {
+    const L = createCompat(compatAll, {});
+    const O = create(all, {});
+    expect(() => O.zeta(O.fraction(4, 1) as never)).toThrow();
+    expect(() => L.zeta(L.fraction(4, 1) as never)).toThrow();
+  });
+
+  it('F5: zeta(bigint) matches mathjs type and value', () => {
+    expectSame('F5 zeta 2n', {}, (lib) => lib.zeta(2n));
+  });
+
+  it('F6: zeta(NaN) and zeta(-2) match mathjs in compat', () => {
+    expectSame('F6 NaN', {}, (lib) => lib.zeta(NaN));
+    expectSame('F6 -2', {}, (lib) => lib.zeta(-2));
+  });
+
+  it('F9: docs describe Re(s)==1 NaN, not "critical strip" falsehood', () => {
+    const strip = create(all, {}).zeta(create(all, {}).complex(0.5, 2)) as {
+      re: number;
+      im: number;
+    };
+    expect(Number.isNaN(strip.re)).toBe(false);
+    const doc = readFileSync(new URL('../../../docs/api/compat.md', import.meta.url), 'utf8');
+    expect(doc).not.toMatch(/NaN \+ NaNi`? for complex arguments in the critical strip/);
+    expect(doc).toMatch(/Re\(s\) = 1|line Re\(s\) = 1/i);
+  });
+});
+
+describe('g18 adversarial: range and bookkeeping', () => {
+  const B = createCompat(compatAll, { number: 'BigNumber' });
+  const OB = create(all, { number: 'BigNumber' });
+
+  // F8 (finding): native `functions` zeta(bignumber(4)) is closer to π⁴/90 than mathjs; compat
+  // intentionally matches mathjs. Documented in docs/api/compat.md — not a compat parity test.
+  it('F8: native accuracy finding is documented (not asserted here)', () => {
+    const piRef = 1.082323233711138;
+    const nativeErr = Math.abs(Number(nativeZeta(nativeBignumber(4)).toString()) - piRef);
+    const oracleErr = Math.abs(
+      (OB.zeta(OB.bignumber(4)) as { toNumber(): number }).toNumber() - piRef
+    );
+    expect(nativeErr < oracleErr).toBe(true);
+    const doc = readFileSync(new URL('../../../docs/api/compat.md', import.meta.url), 'utf8');
+    expect(doc).toMatch(/pi\^4\/90|π⁴\/90/);
+  });
+
+  it('F10: BigNumber range function excludes end like mathjs (not native inclusive mistake)', () => {
+    expect(arr(B.range('4:10'))).toBe(arr(OB.range('4:10')));
+    expect(arr(B.range('4:10'))).toBe(JSON.stringify(['4', '5', '6', '7', '8', '9']));
+  });
+
+  it('F10b: explicit includeEnd on BigNumber string range matches mathjs bug', () => {
+    expect(arr(B.range('4:10', true))).toBe(arr(OB.range('4:10', true)));
+  });
+
+  it('F7: known-gaps drops #1585 zeta/symbolicEqual doc examples', () => {
+    const gaps = JSON.parse(
+      readFileSync(new URL('./known-gaps.json', import.meta.url), 'utf8')
+    ) as Record<string, string[]>;
+    const flat = new Set(Object.values(gaps).flat());
+    const removed = [
+      '{} zeta(4)',
+      '{"number":"BigNumber"} zeta(4)',
+      '{"matrix":"Array"} zeta(4)',
+      '{} zeta(0.2)',
+      '{"number":"BigNumber"} symbolicEqual("x*y","y*x")',
+    ];
+    for (const label of removed) {
+      expect(flat.has(label)).toBe(false);
+    }
+    expect(INTENTIONAL['1585'] ?? []).toHaveLength(0);
+  });
+});
