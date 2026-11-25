@@ -1,0 +1,1628 @@
+ref_name,area,description,source
+linalg.LinAlgError,linalg,Generic Python-exception-derived object raised by linalg functions.,introspection: scipy.linalg.__all__
+linalg.LinAlgWarning,linalg,The warning emitted when a linear algebra related operation is close,introspection: scipy.linalg.__all__
+linalg.bandwidth,linalg,Return the lower and upper bandwidth of a numeric array.,introspection: scipy.linalg.__all__
+linalg.block_diag,linalg,Create a block diagonal array from provided arrays.,introspection: scipy.linalg.__all__
+linalg.cdf2rdf,linalg,Complex diagonal form to real diagonal block form.,introspection: scipy.linalg.__all__
+linalg.cho_factor,linalg,"Compute the Cholesky decomposition of a matrix, to use in cho_solve.",introspection: scipy.linalg.__all__
+linalg.cho_solve,linalg,"Solve the linear equations A x = b, given the Cholesky factorization of A.",introspection: scipy.linalg.__all__
+linalg.cho_solve_banded,linalg,"Solve the linear equations ``A x = b``, given the Cholesky factorization of",introspection: scipy.linalg.__all__
+linalg.cholesky,linalg,Compute the Cholesky decomposition of a matrix.,introspection: scipy.linalg.__all__
+linalg.cholesky_banded,linalg,Cholesky decompose a banded Hermitian positive-definite matrix.,introspection: scipy.linalg.__all__
+linalg.circulant,linalg,Construct a circulant matrix.,introspection: scipy.linalg.__all__
+linalg.clarkson_woodruff_transform,linalg,Applies a Clarkson-Woodruff Transform/sketch to the input matrix.,introspection: scipy.linalg.__all__
+linalg.companion,linalg,Create a companion matrix.,introspection: scipy.linalg.__all__
+linalg.convolution_matrix,linalg,Construct a convolution matrix.,introspection: scipy.linalg.__all__
+linalg.coshm,linalg,Compute the hyperbolic matrix cosine.,introspection: scipy.linalg.__all__
+linalg.cosm,linalg,Compute the matrix cosine.,introspection: scipy.linalg.__all__
+linalg.cossin,linalg,Compute the cosine-sine (CS) decomposition of an orthogonal/unitary matrix.,introspection: scipy.linalg.__all__
+linalg.det,linalg,Compute the determinant of a matrix.,introspection: scipy.linalg.__all__
+linalg.dft,linalg,Discrete Fourier transform matrix.,introspection: scipy.linalg.__all__
+linalg.diagsvd,linalg,"Construct the sigma matrix in SVD from singular values and size M, N.",introspection: scipy.linalg.__all__
+linalg.eig,linalg,Solve an ordinary or generalized eigenvalue problem of a square matrix.,introspection: scipy.linalg.__all__
+linalg.eig_banded,linalg,Solve real symmetric or complex Hermitian band matrix eigenvalue problem.,introspection: scipy.linalg.__all__
+linalg.eigh,linalg,Solve a standard or generalized eigenvalue problem for a complex,introspection: scipy.linalg.__all__
+linalg.eigh_tridiagonal,linalg,Solve eigenvalue problem for a real symmetric tridiagonal matrix.,introspection: scipy.linalg.__all__
+linalg.eigvals,linalg,Compute eigenvalues from an ordinary or generalized eigenvalue problem.,introspection: scipy.linalg.__all__
+linalg.eigvals_banded,linalg,Solve real symmetric or complex Hermitian band matrix eigenvalue problem.,introspection: scipy.linalg.__all__
+linalg.eigvalsh,linalg,Solves a standard or generalized eigenvalue problem for a complex,introspection: scipy.linalg.__all__
+linalg.eigvalsh_tridiagonal,linalg,Solve eigenvalue problem for a real symmetric tridiagonal matrix.,introspection: scipy.linalg.__all__
+linalg.expm,linalg,Compute the matrix exponential of an array.,introspection: scipy.linalg.__all__
+linalg.expm_cond,linalg,Relative condition number of the matrix exponential in the Frobenius norm.,introspection: scipy.linalg.__all__
+linalg.expm_frechet,linalg,Frechet derivative of the matrix exponential of A in the direction E.,introspection: scipy.linalg.__all__
+linalg.fiedler,linalg,Returns a symmetric Fiedler matrix.,introspection: scipy.linalg.__all__
+linalg.fiedler_companion,linalg,Returns a Fiedler companion matrix.,introspection: scipy.linalg.__all__
+linalg.find_best_blas_type,linalg,Find best-matching BLAS/LAPACK type.,introspection: scipy.linalg.__all__
+linalg.fractional_matrix_power,linalg,Compute the fractional power of a matrix.,introspection: scipy.linalg.__all__
+linalg.funm,linalg,Evaluate a matrix function specified by a callable.,introspection: scipy.linalg.__all__
+linalg.get_blas_funcs,linalg,Return available BLAS function objects from names.,introspection: scipy.linalg.__all__
+linalg.get_lapack_funcs,linalg,Return available LAPACK function objects from names.,introspection: scipy.linalg.__all__
+linalg.hadamard,linalg,Construct a Hadamard matrix.,introspection: scipy.linalg.__all__
+linalg.hankel,linalg,Construct a Hankel matrix.,introspection: scipy.linalg.__all__
+linalg.helmert,linalg,Create a Helmert matrix of order `n`.,introspection: scipy.linalg.__all__
+linalg.hessenberg,linalg,Compute Hessenberg form of a matrix.,introspection: scipy.linalg.__all__
+linalg.hilbert,linalg,Create a Hilbert matrix of order `n`.,introspection: scipy.linalg.__all__
+linalg.inv,linalg,Compute the inverse of a matrix.,introspection: scipy.linalg.__all__
+linalg.invhilbert,linalg,Compute the inverse of the Hilbert matrix of order `n`.,introspection: scipy.linalg.__all__
+linalg.invpascal,linalg,Returns the inverse of the n x n Pascal matrix.,introspection: scipy.linalg.__all__
+linalg.ishermitian,linalg,Check if a square 2D array is Hermitian.,introspection: scipy.linalg.__all__
+linalg.issymmetric,linalg,Check if a square 2D array is symmetric.,introspection: scipy.linalg.__all__
+linalg.khatri_rao,linalg,Khatri-Rao product of two matrices.,introspection: scipy.linalg.__all__
+linalg.ldl,linalg,Computes the LDLt or Bunch-Kaufman factorization of a symmetric/,introspection: scipy.linalg.__all__
+linalg.leslie,linalg,Create a Leslie matrix.,introspection: scipy.linalg.__all__
+linalg.logm,linalg,Compute matrix logarithm.,introspection: scipy.linalg.__all__
+linalg.lstsq,linalg,Compute least-squares solution to the equation ``a @ x = b``.,introspection: scipy.linalg.__all__
+linalg.lu,linalg,Compute LU decomposition of a matrix with partial pivoting.,introspection: scipy.linalg.__all__
+linalg.lu_factor,linalg,Compute pivoted LU decomposition of a matrix.,introspection: scipy.linalg.__all__
+linalg.lu_solve,linalg,"Solve an equation system, ``a @ x = b``, given the LU factorization of a.",introspection: scipy.linalg.__all__
+linalg.matmul_toeplitz,linalg,Efficient Toeplitz Matrix-Matrix Multiplication using FFT.,introspection: scipy.linalg.__all__
+linalg.matrix_balance,linalg,Compute a diagonal similarity transformation for row/column balancing.,introspection: scipy.linalg.__all__
+linalg.norm,linalg,Matrix or vector norm.,introspection: scipy.linalg.__all__
+linalg.null_space,linalg,Construct an orthonormal basis for the null space of A using SVD.,introspection: scipy.linalg.__all__
+linalg.ordqz,linalg,QZ decomposition for a pair of matrices with reordering.,introspection: scipy.linalg.__all__
+linalg.orth,linalg,Construct an orthonormal basis for the range of A using SVD.,introspection: scipy.linalg.__all__
+linalg.orthogonal_procrustes,linalg,Compute the matrix solution of the orthogonal (or unitary) Procrustes problem.,introspection: scipy.linalg.__all__
+linalg.pascal,linalg,Returns the n x n Pascal matrix.,introspection: scipy.linalg.__all__
+linalg.pinv,linalg,Compute the (Moore-Penrose) pseudo-inverse of a matrix.,introspection: scipy.linalg.__all__
+linalg.pinvh,linalg,Compute the (Moore-Penrose) pseudo-inverse of a Hermitian matrix.,introspection: scipy.linalg.__all__
+linalg.polar,linalg,Compute the polar decomposition.,introspection: scipy.linalg.__all__
+linalg.qr,linalg,Compute QR decomposition of a matrix.,introspection: scipy.linalg.__all__
+linalg.qr_delete,linalg,QR downdate on row or column deletions.,introspection: scipy.linalg.__all__
+linalg.qr_insert,linalg,QR update on row or column insertions.,introspection: scipy.linalg.__all__
+linalg.qr_multiply,linalg,Calculate the QR decomposition and multiply Q with a matrix.,introspection: scipy.linalg.__all__
+linalg.qr_update,linalg,Rank-k QR update.,introspection: scipy.linalg.__all__
+linalg.qz,linalg,QZ decomposition for generalized eigenvalues of a pair of matrices.,introspection: scipy.linalg.__all__
+linalg.rq,linalg,Compute RQ decomposition of a matrix.,introspection: scipy.linalg.__all__
+linalg.rsf2csf,linalg,Convert real Schur form to complex Schur form.,introspection: scipy.linalg.__all__
+linalg.schur,linalg,Compute Schur decomposition of a matrix.,introspection: scipy.linalg.__all__
+linalg.signm,linalg,Matrix sign function.,introspection: scipy.linalg.__all__
+linalg.sinhm,linalg,Compute the hyperbolic matrix sine.,introspection: scipy.linalg.__all__
+linalg.sinm,linalg,Compute the matrix sine.,introspection: scipy.linalg.__all__
+linalg.solve,linalg,"Solve the equation ``a @ x = b`` for  ``x``,",introspection: scipy.linalg.__all__
+linalg.solve_banded,linalg,"Solve the equation ``a @ x = b`` for ``x``, where ``a`` is the banded matrix",introspection: scipy.linalg.__all__
+linalg.solve_circulant,linalg,"Solve the equation ``C @ x = b`` for ``x``, where ``C`` is a",introspection: scipy.linalg.__all__
+linalg.solve_continuous_are,linalg,Solves the continuous-time algebraic Riccati equation (CARE).,introspection: scipy.linalg.__all__
+linalg.solve_discrete_are,linalg,Solves the discrete-time algebraic Riccati equation (DARE).,introspection: scipy.linalg.__all__
+linalg.solve_discrete_lyapunov,linalg,Solves the discrete Lyapunov equation :math:`AXA^H - X + Q = 0`.,introspection: scipy.linalg.__all__
+linalg.solve_sylvester,linalg,Computes a solution (X) to the Sylvester equation :math:`AX + XB = Q`.,introspection: scipy.linalg.__all__
+linalg.solve_toeplitz,linalg,"Solve the equation ``T @ x = b`` for ``x``, where ``T`` is a Toeplitz",introspection: scipy.linalg.__all__
+linalg.solve_triangular,linalg,"Solve the equation ``a @ x = b`` for ``x``, where `a` is a triangular matrix.",introspection: scipy.linalg.__all__
+linalg.solveh_banded,linalg,"Solve the equation ``a @ x = b`` for ``x``,  where ``a`` is the",introspection: scipy.linalg.__all__
+linalg.sqrtm,linalg,"Compute, if exists, the matrix square root.",introspection: scipy.linalg.__all__
+linalg.subspace_angles,linalg,Compute the subspace angles between two matrices.,introspection: scipy.linalg.__all__
+linalg.svd,linalg,Singular Value Decomposition.,introspection: scipy.linalg.__all__
+linalg.svdvals,linalg,Compute singular values of a matrix.,introspection: scipy.linalg.__all__
+linalg.tanhm,linalg,Compute the hyperbolic matrix tangent.,introspection: scipy.linalg.__all__
+linalg.tanm,linalg,Compute the matrix tangent.,introspection: scipy.linalg.__all__
+linalg.toeplitz,linalg,Construct a Toeplitz matrix.,introspection: scipy.linalg.__all__
+linalg.solve_continuous_lyapunov,linalg,Solves the continuous Lyapunov equation :math:`AX + XA^H = Q`.,introspection: scipy.linalg.__all__
+sparse.SparseEfficiencyWarning,sparse,The warning emitted when the operation is,introspection: scipy.sparse.__all__
+sparse.SparseWarning,sparse,General warning for :mod:`scipy.sparse`.,introspection: scipy.sparse.__all__
+sparse.block_array,sparse,Build a sparse array from sparse sub-blocks.,introspection: scipy.sparse.__all__
+sparse.block_diag,sparse,Build a block diagonal sparse matrix or array from provided matrices.,introspection: scipy.sparse.__all__
+sparse.bmat,sparse,Build a sparse array or matrix from sparse sub-blocks.,introspection: scipy.sparse.__all__
+sparse.bsr_array,sparse,Block Sparse Row format sparse array.,introspection: scipy.sparse.__all__
+sparse.bsr_matrix,sparse,Block Sparse Row format sparse matrix.,introspection: scipy.sparse.__all__
+sparse.coo_array,sparse,A sparse array in COOrdinate format.,introspection: scipy.sparse.__all__
+sparse.coo_matrix,sparse,A sparse matrix in COOrdinate format.,introspection: scipy.sparse.__all__
+sparse.csc_array,sparse,Compressed Sparse Column array.,introspection: scipy.sparse.__all__
+sparse.csc_matrix,sparse,Compressed Sparse Column matrix.,introspection: scipy.sparse.__all__
+sparse.csr_array,sparse,Compressed Sparse Row array.,introspection: scipy.sparse.__all__
+sparse.csr_matrix,sparse,Compressed Sparse Row matrix.,introspection: scipy.sparse.__all__
+sparse.dia_array,sparse,Sparse array with DIAgonal storage.,introspection: scipy.sparse.__all__
+sparse.dia_matrix,sparse,Sparse matrix with DIAgonal storage.,introspection: scipy.sparse.__all__
+sparse.diags,sparse,Construct a sparse matrix from diagonals.,introspection: scipy.sparse.__all__
+sparse.diags_array,sparse,Construct a sparse array from diagonals.,introspection: scipy.sparse.__all__
+sparse.dok_array,sparse,Dictionary Of Keys based sparse array.,introspection: scipy.sparse.__all__
+sparse.dok_matrix,sparse,Dictionary Of Keys based sparse matrix.,introspection: scipy.sparse.__all__
+sparse.expand_dims,sparse,Add trivial axes to an array. Shape gets a ``1`` inserted at position `axis`.,introspection: scipy.sparse.__all__
+sparse.eye,sparse,Sparse matrix of chosen shape with ones on the kth diagonal and zeros elsewhere.,introspection: scipy.sparse.__all__
+sparse.eye_array,sparse,Sparse array of chosen shape with ones on the kth diagonal and zeros elsewhere.,introspection: scipy.sparse.__all__
+sparse.find,sparse,Return the indices and values of the nonzero elements of a matrix.,introspection: scipy.sparse.__all__
+sparse.get_index_dtype,sparse,"Based on input (integer) arrays `a`, determine a suitable index data",introspection: scipy.sparse.__all__
+sparse.hstack,sparse,Stack sparse matrices horizontally (column wise).,introspection: scipy.sparse.__all__
+sparse.identity,sparse,Identity matrix in sparse format.,introspection: scipy.sparse.__all__
+sparse.issparse,sparse,Is `x` either sparse array or sparse matrix type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix,sparse,Is `x` of a sparse matrix type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix_bsr,sparse,Is `x` of a bsr_matrix type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix_coo,sparse,Is `x` of coo_matrix type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix_csc,sparse,Is `x` of csc_matrix type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix_csr,sparse,Is `x` of csr_matrix type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix_dia,sparse,Is `x` of dia_matrix type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix_dok,sparse,Is `x` of dok_array type?,introspection: scipy.sparse.__all__
+sparse.isspmatrix_lil,sparse,Is `x` of lil_matrix type?,introspection: scipy.sparse.__all__
+sparse.kron,sparse,Sparse representation of the Kronecker product of `A` and `B`.,introspection: scipy.sparse.__all__
+sparse.kronsum,sparse,Kronecker sum of square sparse matrices `A` and `B`.,introspection: scipy.sparse.__all__
+sparse.lil_array,sparse,Row-based LIst of Lists sparse array.,introspection: scipy.sparse.__all__
+sparse.lil_matrix,sparse,Row-based LIst of Lists sparse matrix.,introspection: scipy.sparse.__all__
+sparse.load_npz,sparse,Load a sparse array/matrix from a file using ``.npz`` format.,introspection: scipy.sparse.__all__
+sparse.matrix_transpose,sparse,Return the matrix transpose of `A`.,introspection: scipy.sparse.__all__
+sparse.permute_dims,sparse,Permute the axes of the sparse array `A` to the order `axes`.,introspection: scipy.sparse.__all__
+sparse.rand,sparse,Generate a sparse matrix of the given shape and density with uniformly,introspection: scipy.sparse.__all__
+sparse.random,sparse,Generate a sparse matrix of the given shape and density with randomly,introspection: scipy.sparse.__all__
+sparse.random_array,sparse,"Return a sparse array of uniformly random numbers in [0, 1).",introspection: scipy.sparse.__all__
+sparse.safely_cast_index_arrays,sparse,Safely cast sparse array indices to `idx_dtype`.,introspection: scipy.sparse.__all__
+sparse.save_npz,sparse,Save a sparse matrix or array to a file using ``.npz`` format.,introspection: scipy.sparse.__all__
+sparse.sparray,sparse,This class provides a base class for all sparse array and matrix classes.,introspection: scipy.sparse.__all__
+sparse.spdiags,sparse,Return a sparse matrix from diagonals.,introspection: scipy.sparse.__all__
+sparse.spmatrix,sparse,This class provides a base class for all sparse matrix classes.,introspection: scipy.sparse.__all__
+sparse.swapaxes,sparse,Interchange two axes of an array.,introspection: scipy.sparse.__all__
+sparse.tril,sparse,Return the lower triangular portion of a sparse array or matrix.,introspection: scipy.sparse.__all__
+sparse.triu,sparse,Return the upper triangular portion of a sparse array or matrix.,introspection: scipy.sparse.__all__
+sparse.vstack,sparse,Stack sparse arrays vertically (row wise).,introspection: scipy.sparse.__all__
+sparse.linalg.ArpackError,sparse.linalg,ARPACK error.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.ArpackNoConvergence,sparse.linalg,ARPACK iteration did not converge.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.LaplacianNd,sparse.linalg,The grid Laplacian in ``N`` dimensions and its eigenvalues/eigenvectors.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.LinearOperator,sparse.linalg,Common interface for performing matrix vector products.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.MatrixRankWarning,sparse.linalg,Warning for exactly singular matrices.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.SuperLU,sparse.linalg,LU factorization of a sparse matrix.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.aslinearoperator,sparse.linalg,Return `A` as a `LinearOperator`.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.bicg,sparse.linalg,Solve ``Ax = b`` with the BIConjugate Gradient method.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.bicgstab,sparse.linalg,Solve ``Ax = b`` with the BIConjugate Gradient STABilized method.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.cg,sparse.linalg,"Solve ``Ax = b`` with the Conjugate Gradient method, for a symmetric,",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.cgs,sparse.linalg,Solve ``Ax = b`` with the Conjugate Gradient Squared method.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.eigs,sparse.linalg,Find k eigenvalues and eigenvectors of the square matrix A.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.eigsh,sparse.linalg,Find k eigenvalues and eigenvectors of the real symmetric square matrix,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.expm,sparse.linalg,Compute the matrix exponential using Pade approximation.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.expm_multiply,sparse.linalg,Compute the action of the matrix exponential of A on B.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.factorized,sparse.linalg,"Return a function for solving a sparse linear system, with A pre-factorized.",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.funm_multiply_krylov,sparse.linalg,A restarted Krylov method for evaluating ``y = f(tA) b`` from [1]_ [2]_.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.gcrotmk,sparse.linalg,"Solve ``Ax = b`` with the flexible GCROT(m,k) algorithm.",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.gmres,sparse.linalg,Solve ``Ax = b`` with the Generalized Minimal RESidual method.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.inv,sparse.linalg,Compute the inverse of a sparse arrays.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.is_sptriangular,sparse.linalg,Returns 2-tuple indicating lower/upper triangular structure for sparse ``A``.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.lgmres,sparse.linalg,Solve ``Ax = b`` with the LGMRES algorithm.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.lobpcg,sparse.linalg,Locally Optimal Block Preconditioned Conjugate Gradient Method (LOBPCG).,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.lsmr,sparse.linalg,Iterative solver for least-squares problems.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.lsqr,sparse.linalg,"Find the least-squares solution to a large, sparse, linear system",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.matrix_power,sparse.linalg,"Raise a square matrix to the integer power, `power`.",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.minres,sparse.linalg,"Solve ``Ax = b`` with the MINimum RESidual method,",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.norm,sparse.linalg,Norm of a sparse matrix.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.onenormest,sparse.linalg,Compute a lower bound of the 1-norm of a sparse array.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.qmr,sparse.linalg,Solve ``Ax = b`` with the Quasi-Minimal Residual method.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.spbandwidth,sparse.linalg,Return the lower and upper bandwidth of a 2D numeric array.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.spilu,sparse.linalg,"Compute an incomplete LU decomposition for a sparse, square matrix.",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.splu,sparse.linalg,"Compute the LU decomposition of a sparse, square matrix.",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.spsolve,sparse.linalg,"Solve the sparse linear system Ax=b, where b may be a vector or a matrix.",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.spsolve_triangular,sparse.linalg,"Solve the equation ``A x = b`` for `x`, assuming A is a triangular matrix.",introspection: scipy.sparse.linalg.__all__
+sparse.linalg.svds,sparse.linalg,Partial singular value decomposition of a sparse matrix.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.tfqmr,sparse.linalg,Solve ``Ax = b`` with the Transpose-Free Quasi-Minimal Residual method.,introspection: scipy.sparse.linalg.__all__
+sparse.linalg.use_solver,sparse.linalg,Select default sparse direct solver to be used.,introspection: scipy.sparse.linalg.__all__
+sparse.csgraph.NegativeCycleError,sparse.csgraph,Negative cycle in graph.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.bellman_ford,sparse.csgraph,"bellman_ford(csgraph, directed=True, indices=None, return_predecessors=False,",introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.breadth_first_order,sparse.csgraph,Return a breadth-first ordering starting with specified node.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.breadth_first_tree,sparse.csgraph,Return the tree generated by a breadth-first search.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.connected_components,sparse.csgraph,"connected_components(csgraph, directed=True, connection='weak',",introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.construct_dist_matrix,sparse.csgraph,Construct distance matrix from a predecessor matrix.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.csgraph_from_dense,sparse.csgraph,Construct a CSR-format sparse graph from a dense matrix.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.csgraph_from_masked,sparse.csgraph,Construct a CSR-format graph from a masked array.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.csgraph_masked_from_dense,sparse.csgraph,"csgraph_masked_from_dense(graph, null_value=0, nan_null=True,",introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.csgraph_to_dense,sparse.csgraph,Convert a sparse graph representation to a dense representation.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.csgraph_to_masked,sparse.csgraph,Convert a sparse graph representation to a masked array representation.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.depth_first_order,sparse.csgraph,Return a depth-first ordering starting with specified node.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.depth_first_tree,sparse.csgraph,Return a tree generated by a depth-first search.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.dijkstra,sparse.csgraph,"dijkstra(csgraph, directed=True, indices=None, return_predecessors=False,",introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.floyd_warshall,sparse.csgraph,"floyd_warshall(csgraph, directed=True, return_predecessors=False,",introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.johnson,sparse.csgraph,"johnson(csgraph, directed=True, indices=None, return_predecessors=False,",introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.laplacian,sparse.csgraph,Return the Laplacian of a directed graph.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.maximum_bipartite_matching,sparse.csgraph,Returns a matching of a bipartite graph whose cardinality is at least that,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.maximum_flow,sparse.csgraph,Maximize the flow between two vertices in a graph.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.min_weight_full_bipartite_matching,sparse.csgraph,Returns the minimum weight full matching of a bipartite graph.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.minimum_spanning_tree,sparse.csgraph,Return a minimum spanning tree of an undirected graph.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.reconstruct_path,sparse.csgraph,Construct a tree from a graph and a predecessor list.,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.reverse_cuthill_mckee,sparse.csgraph,Returns the permutation array that orders a sparse CSR or CSC matrix,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.shortest_path,sparse.csgraph,"shortest_path(csgraph, method='auto', directed=True, return_predecessors=False,",introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.structural_rank,sparse.csgraph,Compute the structural rank of a graph (matrix) with a given,introspection: scipy.sparse.csgraph.__all__
+sparse.csgraph.yen,sparse.csgraph,"yen(csgraph, source, sink, K, *, directed=True, return_predecessors=False,",introspection: scipy.sparse.csgraph.__all__
+optimize.BFGS,optimize,Broyden-Fletcher-Goldfarb-Shanno (BFGS) Hessian update strategy.,introspection: scipy.optimize.__all__
+optimize.Bounds,optimize,Bounds constraint on the variables.,introspection: scipy.optimize.__all__
+optimize.BroydenFirst,optimize,"Find a root of a function, using Broyden's first Jacobian approximation.",introspection: scipy.optimize.__all__
+optimize.HessianUpdateStrategy,optimize,Interface for implementing Hessian update strategies.,introspection: scipy.optimize.__all__
+optimize.InverseJacobian,optimize,A simple wrapper that inverts the Jacobian using the `solve` method.,introspection: scipy.optimize.__all__
+optimize.KrylovJacobian,optimize,"Find a root of a function, using Krylov approximation for inverse Jacobian.",introspection: scipy.optimize.__all__
+optimize.LbfgsInvHessProduct,optimize,Linear operator for the L-BFGS approximate inverse Hessian.,introspection: scipy.optimize.__all__
+optimize.LinearConstraint,optimize,Linear constraint on the variables.,introspection: scipy.optimize.__all__
+optimize.NoConvergence,optimize,Exception raised when nonlinear solver fails to converge within the specified,introspection: scipy.optimize.__all__
+optimize.NonlinearConstraint,optimize,Nonlinear constraint on the variables.,introspection: scipy.optimize.__all__
+optimize.OptimizeResult,optimize,Represents the optimization result.,introspection: scipy.optimize.__all__
+optimize.OptimizeWarning,optimize,General warning for :mod:`scipy.optimize`.,introspection: scipy.optimize.__all__
+optimize.RootResults,optimize,Represents the root finding result.,introspection: scipy.optimize.__all__
+optimize.SR1,optimize,Symmetric-rank-1 Hessian update strategy.,introspection: scipy.optimize.__all__
+optimize.anderson,optimize,"Find a root of a function, using (extended) Anderson mixing.",introspection: scipy.optimize.__all__
+optimize.approx_fprime,optimize,Finite difference approximation of the derivatives of a,introspection: scipy.optimize.__all__
+optimize.basinhopping,optimize,Find the global minimum of a function using the basin-hopping algorithm.,introspection: scipy.optimize.__all__
+optimize.bisect,optimize,Find root of a function within an interval using bisection.,introspection: scipy.optimize.__all__
+optimize.bracket,optimize,Bracket the minimum of a function.,introspection: scipy.optimize.__all__
+optimize.brent,optimize,"Given a function of one variable and a possible bracket, return",introspection: scipy.optimize.__all__
+optimize.brenth,optimize,Find a root of a function in a bracketing interval using Brent's,introspection: scipy.optimize.__all__
+optimize.brentq,optimize,Find a root of a function in a bracketing interval using Brent's method.,introspection: scipy.optimize.__all__
+optimize.broyden1,optimize,"Find a root of a function, using Broyden's first Jacobian approximation.",introspection: scipy.optimize.__all__
+optimize.broyden2,optimize,"Find a root of a function, using Broyden's second Jacobian approximation.",introspection: scipy.optimize.__all__
+optimize.brute,optimize,Minimize a function over a given range by brute force.,introspection: scipy.optimize.__all__
+optimize.check_grad,optimize,Check the correctness of a gradient function by comparing it against a,introspection: scipy.optimize.__all__
+optimize.curve_fit,optimize,"Use non-linear least squares to fit a function, f, to data.",introspection: scipy.optimize.__all__
+optimize.diagbroyden,optimize,"Find a root of a function, using diagonal Broyden Jacobian approximation.",introspection: scipy.optimize.__all__
+optimize.differential_evolution,optimize,Finds the global minimum of a multivariate function.,introspection: scipy.optimize.__all__
+optimize.direct,optimize,Finds the global minimum of a function using the,introspection: scipy.optimize.__all__
+optimize.dual_annealing,optimize,Find the global minimum of a function using Dual Annealing.,introspection: scipy.optimize.__all__
+optimize.excitingmixing,optimize,"Find a root of a function, using a tuned diagonal Jacobian approximation.",introspection: scipy.optimize.__all__
+optimize.fixed_point,optimize,Find a fixed point of the function.,introspection: scipy.optimize.__all__
+optimize.fmin,optimize,Minimize a function using the downhill simplex algorithm.,introspection: scipy.optimize.__all__
+optimize.fmin_bfgs,optimize,Minimize a function using the BFGS algorithm.,introspection: scipy.optimize.__all__
+optimize.fmin_cg,optimize,Minimize a function using a nonlinear conjugate gradient algorithm.,introspection: scipy.optimize.__all__
+optimize.fmin_cobyla,optimize,Minimize a function using the Constrained Optimization By Linear,introspection: scipy.optimize.__all__
+optimize.fmin_l_bfgs_b,optimize,Minimize a function func using the L-BFGS-B algorithm.,introspection: scipy.optimize.__all__
+optimize.fmin_ncg,optimize,Unconstrained minimization of a function using the Newton-CG method.,introspection: scipy.optimize.__all__
+optimize.fmin_powell,optimize,Minimize a function using modified Powell's method.,introspection: scipy.optimize.__all__
+optimize.fmin_slsqp,optimize,Minimize a function using Sequential Least Squares Programming.,introspection: scipy.optimize.__all__
+optimize.fmin_tnc,optimize,"Minimize a function with variables subject to bounds, using",introspection: scipy.optimize.__all__
+optimize.fminbound,optimize,Bounded minimization for scalar functions.,introspection: scipy.optimize.__all__
+optimize.fsolve,optimize,Find the roots of a function.,introspection: scipy.optimize.__all__
+optimize.golden,optimize,Return the minimizer of a function of one variable using the golden section,introspection: scipy.optimize.__all__
+optimize.isotonic_regression,optimize,Nonparametric isotonic regression.,introspection: scipy.optimize.__all__
+optimize.least_squares,optimize,Solve a nonlinear least-squares problem with bounds on the variables.,introspection: scipy.optimize.__all__
+optimize.leastsq,optimize,Minimize the sum of squares of a set of equations.,introspection: scipy.optimize.__all__
+optimize.line_search,optimize,Find alpha that satisfies strong Wolfe conditions.,introspection: scipy.optimize.__all__
+optimize.linear_sum_assignment,optimize,Solve the linear sum assignment problem.,introspection: scipy.optimize.__all__
+optimize.linearmixing,optimize,"Find a root of a function, using a scalar Jacobian approximation.",introspection: scipy.optimize.__all__
+optimize.linprog,optimize,Linear programming: minimize a linear objective function subject to linear,introspection: scipy.optimize.__all__
+optimize.linprog_verbose_callback,optimize,A sample callback function demonstrating the linprog callback interface.,introspection: scipy.optimize.__all__
+optimize.lsq_linear,optimize,Solve a linear least-squares problem with bounds on the variables.,introspection: scipy.optimize.__all__
+optimize.milp,optimize,Mixed-integer linear programming.,introspection: scipy.optimize.__all__
+optimize.minimize,optimize,Minimization of scalar function of one or more variables.,introspection: scipy.optimize.__all__
+optimize.minimize_scalar,optimize,Local minimization of scalar function of one variable.,introspection: scipy.optimize.__all__
+optimize.newton,optimize,Find a root of a real or complex function using the Newton-Raphson,introspection: scipy.optimize.__all__
+optimize.newton_krylov,optimize,"Find a root of a function, using Krylov approximation for inverse Jacobian.",introspection: scipy.optimize.__all__
+optimize.nnls,optimize,Solve ``argmin_x || Ax - b ||_2^2`` for ``x>=0``.,introspection: scipy.optimize.__all__
+optimize.quadratic_assignment,optimize,Approximates solution to the quadratic assignment problem and,introspection: scipy.optimize.__all__
+optimize.ridder,optimize,Find a root of a function in an interval using Ridder's method.,introspection: scipy.optimize.__all__
+optimize.root,optimize,Find a root of a vector function.,introspection: scipy.optimize.__all__
+optimize.root_scalar,optimize,Find a root of a scalar function.,introspection: scipy.optimize.__all__
+optimize.rosen,optimize,The Rosenbrock function.,introspection: scipy.optimize.__all__
+optimize.rosen_der,optimize,The derivative (i.e. gradient) of the Rosenbrock function.,introspection: scipy.optimize.__all__
+optimize.rosen_hess,optimize,The Hessian matrix of the Rosenbrock function.,introspection: scipy.optimize.__all__
+optimize.rosen_hess_prod,optimize,Product of the Hessian matrix of the Rosenbrock function with a vector.,introspection: scipy.optimize.__all__
+optimize.shgo,optimize,Finds the global minimum of a function using SHG optimization.,introspection: scipy.optimize.__all__
+optimize.show_options,optimize,Show documentation for additional options of optimization solvers.,introspection: scipy.optimize.__all__
+optimize.toms748,optimize,Find a root using TOMS Algorithm 748 method.,introspection: scipy.optimize.__all__
+optimize.elementwise.bracket_minimum,optimize.elementwise,"Bracket the minimum of a unimodal, real-valued function of a real variable.",introspection: scipy.optimize.elementwise.__all__
+optimize.elementwise.bracket_root,optimize.elementwise,"Bracket the root of a monotonic, real-valued function of a real variable.",introspection: scipy.optimize.elementwise.__all__
+optimize.elementwise.find_minimum,optimize.elementwise,"Find the minimum of a unimodal, real-valued function of a real variable.",introspection: scipy.optimize.elementwise.__all__
+optimize.elementwise.find_root,optimize.elementwise,"Find the root of a monotonic, real-valued function of a real variable.",introspection: scipy.optimize.elementwise.__all__
+integrate.BDF,integrate,Implicit method based on backward-differentiation formulas.,introspection: scipy.integrate.__all__
+integrate.DOP853,integrate,Explicit Runge-Kutta method of order 8.,introspection: scipy.integrate.__all__
+integrate.DenseOutput,integrate,Base class for local interpolant over step made by an ODE solver.,introspection: scipy.integrate.__all__
+integrate.IntegrationWarning,integrate,Warning on issues during integration.,introspection: scipy.integrate.__all__
+integrate.LSODA,integrate,Adams/BDF method with automatic stiffness detection and switching.,introspection: scipy.integrate.__all__
+integrate.ODEintWarning,integrate,Warning raised during the execution of `odeint`.,introspection: scipy.integrate.__all__
+integrate.OdeSolution,integrate,Continuous ODE solution.,introspection: scipy.integrate.__all__
+integrate.OdeSolver,integrate,Base class for ODE solvers.,introspection: scipy.integrate.__all__
+integrate.RK23,integrate,Explicit Runge-Kutta method of order 3(2).,introspection: scipy.integrate.__all__
+integrate.RK45,integrate,Explicit Runge-Kutta method of order 5(4).,introspection: scipy.integrate.__all__
+integrate.Radau,integrate,Implicit Runge-Kutta method of Radau IIA family of order 5.,introspection: scipy.integrate.__all__
+integrate.complex_ode,integrate,A wrapper of ode for complex systems.,introspection: scipy.integrate.__all__
+integrate.cubature,integrate,Adaptive cubature of multidimensional array-valued function.,introspection: scipy.integrate.__all__
+integrate.cumulative_simpson,integrate,Cumulatively integrate y(x) using the composite Simpson's 1/3 rule.,introspection: scipy.integrate.__all__
+integrate.cumulative_trapezoid,integrate,Cumulatively integrate y(x) using the composite trapezoidal rule.,introspection: scipy.integrate.__all__
+integrate.dblquad,integrate,Compute a double integral.,introspection: scipy.integrate.__all__
+integrate.fixed_quad,integrate,Compute a definite integral using fixed-order Gaussian quadrature.,introspection: scipy.integrate.__all__
+integrate.lebedev_rule,integrate,Lebedev quadrature.,introspection: scipy.integrate.__all__
+integrate.newton_cotes,integrate,Return weights and error coefficient for Newton-Cotes integration.,introspection: scipy.integrate.__all__
+integrate.nquad,integrate,Integration over multiple variables.,introspection: scipy.integrate.__all__
+integrate.nsum,integrate,Evaluate a convergent finite or infinite series.,introspection: scipy.integrate.__all__
+integrate.ode,integrate,A generic interface class to numeric integrators.,introspection: scipy.integrate.__all__
+integrate.odeint,integrate,Integrate a system of ordinary differential equations.,introspection: scipy.integrate.__all__
+integrate.qmc_quad,integrate,Compute an integral in N-dimensions using Quasi-Monte Carlo quadrature.,introspection: scipy.integrate.__all__
+integrate.quad,integrate,Compute a definite integral.,introspection: scipy.integrate.__all__
+integrate.quad_vec,integrate,Adaptive integration of a vector-valued function.,introspection: scipy.integrate.__all__
+integrate.romb,integrate,Romberg integration using samples of a function.,introspection: scipy.integrate.__all__
+integrate.simpson,integrate,Integrate y(x) using samples along the given axis and the composite,introspection: scipy.integrate.__all__
+integrate.solve_bvp,integrate,Solve a boundary value problem for a system of ODEs.,introspection: scipy.integrate.__all__
+integrate.solve_ivp,integrate,Solve an initial value problem for a system of ODEs.,introspection: scipy.integrate.__all__
+integrate.tanhsinh,integrate,Evaluate a convergent integral numerically using tanh-sinh quadrature.,introspection: scipy.integrate.__all__
+integrate.tplquad,integrate,Compute a triple (definite) integral.,introspection: scipy.integrate.__all__
+integrate.trapezoid,integrate,Integrate along the given axis using the composite trapezoidal rule.,introspection: scipy.integrate.__all__
+interpolate.AAA,interpolate,AAA real or complex rational approximation.,introspection: scipy.interpolate.__all__
+interpolate.Akima1DInterpolator,interpolate,"Akima ""visually pleasing"" interpolator (C1 smooth).",introspection: scipy.interpolate.__all__
+interpolate.BPoly,interpolate,Piecewise polynomial in the Bernstein basis.,introspection: scipy.interpolate.__all__
+interpolate.BSpline,interpolate,Univariate spline in the B-spline basis.,introspection: scipy.interpolate.__all__
+interpolate.BarycentricInterpolator,interpolate,Barycentric (Lagrange with improved stability) interpolator (C∞ smooth).,introspection: scipy.interpolate.__all__
+interpolate.BivariateSpline,interpolate,Base class for bivariate splines.,introspection: scipy.interpolate.__all__
+interpolate.CloughTocher2DInterpolator,interpolate,"Piecewise cubic, C1 smooth, curvature-minimizing interpolator in N=2 dimensions.",introspection: scipy.interpolate.__all__
+interpolate.CubicHermiteSpline,interpolate,Piecewise cubic interpolator to fit values and first derivatives (C1 smooth).,introspection: scipy.interpolate.__all__
+interpolate.CubicSpline,interpolate,Piecewise cubic interpolator to fit values (C2 smooth).,introspection: scipy.interpolate.__all__
+interpolate.FloaterHormannInterpolator,interpolate,Floater-Hormann barycentric rational interpolator (C∞ smooth on real axis).,introspection: scipy.interpolate.__all__
+interpolate.InterpolatedUnivariateSpline,interpolate,1-D interpolating spline for a given set of data points.,introspection: scipy.interpolate.__all__
+interpolate.KroghInterpolator,interpolate,Krogh interpolator (C∞ smooth).,introspection: scipy.interpolate.__all__
+interpolate.LSQBivariateSpline,interpolate,Weighted least-squares bivariate spline approximation.,introspection: scipy.interpolate.__all__
+interpolate.LSQSphereBivariateSpline,interpolate,Weighted least-squares bivariate spline approximation in spherical,introspection: scipy.interpolate.__all__
+interpolate.LSQUnivariateSpline,interpolate,1-D spline with explicit internal knots.,introspection: scipy.interpolate.__all__
+interpolate.LinearNDInterpolator,interpolate,Piecewise linear interpolator in N > 1 dimensions.,introspection: scipy.interpolate.__all__
+interpolate.NdBSpline,interpolate,Tensor product spline object.,introspection: scipy.interpolate.__all__
+interpolate.NdPPoly,interpolate,Piecewise tensor product polynomial.,introspection: scipy.interpolate.__all__
+interpolate.NearestNDInterpolator,interpolate,Nearest-neighbor interpolator in N > 1 dimensions.,introspection: scipy.interpolate.__all__
+interpolate.PPoly,interpolate,Piecewise polynomial in the power basis.,introspection: scipy.interpolate.__all__
+interpolate.PchipInterpolator,interpolate,PCHIP shape-preserving interpolator (C1 smooth).,introspection: scipy.interpolate.__all__
+interpolate.RBFInterpolator,interpolate,Radial basis function interpolator in N ≥ 1 dimensions.,introspection: scipy.interpolate.__all__
+interpolate.Rbf,interpolate,Class for radial basis function interpolation of functions from,introspection: scipy.interpolate.__all__
+interpolate.RectBivariateSpline,interpolate,Bivariate spline approximation over a rectangular mesh.,introspection: scipy.interpolate.__all__
+interpolate.RectSphereBivariateSpline,interpolate,Bivariate spline approximation over a rectangular mesh on a sphere.,introspection: scipy.interpolate.__all__
+interpolate.RegularGridInterpolator,interpolate,Interpolator of specified order on a rectilinear grid in N ≥ 1 dimensions.,introspection: scipy.interpolate.__all__
+interpolate.SmoothBivariateSpline,interpolate,Smooth bivariate spline approximation.,introspection: scipy.interpolate.__all__
+interpolate.SmoothSphereBivariateSpline,interpolate,Smooth bivariate spline approximation in spherical coordinates.,introspection: scipy.interpolate.__all__
+interpolate.UnivariateSpline,interpolate,1-D smoothing spline fit to a given set of data points.,introspection: scipy.interpolate.__all__
+interpolate.barycentric_interpolate,interpolate,Convenience function for barycentric interpolation.,introspection: scipy.interpolate.__all__
+interpolate.bisplev,interpolate,Evaluate a bivariate B-spline and its derivatives.,introspection: scipy.interpolate.__all__
+interpolate.bisplrep,interpolate,Find a bivariate B-spline representation of a surface.,introspection: scipy.interpolate.__all__
+interpolate.generate_knots,interpolate,Generate knot vectors until the Least SQuares (LSQ) criterion is satified.,introspection: scipy.interpolate.__all__
+interpolate.griddata,interpolate,Convenience function for interpolating unstructured data in multiple dimensions.,introspection: scipy.interpolate.__all__
+interpolate.insert,interpolate,Insert knots into a B-spline.,introspection: scipy.interpolate.__all__
+interpolate.interp1d,interpolate,Interpolate a 1-D function (legacy).,introspection: scipy.interpolate.__all__
+interpolate.interp2d,interpolate,"interp2d(x, y, z, kind='linear', copy=True, bounds_error=False,",introspection: scipy.interpolate.__all__
+interpolate.interpn,interpolate,Multidimensional interpolation on regular or rectilinear grids.,introspection: scipy.interpolate.__all__
+interpolate.krogh_interpolate,interpolate,Convenience function for Krogh interpolation.,introspection: scipy.interpolate.__all__
+interpolate.make_interp_spline,interpolate,Create an interpolating B-spline with specified degree and boundary conditions.,introspection: scipy.interpolate.__all__
+interpolate.make_lsq_spline,interpolate,Create a smoothing B-spline satisfying the Least SQuares (LSQ) criterion.,introspection: scipy.interpolate.__all__
+interpolate.make_smoothing_spline,interpolate,Create a smoothing B-spline satisfying the Generalized Cross Validation (GCV) criterion.,introspection: scipy.interpolate.__all__
+interpolate.make_splprep,interpolate,"Create a smoothing parametric B-spline curve with bounded error, minimizing derivative jumps.",introspection: scipy.interpolate.__all__
+interpolate.make_splrep,interpolate,"Create a smoothing B-spline function with bounded error, minimizing derivative jumps.",introspection: scipy.interpolate.__all__
+interpolate.pchip_interpolate,interpolate,Convenience function for pchip interpolation.,introspection: scipy.interpolate.__all__
+interpolate.spalde,interpolate,Evaluate a B-spline and all its derivatives at one point (or set of points) up,introspection: scipy.interpolate.__all__
+interpolate.splantider,interpolate,Compute the spline for the antiderivative (integral) of a given spline.,introspection: scipy.interpolate.__all__
+interpolate.splder,interpolate,Compute the spline representation of the derivative of a given spline.,introspection: scipy.interpolate.__all__
+interpolate.splev,interpolate,Evaluate a B-spline or its derivatives.,introspection: scipy.interpolate.__all__
+interpolate.splint,interpolate,Evaluate the definite integral of a B-spline between two given points.,introspection: scipy.interpolate.__all__
+interpolate.splprep,interpolate,Find the B-spline representation of an N-D curve.,introspection: scipy.interpolate.__all__
+interpolate.splrep,interpolate,Find the B-spline representation of a 1-D curve.,introspection: scipy.interpolate.__all__
+interpolate.sproot,interpolate,Find the roots of a cubic B-spline.,introspection: scipy.interpolate.__all__
+signal.BadCoefficients,signal,Warning about badly conditioned filter coefficients.,introspection: scipy.signal.__all__
+signal.CZT,signal,Create a callable chirp z-transform function.,introspection: scipy.signal.__all__
+signal.ShortTimeFFT,signal,Provide a parametrized discrete Short-time Fourier transform (stft),introspection: scipy.signal.__all__
+signal.StateSpace,signal,Linear Time Invariant system in state-space form.,introspection: scipy.signal.__all__
+signal.TransferFunction,signal,Linear Time Invariant system class in transfer function form.,introspection: scipy.signal.__all__
+signal.ZerosPolesGain,signal,"Linear Time Invariant system class in zeros, poles, gain form.",introspection: scipy.signal.__all__
+signal.ZoomFFT,signal,Create a callable zoom FFT transform function.,introspection: scipy.signal.__all__
+signal.abcd_normalize,signal,Check state-space matrices compatibility and ensure they are 2d arrays.,introspection: scipy.signal.__all__
+signal.argrelextrema,signal,Calculate the relative extrema of `data`.,introspection: scipy.signal.__all__
+signal.argrelmax,signal,Calculate the relative maxima of `data`.,introspection: scipy.signal.__all__
+signal.argrelmin,signal,Calculate the relative minima of `data`.,introspection: scipy.signal.__all__
+signal.band_stop_obj,signal,Band Stop Objective Function for order minimization.,introspection: scipy.signal.__all__
+signal.bessel,signal,Bessel/Thomson digital and analog filter design.,introspection: scipy.signal.__all__
+signal.besselap,signal,"Return (z,p,k) for analog prototype of an Nth-order Bessel filter.",introspection: scipy.signal.__all__
+signal.bilinear,signal,Calculate a digital IIR filter from an analog transfer function by utilizing,introspection: scipy.signal.__all__
+signal.bilinear_zpk,signal,Return a digital IIR filter from an analog one using a bilinear transform.,introspection: scipy.signal.__all__
+signal.bode,signal,Calculate Bode magnitude and phase data of a continuous-time system.,introspection: scipy.signal.__all__
+signal.buttap,signal,"Return (z,p,k) for analog prototype of Nth-order Butterworth filter.",introspection: scipy.signal.__all__
+signal.butter,signal,Butterworth digital and analog filter design.,introspection: scipy.signal.__all__
+signal.buttord,signal,Butterworth filter order selection.,introspection: scipy.signal.__all__
+signal.cheb1ap,signal,"Return (z,p,k) for Nth-order Chebyshev type I analog lowpass filter.",introspection: scipy.signal.__all__
+signal.cheb1ord,signal,Chebyshev type I filter order selection.,introspection: scipy.signal.__all__
+signal.cheb2ap,signal,"Return (z,p,k) for Nth-order Chebyshev type II analog lowpass filter.",introspection: scipy.signal.__all__
+signal.cheb2ord,signal,Chebyshev type II filter order selection.,introspection: scipy.signal.__all__
+signal.cheby1,signal,Chebyshev type I digital and analog filter design.,introspection: scipy.signal.__all__
+signal.cheby2,signal,Chebyshev type II digital and analog filter design.,introspection: scipy.signal.__all__
+signal.check_COLA,signal,Check whether the Constant OverLap Add (COLA) constraint is met,introspection: scipy.signal.__all__
+signal.check_NOLA,signal,Check whether the Nonzero Overlap Add (NOLA) constraint is met.,introspection: scipy.signal.__all__
+signal.chirp,signal,Frequency-swept cosine generator.,introspection: scipy.signal.__all__
+signal.choose_conv_method,signal,Find the fastest convolution/correlation method.,introspection: scipy.signal.__all__
+signal.closest_STFT_dual_window,signal,Calculate the STFT dual window of a given window closest to a desired dual,introspection: scipy.signal.__all__
+signal.coherence,signal,"Estimate the magnitude squared coherence estimate, Cxy, of",introspection: scipy.signal.__all__
+signal.cont2discrete,signal,Transform a continuous to a discrete state-space system.,introspection: scipy.signal.__all__
+signal.convolve,signal,Convolve two N-dimensional arrays.,introspection: scipy.signal.__all__
+signal.convolve2d,signal,Convolve two 2-dimensional arrays.,introspection: scipy.signal.__all__
+signal.correlate,signal,Cross-correlate two N-dimensional arrays.,introspection: scipy.signal.__all__
+signal.correlate2d,signal,Cross-correlate two 2-dimensional arrays.,introspection: scipy.signal.__all__
+signal.correlation_lags,signal,Calculates the lag / displacement indices array for 1D cross-correlation.,introspection: scipy.signal.__all__
+signal.csd,signal,"Estimate the cross power spectral density, Pxy, using Welch's method.",introspection: scipy.signal.__all__
+signal.cspline1d,signal,Compute cubic spline coefficients for rank-1 array.,introspection: scipy.signal.__all__
+signal.cspline1d_eval,signal,Evaluate a cubic spline at the new set of points.,introspection: scipy.signal.__all__
+signal.cspline2d,signal,Coefficients for 2-D cubic (3rd order) B-spline.,introspection: scipy.signal.__all__
+signal.czt,signal,Compute the frequency response around a spiral in the Z plane.,introspection: scipy.signal.__all__
+signal.czt_points,signal,Return the points at which the chirp z-transform is computed.,introspection: scipy.signal.__all__
+signal.dbode,signal,Calculate Bode magnitude and phase data of a discrete-time system.,introspection: scipy.signal.__all__
+signal.decimate,signal,Downsample the signal after applying an anti-aliasing filter.,introspection: scipy.signal.__all__
+signal.deconvolve,signal,Deconvolves ``divisor`` out of ``signal`` using inverse filtering.,introspection: scipy.signal.__all__
+signal.detrend,signal,Remove linear or constant trend along axis from data.,introspection: scipy.signal.__all__
+signal.dfreqresp,signal,Calculate the frequency response of a discrete-time system.,introspection: scipy.signal.__all__
+signal.dimpulse,signal,Impulse response of discrete-time system.,introspection: scipy.signal.__all__
+signal.dlsim,signal,Simulate output of a discrete-time linear system.,introspection: scipy.signal.__all__
+signal.dlti,signal,Discrete-time linear time invariant system base class.,introspection: scipy.signal.__all__
+signal.dstep,signal,Step response of discrete-time system.,introspection: scipy.signal.__all__
+signal.ellip,signal,Elliptic (Cauer) digital and analog filter design.,introspection: scipy.signal.__all__
+signal.ellipap,signal,"Return (z,p,k) of Nth-order elliptic analog lowpass filter.",introspection: scipy.signal.__all__
+signal.ellipord,signal,Elliptic (Cauer) filter order selection.,introspection: scipy.signal.__all__
+signal.envelope,signal,Compute the envelope of a real- or complex-valued signal.,introspection: scipy.signal.__all__
+signal.fftconvolve,signal,Convolve two N-dimensional arrays using FFT.,introspection: scipy.signal.__all__
+signal.filtfilt,signal,Apply a digital filter forward and backward to a signal.,introspection: scipy.signal.__all__
+signal.find_peaks,signal,Find peaks inside a signal based on peak properties.,introspection: scipy.signal.__all__
+signal.find_peaks_cwt,signal,Find peaks in a 1-D array with wavelet transformation.,introspection: scipy.signal.__all__
+signal.findfreqs,signal,Find array of frequencies for computing the response of an analog filter.,introspection: scipy.signal.__all__
+signal.firls,signal,FIR filter design using least-squares error minimization.,introspection: scipy.signal.__all__
+signal.firwin,signal,FIR filter design using the window method.,introspection: scipy.signal.__all__
+signal.firwin2,signal,FIR filter design using the window method.,introspection: scipy.signal.__all__
+signal.firwin_2d,signal,2D FIR filter design using the window method.,introspection: scipy.signal.__all__
+signal.freqresp,signal,Calculate the frequency response of a continuous-time system.,introspection: scipy.signal.__all__
+signal.freqs,signal,Compute frequency response of analog filter.,introspection: scipy.signal.__all__
+signal.freqs_zpk,signal,Compute frequency response of analog filter.,introspection: scipy.signal.__all__
+signal.freqz,signal,Compute the frequency response of a digital filter.,introspection: scipy.signal.__all__
+signal.freqz_sos,signal,Compute the frequency response of a digital filter in SOS format.,introspection: scipy.signal.__all__
+signal.freqz_zpk,signal,Compute the frequency response of a digital filter in ZPK form.,introspection: scipy.signal.__all__
+signal.gammatone,signal,Gammatone filter design.,introspection: scipy.signal.__all__
+signal.gauss_spline,signal,Gaussian approximation to B-spline basis function of order n.,introspection: scipy.signal.__all__
+signal.gausspulse,signal,Return a Gaussian modulated sinusoid.,introspection: scipy.signal.__all__
+signal.get_window,signal,Convenience function for creating various windows.,introspection: scipy.signal.__all__
+signal.group_delay,signal,Compute the group delay of a digital filter.,introspection: scipy.signal.__all__
+signal.hilbert,signal,FFT-based computation of the analytic signal.,introspection: scipy.signal.__all__
+signal.hilbert2,signal,Compute the '2-D' analytic signal of `x`.,introspection: scipy.signal.__all__
+signal.iircomb,signal,Design IIR notching or peaking digital comb filter.,introspection: scipy.signal.__all__
+signal.iirdesign,signal,Complete IIR digital and analog filter design.,introspection: scipy.signal.__all__
+signal.iirfilter,signal,IIR digital and analog filter design given order and critical points.,introspection: scipy.signal.__all__
+signal.iirnotch,signal,Design second-order IIR notch digital filter.,introspection: scipy.signal.__all__
+signal.iirpeak,signal,Design second-order IIR peak (resonant) digital filter.,introspection: scipy.signal.__all__
+signal.impulse,signal,Impulse response of continuous-time system.,introspection: scipy.signal.__all__
+signal.invres,signal,Compute b(s) and a(s) from partial fraction expansion.,introspection: scipy.signal.__all__
+signal.invresz,signal,Compute b(z) and a(z) from partial fraction expansion.,introspection: scipy.signal.__all__
+signal.istft,signal,Perform the inverse Short Time Fourier transform (legacy function).,introspection: scipy.signal.__all__
+signal.kaiser_atten,signal,Compute the attenuation of a Kaiser FIR filter.,introspection: scipy.signal.__all__
+signal.kaiser_beta,signal,"Compute the Kaiser parameter `beta`, given the attenuation `a`.",introspection: scipy.signal.__all__
+signal.kaiserord,signal,Determine the filter window parameters for the Kaiser window method.,introspection: scipy.signal.__all__
+signal.lfilter,signal,Filter data along one-dimension with an IIR or FIR filter.,introspection: scipy.signal.__all__
+signal.lfilter_zi,signal,Construct initial conditions for `lfilter` for step response steady-state.,introspection: scipy.signal.__all__
+signal.lfiltic,signal,Construct initial conditions for lfilter given input and output vectors.,introspection: scipy.signal.__all__
+signal.lombscargle,signal,Compute the generalized Lomb-Scargle periodogram.,introspection: scipy.signal.__all__
+signal.lp2bp,signal,Transform a lowpass filter prototype to a bandpass filter.,introspection: scipy.signal.__all__
+signal.lp2bp_zpk,signal,Transform a lowpass filter prototype to a bandpass filter.,introspection: scipy.signal.__all__
+signal.lp2bs,signal,Transform a lowpass filter prototype to a bandstop filter.,introspection: scipy.signal.__all__
+signal.lp2bs_zpk,signal,Transform a lowpass filter prototype to a bandstop filter.,introspection: scipy.signal.__all__
+signal.lp2hp,signal,Transform a lowpass filter prototype to a highpass filter.,introspection: scipy.signal.__all__
+signal.lp2hp_zpk,signal,Transform a lowpass filter prototype to a highpass filter.,introspection: scipy.signal.__all__
+signal.lp2lp,signal,Transform a lowpass filter prototype to a different frequency.,introspection: scipy.signal.__all__
+signal.lp2lp_zpk,signal,Transform a lowpass filter prototype to a different frequency.,introspection: scipy.signal.__all__
+signal.lsim,signal,Simulate output of a continuous-time linear system.,introspection: scipy.signal.__all__
+signal.lti,signal,Continuous-time linear time invariant system base class.,introspection: scipy.signal.__all__
+signal.max_len_seq,signal,Maximum length sequence (MLS) generator.,introspection: scipy.signal.__all__
+signal.medfilt,signal,Perform a median filter on an N-dimensional array.,introspection: scipy.signal.__all__
+signal.medfilt2d,signal,Median filter a 2-dimensional array.,introspection: scipy.signal.__all__
+signal.minimum_phase,signal,Convert a linear-phase FIR filter to minimum phase.,introspection: scipy.signal.__all__
+signal.normalize,signal,Normalize numerator/denominator of a continuous-time transfer function.,introspection: scipy.signal.__all__
+signal.oaconvolve,signal,Convolve two N-dimensional arrays using the overlap-add method.,introspection: scipy.signal.__all__
+signal.order_filter,signal,Perform an order filter on an N-D array.,introspection: scipy.signal.__all__
+signal.peak_prominences,signal,Calculate the prominence of each peak in a signal.,introspection: scipy.signal.__all__
+signal.peak_widths,signal,Calculate the width of each peak in a signal.,introspection: scipy.signal.__all__
+signal.periodogram,signal,Estimate power spectral density using a periodogram.,introspection: scipy.signal.__all__
+signal.place_poles,signal,"Compute K such that eigenvalues (A - dot(B, K))=poles.",introspection: scipy.signal.__all__
+signal.qspline1d,signal,Compute quadratic spline coefficients for rank-1 array.,introspection: scipy.signal.__all__
+signal.qspline1d_eval,signal,Evaluate a quadratic spline at the new set of points.,introspection: scipy.signal.__all__
+signal.qspline2d,signal,Coefficients for 2-D quadratic (2nd order) B-spline.,introspection: scipy.signal.__all__
+signal.remez,signal,Calculate the minimax optimal filter using the Remez exchange algorithm.,introspection: scipy.signal.__all__
+signal.resample,signal,Resample `x` to `num` samples using the Fourier method along the given `axis`.,introspection: scipy.signal.__all__
+signal.resample_poly,signal,Resample `x` along the given axis using polyphase filtering.,introspection: scipy.signal.__all__
+signal.residue,signal,Compute partial-fraction expansion of b(s) / a(s).,introspection: scipy.signal.__all__
+signal.residuez,signal,Compute partial-fraction expansion of b(z) / a(z).,introspection: scipy.signal.__all__
+signal.savgol_coeffs,signal,Compute the coefficients for a 1-D Savitzky-Golay FIR filter.,introspection: scipy.signal.__all__
+signal.savgol_filter,signal,Apply a Savitzky-Golay filter to an array.,introspection: scipy.signal.__all__
+signal.sawtooth,signal,Return a periodic sawtooth or triangle waveform.,introspection: scipy.signal.__all__
+signal.sepfir2d,signal,Convolve with a 2-D separable FIR filter.,introspection: scipy.signal.__all__
+signal.sos2tf,signal,Return a single transfer function from a series of second-order sections.,introspection: scipy.signal.__all__
+signal.sos2zpk,signal,"Return zeros, poles, and gain of a series of second-order sections.",introspection: scipy.signal.__all__
+signal.sosfilt,signal,Filter data along one dimension using cascaded second-order sections.,introspection: scipy.signal.__all__
+signal.sosfilt_zi,signal,Construct initial conditions for sosfilt for step response steady-state.,introspection: scipy.signal.__all__
+signal.sosfiltfilt,signal,A forward-backward digital filter using cascaded second-order sections.,introspection: scipy.signal.__all__
+signal.sosfreqz,signal,Compute the frequency response of a digital filter in SOS format (legacy).,introspection: scipy.signal.__all__
+signal.spectrogram,signal,Compute a spectrogram with consecutive Fourier transforms (legacy function).,introspection: scipy.signal.__all__
+signal.spline_filter,signal,Smoothing spline (cubic) filtering of a rank-2 array.,introspection: scipy.signal.__all__
+signal.square,signal,Return a periodic square-wave waveform.,introspection: scipy.signal.__all__
+signal.ss2tf,signal,State-space to transfer function.,introspection: scipy.signal.__all__
+signal.ss2zpk,signal,State-space representation to zero-pole-gain representation.,introspection: scipy.signal.__all__
+signal.step,signal,Step response of continuous-time system.,introspection: scipy.signal.__all__
+signal.stft,signal,Compute the Short Time Fourier Transform (legacy function).,introspection: scipy.signal.__all__
+signal.sweep_poly,signal,"Frequency-swept cosine generator, with a time-dependent frequency.",introspection: scipy.signal.__all__
+signal.symiirorder1,signal,Implement a smoothing IIR filter with mirror-symmetric boundary conditions,introspection: scipy.signal.__all__
+signal.symiirorder2,signal,Implement a smoothing IIR filter with mirror-symmetric boundary conditions,introspection: scipy.signal.__all__
+signal.tf2sos,signal,Return second-order sections from transfer function representation.,introspection: scipy.signal.__all__
+signal.tf2ss,signal,Transfer function to state-space representation.,introspection: scipy.signal.__all__
+signal.tf2zpk,signal,"Return zero, pole, gain (z, p, k) representation from a numerator,",introspection: scipy.signal.__all__
+signal.unique_roots,signal,Determine unique roots and their multiplicities from a list of roots.,introspection: scipy.signal.__all__
+signal.unit_impulse,signal,Unit impulse signal (discrete delta function) or unit basis vector.,introspection: scipy.signal.__all__
+signal.upfirdn,signal,"Upsample, FIR filter, and downsample.",introspection: scipy.signal.__all__
+signal.vectorstrength,signal,Determine the vector strength of the events corresponding to the given,introspection: scipy.signal.__all__
+signal.welch,signal,Estimate power spectral density using Welch's method.,introspection: scipy.signal.__all__
+signal.whittaker_henderson,signal,Whittaker-Henderson (WH) smoothing/graduation of a discrete signal.,introspection: scipy.signal.__all__
+signal.wiener,signal,Perform a Wiener filter on an N-dimensional array.,introspection: scipy.signal.__all__
+signal.zoom_fft,signal,Compute the DFT of `x` only for frequencies in range `fn`.,introspection: scipy.signal.__all__
+signal.zpk2sos,signal,"Return second-order sections from zeros, poles, and gain of a system.",introspection: scipy.signal.__all__
+signal.zpk2ss,signal,Zero-pole-gain representation to state-space representation.,introspection: scipy.signal.__all__
+signal.zpk2tf,signal,Return polynomial transfer function representation from zeros and poles.,introspection: scipy.signal.__all__
+signal.windows.barthann,signal.windows,Return a modified Bartlett-Hann window.,introspection: scipy.signal.windows.__all__
+signal.windows.bartlett,signal.windows,Return a Bartlett window.,introspection: scipy.signal.windows.__all__
+signal.windows.blackman,signal.windows,Return a Blackman window.,introspection: scipy.signal.windows.__all__
+signal.windows.blackmanharris,signal.windows,Return a minimum 4-term Blackman-Harris window.,introspection: scipy.signal.windows.__all__
+signal.windows.bohman,signal.windows,Return a Bohman window.,introspection: scipy.signal.windows.__all__
+signal.windows.boxcar,signal.windows,Return a boxcar or rectangular window.,introspection: scipy.signal.windows.__all__
+signal.windows.chebwin,signal.windows,Return a Dolph-Chebyshev window.,introspection: scipy.signal.windows.__all__
+signal.windows.cosine,signal.windows,Return a window with a simple cosine shape.,introspection: scipy.signal.windows.__all__
+signal.windows.dpss,signal.windows,Compute the Discrete Prolate Spheroidal Sequences (DPSS).,introspection: scipy.signal.windows.__all__
+signal.windows.exponential,signal.windows,Return an exponential (or Poisson) window.,introspection: scipy.signal.windows.__all__
+signal.windows.flattop,signal.windows,Return a flat top window.,introspection: scipy.signal.windows.__all__
+signal.windows.gaussian,signal.windows,Return a Gaussian window.,introspection: scipy.signal.windows.__all__
+signal.windows.general_cosine,signal.windows,Generic weighted sum of cosine terms window.,introspection: scipy.signal.windows.__all__
+signal.windows.general_gaussian,signal.windows,Return a window with a generalized Gaussian shape.,introspection: scipy.signal.windows.__all__
+signal.windows.general_hamming,signal.windows,Return a generalized Hamming window.,introspection: scipy.signal.windows.__all__
+signal.windows.get_window,signal.windows,Convenience function for creating various windows.,introspection: scipy.signal.windows.__all__
+signal.windows.hamming,signal.windows,Return a Hamming window.,introspection: scipy.signal.windows.__all__
+signal.windows.hann,signal.windows,Return a Hann window.,introspection: scipy.signal.windows.__all__
+signal.windows.kaiser,signal.windows,Return a Kaiser window.,introspection: scipy.signal.windows.__all__
+signal.windows.kaiser_bessel_derived,signal.windows,Return a Kaiser-Bessel derived window.,introspection: scipy.signal.windows.__all__
+signal.windows.lanczos,signal.windows,Return a Lanczos window also known as a sinc window.,introspection: scipy.signal.windows.__all__
+signal.windows.nuttall,signal.windows,Return a minimum 4-term Blackman-Harris window according to Nuttall.,introspection: scipy.signal.windows.__all__
+signal.windows.parzen,signal.windows,Return a Parzen window.,introspection: scipy.signal.windows.__all__
+signal.windows.taylor,signal.windows,Return a Taylor window.,introspection: scipy.signal.windows.__all__
+signal.windows.triang,signal.windows,Return a triangular window.,introspection: scipy.signal.windows.__all__
+signal.windows.tukey,signal.windows,"Return a Tukey window, also known as a tapered cosine window.",introspection: scipy.signal.windows.__all__
+fft.dct,fft,Return the Discrete Cosine Transform of arbitrary type sequence x.,introspection: scipy.fft.__all__
+fft.dctn,fft,Return multidimensional Discrete Cosine Transform along the specified axes.,introspection: scipy.fft.__all__
+fft.dst,fft,Return the Discrete Sine Transform of arbitrary type sequence x.,introspection: scipy.fft.__all__
+fft.dstn,fft,Return multidimensional Discrete Sine Transform along the specified axes.,introspection: scipy.fft.__all__
+fft.fft,fft,Compute the 1-D discrete Fourier Transform.,introspection: scipy.fft.__all__
+fft.fft2,fft,Compute the 2-D discrete Fourier Transform.,introspection: scipy.fft.__all__
+fft.fftfreq,fft,Return the Discrete Fourier Transform sample frequencies.,introspection: scipy.fft.__all__
+fft.fftn,fft,Compute the N-D discrete Fourier Transform.,introspection: scipy.fft.__all__
+fft.fftshift,fft,Shift the zero-frequency component to the center of the spectrum.,introspection: scipy.fft.__all__
+fft.fht,fft,Compute the fast Hankel transform.,introspection: scipy.fft.__all__
+fft.fhtoffset,fft,Return optimal offset for a fast Hankel transform.,introspection: scipy.fft.__all__
+fft.get_workers,fft,Returns the default number of workers within the current context.,introspection: scipy.fft.__all__
+fft.hfft,fft,"Compute the FFT of a signal that has Hermitian symmetry, i.e., a real",introspection: scipy.fft.__all__
+fft.hfft2,fft,Compute the 2-D FFT of a Hermitian complex array.,introspection: scipy.fft.__all__
+fft.hfftn,fft,"Compute the N-D FFT of Hermitian symmetric complex input, i.e., a",introspection: scipy.fft.__all__
+fft.idct,fft,Return the Inverse Discrete Cosine Transform of an arbitrary type sequence.,introspection: scipy.fft.__all__
+fft.idctn,fft,Return multidimensional Inverse Discrete Cosine Transform along the specified axes.,introspection: scipy.fft.__all__
+fft.idst,fft,Return the Inverse Discrete Sine Transform of an arbitrary type sequence.,introspection: scipy.fft.__all__
+fft.idstn,fft,Return multidimensional Inverse Discrete Sine Transform along the specified axes.,introspection: scipy.fft.__all__
+fft.ifft,fft,Compute the 1-D inverse discrete Fourier Transform.,introspection: scipy.fft.__all__
+fft.ifft2,fft,Compute the 2-D inverse discrete Fourier Transform.,introspection: scipy.fft.__all__
+fft.ifftn,fft,Compute the N-D inverse discrete Fourier Transform.,introspection: scipy.fft.__all__
+fft.ifftshift,fft,"The inverse of `fftshift`. Although identical for even-length `x`, the",introspection: scipy.fft.__all__
+fft.ifht,fft,Compute the inverse fast Hankel transform.,introspection: scipy.fft.__all__
+fft.ihfft,fft,Compute the inverse FFT of a signal that has Hermitian symmetry.,introspection: scipy.fft.__all__
+fft.ihfft2,fft,Compute the 2-D inverse FFT of a real spectrum.,introspection: scipy.fft.__all__
+fft.ihfftn,fft,Compute the N-D inverse discrete Fourier Transform for a real,introspection: scipy.fft.__all__
+fft.irfft,fft,Computes the inverse of `rfft`.,introspection: scipy.fft.__all__
+fft.irfft2,fft,Computes the inverse of `rfft2`.,introspection: scipy.fft.__all__
+fft.irfftn,fft,Computes the inverse of `rfftn`.,introspection: scipy.fft.__all__
+fft.next_fast_len,fft,"Find the next fast size of input data to ``fft``, for zero-padding, etc.",introspection: scipy.fft.__all__
+fft.prev_fast_len,fft,Find the previous fast size of input data to ``fft``.,introspection: scipy.fft.__all__
+fft.register_backend,fft,Register a backend for permanent use.,introspection: scipy.fft.__all__
+fft.rfft,fft,Compute the 1-D discrete Fourier Transform for real input.,introspection: scipy.fft.__all__
+fft.rfft2,fft,Compute the 2-D FFT of a real array.,introspection: scipy.fft.__all__
+fft.rfftfreq,fft,Return the Discrete Fourier Transform sample frequencies,introspection: scipy.fft.__all__
+fft.rfftn,fft,Compute the N-D discrete Fourier Transform for real input.,introspection: scipy.fft.__all__
+fft.set_backend,fft,Context manager to set the backend within a fixed scope.,introspection: scipy.fft.__all__
+fft.set_global_backend,fft,Sets the global fft backend.,introspection: scipy.fft.__all__
+fft.set_workers,fft,Context manager for the default number of workers used in `scipy.fft`.,introspection: scipy.fft.__all__
+fft.skip_backend,fft,Context manager to skip a backend within a fixed scope.,introspection: scipy.fft.__all__
+special.SpecialFunctionError,special,Exception that can be raised by special functions.,introspection: scipy.special.__all__
+special.SpecialFunctionWarning,special,Warning that can be emitted by special functions.,introspection: scipy.special.__all__
+special.agm,special,Compute the arithmetic-geometric mean of `a` and `b`.,introspection: scipy.special.__all__
+special.ai_zeros,special,Compute `nt` zeros and values of the Airy function Ai and its derivative.,introspection: scipy.special.__all__
+special.airy,special,Airy functions and their derivatives.,introspection: scipy.special.__all__
+special.airye,special,Exponentially scaled Airy functions and their derivatives.,introspection: scipy.special.__all__
+special.assoc_laguerre,special,Compute the generalized (associated) Laguerre polynomial of degree :math:`n`,introspection: scipy.special.__all__
+special.assoc_legendre_p,special,Associated Legendre polynomial of the first kind.,introspection: scipy.special.__all__
+special.assoc_legendre_p_all,special,All associated Legendre polynomials of the first kind up to the,introspection: scipy.special.__all__
+special.bdtr,special,Binomial distribution cumulative distribution function.,introspection: scipy.special.__all__
+special.bdtrc,special,Binomial distribution survival function.,introspection: scipy.special.__all__
+special.bdtri,special,Inverse function to `bdtr` with respect to `p`.,introspection: scipy.special.__all__
+special.bdtrik,special,Inverse function to `bdtr` with respect to `k`.,introspection: scipy.special.__all__
+special.bdtrin,special,Inverse function to `bdtr` with respect to `n`.,introspection: scipy.special.__all__
+special.bei,special,Kelvin function bei.,introspection: scipy.special.__all__
+special.bei_zeros,special,Compute nt zeros of the Kelvin function bei.,introspection: scipy.special.__all__
+special.beip,special,Derivative of the Kelvin function bei.,introspection: scipy.special.__all__
+special.beip_zeros,special,Compute nt zeros of the derivative of the Kelvin function bei.,introspection: scipy.special.__all__
+special.ber,special,Kelvin function ber.,introspection: scipy.special.__all__
+special.ber_zeros,special,Compute nt zeros of the Kelvin function ber.,introspection: scipy.special.__all__
+special.bernoulli,special,Bernoulli numbers B0..Bn (inclusive).,introspection: scipy.special.__all__
+special.berp,special,Derivative of the Kelvin function ber.,introspection: scipy.special.__all__
+special.berp_zeros,special,Compute nt zeros of the derivative of the Kelvin function ber.,introspection: scipy.special.__all__
+special.besselpoly,special,Weighted integral of the Bessel function of the first kind.,introspection: scipy.special.__all__
+special.beta,special,Beta function.,introspection: scipy.special.__all__
+special.betainc,special,Regularized incomplete beta function.,introspection: scipy.special.__all__
+special.betaincc,special,Complement of the regularized incomplete beta function.,introspection: scipy.special.__all__
+special.betainccinv,special,Inverse of the complemented regularized incomplete beta function.,introspection: scipy.special.__all__
+special.betaincinv,special,Inverse of the regularized incomplete beta function.,introspection: scipy.special.__all__
+special.betaln,special,Natural logarithm of absolute value of beta function.,introspection: scipy.special.__all__
+special.bi_zeros,special,Compute `nt` zeros and values of the Airy function Bi and its derivative.,introspection: scipy.special.__all__
+special.binom,special,Binomial coefficient considered as a function of two real variables.,introspection: scipy.special.__all__
+special.boxcox,special,Compute the Box-Cox transformation.,introspection: scipy.special.__all__
+special.boxcox1p,special,Compute the Box-Cox transformation of :math:`1 + x`.,introspection: scipy.special.__all__
+special.btdtria,special,Inverse of `betainc` with respect to `a`.,introspection: scipy.special.__all__
+special.btdtrib,special,Inverse of `betainc` with respect to `b`.,introspection: scipy.special.__all__
+special.cbrt,special,Element-wise cube root of `x`.,introspection: scipy.special.__all__
+special.chdtr,special,Chi square cumulative distribution function.,introspection: scipy.special.__all__
+special.chdtrc,special,Chi square survival function.,introspection: scipy.special.__all__
+special.chdtri,special,Inverse to `chdtrc` with respect to `x`.,introspection: scipy.special.__all__
+special.chdtriv,special,Inverse to `chdtr` with respect to `v`.,introspection: scipy.special.__all__
+special.chebyc,special,"Chebyshev polynomial of the first kind on :math:`[-2, 2]`.",introspection: scipy.special.__all__
+special.chebys,special,"Chebyshev polynomial of the second kind on :math:`[-2, 2]`.",introspection: scipy.special.__all__
+special.chebyt,special,Chebyshev polynomial of the first kind.,introspection: scipy.special.__all__
+special.chebyu,special,Chebyshev polynomial of the second kind.,introspection: scipy.special.__all__
+special.chndtr,special,Non-central chi-squared cumulative distribution function.,introspection: scipy.special.__all__
+special.chndtridf,special,Inverse to `chndtr` vs `df`.,introspection: scipy.special.__all__
+special.chndtrinc,special,Inverse of `chndtr` with respect to `nc`.,introspection: scipy.special.__all__
+special.chndtrix,special,Inverse to `chndtr` vs `x`.,introspection: scipy.special.__all__
+special.comb,special,The number of combinations of N things taken k at a time.,introspection: scipy.special.__all__
+special.cosdg,special,Cosine of the angle `x` given in degrees.,introspection: scipy.special.__all__
+special.cosm1,special,"Compute ``cos(x) - 1``, especially when `x` is near zero.",introspection: scipy.special.__all__
+special.cotdg,special,Cotangent of the angle `x` given in degrees.,introspection: scipy.special.__all__
+special.dawsn,special,Dawson's integral.,introspection: scipy.special.__all__
+special.diric,special,"Periodic sinc function, also called the Dirichlet kernel.",introspection: scipy.special.__all__
+special.ellip_harm,special,Ellipsoidal harmonic functions E^p_n(l).,introspection: scipy.special.__all__
+special.ellip_harm_2,special,Ellipsoidal harmonic functions F^p_n(l).,introspection: scipy.special.__all__
+special.ellip_normal,special,Ellipsoidal harmonic normalization constants gamma^p_n.,introspection: scipy.special.__all__
+special.ellipe,special,Complete elliptic integral of the second kind.,introspection: scipy.special.__all__
+special.ellipeinc,special,Incomplete elliptic integral of the second kind.,introspection: scipy.special.__all__
+special.ellipj,special,Jacobi elliptic functions.,introspection: scipy.special.__all__
+special.ellipk,special,Complete elliptic integral of the first kind.,introspection: scipy.special.__all__
+special.ellipkinc,special,Incomplete elliptic integral of the first kind.,introspection: scipy.special.__all__
+special.ellipkm1,special,Complete elliptic integral of the first kind around `m` = 1.,introspection: scipy.special.__all__
+special.elliprc,special,Degenerate symmetric elliptic integral.,introspection: scipy.special.__all__
+special.elliprd,special,Symmetric elliptic integral of the second kind.,introspection: scipy.special.__all__
+special.elliprf,special,Completely-symmetric elliptic integral of the first kind.,introspection: scipy.special.__all__
+special.elliprg,special,Completely-symmetric elliptic integral of the second kind.,introspection: scipy.special.__all__
+special.elliprj,special,Symmetric elliptic integral of the third kind.,introspection: scipy.special.__all__
+special.entr,special,Elementwise function for computing entropy.,introspection: scipy.special.__all__
+special.erf,special,Error function of real or complex argument.,introspection: scipy.special.__all__
+special.erf_zeros,special,"Compute the first nt zero in the first quadrant, ordered by absolute value.",introspection: scipy.special.__all__
+special.erfc,special,Complementary error function.,introspection: scipy.special.__all__
+special.erfcinv,special,Inverse of the complementary error function.,introspection: scipy.special.__all__
+special.erfcx,special,Scaled complementary error function.,introspection: scipy.special.__all__
+special.erfi,special,Imaginary error function.,introspection: scipy.special.__all__
+special.erfinv,special,Inverse of the error function.,introspection: scipy.special.__all__
+special.errstate,special,Context manager for special-function error handling.,introspection: scipy.special.__all__
+special.euler,special,"Euler numbers E(0), E(1), ..., E(n).",introspection: scipy.special.__all__
+special.eval_chebyc,special,"Evaluate Chebyshev polynomial of the first kind on [-2, 2] at a",introspection: scipy.special.__all__
+special.eval_chebys,special,"Evaluate Chebyshev polynomial of the second kind on [-2, 2] at a",introspection: scipy.special.__all__
+special.eval_chebyt,special,Evaluate Chebyshev polynomial of the first kind at a point.,introspection: scipy.special.__all__
+special.eval_chebyu,special,Evaluate Chebyshev polynomial of the second kind at a point.,introspection: scipy.special.__all__
+special.eval_gegenbauer,special,Evaluate Gegenbauer (ultraspherical) polynomial at a point.,introspection: scipy.special.__all__
+special.eval_genlaguerre,special,Evaluate generalized Laguerre polynomial at a point.,introspection: scipy.special.__all__
+special.eval_hermite,special,Evaluate physicist's Hermite polynomial at a point.,introspection: scipy.special.__all__
+special.eval_hermitenorm,special,Evaluate probabilist's (normalized) Hermite polynomial at a,introspection: scipy.special.__all__
+special.eval_jacobi,special,Evaluate Jacobi polynomial at a point.,introspection: scipy.special.__all__
+special.eval_laguerre,special,Evaluate Laguerre polynomial at a point.,introspection: scipy.special.__all__
+special.eval_legendre,special,Evaluate Legendre polynomial at a point.,introspection: scipy.special.__all__
+special.eval_sh_chebyt,special,Evaluate shifted Chebyshev polynomial of the first kind at a,introspection: scipy.special.__all__
+special.eval_sh_chebyu,special,Evaluate shifted Chebyshev polynomial of the second kind at a,introspection: scipy.special.__all__
+special.eval_sh_jacobi,special,Evaluate shifted Jacobi polynomial at a point.,introspection: scipy.special.__all__
+special.eval_sh_legendre,special,Evaluate shifted Legendre polynomial at a point.,introspection: scipy.special.__all__
+special.exp1,special,Exponential integral E1.,introspection: scipy.special.__all__
+special.exp10,special,Compute ``10**x`` element-wise.,introspection: scipy.special.__all__
+special.exp2,special,Compute ``2**x`` element-wise.,introspection: scipy.special.__all__
+special.expi,special,Exponential integral Ei.,introspection: scipy.special.__all__
+special.expit,special,Expit (also known as logistic sigmoid) ufunc for ndarrays.,introspection: scipy.special.__all__
+special.expm1,special,Compute ``exp(x) - 1``.,introspection: scipy.special.__all__
+special.expn,special,Generalized exponential integral En.,introspection: scipy.special.__all__
+special.exprel,special,"Relative error exponential, ``(exp(x) - 1)/x``.",introspection: scipy.special.__all__
+special.factorial,special,The factorial of a number or array of numbers.,introspection: scipy.special.__all__
+special.factorial2,special,Double factorial.,introspection: scipy.special.__all__
+special.factorialk,special,"Multifactorial of n of order k, n(!!...!).",introspection: scipy.special.__all__
+special.fdtr,special,F cumulative distribution function.,introspection: scipy.special.__all__
+special.fdtrc,special,F survival function.,introspection: scipy.special.__all__
+special.fdtri,special,The `p`-th quantile of the F-distribution.,introspection: scipy.special.__all__
+special.fdtridfd,special,Inverse to `fdtr` vs dfd.,introspection: scipy.special.__all__
+special.fresnel,special,Fresnel integrals.,introspection: scipy.special.__all__
+special.fresnel_zeros,special,Compute nt complex zeros of sine and cosine Fresnel integrals S(z) and C(z).,introspection: scipy.special.__all__
+special.fresnelc_zeros,special,Compute nt complex zeros of cosine Fresnel integral C(z).,introspection: scipy.special.__all__
+special.fresnels_zeros,special,Compute nt complex zeros of sine Fresnel integral S(z).,introspection: scipy.special.__all__
+special.gamma,special,Compute the gamma function.,introspection: scipy.special.__all__
+special.gammainc,special,Regularized lower incomplete gamma function.,introspection: scipy.special.__all__
+special.gammaincc,special,Regularized upper incomplete gamma function.,introspection: scipy.special.__all__
+special.gammainccinv,special,Inverse of the regularized upper incomplete gamma function.,introspection: scipy.special.__all__
+special.gammaincinv,special,Inverse to the regularized lower incomplete gamma function.,introspection: scipy.special.__all__
+special.gammaln,special,Logarithm of the absolute value of the gamma function.,introspection: scipy.special.__all__
+special.gammasgn,special,Sign of the gamma function.,introspection: scipy.special.__all__
+special.gdtr,special,Gamma distribution cumulative distribution function.,introspection: scipy.special.__all__
+special.gdtrc,special,Gamma distribution survival function.,introspection: scipy.special.__all__
+special.gdtria,special,Inverse of `gdtr` vs a.,introspection: scipy.special.__all__
+special.gdtrib,special,Inverse of `gdtr` vs b.,introspection: scipy.special.__all__
+special.gdtrix,special,Inverse of `gdtr` vs x.,introspection: scipy.special.__all__
+special.gegenbauer,special,Gegenbauer (ultraspherical) polynomial.,introspection: scipy.special.__all__
+special.genlaguerre,special,Generalized (associated) Laguerre polynomial.,introspection: scipy.special.__all__
+special.geterr,special,Get the current way of handling special-function errors.,introspection: scipy.special.__all__
+special.h1vp,special,Compute derivatives of Hankel function H1v(z) with respect to `z`.,introspection: scipy.special.__all__
+special.h2vp,special,Compute derivatives of Hankel function H2v(z) with respect to `z`.,introspection: scipy.special.__all__
+special.hankel1,special,Hankel function of the first kind.,introspection: scipy.special.__all__
+special.hankel1e,special,Exponentially scaled Hankel function of the first kind.,introspection: scipy.special.__all__
+special.hankel2,special,Hankel function of the second kind.,introspection: scipy.special.__all__
+special.hankel2e,special,Exponentially scaled Hankel function of the second kind.,introspection: scipy.special.__all__
+special.hermite,special,Physicist's Hermite polynomial.,introspection: scipy.special.__all__
+special.hermitenorm,special,Probabilist's Hermite polynomial.,introspection: scipy.special.__all__
+special.huber,special,Huber loss function.,introspection: scipy.special.__all__
+special.hyp0f1,special,Confluent hypergeometric limit function 0F1.,introspection: scipy.special.__all__
+special.hyp1f1,special,Confluent hypergeometric function 1F1.,introspection: scipy.special.__all__
+special.hyp2f1,special,"Gauss hypergeometric function 2F1(a, b; c; z).",introspection: scipy.special.__all__
+special.hyperu,special,Confluent hypergeometric function U.,introspection: scipy.special.__all__
+special.i0,special,Modified Bessel function of order 0.,introspection: scipy.special.__all__
+special.i0e,special,Exponentially scaled modified Bessel function of order 0.,introspection: scipy.special.__all__
+special.i1,special,Modified Bessel function of order 1.,introspection: scipy.special.__all__
+special.i1e,special,Exponentially scaled modified Bessel function of order 1.,introspection: scipy.special.__all__
+special.inv_boxcox,special,Compute the inverse of the Box-Cox transformation.,introspection: scipy.special.__all__
+special.inv_boxcox1p,special,Compute the inverse of the Box-Cox transformation of :math:`1 + x`.,introspection: scipy.special.__all__
+special.it2i0k0,special,Integrals related to modified Bessel functions of order 0.,introspection: scipy.special.__all__
+special.it2j0y0,special,Integrals related to Bessel functions of the first kind of order 0.,introspection: scipy.special.__all__
+special.it2struve0,special,Integral related to the Struve function of order 0.,introspection: scipy.special.__all__
+special.itairy,special,Integrals of Airy functions.,introspection: scipy.special.__all__
+special.iti0k0,special,Integrals of modified Bessel functions of order 0.,introspection: scipy.special.__all__
+special.itj0y0,special,Integrals of Bessel functions of the first kind of order 0.,introspection: scipy.special.__all__
+special.itmodstruve0,special,Integral of the modified Struve function of order 0.,introspection: scipy.special.__all__
+special.itstruve0,special,Integral of the Struve function of order 0.,introspection: scipy.special.__all__
+special.iv,special,Modified Bessel function of the first kind of real order.,introspection: scipy.special.__all__
+special.ive,special,Exponentially scaled modified Bessel function of the first kind.,introspection: scipy.special.__all__
+special.ivp,special,Compute derivatives of modified Bessel functions of the first kind.,introspection: scipy.special.__all__
+special.j0,special,Bessel function of the first kind of order 0.,introspection: scipy.special.__all__
+special.j1,special,Bessel function of the first kind of order 1.,introspection: scipy.special.__all__
+special.jacobi,special,Jacobi polynomial.,introspection: scipy.special.__all__
+special.jn_zeros,special,Compute zeros of integer-order Bessel functions Jn.,introspection: scipy.special.__all__
+special.jnjnp_zeros,special,Compute zeros of integer-order Bessel functions Jn and Jn'.,introspection: scipy.special.__all__
+special.jnp_zeros,special,Compute zeros of integer-order Bessel function derivatives Jn'.,introspection: scipy.special.__all__
+special.jnyn_zeros,special,"Compute nt zeros of Bessel functions Jn(x), Jn'(x), Yn(x), and Yn'(x).",introspection: scipy.special.__all__
+special.jve,special,Exponentially scaled Bessel function of the first kind of order `v`.,introspection: scipy.special.__all__
+special.jvp,special,Compute derivatives of Bessel functions of the first kind.,introspection: scipy.special.__all__
+special.k0,special,"Modified Bessel function of the second kind of order 0, :math:`K_0`.",introspection: scipy.special.__all__
+special.k0e,special,Exponentially scaled modified Bessel function K of order 0.,introspection: scipy.special.__all__
+special.k1,special,"Modified Bessel function of the second kind of order 1, :math:`K_1(x)`.",introspection: scipy.special.__all__
+special.k1e,special,Exponentially scaled modified Bessel function K of order 1.,introspection: scipy.special.__all__
+special.kei,special,Kelvin function kei.,introspection: scipy.special.__all__
+special.kei_zeros,special,Compute nt zeros of the Kelvin function kei.,introspection: scipy.special.__all__
+special.keip,special,Derivative of the Kelvin function kei.,introspection: scipy.special.__all__
+special.keip_zeros,special,Compute nt zeros of the derivative of the Kelvin function kei.,introspection: scipy.special.__all__
+special.kelvin,special,Kelvin functions as complex numbers.,introspection: scipy.special.__all__
+special.kelvin_zeros,special,Compute `nt` zeros of all Kelvin functions.,introspection: scipy.special.__all__
+special.ker,special,Kelvin function ker.,introspection: scipy.special.__all__
+special.ker_zeros,special,Compute nt zeros of the Kelvin function ker.,introspection: scipy.special.__all__
+special.kerp,special,Derivative of the Kelvin function ker.,introspection: scipy.special.__all__
+special.kerp_zeros,special,Compute nt zeros of the derivative of the Kelvin function ker.,introspection: scipy.special.__all__
+special.kl_div,special,Elementwise function for computing Kullback-Leibler divergence.,introspection: scipy.special.__all__
+special.kn,special,Modified Bessel function of the second kind of integer order `n`.,introspection: scipy.special.__all__
+special.kolmogi,special,Inverse Survival Function of Kolmogorov distribution.,introspection: scipy.special.__all__
+special.kolmogorov,special,Complementary cumulative distribution (Survival Function) function of,introspection: scipy.special.__all__
+special.kv,special,Modified Bessel function of the second kind of real order `v`.,introspection: scipy.special.__all__
+special.kve,special,Exponentially scaled modified Bessel function of the second kind.,introspection: scipy.special.__all__
+special.kvp,special,Compute derivatives of real-order modified Bessel function Kv(z).,introspection: scipy.special.__all__
+special.laguerre,special,Laguerre polynomial.,introspection: scipy.special.__all__
+special.lambertw,special,Lambert W function.,introspection: scipy.special.__all__
+special.legendre,special,Legendre polynomial.,introspection: scipy.special.__all__
+special.legendre_p,special,Legendre polynomial of the first kind.,introspection: scipy.special.__all__
+special.legendre_p_all,special,All Legendre polynomials of the first kind up to the specified degree,introspection: scipy.special.__all__
+special.lmbda,special,"Jahnke-Emden Lambda function, Lambdav(x).",introspection: scipy.special.__all__
+special.log1p,special,Calculates log(1 + x) for use when `x` is near zero.,introspection: scipy.special.__all__
+special.log_expit,special,Logarithm of the logistic sigmoid function.,introspection: scipy.special.__all__
+special.log_ndtr,special,Logarithm of Gaussian cumulative distribution function.,introspection: scipy.special.__all__
+special.log_softmax,special,Compute the logarithm of the softmax function.,introspection: scipy.special.__all__
+special.log_wright_bessel,special,"Natural logarithm of Wright's generalized Bessel function, see `wright_bessel`.",introspection: scipy.special.__all__
+special.loggamma,special,Principal branch of the logarithm of the gamma function.,introspection: scipy.special.__all__
+special.logit,special,Logit ufunc for ndarrays.,introspection: scipy.special.__all__
+special.logsumexp,special,Compute the log of the sum of exponentials of input elements.,introspection: scipy.special.__all__
+special.lpmv,special,Associated Legendre function of integer order and real degree.,introspection: scipy.special.__all__
+special.lqmn,special,Sequence of associated Legendre functions of the second kind.,introspection: scipy.special.__all__
+special.lqn,special,Legendre functions of the second kind.,introspection: scipy.special.__all__
+special.mathieu_a,special,Characteristic value of even Mathieu functions.,introspection: scipy.special.__all__
+special.mathieu_b,special,Characteristic value of odd Mathieu functions.,introspection: scipy.special.__all__
+special.mathieu_cem,special,Even Mathieu function and its derivative.,introspection: scipy.special.__all__
+special.mathieu_even_coef,special,Fourier coefficients for even Mathieu and modified Mathieu functions.,introspection: scipy.special.__all__
+special.mathieu_modcem1,special,Even modified Mathieu function of the first kind and its derivative.,introspection: scipy.special.__all__
+special.mathieu_modcem2,special,Even modified Mathieu function of the second kind and its derivative.,introspection: scipy.special.__all__
+special.mathieu_modsem1,special,Odd modified Mathieu function of the first kind and its derivative.,introspection: scipy.special.__all__
+special.mathieu_modsem2,special,Odd modified Mathieu function of the second kind and its derivative.,introspection: scipy.special.__all__
+special.mathieu_odd_coef,special,Fourier coefficients for odd Mathieu and modified Mathieu functions.,introspection: scipy.special.__all__
+special.mathieu_sem,special,Odd Mathieu function and its derivative.,introspection: scipy.special.__all__
+special.modfresnelm,special,Modified Fresnel negative integrals.,introspection: scipy.special.__all__
+special.modfresnelp,special,Modified Fresnel positive integrals.,introspection: scipy.special.__all__
+special.modstruve,special,Modified Struve function.,introspection: scipy.special.__all__
+special.multigammaln,special,"Returns the log of multivariate gamma, also sometimes called the",introspection: scipy.special.__all__
+special.nbdtr,special,Negative binomial cumulative distribution function.,introspection: scipy.special.__all__
+special.nbdtrc,special,Negative binomial survival function.,introspection: scipy.special.__all__
+special.nbdtri,special,Returns the inverse with respect to the parameter `p` of,introspection: scipy.special.__all__
+special.nbdtrik,special,Negative binomial percentile function.,introspection: scipy.special.__all__
+special.nbdtrin,special,Inverse of `nbdtr` vs `n`.,introspection: scipy.special.__all__
+special.ncfdtr,special,Cumulative distribution function of the non-central F distribution.,introspection: scipy.special.__all__
+special.ncfdtri,special,Inverse with respect to `f` of the CDF of the non-central F distribution.,introspection: scipy.special.__all__
+special.ncfdtridfd,special,Calculate degrees of freedom (denominator) for the noncentral F-distribution.,introspection: scipy.special.__all__
+special.ncfdtridfn,special,Calculate degrees of freedom (numerator) for the noncentral F-distribution.,introspection: scipy.special.__all__
+special.ncfdtrinc,special,Calculate non-centrality parameter for non-central F distribution.,introspection: scipy.special.__all__
+special.nctdtr,special,Cumulative distribution function of the non-central `t` distribution.,introspection: scipy.special.__all__
+special.nctdtridf,special,Calculate degrees of freedom for non-central t distribution.,introspection: scipy.special.__all__
+special.nctdtrinc,special,Calculate non-centrality parameter for non-central t distribution.,introspection: scipy.special.__all__
+special.nctdtrit,special,Inverse cumulative distribution function of the non-central t distribution.,introspection: scipy.special.__all__
+special.ndtr,special,Cumulative distribution of the standard normal distribution.,introspection: scipy.special.__all__
+special.ndtri,special,Inverse of `ndtr`.,introspection: scipy.special.__all__
+special.ndtri_exp,special,Inverse of `log_ndtr` vs x. Allows for greater precision than,introspection: scipy.special.__all__
+special.nrdtrimn,special,Calculate mean of normal distribution given other params.,introspection: scipy.special.__all__
+special.nrdtrisd,special,Calculate standard deviation of normal distribution given other params.,introspection: scipy.special.__all__
+special.obl_ang1,special,Oblate spheroidal angular function of the first kind and its derivative.,introspection: scipy.special.__all__
+special.obl_ang1_cv,special,Oblate spheroidal angular function obl_ang1 for precomputed characteristic value.,introspection: scipy.special.__all__
+special.obl_cv,special,Characteristic value of oblate spheroidal function.,introspection: scipy.special.__all__
+special.obl_cv_seq,special,Characteristic values for oblate spheroidal wave functions.,introspection: scipy.special.__all__
+special.obl_rad1,special,Oblate spheroidal radial function of the first kind and its derivative.,introspection: scipy.special.__all__
+special.obl_rad1_cv,special,Oblate spheroidal radial function obl_rad1 for precomputed characteristic value.,introspection: scipy.special.__all__
+special.obl_rad2,special,Oblate spheroidal radial function of the second kind and its derivative.,introspection: scipy.special.__all__
+special.obl_rad2_cv,special,Oblate spheroidal radial function obl_rad2 for precomputed characteristic value.,introspection: scipy.special.__all__
+special.owens_t,special,Owen's T Function.,introspection: scipy.special.__all__
+special.pbdn_seq,special,Parabolic cylinder functions Dn(z) and derivatives.,introspection: scipy.special.__all__
+special.pbdv,special,Parabolic cylinder function D.,introspection: scipy.special.__all__
+special.pbdv_seq,special,Parabolic cylinder functions Dv(x) and derivatives.,introspection: scipy.special.__all__
+special.pbvv,special,Parabolic cylinder function V.,introspection: scipy.special.__all__
+special.pbvv_seq,special,Parabolic cylinder functions Vv(x) and derivatives.,introspection: scipy.special.__all__
+special.pbwa,special,Parabolic cylinder function W.,introspection: scipy.special.__all__
+special.pdtr,special,Poisson cumulative distribution function.,introspection: scipy.special.__all__
+special.pdtrc,special,Poisson survival function.,introspection: scipy.special.__all__
+special.pdtri,special,Inverse of `pdtr` with respect to `m`.,introspection: scipy.special.__all__
+special.pdtrik,special,Inverse of `pdtr` with respect to `k`.,introspection: scipy.special.__all__
+special.perm,special,"Permutations of N things taken k at a time, i.e., k-permutations of N.",introspection: scipy.special.__all__
+special.poch,special,Pochhammer symbol.,introspection: scipy.special.__all__
+special.polygamma,special,Polygamma functions.,introspection: scipy.special.__all__
+special.powm1,special,Computes ``x**y - 1``.,introspection: scipy.special.__all__
+special.pro_ang1,special,Prolate spheroidal angular function of the first kind and its derivative.,introspection: scipy.special.__all__
+special.pro_ang1_cv,special,Prolate spheroidal angular function pro_ang1 for precomputed characteristic value.,introspection: scipy.special.__all__
+special.pro_cv,special,Characteristic value of prolate spheroidal function.,introspection: scipy.special.__all__
+special.pro_cv_seq,special,Characteristic values for prolate spheroidal wave functions.,introspection: scipy.special.__all__
+special.pro_rad1,special,Prolate spheroidal radial function of the first kind and its derivative.,introspection: scipy.special.__all__
+special.pro_rad1_cv,special,Prolate spheroidal radial function pro_rad1 for precomputed characteristic value.,introspection: scipy.special.__all__
+special.pro_rad2,special,Prolate spheroidal radial function of the second kind and its derivative.,introspection: scipy.special.__all__
+special.pro_rad2_cv,special,Prolate spheroidal radial function pro_rad2 for precomputed characteristic value.,introspection: scipy.special.__all__
+special.pseudo_huber,special,Pseudo-Huber loss function.,introspection: scipy.special.__all__
+special.radian,special,Convert from degrees to radians.,introspection: scipy.special.__all__
+special.rel_entr,special,Elementwise function for computing relative entropy.,introspection: scipy.special.__all__
+special.rgamma,special,Reciprocal of the gamma function.,introspection: scipy.special.__all__
+special.riccati_jn,special,Compute Riccati-Bessel function of the first kind and its derivative.,introspection: scipy.special.__all__
+special.riccati_yn,special,Compute Riccati-Bessel function of the second kind and its derivative.,introspection: scipy.special.__all__
+special.round,special,Round to the nearest integer.,introspection: scipy.special.__all__
+special.seterr,special,Set how special-function errors are handled.,introspection: scipy.special.__all__
+special.sh_chebyt,special,Shifted Chebyshev polynomial of the first kind.,introspection: scipy.special.__all__
+special.sh_chebyu,special,Shifted Chebyshev polynomial of the second kind.,introspection: scipy.special.__all__
+special.sh_jacobi,special,Shifted Jacobi polynomial.,introspection: scipy.special.__all__
+special.sh_legendre,special,Shifted Legendre polynomial.,introspection: scipy.special.__all__
+special.shichi,special,Hyperbolic sine and cosine integrals.,introspection: scipy.special.__all__
+special.sici,special,Sine and cosine integrals.,introspection: scipy.special.__all__
+special.sinc,special,Return the normalized sinc function.,introspection: scipy.special.__all__
+special.sindg,special,Sine of the angle `x` given in degrees.,introspection: scipy.special.__all__
+special.smirnov,special,Kolmogorov-Smirnov complementary cumulative distribution function.,introspection: scipy.special.__all__
+special.smirnovi,special,Inverse to `smirnov`.,introspection: scipy.special.__all__
+special.softmax,special,Compute the softmax function.,introspection: scipy.special.__all__
+special.softplus,special,Compute the softplus function element-wise.,introspection: scipy.special.__all__
+special.spence,special,"Spence's function, also known as the dilogarithm.",introspection: scipy.special.__all__
+special.sph_harm_y,special,Spherical harmonics.,introspection: scipy.special.__all__
+special.sph_harm_y_all,special,"All spherical harmonics up to the specified degree `n`, order `m`,",introspection: scipy.special.__all__
+special.sph_legendre_p,special,Spherical Legendre polynomial of the first kind.,introspection: scipy.special.__all__
+special.sph_legendre_p_all,special,All spherical Legendre polynomials of the first kind up to the,introspection: scipy.special.__all__
+special.spherical_in,special,Modified spherical Bessel function of the first kind or its derivative.,introspection: scipy.special.__all__
+special.spherical_jn,special,Spherical Bessel function of the first kind or its derivative.,introspection: scipy.special.__all__
+special.spherical_kn,special,Modified spherical Bessel function of the second kind or its derivative.,introspection: scipy.special.__all__
+special.spherical_yn,special,Spherical Bessel function of the second kind or its derivative.,introspection: scipy.special.__all__
+special.stdtr,special,Student t distribution cumulative distribution function.,introspection: scipy.special.__all__
+special.stdtridf,special,Inverse of `stdtr` vs df.,introspection: scipy.special.__all__
+special.stdtrit,special,The `p`-th quantile of the student t distribution.,introspection: scipy.special.__all__
+special.stirling2,special,Generate Stirling number(s) of the second kind.,introspection: scipy.special.__all__
+special.struve,special,Struve function.,introspection: scipy.special.__all__
+special.tandg,special,Tangent of angle `x` given in degrees.,introspection: scipy.special.__all__
+special.tklmbda,special,Cumulative distribution function of the Tukey lambda distribution.,introspection: scipy.special.__all__
+special.voigt_profile,special,Voigt profile.,introspection: scipy.special.__all__
+special.wofz,special,Faddeeva function.,introspection: scipy.special.__all__
+special.wright_bessel,special,Wright's generalized Bessel function.,introspection: scipy.special.__all__
+special.wrightomega,special,Wright Omega function.,introspection: scipy.special.__all__
+special.xlog1py,special,Compute ``x*log1p(y)`` so that the result is 0 if ``x = 0``.,introspection: scipy.special.__all__
+special.xlogy,special,Compute ``x*log(y)`` so that the result is 0 if ``x = 0``.,introspection: scipy.special.__all__
+special.y0,special,Bessel function of the second kind of order 0.,introspection: scipy.special.__all__
+special.y0_zeros,special,"Compute nt zeros of Bessel function Y0(z), and derivative at each zero.",introspection: scipy.special.__all__
+special.y1,special,Bessel function of the second kind of order 1.,introspection: scipy.special.__all__
+special.y1_zeros,special,"Compute nt zeros of Bessel function Y1(z), and derivative at each zero.",introspection: scipy.special.__all__
+special.y1p_zeros,special,"Compute nt zeros of Bessel derivative Y1'(z), and value at each zero.",introspection: scipy.special.__all__
+special.yn,special,Bessel function of the second kind of integer order and real argument.,introspection: scipy.special.__all__
+special.yn_zeros,special,Compute zeros of integer-order Bessel function Yn(x).,introspection: scipy.special.__all__
+special.ynp_zeros,special,Compute zeros of integer-order Bessel function derivatives Yn'(x).,introspection: scipy.special.__all__
+special.yv,special,Bessel function of the second kind of real order and complex argument.,introspection: scipy.special.__all__
+special.yve,special,Exponentially scaled Bessel function of the second kind of real order.,introspection: scipy.special.__all__
+special.yvp,special,Compute derivatives of Bessel functions of the second kind.,introspection: scipy.special.__all__
+special.zeta,special,Riemann or Hurwitz zeta function.,introspection: scipy.special.__all__
+special.zetac,special,Riemann zeta function minus 1.,introspection: scipy.special.__all__
+special.roots_chebyc,special,Gauss-Chebyshev (first kind) quadrature.,introspection: scipy.special.__all__
+special.roots_gegenbauer,special,Gauss-Gegenbauer quadrature.,introspection: scipy.special.__all__
+special.psi,special,The digamma function.,introspection: scipy.special.__all__
+special.roots_hermite,special,Gauss-Hermite (physicist's) quadrature.,introspection: scipy.special.__all__
+special.roots_hermitenorm,special,Gauss-Hermite (statistician's) quadrature.,introspection: scipy.special.__all__
+special.roots_jacobi,special,Gauss-Jacobi quadrature.,introspection: scipy.special.__all__
+special.jv,special,Bessel function of the first kind of real order and complex argument.,introspection: scipy.special.__all__
+special.roots_sh_jacobi,special,Gauss-Jacobi (shifted) quadrature.,introspection: scipy.special.__all__
+special.roots_laguerre,special,Gauss-Laguerre quadrature.,introspection: scipy.special.__all__
+special.roots_genlaguerre,special,Gauss-generalized Laguerre quadrature.,introspection: scipy.special.__all__
+special.roots_legendre,special,Gauss-Legendre quadrature.,introspection: scipy.special.__all__
+special.roots_sh_legendre,special,Gauss-Legendre (shifted) quadrature.,introspection: scipy.special.__all__
+special.roots_chebys,special,Gauss-Chebyshev (second kind) quadrature.,introspection: scipy.special.__all__
+special.roots_chebyt,special,Gauss-Chebyshev (first kind) quadrature.,introspection: scipy.special.__all__
+special.roots_chebyu,special,Gauss-Chebyshev (second kind) quadrature.,introspection: scipy.special.__all__
+special.roots_sh_chebyt,special,"Gauss-Chebyshev (first kind, shifted) quadrature.",introspection: scipy.special.__all__
+special.roots_sh_chebyu,special,"Gauss-Chebyshev (second kind, shifted) quadrature.",introspection: scipy.special.__all__
+stats.Binomial,stats.distributions,Binomial distribution with prescribed success probability and number of trials,introspection: scipy.stats.__all__
+stats.BootstrapMethod,stats.classes,Configuration information for a bootstrap confidence interval.,introspection: scipy.stats.__all__
+stats.CensoredData,stats.classes,Instances of this class represent censored data.,introspection: scipy.stats.__all__
+stats.ConstantInputWarning,stats.descriptive,Warns when all values in data are exactly equal.,introspection: scipy.stats.__all__
+stats.Covariance,stats.classes,Representation of a covariance matrix.,introspection: scipy.stats.__all__
+stats.DegenerateDataWarning,stats.descriptive,Warns when data is degenerate and results may not be reliable.,introspection: scipy.stats.__all__
+stats.FitError,stats.descriptive,Represents an error condition when fitting a distribution to data.,introspection: scipy.stats.__all__
+stats.Logistic,stats.distributions,Standard logistic distribution.,introspection: scipy.stats.__all__
+stats.Mixture,stats.distributions,Representation of a mixture distribution.,introspection: scipy.stats.__all__
+stats.MonteCarloMethod,stats.classes,Configuration information for a Monte Carlo hypothesis test.,introspection: scipy.stats.__all__
+stats.NearConstantInputWarning,stats.descriptive,Warns when all values in data are nearly equal.,introspection: scipy.stats.__all__
+stats.Normal,stats.distributions,Normal distribution with prescribed mean and standard deviation.,introspection: scipy.stats.__all__
+stats.PermutationMethod,stats.classes,Configuration information for a permutation hypothesis test.,introspection: scipy.stats.__all__
+stats.Uniform,stats.distributions,Uniform distribution.,introspection: scipy.stats.__all__
+stats.abs,stats.descriptive,Absolute value of a random variable.,introspection: scipy.stats.__all__
+stats.alexandergovern,stats.tests,Performs the Alexander Govern test.,introspection: scipy.stats.__all__
+stats.alpha,stats.distributions,An alpha continuous random variable.,introspection: scipy.stats.__all__
+stats.anderson,stats.tests,Anderson-Darling test for data coming from a particular distribution.,introspection: scipy.stats.__all__
+stats.anderson_ksamp,stats.tests,The Anderson-Darling test for k-samples.,introspection: scipy.stats.__all__
+stats.anglit,stats.distributions,An anglit continuous random variable.,introspection: scipy.stats.__all__
+stats.ansari,stats.tests,Perform the Ansari-Bradley test for equal scale parameters.,introspection: scipy.stats.__all__
+stats.arcsine,stats.distributions,An arcsine continuous random variable.,introspection: scipy.stats.__all__
+stats.argus,stats.distributions,Argus distribution.,introspection: scipy.stats.__all__
+stats.barnard_exact,stats.tests,Perform a Barnard exact test on a 2x2 contingency table.,introspection: scipy.stats.__all__
+stats.bartlett,stats.tests,Perform Bartlett's test for equal variances.,introspection: scipy.stats.__all__
+stats.bayes_mvs,stats.descriptive,"Bayesian confidence intervals for the mean, var, and std.",introspection: scipy.stats.__all__
+stats.bernoulli,stats.distributions,A Bernoulli discrete random variable.,introspection: scipy.stats.__all__
+stats.beta,stats.distributions,A beta continuous random variable.,introspection: scipy.stats.__all__
+stats.betabinom,stats.distributions,A beta-binomial discrete random variable.,introspection: scipy.stats.__all__
+stats.betanbinom,stats.distributions,A beta-negative-binomial discrete random variable.,introspection: scipy.stats.__all__
+stats.betaprime,stats.distributions,A beta prime continuous random variable.,introspection: scipy.stats.__all__
+stats.binned_statistic,stats.descriptive,Compute a binned statistic for one or more sets of data.,introspection: scipy.stats.__all__
+stats.binned_statistic_2d,stats.descriptive,Compute a bidimensional binned statistic for one or more sets of data.,introspection: scipy.stats.__all__
+stats.binned_statistic_dd,stats.descriptive,Compute a multidimensional binned statistic for a set of data.,introspection: scipy.stats.__all__
+stats.binom,stats.distributions,A binomial discrete random variable.,introspection: scipy.stats.__all__
+stats.binomtest,stats.tests,Perform a test that the probability of success is p.,introspection: scipy.stats.__all__
+stats.boltzmann,stats.distributions,A Boltzmann (Truncated Discrete Exponential) random variable.,introspection: scipy.stats.__all__
+stats.bootstrap,stats.tests,Compute a two-sided bootstrap confidence interval of a statistic.,introspection: scipy.stats.__all__
+stats.boschloo_exact,stats.tests,Perform Boschloo's exact test on a 2x2 contingency table.,introspection: scipy.stats.__all__
+stats.boxcox,stats.descriptive,Return a dataset transformed by a Box-Cox power transformation.,introspection: scipy.stats.__all__
+stats.boxcox_llf,stats.descriptive,The boxcox log-likelihood function.,introspection: scipy.stats.__all__
+stats.boxcox_normmax,stats.descriptive,Compute optimal Box-Cox transform parameter for input data.,introspection: scipy.stats.__all__
+stats.boxcox_normplot,stats.descriptive,"Compute parameters for a Box-Cox normality plot, optionally show it.",introspection: scipy.stats.__all__
+stats.bradford,stats.distributions,A Bradford continuous random variable.,introspection: scipy.stats.__all__
+stats.brunnermunzel,stats.tests,Compute the Brunner-Munzel test on samples x and y.,introspection: scipy.stats.__all__
+stats.burr,stats.distributions,A Burr (Type III) continuous random variable.,introspection: scipy.stats.__all__
+stats.burr12,stats.distributions,A Burr (Type XII) continuous random variable.,introspection: scipy.stats.__all__
+stats.bws_test,stats.tests,Perform the Baumgartner-Weiss-Schindler test on two independent samples.,introspection: scipy.stats.__all__
+stats.cauchy,stats.distributions,A Cauchy continuous random variable.,introspection: scipy.stats.__all__
+stats.chatterjeexi,stats.tests,Compute the xi correlation and perform a test of independence.,introspection: scipy.stats.__all__
+stats.chi,stats.distributions,A chi continuous random variable.,introspection: scipy.stats.__all__
+stats.chi2,stats.distributions,A chi-squared continuous random variable.,introspection: scipy.stats.__all__
+stats.chi2_contingency,stats.tests,Chi-square test of independence of variables in a contingency table.,introspection: scipy.stats.__all__
+stats.chisquare,stats.tests,Perform Pearson's chi-squared test.,introspection: scipy.stats.__all__
+stats.circmean,stats.descriptive,Compute the circular mean of a sample of angle observations.,introspection: scipy.stats.__all__
+stats.circstd,stats.descriptive,Compute the circular standard deviation of a sample of angle observations.,introspection: scipy.stats.__all__
+stats.circvar,stats.descriptive,Compute the circular variance of a sample of angle observations.,introspection: scipy.stats.__all__
+stats.combine_pvalues,stats.tests,Combine p-values from independent tests that bear upon the same hypothesis.,introspection: scipy.stats.__all__
+stats.cosine,stats.distributions,A cosine continuous random variable.,introspection: scipy.stats.__all__
+stats.cramervonmises,stats.tests,Perform the one-sample Cramér-von Mises test for goodness of fit.,introspection: scipy.stats.__all__
+stats.cramervonmises_2samp,stats.tests,Perform the two-sample Cramér-von Mises test for goodness of fit.,introspection: scipy.stats.__all__
+stats.crystalball,stats.distributions,Crystalball distribution.,introspection: scipy.stats.__all__
+stats.cumfreq,stats.descriptive,"Return a cumulative frequency histogram, using the histogram function.",introspection: scipy.stats.__all__
+stats.describe,stats.descriptive,Compute several descriptive statistics of the passed array.,introspection: scipy.stats.__all__
+stats.dgamma,stats.distributions,A double gamma continuous random variable.,introspection: scipy.stats.__all__
+stats.differential_entropy,stats.descriptive,"Given a sample of a distribution, estimate the differential entropy.",introspection: scipy.stats.__all__
+stats.directional_stats,stats.descriptive,Computes sample statistics for directional data.,introspection: scipy.stats.__all__
+stats.dirichlet,stats.distributions,A Dirichlet random variable.,introspection: scipy.stats.__all__
+stats.dirichlet_multinomial,stats.distributions,A Dirichlet multinomial random variable.,introspection: scipy.stats.__all__
+stats.dlaplace,stats.distributions,A  Laplacian discrete random variable.,introspection: scipy.stats.__all__
+stats.dpareto_lognorm,stats.distributions,A double Pareto lognormal continuous random variable.,introspection: scipy.stats.__all__
+stats.dunnett,stats.tests,Dunnett's test: multiple comparisons of means against a control group.,introspection: scipy.stats.__all__
+stats.dweibull,stats.distributions,A double Weibull continuous random variable.,introspection: scipy.stats.__all__
+stats.ecdf,stats.descriptive,Empirical cumulative distribution function of a sample.,introspection: scipy.stats.__all__
+stats.energy_distance,stats.descriptive,Compute the energy distance between two 1D distributions.,introspection: scipy.stats.__all__
+stats.entropy,stats.descriptive,Calculate the Shannon entropy/relative entropy of given distribution(s).,introspection: scipy.stats.__all__
+stats.epps_singleton_2samp,stats.tests,Compute the Epps-Singleton (ES) test statistic.,introspection: scipy.stats.__all__
+stats.erlang,stats.distributions,An Erlang continuous random variable.,introspection: scipy.stats.__all__
+stats.estimated_cdf,stats.descriptive,Estimate the CDF of the distribution underlying a sample.,introspection: scipy.stats.__all__
+stats.exp,stats.descriptive,Natural exponential of a random variable.,introspection: scipy.stats.__all__
+stats.expectile,stats.descriptive,Compute the expectile at the specified level.,introspection: scipy.stats.__all__
+stats.expon,stats.distributions,An exponential continuous random variable.,introspection: scipy.stats.__all__
+stats.exponnorm,stats.distributions,An exponentially modified Normal continuous random variable.,introspection: scipy.stats.__all__
+stats.exponpow,stats.distributions,An exponential power continuous random variable.,introspection: scipy.stats.__all__
+stats.exponweib,stats.distributions,An exponentiated Weibull continuous random variable.,introspection: scipy.stats.__all__
+stats.f,stats.distributions,An F continuous random variable.,introspection: scipy.stats.__all__
+stats.f_oneway,stats.tests,Perform one-way ANOVA.,introspection: scipy.stats.__all__
+stats.false_discovery_control,stats.tests,Adjust p-values to control the false discovery rate.,introspection: scipy.stats.__all__
+stats.fatiguelife,stats.distributions,A fatigue-life (Birnbaum-Saunders) continuous random variable.,introspection: scipy.stats.__all__
+stats.fisher_exact,stats.tests,Perform a Fisher exact test on a contingency table.,introspection: scipy.stats.__all__
+stats.fisk,stats.distributions,A Fisk continuous random variable.,introspection: scipy.stats.__all__
+stats.fit,stats.descriptive,Fit a discrete or continuous distribution to data.,introspection: scipy.stats.__all__
+stats.fligner,stats.tests,Perform Fligner-Killeen test for equality of variance.,introspection: scipy.stats.__all__
+stats.foldcauchy,stats.distributions,A folded Cauchy continuous random variable.,introspection: scipy.stats.__all__
+stats.foldnorm,stats.distributions,A folded normal continuous random variable.,introspection: scipy.stats.__all__
+stats.friedmanchisquare,stats.tests,Compute the Friedman test for repeated samples.,introspection: scipy.stats.__all__
+stats.gamma,stats.distributions,A gamma continuous random variable.,introspection: scipy.stats.__all__
+stats.gausshyper,stats.distributions,A Gauss hypergeometric continuous random variable.,introspection: scipy.stats.__all__
+stats.gaussian_kde,stats.classes,Representation of a kernel-density estimate using Gaussian kernels.,introspection: scipy.stats.__all__
+stats.genexpon,stats.distributions,A generalized exponential continuous random variable.,introspection: scipy.stats.__all__
+stats.genextreme,stats.distributions,A generalized extreme value continuous random variable.,introspection: scipy.stats.__all__
+stats.gengamma,stats.distributions,A generalized gamma continuous random variable.,introspection: scipy.stats.__all__
+stats.genhalflogistic,stats.distributions,A generalized half-logistic continuous random variable.,introspection: scipy.stats.__all__
+stats.genhyperbolic,stats.distributions,A generalized hyperbolic continuous random variable.,introspection: scipy.stats.__all__
+stats.geninvgauss,stats.distributions,A Generalized Inverse Gaussian continuous random variable.,introspection: scipy.stats.__all__
+stats.genlogistic,stats.distributions,A generalized logistic continuous random variable.,introspection: scipy.stats.__all__
+stats.gennorm,stats.distributions,A (symmetric) generalized normal continuous random variable.,introspection: scipy.stats.__all__
+stats.genpareto,stats.distributions,A generalized Pareto continuous random variable.,introspection: scipy.stats.__all__
+stats.geom,stats.distributions,A geometric discrete random variable.,introspection: scipy.stats.__all__
+stats.gibrat,stats.distributions,A Gibrat continuous random variable.,introspection: scipy.stats.__all__
+stats.gmean,stats.descriptive,Compute the weighted geometric mean along the specified axis.,introspection: scipy.stats.__all__
+stats.gompertz,stats.distributions,A Gompertz (or truncated Gumbel) continuous random variable.,introspection: scipy.stats.__all__
+stats.goodness_of_fit,stats.tests,Perform a goodness of fit test comparing data to a distribution family.,introspection: scipy.stats.__all__
+stats.gstd,stats.descriptive,Calculate the geometric standard deviation of an array.,introspection: scipy.stats.__all__
+stats.gumbel_l,stats.distributions,A left-skewed Gumbel continuous random variable.,introspection: scipy.stats.__all__
+stats.gumbel_r,stats.distributions,A right-skewed Gumbel continuous random variable.,introspection: scipy.stats.__all__
+stats.gzscore,stats.descriptive,Compute the geometric standard score.,introspection: scipy.stats.__all__
+stats.halfcauchy,stats.distributions,A Half-Cauchy continuous random variable.,introspection: scipy.stats.__all__
+stats.halfgennorm,stats.distributions,The upper half of a generalized normal continuous random variable.,introspection: scipy.stats.__all__
+stats.halflogistic,stats.distributions,A half-logistic continuous random variable.,introspection: scipy.stats.__all__
+stats.halfnorm,stats.distributions,A half-normal continuous random variable.,introspection: scipy.stats.__all__
+stats.hmean,stats.descriptive,Calculate the weighted harmonic mean along the specified axis.,introspection: scipy.stats.__all__
+stats.hypergeom,stats.distributions,A hypergeometric discrete random variable.,introspection: scipy.stats.__all__
+stats.hypsecant,stats.distributions,A hyperbolic secant continuous random variable.,introspection: scipy.stats.__all__
+stats.invgamma,stats.distributions,An inverted gamma continuous random variable.,introspection: scipy.stats.__all__
+stats.invgauss,stats.distributions,An inverse Gaussian continuous random variable.,introspection: scipy.stats.__all__
+stats.invweibull,stats.distributions,An inverted Weibull continuous random variable.,introspection: scipy.stats.__all__
+stats.invwishart,stats.distributions,An inverse Wishart random variable.,introspection: scipy.stats.__all__
+stats.iqr,stats.descriptive,Compute the interquartile range of the data along the specified axis.,introspection: scipy.stats.__all__
+stats.irwinhall,stats.distributions,An Irwin-Hall (Uniform Sum) continuous random variable.,introspection: scipy.stats.__all__
+stats.jarque_bera,stats.tests,Perform the Jarque-Bera goodness of fit test on sample data.,introspection: scipy.stats.__all__
+stats.jf_skew_t,stats.distributions,Jones and Faddy skew-t distribution.,introspection: scipy.stats.__all__
+stats.johnsonsb,stats.distributions,A Johnson SB continuous random variable.,introspection: scipy.stats.__all__
+stats.johnsonsu,stats.distributions,A Johnson SU continuous random variable.,introspection: scipy.stats.__all__
+stats.kappa3,stats.distributions,Kappa 3 parameter distribution.,introspection: scipy.stats.__all__
+stats.kappa4,stats.distributions,Kappa 4 parameter distribution.,introspection: scipy.stats.__all__
+stats.kendalltau,stats.tests,"Calculate Kendall's tau, a correlation measure for ordinal data.",introspection: scipy.stats.__all__
+stats.kruskal,stats.tests,Compute the Kruskal-Wallis H-test for independent samples.,introspection: scipy.stats.__all__
+stats.ks_1samp,stats.tests,Performs the one-sample Kolmogorov-Smirnov test for goodness of fit.,introspection: scipy.stats.__all__
+stats.ks_2samp,stats.tests,Performs the two-sample Kolmogorov-Smirnov test for goodness of fit.,introspection: scipy.stats.__all__
+stats.ksone,stats.distributions,Kolmogorov-Smirnov one-sided test statistic distribution.,introspection: scipy.stats.__all__
+stats.kstat,stats.descriptive,Return the `n` th k-statistic ( ``1<=n<=4`` so far).,introspection: scipy.stats.__all__
+stats.kstatvar,stats.descriptive,Return an unbiased estimator of the variance of the k-statistic.,introspection: scipy.stats.__all__
+stats.kstest,stats.tests,Performs the (one-sample or two-sample) Kolmogorov-Smirnov test for,introspection: scipy.stats.__all__
+stats.kstwo,stats.distributions,Kolmogorov-Smirnov two-sided test statistic distribution.,introspection: scipy.stats.__all__
+stats.kstwobign,stats.distributions,Limiting distribution of scaled Kolmogorov-Smirnov two-sided test statistic.,introspection: scipy.stats.__all__
+stats.kurtosis,stats.descriptive,Compute the kurtosis (Fisher or Pearson) of a dataset.,introspection: scipy.stats.__all__
+stats.kurtosistest,stats.tests,Test whether a dataset has normal kurtosis.,introspection: scipy.stats.__all__
+stats.landau,stats.distributions,A Landau continuous random variable.,introspection: scipy.stats.__all__
+stats.laplace,stats.distributions,A Laplace continuous random variable.,introspection: scipy.stats.__all__
+stats.laplace_asymmetric,stats.distributions,An asymmetric Laplace continuous random variable.,introspection: scipy.stats.__all__
+stats.levene,stats.tests,Perform Levene test for equal variances.,introspection: scipy.stats.__all__
+stats.levy,stats.distributions,A Levy continuous random variable.,introspection: scipy.stats.__all__
+stats.levy_l,stats.distributions,A left-skewed Levy continuous random variable.,introspection: scipy.stats.__all__
+stats.levy_stable,stats.distributions,A Levy-stable continuous random variable.,introspection: scipy.stats.__all__
+stats.linregress,stats.tests,Calculate a linear least-squares regression for two sets of measurements.,introspection: scipy.stats.__all__
+stats.lmoment,stats.descriptive,Compute L-moments of a sample from a continuous distribution.,introspection: scipy.stats.__all__
+stats.log,stats.descriptive,Natural logarithm of a non-negative random variable.,introspection: scipy.stats.__all__
+stats.loggamma,stats.distributions,A log gamma continuous random variable.,introspection: scipy.stats.__all__
+stats.logistic,stats.distributions,A logistic (or Sech-squared) continuous random variable.,introspection: scipy.stats.__all__
+stats.loglaplace,stats.distributions,A log-Laplace continuous random variable.,introspection: scipy.stats.__all__
+stats.lognorm,stats.distributions,A lognormal continuous random variable.,introspection: scipy.stats.__all__
+stats.logrank,stats.descriptive,Compare the survival distributions of two samples via the logrank test.,introspection: scipy.stats.__all__
+stats.logser,stats.distributions,"A Logarithmic (Log-Series, Series) discrete random variable.",introspection: scipy.stats.__all__
+stats.loguniform,stats.distributions,A loguniform or reciprocal continuous random variable.,introspection: scipy.stats.__all__
+stats.lomax,stats.distributions,A Lomax (Pareto of the second kind) continuous random variable.,introspection: scipy.stats.__all__
+stats.make_distribution,stats.descriptive,Generate a `UnivariateDistribution` class from a compatible object.,introspection: scipy.stats.__all__
+stats.mannwhitneyu,stats.tests,Perform the Mann-Whitney U rank test on two independent samples.,introspection: scipy.stats.__all__
+stats.matrix_normal,stats.distributions,A matrix normal random variable.,introspection: scipy.stats.__all__
+stats.matrix_t,stats.distributions,A matrix t-random variable.,introspection: scipy.stats.__all__
+stats.maxwell,stats.distributions,A Maxwell continuous random variable.,introspection: scipy.stats.__all__
+stats.median_abs_deviation,stats.descriptive,Compute the median absolute deviation of the data along the given axis.,introspection: scipy.stats.__all__
+stats.median_test,stats.tests,Perform a Mood's median test.,introspection: scipy.stats.__all__
+stats.mielke,stats.distributions,A Mielke Beta-Kappa / Dagum continuous random variable.,introspection: scipy.stats.__all__
+stats.mode,stats.descriptive,Return an array of the modal (most common) value in the passed array.,introspection: scipy.stats.__all__
+stats.moment,stats.descriptive,Calculate the nth moment about the mean for a sample.,introspection: scipy.stats.__all__
+stats.monte_carlo_test,stats.tests,Perform a Monte Carlo hypothesis test.,introspection: scipy.stats.__all__
+stats.mood,stats.tests,Perform Mood's test for equal scale parameters.,introspection: scipy.stats.__all__
+stats.moyal,stats.distributions,A Moyal continuous random variable.,introspection: scipy.stats.__all__
+stats.multinomial,stats.distributions,A multinomial random variable.,introspection: scipy.stats.__all__
+stats.multiscale_graphcorr,stats.tests,Computes the Multiscale Graph Correlation (MGC) test statistic.,introspection: scipy.stats.__all__
+stats.multivariate_hypergeom,stats.distributions,A multivariate hypergeometric random variable.,introspection: scipy.stats.__all__
+stats.multivariate_normal,stats.distributions,A multivariate normal random variable.,introspection: scipy.stats.__all__
+stats.multivariate_t,stats.distributions,A multivariate t-distributed random variable.,introspection: scipy.stats.__all__
+stats.mvsdist,stats.descriptive,"'Frozen' distributions for mean, variance, and standard deviation of data.",introspection: scipy.stats.__all__
+stats.nakagami,stats.distributions,A Nakagami continuous random variable.,introspection: scipy.stats.__all__
+stats.nbinom,stats.distributions,A negative binomial discrete random variable.,introspection: scipy.stats.__all__
+stats.ncf,stats.distributions,A non-central F distribution continuous random variable.,introspection: scipy.stats.__all__
+stats.nchypergeom_fisher,stats.distributions,A Fisher's noncentral hypergeometric discrete random variable.,introspection: scipy.stats.__all__
+stats.nchypergeom_wallenius,stats.distributions,A Wallenius' noncentral hypergeometric discrete random variable.,introspection: scipy.stats.__all__
+stats.nct,stats.distributions,A non-central Student's t continuous random variable.,introspection: scipy.stats.__all__
+stats.ncx2,stats.distributions,A non-central chi-squared continuous random variable.,introspection: scipy.stats.__all__
+stats.nhypergeom,stats.distributions,A negative hypergeometric discrete random variable.,introspection: scipy.stats.__all__
+stats.norm,stats.distributions,A normal continuous random variable.,introspection: scipy.stats.__all__
+stats.normal_inverse_gamma,stats.distributions,Normal-inverse-gamma distribution.,introspection: scipy.stats.__all__
+stats.normaltest,stats.tests,Test whether a sample differs from a normal distribution.,introspection: scipy.stats.__all__
+stats.norminvgauss,stats.distributions,A Normal Inverse Gaussian continuous random variable.,introspection: scipy.stats.__all__
+stats.obrientransform,stats.descriptive,Compute the O'Brien transform on input data (any number of arrays).,introspection: scipy.stats.__all__
+stats.order_statistic,stats.descriptive,Probability distribution of an order statistic.,introspection: scipy.stats.__all__
+stats.ortho_group,stats.distributions,An Orthogonal matrix (O(N)) random variable.,introspection: scipy.stats.__all__
+stats.page_trend_test,stats.tests,"Perform Page's Test, a measure of trend in observations between treatments.",introspection: scipy.stats.__all__
+stats.pareto,stats.distributions,A Pareto continuous random variable.,introspection: scipy.stats.__all__
+stats.pearson3,stats.distributions,A pearson type III continuous random variable.,introspection: scipy.stats.__all__
+stats.pearsonr,stats.tests,Pearson correlation coefficient and p-value for testing non-correlation.,introspection: scipy.stats.__all__
+stats.percentileofscore,stats.descriptive,Compute the percentile rank of a score relative to a list of scores.,introspection: scipy.stats.__all__
+stats.permutation_test,stats.tests,Performs a permutation test of a given statistic on provided data.,introspection: scipy.stats.__all__
+stats.planck,stats.distributions,A Planck discrete exponential random variable.,introspection: scipy.stats.__all__
+stats.pmean,stats.descriptive,Calculate the weighted power mean along the specified axis.,introspection: scipy.stats.__all__
+stats.pointbiserialr,stats.tests,Calculate a point biserial correlation coefficient and its p-value.,introspection: scipy.stats.__all__
+stats.poisson,stats.distributions,A Poisson discrete random variable.,introspection: scipy.stats.__all__
+stats.poisson_binom,stats.distributions,A Poisson Binomial discrete random variable.,introspection: scipy.stats.__all__
+stats.poisson_means_test,stats.tests,"Performs the Poisson means test, AKA the ""E-test"".",introspection: scipy.stats.__all__
+stats.power,stats.tests,Simulate the power of a hypothesis test under an alternative hypothesis.,introspection: scipy.stats.__all__
+stats.power_divergence,stats.tests,Cressie-Read power divergence statistic and goodness of fit test.,introspection: scipy.stats.__all__
+stats.powerlaw,stats.distributions,A power-function continuous random variable.,introspection: scipy.stats.__all__
+stats.powerlognorm,stats.distributions,A power log-normal continuous random variable.,introspection: scipy.stats.__all__
+stats.powernorm,stats.distributions,A power normal continuous random variable.,introspection: scipy.stats.__all__
+stats.ppcc_max,stats.descriptive,Calculate the shape parameter that maximizes the PPCC.,introspection: scipy.stats.__all__
+stats.ppcc_plot,stats.descriptive,Calculate and optionally plot probability plot correlation coefficient.,introspection: scipy.stats.__all__
+stats.probplot,stats.descriptive,"Calculate quantiles for a probability plot, and optionally show the plot.",introspection: scipy.stats.__all__
+stats.quantile,stats.descriptive,Compute the p-th quantile of the data along the specified axis.,introspection: scipy.stats.__all__
+stats.quantile_test,stats.tests,Perform a quantile test and compute a confidence interval of the quantile.,introspection: scipy.stats.__all__
+stats.randint,stats.distributions,A uniform discrete random variable.,introspection: scipy.stats.__all__
+stats.random_correlation,stats.distributions,A random correlation matrix.,introspection: scipy.stats.__all__
+stats.random_table,stats.distributions,Contingency tables from independent samples with fixed marginal sums.,introspection: scipy.stats.__all__
+stats.rankdata,stats.descriptive,"Assign ranks to data, dealing with ties appropriately.",introspection: scipy.stats.__all__
+stats.ranksums,stats.tests,Compute the Wilcoxon rank-sum statistic for two samples.,introspection: scipy.stats.__all__
+stats.rayleigh,stats.distributions,A Rayleigh continuous random variable.,introspection: scipy.stats.__all__
+stats.rdist,stats.distributions,An R-distributed (symmetric beta) continuous random variable.,introspection: scipy.stats.__all__
+stats.recipinvgauss,stats.distributions,A reciprocal inverse Gaussian continuous random variable.,introspection: scipy.stats.__all__
+stats.reciprocal,stats.distributions,A loguniform or reciprocal continuous random variable.,introspection: scipy.stats.__all__
+stats.rel_breitwigner,stats.distributions,A relativistic Breit-Wigner random variable.,introspection: scipy.stats.__all__
+stats.relfreq,stats.descriptive,"Return a relative frequency histogram, using the histogram function.",introspection: scipy.stats.__all__
+stats.rice,stats.distributions,A Rice continuous random variable.,introspection: scipy.stats.__all__
+stats.rv_continuous,stats.classes,A generic continuous random variable class meant for subclassing.,introspection: scipy.stats.__all__
+stats.rv_discrete,stats.classes,A generic discrete random variable class meant for subclassing.,introspection: scipy.stats.__all__
+stats.rv_histogram,stats.classes,Generates a distribution given by a histogram.,introspection: scipy.stats.__all__
+stats.scoreatpercentile,stats.descriptive,Calculate the score at a given percentile of the input sequence.,introspection: scipy.stats.__all__
+stats.sem,stats.descriptive,Compute standard error of the mean.,introspection: scipy.stats.__all__
+stats.semicircular,stats.distributions,A semicircular continuous random variable.,introspection: scipy.stats.__all__
+stats.shapiro,stats.tests,Perform the Shapiro-Wilk test for normality.,introspection: scipy.stats.__all__
+stats.siegelslopes,stats.tests,"Computes the Siegel estimator for a set of points (x, y).",introspection: scipy.stats.__all__
+stats.sigmaclip,stats.descriptive,Perform iterative sigma-clipping of array elements.,introspection: scipy.stats.__all__
+stats.skellam,stats.distributions,A  Skellam discrete random variable.,introspection: scipy.stats.__all__
+stats.skew,stats.descriptive,Compute the sample skewness of a data set.,introspection: scipy.stats.__all__
+stats.skewcauchy,stats.distributions,A skewed Cauchy random variable.,introspection: scipy.stats.__all__
+stats.skewnorm,stats.distributions,A skew-normal random variable.,introspection: scipy.stats.__all__
+stats.skewtest,stats.tests,Test whether the skew is different from the normal distribution.,introspection: scipy.stats.__all__
+stats.sobol_indices,stats.descriptive,Global sensitivity indices of Sobol'.,introspection: scipy.stats.__all__
+stats.somersd,stats.tests,"Calculates Somers' D, an asymmetric measure of ordinal association.",introspection: scipy.stats.__all__
+stats.spearmanr,stats.tests,Calculate a Spearman correlation coefficient with associated p-value.,introspection: scipy.stats.__all__
+stats.spearmanrho,stats.tests,Calculate a Spearman rho correlation coefficient with associated p-value.,introspection: scipy.stats.__all__
+stats.special_ortho_group,stats.distributions,A Special Orthogonal matrix (SO(N)) random variable.,introspection: scipy.stats.__all__
+stats.studentized_range,stats.distributions,A studentized range continuous random variable.,introspection: scipy.stats.__all__
+stats.t,stats.distributions,A Student's t continuous random variable.,introspection: scipy.stats.__all__
+stats.theilslopes,stats.tests,"Computes the Theil-Sen estimator for a set of points (x, y).",introspection: scipy.stats.__all__
+stats.tiecorrect,stats.descriptive,Tie correction factor for Mann-Whitney U and Kruskal-Wallis H tests.,introspection: scipy.stats.__all__
+stats.tmax,stats.descriptive,Compute the trimmed maximum.,introspection: scipy.stats.__all__
+stats.tmean,stats.descriptive,Compute the trimmed mean.,introspection: scipy.stats.__all__
+stats.tmin,stats.descriptive,Compute the trimmed minimum.,introspection: scipy.stats.__all__
+stats.trapezoid,stats.distributions,A trapezoidal continuous random variable.,introspection: scipy.stats.__all__
+stats.triang,stats.distributions,A triangular continuous random variable.,introspection: scipy.stats.__all__
+stats.trim1,stats.descriptive,Slice off a proportion from ONE end of the passed array distribution.,introspection: scipy.stats.__all__
+stats.trim_mean,stats.descriptive,Return mean of array after trimming a specified fraction of extreme values.,introspection: scipy.stats.__all__
+stats.trimboth,stats.descriptive,Slice off a proportion of items from both ends of an array.,introspection: scipy.stats.__all__
+stats.truncate,stats.descriptive,Truncate the support of a random variable.,introspection: scipy.stats.__all__
+stats.truncexpon,stats.distributions,A truncated exponential continuous random variable.,introspection: scipy.stats.__all__
+stats.truncnorm,stats.distributions,A truncated normal continuous random variable.,introspection: scipy.stats.__all__
+stats.truncpareto,stats.distributions,An upper truncated Pareto continuous random variable.,introspection: scipy.stats.__all__
+stats.truncweibull_min,stats.distributions,A doubly truncated Weibull minimum continuous random variable.,introspection: scipy.stats.__all__
+stats.tsem,stats.descriptive,Compute the trimmed standard error of the mean.,introspection: scipy.stats.__all__
+stats.tstd,stats.descriptive,Compute the trimmed sample standard deviation.,introspection: scipy.stats.__all__
+stats.ttest_1samp,stats.tests,Calculate the T-test for the mean of ONE group of scores.,introspection: scipy.stats.__all__
+stats.ttest_ind,stats.tests,Calculate the T-test for the means of *two independent* samples of scores.,introspection: scipy.stats.__all__
+stats.ttest_ind_from_stats,stats.tests,T-test for means of two independent samples from descriptive statistics.,introspection: scipy.stats.__all__
+stats.ttest_rel,stats.tests,"Calculate the t-test on TWO RELATED samples of scores, a and b.",introspection: scipy.stats.__all__
+stats.tukey_hsd,stats.tests,Perform Tukey's HSD test for equality of means over multiple treatments.,introspection: scipy.stats.__all__
+stats.tukeylambda,stats.distributions,A Tukey-Lamdba continuous random variable.,introspection: scipy.stats.__all__
+stats.tvar,stats.descriptive,Compute the trimmed variance.,introspection: scipy.stats.__all__
+stats.uniform,stats.distributions,A uniform continuous random variable.,introspection: scipy.stats.__all__
+stats.uniform_direction,stats.distributions,A vector-valued uniform direction.,introspection: scipy.stats.__all__
+stats.unitary_group,stats.distributions,A matrix-valued U(N) random variable.,introspection: scipy.stats.__all__
+stats.variation,stats.descriptive,Compute the coefficient of variation.,introspection: scipy.stats.__all__
+stats.vonmises,stats.distributions,A Von Mises continuous random variable.,introspection: scipy.stats.__all__
+stats.vonmises_fisher,stats.distributions,A von Mises-Fisher variable.,introspection: scipy.stats.__all__
+stats.vonmises_line,stats.distributions,A Von Mises continuous random variable.,introspection: scipy.stats.__all__
+stats.wald,stats.distributions,A Wald continuous random variable.,introspection: scipy.stats.__all__
+stats.wasserstein_distance,stats.descriptive,Compute the Wasserstein-1 distance between two 1D discrete distributions.,introspection: scipy.stats.__all__
+stats.wasserstein_distance_nd,stats.descriptive,Compute the Wasserstein-1 distance between two N-D discrete distributions.,introspection: scipy.stats.__all__
+stats.weibull_max,stats.distributions,Weibull maximum continuous random variable.,introspection: scipy.stats.__all__
+stats.weibull_min,stats.distributions,Weibull minimum continuous random variable.,introspection: scipy.stats.__all__
+stats.weightedtau,stats.tests,Compute a weighted version of Kendall's :math:`\tau`.,introspection: scipy.stats.__all__
+stats.wilcoxon,stats.tests,Calculate the Wilcoxon signed-rank test.,introspection: scipy.stats.__all__
+stats.wishart,stats.distributions,A Wishart random variable.,introspection: scipy.stats.__all__
+stats.wrapcauchy,stats.distributions,A wrapped Cauchy continuous random variable.,introspection: scipy.stats.__all__
+stats.yeojohnson,stats.descriptive,Return a dataset transformed by a Yeo-Johnson power transformation.,introspection: scipy.stats.__all__
+stats.yeojohnson_llf,stats.descriptive,The Yeo-Johnson log-likelihood function.,introspection: scipy.stats.__all__
+stats.yeojohnson_normmax,stats.descriptive,Compute optimal Yeo-Johnson transform parameter.,introspection: scipy.stats.__all__
+stats.yeojohnson_normplot,stats.descriptive,"Compute parameters for a Yeo-Johnson normality plot, optionally show it.",introspection: scipy.stats.__all__
+stats.yulesimon,stats.distributions,A Yule-Simon discrete random variable.,introspection: scipy.stats.__all__
+stats.zipf,stats.distributions,A Zipf (Zeta) discrete random variable.,introspection: scipy.stats.__all__
+stats.zipfian,stats.distributions,A Zipfian discrete random variable.,introspection: scipy.stats.__all__
+stats.zmap,stats.descriptive,Calculate the relative z-scores.,introspection: scipy.stats.__all__
+stats.zscore,stats.descriptive,Compute the z score.,introspection: scipy.stats.__all__
+stats.qmc.Halton,stats.qmc,Halton sequence.,introspection: scipy.stats.qmc.__all__
+stats.qmc.LatinHypercube,stats.qmc,Latin hypercube sampling (LHS).,introspection: scipy.stats.qmc.__all__
+stats.qmc.MultinomialQMC,stats.qmc,QMC sampling from a multinomial distribution.,introspection: scipy.stats.qmc.__all__
+stats.qmc.MultivariateNormalQMC,stats.qmc,"QMC sampling from a multivariate Normal :math:`N(\mu, \Sigma)`.",introspection: scipy.stats.qmc.__all__
+stats.qmc.PoissonDisk,stats.qmc,Poisson disk sampling.,introspection: scipy.stats.qmc.__all__
+stats.qmc.QMCEngine,stats.qmc,A generic Quasi-Monte Carlo sampler class meant for subclassing.,introspection: scipy.stats.qmc.__all__
+stats.qmc.Sobol,stats.qmc,Engine for generating (scrambled) Sobol' sequences.,introspection: scipy.stats.qmc.__all__
+stats.qmc.discrepancy,stats.qmc,Discrepancy of a given sample.,introspection: scipy.stats.qmc.__all__
+stats.qmc.geometric_discrepancy,stats.qmc,Discrepancy of a given sample based on its geometric properties.,introspection: scipy.stats.qmc.__all__
+stats.qmc.scale,stats.qmc,Sample scaling from unit hypercube to different bounds.,introspection: scipy.stats.qmc.__all__
+stats.qmc.update_discrepancy,stats.qmc,Update the centered discrepancy with a new sample.,introspection: scipy.stats.qmc.__all__
+stats.contingency.association,stats.contingency,Calculates degree of association between two nominal variables.,introspection: scipy.stats.contingency.__all__
+stats.contingency.chi2_contingency,stats.contingency,Chi-square test of independence of variables in a contingency table.,introspection: scipy.stats.contingency.__all__
+stats.contingency.crosstab,stats.contingency,Return table of counts for each possible unique combination in ``*args``.,introspection: scipy.stats.contingency.__all__
+stats.contingency.expected_freq,stats.contingency,Compute the expected frequencies from a contingency table.,introspection: scipy.stats.contingency.__all__
+stats.contingency.margins,stats.contingency,Return a list of the marginal sums of the array `a`.,introspection: scipy.stats.contingency.__all__
+stats.contingency.odds_ratio,stats.contingency,Compute the odds ratio for a 2x2 contingency table.,introspection: scipy.stats.contingency.__all__
+stats.contingency.relative_risk,stats.contingency,Compute the relative risk (also known as the risk ratio).,introspection: scipy.stats.contingency.__all__
+spatial.ConvexHull,spatial,Convex hulls in N dimensions.,introspection: scipy.spatial.__all__
+spatial.Delaunay,spatial,Delaunay tessellation in N dimensions.,introspection: scipy.spatial.__all__
+spatial.HalfspaceIntersection,spatial,Halfspace intersections in N dimensions.,introspection: scipy.spatial.__all__
+spatial.KDTree,spatial,kd-tree for quick nearest-neighbor lookup.,introspection: scipy.spatial.__all__
+spatial.QhullError,spatial,"Raised when Qhull encounters an error condition, such as",introspection: scipy.spatial.__all__
+spatial.Rectangle,spatial,Hyperrectangle class.,introspection: scipy.spatial.__all__
+spatial.SphericalVoronoi,spatial,Voronoi diagrams on the surface of a sphere.,introspection: scipy.spatial.__all__
+spatial.Voronoi,spatial,Voronoi diagrams in N dimensions.,introspection: scipy.spatial.__all__
+spatial.cKDTree,spatial,kd-tree for quick nearest-neighbor lookup.,introspection: scipy.spatial.__all__
+spatial.convex_hull_plot_2d,spatial,Plot the given convex hull diagram in 2-D.,introspection: scipy.spatial.__all__
+spatial.delaunay_plot_2d,spatial,Plot the given Delaunay triangulation in 2-D.,introspection: scipy.spatial.__all__
+spatial.geometric_slerp,spatial,Geometric spherical linear interpolation.,introspection: scipy.spatial.__all__
+spatial.procrustes,spatial,"Procrustes analysis, a similarity test for two data sets.",introspection: scipy.spatial.__all__
+spatial.voronoi_plot_2d,spatial,Plot the given Voronoi diagram in 2-D.,introspection: scipy.spatial.__all__
+spatial.distance.braycurtis,spatial.distance,Compute the Bray-Curtis distance between two 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.canberra,spatial.distance,Compute the Canberra distance between two 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.cdist,spatial.distance,Compute distance between each pair of the two collections of inputs.,introspection: scipy.spatial.distance.__all__
+spatial.distance.chebyshev,spatial.distance,Compute the Chebyshev distance.,introspection: scipy.spatial.distance.__all__
+spatial.distance.cityblock,spatial.distance,Compute the City Block (Manhattan) distance.,introspection: scipy.spatial.distance.__all__
+spatial.distance.correlation,spatial.distance,Compute the correlation distance between two 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.cosine,spatial.distance,Compute the Cosine distance between 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.dice,spatial.distance,Compute the Dice dissimilarity between two boolean 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.directed_hausdorff,spatial.distance,Compute the directed Hausdorff distance between two 2-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.euclidean,spatial.distance,Computes the Euclidean distance between two arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.hamming,spatial.distance,Compute the Hamming distance between two 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.is_valid_dm,spatial.distance,Return True if input array satisfies basic distance matrix properties,introspection: scipy.spatial.distance.__all__
+spatial.distance.is_valid_y,spatial.distance,Return True if the input array is a valid condensed distance matrix.,introspection: scipy.spatial.distance.__all__
+spatial.distance.jaccard,spatial.distance,Compute the Jaccard dissimilarity between two boolean vectors.,introspection: scipy.spatial.distance.__all__
+spatial.distance.jensenshannon,spatial.distance,Compute the Jensen-Shannon distance (metric) between,introspection: scipy.spatial.distance.__all__
+spatial.distance.mahalanobis,spatial.distance,Compute the Mahalanobis distance between two 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.minkowski,spatial.distance,Compute the Minkowski distance between two arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.num_obs_dm,spatial.distance,Return the number of original observations that correspond to a,introspection: scipy.spatial.distance.__all__
+spatial.distance.num_obs_y,spatial.distance,Return the number of original observations that correspond to a,introspection: scipy.spatial.distance.__all__
+spatial.distance.pdist,spatial.distance,Pairwise distances between observations in n-dimensional space.,introspection: scipy.spatial.distance.__all__
+spatial.distance.rogerstanimoto,spatial.distance,Compute the Rogers-Tanimoto dissimilarity between two boolean 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.russellrao,spatial.distance,Compute the Russell-Rao dissimilarity between two boolean 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.seuclidean,spatial.distance,Return the standardized Euclidean distance between two 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.sokalsneath,spatial.distance,Compute the Sokal-Sneath dissimilarity between two boolean 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.sqeuclidean,spatial.distance,Compute the squared Euclidean distance between two arrays.,introspection: scipy.spatial.distance.__all__
+spatial.distance.squareform,spatial.distance,Convert a vector-form distance vector to a square-form distance,introspection: scipy.spatial.distance.__all__
+spatial.distance.yule,spatial.distance,Compute the Yule dissimilarity between two boolean 1-D arrays.,introspection: scipy.spatial.distance.__all__
+spatial.transform.RigidTransform,spatial.transform,Rigid transform in 3 dimensions.,introspection: scipy.spatial.transform.__all__
+spatial.transform.Rotation,spatial.transform,Rotation in 3 dimensions.,introspection: scipy.spatial.transform.__all__
+spatial.transform.RotationSpline,spatial.transform,Interpolate rotations with continuous angular rate and acceleration.,introspection: scipy.spatial.transform.__all__
+spatial.transform.Slerp,spatial.transform,Spherical Linear Interpolation of Rotations.,introspection: scipy.spatial.transform.__all__
+ndimage.affine_transform,ndimage,Apply an affine transformation.,introspection: scipy.ndimage.__all__
+ndimage.binary_closing,ndimage,Multidimensional binary closing with the given structuring element.,introspection: scipy.ndimage.__all__
+ndimage.binary_dilation,ndimage,Multidimensional binary dilation with the given structuring element.,introspection: scipy.ndimage.__all__
+ndimage.binary_erosion,ndimage,Multidimensional binary erosion with a given structuring element.,introspection: scipy.ndimage.__all__
+ndimage.binary_fill_holes,ndimage,Fill the holes in binary objects.,introspection: scipy.ndimage.__all__
+ndimage.binary_hit_or_miss,ndimage,Multidimensional binary hit-or-miss transform.,introspection: scipy.ndimage.__all__
+ndimage.binary_opening,ndimage,Multidimensional binary opening with the given structuring element.,introspection: scipy.ndimage.__all__
+ndimage.binary_propagation,ndimage,Multidimensional binary propagation with the given structuring element.,introspection: scipy.ndimage.__all__
+ndimage.black_tophat,ndimage,Multidimensional black tophat filter.,introspection: scipy.ndimage.__all__
+ndimage.center_of_mass,ndimage,Calculate the center of mass of the values of an array at labels.,introspection: scipy.ndimage.__all__
+ndimage.convolve,ndimage,Multidimensional convolution.,introspection: scipy.ndimage.__all__
+ndimage.convolve1d,ndimage,Calculate a 1-D convolution along the given axis.,introspection: scipy.ndimage.__all__
+ndimage.correlate,ndimage,Multidimensional correlation.,introspection: scipy.ndimage.__all__
+ndimage.correlate1d,ndimage,Calculate a 1-D correlation along the given axis.,introspection: scipy.ndimage.__all__
+ndimage.distance_transform_bf,ndimage,Distance transform function by a brute force algorithm.,introspection: scipy.ndimage.__all__
+ndimage.distance_transform_cdt,ndimage,Distance transform for chamfer type of transforms.,introspection: scipy.ndimage.__all__
+ndimage.distance_transform_edt,ndimage,Exact Euclidean distance transform.,introspection: scipy.ndimage.__all__
+ndimage.extrema,ndimage,Calculate the minimums and maximums of the values of an array,introspection: scipy.ndimage.__all__
+ndimage.find_objects,ndimage,Find objects in a labeled array.,introspection: scipy.ndimage.__all__
+ndimage.fourier_ellipsoid,ndimage,Multidimensional ellipsoid Fourier filter.,introspection: scipy.ndimage.__all__
+ndimage.fourier_gaussian,ndimage,Multidimensional Gaussian fourier filter.,introspection: scipy.ndimage.__all__
+ndimage.fourier_shift,ndimage,Multidimensional Fourier shift filter.,introspection: scipy.ndimage.__all__
+ndimage.fourier_uniform,ndimage,Multidimensional uniform fourier filter.,introspection: scipy.ndimage.__all__
+ndimage.gaussian_filter,ndimage,Multidimensional Gaussian filter.,introspection: scipy.ndimage.__all__
+ndimage.gaussian_filter1d,ndimage,1-D Gaussian filter.,introspection: scipy.ndimage.__all__
+ndimage.gaussian_gradient_magnitude,ndimage,Multidimensional gradient magnitude using Gaussian derivatives.,introspection: scipy.ndimage.__all__
+ndimage.gaussian_laplace,ndimage,Multidimensional Laplace filter using Gaussian second derivatives.,introspection: scipy.ndimage.__all__
+ndimage.generate_binary_structure,ndimage,Generate a binary structure for binary morphological operations.,introspection: scipy.ndimage.__all__
+ndimage.generic_filter,ndimage,Calculate a multidimensional filter using the given function.,introspection: scipy.ndimage.__all__
+ndimage.generic_filter1d,ndimage,Calculate a 1-D filter along the given axis.,introspection: scipy.ndimage.__all__
+ndimage.generic_gradient_magnitude,ndimage,Gradient magnitude using a provided gradient function.,introspection: scipy.ndimage.__all__
+ndimage.generic_laplace,ndimage,N-D Laplace filter using a provided second derivative function.,introspection: scipy.ndimage.__all__
+ndimage.geometric_transform,ndimage,Apply an arbitrary geometric transform.,introspection: scipy.ndimage.__all__
+ndimage.grey_closing,ndimage,Multidimensional grayscale closing.,introspection: scipy.ndimage.__all__
+ndimage.grey_dilation,ndimage,"Calculate a greyscale dilation, using either a structuring element,",introspection: scipy.ndimage.__all__
+ndimage.grey_erosion,ndimage,"Calculate a greyscale erosion, using either a structuring element,",introspection: scipy.ndimage.__all__
+ndimage.grey_opening,ndimage,Multidimensional grayscale opening.,introspection: scipy.ndimage.__all__
+ndimage.histogram,ndimage,"Calculate the histogram of the values of an array, optionally at labels.",introspection: scipy.ndimage.__all__
+ndimage.iterate_structure,ndimage,Iterate a structure by dilating it with itself.,introspection: scipy.ndimage.__all__
+ndimage.label,ndimage,Label features in an array.,introspection: scipy.ndimage.__all__
+ndimage.labeled_comprehension,ndimage,Roughly equivalent to [func(input[labels == i]) for i in index].,introspection: scipy.ndimage.__all__
+ndimage.laplace,ndimage,N-D Laplace filter based on approximate second derivatives.,introspection: scipy.ndimage.__all__
+ndimage.map_coordinates,ndimage,Map the input array to new coordinates by interpolation.,introspection: scipy.ndimage.__all__
+ndimage.maximum,ndimage,Calculate the maximum of the values of an array over labeled regions.,introspection: scipy.ndimage.__all__
+ndimage.maximum_filter,ndimage,Calculate a multidimensional maximum filter.,introspection: scipy.ndimage.__all__
+ndimage.maximum_filter1d,ndimage,Calculate a 1-D maximum filter along the given axis.,introspection: scipy.ndimage.__all__
+ndimage.maximum_position,ndimage,Find the positions of the maximums of the values of an array at labels.,introspection: scipy.ndimage.__all__
+ndimage.mean,ndimage,Calculate the mean of the values of an array at labels.,introspection: scipy.ndimage.__all__
+ndimage.median,ndimage,Calculate the median of the values of an array over labeled regions.,introspection: scipy.ndimage.__all__
+ndimage.median_filter,ndimage,Calculate a multidimensional median filter.,introspection: scipy.ndimage.__all__
+ndimage.minimum,ndimage,Calculate the minimum of the values of an array over labeled regions.,introspection: scipy.ndimage.__all__
+ndimage.minimum_filter,ndimage,Calculate a multidimensional minimum filter.,introspection: scipy.ndimage.__all__
+ndimage.minimum_filter1d,ndimage,Calculate a 1-D minimum filter along the given axis.,introspection: scipy.ndimage.__all__
+ndimage.minimum_position,ndimage,Find the positions of the minimums of the values of an array at labels.,introspection: scipy.ndimage.__all__
+ndimage.morphological_gradient,ndimage,Multidimensional morphological gradient.,introspection: scipy.ndimage.__all__
+ndimage.morphological_laplace,ndimage,Multidimensional morphological laplace.,introspection: scipy.ndimage.__all__
+ndimage.percentile_filter,ndimage,Calculate a multidimensional percentile filter.,introspection: scipy.ndimage.__all__
+ndimage.prewitt,ndimage,Calculate a Prewitt filter.,introspection: scipy.ndimage.__all__
+ndimage.rank_filter,ndimage,Calculate a multidimensional rank filter.,introspection: scipy.ndimage.__all__
+ndimage.rotate,ndimage,Rotate an array.,introspection: scipy.ndimage.__all__
+ndimage.shift,ndimage,Shift an array.,introspection: scipy.ndimage.__all__
+ndimage.sobel,ndimage,Calculate a Sobel filter.,introspection: scipy.ndimage.__all__
+ndimage.spline_filter,ndimage,Multidimensional spline filter.,introspection: scipy.ndimage.__all__
+ndimage.spline_filter1d,ndimage,Calculate a 1-D spline filter along the given axis.,introspection: scipy.ndimage.__all__
+ndimage.standard_deviation,ndimage,"Calculate the standard deviation of the values of an N-D image array,",introspection: scipy.ndimage.__all__
+ndimage.sum,ndimage,Calculate the sum of the values of the array.,introspection: scipy.ndimage.__all__
+ndimage.sum_labels,ndimage,Calculate the sum of the values of the array.,introspection: scipy.ndimage.__all__
+ndimage.uniform_filter,ndimage,Multidimensional uniform filter.,introspection: scipy.ndimage.__all__
+ndimage.uniform_filter1d,ndimage,Calculate a 1-D uniform filter along the given axis.,introspection: scipy.ndimage.__all__
+ndimage.value_indices,ndimage,Find indices of each distinct value in given array.,introspection: scipy.ndimage.__all__
+ndimage.variance,ndimage,"Calculate the variance of the values of an N-D image array, optionally at",introspection: scipy.ndimage.__all__
+ndimage.vectorized_filter,ndimage,Filter an array with a vectorized Python callable as the kernel.,introspection: scipy.ndimage.__all__
+ndimage.watershed_ift,ndimage,Apply watershed from markers using image foresting transform algorithm.,introspection: scipy.ndimage.__all__
+ndimage.white_tophat,ndimage,Multidimensional white tophat filter.,introspection: scipy.ndimage.__all__
+ndimage.zoom,ndimage,Zoom an array.,introspection: scipy.ndimage.__all__
+cluster.vq.ClusterError,cluster.vq,An ``Exception`` raised during clustering.,introspection: scipy.cluster.vq.__all__
+cluster.vq.kmeans,cluster.vq,Performs k-means on a set of observation vectors forming k clusters.,introspection: scipy.cluster.vq.__all__
+cluster.vq.kmeans2,cluster.vq,Classify a set of observations into k clusters using the k-means algorithm.,introspection: scipy.cluster.vq.__all__
+cluster.vq.py_vq,cluster.vq,Python version of vq algorithm.,introspection: scipy.cluster.vq.__all__
+cluster.vq.vq,cluster.vq,Assign codes from a code book to observations.,introspection: scipy.cluster.vq.__all__
+cluster.vq.whiten,cluster.vq,Normalize a group of observations on a per feature basis.,introspection: scipy.cluster.vq.__all__
+cluster.hierarchy.ClusterNode,cluster.hierarchy,A tree node class for representing a cluster.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.ClusterWarning,cluster.hierarchy,A ``UserWarning`` raised during clustering.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.DisjointSet,cluster.hierarchy,Disjoint set data structure for incremental connectivity queries.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.average,cluster.hierarchy,Perform average/UPGMA linkage on a condensed distance matrix.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.centroid,cluster.hierarchy,Perform centroid/UPGMC linkage.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.complete,cluster.hierarchy,Perform complete/max/farthest point linkage on a condensed distance matrix.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.cophenet,cluster.hierarchy,Calculate the cophenetic distances between each observation in,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.correspond,cluster.hierarchy,Check for correspondence between linkage and condensed distance matrices.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.cut_tree,cluster.hierarchy,"Given a linkage matrix Z, return the cut tree.",introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.dendrogram,cluster.hierarchy,Plot the hierarchical clustering as a dendrogram.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.fcluster,cluster.hierarchy,Form flat clusters from the hierarchical clustering defined by,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.fclusterdata,cluster.hierarchy,Cluster observation data using a given metric.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.from_mlab_linkage,cluster.hierarchy,Convert a linkage matrix generated by MATLAB(TM) to a new,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.inconsistent,cluster.hierarchy,Calculate inconsistency statistics on a linkage matrix.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.is_isomorphic,cluster.hierarchy,Determine if two different cluster assignments are equivalent.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.is_monotonic,cluster.hierarchy,Return True if the linkage passed is monotonic.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.is_valid_im,cluster.hierarchy,Return True if the inconsistency matrix passed is valid.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.is_valid_linkage,cluster.hierarchy,Check the validity of a linkage matrix.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.leaders,cluster.hierarchy,Return the root nodes in a hierarchical clustering.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.leaves_list,cluster.hierarchy,Return a list of leaf node ids.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.linkage,cluster.hierarchy,Perform hierarchical/agglomerative clustering.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.maxRstat,cluster.hierarchy,Return the maximum statistic for each non-singleton cluster and its,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.maxdists,cluster.hierarchy,Return the maximum distance between any non-singleton cluster.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.maxinconsts,cluster.hierarchy,Return the maximum inconsistency coefficient for each,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.median,cluster.hierarchy,Perform median/WPGMC linkage.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.num_obs_linkage,cluster.hierarchy,Return the number of original observations of the linkage matrix passed.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.optimal_leaf_ordering,cluster.hierarchy,"Given a linkage matrix Z and distance, reorder the cut tree.",introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.set_link_color_palette,cluster.hierarchy,Set list of matplotlib color codes for use by dendrogram.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.single,cluster.hierarchy,Perform single/min/nearest linkage on the condensed distance matrix ``y``.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.to_mlab_linkage,cluster.hierarchy,Convert a linkage matrix to a MATLAB(TM) compatible one.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.to_tree,cluster.hierarchy,Convert a linkage matrix into an easy-to-use tree object.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.ward,cluster.hierarchy,Perform Ward's linkage on a condensed distance matrix.,introspection: scipy.cluster.hierarchy.__all__
+cluster.hierarchy.weighted,cluster.hierarchy,Perform weighted/WPGMA linkage on the condensed distance matrix.,introspection: scipy.cluster.hierarchy.__all__
+differentiate.derivative,differentiate,"Evaluate the derivative of an elementwise, real scalar function numerically.",introspection: scipy.differentiate.__all__
+differentiate.hessian,differentiate,Evaluate the Hessian of a function numerically.,introspection: scipy.differentiate.__all__
+differentiate.jacobian,differentiate,Evaluate the Jacobian of a function numerically.,introspection: scipy.differentiate.__all__
+constants.Avogadro,constants,6.02214076e+23,introspection: scipy.constants.__all__
+constants.Boltzmann,constants,1.380649e-23,introspection: scipy.constants.__all__
+constants.Btu,constants,1055.05585262,introspection: scipy.constants.__all__
+constants.Btu_th,constants,1054.3502644888888,introspection: scipy.constants.__all__
+constants.ConstantWarning,constants,Accessing a constant no longer in current CODATA data set.,introspection: scipy.constants.__all__
+constants.G,constants,6.6743e-11,introspection: scipy.constants.__all__
+constants.Julian_year,constants,31557600.0,introspection: scipy.constants.__all__
+constants.Planck,constants,6.62607015e-34,introspection: scipy.constants.__all__
+constants.R,constants,8.31446261815324,introspection: scipy.constants.__all__
+constants.Rydberg,constants,10973731.568157,introspection: scipy.constants.__all__
+constants.Stefan_Boltzmann,constants,5.6703744191844314e-08,introspection: scipy.constants.__all__
+constants.Wien,constants,0.0028977719551851727,introspection: scipy.constants.__all__
+constants.acre,constants,4046.8564223999992,introspection: scipy.constants.__all__
+constants.alpha,constants,0.0072973525643,introspection: scipy.constants.__all__
+constants.angstrom,constants,1e-10,introspection: scipy.constants.__all__
+constants.arcmin,constants,0.0002908882086657216,introspection: scipy.constants.__all__
+constants.arcsec,constants,4.84813681109536e-06,introspection: scipy.constants.__all__
+constants.astronomical_unit,constants,149597870700.0,introspection: scipy.constants.__all__
+constants.atm,constants,101325.0,introspection: scipy.constants.__all__
+constants.atomic_mass,constants,1.66053906892e-27,introspection: scipy.constants.__all__
+constants.atto,constants,1e-18,introspection: scipy.constants.__all__
+constants.bar,constants,100000.0,introspection: scipy.constants.__all__
+constants.barrel,constants,0.15898729492799998,introspection: scipy.constants.__all__
+constants.bbl,constants,0.15898729492799998,introspection: scipy.constants.__all__
+constants.blob,constants,175.12683524647636,introspection: scipy.constants.__all__
+constants.c,constants,299792458.0,introspection: scipy.constants.__all__
+constants.calorie,constants,4.184,introspection: scipy.constants.__all__
+constants.calorie_IT,constants,4.1868,introspection: scipy.constants.__all__
+constants.carat,constants,0.0002,introspection: scipy.constants.__all__
+constants.centi,constants,0.01,introspection: scipy.constants.__all__
+constants.convert_temperature,constants,"Convert from a temperature scale to another one among Celsius, Kelvin,",introspection: scipy.constants.__all__
+constants.day,constants,86400.0,introspection: scipy.constants.__all__
+constants.deci,constants,0.1,introspection: scipy.constants.__all__
+constants.degree,constants,0.017453292519943295,introspection: scipy.constants.__all__
+constants.degree_Fahrenheit,constants,0.5555555555555556,introspection: scipy.constants.__all__
+constants.deka,constants,10.0,introspection: scipy.constants.__all__
+constants.dyn,constants,1e-05,introspection: scipy.constants.__all__
+constants.e,constants,1.602176634e-19,introspection: scipy.constants.__all__
+constants.eV,constants,1.602176634e-19,introspection: scipy.constants.__all__
+constants.electron_mass,constants,9.1093837139e-31,introspection: scipy.constants.__all__
+constants.epsilon_0,constants,8.8541878188e-12,introspection: scipy.constants.__all__
+constants.erg,constants,1e-07,introspection: scipy.constants.__all__
+constants.exa,constants,1e+18,introspection: scipy.constants.__all__
+constants.exbi,constants,1152921504606846976,introspection: scipy.constants.__all__
+constants.femto,constants,1e-15,introspection: scipy.constants.__all__
+constants.fermi,constants,1e-15,introspection: scipy.constants.__all__
+constants.find,constants,Return list of physical_constant keys containing a given string.,introspection: scipy.constants.__all__
+constants.fluid_ounce,constants,2.9573529562499998e-05,introspection: scipy.constants.__all__
+constants.fluid_ounce_imp,constants,2.84130625e-05,introspection: scipy.constants.__all__
+constants.foot,constants,0.30479999999999996,introspection: scipy.constants.__all__
+constants.g,constants,9.80665,introspection: scipy.constants.__all__
+constants.gallon,constants,0.0037854117839999997,introspection: scipy.constants.__all__
+constants.gallon_imp,constants,0.00454609,introspection: scipy.constants.__all__
+constants.gibi,constants,1073741824,introspection: scipy.constants.__all__
+constants.giga,constants,1000000000.0,introspection: scipy.constants.__all__
+constants.golden,constants,1.618033988749895,introspection: scipy.constants.__all__
+constants.grain,constants,6.479891e-05,introspection: scipy.constants.__all__
+constants.gram,constants,0.001,introspection: scipy.constants.__all__
+constants.hbar,constants,1.0545718176461565e-34,introspection: scipy.constants.__all__
+constants.hectare,constants,10000.0,introspection: scipy.constants.__all__
+constants.hecto,constants,100.0,introspection: scipy.constants.__all__
+constants.horsepower,constants,745.6998715822701,introspection: scipy.constants.__all__
+constants.hour,constants,3600.0,introspection: scipy.constants.__all__
+constants.inch,constants,0.0254,introspection: scipy.constants.__all__
+constants.kgf,constants,9.80665,introspection: scipy.constants.__all__
+constants.kibi,constants,1024,introspection: scipy.constants.__all__
+constants.kilo,constants,1000.0,introspection: scipy.constants.__all__
+constants.kmh,constants,0.2777777777777778,introspection: scipy.constants.__all__
+constants.knot,constants,0.5144444444444445,introspection: scipy.constants.__all__
+constants.lambda2nu,constants,Convert wavelength to optical frequency.,introspection: scipy.constants.__all__
+constants.lb,constants,0.45359236999999997,introspection: scipy.constants.__all__
+constants.lbf,constants,4.4482216152605,introspection: scipy.constants.__all__
+constants.light_year,constants,9460730472580800.0,introspection: scipy.constants.__all__
+constants.liter,constants,0.001,introspection: scipy.constants.__all__
+constants.long_ton,constants,1016.0469088,introspection: scipy.constants.__all__
+constants.m_n,constants,1.67492750056e-27,introspection: scipy.constants.__all__
+constants.m_p,constants,1.67262192595e-27,introspection: scipy.constants.__all__
+constants.mach,constants,340.5,introspection: scipy.constants.__all__
+constants.mebi,constants,1048576,introspection: scipy.constants.__all__
+constants.mega,constants,1000000.0,introspection: scipy.constants.__all__
+constants.metric_ton,constants,1000.0,introspection: scipy.constants.__all__
+constants.micro,constants,1e-06,introspection: scipy.constants.__all__
+constants.micron,constants,1e-06,introspection: scipy.constants.__all__
+constants.mil,constants,2.5399999999999997e-05,introspection: scipy.constants.__all__
+constants.mile,constants,1609.3439999999998,introspection: scipy.constants.__all__
+constants.milli,constants,0.001,introspection: scipy.constants.__all__
+constants.minute,constants,60.0,introspection: scipy.constants.__all__
+constants.mmHg,constants,133.32236842105263,introspection: scipy.constants.__all__
+constants.mph,constants,0.44703999999999994,introspection: scipy.constants.__all__
+constants.mu_0,constants,1.25663706127e-06,introspection: scipy.constants.__all__
+constants.nano,constants,1e-09,introspection: scipy.constants.__all__
+constants.nautical_mile,constants,1852.0,introspection: scipy.constants.__all__
+constants.nu2lambda,constants,Convert optical frequency to wavelength.,introspection: scipy.constants.__all__
+constants.ounce,constants,0.028349523124999998,introspection: scipy.constants.__all__
+constants.parsec,constants,3.085677581491367e+16,introspection: scipy.constants.__all__
+constants.pebi,constants,1125899906842624,introspection: scipy.constants.__all__
+constants.peta,constants,1000000000000000.0,introspection: scipy.constants.__all__
+constants.physical_constants,constants,"CODATA database: 445 entries (value, unit, uncertainty)",introspection: scipy.constants.__all__
+constants.pi,constants,3.141592653589793,introspection: scipy.constants.__all__
+constants.pico,constants,1e-12,introspection: scipy.constants.__all__
+constants.point,constants,0.00035277777777777776,introspection: scipy.constants.__all__
+constants.precision,constants,Relative precision in physical_constants indexed by key.,introspection: scipy.constants.__all__
+constants.psi,constants,6894.757293168361,introspection: scipy.constants.__all__
+constants.quecto,constants,1e-30,introspection: scipy.constants.__all__
+constants.quetta,constants,1e+30,introspection: scipy.constants.__all__
+constants.ronna,constants,1e+27,introspection: scipy.constants.__all__
+constants.ronto,constants,1e-27,introspection: scipy.constants.__all__
+constants.short_ton,constants,907.1847399999999,introspection: scipy.constants.__all__
+constants.slug,constants,14.593902937206364,introspection: scipy.constants.__all__
+constants.stone,constants,6.3502931799999995,introspection: scipy.constants.__all__
+constants.survey_foot,constants,0.3048006096012192,introspection: scipy.constants.__all__
+constants.survey_mile,constants,1609.3472186944373,introspection: scipy.constants.__all__
+constants.tebi,constants,1099511627776,introspection: scipy.constants.__all__
+constants.tera,constants,1000000000000.0,introspection: scipy.constants.__all__
+constants.ton_TNT,constants,4184000000.0,introspection: scipy.constants.__all__
+constants.troy_ounce,constants,0.031103476799999998,introspection: scipy.constants.__all__
+constants.troy_pound,constants,0.37324172159999996,introspection: scipy.constants.__all__
+constants.unit,constants,Unit in physical_constants indexed by key.,introspection: scipy.constants.__all__
+constants.value,constants,Value in physical_constants indexed by key.,introspection: scipy.constants.__all__
+constants.week,constants,604800.0,introspection: scipy.constants.__all__
+constants.yard,constants,0.9143999999999999,introspection: scipy.constants.__all__
+constants.year,constants,31536000.0,introspection: scipy.constants.__all__
+constants.yobi,constants,1208925819614629174706176,introspection: scipy.constants.__all__
+constants.yocto,constants,1e-24,introspection: scipy.constants.__all__
+constants.yotta,constants,1e+24,introspection: scipy.constants.__all__
+constants.zebi,constants,1180591620717411303424,introspection: scipy.constants.__all__
+constants.zepto,constants,1e-21,introspection: scipy.constants.__all__
+constants.zero_Celsius,constants,273.15,introspection: scipy.constants.__all__
+constants.zetta,constants,1e+21,introspection: scipy.constants.__all__
+stats.rv_continuous.cdf,stats.distribution-methods,Cumulative distribution function of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.entropy,stats.distribution-methods,Differential entropy of the RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.expect,stats.distribution-methods,Calculate expected value of a function with respect to the,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.fit,stats.distribution-methods,"Return estimates of shape (if applicable), location, and scale",introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.fit_loc_scale,stats.distribution-methods,Estimate loc and scale parameters from data using 1st and 2nd moments.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.interval,stats.distribution-methods,Confidence interval with equal areas around the median.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.isf,stats.distribution-methods,Inverse survival function (inverse of `sf`) at q of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.logcdf,stats.distribution-methods,Log of the cumulative distribution function at x of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.logpdf,stats.distribution-methods,Log of the probability density function at x of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.logsf,stats.distribution-methods,Log of the survival function of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.mean,stats.distribution-methods,Mean of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.median,stats.distribution-methods,Median of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.moment,stats.distribution-methods,non-central moment of distribution of specified order.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.nnlf,stats.distribution-methods,Negative loglikelihood function.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.pdf,stats.distribution-methods,Probability density function at x of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.ppf,stats.distribution-methods,Percent point function (inverse of `cdf`) at q of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.rvs,stats.distribution-methods,Random variates of given type.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.sf,stats.distribution-methods,Survival function (1 - `cdf`) at x of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.stats,stats.distribution-methods,Some statistics of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.std,stats.distribution-methods,Standard deviation of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.support,stats.distribution-methods,Support of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_continuous.var,stats.distribution-methods,Variance of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_continuous)
+stats.rv_discrete.cdf,stats.distribution-methods,Cumulative distribution function of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.entropy,stats.distribution-methods,Differential entropy of the RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.expect,stats.distribution-methods,Calculate expected value of a function with respect to the distribution,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.interval,stats.distribution-methods,Confidence interval with equal areas around the median.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.isf,stats.distribution-methods,Inverse survival function (inverse of `sf`) at q of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.logcdf,stats.distribution-methods,Log of the cumulative distribution function at k of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.logpmf,stats.distribution-methods,Log of the probability mass function at k of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.logsf,stats.distribution-methods,Log of the survival function of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.mean,stats.distribution-methods,Mean of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.median,stats.distribution-methods,Median of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.moment,stats.distribution-methods,non-central moment of distribution of specified order.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.nnlf,stats.distribution-methods,Negative loglikelihood function.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.pmf,stats.distribution-methods,Probability mass function at k of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.ppf,stats.distribution-methods,Percent point function (inverse of `cdf`) at q of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.rvs,stats.distribution-methods,Random variates of given type.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.sf,stats.distribution-methods,Survival function (1 - `cdf`) at k of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.stats,stats.distribution-methods,Some statistics of the given RV.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.std,stats.distribution-methods,Standard deviation of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.support,stats.distribution-methods,Support of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.rv_discrete.var,stats.distribution-methods,Variance of the distribution.,introspection: inspect.getmembers(scipy.stats.rv_discrete)
+stats.UnivariateDistribution.cache_policy,stats.distribution-methods,"{None, ""no_cache""}:",introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.ccdf,stats.distribution-methods,Complementary cumulative distribution function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.cdf,stats.distribution-methods,Cumulative distribution function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.entropy,stats.distribution-methods,Differential entropy,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.iccdf,stats.distribution-methods,Inverse complementary cumulative distribution function.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.icdf,stats.distribution-methods,Inverse of the cumulative distribution function.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.ilogccdf,stats.distribution-methods,Inverse of the log of the complementary cumulative distribution function.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.ilogcdf,stats.distribution-methods,Inverse of the logarithm of the cumulative distribution function.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.kurtosis,stats.distribution-methods,Kurtosis (standardized fourth moment),introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.lmoment,stats.distribution-methods,L-moment or L-moment ratio of positive integer order.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.logccdf,stats.distribution-methods,Log of the complementary cumulative distribution function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.logcdf,stats.distribution-methods,Log of the cumulative distribution function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.logentropy,stats.distribution-methods,Logarithm of the differential entropy,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.logpdf,stats.distribution-methods,Log of the probability density function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.logpmf,stats.distribution-methods,Log of the probability mass function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.mean,stats.distribution-methods,Mean (raw first moment about the origin),introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.median,stats.distribution-methods,Median (50th percentile),introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.mode,stats.distribution-methods,Mode (most likely value),introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.moment,stats.distribution-methods,"Raw, central, or standard moment of positive integer order.",introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.pdf,stats.distribution-methods,Probability density function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.plot,stats.distribution-methods,Plot a function of the distribution.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.pmf,stats.distribution-methods,Probability mass function,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.reset_cache,stats.distribution-methods,Clear all cached values.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.sample,stats.distribution-methods,Random sample from the distribution.,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.skewness,stats.distribution-methods,Skewness (standardized third moment),introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.standard_deviation,stats.distribution-methods,Standard deviation (square root of the second central moment),introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.support,stats.distribution-methods,Support of the random variable,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.tol,stats.distribution-methods,positive float:,introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.validation_policy,stats.distribution-methods,"{None, ""skip_all""}:",introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)
+stats.UnivariateDistribution.variance,stats.distribution-methods,Variance (central second moment),introspection: inspect.getmembers(scipy.stats.Normal mro UnivariateDistribution)

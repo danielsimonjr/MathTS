@@ -1,0 +1,706 @@
+ref_name,area,mathts_status,mathts_location,option_gaps,priority,verified,notes
+numpy.abs,ufuncs: arithmetic,full,abs@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.acos,ufuncs: trig,full,acos@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.acosh,ufuncs: trig,full,acosh@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.add,ufuncs: arithmetic,full,add@functions,,P0,runtime,runtime: 3/3 cases pass
+numpy.all,ufuncs: comparison & logic,missing,,,P0,export+grep,"no all() reduction; `all` in compat is the mathjs factory bundle (name collision); name-variant check: runtime ['all'], source none"
+numpy.allclose,ufuncs: comparison & logic,missing,,,P0,export+grep,
+numpy.amax,reductions & statistics,partial,max@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.amin,reductions & statistics,partial,min@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.angle,ufuncs: arithmetic,partial,arg@functions,no deg= option,P1,runtime,runtime: 1/1 cases pass
+numpy.any,ufuncs: comparison & logic,missing,,,P0,export+grep,
+numpy.append,shape manipulation,missing,,,P1,export+grep,
+numpy.apply_along_axis,indexing,partial,mapSlices@functions,"mathjs mapSlices(A, dim, cb) covers it",P1,runtime,runtime: 2/2 cases pass
+numpy.apply_over_axes,indexing,missing,,,P2,export+grep,
+numpy.arange,array creation,partial,range@functions; Tensor.arange@tensor,"range() is mathjs-style (string 'a:b:c', includeEnd flag); no dtype",P0,runtime,runtime: 4/4 cases pass
+numpy.arcsin,ufuncs: trig,full,asin@functions,for real x>1 the complex result is the conjugate of numpy/C99 (branch-cut side differs),P0,runtime,runtime: 1/2 cases pass [c_misc:46: CONVENTION: asin(2) branch-cut side is the conjugate of C99/numpy]
+numpy.arcsinh,ufuncs: trig,full,asinh@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.arctan,ufuncs: trig,full,atan@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.arctan2,ufuncs: trig,full,atan2@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.arctanh,ufuncs: trig,full,atanh@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.argmax,reductions & statistics,missing,,,P0,export+grep,
+numpy.argmin,reductions & statistics,missing,,,P0,export+grep,
+numpy.argpartition,sorting / searching,missing,,,P2,export+grep,
+numpy.argsort,sorting / searching,missing,,,P0,export+grep,
+numpy.argwhere,indexing,missing,,,P1,export+grep,
+numpy.around,ufuncs: rounding,partial,round@functions,same as round,P2,runtime,runtime: 1/1 cases pass
+numpy.array,array creation,partial,matrix@functions; Tensor.fromNested@tensor,"no dtype=, copy=, ndmin=, order=; Tensor is float64-only",P0,runtime,matrix() builds DenseMatrix (any element type); Tensor.fromNested builds float64 N-d; runtime: 2/2 cases pass
+numpy.array_equal,ufuncs: comparison & logic,partial,deepEqual@functions,no equal_nan=,P1,runtime,runtime: 2/2 cases pass
+numpy.array_equiv,ufuncs: comparison & logic,missing,,,P2,export+grep,
+numpy.array_split,shape manipulation,missing,,,P1,export+grep,
+numpy.asanyarray,array creation,partial,matrix@functions,no subclass passthrough concept,P2,runtime,runtime: 1/1 cases pass
+numpy.asarray,array creation,partial,matrix@functions; Tensor.fromNested@tensor,no dtype/zero-copy view semantics,P0,runtime,runtime: 1/1 cases pass
+numpy.asarray_chkfinite,array creation,missing,,no finite-check constructor,P2,export+grep,
+numpy.ascontiguousarray,array creation,partial,Tensor.contiguous@tensor,method only,P2,runtime,runtime: 1/1 cases pass
+numpy.asfortranarray,array creation,missing,,no column-major storage,P2,export+grep,
+numpy.astype,array creation,missing,,no dtype casting (Tensor float64-only; matrix() has no dtype arg),P1,export+grep,
+numpy.atleast_1d,shape manipulation,missing,,,P2,export+grep,
+numpy.atleast_2d,shape manipulation,missing,,,P2,export+grep,
+numpy.atleast_3d,shape manipulation,missing,,,P2,export+grep,
+numpy.average,reductions & statistics,partial,weightedMean@functions,1-D only (2-D throws); no axis/returned=,P1,runtime,runtime: 2/3 cases pass [c_misc:40: GAP: weightedMean is 1-D only (no axis)]
+numpy.bartlett,misc / windows / polynomials (legacy np.poly*),full,getWindow@functions,"getWindow(""bartlett"", n)",P2,runtime,runtime: 1/1 cases pass
+numpy.bincount,reductions & statistics,missing,,,P1,export+grep,
+numpy.bitwise_and,bitwise,full,bitAnd@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.bitwise_count,bitwise,missing,,,P2,export+grep,
+numpy.bitwise_invert,bitwise,full,bitNot@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.bitwise_left_shift,bitwise,full,leftShift@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.bitwise_or,bitwise,full,bitOr@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.bitwise_right_shift,bitwise,full,rightArithShift@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.bitwise_xor,bitwise,full,bitXor@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.blackman,misc / windows / polynomials (legacy np.poly*),full,getWindow@functions,"getWindow(""blackman"", n)",P2,runtime,runtime: 1/1 cases pass
+numpy.block,array creation,missing,,,P1,export+grep,
+numpy.bool,dtypes & type info,partial,boolean scalars,no typed boolean array storage,P1,runtime,runtime: 1/1 cases pass
+numpy.broadcast,shape manipulation,n/a-out-of-scope,,,P2,n/a,iterator object
+numpy.broadcast_arrays,shape manipulation,missing,,,P1,export+grep,"core/src/array.ts has broadcastArrays() but it is not exported from @mathts/core (internal); name-variant check: runtime none, source ['broadcastArrays']"
+numpy.broadcast_shapes,shape manipulation,partial,Tensor.broadcastShape@tensor,two shapes only,P1,runtime,runtime: 1/1 cases pass
+numpy.broadcast_to,shape manipulation,partial,Tensor.broadcastOp@tensor (internal),no public broadcast_to; broadcasting used inside binary ops,P1,runtime,runtime: 1/1 cases pass
+numpy.c_,indexing,n/a-out-of-scope,,,P2,n/a,Python index-trick concatenation
+numpy.can_cast,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype-promotion machinery
+numpy.cbrt,ufuncs: arithmetic,full,cbrt@functions,,P1,runtime,runtime: 3/3 cases pass
+numpy.ceil,ufuncs: rounding,full,ceil@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.choose,indexing,missing,,,P2,export+grep,
+numpy.clip,ufuncs: arithmetic,partial,clamp@functions,scalar and 1-D arrays only (2-D throws); no a_min/a_max arrays,P0,runtime,runtime: 2/3 cases pass [c_misc:39: GAP: clamp is 1-D only]
+numpy.clongdouble,dtypes & type info,missing,,,P2,export+grep,
+numpy.column_stack,shape manipulation,partial,matrixFromColumns@functions,1-D vectors only,P1,runtime,runtime: 1/1 cases pass
+numpy.common_type,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype machinery
+numpy.complex128,dtypes & type info,partial,Complex@core,scalar Complex class; no complex ndarray storage,P1,runtime,runtime: 1/1 cases pass
+numpy.complex64,dtypes & type info,missing,,,P2,export+grep,
+numpy.compress,indexing,partial,filter@functions,filter by predicate only; no axis=,P2,runtime,runtime: 1/1 cases pass
+numpy.concat,shape manipulation,partial,concat@functions; concatenate@tensor,"concat(…, dim) ok; no axis=None flatten",P0,runtime,runtime: 4/4 cases pass
+numpy.conj,ufuncs: arithmetic,full,conj@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.convolve,reductions & statistics,partial,convolve@functions,"full mode only; a third mode argument (""same""/""valid"") is silently ignored (BUG-6)",P1,runtime,"runtime: 2/4 cases pass [c_reduce:61: BUG-6: convolve ignores ""same"" mode silently] [c_reduce:62: BUG-6: convolve ignores ""valid"" mode silently]"
+numpy.copy,array creation,partial,clone@functions; Tensor.clone@tensor,no order=/subok=,P0,runtime,runtime: 1/1 cases pass
+numpy.copysign,ufuncs: arithmetic,missing,,,P2,export+grep,"core/src/number.ts copysign() exists but is not exported (internal); name-variant check: runtime none, source ['copysign']"
+numpy.copyto,shape manipulation,missing,,,P2,export+grep,
+numpy.corrcoef,reductions & statistics,partial,corrcoef@functions,"default layout rowvar=false (numpy rowvar=True); corrcoef(x,y) two-vector form throws",P1,runtime,"runtime: 2/4 cases pass [c_reduce:52: GAP: corrcoef(x, y) two-vector form not supported] [c_reduce:54: CONVENTION: corrcoef default rowvar=false]"
+numpy.correlate,reductions & statistics,partial,correlate@functions,full mode only (numpy default is valid); mode argument silently ignored (BUG-6),P1,runtime,"runtime: 1/2 cases pass [c_reduce:64: BUG-6: correlate ignores ""valid"" mode silently]"
+numpy.cos,ufuncs: trig,full,cos@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.cosh,ufuncs: trig,full,cosh@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.count_nonzero,reductions & statistics,missing,,,P2,runtime,count() counts all elements (not nonzero); no count_nonzero; runtime: 0/1 cases pass [c_reduce:92: GAP: count() is not count_nonzero]
+numpy.cov,reductions & statistics,partial,cov@functions,"default layout rowvar=false (numpy rowvar=True); cov(x,y) returns the scalar covariance (numpy 2x2 matrix); no fweights/aweights/bias; ddof unvalidated (BUG-8)",P1,runtime,"runtime: 5/7 cases pass [c_misc:87: BUG-8: cov(x,y,ddof) with a non-numeric ddof returns NaN instead of throwing] [c_reduce:55: CONVENTION: cov(x, y) returns scalar, numpy 2x2]"
+numpy.cross,products & linear algebra (top level),partial,cross@functions; Tensor.cross@tensor,3-vectors only; no axis/batched,P1,runtime,runtime: 2/2 cases pass
+numpy.cumprod,reductions & statistics,partial,cumprod@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.cumsum,reductions & statistics,partial,cumsum@functions,dim arg ok; no dtype,P0,runtime,"runtime: 5/5 cases pass [c_misc:67: AHEAD: correctly rounded running sums; NumPy naive cumsum gives [1e16,1e16,0,1]]"
+numpy.cumulative_prod,reductions & statistics,partial,cumprod@functions,no include_initial=,P2,runtime,runtime: 1/1 cases pass
+numpy.cumulative_sum,reductions & statistics,partial,cumsum@functions,no include_initial=,P2,runtime,runtime: 1/1 cases pass
+numpy.deg2rad,ufuncs: trig,full,toRadians@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.degrees,ufuncs: trig,full,toDegrees@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.delete,shape manipulation,missing,,,P1,export+grep,
+numpy.diag,array creation,partial,diag@functions,"diag(v,k) for k!=0 returns n x (n+",k,runtime,") (mathjs convention) instead of numpy (n+; runtime: 3/4 cases pass [c_array:19: CONVENTION: mathjs diag(v,k) shape n x (n+k) vs numpy square (n+k)]"
+numpy.diag_indices,indexing,missing,,,P2,export+grep,
+numpy.diag_indices_from,indexing,missing,,,P2,export+grep,
+numpy.diagflat,array creation,missing,,,P2,export+grep,
+numpy.diagonal,indexing,partial,diagonal@matrix; diag@functions,no offset/axis1/axis2 for N-d,P1,runtime,runtime: 2/2 cases pass
+numpy.diff,reductions & statistics,partial,diff@functions,"no n= (order), prepend=/append=",P0,runtime,runtime: 5/5 cases pass
+numpy.digitize,reductions & statistics,missing,,,P1,export+grep,
+numpy.divide,ufuncs: arithmetic,partial,dotDivide@functions,elementwise is dotDivide,P0,runtime,runtime: 2/2 cases pass
+numpy.divmod,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.dot,products & linear algebra (top level),partial,dot@functions; multiply@functions,dot() is vector inner product; N-d dot via multiply,P0,runtime,runtime: 1/1 cases pass
+numpy.dsplit,shape manipulation,missing,,,P2,export+grep,
+numpy.dstack,shape manipulation,missing,,,P2,export+grep,
+numpy.e,misc / windows / polynomials (legacy np.poly*),full,e@compat; E@core,,P0,runtime,runtime: 1/1 cases pass
+numpy.ediff1d,reductions & statistics,partial,diff@functions,no to_begin/to_end,P2,runtime,runtime: 1/1 cases pass
+numpy.einsum,products & linear algebra (top level),partial,Tensor.einsum@tensor,"structured {contractions, free} spec only; no subscript strings (""ij,jk->ik"" throws), no ellipsis/diagonal/implicit output",P1,runtime,runtime: 1/2 cases pass [c_linalg:75: GAP: einsum has no subscript-string form]
+numpy.einsum_path,products & linear algebra (top level),missing,,,P2,export+grep,
+numpy.empty,array creation,partial,Tensor.empty@tensor,no dtype; zero-filled,P1,runtime,runtime: 1/1 cases pass
+numpy.empty_like,array creation,missing,,,P2,export+grep,
+numpy.equal,ufuncs: comparison & logic,full,equal@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.euler_gamma,misc / windows / polynomials (legacy np.poly*),missing,,,P2,export+grep,EULER_GAMMA is a private const in functions/src/special/*.ts; not exported
+numpy.exp,ufuncs: arithmetic,full,exp@functions,,P0,runtime,runtime: 3/3 cases pass
+numpy.exp2,ufuncs: arithmetic,missing,,,P1,export+grep,
+numpy.expand_dims,shape manipulation,missing,,,P1,export+grep,
+numpy.expm1,ufuncs: arithmetic,full,expm1@functions,,P1,runtime,runtime: 3/3 cases pass
+numpy.extract,indexing,partial,filter@functions,predicate not boolean mask,P2,runtime,runtime: 1/1 cases pass
+numpy.eye,array creation,partial,identity@functions,"identity(m,n) ok; no k (diagonal offset): identity(3,3,1) throws; no dtype",P0,runtime,runtime: 1/2 cases pass [c_array:10: GAP: identity() has no diagonal offset k]
+numpy.fabs,ufuncs: arithmetic,partial,abs@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.fill_diagonal,indexing,missing,,,P2,export+grep,
+numpy.finfo,dtypes & type info,missing,,,P1,export+grep,
+numpy.fix,ufuncs: rounding,full,fix@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.flatnonzero,indexing,missing,,,P2,export+grep,
+numpy.flip,shape manipulation,partial,flip@tensor,Tensor only; no flip for matrix/arrays,P1,runtime,runtime: 2/2 cases pass
+numpy.fliplr,shape manipulation,missing,,,P1,export+grep,
+numpy.flipud,shape manipulation,missing,,,P1,export+grep,
+numpy.float16,dtypes & type info,missing,,,P2,export+grep,
+numpy.float32,dtypes & type info,missing,,,P1,export+grep,Tensor is float64-only (TensorDtype = 'float64'); WASM/GPU backends use f32 internally
+numpy.float64,dtypes & type info,full,number; Tensor dtype 'float64',,P0,runtime,runtime: 1/1 cases pass
+numpy.float_power,ufuncs: arithmetic,partial,dotPow@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.floor,ufuncs: rounding,full,floor@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.floor_divide,ufuncs: arithmetic,missing,,,P1,export+grep,floor(divide) workaround
+numpy.fmax,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.fmin,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.fmod,ufuncs: arithmetic,missing,,,P1,export+grep,
+numpy.frexp,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.frombuffer,array creation,n/a-out-of-scope,,,P2,n/a,buffer view; JS typed arrays cover it
+numpy.fromfunction,array creation,partial,matrixFromFunction@functions,2-D/N-d via size array; mathjs signature,P1,runtime,runtime: 1/1 cases pass
+numpy.fromiter,array creation,n/a-out-of-scope,,,P2,n/a,Python iterator protocol; JS Array.from covers it
+numpy.fromstring,array creation,n/a-out-of-scope,,,P2,n/a,text parsing helper
+numpy.full,array creation,partial,Tensor.full@tensor,"Tensor only (float64); no full() for matrix/arrays, no dtype",P0,runtime,runtime: 1/1 cases pass
+numpy.full_like,array creation,missing,,,P1,export+grep,
+numpy.gcd,ufuncs: arithmetic,full,gcd@functions,,P1,runtime,runtime: 3/3 cases pass
+numpy.geomspace,array creation,missing,,,P1,export+grep,
+numpy.gradient,reductions & statistics,partial,gradient@functions,"1-D only; no edge_order, no N-d",P1,runtime,runtime: 4/4 cases pass
+numpy.greater,ufuncs: comparison & logic,full,larger@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.greater_equal,ufuncs: comparison & logic,full,largerEq@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.hamming,misc / windows / polynomials (legacy np.poly*),full,getWindow@functions,"getWindow(""hamming"", n)",P1,runtime,runtime: 1/1 cases pass
+numpy.hanning,misc / windows / polynomials (legacy np.poly*),full,getWindow@functions,"getWindow(""hann"", n)",P1,runtime,runtime: 1/1 cases pass
+numpy.heaviside,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.histogram,reductions & statistics,partial,histogram@functions,"integer bin count only; explicit edges array throws; no range=, density=, weights=",P1,runtime,runtime: 3/4 cases pass [c_misc:66: GAP: histogram only takes an integer bin count]
+numpy.histogram2d,reductions & statistics,missing,,,P2,export+grep,
+numpy.histogram_bin_edges,reductions & statistics,missing,,,P2,export+grep,
+numpy.histogramdd,reductions & statistics,missing,,,P2,export+grep,
+numpy.hsplit,shape manipulation,missing,,,P2,export+grep,
+numpy.hstack,shape manipulation,missing,,,P0,export+grep,
+numpy.hypot,ufuncs: arithmetic,partial,hypot@functions,"hypot(a,b) scalars ok; elementwise over two arrays unsupported (array arg means norm of all values, mathjs convention)",P1,runtime,"runtime: 3/4 cases pass [c_ufunc:30: GAP: hypot(a,b) is not elementwise over arrays (mathjs hypot(array) = norm)]"
+numpy.i0,ufuncs: arithmetic,partial,besselI@functions,"besselI(0,x)",P2,runtime,runtime: 2/2 cases pass
+numpy.identity,array creation,full,identity@functions; Tensor.identity@tensor,,P0,runtime,runtime: 2/2 cases pass
+numpy.iinfo,dtypes & type info,missing,,,P2,export+grep,
+numpy.imag,ufuncs: arithmetic,full,im@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.index_exp,indexing,n/a-out-of-scope,,,P2,n/a,Python slicing helper
+numpy.indices,array creation,missing,,,P2,export+grep,
+numpy.inf,misc / windows / polynomials (legacy np.poly*),full,Infinity (JS),,P0,runtime,JS global; runtime: 1/1 cases pass
+numpy.inner,products & linear algebra (top level),partial,dot@functions,1-D only,P1,runtime,runtime: 1/1 cases pass
+numpy.insert,shape manipulation,missing,,,P1,export+grep,"name-variant check: runtime ['FibonacciHeap.insert', '.insert'], source none"
+numpy.int16,dtypes & type info,missing,,,P2,export+grep,
+numpy.int32,dtypes & type info,partial,bitwise funcs coerce to int32,,P2,runtime,no int32 array dtype; runtime: 1/1 cases pass
+numpy.int64,dtypes & type info,partial,bigint scalars,no int64 array dtype,P2,runtime,runtime: 1/1 cases pass
+numpy.int8,dtypes & type info,missing,,,P2,export+grep,
+numpy.interp,reductions & statistics,partial,linearInterp@functions; interpolate@functions,"scalar x; extrapolates linearly outside [xp0,xpN] where numpy clamps to fp[0]/fp[-1]; no left/right/period",P0,runtime,runtime: 2/4 cases pass [c_reduce:69: CONVENTION: linearInterp extrapolates; numpy interp clamps to end values] [c_reduce:70: CONVENTION: interpolate() extrapolates; numpy clamps]
+numpy.intersect1d,set operations,partial,setIntersect@functions,no return_indices/assume_unique,P1,runtime,runtime: 1/1 cases pass
+numpy.intp,dtypes & type info,missing,,,P2,export+grep,
+numpy.isclose,ufuncs: comparison & logic,missing,,,P0,export+grep,"mathjs equal() uses config relTol/absTol, but no isclose(a,b,rtol,atol) array function"
+numpy.iscomplex,ufuncs: comparison & logic,partial,isComplex@core,"type check, not elementwise imag!=0",P2,runtime,runtime: 1/1 cases pass
+numpy.iscomplexobj,ufuncs: comparison & logic,partial,isComplex@core,,P2,runtime,runtime: 1/1 cases pass
+numpy.isdtype,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype machinery
+numpy.isfinite,ufuncs: comparison & logic,full,isFinite@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.isin,set operations,missing,,,P1,export+grep,
+numpy.isinf,ufuncs: comparison & logic,missing,,,P1,export+grep,
+numpy.isnan,ufuncs: comparison & logic,full,isNaN@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.isnat,ufuncs: comparison & logic,n/a-out-of-scope,,,P2,n/a,datetime NaT
+numpy.isneginf,ufuncs: comparison & logic,missing,,,P2,export+grep,
+numpy.isposinf,ufuncs: comparison & logic,missing,,,P2,export+grep,
+numpy.isreal,ufuncs: comparison & logic,missing,,,P2,export+grep,"name-variant check: runtime ['Complex.isReal', '.isReal'], source none"
+numpy.isrealobj,ufuncs: comparison & logic,missing,,,P2,export+grep,
+numpy.isscalar,dtypes & type info,partial,isNumber/isNumeric@core,,P2,runtime,runtime: 2/2 cases pass
+numpy.issubdtype,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype machinery
+numpy.iterable,indexing,n/a-out-of-scope,,,P2,n/a,Python protocol check
+numpy.ix_,indexing,missing,,,P2,export+grep,
+numpy.kaiser,misc / windows / polynomials (legacy np.poly*),full,kaiserWindow@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.kron,products & linear algebra (top level),full,kron@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.lcm,ufuncs: arithmetic,full,lcm@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.ldexp,ufuncs: arithmetic,missing,,,P2,export+grep,"core/src/pow2-scale.ts ldexp() exists but is not exported (internal); name-variant check: runtime none, source ['ldexp']"
+numpy.less,ufuncs: comparison & logic,full,smaller@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.less_equal,ufuncs: comparison & logic,full,smallerEq@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.lexsort,sorting / searching,missing,,,P2,export+grep,
+numpy.linspace,array creation,missing,,,P0,export+grep,pass-1 also found missing
+numpy.log,ufuncs: arithmetic,full,log@functions,log(-1) returns Complex (numpy nan),P0,runtime,runtime: 2/2 cases pass
+numpy.log10,ufuncs: arithmetic,full,log10@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.log1p,ufuncs: arithmetic,full,log1p@functions,,P1,runtime,runtime: 3/3 cases pass
+numpy.log2,ufuncs: arithmetic,full,log2@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.logaddexp,ufuncs: arithmetic,partial,logsumexp@functions,pairwise elementwise form missing; logsumexp(vector) only,P1,runtime,runtime: 2/2 cases pass
+numpy.logaddexp2,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.logical_and,ufuncs: comparison & logic,full,and@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.logical_not,ufuncs: comparison & logic,full,not@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.logical_or,ufuncs: comparison & logic,full,or@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.logical_xor,ufuncs: comparison & logic,full,xor@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.logspace,array creation,missing,,,P1,export+grep,
+numpy.longdouble,dtypes & type info,partial,BigNumber@core,arbitrary precision decimal instead of 80/128-bit float,P2,runtime,MathTS ahead (arbitrary precision); runtime: 1/1 cases pass
+numpy.mask_indices,indexing,missing,,,P2,export+grep,
+numpy.matmul,products & linear algebra (top level),partial,multiply@functions; Tensor.matmul@tensor,Tensor.matmul supports batched stacks; multiply() is 2-D only,P0,runtime,runtime: 1/1 cases pass
+numpy.matrix_transpose,shape manipulation,partial,transpose@functions,2-D only; no batched last-two-axes transpose,P1,runtime,runtime: 1/1 cases pass
+numpy.matvec,products & linear algebra (top level),partial,matvec@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.max,reductions & statistics,partial,max@functions,"max(A, dim) ok; no keepdims/initial/where",P0,runtime,runtime: 4/4 cases pass
+numpy.maximum,ufuncs: arithmetic,missing,,,P0,export+grep,"elementwise binary max (max(a,b) in mathjs reduces over all args)"
+numpy.mean,reductions & statistics,partial,mean@functions,"mean(A, dim) ok; no keepdims/dtype/where",P0,runtime,runtime: 4/4 cases pass [c_misc:58: AHEAD: exact answer 1e308; NumPy 2.5.5 np.mean overflows to inf]
+numpy.median,reductions & statistics,partial,median@functions,"median(A, dim) ok; no keepdims/out",P0,runtime,runtime: 5/5 cases pass
+numpy.meshgrid,array creation,missing,,,P0,export+grep,
+numpy.mgrid,array creation,n/a-out-of-scope,,,P2,n/a,index-trick object (Python slicing syntax); JS equivalent would be meshgrid
+numpy.min,reductions & statistics,partial,min@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.min_scalar_type,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype machinery
+numpy.minimum,ufuncs: arithmetic,missing,,,P0,export+grep,
+numpy.mintypecode,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype machinery
+numpy.mod,ufuncs: arithmetic,full,mod@functions,"sign follows divisor like numpy; mod(x,0)=x (mathjs) vs numpy 0/nan",P0,runtime,"runtime: 4/5 cases pass [c_misc:45: CONVENTION: mod(x,0)=x (mathjs) vs numpy 0]"
+numpy.modf,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.moveaxis,shape manipulation,missing,,,P1,export+grep,
+numpy.multiply,ufuncs: arithmetic,partial,dotMultiply@functions,elementwise is dotMultiply; multiply() is matrix product (mathjs convention),P0,runtime,naming convention differs; runtime: 1/1 cases pass
+numpy.nan,misc / windows / polynomials (legacy np.poly*),full,NaN (JS),,P0,runtime,JS global; runtime: 1/1 cases pass
+numpy.nan_to_num,ufuncs: arithmetic,missing,,,P1,export+grep,
+numpy.nanargmax,nan functions,missing,,,P2,export+grep,
+numpy.nanargmin,nan functions,missing,,,P2,export+grep,
+numpy.nancumprod,nan functions,missing,,,P2,export+grep,
+numpy.nancumsum,nan functions,missing,,,P2,export+grep,
+numpy.nanmax,nan functions,missing,,,P1,export+grep,
+numpy.nanmean,nan functions,partial,nanmean@functions,"nanmean(A, dim) ok; no keepdims",P1,runtime,runtime: 2/2 cases pass
+numpy.nanmedian,nan functions,partial,nanmedian@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.nanmin,nan functions,missing,,,P1,export+grep,
+numpy.nanpercentile,nan functions,missing,,,P2,export+grep,
+numpy.nanprod,nan functions,missing,,,P2,export+grep,
+numpy.nanquantile,nan functions,missing,,,P2,export+grep,
+numpy.nanstd,nan functions,partial,nanstd@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.nansum,nan functions,missing,,,P1,export+grep,
+numpy.nanvar,nan functions,partial,nanvariance@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.ndarray,ndarray methods,partial,Tensor@tensor; DenseMatrix@matrix,Tensor is float64-only N-d with strides/views; DenseMatrix is 2-D-centric mathjs matrix,P0,runtime,runtime: 1/1 cases pass
+numpy.ndenumerate,indexing,n/a-out-of-scope,,,P2,n/a,Python iterator helper (forEach with index covers it)
+numpy.ndim,dtypes & type info,partial,size(x).length,,P2,runtime,no ndim() helper; runtime: 1/1 cases pass
+numpy.ndindex,indexing,n/a-out-of-scope,,,P2,n/a,Python iterator helper
+numpy.nditer,indexing,n/a-out-of-scope,,,P2,n/a,Python iterator object
+numpy.negative,ufuncs: arithmetic,full,unaryMinus@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.nextafter,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.nonzero,indexing,missing,,,P1,export+grep,
+numpy.not_equal,ufuncs: comparison & logic,full,unequal@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.ogrid,array creation,n/a-out-of-scope,,,P2,n/a,index-trick object (Python slicing syntax)
+numpy.ones,array creation,partial,ones@functions; Tensor.ones@tensor,no dtype=,P0,runtime,runtime: 1/1 cases pass
+numpy.ones_like,array creation,missing,,,P1,export+grep,
+numpy.outer,products & linear algebra (top level),partial,outer@functions,"Float64Array in, flat row-major Float64Array out (no 2-D result)",P1,runtime,runtime: 1/1 cases pass
+numpy.packbits,bitwise,missing,,,P2,export+grep,
+numpy.pad,shape manipulation,partial,pad@tensor,constant/edge/reflect only; no wrap/symmetric/linear_ramp/maximum/mean/median/minimum; unknown modes silently fall back to reflect (BUG-4),P1,runtime,"runtime: 4/6 cases pass [c_array:51: BUG-4: pad mode ""wrap"" silently treated as reflect] [c_array:52: BUG-4: pad mode ""symmetric"" silently treated as reflect]"
+numpy.partition,sorting / searching,partial,partitionSelect@functions,"returns kth value, not partitioned array",P2,runtime,runtime: 1/1 cases pass
+numpy.percentile,reductions & statistics,partial,quantileSeq@functions,"probabilities in [0,1]; no 0-100 percentile wrapper",P0,runtime,runtime: 1/1 cases pass
+numpy.permute_dims,shape manipulation,partial,Tensor.transpose(perm)@tensor,Tensor method only,P1,runtime,runtime: 1/1 cases pass
+numpy.pi,misc / windows / polynomials (legacy np.poly*),full,pi@compat; PI@core,,P0,runtime,runtime: 1/1 cases pass
+numpy.piecewise,indexing,partial,piecewise@functions,"symbolic CAS piecewise, not array piecewise(x, condlist, funclist)",P2,export,different concept
+numpy.place,indexing,missing,,,P2,export+grep,
+numpy.poly,misc / windows / polynomials (legacy np.poly*),missing,,,P2,export+grep,"functions/src/signal-filter-extra.ts polyFromRoots() (descending order, = np.poly) exists but is not exported; name-variant check: runtime none, source ['Poly']"
+numpy.poly1d,misc / windows / polynomials (legacy np.poly*),missing,,,P2,export+grep,legacy class
+numpy.polyadd,misc / windows / polynomials (legacy np.poly*),partial,polyadd@functions,ascending-order coefficients (numpy legacy is descending),P2,runtime,convention differs; runtime: 0/1 cases pass [c_poly:6: CONVENTION: ascending order (np.polyadd descending)]
+numpy.polyder,misc / windows / polynomials (legacy np.poly*),partial,polyder@functions,ascending order,P2,runtime,runtime: 1/1 cases pass
+numpy.polydiv,misc / windows / polynomials (legacy np.poly*),partial,polynomialQuotient@functions; polynomialRemainder@functions,ascending order (np.polydiv descending); separate quotient/remainder calls,P2,runtime,runtime: 1/1 cases pass
+numpy.polyfit,misc / windows / polynomials (legacy np.poly*),partial,polyFit@functions,"ascending order; no w=, cov=, full=",P1,runtime,runtime: 2/2 cases pass
+numpy.polyint,misc / windows / polynomials (legacy np.poly*),missing,,,P2,export+grep,
+numpy.polymul,misc / windows / polynomials (legacy np.poly*),partial,polymul@functions,ascending order,P2,runtime,runtime: 1/1 cases pass
+numpy.polysub,misc / windows / polynomials (legacy np.poly*),missing,,,P2,export+grep,"name-variant check: runtime none, source ['polySub']"
+numpy.polyval,misc / windows / polynomials (legacy np.poly*),partial,polyval@functions,ascending order (np.polyval is descending); scalar x,P1,runtime,"convention differs from np.polyval, matches np.polynomial.polynomial.polyval; runtime: 1/2 cases pass [c_poly:4: CONVENTION: MathTS polyval is ascending order (np.polyval descending)]"
+numpy.positive,ufuncs: arithmetic,full,unaryPlus@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.pow,ufuncs: arithmetic,partial,dotPow@functions,elementwise is dotPow; pow() is matrix power; negative base with fractional exponent returns complex principal root (numpy nan),P0,runtime,"runtime: 1/2 cases pass [c_misc:48: CONVENTION: pow(-8,1/3) gives complex principal root; numpy real nan]"
+numpy.prod,reductions & statistics,partial,prod@functions; Tensor.prod@tensor,"prod(A, dim) ok; no keepdims/dtype/where",P0,runtime,runtime: 2/2 cases pass
+numpy.promote_types,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype-promotion machinery
+numpy.ptp,reductions & statistics,partial,ptp@functions,1-D only,P1,runtime,runtime: 1/1 cases pass
+numpy.put,indexing,missing,,,P2,export+grep,
+numpy.put_along_axis,indexing,missing,,,P2,export+grep,
+numpy.putmask,indexing,missing,,,P2,export+grep,
+numpy.quantile,reductions & statistics,full,quantileSeq@functions,all 13 numpy methods via {method}; dim ok; no keepdims/weights,P0,runtime,runtime: 19/19 cases pass
+numpy.r_,indexing,n/a-out-of-scope,,,P2,n/a,Python index-trick concatenation
+numpy.rad2deg,ufuncs: trig,full,toDegrees@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.radians,ufuncs: trig,full,toRadians@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ravel,shape manipulation,partial,flatten@functions,"returns copy, no order=",P1,runtime,runtime: 1/1 cases pass
+numpy.ravel_multi_index,indexing,missing,,,P2,export+grep,
+numpy.real,ufuncs: arithmetic,full,re@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.real_if_close,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.reciprocal,ufuncs: arithmetic,missing,,,P1,export+grep,"name-variant check: runtime ['DualTensor.reciprocal', '.reciprocal', 'TapedTensor.reciprocal'], source none"
+numpy.repeat,shape manipulation,missing,,,P1,export+grep,
+numpy.require,dtypes & type info,n/a-out-of-scope,,,P2,n/a,memory-layout helper
+numpy.reshape,shape manipulation,full,reshape@functions; Tensor.reshape@tensor,"-1 inferred dim ok; no order=""F""",P0,runtime,runtime: 3/3 cases pass
+numpy.resize,shape manipulation,partial,resize@functions,pads with zeros (mathjs) instead of numpy np.resize cyclic repeat,P2,runtime,semantics differ; runtime: 0/1 cases pass [c_array:31: CONVENTION: resize pads with zeros (mathjs) vs numpy cyclic repeat]
+numpy.result_type,dtypes & type info,n/a-out-of-scope,,,P2,n/a,dtype-promotion machinery
+numpy.rint,ufuncs: rounding,missing,,,P1,export+grep,round-half-even
+numpy.roll,shape manipulation,partial,roll@tensor,Tensor only,P1,runtime,runtime: 3/3 cases pass
+numpy.rollaxis,shape manipulation,missing,,,P2,export+grep,legacy (moveaxis preferred)
+numpy.roots,misc / windows / polynomials (legacy np.poly*),partial,polynomialRoot@functions; realRoots@functions,polynomialRoot degree<=3 only; realRoots real roots only; no general complex roots via companion eig,P0,runtime,pass-1 finding; runtime: 1/2 cases pass [c_poly:22: GAP: polynomialRoot only to degree 3]
+numpy.rot90,shape manipulation,missing,,,P2,export+grep,"rotate@functions is a vector rotation (mathjs), not an array rot90"
+numpy.round,ufuncs: rounding,partial,round@functions,"rounds half away from zero; numpy rounds half to even ([0.5,1.5,2.5] -> [0,2,2])",P0,runtime,semantic difference; runtime: 2/3 cases pass [c_ufunc:39: CONVENTION: round half away from zero vs numpy half-to-even]
+numpy.s_,indexing,n/a-out-of-scope,,,P2,n/a,Python slicing helper
+numpy.searchsorted,sorting / searching,missing,,,P0,export+grep,
+numpy.select,indexing,missing,,,P1,export+grep,
+numpy.setdiff1d,set operations,full,setDifference@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.setxor1d,set operations,full,setSymDifference@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.shape,dtypes & type info,partial,size@functions; DenseMatrix.shape,,P0,runtime,runtime: 1/1 cases pass
+numpy.sign,ufuncs: arithmetic,full,sign@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.signbit,ufuncs: comparison & logic,missing,,,P2,export+grep,
+numpy.sin,ufuncs: trig,full,sin@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.sinc,ufuncs: arithmetic,partial,sinc@functions,scalar only; array input returns NaN silently (BUG-3),P1,runtime,"runtime: 1/3 cases pass [c_misc:37: BUG-3: sinc([0]) returns NaN (array input not supported, silently)] [c_ufunc:38: BUG-3: sinc(array) returns NaN silently]"
+numpy.sinh,ufuncs: trig,full,sinh@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.size,dtypes & type info,partial,size@functions,"mathjs size returns shape, not element count",P1,runtime,semantics differ from np.size; runtime: 1/1 cases pass
+numpy.sort,sorting / searching,partial,sort@functions,no axis= for matrices (mapSlices works); no kind/stable; NaN input gives an unsorted result (BUG-5),P0,runtime,runtime: 4/6 cases pass [c_reduce:81: BUG-5: sort with NaN returns an unsorted array] [c_reduce:106: BUG-5: sort with NaN returns an unsorted array]
+numpy.sort_complex,sorting / searching,n/a-out-of-scope,,,P2,n/a,specialized
+numpy.spacing,ufuncs: arithmetic,missing,,,P2,export+grep,
+numpy.split,shape manipulation,missing,,,P1,export+grep,
+numpy.sqrt,ufuncs: arithmetic,full,sqrt@functions,returns Complex for negatives (numpy returns nan for real input),P0,runtime,runtime: 2/2 cases pass
+numpy.square,ufuncs: arithmetic,full,square@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.squeeze,shape manipulation,partial,squeeze@functions,no axis= argument,P1,runtime,runtime: 1/1 cases pass
+numpy.stack,shape manipulation,partial,stack@tensor,Tensor only,P0,runtime,runtime: 2/2 cases pass
+numpy.std,reductions & statistics,partial,std@functions,"std(A, dim, normalization) ok; ddof expressed as 'unbiased'/'uncorrected'/'biased'",P0,runtime,runtime: 5/5 cases pass [c_misc:59: AHEAD: exact 1e200; NumPy np.std overflows to inf]
+numpy.subtract,ufuncs: arithmetic,full,subtract@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.sum,reductions & statistics,partial,sum@functions; Tensor.sum@tensor,"sum(A, dim) ok; no keepdims/dtype/where on sum(); Tensor.sum has keepDims",P0,runtime,runtime: 8/8 cases pass
+numpy.swapaxes,shape manipulation,missing,,,P1,export+grep,
+numpy.take,indexing,partial,gather@tensor; subset@functions,"gather(t, axis, idx) ok; no mode='wrap'/'clip'",P1,runtime,runtime: 2/2 cases pass
+numpy.take_along_axis,indexing,missing,,,P1,export+grep,
+numpy.tan,ufuncs: trig,full,tan@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.tanh,ufuncs: trig,full,tanh@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.tensordot,products & linear algebra (top level),full,Tensor.tensordot@tensor,,P1,runtime,runtime: 2/2 cases pass
+numpy.tile,shape manipulation,missing,,,P1,export+grep,
+numpy.trace,products & linear algebra (top level),partial,trace@functions,"no offset (trace(A,1) throws), no axis1/axis2",P0,runtime,runtime: 0/1 cases pass [c_linalg:60: GAP: trace has no offset]
+numpy.trapezoid,reductions & statistics,partial,trapz@functions,"1-D only; no axis, dx",P1,runtime,runtime: 3/3 cases pass
+numpy.tri,array creation,missing,,,P2,export+grep,
+numpy.tril,array creation,full,tril@functions,,P1,runtime,runtime: 2/2 cases pass
+numpy.tril_indices,indexing,missing,,,P2,export+grep,
+numpy.tril_indices_from,indexing,missing,,,P2,export+grep,
+numpy.trim_zeros,shape manipulation,missing,,,P2,export+grep,
+numpy.triu,array creation,full,triu@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.triu_indices,indexing,missing,,,P2,export+grep,
+numpy.triu_indices_from,indexing,missing,,,P2,export+grep,
+numpy.trunc,ufuncs: rounding,full,fix@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.uint16,dtypes & type info,missing,,,P2,export+grep,
+numpy.uint32,dtypes & type info,missing,,,P2,export+grep,
+numpy.uint64,dtypes & type info,missing,,,P2,export+grep,
+numpy.uint8,dtypes & type info,missing,,,P2,export+grep,
+numpy.uintp,dtypes & type info,missing,,,P2,export+grep,
+numpy.union1d,set operations,partial,setUnion@functions,"result is in first-seen order, not sorted like numpy",P1,runtime,runtime: 1/2 cases pass [c_reduce:87: CONVENTION: setUnion keeps first-seen order (numpy sorted)]
+numpy.unique,set operations,partial,setDistinct@functions,"sorted unique values; no return_index/return_inverse/return_counts, no axis",P0,runtime,runtime: 1/1 cases pass
+numpy.unique_all,set operations,missing,,,P2,export+grep,
+numpy.unique_counts,set operations,partial,setMultiplicity@functions,"per-value multiplicity(e, A), not (values, counts)",P1,runtime,runtime: 1/1 cases pass
+numpy.unique_inverse,set operations,missing,,,P2,export+grep,
+numpy.unique_values,set operations,partial,setDistinct@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.unpackbits,bitwise,missing,,,P2,export+grep,
+numpy.unravel_index,indexing,missing,,,P1,export+grep,
+numpy.unstack,shape manipulation,missing,,,P2,export+grep,
+numpy.unwrap,ufuncs: trig,partial,unwrapPhase@functions,"no discont=, axis=, period=",P1,runtime,runtime: 1/1 cases pass
+numpy.vander,array creation,full,vander@functions,N and increasing supported,P1,runtime,runtime: 2/2 cases pass
+numpy.var,reductions & statistics,partial,variance@functions,same as std,P0,runtime,runtime: 4/4 cases pass
+numpy.vdot,products & linear algebra (top level),full,dot@functions,dot() conjugates the first complex argument like vdot,P2,runtime,runtime: 1/1 cases pass
+numpy.vecdot,products & linear algebra (top level),partial,dot@functions,no axis/batched,P2,runtime,runtime: 1/1 cases pass
+numpy.vecmat,products & linear algebra (top level),missing,,,P2,export+grep,
+numpy.vectorize,indexing,n/a-out-of-scope,,,P2,n/a,JS map/typed() covers it
+numpy.vsplit,shape manipulation,missing,,,P2,export+grep,
+numpy.vstack,shape manipulation,missing,,,P0,export+grep,"concat(a,b,0) is the workaround"
+numpy.where,indexing,missing,,,P0,export+grep,neither 1-arg (nonzero) nor 3-arg (ternary) form; mathjs filter() only returns values
+numpy.zeros,array creation,partial,zeros@functions; Tensor.zeros@tensor,no dtype= (mathjs 'dense'/'sparse' format arg instead),P0,runtime,runtime: 2/2 cases pass
+numpy.zeros_like,array creation,missing,,,P1,export+grep,
+numpy.ndarray.T,ndarray methods,partial,transpose@functions,no .T property,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.all,ndarray methods,missing,,,P1,export+grep,"name-variant check: runtime ['all'], source none"
+numpy.ndarray.any,ndarray methods,missing,,,P1,export+grep,
+numpy.ndarray.argmax,ndarray methods,missing,,,P1,export+grep,
+numpy.ndarray.argmin,ndarray methods,missing,,,P1,export+grep,
+numpy.ndarray.argpartition,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.argsort,ndarray methods,missing,,,P1,export+grep,
+numpy.ndarray.astype,ndarray methods,missing,,,P1,export+grep,
+numpy.ndarray.choose,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.clip,ndarray methods,missing,,,P1,export+grep,
+numpy.ndarray.compress,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.conj,ndarray methods,partial,conj@functions,"function, not method",P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.conjugate,ndarray methods,partial,conj@functions,"function, not method",P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.copy,ndarray methods,full,Tensor.clone; DenseMatrix.clone,,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.cumprod,ndarray methods,partial,cumprod@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.cumsum,ndarray methods,partial,cumsum@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.diagonal,ndarray methods,full,DenseMatrix.diagonal,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.dot,ndarray methods,full,Tensor.dot; DenseMatrix.multiply,,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.dtype,ndarray methods,partial,Tensor.dtype,always 'float64',P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.fill,ndarray methods,full,Tensor.fill_; DenseMatrix.fill,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.flat,ndarray methods,n/a-out-of-scope,,,P2,n/a,iterator
+numpy.ndarray.flatten,ndarray methods,full,flatten@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.imag,ndarray methods,partial,im@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.item,ndarray methods,n/a-out-of-scope,,,P2,n/a,scalar extraction
+numpy.ndarray.mT,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.max,ndarray methods,full,"Tensor.max(axis,keepDims); DenseMatrix.max",,P1,runtime,runtime: 2/2 cases pass
+numpy.ndarray.mean,ndarray methods,full,"Tensor.mean(axis,keepDims)",,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.min,ndarray methods,full,"Tensor.min(axis,keepDims)",,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.ndim,ndarray methods,partial,Tensor.shape.length,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.nonzero,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.partition,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.prod,ndarray methods,full,"Tensor.prod(axis,keepDims)",,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.put,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.ravel,ndarray methods,partial,flatten@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.real,ndarray methods,partial,re@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.repeat,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.reshape,ndarray methods,full,Tensor.reshape,,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.resize,ndarray methods,partial,resize@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.round,ndarray methods,partial,round@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.searchsorted,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.shape,ndarray methods,full,Tensor.shape; DenseMatrix.shape,,P0,runtime,runtime: 1/1 cases pass
+numpy.ndarray.size,ndarray methods,partial,Tensor.sizeOf(shape)@tensor,no size property on Tensor,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.sort,ndarray methods,partial,sort@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.squeeze,ndarray methods,partial,squeeze@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.std,ndarray methods,partial,std@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.sum,ndarray methods,full,"Tensor.sum(axis,keepDims)",,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.swapaxes,ndarray methods,missing,,,P2,export+grep,
+numpy.ndarray.take,ndarray methods,partial,gather@tensor,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.trace,ndarray methods,full,DenseMatrix.trace,,P2,runtime,runtime: 1/1 cases pass
+numpy.ndarray.transpose,ndarray methods,full,Tensor.transpose(perm),,P1,runtime,runtime: 1/1 cases pass
+numpy.ndarray.var,ndarray methods,partial,variance@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.linalg.LinAlgError,linalg,partial,DimensionError / plain Error,no dedicated singular-matrix error class,P2,runtime,runtime: 1/1 cases pass
+numpy.linalg.cholesky,linalg,partial,cholesky@functions,"returns {L} (lower); no upper=, unknown options silently ignored; no batched",P0,runtime,runtime: 3/3 cases pass
+numpy.linalg.cond,linalg,partial,cond@functions,"2-norm only; cond(A,p) throws ""Too many arguments""",P1,runtime,runtime: 2/3 cases pass [c_linalg:56: GAP: cond has no p argument]
+numpy.linalg.cross,linalg,partial,cross@functions,3-vectors only,P1,runtime,runtime: 1/1 cases pass
+numpy.linalg.det,linalg,partial,det@functions,no batched (stacked) input,P0,runtime,runtime: 4/4 cases pass
+numpy.linalg.diagonal,linalg,partial,diagonal@matrix,no offset/batched,P2,runtime,runtime: 1/1 cases pass
+numpy.linalg.eig,linalg,partial,eig@matrix,eigenvectors returned as ROWS of .vectors/.vectorsIm (numpy: columns); no batched,P0,runtime,runtime: 6/6 cases pass
+numpy.linalg.eigh,linalg,full,eigs@functions,"ascending eigenvalues + eigenvectors (as {value,vector} list), Hermitian ok; no UPLO=",P0,runtime,runtime: 4/4 cases pass
+numpy.linalg.eigvals,linalg,partial,eigvals@matrix,,P0,runtime,runtime: 2/2 cases pass
+numpy.linalg.eigvalsh,linalg,partial,eigs@functions(eigenvectors:false),,P1,runtime,runtime: 1/1 cases pass
+numpy.linalg.inv,linalg,partial,inv@functions,no batched,P0,runtime,runtime: 3/3 cases pass
+numpy.linalg.lstsq,linalg,partial,lstsq@functions,"returns the solution only (no residuals, rank, singular values)",P0,runtime,runtime: 4/4 cases pass
+numpy.linalg.matmul,linalg,partial,multiply@functions,no batched,P0,runtime,runtime: 1/1 cases pass
+numpy.linalg.matrix_norm,linalg,partial,norm@functions,fro/1/inf/2 ok; nuc and -1/-2/-inf orders unsupported,P1,runtime,runtime: 0/1 cases pass [c_linalg:52: GAP: no nuclear norm]
+numpy.linalg.matrix_power,linalg,full,matrixPower@functions,negative and fractional powers supported,P1,runtime,runtime: 4/4 cases pass
+numpy.linalg.matrix_rank,linalg,partial,matrixRank@functions,"absolute tol=1e-10 default (numpy uses S.max*max(M,N)*eps), so small-scaled full-rank matrices report rank 0 (BUG-2; root cause: rank = nonzero rows of an RREF with an absolute pivot tolerance, not an SVD with a relative tolerance); no hermitian=",P1,runtime,"runtime: 4/5 cases pass [c_linalg:37: BUG-2: matrixRank uses an absolute 1e-10 tolerance; diag(1e-12,1e-12) reports rank 0 (numpy 2)]"
+numpy.linalg.matrix_transpose,linalg,partial,transpose@functions,2-D only,P2,runtime,runtime: 1/1 cases pass
+numpy.linalg.multi_dot,linalg,missing,,,P2,export+grep,
+numpy.linalg.norm,linalg,partial,norm@functions,"vector ords 1/2/inf/-inf/p and matrix fro/1/inf/2 ok; no axis= (norm(A,2,1) throws), no keepdims, no nuc",P0,runtime,runtime: 13/13 cases pass [c_misc:60: AHEAD: exact 1.414e200; NumPy np.linalg.norm overflows to inf]
+numpy.linalg.outer,linalg,partial,outer@functions,flat Float64Array result,P1,runtime,runtime: 1/1 cases pass
+numpy.linalg.pinv,linalg,full,pinv@functions,,P0,runtime,runtime: 3/3 cases pass
+numpy.linalg.qr,linalg,partial,qr@functions,"always ""complete"" R shape (m x n) for tall input; no mode=reduced/r/raw",P0,runtime,runtime: 4/5 cases pass [c_linalg:28: CONVENTION: qr returns complete-shape R (numpy default reduced)]
+numpy.linalg.slogdet,linalg,full,logdet@functions,"returns {sign,value} (numpy: sign, logabsdet)",P1,runtime,runtime: 3/3 cases pass
+numpy.linalg.solve,linalg,partial,lusolve@functions; linsolve@functions,"no batched (stacked) systems; lusolve returns n x 1 column for vector b, linsolve returns a vector; matrix RHS via lusolve throws",P0,runtime,runtime: 4/6 cases pass [c_linalg:6: GAP: lusolve cannot take a matrix right-hand side here] [c_linalg:7: GAP: no batched (stacked) solve]
+numpy.linalg.svd,linalg,partial,svd@functions,economy U only (no full_matrices=True); no compute_uv=False (use singularValues),P0,runtime,runtime: 4/5 cases pass [c_linalg:25: GAP: svd returns economy U only (no full_matrices)]
+numpy.linalg.svdvals,linalg,partial,singularValues@matrix,,P1,runtime,runtime: 1/1 cases pass
+numpy.linalg.tensordot,linalg,full,Tensor.tensordot@tensor,,P2,runtime,runtime: 1/1 cases pass
+numpy.linalg.tensorinv,linalg,missing,,,P2,export+grep,
+numpy.linalg.tensorsolve,linalg,partial,tensorSolve@tensor,axis convention differs from numpy (a.shape = b.shape + Q); numpy-style call throws,P2,runtime,runtime: 0/1 cases pass [c_linalg:77: CONVENTION/UNVERIFIED: tensorSolve axis convention differs; numpy-style call throws]
+numpy.linalg.trace,linalg,partial,trace@functions,no offset,P1,runtime,runtime: 1/1 cases pass
+numpy.linalg.vecdot,linalg,partial,dot@functions,no axis/batched,P2,runtime,runtime: 1/1 cases pass
+numpy.linalg.vector_norm,linalg,partial,norm@functions,no axis/keepdims,P1,runtime,runtime: 1/1 cases pass
+numpy.fft.fft,fft,partial,fft@functions,"no n= (pad/truncate), axis=, norm= (fft(x, n) throws ""Too many arguments"")",P0,runtime,runtime: 5/7 cases pass [c_fft:4: GAP: fft has no n= argument] [c_fft:5: GAP: fft has no norm= argument]
+numpy.fft.fft2,fft,partial,fft2d@functions; fftn@functions,"fft2d zero-pads every axis to a power of two, so non-power-of-2 shapes give a different, larger spectrum (BUG-1); fftn is correct; no s=, axes=, norm=; fft2d returns {real,imag} but fftn returns {re,im}",P1,runtime,"runtime: 0/1 cases pass [c_fft:12: BUG-1: fft2d zero-pads 2x3 to 2x4 (power of two), wrong spectrum shape and values]"
+numpy.fft.fftfreq,fft,full,fftfreq@functions,,P0,runtime,runtime: 2/2 cases pass
+numpy.fft.fftn,fft,partial,fftn@functions,"no s=, axes=, norm=",P1,runtime,runtime: 3/3 cases pass
+numpy.fft.fftshift,fft,partial,fftshift@functions,1-D and 2-D (all axes) ok; no axes=,P1,runtime,runtime: 3/3 cases pass
+numpy.fft.hfft,fft,missing,,,P2,export+grep,
+numpy.fft.ifft,fft,partial,ifft@functions,"n= supported (pad/truncate); no norm=, axis=",P0,runtime,runtime: 5/5 cases pass
+numpy.fft.ifft2,fft,missing,,,P1,runtime,"ifft2 exists in functions/src/signal/fft.ts but is not exported (pass-1 finding); name-variant check: runtime none, source ['ifft2']; runtime: 0/1 cases pass [c_fft:22: GAP: ifft2 exists in source but is not exported]"
+numpy.fft.ifftn,fft,missing,,,P1,export+grep,
+numpy.fft.ifftshift,fft,partial,ifftshift@functions,1-D only,P1,runtime,runtime: 1/1 cases pass
+numpy.fft.ihfft,fft,missing,,,P2,export+grep,
+numpy.fft.irfft,fft,partial,irfft@functions,n is required; omitting it fails with an unrelated conj() type error (BUG-7),P0,runtime,runtime: 1/2 cases pass [c_fft:11: BUG-7: irfft without n fails with an unrelated conj() TypeError]
+numpy.fft.irfft2,fft,missing,,,P2,export+grep,
+numpy.fft.irfftn,fft,missing,,,P2,export+grep,
+numpy.fft.rfft,fft,partial,rfft@functions,"rfft(x, n) silently ignores n (BUG-6); no norm=, axis=",P0,runtime,"runtime: 3/4 cases pass [c_fft:30: BUG-6: rfft(x, n) silently ignores n (returns rfft of the unpadded input)]"
+numpy.fft.rfft2,fft,missing,,,P2,export+grep,
+numpy.fft.rfftfreq,fft,full,rfftfreq@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.fft.rfftn,fft,missing,,,P2,export+grep,
+numpy.random.default_rng,random (Generator),partial,"seedProbabilityRng@functions; dist.sampleN(n,{seed})","global seed for random/randomInt/pickRandom; dist.sample() uses unseeded Math.random (documented); seeded dist batches via async sampleN(n,{seed}); no independent Generator object",P0,runtime,location names not found at runtime: dist.sampleN; runtime: 1/1 cases pass
+numpy.random.Generator,random (Generator),missing,,,P0,export+grep,no Generator object holding its own stream; sampling uses a global RNG
+numpy.random.BitGenerator,random (Generator),missing,,,P2,export+grep,
+numpy.random.SeedSequence,random (Generator),missing,,,P2,export+grep,
+numpy.random.PCG64,random (Generator),missing,,,P2,export+grep,
+numpy.random.PCG64DXSM,random (Generator),missing,,,P2,export+grep,
+numpy.random.MT19937,random (Generator),missing,,,P2,export+grep,
+numpy.random.Philox,random (Generator),missing,,,P2,export+grep,
+numpy.random.SFC64,random (Generator),missing,,,P2,export+grep,mulberry32 is the only exported PRNG (core)
+numpy.random.Generator.beta,random (Generator),partial,betaDist.sample(n)@functions,beta@functions is the Beta function,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.binomial,random (Generator),partial,binomialDist.sample(n)@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.bit_generator,random (Generator),n/a-out-of-scope,,,P2,n/a,attribute of Generator object
+numpy.random.Generator.bytes,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.chisquare,random (Generator),partial,chiSquaredDist.sample(n)@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.choice,random (Generator),partial,pickRandom@functions,"weights ok; samples with replacement only (no replace=False); no axis, shape",P0,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.dirichlet,random (Generator),partial,dirichletSample@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.exponential,random (Generator),partial,exponentialDist.sample(n)@functions,rate parameterisation (numpy uses scale),P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.f,random (Generator),partial,fDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.gamma,random (Generator),partial,gammaDist.sample(n)@functions,gamma@functions is the Gamma function; sampler via gammaDist,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.geometric,random (Generator),missing,,,P2,export+grep,geometricPMF only (no sampler)
+numpy.random.Generator.gumbel,random (Generator),partial,gumbelDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.hypergeometric,random (Generator),partial,hypergeometricDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.integers,random (Generator),partial,randomInt@functions,"no endpoint=, dtype",P0,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.laplace,random (Generator),missing,,,P2,export+grep,"laplace@functions is the Laplace transform; name-variant check: runtime ['laplace'], source ['laplace']"
+numpy.random.Generator.logistic,random (Generator),missing,,,P2,export+grep,logistic PDF/CDF/quantile exist; no sampler
+numpy.random.Generator.lognormal,random (Generator),partial,logNormalDist.sample(n)@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.logseries,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.multinomial,random (Generator),missing,,,P2,export+grep,"multinomial@functions is the multinomial coefficient; name-variant check: runtime ['multinomial'], source ['multinomial']"
+numpy.random.Generator.multivariate_hypergeometric,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.multivariate_normal,random (Generator),partial,mvnSample@functions; multivariateNormal@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.negative_binomial,random (Generator),partial,negativeBinomialDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.noncentral_chisquare,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.noncentral_f,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.normal,random (Generator),partial,"normalDist(mu,s).sample(n)@functions",,P0,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.pareto,random (Generator),partial,paretoDist.sample(n)@functions,"numpy pareto is Lomax (pareto II, shifted); MathTS paretoDist is Pareto I",P2,runtime,parameterisation differs; runtime: 1/1 cases pass
+numpy.random.Generator.permutation,random (Generator),missing,,,P1,export+grep,
+numpy.random.Generator.permuted,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.poisson,random (Generator),partial,poissonDist.sample(n)@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.power,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.random,random (Generator),partial,random@functions,"random(size,min,max) ok; no dtype/out",P0,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.rayleigh,random (Generator),partial,rayleighDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.shuffle,random (Generator),missing,,,P1,export+grep,private _shuffle() Fisher-Yates in functions/src/typed/hypothesis.ts (not exported)
+numpy.random.Generator.spawn,random (Generator),missing,,,P2,export+grep,
+numpy.random.Generator.standard_cauchy,random (Generator),missing,,,P2,export+grep,cauchy PDF/CDF/quantile only
+numpy.random.Generator.standard_exponential,random (Generator),partial,exponentialDist().sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.standard_gamma,random (Generator),partial,gammaDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.standard_normal,random (Generator),partial,normalDist().sample(n)@functions,,P0,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.standard_t,random (Generator),partial,tDist.sample(n)@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.triangular,random (Generator),partial,triangularDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.uniform,random (Generator),partial,"uniformDist(a,b).sample(n)@functions","distribution objects: sample(n) (unseeded) or async sampleN(n,{seed}); no size shape",P0,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.vonmises,random (Generator),missing,,,P2,export+grep,vonMisesPDF only
+numpy.random.Generator.wald,random (Generator),partial,invGaussDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.weibull,random (Generator),partial,weibullDist.sample(n)@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.random.Generator.zipf,random (Generator),missing,,,P2,export+grep,zipfPMF only
+numpy.polynomial.set_default_printstyle,polynomial,n/a-out-of-scope,,,P2,n/a,printing
+numpy.polynomial.Polynomial,polynomial,missing,,,P1,export+grep,no polynomial class (coefficient arrays + functions instead)
+numpy.polynomial.Chebyshev,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Legendre,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Hermite,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.HermiteE,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Laguerre,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polyline,polynomial,missing,,,P2,export+grep,"name-variant check: runtime none, source ['polyline']"
+numpy.polynomial.polynomial.polyadd,polynomial,full,polyadd@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.polynomial.polynomial.polysub,polynomial,missing,,,P1,export+grep,"name-variant check: runtime none, source ['polySub']"
+numpy.polynomial.polynomial.polymulx,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polymul,polynomial,full,polymul@functions,,P1,runtime,runtime: 1/1 cases pass
+numpy.polynomial.polynomial.polydiv,polynomial,partial,polynomialQuotient@functions; polynomialRemainder@functions,quotient and remainder are separate calls (numpy returns both); string input gives NaN (BUG-9),P1,runtime,runtime: 2/3 cases pass [c_misc:89: BUG-9: polynomialQuotient on strings returns an array of NaN instead of throwing]
+numpy.polynomial.polynomial.polypow,polynomial,missing,,,P2,export+grep,private polyPow() in functions/src/signal/iir-design.ts (not exported)
+numpy.polynomial.polynomial.polyval,polynomial,partial,polyval@functions,scalar x only; array x returns NaN silently (BUG-3),P1,runtime,"runtime: 3/4 cases pass [c_poly:2: BUG-3: polyval(coeffs, array) returns NaN silently]"
+numpy.polynomial.polynomial.polyvalfromroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polyder,polynomial,partial,polyder@functions,"no scl=, axis=",P1,runtime,runtime: 2/2 cases pass
+numpy.polynomial.polynomial.polyint,polynomial,missing,,,P1,export+grep,
+numpy.polynomial.polynomial.polyfromroots,polynomial,missing,,,P1,export+grep,"internal polyFromRoots() is descending-order and not exported; name-variant check: runtime none, source ['polyFromRoots']"
+numpy.polynomial.polynomial.polyvander,polynomial,partial,vander@functions(increasing=true),,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.polynomial.polyfit,polynomial,partial,polyFit@functions,"no w=, full=, rcond=",P1,runtime,runtime: 1/1 cases pass
+numpy.polynomial.polynomial.polytrim,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polyroots,polynomial,partial,polynomialRoot@functions; realRoots@functions,degree<=3 / real roots only,P0,runtime,runtime: 3/3 cases pass
+numpy.polynomial.polynomial.polyval2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polyval3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polyvalnd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polygrid2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polygrid3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polyvander2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polyvander3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.polynomial.polycompanion,polynomial,partial,companion@functions,takes descending coefficients and returns the first-row Frobenius form (numpy: last-column form); same eigenvalues,P2,runtime,runtime: 0/1 cases pass [c_poly:24: CONVENTION: companion first-row form with descending coefficients (numpy last-column form)]
+numpy.polynomial.chebyshev.chebline,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebadd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebsub,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebmulx,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebmul,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebdiv,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebpow,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebval,polynomial,partial,chebyshevT@functions (T_n(x) basis only),no series evaluation sum c_k P_k(x); no array x,P2,runtime,runtime: 2/2 cases pass
+numpy.polynomial.chebyshev.chebder,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebint,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.cheb2poly,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.chebyshev.poly2cheb,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.chebyshev.chebfromroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebvander,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebfit,polynomial,partial,chebyshevFit@functions,"no w=, domain mapping, full=",P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.chebyshev.chebtrim,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebpts1,polynomial,partial,rootsChebyshevT@functions (.nodes),returns nodes+weights object,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.chebyshev.chebpts2,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebval2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebval3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebvalnd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebgrid2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebgrid3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebvander2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebvander3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebcompanion,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebgauss,polynomial,full,rootsChebyshevT@functions,,P2,runtime,"returns {nodes, weights}; runtime: 1/1 cases pass"
+numpy.polynomial.chebyshev.chebweight,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.chebyshev.chebinterpolate,polynomial,partial,chebyshevApprox@functions,"different signature (f,a,b,n)",P2,runtime,"runtime: 0/1 cases pass [c_poly:38: GAP: chebyshevApprox returns an evaluator function, not coefficients]"
+numpy.polynomial.legendre.legline,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legadd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legsub,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legmulx,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legmul,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legdiv,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legpow,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legval,polynomial,partial,legendreP@functions (P_n(x) basis only),no series evaluation sum c_k P_k(x); no array x,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.legendre.legder,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legint,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.leg2poly,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.legendre.poly2leg,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.legendre.legfromroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legvander,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legfit,polynomial,partial,legendreFit@functions,"no w=, domain mapping, full=",P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.legendre.legtrim,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legval2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legval3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legvalnd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.leggrid2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.leggrid3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legvander2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legvander3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.legcompanion,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.legendre.leggauss,polynomial,full,rootsLegendre@functions,,P2,runtime,"returns {nodes, weights}; runtime: 2/2 cases pass"
+numpy.polynomial.legendre.legweight,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagline,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagadd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagsub,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagmulx,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagmul,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagdiv,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagpow,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagval,polynomial,partial,laguerreL@functions (L_n(x) basis only),no series evaluation sum c_k P_k(x); no array x,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.laguerre.lagder,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagint,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lag2poly,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.laguerre.poly2lag,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.laguerre.lagfromroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagvander,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagfit,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagtrim,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagval2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagval3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagvalnd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.laggrid2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.laggrid3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagvander2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagvander3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.lagcompanion,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.laguerre.laggauss,polynomial,full,rootsLaguerre@functions,,P2,runtime,"returns {nodes, weights}; runtime: 1/1 cases pass"
+numpy.polynomial.laguerre.lagweight,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermline,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermadd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermsub,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermmulx,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermmul,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermdiv,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermpow,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermval,polynomial,partial,hermiteH@functions (H_n(x) basis only),no series evaluation sum c_k P_k(x); no array x,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.hermite.hermder,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermint,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.herm2poly,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.hermite.poly2herm,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.hermite.hermfromroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermvander,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermfit,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermtrim,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermval2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermval3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermvalnd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermgrid2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermgrid3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermvander2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermvander3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermcompanion,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite.hermgauss,polynomial,full,rootsHermite@functions,,P2,runtime,"returns {nodes, weights}; runtime: 1/1 cases pass"
+numpy.polynomial.hermite.hermweight,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeline,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeadd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermesub,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermemulx,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermemul,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermediv,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermepow,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeval,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeder,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeint,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.herme2poly,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.hermite_e.poly2herme,polynomial,missing,,,P2,export+grep,basis conversion
+numpy.polynomial.hermite_e.hermefromroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermevander,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermefit,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermetrim,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeval2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeval3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermevalnd,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermegrid2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermegrid3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermevander2d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermevander3d,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermecompanion,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermegauss,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.hermite_e.hermeweight,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.basis,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.cast,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.convert,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.copy,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.cutdeg,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.degree,polynomial,partial,degree@functions,symbolic expression degree,P2,runtime,"runtime: 1/2 cases pass [c_misc:88: BUG-9: degree(""x^3+2"") returns 4 (string length - 1) instead of throwing]"
+numpy.polynomial.Polynomial.deriv,polynomial,partial,polyder@functions,,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.Polynomial.fit,polynomial,partial,polyFit@functions,no domain/window scaling,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.Polynomial.fromroots,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.identity,polynomial,missing,,,P2,export+grep,"name-variant check: runtime ['DenseMatrix.identity', '.identity', 'SparseMatrix.identity', 'identity'], source ['identity']"
+numpy.polynomial.Polynomial.integ,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.linspace,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.mapparms,polynomial,missing,,,P2,export+grep,
+numpy.polynomial.Polynomial.roots,polynomial,partial,polynomialRoot@functions,degree<=3,P2,runtime,runtime: 1/1 cases pass
+numpy.polynomial.Polynomial.trim,polynomial,missing,,,P2,export+grep,"name-variant check: runtime none, source ['trim']"
+numpy.polynomial.Polynomial.truncate,polynomial,missing,,,P2,export+grep,

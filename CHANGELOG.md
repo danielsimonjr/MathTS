@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`docs/reports/`: archived parity and gap-analysis reports (2026-11-25):** the mathjs 15.3.0 parity gap analysis (issues #1549–#1589, tracker #1590) and the six-system parity review against NumPy, SciPy, PySR, Mathematica, Mathcad and MATLAB (issues #1592–#1713, tracker #1714), with per-reference deep reports and data tables. Index: [`docs/reports/README.md`](docs/reports/README.md). For numeric and symbolic correctness, the sources of truth are NumPy, SciPy, SymPy and PySR; Mathematica, Mathcad and MATLAB are feature references only.
+
 ### Changed
+
+- **Compat `version` reports the emulated mathjs version (#1581):** `version` is `"15.3.0"` on the compat instance, the named export, and the expression scope, and a `compatVersion` named export carries the compat package version; `help('version')` and other doc examples evaluate through the instance evaluator. BREAKING: code reading the compat package version from `math.version` must read `compatVersion`.
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
 
@@ -18,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Fraction sign fields, rational `pow`, and Unit BigNumber converter (#1551):** Root cause: MathTS `Fraction` stores `numerator`/`denominator` (sign in the numerator), while several native paths still read fraction.js `.s`/`.n`/`.d` (`undefined`). `isPositive`/`isNegative`/`isInteger`/`fix` now call `Fraction.isPositive()`/`isNegative()`/`isInteger()`. Native `pow` uses core `rationalPow` so a rational result stays a Fraction, including real odd roots of negatives (`(-8)^(1/3) = -2`). Compat still matches mathjs 15.3.0 on those negatives (principal Complex, or throw when `predictable`). `Unit.typeConverters.BigNumber` divides `numerator` by `denominator`. Compat `format` still prints whole fractions as `n/1` (mathjs quirk) and forwards `null`/`undefined`/primitives to native `format` instead of reading `.storage` on them.
+
+- **Expression compile uses `scope.has`, not `get === undefined` (#1581):** a Map-like scope documents `has`/`get`/`set`. Native compile treated `get(name) === undefined` as a missing symbol, so `evaluate('pi', { pi: undefined })` threw `Undefined symbol "pi"` even when `has('pi')` was true (an explicit binding, including `Map.set('pi', undefined)`). Lookup now follows the Map contract: missing keys throw; a present key whose value is `undefined` returns `undefined`. This is a native correctness fix, not a mathjs-parity shim. Compat no longer injects a `mathjsScopedSymbols` flag.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 
