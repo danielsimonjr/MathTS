@@ -1,31 +1,20 @@
 /**
- * Challenger round 3 for PR #1753, after commit cc311160 ("fix(docs): emit one
- * name per line in generated export indexes").
+ * Challenger round 3 for PR #1753, in its post-fix form.
  *
- * cc311160 changes the generated reference's group lines from
- *
+ * Commit cc311160 moved the generated export index from
  *   **Arithmetic** (43): `abs`, `add`, ...
+ * to one name per following line, and updated parseReferenceIndex. The other
+ * reader of the same block — `countsFromReference` in
+ * tools/test/site-generators.test.mjs — kept a pattern that required a space and
+ * the names on the heading line, so Compile & Lint failed `'27' !== '0'`
+ * (reproduced locally and in CI job 139553398268). 8595066e fixed that reader.
  *
- * to
- *
- *   **Arithmetic** (43):
- *   `abs`
- *   `add`
- *
- * It updates `parseReferenceIndex` to read the new form, but the two OTHER
- * readers of the same block were not touched:
- *
- *  - `tools/test/site-generators.test.mjs#countsFromReference` keeps the old
- *    `^\*\*(.+?)\*\* \(\d+\): ` (space + names on the same line) pattern, so it
- *    counts 0 groups while the generated file has 27, and the landing-page test
- *    fails with `'27' !== '0'`.
- *  - `docs/reference/functions.md` is what the landing page reads, so the
- *    shipped "Categories" stat is affected too until the reader is fixed.
- *
- * This regressed a previously-green required check: the same file passes at
- * 8baa9ddc and fails at cc311160 (verified locally). The test below pins the
- * generated format and the readers' agreement on it, without depending on a
- * build of the packages.
+ * The bug this file guards against is reader drift: one parser of the generated
+ * block updated, another left behind. Rather than hard-code either the old or the
+ * new shape (which is how the drift slipped through), these tests read the ACTUAL
+ * counter pattern out of tools/test/site-generators.test.mjs and require it to
+ * agree with parseReferenceIndex on the real generated file. A future format
+ * change that updates one reader and not the other fails here, naming the cause.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -36,74 +25,61 @@ import { parseReferenceIndex, UNCATEGORIZED } from '../reference-index.mjs';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const REFERENCE = join(repoRoot, 'docs', 'reference', 'functions.md');
+const SITE_TEST = join(repoRoot, 'tools', 'test', 'site-generators.test.mjs');
 
 /**
- * The independent counter used by site-generators.test.mjs's landing-page check,
- * copied verbatim from `countsFromReference` there. Kept local so this test
- * fails on its own terms even if that file is edited.
+ * The group-heading regex that `countsFromReference` in site-generators.test.mjs
+ * uses, read from that file's source so this guard cannot go stale the way a
+ * copied literal would. Throws when the line it is extracted from is renamed.
  */
-function countsFromReference(referenceText) {
-  const indexText = referenceText.split('## Complete export index')[1] ?? '';
-  const exports = indexText.match(/\((\d+) exports\)/);
-  assert.ok(exports, 'reference index has no "(N exports)" header');
-  const section = indexText.split('### Functions by category')[1]?.split(/\n### /)[0] ?? '';
-  const labels = [...section.matchAll(/^\*\*(.+?)\*\* \(\d+\): /gm)].map((m) => m[1]);
-  return {
-    exports: Number(exports[1]),
-    groups: labels.length,
-    categories: labels.filter((l) => l !== 'Other exports (uncategorized)').length,
-  };
+function siteCounterPattern() {
+  const source = readFileSync(SITE_TEST, 'utf8');
+  const m = source.match(/const labels = \[\.\.\.section\.matchAll\(\/(.+?)\/([a-z]*)\)\]/);
+  assert.ok(
+    m,
+    "could not find countsFromReference's matchAll regex in site-generators.test.mjs; " +
+      'update this guard if that helper was renamed'
+  );
+  return new RegExp(m[1], m[2].includes('g') ? 'gm' : 'm');
 }
 
-test('the independent counter agrees with parseReferenceIndex on the generated reference', () => {
+const sectionOf = (text) =>
+  text
+    .split('## Complete export index')[1]
+    ?.split('### Functions by category')[1]
+    ?.split(/\n### /)[0] ?? '';
+
+test('the site-generators counter and parseReferenceIndex agree on the generated reference', () => {
   const text = readFileSync(REFERENCE, 'utf8');
-  const independent = countsFromReference(text);
   const parsed = parseReferenceIndex(text, 'challenger');
+  const labels = [...sectionOf(text).matchAll(siteCounterPattern())].map((m) => m[1]);
 
   assert.ok(parsed.categoryCount > 0, 'parseReferenceIndex must find categories');
   assert.equal(
-    independent.groups,
+    labels.length,
     parsed.domains.size,
-    'the site-generators counter counts a different number of groups than parseReferenceIndex; ' +
-      `the generated group heading no longer matches the counter's pattern (got ${independent.groups}, ` +
-      `expected ${parsed.domains.size}). The landing-page test then compares '27' with '0'.`
+    'site-generators.test.mjs counts a different number of groups than parseReferenceIndex ' +
+      `(${labels.length} vs ${parsed.domains.size}); one reader was changed without the other. ` +
+      'The landing-page test then compares two different counts.'
   );
   assert.equal(
-    independent.categories,
+    labels.filter((l) => l !== UNCATEGORIZED).length,
     parsed.categoryCount,
-    'the independent category count must equal parseReferenceIndex.categoryCount'
-  );
-  assert.equal(
-    independent.exports,
-    parsed.exportTotal,
-    'the independent export total must equal parseReferenceIndex.exportTotal'
+    'the catch-all group must be excluded from the category count by BOTH readers'
   );
 });
 
-test('every group heading in the generated reference matches the site-generators pattern', () => {
+test('the export total header is readable by both readers', () => {
   const text = readFileSync(REFERENCE, 'utf8');
-  const section =
-    text
-      .split('## Complete export index')[1]
-      ?.split('### Functions by category')[1]
-      ?.split(/\n### /)[0] ?? '';
-  const headings = section.split('\n').filter((line) => /^\*\*.+\*\* \(\d+\):/.test(line));
-  assert.ok(headings.length > 0, 'the generated reference has no group headings');
-  const sameLineNames = headings.filter((line) => /^\*\*.+\*\* \(\d+\): /.test(line));
-  assert.equal(
-    sameLineNames.length,
-    headings.length,
-    `the generator writes names on the following lines, but the shared counter in ` +
-      `tools/test/site-generators.test.mjs only matches a space + names on the heading line; ` +
-      `${headings.length - sameLineNames.length} of ${headings.length} headings are unreadable by it. ` +
-      `Either keep the comma form, or update every reader (parseReferenceIndex and ` +
-      `countsFromReference) together.`
-  );
+  const parsed = parseReferenceIndex(text, 'challenger');
+  const indexText = text.split('## Complete export index')[1] ?? '';
+  const header = indexText.match(/\((\d+) exports\)/);
+  assert.ok(header, 'the generated index has no "(N exports)" header');
+  assert.equal(Number(header[1]), parsed.exportTotal);
 });
 
 test('parseReferenceIndex still counts the catch-all group out of the category total', () => {
-  const text = readFileSync(REFERENCE, 'utf8');
-  const parsed = parseReferenceIndex(text, 'challenger');
+  const parsed = parseReferenceIndex(readFileSync(REFERENCE, 'utf8'), 'challenger');
   const catchAll = parsed.domains.get(UNCATEGORIZED) ?? [];
   assert.ok(catchAll.length > 0, 'the generated reference should carry an uncategorized group');
   assert.equal(
