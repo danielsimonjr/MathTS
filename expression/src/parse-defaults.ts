@@ -41,6 +41,29 @@ import { createRangeNode } from './node/RangeNode.js';
 import { createRelationalNode } from './node/RelationalNode.js';
 import { createSymbolNode } from './node/SymbolNode.js';
 import type { DefaultDependencies } from './utils/factory.js';
+import {
+  Node as DefaultNode,
+  AccessorNode as DefaultAccessorNode,
+  ArrayNode as DefaultArrayNode,
+  AssignmentNode as DefaultAssignmentNode,
+  BlockNode as DefaultBlockNode,
+  ConditionalNode as DefaultConditionalNode,
+  ConstantNode as DefaultConstantNode,
+  FunctionAssignmentNode as DefaultFunctionAssignmentNode,
+  FunctionNode as DefaultFunctionNode,
+  IndexNode as DefaultIndexNode,
+  ObjectNode as DefaultObjectNode,
+  OperatorNode as DefaultOperatorNode,
+  ParenthesisNode as DefaultParenthesisNode,
+  RangeNode as DefaultRangeNode,
+  RelationalNode as DefaultRelationalNode,
+  SymbolNode as DefaultSymbolNode,
+} from './node/classes.js';
+
+/** Pick the package export or build a fresh constructor for a non-default scope. */
+function defaultOrBuild<T>(isDefault: boolean, exported: T, build: () => T): T {
+  return isDefault ? exported : build();
+}
 
 function numeric(value: string, _type: string): number {
   return Number(value);
@@ -73,37 +96,91 @@ export const parseDefaults: DefaultDependencies = (supplied, missing) => {
   const typed: unknown = source.typed ?? mathTyped;
   /** The caller's `Node` base class, else the base shared by every default node of this scope. */
   let nodeBase: unknown;
-  const getNode = (): unknown => (nodeBase ??= source.Node ?? nodeBaseFor(math));
+  const getNode = (): unknown =>
+    (nodeBase ??= source.Node ?? (isDefaultScope ? DefaultNode : nodeBaseFor(math)));
   /** A caller-supplied `SymbolNode` is shared with `FunctionNode`, so both use one class. */
   let symbolNode: unknown;
   const getSymbolNode = (): unknown =>
-    (symbolNode ??= source.SymbolNode ?? createSymbolNode({ math, Node: getNode() }));
+    (symbolNode ??=
+      source.SymbolNode ??
+      defaultOrBuild(isDefaultScope, DefaultSymbolNode, () =>
+        createSymbolNode({ math, Node: getNode() })
+      ));
 
   const builders: Record<string, () => unknown> = {
     typed: () => typed,
     numeric: () => numeric,
     config: () => config,
     AccessorNode: () =>
-      createAccessorNode({ subset: host('subset', (obj: unknown) => obj), Node: getNode() }),
-    ArrayNode: () => createArrayNode({ Node: getNode() }),
+      source.AccessorNode ??
+      defaultOrBuild(isDefaultScope, DefaultAccessorNode, () =>
+        createAccessorNode({ subset: host('subset', (obj: unknown) => obj), Node: getNode() })
+      ),
+    ArrayNode: () =>
+      source.ArrayNode ??
+      defaultOrBuild(isDefaultScope, DefaultArrayNode, () => createArrayNode({ Node: getNode() })),
     AssignmentNode: () =>
-      createAssignmentNode({
-        subset: host('subset', (_obj: unknown, _idx: unknown, val: unknown) => val),
-        matrix: host('matrix', () => ({})),
-        Node: getNode(),
-      }),
-    BlockNode: () => createBlockNode({ ResultSet: source.ResultSet ?? ResultSet, Node: getNode() }),
-    ConditionalNode: () => createConditionalNode({ Node: getNode() }),
+      source.AssignmentNode ??
+      defaultOrBuild(isDefaultScope, DefaultAssignmentNode, () =>
+        createAssignmentNode({
+          subset: host('subset', (_obj: unknown, _idx: unknown, val: unknown) => val),
+          matrix: host('matrix', () => ({})),
+          Node: getNode(),
+        })
+      ),
+    BlockNode: () =>
+      source.BlockNode ??
+      defaultOrBuild(isDefaultScope, DefaultBlockNode, () =>
+        createBlockNode({ ResultSet: source.ResultSet ?? ResultSet, Node: getNode() })
+      ),
+    ConditionalNode: () =>
+      source.ConditionalNode ??
+      defaultOrBuild(isDefaultScope, DefaultConditionalNode, () =>
+        createConditionalNode({ Node: getNode() })
+      ),
     ConstantNode: () =>
-      createConstantNode({ Node: getNode(), isBounded: source.isBounded ?? isBounded }),
-    FunctionAssignmentNode: () => createFunctionAssignmentNode({ typed, Node: getNode() }),
-    FunctionNode: () => createFunctionNode({ math, Node: getNode(), SymbolNode: getSymbolNode() }),
-    IndexNode: () => createIndexNode({ Node: getNode(), size: host('size', () => []) }),
-    ObjectNode: () => createObjectNode({ Node: getNode() }),
-    OperatorNode: () => createOperatorNode({ Node: getNode() }),
-    ParenthesisNode: () => createParenthesisNode({ Node: getNode() }),
-    RangeNode: () => createRangeNode({ Node: getNode() }),
-    RelationalNode: () => createRelationalNode({ Node: getNode() }),
+      source.ConstantNode ??
+      defaultOrBuild(isDefaultScope, DefaultConstantNode, () =>
+        createConstantNode({ Node: getNode(), isBounded: source.isBounded ?? isBounded })
+      ),
+    FunctionAssignmentNode: () =>
+      source.FunctionAssignmentNode ??
+      defaultOrBuild(isDefaultScope, DefaultFunctionAssignmentNode, () =>
+        createFunctionAssignmentNode({ typed, Node: getNode() })
+      ),
+    FunctionNode: () =>
+      source.FunctionNode ??
+      defaultOrBuild(isDefaultScope, DefaultFunctionNode, () =>
+        createFunctionNode({ math, Node: getNode(), SymbolNode: getSymbolNode() })
+      ),
+    IndexNode: () =>
+      source.IndexNode ??
+      defaultOrBuild(isDefaultScope, DefaultIndexNode, () =>
+        createIndexNode({ Node: getNode(), size: host('size', () => []) })
+      ),
+    ObjectNode: () =>
+      source.ObjectNode ??
+      defaultOrBuild(isDefaultScope, DefaultObjectNode, () =>
+        createObjectNode({ Node: getNode() })
+      ),
+    OperatorNode: () =>
+      source.OperatorNode ??
+      defaultOrBuild(isDefaultScope, DefaultOperatorNode, () =>
+        createOperatorNode({ Node: getNode() })
+      ),
+    ParenthesisNode: () =>
+      source.ParenthesisNode ??
+      defaultOrBuild(isDefaultScope, DefaultParenthesisNode, () =>
+        createParenthesisNode({ Node: getNode() })
+      ),
+    RangeNode: () =>
+      source.RangeNode ??
+      defaultOrBuild(isDefaultScope, DefaultRangeNode, () => createRangeNode({ Node: getNode() })),
+    RelationalNode: () =>
+      source.RelationalNode ??
+      defaultOrBuild(isDefaultScope, DefaultRelationalNode, () =>
+        createRelationalNode({ Node: getNode() })
+      ),
     SymbolNode: getSymbolNode,
   };
 

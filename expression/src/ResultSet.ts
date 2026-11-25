@@ -18,12 +18,18 @@ export interface ResultSetJSON {
 /** The class `new ResultSet(entries)` builds. */
 export class ResultSet {
   entries: unknown[];
-  /** The type guard `isResultSet` reads this flag from the constructor prototype. */
-  readonly isResultSet = true as const;
-  readonly type = 'ResultSet' as const;
 
   constructor(entries?: unknown[]) {
     this.entries = entries ?? [];
+  }
+
+  /** The type guard `isResultSet` reads this from the constructor prototype. */
+  get isResultSet(): true {
+    return true;
+  }
+
+  get type(): 'ResultSet' {
+    return 'ResultSet';
   }
 
   /** The array with the results held by this ResultSet. */
