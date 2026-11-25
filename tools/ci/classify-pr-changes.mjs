@@ -5,37 +5,21 @@
  * (src, tests, tools, .github, lockfiles, tsconfig, bundle locks, assembly, etc.) is code.
  */
 import { readFileSync } from 'node:fs';
-import { basename } from 'node:path';
-
-/** Basenames (case-sensitive) treated as license / policy docs at any directory depth. */
-const LICENSE_LIKE = new Set([
-  'LICENSE',
-  'LICENSE.md',
-  'LICENSE.txt',
-  'COPYING',
-  'COPYING.md',
-  'NOTICE',
-  'NOTICE.md',
-  'AUTHORS',
-  'AUTHORS.md',
-  'CODE_OF_CONDUCT.md',
-  'SECURITY.md',
-  'CONTRIBUTING.md',
-  'PATENTS',
-  'TRADEMARK',
-]);
 
 /** Return whether a changed path counts as documentation-only for CI skipping. */
 export function isDocsOnlyPath(filePath) {
   const path = filePath.replace(/\\/g, '/').trim();
-  if (!path) return true;
+  if (!path) return false;
 
-  if (path.endsWith('.md')) return true;
-  if (path.startsWith('docs/')) return true;
-  if (path.startsWith('.changeset/') && path.endsWith('.md')) return true;
-  if (LICENSE_LIKE.has(basename(path))) return true;
+  if (
+    path.startsWith('.changeset/') ||
+    path.startsWith('.github/workflows/') ||
+    path.startsWith('tools/ci/')
+  ) {
+    return false;
+  }
 
-  return false;
+  return path.endsWith('.md');
 }
 
 /** Return whether every changed path in the pull request is documentation-only. */

@@ -47,19 +47,24 @@ jobs:
 
       - name: Classify changed paths
         id: classify
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if [ "${{ github.event_name }}" != "pull_request" ]; then
+          if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
-          mapfile -t changed < <(git diff --name-only --diff-filter=ACMRT "$BASE" "$HEAD")
-          if [ "${#changed[@]}" -eq 0 ]; then
+          if ! changed_output=$(git diff --name-only "$BASE_SHA...$HEAD_SHA"); then
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          printf '%s\n' "${changed[@]}" | GITHUB_EVENT_NAME=pull_request node tools/ci/classify-pr-changes.mjs >> "$GITHUB_OUTPUT"
+          if [ -z "$changed_output" ]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s\n' "$changed_output" | GITHUB_EVENT_NAME=pull_request node tools/ci/classify-pr-changes.mjs >> "$GITHUB_OUTPUT"
 
   compile:
     name: Compile & Lint

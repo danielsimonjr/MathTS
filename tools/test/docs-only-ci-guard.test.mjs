@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { discoverMdConsumers, manifestVitestFiles, uncoveredMdConsumers } from '../ci/discover-md-consumers.mjs';
+import { repoRoot } from './workspaces.mjs';
 
 test('every test file that consumes Markdown at runtime is in docs-only-manifest.json', () => {
   const uncovered = uncoveredMdConsumers();
@@ -19,5 +22,6 @@ test('every test file that consumes Markdown at runtime is in docs-only-manifest
 test('docs-only manifest entries exist on disk', () => {
   for (const file of manifestVitestFiles()) {
     assert.ok(file.endsWith('.test.ts'), file);
+    assert.ok(existsSync(join(repoRoot, file)), `missing manifest file: ${file}`);
   }
 });
