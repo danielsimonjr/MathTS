@@ -593,6 +593,7 @@ export function create(
     sinh: mathFunctions.factory_sinh,
     square: mathFunctions.factory_square,
     tanh: mathFunctions.factory_tanh,
+    bignumber: shims.bignumber,
     string: namedString,
     setUnion: namedSetUnion,
     compareText: namedCompareText,
@@ -1133,11 +1134,12 @@ export { namedUnit as unit, namedCreateUnit as createUnit };
 // Re-export all shims for direct import
 export * from './shims.js';
 
+export { BigNumber } from './bignumber.js';
+
 // Re-export core types
 export {
   Complex,
   Fraction,
-  BigNumber,
   isBigNumber,
   isComplex,
   isFraction,

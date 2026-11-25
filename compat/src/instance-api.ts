@@ -1,3 +1,4 @@
+import { compatDecimalResult } from './bignumber.js';
 /**
  * mathjs instance methods on `create(all)`: import, typed, compile, and
  * expression scope wired for per-instance evaluate.
@@ -214,7 +215,8 @@ export function wireMathjsInstanceApi(
       COMPAT_INTERNAL_NAMES,
       true,
       constants,
-      true
+      true,
+      compatDecimalResult
     );
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>

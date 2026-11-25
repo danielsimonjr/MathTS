@@ -662,13 +662,15 @@ function buildUnsafeScopedMathNamespace(
  * @param matrixLiterals - Whether the host enables Matrix literals according to its live config.
  * @param constants - Optional live reads of the host's built-in constants.
  * @param mathjsSyntax - Use the mathjs tokenizer for this instance.
+ * @param decimalLiteral - Convert parsed BigNumber literals to the host decimal type.
  */
 export function createInstanceEvaluator(
   importedExpressionScope: Record<string, unknown>,
   hiddenNames: Iterable<string> = [],
   matrixLiterals = false,
   constants: Readonly<Record<string, () => unknown>> = {},
-  mathjsSyntax = false
+  mathjsSyntax = false,
+  decimalLiteral?: (value: unknown) => unknown
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
@@ -707,7 +709,8 @@ export function createInstanceEvaluator(
   }
   const scopedParse = activatedFactories.factory_mathjsCompat.createScopedParse(
     parseScope,
-    mathjsSyntax
+    mathjsSyntax,
+    decimalLiteral
   );
   const safeEvaluate = createEvaluate(scopedParse, safeScope, configFingerprint);
   const unsafeEvaluate = createEvaluate(scopedParse, unsafeScope, configFingerprint);

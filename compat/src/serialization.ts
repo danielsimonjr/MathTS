@@ -49,9 +49,9 @@ export function reviveInstanceValue(
     value &&
     typeof value === 'object' &&
     Object.hasOwn(value, 'mathjs') &&
-    Reflect.get(value, 'mathjs') === 'Unit'
+    (Reflect.get(value, 'mathjs') === 'Unit' || Reflect.get(value, 'mathjs') === 'BigNumber')
   ) {
-    return reviveWithClasses(value, { Unit });
+    return reviveWithClasses(value, { Unit, BigNumber: instanceSymbols.BigNumber });
   }
   const numeric = nativeReviver(key, value);
   return numeric === value ? reviveWithClasses(value, instanceSymbols) : numeric;
