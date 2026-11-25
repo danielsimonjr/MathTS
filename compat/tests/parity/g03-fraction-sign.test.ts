@@ -62,6 +62,10 @@ const CASES: [string, (L: Instance) => unknown][] = [
   ],
   ['#1551 format(fraction(2)) prints n/1', (L) => L.format(L.fraction(2))],
   ['#1551 format(fraction(1,3))', (L) => L.format(L.fraction(1, 3))],
+  ['#1551 format(null) does not throw', (L) => L.format(null)],
+  ['#1551 max([], 0)', (L) => L.max([], 0)],
+  ['#1551 min([], 0)', (L) => L.min([], 0)],
+  ['#1551 sum([], 0)', (L) => L.sum([], 0)],
 ];
 
 describe('G03 fraction sign predicates (#1551)', () => {

@@ -532,6 +532,9 @@ function formatMathjsTree(value: unknown, options?: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map((entry) => formatMathjsTree(entry, options)).join(', ')}]`;
   }
+  if (value == null || (typeof value !== 'object' && typeof value !== 'function')) {
+    return _format(value, options);
+  }
   const storage = (value as { storage?: unknown }).storage;
   const sparseStorage =
     isSparseMatrix(value) ||
