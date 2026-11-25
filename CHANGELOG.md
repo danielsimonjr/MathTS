@@ -7,15 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`docs/reports/`: archived parity and gap-analysis reports (2026-11-25):** the mathjs 15.3.0 parity gap analysis (issues #1549–#1589, tracker #1590) and the six-system parity review against NumPy, SciPy, PySR, Mathematica, Mathcad and MATLAB (issues #1592–#1713, tracker #1714), with per-reference deep reports and data tables. Index: [`docs/reports/README.md`](docs/reports/README.md). For numeric and symbolic correctness, the sources of truth are NumPy, SciPy, SymPy and PySR; Mathematica, Mathcad and MATLAB are feature references only.
+
 ### Changed
 
-- **`eigs` mathjs 15.3.0 quirks live in compat only (#1561):** Restored the public native `eigs` export (`correctEigs` / matrix `eig`) in `@danielsimonjr/mathts-functions`; mathjs `precision` semantics, non-unit eigenvector scale and magnitude-ordered values are wired only on `create(all)` via `compat/src/eigs-mathjs.ts` calling `eigsMathjsFactory` through the `@danielsimonjr/mathts-functions/eigs-mathjs` subpath so the main functions bundle does not eagerly load the mathjs port. BREAKING (compat): instance `eigs` matches mathjs 15.3.0 including loose `precision`; native `eigs` keeps unit-normalized vectors and the real-part value order.
+- **`eigs` mathjs 15.3.0 quirks live in compat only (#1561):** Restored the public native `eigs` export (`correctEigs` / matrix `eig`) in `@danielsimonjr/mathts-functions`. The mathjs 15.3.0 factory port (precision, non-unit eigenvector scale, magnitude-ordered values) lives in `compat/src/mathjs-eigs/` and is lazy-loaded from `compat/src/eigs-mathjs.ts` so the functions eager entry stays at main. BREAKING (compat): instance `eigs` matches mathjs 15.3.0 including loose `precision`; native `eigs` keeps unit-normalized vectors and the real-part value order.
+
+- **Compat `version` reports the emulated mathjs version (#1581):** `version` is `"15.3.0"` on the compat instance, the named export, and the expression scope, and a `compatVersion` named export carries the compat package version; `help('version')` and other doc examples evaluate through the instance evaluator. BREAKING: code reading the compat package version from `math.version` must read `compatVersion`.
 
 ### Fixed
 
-- **native bug — symmetric `eig` at huge scale (#1561):** Rayleigh-quotient refinement after hqr2 recovers a small eigenvalue beside a 1e15 diagonal (mpmath: exactly 5; was 4.992). `matrix/src/operations/eig.ts`.
-
-- **native bug — defective block eigenvectors in the mathjs eigs port (#1561):** Block-triangular assembly no longer emits a fabricated direction when back-coupling is inconsistent; inverse iteration uses a deterministic `seedrandom` stream instead of `Math.random`. `functions/src/matrix/eigs.ts`, `complexEigs-robust.ts`.
+- **native bug — symmetric `eig` at huge scale (#1561):** Rayleigh-quotient refinement after hqr2 recovers a small eigenvalue beside a 1e15 diagonal (mpmath: exactly 5; was 4.992). Runs only when the spectrum already spans ≥1e6 and a real eigenvalue is ≤1e-6 of the spectral radius, so clustered/repeated spectra and `eigenvectors: false` on ordinary matrices keep the previous path. `matrix/src/operations/eig.ts`.
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
 
@@ -24,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **mathjs 15.3.0 behavior parity (#1563, #1564, #1565, #1566):** Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`.
 
 ### Fixed
+
+- **Expression compile uses `scope.has`, not `get === undefined` (#1581):** a Map-like scope documents `has`/`get`/`set`. Native compile treated `get(name) === undefined` as a missing symbol, so `evaluate('pi', { pi: undefined })` threw `Undefined symbol "pi"` even when `has('pi')` was true (an explicit binding, including `Map.set('pi', undefined)`). Lookup now follows the Map contract: missing keys throw; a present key whose value is `undefined` returns `undefined`. This is a native correctness fix, not a mathjs-parity shim. Compat no longer injects a `mathjsScopedSymbols` flag.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 
