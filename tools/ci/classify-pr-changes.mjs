@@ -4,6 +4,7 @@
  * Docs-only means every changed path is an allowlisted documentation path; anything else
  * (src, tests, tools, .github, lockfiles, tsconfig, bundle locks, assembly, etc.) is code.
  */
+import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 
 /** Basenames (case-sensitive) treated as license / policy docs at any directory depth. */
@@ -55,10 +56,11 @@ function readChangedPaths() {
   if (fromEnv) {
     return fromEnv.split('\n').filter(Boolean);
   }
-  const chunks = [];
-  process.stdin.setEncoding('utf8');
-  for (const chunk of process.stdin) chunks.push(chunk);
-  return chunks.join('').split('\n').filter((line) => line.trim());
+  if (process.stdin.isTTY) return [];
+  return readFileSync(0, 'utf8')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 function main() {
