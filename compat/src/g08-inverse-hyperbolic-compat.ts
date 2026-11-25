@@ -15,6 +15,7 @@ import {
 
 type Fn = (...args: unknown[]) => unknown;
 
+/** Typed-function entry points overridden for G08 on `create(all)`. */
 export type G08FactoryBundle = {
   factory_asinh: Fn;
   factory_acosh: Fn;
@@ -26,6 +27,7 @@ export type G08FactoryBundle = {
   factory_asec: Fn;
 };
 
+/** Build wrapped G08 factories for `compatDefaultOverrides`. */
 export function applyG08CompatOverrides(factories: G08FactoryBundle): {
   asinh: Fn;
   acosh: Fn;

@@ -64,11 +64,13 @@ function complexJsAcos(a: number, b: number): Complex {
   return new Complex(Math.PI / 2 - t2.im, t2.re);
 }
 
+/** complex.js 2.4.2 `asinh` on a core `Complex` argument (compat oracle only). */
 export function complexJsAsinh(z: Complex): Complex {
   const res = complexJsAsin(z.im, -z.re);
   return new Complex(-res.im, res.re);
 }
 
+/** complex.js 2.4.2 `acosh` (compat oracle only). */
 export function complexJsAcosh(z: Complex): Complex {
   const res = complexJsAcos(z.re, z.im);
   if (res.im <= 0) {
@@ -77,6 +79,7 @@ export function complexJsAcosh(z: Complex): Complex {
   return new Complex(res.im, -res.re);
 }
 
+/** complex.js 2.4.2 `atanh` including overflow `logHypot` (compat oracle only). */
 export function complexJsAtanh(z: Complex): Complex {
   const a = z.re;
   const b = z.im;
@@ -94,6 +97,7 @@ export function complexJsAtanh(z: Complex): Complex {
   return new Complex(re, noIM ? -im : im);
 }
 
+/** complex.js 2.4.2 `acoth` (compat oracle only). */
 export function complexJsAcoth(z: Complex): Complex {
   const a = z.re;
   const b = z.im;
@@ -107,6 +111,7 @@ export function complexJsAcoth(z: Complex): Complex {
   return complexJsAtanh(new Complex(a !== 0 ? a / 0 : 0, b !== 0 ? -b / 0 : 0));
 }
 
+/** complex.js 2.4.2 `acsch` (compat oracle only). */
 export function complexJsAcsch(z: Complex): Complex {
   const a = z.re;
   const b = z.im;
@@ -120,6 +125,7 @@ export function complexJsAcsch(z: Complex): Complex {
   return complexJsAsinh(new Complex(a !== 0 ? a / 0 : 0, b !== 0 ? -b / 0 : 0));
 }
 
+/** complex.js 2.4.2 `asech` (compat oracle only). */
 export function complexJsAsech(z: Complex): Complex {
   const a = z.re;
   const b = z.im;
@@ -133,6 +139,7 @@ export function complexJsAsech(z: Complex): Complex {
   return complexJsAcosh(new Complex(a !== 0 ? a / 0 : 0, b !== 0 ? -b / 0 : 0));
 }
 
+/** complex.js-style `acsc` via ported `asin` (compat oracle only). */
 export function complexJsAcsc(z: Complex): Complex {
   const a = z.re;
   const b = z.im;
@@ -146,6 +153,7 @@ export function complexJsAcsc(z: Complex): Complex {
   return complexJsAsin(a !== 0 ? a / 0 : 0, b !== 0 ? -b / 0 : 0);
 }
 
+/** complex.js-style `asec` via ported `acos` (compat oracle only). */
 export function complexJsAsec(z: Complex): Complex {
   const a = z.re;
   const b = z.im;
@@ -183,6 +191,7 @@ function copyFunctionSurface(
 
 type CjsFn = (z: Complex) => Complex;
 
+/** Which real zero argument gets a mathjs special value before the typed factory runs. */
 export type G08ZeroCase = 'acoth' | 'acsc' | 'asec' | 'none';
 
 /** When false, keep the factory Complex result (hand-tuned branch); when true, use complex.js on `Complex(x,0)`. */
@@ -190,6 +199,7 @@ export type G08RecomputePolicy = (x: number) => boolean;
 
 export const recomputeInsideUnitDisk: G08RecomputePolicy = (x) => x > -1 && x < 1;
 
+/** Wrap a factory so Complex and selected real promotions use the complex.js adapter. */
 export function wrapG08InverseHyperbolic(
   base: (...args: unknown[]) => unknown,
   mathjs: CjsFn,
