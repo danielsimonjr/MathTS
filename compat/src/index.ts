@@ -589,6 +589,7 @@ export function create(
     unit: localUnits?.unit ?? namedUnit,
     createUnit: localUnits?.createUnit ?? namedCreateUnit,
     combinations: namedCombinations,
+    combinationsWithRep: namedCombinationsWithRep,
     xgcd: namedXgcd,
     permutations: namedPermutations,
     lgamma: namedLgamma,
@@ -877,6 +878,8 @@ const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
   (left: string, right: string): boolean;
   (left: unknown, right: unknown): unknown;
 };
+const namedCombinationsWithRep = mathFunctions.factory_mathjsCompat
+  .combinationsWithRep as typeof mathFunctions.combinationsWithRep;
 const namedCombinations = mathFunctions.factory_mathjsCompat
   .combinations as typeof mathFunctions.combinations;
 const namedXgcd = mathFunctions.factory_mathjsCompat.xgcd as unknown as (
@@ -898,6 +901,7 @@ export {
   namedToBest as toBest,
   namedPermutations as permutations,
   namedCombinations as combinations,
+  namedCombinationsWithRep as combinationsWithRep,
   namedXgcd as xgcd,
   namedLgamma as lgamma,
 };
@@ -946,7 +950,6 @@ export {
   factory_cbrt as cbrt,
   clone,
   column,
-  combinationsWithRep,
   compare,
   compareNatural,
   composition,

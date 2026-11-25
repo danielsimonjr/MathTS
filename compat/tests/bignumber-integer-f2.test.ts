@@ -17,6 +17,8 @@ import {
   xgcd,
   xgcdDependencies,
   combinationsDependencies,
+  combinationsWithRepDependencies,
+  combinationsWithRep,
 } from '../src/index.js';
 
 interface Loose {
@@ -461,6 +463,41 @@ it('matches mathjs counting and Bezout results across named, configured, and sel
       expect(
         (math.xgcd(configured.bignumber(a), configured.bignumber(b)) as unknown[]).map(String)
       ).toEqual((toArr(expected) as unknown[]).map(String));
+    }
+  }
+});
+
+it('uses mathjs range products when counting with replacement', () => {
+  const full = create(all);
+  const selected = create({ combinationsWithRepDependencies });
+  for (const [n, k] of [
+    [1, 0],
+    [7, 5],
+    [100, 140],
+    [200, 100],
+    [200, 200],
+  ] as const) {
+    const expected = oracle.evaluate('combinationsWithRep(n, k)', { n, k });
+    expect(combinationsWithRep(n, k)).toBe(expected);
+    expect(full.combinationsWithRep(n, k)).toBe(expected);
+    expect(selected.combinationsWithRep(n, k)).toBe(expected);
+  }
+});
+
+it('rounds each decimal counting operation at the instance precision', () => {
+  for (const precision of [4, 16, 64]) {
+    const actual = create(all, { precision });
+    const expected = oracle.create(oracle.all, { precision });
+    for (const name of ['combinations', 'combinationsWithRep'] as const) {
+      for (const [n, k] of [
+        [40, 13],
+        [200, 100],
+      ] as const) {
+        const expression = name + '(bignumber(' + n + '), bignumber(' + k + '))';
+        expect((actual.evaluate(expression) as BigNumber).toFixed()).toBe(
+          (expected.evaluate(expression) as oracle.BigNumber).toFixed()
+        );
+      }
     }
   }
 });

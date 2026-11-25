@@ -1,3 +1,4 @@
+import { MAX_LOOP_ORDER } from '../utils/limits.js';
 import { product } from '../utils/product.js';
 import { fractionPart } from '../typed/fraction-parts.js';
 import FractionJS from 'fraction.js';
@@ -1955,6 +1956,30 @@ function mapCollection(x: unknown, convert: (v: unknown) => unknown): unknown {
   return undefined;
 }
 
+/** Accumulate the decimal binomial coefficient in mathjs order, rounding each operation. */
+function compatDecimalCombinations(n: CoreBigNumber, k: CoreBigNumber, replacement: boolean) {
+  const nativeCount = replacement ? typedCombinationsWithRep : typedCombinations;
+  if (
+    !n.isInteger() ||
+    !k.isInteger() ||
+    n.isNegative() ||
+    k.isNegative() ||
+    (replacement ? n.isZero() : k.gt(n))
+  )
+    return nativeCount(n, k);
+  const Decimal = n.constructor as typeof CoreBigNumber;
+  const other = replacement ? n.minus(1) : n.minus(k);
+  const [smaller, larger] = k.lt(other) ? [k, other] : [other, k];
+  const iterations = larger.toNumber();
+  if (smaller.isZero()) return new Decimal(1);
+  if (iterations > MAX_LOOP_ORDER) return nativeCount(n, k);
+  let result = new Decimal(1);
+  for (let i = 1; i <= iterations; i++) {
+    result = result.times(smaller.plus(i)).div(i);
+  }
+  return result;
+}
+
 const createSelectedCombinations = /* #__PURE__ */ factory(
   'combinations',
   ['typed'],
@@ -1978,7 +2003,8 @@ const createSelectedCombinations = /* #__PURE__ */ factory(
         const denominator = count - divisor >= 170 ? Infinity : product(divisor, count);
         return result / denominator;
       },
-      'BigNumber, BigNumber': typedCombinations.signatures['BigNumber,BigNumber'],
+      'BigNumber, BigNumber': (n: CoreBigNumber, k: CoreBigNumber) =>
+        compatDecimalCombinations(n, k, false),
     })
 );
 
@@ -1987,8 +2013,23 @@ const createSelectedCombinationsWithRep = /* #__PURE__ */ factory(
   ['typed'],
   ({ typed }: { typed: TypedBuilder }) =>
     typed('combinationsWithRep', {
-      'number, number': typedCombinationsWithRep.signatures['number,number'],
-      'BigNumber, BigNumber': typedCombinationsWithRep.signatures['BigNumber,BigNumber'],
+      'number, number': (n: number, k: number) => {
+        const last = n + k - 1;
+        if (
+          n < 1 ||
+          k < 0 ||
+          !Number.isInteger(n) ||
+          !Number.isInteger(k) ||
+          !Number.isSafeInteger(last)
+        ) {
+          return typedCombinationsWithRep(n, k);
+        }
+        const count = Math.min(n - 1, k);
+        if (count > 170) return NaN;
+        return product(last - count + 1, last) / product(1, count);
+      },
+      'BigNumber, BigNumber': (n: CoreBigNumber, k: CoreBigNumber) =>
+        compatDecimalCombinations(n, k, true),
     })
 );
 
@@ -3799,6 +3840,7 @@ export const factory_mathjsCompat = {
   conj,
   im,
   re,
+  combinationsWithRep: createSelectedCombinationsWithRep({ typed: createTyped(factoryScope) }),
   combinations: createSelectedCombinations({ typed: createTyped(factoryScope) }),
   xgcd: createSelectedXgcd({ ...factoryScope, typed: createTyped(factoryScope) } as Parameters<
     typeof createSelectedXgcd
