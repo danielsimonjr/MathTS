@@ -721,12 +721,14 @@ describe('Unit truthiness (not object presence)', () => {
   });
 
   it('zero Units with BigNumber, Fraction, and Complex values are falsy', () => {
-    expect(not(new Unit(BigNumber.fromNumber(0), 'm'))).toBe(true);
-    expect(not(new Unit(new Fraction(0n, 1n), 'm'))).toBe(true);
-    expect(not(new Unit(new Complex(0, 0), 'm'))).toBe(true);
-    expect(not(new Unit(BigNumber.fromNumber(1), 'm'))).toBe(false);
-    expect(not(new Unit(new Fraction(1n, 2n), 'm'))).toBe(false);
-    expect(not(new Unit(new Complex(0, 1), 'm'))).toBe(false);
+    // Unit.Numeric is a structural Unit-local type; the live core classes are the
+    // values the constructor actually stores (same cast as core/tests Unit exact-scale).
+    expect(not(new Unit(BigNumber.fromNumber(0) as never, 'm'))).toBe(true);
+    expect(not(new Unit(new Fraction(0n, 1n) as never, 'm'))).toBe(true);
+    expect(not(new Unit(new Complex(0, 0) as never, 'm'))).toBe(true);
+    expect(not(new Unit(BigNumber.fromNumber(1) as never, 'm'))).toBe(false);
+    expect(not(new Unit(new Fraction(1n, 2n) as never, 'm'))).toBe(false);
+    expect(not(new Unit(new Complex(0, 1) as never, 'm'))).toBe(false);
   });
 });
 
