@@ -1,11 +1,9 @@
 /**
  * The typed bitwise Int32Array signatures are synchronous.
  *
- * Each op returns a new Int32Array, never a Promise. A length mismatch throws
- * the canonical DimensionError (#1567).
+ * Each op returns a new Int32Array, never a Promise. A length mismatch throws RangeError.
  */
 import { describe, it, expect } from 'vitest';
-import { DimensionError } from '@danielsimonjr/mathts-core';
 import {
   bitAnd,
   bitOr,
@@ -55,13 +53,11 @@ describe.each(BITWISE)('%s(Int32Array, Int32Array) is synchronous', (name, f, js
     same(b, I32_B);
   });
 
-  // #1567: the mismatch is the canonical DimensionError from core (a RangeError
-  // subclass with the same message); the assertion stays at full message strength.
-  it('throws the canonical DimensionError on a length mismatch, both ways', () => {
+  it('throws RangeError on a length mismatch, both ways', () => {
     expect(() => f(Int32Array.of(1, 2, 3), Int32Array.of(1, 2))).toThrow(
-      new DimensionError('Dimension mismatch (3 != 2) in element-wise operation')
+      new RangeError('Dimension mismatch (3 != 2) in element-wise operation')
     );
-    expect(() => f(Int32Array.of(1), Int32Array.of(1, 2))).toThrow(DimensionError);
+    expect(() => f(Int32Array.of(1), Int32Array.of(1, 2))).toThrow(RangeError);
     expect(name.length).toBeGreaterThan(0);
   });
 

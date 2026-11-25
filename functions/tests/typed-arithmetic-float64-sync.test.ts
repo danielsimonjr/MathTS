@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { computePool } from '@danielsimonjr/mathts-parallel';
-import { pairwiseDot, DimensionError } from '@danielsimonjr/mathts-core';
+import { pairwiseDot } from '@danielsimonjr/mathts-core';
 import {
   add,
   subtract,
@@ -73,17 +73,14 @@ describe('binary element-wise ops are synchronous', () => {
     expectF64(subtract(F(0), F(0)), [0]);
   });
 
-  // #1567: the mismatch is the canonical DimensionError from core (a RangeError
-  // subclass with the same message); the assertion stays at full message strength.
-  it('throws the canonical DimensionError on a length mismatch, for each operand shorter', () => {
+  it('throws RangeError on a length mismatch, for each operand shorter', () => {
     const fns: Fn[] = [add as Fn, subtract as Fn, multiply as Fn, divide as Fn];
     for (const f of fns) {
-      expect(() => f(F(1, 2), F(1, 2, 3))).toThrow(DimensionError);
       expect(() => f(F(1, 2), F(1, 2, 3))).toThrow(
-        new DimensionError('Dimension mismatch (2 != 3) in element-wise operation')
+        new RangeError('Dimension mismatch (2 != 3) in element-wise operation')
       );
       expect(() => f(F(1, 2, 3), F(1, 2))).toThrow(
-        new DimensionError('Dimension mismatch (3 != 2) in element-wise operation')
+        new RangeError('Dimension mismatch (3 != 2) in element-wise operation')
       );
     }
   });

@@ -29,7 +29,6 @@ import { factoryScope } from '../factories/scope.js';
 import {
   mathTyped,
   Complex,
-  DimensionError,
   Fraction,
   BigNumber,
   Dual,
@@ -178,7 +177,7 @@ function elementwise(op: ScalarOp, a: unknown, b: unknown): unknown {
   const bArr = Array.isArray(b);
   if (aArr && bArr) {
     if (a.length !== b.length) {
-      throw new DimensionError(
+      throw new RangeError(
         `Dimension mismatch (${a.length} != ${b.length}) in element-wise operation`
       );
     }
@@ -198,7 +197,7 @@ const numberBinCache = new WeakMap<object, NumberBin>();
  */
 function f64Binary(a: Float64Array, b: Float64Array, f: NumberBin): Float64Array {
   if (a.length !== b.length) {
-    throw new DimensionError(
+    throw new RangeError(
       `Dimension mismatch (${a.length} != ${b.length}) in element-wise operation`
     );
   }
@@ -286,7 +285,7 @@ function broadcastSize(sizeA: readonly number[], sizeB: readonly number[]): numb
     const da = sizeA[sizeA.length - k] ?? 1;
     const db = sizeB[sizeB.length - k] ?? 1;
     if (da !== db && !((da === 1 && db >= 1) || (db === 1 && da >= 1))) {
-      throw new DimensionError(`Dimension mismatch (${da} != ${db}) in element-wise operation`);
+      throw new RangeError(`Dimension mismatch (${da} != ${db}) in element-wise operation`);
     }
     common[rank - k] = Math.max(da, db);
   }
@@ -338,7 +337,7 @@ function elementwiseWalk(tf: object, fallback: ScalarOp, a: unknown, b: unknown)
   const bArr = Array.isArray(b);
   if (aArr && bArr) {
     if (a.length !== b.length) {
-      throw new DimensionError(
+      throw new RangeError(
         `Dimension mismatch (${a.length} != ${b.length}) in element-wise operation`
       );
     }

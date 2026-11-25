@@ -323,6 +323,15 @@ async function parallelSum(data) {
 
 ---
 
+## G12 compat parity (mathjs 15.3.0)
+
+On `create(all)`, the following match the pinned oracle exactly (#1567, #1571):
+
+- `add` / `divide` broadcast errors use the same error class and message as mathjs 15.3.0 (typed-layer mismatches are adapted in `compat/src/g12-mathjs-parity.ts`, not reimplemented in `functions`).
+- Multi-statement `evaluate` (`'1+1\n2+2'`) returns a `ResultSet` with the same `isResultSet` / `toJSON()` shape as mathjs (overlaps the G01 native `ResultSet` compiler work — compat wraps arrays until that lands).
+- Module-level `DimensionError` is the same constructor as `math.DimensionError`.
+- `docs` is byte-identical to mathjs 15.3.0's embedded-docs map (`compat/src/mathjs-docs-15.3.0.generated.json`).
+
 ## API Differences from mathjs
 
 | mathjs                         | @danielsimonjr/mathts-compat                      |
