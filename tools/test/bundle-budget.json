@@ -20,11 +20,11 @@
     "tensor/package.json": 2215,
     "autograd/dist/index.js": 74477,
     "autograd/package.json": 2250,
-    "functions/dist/index.js": 2363431,
-    "functions/dist/subpath-evaluate.js": 1586768,
+    "functions/dist/index.js": 2363135,
+    "functions/dist/subpath-evaluate.js": 1586472,
     "functions/package.json": 3741,
     "functions/dist/wasm/mathts-as.wasm": 69718,
-    "expression/dist/index.js": 369701,
+    "expression/dist/index.js": 369679,
     "expression/package.json": 2208,
     "parser/dist/index.js": 541,
     "parser/package.json": 2382,
@@ -55,7 +55,7 @@
     "assembly/build/mathts-debug.wasm": 133381,
     "assembly/build/mathts-debug.js": 103537,
     "assembly/package.json": 2903,
-    "compat/dist/index.js": 190382,
+    "compat/dist/index.js": 212328,
     "compat/package.json": 2327,
     "gpu/dist/index.js": 18275,
     "gpu/package.json": 2189,
@@ -184,37 +184,37 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1406829
+      "bytes": 1406671
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "bytes": 1407200
+      "bytes": 1407042
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "bytes": 1415400
+      "bytes": 1415242
     },
     {
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "bytes": 277032
+      "bytes": 277023
     },
     {
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "bytes": 2039318
+      "bytes": 2049614
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "bytes": 2048637
+      "bytes": 2058933
     }
   ]
 }

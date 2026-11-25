@@ -18,7 +18,8 @@ describe('reported invalid runtime arguments (#1008, #1009)', () => {
   });
 
   it('surfaces invalid values before numerical or symbolic processing', async () => {
-    expect(() => f.compileExpr('x').evaluate({ x: undefined })).toThrow(/Undefined symbol "x"/);
+    expect(f.compileExpr('x').evaluate({ x: undefined })).toBeUndefined();
+    expect(() => f.compileExpr('x').evaluate({})).toThrow(/Undefined symbol "x"/);
     expect(() => f.derivativeAt(((x: number) => x * x * x) as never, 2)).toThrow(
       /derivativeAt.*Dual/
     );

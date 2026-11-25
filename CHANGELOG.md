@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Fraction `format`, `string`, and Fraction-config `parse().toString()` parity (#1579, #1586):** `create(all)` routes `format` and `string` through thin compat wrappers that always show integral Fractions as `n/1` (including dense/sparse matrices, nested arrays, and Fraction unit magnitudes), map `string(fraction)` element-wise through fraction.js decimal notation (repeating and terminating caps of mathjs 15.3.0), interpolate `print` Fraction placeholders as `n/1`, normalize mathjs `print` wrong-arg errors, and print Fraction-config constants as `n/d` ratios in `parse(expr).toString()`. Native `core` / `expression` Fraction output is unchanged. Stale `known-gaps.json` pool rows removed where the oracle now matches. BREAKING: compat snapshots that expected `"2"`, float `string(fraction)`, or `1 / 3` parse text must expect mathjs forms.
+
+- **Compat `version` reports the emulated mathjs version (#1581):** `version` is `"15.3.0"` on the compat instance, the named export, and the expression scope, and a `compatVersion` named export carries the compat package version; `help('version')` and other doc examples evaluate through the instance evaluator. BREAKING: code reading the compat package version from `math.version` must read `compatVersion`.
+
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
 
 - **mathjs 15.3.0 G11 adversarial fixes (#1563–#1566, #1574):** mixed-type `mod`/`xgcd`/`invmod` and `stirlingS2` keep bigint results; compat `subtract` and `mod` bind mathjs factories; sparse `isZero` uses `equalScalar` tolerances; `sqrt`/`larger` refuse out-of-range bigint; `multinomial` overflow matches 15.3.0 (`NaN`).
@@ -24,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **mathjs 15.3.0 behavior parity (#1563, #1564, #1565, #1566):** Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`.
 
 ### Fixed
+
+- **Expression compile uses `scope.has`, not `get === undefined` (#1581):** a Map-like scope documents `has`/`get`/`set`. Native compile treated `get(name) === undefined` as a missing symbol, so `evaluate('pi', { pi: undefined })` threw `Undefined symbol "pi"` even when `has('pi')` was true (an explicit binding, including `Map.set('pi', undefined)`). Lookup now follows the Map contract: missing keys throw; a present key whose value is `undefined` returns `undefined`. This is a native correctness fix, not a mathjs-parity shim. Compat no longer injects a `mathjsScopedSymbols` flag.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 
