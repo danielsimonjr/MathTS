@@ -79,6 +79,10 @@ export function withMathjsComplexBinary(
     div: complexJsDivide,
   }[op];
   return (a: unknown, b: unknown) => {
+    // Only Riemann-sphere when at least one operand is Complex. Number/BigNumber
+    // pairs must stay on native typed add/mul/div (otherwise `0.1 + 0.2` under
+    // number:'BigNumber' becomes Complex and the full-surface sweep fails).
+    if (!isComplex(a) && !isComplex(b)) return native(a, b);
     const ca = asComplex(a);
     const cb = asComplex(b);
     if (ca !== null && cb !== null) return combine(ca, cb);

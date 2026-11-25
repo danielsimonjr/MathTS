@@ -45,4 +45,10 @@ describe('zpk2tf parity (#1589)', () => {
       );
     });
   }
+
+  it("number/BigNumber add stays native (not Complex) under {number:'BigNumber'}", () => {
+    expectSame('0.1 + 0.2 BigNumber', { number: 'BigNumber' }, (L) =>
+      (L.evaluate as (s: string) => unknown)('0.1 + 0.2')
+    );
+  });
 });
