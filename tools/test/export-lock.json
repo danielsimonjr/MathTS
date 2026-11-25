@@ -1209,6 +1209,9 @@
       "createMap": {
         "kind": "function"
       },
+      "createMathjsUnitClass": {
+        "kind": "function"
+      },
       "createUnitClass": {
         "kind": "function"
       },

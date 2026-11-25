@@ -38,6 +38,14 @@ export function reviveWithClasses(value: unknown, classes: Record<string, unknow
 
 /** Restore MathJS numeric values, ranges, indices, and expression nodes. */
 export function compatReviver(key: string, value: unknown): unknown {
+  if (
+    value &&
+    typeof value === 'object' &&
+    Object.hasOwn(value, 'mathjs') &&
+    Reflect.get(value, 'mathjs') === 'Unit'
+  ) {
+    return reviveWithClasses(value, instanceSymbols);
+  }
   const numeric = nativeReviver(key, value);
   return numeric === value ? reviveWithClasses(value, instanceSymbols) : numeric;
 }

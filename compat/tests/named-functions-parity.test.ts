@@ -274,8 +274,16 @@ describe('named compatibility function imports', () => {
       Number(oracle.round(oracleValue, 2, oracleTarget).toNumeric('cm')),
       14
     );
-    expect(String(math.evaluate('round(3.241 cm, 2, cm)'))).toBe('3.24 cm');
-    expect(String(round([value, math.unit('2.178 cm'), 0], 2, target))).toBe('3.24 cm,2.18 cm,0');
+    expect(String(math.evaluate('round(3.241 cm, 2, cm)'))).toBe(
+      String(oracle.evaluate('round(3.241 cm, 2, cm)'))
+    );
+    expect(String(round([value, math.unit('2.178 cm'), 0], 2, target))).toBe(
+      String(
+        oracle.evaluate('round(values, 2, cm)', {
+          values: [oracleValue, oracle.unit('2.178 cm'), 0],
+        })
+      )
+    );
   });
 
   it('allows preferred units and an offset in toBest', () => {
@@ -365,7 +373,9 @@ describe('named compatibility function imports', () => {
     expect(String(math.toBest(value))).toBe(expected);
     expect(String(selected.toBest(value))).toBe(expected);
     expect(String(math.evaluate(expression))).toBe(expected);
-    expect(String(toBest(value, [], { offset: 0 }))).toBe('0.123 uA');
+    expect(String(toBest(value, [], { offset: 0 }))).toBe(
+      String(oracle.evaluate('toBest(unit(0.000000123, "A"), [], {offset: 0})'))
+    );
   });
 
   it('matches the MathJS approximation of floating-point fractions', () => {

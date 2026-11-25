@@ -1245,7 +1245,11 @@ import {
   mathTyped as coreTyped,
   createMathTSTyped,
 } from '@danielsimonjr/mathts-core';
-import { createUnitClass, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import {
+  createMathjsUnitClass,
+  createUnitClass,
+  notSquareError,
+} from '@danielsimonjr/mathts-core/internal';
 import { createFibonacciHeapClass } from '../type/matrix/FibonacciHeap.js';
 import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMatrix.js';
 
@@ -2537,7 +2541,7 @@ const compatConstructors: {
   Spa: _Spa,
   SparseMatrix: MathJSSparseMatrix,
   SymbolNode: _SymbolNode,
-  Unit: _Unit,
+  Unit: createMathjsUnitClass(factoryScope),
 };
 
 /** Construct the mathjs RNG functions with instance-local configuration and events. */
@@ -3606,7 +3610,7 @@ function compatFactoryExports(): {
     createCross,
     createDotPow,
     createSlu,
-    createUnitClass,
+    createUnitClass: createMathjsUnitClass,
     createUnitFunction,
     createCreateUnit,
     createSymbolNode,
@@ -3762,6 +3766,8 @@ export const factory_mathjsCompat = {
     typed: createTyped(factoryScope),
     factorial: factoryScope.factorial,
   }),
+  unit: createUnitFunction({ typed: factoryScope.typed, Unit: compatConstructors.Unit }),
+  createUnit: createCreateUnit({ typed: factoryScope.typed, Unit: compatConstructors.Unit }),
   sqrt: createMathjsSqrt(factoryScope),
   lgamma: createMathJSLgamma(factoryScope as Parameters<typeof createMathJSLgamma>[0]),
   fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),

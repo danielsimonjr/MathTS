@@ -1,3 +1,4 @@
+import { EXPRESSION_SCOPE_OMIT } from '../default-math-scope.js';
 import { nodeDefaults } from './default-node.js';
 import { escape } from '../utils/string.js';
 import { getSafeProperty } from '../utils/customs.js';
@@ -107,7 +108,10 @@ export const createSymbolNode = /* #__PURE__ */ factory(
             return scope.has(name) ? scope.get(name) : getSafeProperty(math, name);
           };
         } else {
-          const isUnit = isValuelessUnit(name);
+          const unitClass = EXPRESSION_SCOPE_OMIT.has(name)
+            ? Unit
+            : ((math.Unit as UnitConstructor | undefined) ?? Unit);
+          const isUnit = unitClass?.isValuelessUnit(name);
 
           return function (
             scope: Map<string, unknown>,
@@ -117,7 +121,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
             return scope.has(name)
               ? scope.get(name)
               : isUnit
-                ? new Unit!(null, name)
+                ? new unitClass!(null, name)
                 : SymbolNode.onUndefinedSymbol(name);
           };
         }

@@ -45,6 +45,8 @@ math.complex(2, 3); // 2 + 3i
 - `math.add`, `math.subtract`, and `math.multiply` preserve boxed Matrix results.
   Matrix literals and numeric-dimension `math.zeros` follow the instance's `matrix`
   setting. `math.size` returns a plain array of dimensions, as in mathjs 15.
+- Unit readings use mathjs’s floating-point conversion order. For example, both
+  `unit(0.75, 'inch')` and `evaluate('0.75 inch')` print `0.7499999999999999 inch`.
 - Direct named imports (`add`, `matrix`, …) come from `compat/src/shims.ts`. There is
   no package-level named `import` / `createUnit` / `config` export (use the instance).
 - Delegates to `@danielsimonjr/mathts-core` types + `@danielsimonjr/mathts-functions`
@@ -54,23 +56,6 @@ math.complex(2, 3); // 2 + 3i
 - With default `predictable: false` (mathjs parity), real-scalar `asin`/`acos`/`log`/`pow`
   and related helpers promote out-of-domain values to `Complex` instead of `NaN`.
   `create(all, { predictable: true })` keeps real-only `Math.*` behaviour.
-
-## Deliberate differences from mathjs
-
-### Unit readings and their printed digits
-
-`unit(v, name)` and `evaluate('v name')` store one value, and that value is the exact SI quantity
-rounded once. mathjs 15 rounds through a float product, so the two libraries can print one unit
-reading differently:
-
-| Input                   | MathTS      | mathjs 15.2.0             |
-| ----------------------- | ----------- | ------------------------- |
-| `unit(0.75, 'inch')`    | `0.75 inch` | `0.7499999999999999 inch` |
-| `evaluate('0.75 inch')` | `0.75 inch` | `0.7499999999999999 inch` |
-
-Both MathTS forms store the same SI value (`0.01905`). mathjs stores `0.019049999999999997`.
-The exact route is a deliberate feature (the `exact-scale` conversions, #742); see the core
-`Unit` tests that pin it.
 
 ## License
 

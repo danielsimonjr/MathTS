@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import * as oracle from 'mathjs';
 import { create, all } from '../src/index.js';
 import { fraction } from '../src/shims.js';
 import { Fraction } from '@danielsimonjr/mathts-core';
@@ -57,24 +58,17 @@ describe('dogfood G32b formatting and units', () => {
     expect(() => mt.unit(1, 'sneakyUnit')).toThrow();
   });
 
-  it('#742 litre to millilitre is exactly 1000 mL via rational scales', () => {
-    const litres: UnitOut = mt.unit(1, 'L').to('mL');
-    expect(String(litres)).toBe('1000 mL');
-    expect(litres.toNumber()).toBe(1000);
-    const km: UnitOut = mt.unit(1, 'km').to('m');
-    expect(String(km)).toBe('1000 m');
-    expect(km.toNumber()).toBe(1000);
-    const foot: UnitOut = mt.unit(1, 'ft').to('inch');
-    expect(foot.toNumber()).toBe(12);
-    expect(String(foot)).toBe('12 inch');
-  });
-
-  it('#742 the other two pairs of the report: exact scales round once', () => {
-    // mathjs 13 and 15 print 1.9685039370078743 inch and 211.99999999999997 degF:
-    // they divide or add rounded doubles. 250/127 and 212 are the nearest doubles.
-    expect(String(mt.unit(5, 'cm').to('inch'))).toBe('1.968503937007874 inch');
-    expect(String(mt.unit(100, 'degC').to('degF'))).toBe('212 degF');
-    expect(mt.unit(100, 'degC').to('degF').toNumber()).toBe(212);
+  it.each([
+    [1, 'L', 'mL'],
+    [1, 'km', 'm'],
+    [1, 'ft', 'inch'],
+    [5, 'cm', 'inch'],
+    [100, 'degC', 'degF'],
+  ] as const)('#742 converts %s %s to %s with MathJS rounding', (value, from, to) => {
+    const actual = mt.unit(value, from).to(to);
+    const expected = oracle.unit(value, from).to(to);
+    expect(String(actual)).toBe(String(expected));
+    expect(actual.toNumber()).toBe(expected.toNumber());
   });
 
   it('#742 a fixed precision makes the strings of both libraries agree', () => {

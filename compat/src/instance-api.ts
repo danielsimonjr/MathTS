@@ -186,6 +186,7 @@ export function wireMathjsInstanceApi(
   const UnitCtor = instance.Unit as { isValuelessUnit: (name: string) => boolean } | undefined;
   if (UnitCtor?.isValuelessUnit) {
     mathNs.Unit = UnitCtor;
+    expressionLayers.mathWithTransform.Unit = UnitCtor;
   }
 
   const importedFactories: ImportableFactories = {};

@@ -1,5 +1,5 @@
-import { BigNumber, Unit } from '@danielsimonjr/mathts-core';
-import { evaluate, runWithConfig } from '@danielsimonjr/mathts-functions';
+import { BigNumber } from '@danielsimonjr/mathts-core';
+import { evaluate, factory_mathjsCompat, runWithConfig } from '@danielsimonjr/mathts-functions';
 import { MATHJS_UNIT_CONSTANTS } from './parity-names.generated.js';
 
 const mathConstants = {
@@ -30,6 +30,7 @@ const scalarConstants = {
 export type CompatConstantName =
   keyof typeof mathConstants | keyof typeof scalarConstants | 'Infinity' | 'NaN';
 
+const Unit = factory_mathjsCompat.constructors.Unit;
 const unitTemplates = new Map<string, InstanceType<typeof Unit>>();
 
 function cloneUnit(name: string, value: number, units: string): InstanceType<typeof Unit> {

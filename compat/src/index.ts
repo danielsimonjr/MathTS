@@ -580,6 +580,8 @@ export function create(
     compareText: namedCompareText,
     equalText: namedEqualText,
     toBest: namedToBest,
+    unit: namedUnit,
+    createUnit: namedCreateUnit,
     permutations: namedPermutations,
     lgamma: namedLgamma,
   };
@@ -937,7 +939,6 @@ export {
   factory_cot as cot,
   coth,
   count,
-  createUnit,
   cross,
   factory_csc as csc,
   csch,
@@ -1089,11 +1090,13 @@ export {
 type UnitMagnitude = number | ConfiguredBigNumber | Fraction;
 
 /** Construct or clone a unit using the MathJS scalar signatures. */
-const namedUnit = mathFunctions.unit as {
+const namedCreateUnit: typeof mathFunctions.createUnit =
+  mathFunctions.factory_mathjsCompat.createUnit;
+const namedUnit = mathFunctions.factory_mathjsCompat.unit as {
   (value: string | UnitMagnitude | UnitInstance): UnitInstance;
   (value: UnitMagnitude | Complex, unit: string | UnitInstance): UnitInstance;
 } & typeof mathFunctions.unit;
-export { namedUnit as unit };
+export { namedUnit as unit, namedCreateUnit as createUnit };
 
 // Re-export all shims for direct import
 export * from './shims.js';

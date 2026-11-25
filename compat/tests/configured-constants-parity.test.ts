@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { all as oracleAll, create as createOracle } from 'mathjs';
-import { BigNumber, Unit } from '@danielsimonjr/mathts-core';
+import { BigNumber } from '@danielsimonjr/mathts-core';
 import { all, create } from '../src/index.js';
 import { MATHJS_UNIT_CONSTANTS } from '../src/parity-names.generated.js';
 
@@ -54,7 +54,7 @@ describe('mathjs 15.2 instance constants and configuration', () => {
     expect(peer.PI).toBeInstanceOf(BigNumber);
   });
 
-  it('matches physical values using native Unit objects', () => {
+  it('matches physical values using instance Unit objects', () => {
     const math = create(all);
     const oracle = createOracle(oracleAll);
     const constants = oracle as unknown as Record<string, typeof oracle.speedOfLight>;
@@ -63,7 +63,7 @@ describe('mathjs 15.2 instance constants and configuration', () => {
       const direct = math[name];
       const evaluated = math.evaluate(name);
       for (const value of [direct, evaluated]) {
-        expect(value).toBeInstanceOf(Unit);
+        expect(value).toBeInstanceOf(math.Unit);
         expect(Number((value as typeof direct).toNumeric(units)) / expected).toBeCloseTo(1, 14);
       }
     }
