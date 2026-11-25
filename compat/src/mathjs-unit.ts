@@ -30,7 +30,9 @@ export function wrapCompatUnitConstructor<T extends CompatUnitConstructorLike>(B
   }
 
   Object.setPrototypeOf(CompatUnit, Base);
-  Object.setPrototypeOf(CompatUnit.prototype, Base.prototype);
+  // Share Base.prototype so factory-built units (`math.unit('1 m')`) stay
+  // `instanceof math.Unit` without mutating Base itself.
+  CompatUnit.prototype = Base.prototype;
   Object.defineProperty(CompatUnit, 'name', { value: Base.name });
   CompatUnit.isValuelessUnit = (name: string): boolean => {
     if (name === 'd') return false;

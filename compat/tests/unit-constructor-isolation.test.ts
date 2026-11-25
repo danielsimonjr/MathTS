@@ -76,5 +76,6 @@ describe('compat Unit constructor isolation (#1557)', () => {
     expect(wrapped.isValuelessUnit('d')).toBe(false);
     expect(wrapped.isValuelessUnit('cm')).toBe(true);
     expect(new wrapped(2, 's')).toBeInstanceOf(wrapped);
+    expect(new Unit(1, 'm')).toBeInstanceOf(wrapped);
   });
 });
