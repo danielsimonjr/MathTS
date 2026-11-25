@@ -108,14 +108,6 @@ export const createMatAlgo07xSSf = /* #__PURE__ */ factory(
         cf = typed.find(callback, [adt, bdt]) as unknown as MatrixCallback;
       }
 
-      // isZero signature to use (#1582: `!== 0` kept BigNumber/Fraction/Unit zeros)
-      let isZ: (value: MatrixValue) => boolean = (v) => a.isZero_Full(v);
-      if (typeof adt === 'string' && adt !== 'mixed') {
-        isZ = (v) => a.isZero(v);
-      } else if (typeof bdt === 'string' && bdt !== 'mixed') {
-        isZ = (v) => b.isZero(v);
-      }
-
       // result arrays for sparse format
       const cvalues: MatrixValue[] = [];
       const cindex: number[] = [];
@@ -142,8 +134,8 @@ export const createMatAlgo07xSSf = /* #__PURE__ */ factory(
 
           // invoke callback
           const cij: MatrixValue = cf(va, vb);
-          // Store all non-zero and true values (typed zeros use isZero, not `!== 0`)
-          if (!isZ(cij)) {
+          // Store all non zero and true values (mathjs matAlgo07xSSf: `cij !== 0`)
+          if (cij !== 0 && cij !== false) {
             cindex.push(i); // row index
             cvalues.push(cij); // computed value
             nonZeroCount++;

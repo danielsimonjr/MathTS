@@ -14,12 +14,7 @@
  */
 
 import { SparseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
-import {
-  MathJSDenseMatrix,
-  MathJSSparseMatrix,
-  denseOfSize,
-  isStructuralZero,
-} from '../factories/matrix-bridge.js';
+import { MathJSDenseMatrix, MathJSSparseMatrix, denseOfSize } from '../factories/matrix-bridge.js';
 import { csrToCsc, cscToPublic } from '../factories/sparse-adapter.js';
 import { collectionSize } from './number-matrix.js';
 
@@ -190,10 +185,8 @@ export function cscProduct(
     sortRows(columnRows, count);
     for (let c = 0; c < count; c++) {
       const r = columnRows[c];
-      const value = accNumber !== null ? accNumber[r] : accAny![r];
-      if (values !== null && isStructuralZero(value)) continue;
       index.push(compact !== null ? compact.rows[r] : r);
-      if (values !== null) values.push(value);
+      if (values !== null) values.push(accNumber !== null ? accNumber[r] : accAny![r]);
     }
     ptr[j + 1] = index.length;
   }
