@@ -158,6 +158,11 @@ describe('compile - SymbolNode', () => {
     expect(result).toBe(3);
   });
 
+  it('should resolve an explicit undefined binding over a math constant', () => {
+    const node = symbolNode('pi');
+    expect(compile(node, mathScope).evaluate({ pi: undefined })).toBeUndefined();
+  });
+
   it('should throw for undefined symbols', () => {
     const node = symbolNode('undefined_var');
     expect(() => compile(node, mathScope).evaluate()).toThrow('Undefined symbol "undefined_var"');

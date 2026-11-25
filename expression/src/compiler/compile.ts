@@ -211,9 +211,10 @@ function undefinedSymbol(name: string): Error {
 }
 
 function readScopedSymbol(scope: Scope, name: string): unknown {
-  const value = scope.get(name);
-  if (value === undefined) throw undefinedSymbol(name);
-  return value;
+  // An explicit scope entry may bind `undefined` and must shadow math constants
+  // (mathjs parity: `evaluate('pi', { pi: undefined })` is `undefined`).
+  if (!scope.has(name)) throw undefinedSymbol(name);
+  return scope.get(name);
 }
 
 function compileSymbolNode(
