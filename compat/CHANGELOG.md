@@ -1,5 +1,15 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.22
+
+### Patch Changes
+
+- f3ba0d6: Restore MathJS ranges, indices, and expression nodes with the default compatibility JSON reviver.
+- f3ba0d6: Match the MathJS JSON representation of fractions and BigNumbers when using the compatibility replacer.
+- f3ba0d6: Support unit operands in square roots, squares, and cubes, and complex operands in expm1.
+- Updated dependencies [f3ba0d6]
+  - @danielsimonjr/mathts-functions@0.89.20
+
 ## 0.7.21
 
 ### Patch Changes
