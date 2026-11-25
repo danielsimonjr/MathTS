@@ -17,9 +17,7 @@ const srcRoot = join(dirname(fileURLToPath(import.meta.url)), '../src');
 function assertNoFractionJsFields(rel: string): void {
   const text = readFileSync(join(srcRoot, rel), 'utf8');
   expect(text, `${rel} must mention Fraction`).toMatch(/Fraction/);
-  expect(text, `${rel} must not read fraction.js fields .s/.n/.d`).not.toMatch(
-    /\bx\.[snd]\b/
-  );
+  expect(text, `${rel} must not read fraction.js fields .s/.n/.d`).not.toMatch(/\bx\.[snd]\b/);
 }
 
 describe('Fraction sign fields (#1551)', () => {
