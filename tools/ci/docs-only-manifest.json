@@ -41,6 +41,10 @@
     {
       "file": "tools/test/site-generators.test.mjs",
       "reason": "Generator unit tests use fixture markdown under a temp dir."
+    },
+    {
+      "file": "compat/tests/parity/adversarial-g01.test.ts",
+      "reason": "G01 adversarial uses sweepDocs against mathjs embedded docs; full CI Test job only."
     }
   ]
 }
