@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **G17 sparse structural zeros (#1582):** factory CSC sparse construction (`MathJSSparseMatrix` constructor, `set`, `resize`, `SparseMatrix.diagonal`) uses `isStructuralZero` so BigNumber, Fraction, Complex and Unit zeros are not stored (number entries keep exact `=== 0`, so `1e-100` stays stored; `-0` is dropped; `NaN` is kept). `sparseMatrixFromVectors` uses the same predicate; `matAlgo07xSSf` keeps the mathjs source store test `cij !== 0 && cij !== false` (mathjs does not consult the typed `isZero` there). Gustavson sparse×sparse product and mixed `selectedMultiply` accumulators still keep cancelled numeric zeros: that is the CSparse pattern used by `slu`/`csAmd` (#1271), not a typed-zero store bug. Typed CSC sparse add/subtract/multiply with Unit operands routes through factory matAlgo paths instead of `toArray()` element-wise walks that paired `Unit` with numeric implicit zeros. The public CSR `SparseMatrix` (`matrix/`) stays `Float64Array` with `!== 0` (numbers only).
 
+### Added
+
+- **`docs/reports/`: archived parity and gap-analysis reports (2026-11-25):** the mathjs 15.3.0 parity gap analysis (issues #1549–#1589, tracker #1590) and the six-system parity review against NumPy, SciPy, PySR, Mathematica, Mathcad and MATLAB (issues #1592–#1713, tracker #1714), with per-reference deep reports and data tables. Index: [`docs/reports/README.md`](docs/reports/README.md). For numeric and symbolic correctness, the sources of truth are NumPy, SciPy, SymPy and PySR; Mathematica, Mathcad and MATLAB are feature references only.
+
 ### Changed
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
