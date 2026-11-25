@@ -38,9 +38,9 @@ The compat binary was not rebuilt in the planning session. The “actual” colu
 
 ### S1. Oracle is mathjs 15.3.0 (do this before any other group)
 
-`compat/package.json` devDependency `"mathjs": "15.2.0"` becomes `"mathjs": "15.3.0"`. `compat/scripts/gen-parity-names.mjs` and the header of `compat/src/parity-names.generated.ts` say 15.3.0. 15.3.0 adds no export names (tracker #1590; re-check with `Object.keys` of the module and of `create(all)` while regenerating). It does change `multinomial`, `catalan(bigint)`, sparse `dotPow` / `dotDivide` / `divide`, and the bigint-to-number conversion. Those four are G11. The generator and the existing parity tests must stay green at the pin bump **except** tests that assert the 15.2.0 behavior of those four. Those tests are updated in G11, not deleted: change the expected value to the 15.3.0 value in the same commit as the implementation. Until G11 lands, G00 may leave those four test files skipped only if they are skipped by a `describe` that names the follow-up group and is removed in G11. Prefer not skipping: land G00 and G11 in one branch if the suite cannot be green in between. Do not lower any other assertion to make the pin bump pass.
+`compat/package.json` devDependency `"mathjs": "15.2.0"` becomes `"mathjs": "15.3.0"`. `compat/scripts/gen-parity-names.mjs` and the header of `compat/src/parity-names.generated.ts` say 15.3.0. 15.3.0 adds no export names (tracker #1590; re-check with `Object.keys` of the module and of `create(all)` while regenerating). It does change `multinomial`, `catalan(bigint)`, sparse `dotPow` / `dotDivide` / `divide`, and the bigint-to-number conversion. Those four are G11. The generator and the existing parity tests must stay green at the pin bump **except** tests that assert the 15.2.0 behavior of those four. Those tests are updated in G11, not deleted: change the expected value to the 15.3.0 value in the same commit as the implementation. **Do not skip those tests in G00** — CI's skip-budget gate (`node tools/test/check-skip-budget.mjs`) fails on any new skipped test. Land G00 and G11 together on the same branch/PR so the suite is green without skipping. Do not lower any other assertion to make the pin bump pass.
 
-A scheduled check: `.github/workflows/mathjs-oracle.yml`, `cron` weekly, `workflow_dispatch` as well. It runs `npm view mathjs version` and fails the job when that string differs from the `mathjs` devDependency in `compat/package.json`. The job opens no release. Dependabot is not required if this workflow exists. The workflow must not publish.
+A scheduled check: `.github/workflows/mathjs-oracle.yml`, `cron` weekly, `workflow_dispatch` as well. It runs `npm view mathjs version` and, when that string differs from the `mathjs` devDependency in `compat/package.json`, opens (or updates an existing open) GitHub issue titled `[parity] mathjs oracle update: <latest>` (requires `permissions: { issues: write }`) and fails the job. The job opens no release. Dependabot is not required if this workflow exists. The workflow must not publish.
 
 ### S2. `create(all)` binds mathjs-shaped factories
 
@@ -96,7 +96,9 @@ Record each row in the root changelog bullet and in the changeset body as `BREAK
 | Change | Before | After | Callers |
 | --- | --- | --- | --- |
 | Compat `evaluate` / `parser` / `compile` default | Throws `Security: …` on assignment and on `simplify` / `parse` / … | Mathjs behavior | Anyone who caught the Security error to reject untrusted expressions on the **compat** instance. Pass `{ safe: true }`. The typed `evaluate` is unchanged. |
+| Block `evaluate` result (#1556) | `evaluate('1; 2')` returns `2` (unwrapped number) and `evaluate('1\n2')` returns `[1, 2]` (plain Array) | Returns `ResultSet` (`entries: [2]` / `[1, 2]`) on both compat and typed `evaluate` | Callers who read the return value of a multi-statement expression directly instead of `.entries` / `.valueOf()`. |
 | `version` | `"0.7.25"` (the package) | `"15.3.0"` | Code that read the compat package version from `math.version`. Read `compatVersion`. |
+| Factory return types (#1550, #1588) | `ones(2)` and `expm(Array)` return `Array`; `std(complex, 2)` and `variance(complex, 2)` return a real `number` magnitude | `ones(2)` and `expm(Array)` return `DenseMatrix` (under default `matrix: 'Matrix'`); `std`/`variance` of Complex return `Complex` | Callers who assumed `Array.isArray(ones(2))`, `Array.isArray(expm(arr))`, or real `std(complex)`. Use `matrix: 'Array'` or `.toArray()` / `abs()`. |
 | Arity (#1587) | `add(2)`, `size(2, 3)`, `transpose(2, 3)`, `bignumber(2, 3)`, `det(2, 3)`, `inv(2, 3)` return a value | Throw the mathjs `TypeError` (`Too few arguments` / `Too many arguments`) | Callers who passed extra arguments that were ignored. |
 | `sin(fraction)` and the same pattern for other trig functions | A Complex (Fraction converted through the typed table) | Throw `Cannot implicitly convert a Fraction to BigNumber or vice versa…`, as mathjs does | Callers who relied on the conversion. Use `number(fraction)` first. |
 | bigint to number (#1566) | `add(-(2n ** 1100n), 0.5)` is `-Infinity`; `add(2n ** 60n, 0.5)` is a finite number past `2^53` | Throw `Cannot implicitly convert bigint to number: value is below the min safe integer value` / `exceeds the max safe integer value` | Callers who used the overflow as a sentinel. Convert with `bignumber` explicitly. This is `core`’s `bigintToNumber` (`core/src/typed/number-input.ts` line 42 is `Number(n)`), so every typed function that converts bigint to number changes. In-range bigints (`2n ** 40n`) still convert. |
@@ -192,13 +194,15 @@ G00 oracle pin
                           └─ G21 unpublished-surface CI   last; sees every changeset
 ```
 
-**Parallel after G00:** G01, G02, G03, G04, G07, G08, G10, G11, G12, G14, G15, G16, G17, G18, G19.
+**Parallel after G00 + G11:** G01, G03, G04, G07, G08, G10, G12, G14, G15, G16, G17, G18, G19. (G11 lands with or immediately after G00 on the same branch so the skip-budget CI gate stays green without skipping tests, and so G17 does not conflict with G11 on `matrix/src/types/SparseMatrix.ts`.)
 
-**Parallel once G01 and G02 are green:** G05, G06, G09, G13.
+**After G01:** G02 (avoids merge conflicts with G01 on `compat/src/index.ts`), G09.
+
+**Parallel once G01 and G02 are green:** G05, G06, G13.
 
 **Then:** G20, then G21.
 
-G11 should land immediately after G00 on the same branch if the 15.2.0 assertions for `multinomial` / `catalan` / sparse divide / bigint conversion cannot stay green (S1).
+**Shared-file coordination note:** `functions/src/factories/index.ts` is touched by G02, G10, G12, and G15 (disjoint export blocks — merge sequentially or rebase cleanly). `docs/api/compat.md` (G01, G05, G14, G15, G16, G18, G19), `docs/migration-guide.md` (G01, G12), `compat/tests/parity/known-gaps.json`, and `CHANGELOG.md` are additive/disjoint-section edits.
 
 ---
 
@@ -293,7 +297,7 @@ Resolution: `safe: true` or the typed default → run `validateAst` and `sanitiz
 
 - [ ] **Step 5: Delete** the G01 labels from `known-gaps.json`.
 
-- [ ] **Step 6: Changelog.** `### Changed` because S5 lists the compat default. Changeset: `compat`, `expression`, `functions`. `BREAKING:` the compat default sentence from S5. The typed API sentence says it is unchanged.
+- [ ] **Step 6: Changelog.** `### Changed`: `- **Compat expression policy matches mathjs by default (#1549, #1556, #1562, #1576, #1580):** Enabled assignment, function definitions, in-expression `simplify`/`derivative`/`parse`/`evaluate`/`compile`/`parser`/`help`/`config`, `ResultSet` block results, and declared function names on compat `create(all)`; opt-in hardening via `{ safe: true }`. Typed `evaluate` remains safe by default. BREAKING: compat `evaluate`/`parser`/`compile` no longer throw `Security:` by default (pass `{ safe: true }` to opt in), and multi-statement blocks return `ResultSet` on both compat and typed `evaluate`.` Changeset: `compat`, `expression`, `functions`.
 
 **Done:**
 
@@ -323,7 +327,7 @@ Resolution: `safe: true` or the typed default → run `validateAst` and `sanitiz
 - Modify: `functions/src/statistics/mad.ts` so `mad(unit('5 cm'), unit('2 inch'))` is `0.015748031496063 inch`, not `400 um` (#1583). The unit of the result is the unit mathjs keeps (the second argument’s unit in this call). Match the oracle on a list of mixed units, not a hard-coded `inch`.
 - Test: `compat/tests/parity/g02-factories.test.ts` covering every row of the #1550 table, plus the #1587 rows that are arity (`add(2)`, `multiply(2)`, `size(2,3)`, `transpose(2,3)`, `bignumber(2,3)`, `det(2,3)`, `inv(2,3)`, `sin(fraction(1,3))`, BigNumber-config `erf(0.2)`), `count(true)` which must return `4` and today throws, and the two `expm` rows and two `mad` rows.
 
-**Design:** S2. Arity comes from the factory’s typed-function signatures. Do not wrap the factory in a function that counts arguments. If the factory accepts `add(2)`, remove the one-argument signature in `functions/src/arithmetic/add.ts` (the mathjs factory) so the typed dispatcher throws `Too few arguments in function add`. Same for `multiply` and `subtract`. `count(true)` needs a `boolean` signature that returns `4`, in the factory `functions` uses for `count`, because mathjs counts the bits of a boolean. Read the mathjs `count` implementation in `node_modules/mathjs` (after G00) and port that signature into the existing factory. Do not add a compat-only branch.
+**Design:** S2. Arity comes from the factory’s typed-function signatures. Do not wrap the factory in a function that counts arguments. If the factory accepts `add(2)`, remove the one-argument signature in `functions/src/arithmetic/add.ts` (the mathjs factory) so the typed dispatcher throws `Too few arguments in function add`. Same for `multiply` and `subtract`. `count(true)` returns `4` and `count(false)` returns `5` in mathjs because mathjs’s `typed-function` converts `boolean -> string` (`'true'.length === 4`, `'false'.length === 5`); `functions/src/matrix/count.ts` already has `{ string, 'Matrix | Array' }`. Add the `boolean -> string` conversion in the compat typed instance (or `core/src/typed/mathts-typed.ts` if mathjs-compatible across the board) rather than hard-coding a `boolean => 4` shim, and test both `count(true) === 4` and `count(false) === 5`.
 
 `size(2, 3)` must throw `Too many arguments in function size (expected: 1, actual: 2)`. The factory signature is one argument. A rest parameter is the bug; delete it.
 
@@ -341,7 +345,7 @@ BigNumber-config `erf(0.2)` throws in mathjs (`Unexpected type of argument … a
 
 - [ ] **Step 5: Remove** the #1550, #1587, #1588, #1583 labels that now match from `known-gaps.json`.
 
-- [ ] **Step 6: Changelog** under `### Changed` with the BREAKING arity and Fraction-trig sentences. Changesets: `compat`, `functions`, `matrix` if `expm` lives there.
+- [ ] **Step 6: Changelog.** `### Changed`: `- **Compat binds mathjs-shaped factories (#1550, #1583, #1587, #1588):** Bound `create(all)` and compat named exports to `functions` factories (`ceil`/`floor`/`fix`/`round`, `identity`, `ones`, `std`, `variance`, `mad`, `expm`, `count`) and aligned arity and Fraction-trig rejections with mathjs 15.3.0. BREAKING: extra/missing arguments and trig on Fractions now throw matching mathjs `TypeError`s; `ones(n)` and `expm(Array)` return `DenseMatrix`; `std`/`variance` of Complex return `Complex`.` Changesets: `compat`, `functions`, `matrix` if `expm` lives there.
 
 **Done:**
 
@@ -372,7 +376,7 @@ BigNumber-config `erf(0.2)` throws in mathjs (`Unexpected type of argument … a
 
 - [ ] **Step 4: Run the tests.** Pass. Mutate `isPositive` back to `x.s > 0n` and confirm the test fails; restore.
 
-- [ ] **Step 5: Gaps and changelog.** Patch changeset for `functions` and `compat`. Not in the breaking ledger.
+- [ ] **Step 5: Gaps and changelog.** `### Fixed`: `- **Fraction sign predicates (#1551):** `isPositive` and `isNegative` now call `Fraction.isPositive()` / `Fraction.isNegative()` instead of reading undefined `fraction.js` fields `.s`/`.n`.` Patch changeset for `functions` and `compat`. Not in the breaking ledger.
 
 **Done:**
 
@@ -399,7 +403,7 @@ BigNumber-config `erf(0.2)` throws in mathjs (`Unexpected type of argument … a
 
 - [ ] **Step 4: Re-run.** Then `bunx vitest run core/tests` filtered to unit tests, and the functions relational tests. Existing assertions stay.
 
-- [ ] **Step 5: Gaps, changelog, changeset** for `core`, `functions`, `compat`. Not breaking if unequal units were the bug. If a caller depended on `50cm == 0.5m` being false, the changelog says the boolean was wrong.
+- [ ] **Step 5: Gaps, changelog, changeset.** `### Fixed`: `- **BigNumber Unit equality (#1552):** Normalized both units to a common base before scalar comparison in `compareUnits` and `Unit.equals` so `50cm == 0.5m` is `true` under `number: 'BigNumber'`.` Patch changeset for `core`, `functions`, `compat`. Not in the breaking ledger.
 
 **Done:**
 
@@ -434,7 +438,7 @@ BigNumber-config `erf(0.2)` throws in mathjs (`Unexpected type of argument … a
 
 - [ ] **Step 4: Run the tests** and `matrix` / `functions` schur tests. If an existing test pins the old diagonal order, update the expected matrix and cite #1584. Keep the reconstruction assertion (`U*T*U^T`).
 
-- [ ] **Step 5: Gaps, changelog.** `### Changed` with the #1584 BREAKING sentence. Changesets: `matrix`, `functions`, `compat`.
+- [ ] **Step 5: Gaps, docs, and changelog.** Record the #1584 decision (match mathjs `schur` ordering and `solveODE` step selection) in `docs/api/compat.md`. `### Changed`: `- **BigNumber matrix pow/schur/lyap and schur/solveODE parity (#1553, #1584):** Enabled BigNumber matrices in `pow`, `schur`, `sylvester`, and `lyap`, and aligned `schur` diagonal ordering and `solveODE` initial step selection with mathjs 15.3.0. BREAKING: `schur` diagonal order and `solveODE` step grid now match mathjs 15.3.0.` Changesets: `matrix`, `functions`, `compat`.
 
 **Done:**
 
@@ -460,7 +464,7 @@ BigNumber-config `erf(0.2)` throws in mathjs (`Unexpected type of argument … a
 
 - [ ] **Step 4: Re-run** plus the existing pinv tests. #1040’s matrix-with-Complex case stays.
 
-- [ ] **Step 5: Gaps and changelog.** Patch. Changesets: `functions`, `matrix`, `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Fixed`: `- **Preserve BigNumber/Fraction/Complex types (#1554):** Updated `pinv`, `bernoulli`, `unaryPlus`, and `compare` to preserve BigNumber, Fraction, and Complex inputs and `config.number` instead of collapsing to `number`.` Patch changesets: `functions`, `matrix`, `compat`.
 
 **Done:**
 
@@ -485,7 +489,7 @@ BigNumber-config `erf(0.2)` throws in mathjs (`Unexpected type of argument … a
 
 - [ ] **Step 4: Re-run.** Mutation: delete the Fraction signature, test fails, restore.
 
-- [ ] **Step 5: Gaps and changelog.** Patch. `functions`, `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Fixed`: `- **Preserve Fraction and Unit in `nullish` (#1555):** Added explicit `Fraction, any` and `Unit, any` signatures to `nullish` so non-nullish Fractions are not converted to Complex.` Patch changesets: `functions`, `compat`.
 
 **Done:**
 
@@ -518,7 +522,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run** and the existing trigonometry tests (#729 / #728). Keep their Complex-domain assertions.
 
-- [ ] **Step 5: Gaps and changelog.** Patch. `functions`, `core` if `Complex` gained a method, `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Fixed`: `- **Inverse trig/hyperbolic special values and Complex `acsch` (#1558, #1559, #1560):** Fixed `acoth(0)`, `acsc(0)`, `asec(0)`, `asech` branch cut for `x > 1`, and Complex `acsch` to match mathjs 15.3.0.` Patch changesets: `functions`, `core` if `Complex` gained a method, `compat`.
 
 **Done:**
 
@@ -544,7 +548,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run.**
 
-- [ ] **Step 5: Gaps and changelog.** Patch. `expression` or `functions`, and `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Fixed`: `- **Auto-resize matrix on indexed assignment (#1557):** Routed indexed assignment in `AssignmentNode` through the resizing `subset` path so growing an empty matrix matches mathjs 15.3.0.` Patch changesets: `expression` or `functions`, and `compat`.
 
 **Done:**
 
@@ -571,7 +575,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run** and the eigs tests under `functions/tests`. Update expected vectors that #1561 proves wrong.
 
-- [ ] **Step 5: Gaps and changelog.** `### Changed` with the BREAKING sentence. `functions`, `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Changed`: `- **`eigs` precision and eigenvector scaling (#1561):** Repaired `createEigs` and removed the `correctEigs` public bypass so `eigs` honors `precision` and matches mathjs 15.3.0 eigenvector scaling. BREAKING: `eigs` eigenvectors are no longer unit-normalized and loose `precision` options now take effect.` Changesets: `functions`, `compat`.
 
 **Done:**
 
@@ -607,7 +611,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run** and the package tests those files already have (`#1093`, `#1102`, `#1347`). Update expected values that described 15.2.0. Do not delete them.
 
-- [ ] **Step 5: Gaps and changelog.** `### Changed` with the three BREAKING sentences (bigint, sparse, multinomial 2-D). Changesets: `core`, `functions`, `matrix`, `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Changed`: `- **mathjs 15.3.0 behavior parity (#1563, #1564, #1565, #1566):** Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`.` Changesets: `core`, `functions`, `matrix`, `compat`.
 
 **Done:**
 
@@ -639,7 +643,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run** and `bunx tsc --noEmit` in `functions`, `expression`, and `core`. A duplicate class that is still imported fails the build; fix the import.
 
-- [ ] **Step 5: Gaps and changelog.** Patch for new exports. Not breaking if the old names remain. Changesets: `core`, `functions`, `expression`, `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Added`: `- **Typed-package surface exports and decisions (#1567, #1568, #1569, #1570, #1571):** Exported canonical error/matrix/node classes, `docs`, lowercase constant aliases (`pi`, `e`, `tau`, `phi`, `i`), and 63 `create*` aliases; documented compat-only decisions for events, `all`/`expression`, and remaining factories in `docs/migration-guide.md`.` Patch changesets: `core`, `functions`, `expression`, `compat`.
 
 **Done:**
 
@@ -666,7 +670,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run.**
 
-- [ ] **Step 5: Gaps and changelog.** Patch. `compat`, `expression` if `apply` is new.
+- [ ] **Step 5: Gaps and changelog.** `### Fixed`: `- **Populate compat `expression.transform` and `mathWithTransform` (#1572):** Wired all 26 mathjs transforms onto `instance.expression.transform` and populated `instance.expression.mathWithTransform` with every instance function.` Patch changesets: `compat`, `expression` if `apply` is new.
 
 **Done:**
 
@@ -693,7 +697,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run.** Mutation: put the space back, the #1578 test fails, restore.
 
-- [ ] **Step 5: Gaps and changelog.** Patch. `expression`, `compat`. Mention #1578 matches mathjs including the invalid LaTeX macro, on purpose.
+- [ ] **Step 5: Gaps, docs, and changelog.** Record the #1578 decision (match mathjs `toTex` boolean-operator spacing) in `docs/api/compat.md`. `### Fixed`: `- **`toTex` unit names and logical operator spacing (#1577, #1578):** Passed `Unit` into `SymbolNode` so units render as `\mathrm{…}` and `deg` as `^\circ`, and matched mathjs 15.3.0 boolean-operator spacing (`true\wedgefalse`, `\negtrue`, `true\veebarfalse`) on purpose.` Patch changesets: `expression`, `compat`.
 
 **Done:**
 
@@ -718,7 +722,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run** and the Fraction toString tests (#892, #743). Keep their repeating-decimal assertions.
 
-- [ ] **Step 5: Gaps and changelog.** `### Changed` with the #1579 and #1586 BREAKING sentences. `functions`, `expression`, `compat`.
+- [ ] **Step 5: Gaps, docs, and changelog.** Record the #1586 decision (match mathjs Fraction-config `ConstantNode.toString`) in `docs/api/compat.md`. `### Changed`: `- **Fraction `format`, `string`, and `ConstantNode.toString` parity (#1579, #1586):** Formatted integral Fractions as `n/1`, routed `string(fraction)` through `Fraction.toString()`, and matched mathjs Fraction-config `ConstantNode.toString()`. BREAKING: `format(fraction(2))` is now `"2/1"`, `string(fraction(1,3))` is `"0.(3)"`, and Fraction-config `parse('1/3 + 1/4').toString()` is `"1/1 / 3/1 + 1/1 / 4/1"`.` Changesets: `functions`, `expression`, `compat`.
 
 **Done:**
 
@@ -743,7 +747,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run.**
 
-- [ ] **Step 5: Gaps and changelog.** `### Changed` with the BREAKING sentence. `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Changed`: `- **Compat `version` reports emulated mathjs version (#1581):** Set `version` to `"15.3.0"` on the compat instance, named export, and expression scope, and added `compatVersion` for the package version. BREAKING: code reading the compat package version from `math.version` must read `compatVersion`.` Changeset: `compat`.
 
 **Done:**
 
@@ -768,7 +772,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run** and `matrix/tests` sparse tests.
 
-- [ ] **Step 5: Gaps and changelog.** Patch. `matrix`, `compat`.
+- [ ] **Step 5: Gaps and changelog.** `### Fixed`: `- **Drop structural zeros for BigNumber/Fraction/Unit in `SparseMatrix` (#1582):** Replaced `!== 0` storage checks with `isStructuralZero` so BigNumber, Fraction, and Unit zeros are omitted like mathjs 15.3.0.` Patch changesets: `matrix`, `compat`.
 
 **Done:**
 
@@ -817,7 +821,7 @@ For `asech`: negate the imaginary part when the real input is `> 1`, and match `
 
 - [ ] **Step 4: Re-run.**
 
-- [ ] **Step 5: Gaps and changelog.** Patch. `functions`, `compat`.
+- [ ] **Step 5: Gaps, docs, and changelog.** Record the #1589 decision (match mathjs 2-D `zpk2tf` polynomial product) in `docs/api/compat.md`. `### Fixed`: `- **Align 2-D `zpk2tf` complex polynomial product (#1589):** Matched mathjs 15.3.0 polynomial product behavior for 2-D Matrix arguments in `zpk2tf` while keeping 1-D results unchanged.` Patch changesets: `functions`, `compat`.
 
 **Done:**
 
