@@ -1,5 +1,14 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.24
+
+### Patch Changes
+
+- ba839d1: Support fraction negation and exact ratio, mixed-number, and continued-fraction representations through the MathJS instance methods.
+- ba839d1: Infer Unit results from scalar calls to unit, including when composing them with sqrt and other unit operations.
+- Updated dependencies [ba839d1]
+  - @danielsimonjr/mathts-core@0.30.2
+
 ## 0.7.23
 
 ### Patch Changes
