@@ -9,16 +9,21 @@
  * as its own file under `src/` and re-export it from `src/index.ts`.
  *
  * `create` and `all` live in `src/index.js`; index binds them at module scope
- * with `bindDefaultInstanceSource`, so this module holds no runtime import of
- * `./index.js` and the module graph stays free of a runtime cycle (only the
- * `MathInstance`/`MathJSConfig` types come from there, as type-only imports).
+ * with `bindDefaultInstanceSource`, so this module holds no import of
+ * `./index.js` (runtime or type-only). Bind types live in `compat-types.ts`.
  * `getDefaultInstance` runs lazily, long after the bind.
  *
  * @packageDocumentation
  */
+import type { mathTyped } from '@danielsimonjr/mathts-core';
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import {
+  parser as functionsParser,
+  type PhysicsEvaluateOptions,
+} from '@danielsimonjr/mathts-functions';
 import { createChain } from './chain.js';
+import type { BoundInstanceConfig, CompatCreate, CompatFactoryInput } from './compat-types.js';
 import {
   createCompatFormat,
   createCompatPrint,
@@ -26,15 +31,10 @@ import {
 } from './fraction-format-parity.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
-import type { MathInstance, MathJSConfig } from './index.js';
 
-type CompatFactoryInput = Record<string, unknown> | readonly unknown[];
-type CompatCreate = (
-  factories?: CompatFactoryInput,
-  config?: Partial<MathJSConfig>
-) => MathInstance;
-
-let createInstance: CompatCreate | undefined;
+let createInstance:
+  | ((factories: CompatFactoryInput, config: BoundInstanceConfig) => Record<string, unknown>)
+  | undefined;
 let allBundle: CompatFactoryInput | undefined;
 
 /**
@@ -42,7 +42,7 @@ let allBundle: CompatFactoryInput | undefined;
  * scope right after their definitions. Called before any wrapper can run.
  */
 export function bindDefaultInstanceSource(create: CompatCreate, all: CompatFactoryInput): void {
-  createInstance = create;
+  createInstance = create as typeof createInstance;
   allBundle = all;
 }
 
@@ -56,13 +56,13 @@ const moduleDefaults = {
   predictable: false,
   randomSeed: null,
   legacySubset: false,
-} as const satisfies MathJSConfig;
+} as const satisfies BoundInstanceConfig;
 
 export { moduleDefaults };
 
-let defaultInstance: MathInstance | undefined;
+let defaultInstance: Record<string, unknown> | undefined;
 
-function getDefaultInstance(): MathInstance {
+function getDefaultInstance(): Record<string, unknown> {
   if (!createInstance || !allBundle) {
     throw new Error('compat default instance source is not bound by src/index.ts');
   }
@@ -73,31 +73,34 @@ function getDefaultInstance(): MathInstance {
 const defaultEvaluate = ((...args: unknown[]) =>
   (getDefaultInstance().evaluate as (...args: unknown[]) => unknown)(
     ...args
-  )) as MathInstance['evaluate'];
+  )) as typeof mathFunctions.evaluate;
 
 /** Compile an expression or a collection in the default compatibility instance. */
 const defaultCompile = ((...args: unknown[]) =>
   (getDefaultInstance().compile as (...args: unknown[]) => unknown)(
     ...args
-  )) as MathInstance['compile'];
+  )) as typeof mathFunctions.compile;
 
 /** Parse an expression into a mathjs-compatible syntax tree. */
-const defaultParse: MathInstance['parse'] = /* #__PURE__ */ new Proxy(mathFunctions.parse, {
+const defaultParse = /* #__PURE__ */ new Proxy(mathFunctions.parse, {
   get: (target, key, receiver) =>
     typeof key === 'string' && key.startsWith('is')
-      ? Reflect.get(getDefaultInstance().parse, key)
+      ? Reflect.get(getDefaultInstance().parse as object, key)
       : Reflect.get(target, key, receiver),
-  apply: (_target, receiver, args) => Reflect.apply(getDefaultInstance().parse, receiver, args),
-});
+  apply: (_target, receiver, args) =>
+    Reflect.apply(getDefaultInstance().parse as (...args: unknown[]) => unknown, receiver, args),
+}) as typeof mathFunctions.parse;
+
+type CompatParser = ReturnType<typeof functionsParser>;
 
 /** Stateful expression parser for the default compatibility instance. */
-export const Parser = function Parser(options?: Parameters<MathInstance['parser']>[0]): object {
+export const Parser = function Parser(options?: PhysicsEvaluateOptions): CompatParser {
   if (new.target === undefined) throw new TypeError('Parser must be constructed with new');
-  return Reflect.construct(getDefaultInstance().Parser, [options], new.target);
-} as unknown as MathInstance['Parser'];
+  return Reflect.construct(getDefaultInstance().Parser as typeof Parser, [options], new.target);
+} as unknown as { new (options?: PhysicsEvaluateOptions): CompatParser };
 
 /** Create a compatibility parser with its own retained scope. */
-const defaultParser: MathInstance['parser'] = (options) => new Parser(options);
+const defaultParser = (options?: PhysicsEvaluateOptions) => new Parser(options);
 
 const defaultChainApi = /* #__PURE__ */ createChain(
   /* #__PURE__ */ new Proxy<Record<string, unknown>>(
@@ -111,11 +114,10 @@ const defaultChainApi = /* #__PURE__ */ createChain(
 );
 
 /** Start a fluent chain using the default compatibility instance. */
-const defaultChain: MathInstance['chain'] = /* #__PURE__ */ (() => defaultChainApi.chain)();
+const defaultChain = /* #__PURE__ */ (() => defaultChainApi.chain)();
 
 /** Chain constructor that uses the default compatibility instance. */
-const defaultChainConstructor: MathInstance['Chain'] = /* #__PURE__ */ (() =>
-  defaultChainApi.Chain)();
+const defaultChainConstructor = /* #__PURE__ */ (() => defaultChainApi.Chain)();
 
 export {
   defaultChainConstructor as Chain,
@@ -128,7 +130,7 @@ export {
 
 /** Read the configuration for MathJS-compatible named imports. */
 const defaultConfigReader = /* #__PURE__ */ Object.assign(
-  (settings?: Partial<MathJSConfig>) => {
+  (settings?: Partial<BoundInstanceConfig>) => {
     if (settings !== undefined) {
       throw new Error('The global config is readonly. Create an instance to change its settings.');
     }
@@ -224,7 +226,7 @@ export * from './native-factory-exports.js';
 export * from './constant-factory-exports.js';
 export * from './named-physical-constants.generated.js';
 
-const defaultTyped: MathInstance['typed'] =
+const defaultTyped: typeof mathTyped & { isTypedFunction: (value: unknown) => boolean } =
   /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatTyped();
 export { defaultTyped as typed };
 

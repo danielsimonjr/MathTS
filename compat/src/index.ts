@@ -849,7 +849,8 @@ export { all };
 
 // The default-instance wrappers of named-instance-exports.ts build their lazy
 // instance through `create` and `all`; bind them here so that module keeps no
-// runtime import of this one (the Architecture docs pin 2 runtime cycles).
+// import of this one (runtime or type-only). Architecture docs pin 2 runtime
+// cycles; the bind types live in compat-types.ts.
 bindDefaultInstanceSource(create, all);
 
 // =============================================================================
