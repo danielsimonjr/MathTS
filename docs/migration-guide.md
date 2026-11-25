@@ -188,11 +188,9 @@ DimensionError` against that export). `ArgumentsError`, `FibonacciHeap`,
   `ImmutableDenseMatrix` and `Spa` come from `@danielsimonjr/mathts-functions`;
   `ResultSet`, the 16 Node classes (`Node`, `ConstantNode`, `SymbolNode`, …)
   and `Parser` come from `@danielsimonjr/mathts-expression`, next to the
-  `create<X>` factories that build them with custom dependencies. One
-  intentional divergence: the typed elementwise dimension mismatch
-  (`add([1, 2], [1, 2, 3])`) throws that canonical `DimensionError`, where
-  mathjs 15.3.0 throws a plain `Error` with a different `shape mismatch`
-  message — the class is the point of the fix (#1567).
+  `create<X>` factories that build them with custom dependencies. Native typed
+  `add` of mismatched vectors still throws `RangeError`; `create(all).add` maps
+  that to mathjs 15.3.0's plain `Error` and `shape mismatch` text (#G12).
 - **Events are per instance (#1568).** The typed packages export functions, not
   an event emitter; `on`, `off`, `once`, and `emit` exist only on
   `create(all)` from `@danielsimonjr/mathts-compat`, where `config` and
