@@ -15,7 +15,7 @@ interface BigNumberType {
 }
 
 interface FractionType {
-  s: bigint;
+  isNegative(): boolean;
 }
 
 interface UnitType {
@@ -75,7 +75,7 @@ export const createIsNegative = /* #__PURE__ */ factory(
 
       bigint: (x: bigint): boolean => x < 0n,
 
-      Fraction: (x: FractionType): boolean => x.s < 0n, // It's enough to decide on the sign
+      Fraction: (x: FractionType): boolean => x.isNegative(),
 
       Unit: typed.referToSelf(
         (self: TypedFunction) =>

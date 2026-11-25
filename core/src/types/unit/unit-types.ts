@@ -28,15 +28,10 @@ export interface BigNumberValue {
   times(other: BigNumberValue | number | string): BigNumberValue;
 }
 
-/**
- * Structural view of a mathjs-style Fraction (`n`/`d`/`s`) used by the Unit
- * typeConverters. The live `Fraction` class stores `numerator`/`denominator`
- * bigints instead; it is still a `Numeric` value.
- */
+/** Structural view of a MathTS Fraction (`numerator` / `denominator`; sign lives in the numerator). */
 export interface FractionValue {
-  n: number;
-  d: number;
-  s: number;
+  numerator: bigint;
+  denominator: bigint;
   isFraction?: boolean;
 }
 
