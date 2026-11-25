@@ -1,5 +1,16 @@
 # @danielsimonjr/mathts-compat
 
+## 0.7.23
+
+### Patch Changes
+
+- 792a54b: Match MathJS matrix formatting and support swapping rows in place on dense and sparse compatibility matrices.
+- 792a54b: Report the public DenseMatrix and SparseMatrix names from typeOf for compatibility matrices.
+  Compare matrix contents in compareNatural and use the public storage type to break ties.
+- Updated dependencies [792a54b]
+- Updated dependencies [792a54b]
+  - @danielsimonjr/mathts-functions@0.89.21
+
 ## 0.7.22
 
 ### Patch Changes

@@ -80,7 +80,7 @@
     },
     "compat": {
       "name": "@danielsimonjr/mathts-compat",
-      "version": "0.7.22",
+      "version": "0.7.23",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.30.1",
         "@danielsimonjr/mathts-expression": "^0.14.4",
@@ -141,7 +141,7 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.89.20",
+      "version": "0.89.21",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.30.1",
         "@danielsimonjr/mathts-expression": "^0.14.4",
