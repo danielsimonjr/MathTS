@@ -353,7 +353,7 @@ See [Migration Guide](../migration/guide.md) for complete details.
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-compat` (1156 exports).
+> `@danielsimonjr/mathts-compat` (1157 exports).
 
 ### Functions by category
 
