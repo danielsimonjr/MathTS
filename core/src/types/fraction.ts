@@ -36,61 +36,59 @@ export function isFraction(value: unknown): value is Fraction {
 
 const gcd = gcdBigInt;
 
-const PRIME_WHEEL_STEPS = [2n, 4n, 2n, 4n, 6n, 2n, 6n] as const;
+const MAX_RATIONAL_POW_BITS = 65536n;
 
-/** Prime factorization of a positive integer (`n ≥ 1`). */
-function primeFactorExponents(n: bigint): Map<bigint, bigint> {
-  const factors = new Map<bigint, bigint>();
-  const add = (p: bigint) => factors.set(p, (factors.get(p) ?? 0n) + 1n);
-  let num = n;
-  while (num % 2n === 0n) {
-    add(2n);
-    num /= 2n;
-  }
-  while (num % 3n === 0n) {
-    add(3n);
-    num /= 3n;
-  }
-  while (num % 5n === 0n) {
-    add(5n);
-    num /= 5n;
-  }
-  let p = 7n;
-  let stepIdx = 0;
-  while (p * p <= num) {
-    while (num % p === 0n) {
-      add(p);
-      num /= p;
-    }
-    p += PRIME_WHEEL_STEPS[stepIdx]!;
-    stepIdx = (stepIdx + 1) % PRIME_WHEEL_STEPS.length;
-  }
-  if (num > 1n) add(num);
-  return factors;
+function bigIntBitLength(n: bigint): number {
+  return n.toString(2).length;
 }
 
 /**
- * Raise each prime power in `value` by `num/den` when every exponent is divisible by `den`.
- * `num` is non-negative. Returns `null` when the result is not an integer.
+ * Exact integer `k`-th root of a non-negative integer (`k >= 2`), or `null` when
+ * `value` is not a perfect `k`-th power. Uses Newton's method so large primes
+ * never stall on trial division.
+ */
+function exactNthRoot(value: bigint, k: bigint): bigint | null {
+  if (value === 0n || value === 1n) return value;
+  const bits = bigIntBitLength(value);
+  if (BigInt(bits - 1) < k) return null;
+  const kNum = Number(k);
+  let x = 1n << BigInt(Math.ceil(bits / kNum));
+  const kMinus1 = k - 1n;
+  while (true) {
+    const next = (kMinus1 * x + value / x ** kMinus1) / k;
+    if (next >= x) break;
+    x = next;
+  }
+  return x ** k === value ? x : null;
+}
+
+/**
+ * Raise `value` (non-negative) to `num/den` (`gcd(num, den) === 1`, `num >= 0`, `den >= 2`)
+ * when the result is an integer within `MAX_RATIONAL_POW_BITS`. Returns `null` otherwise.
  */
 function integerRationalPower(value: bigint, num: bigint, den: bigint): bigint | null {
   if (value === 1n) return 1n;
   if (value === 0n) return 0n;
-  let out = 1n;
-  for (const [prime, count] of primeFactorExponents(value)) {
-    const e = count * num;
-    if (e % den !== 0n) return null;
-    out *= prime ** (e / den);
-  }
-  return out;
+  const root = exactNthRoot(value, den);
+  if (root === null) return null;
+  if (root <= 1n) return root;
+  if (num * BigInt(bigIntBitLength(root)) > MAX_RATIONAL_POW_BITS) return null;
+  return root ** num;
 }
 
 /**
  * Exact `base^exp` as a Fraction when the result is rational (and real).
- * Returns `null` when the power is irrational or not real (even root of a negative).
+ * Returns `null` when the power is irrational, not real (even root of a negative),
+ * or exceeds the exact-BigInt bit budget.
  */
 export function rationalPow(base: Fraction, exp: Fraction): Fraction | null {
   if (exp.denominator === 1n) {
+    const absExp = exp.numerator < 0n ? -exp.numerator : exp.numerator;
+    const absNum = base.numerator < 0n ? -base.numerator : base.numerator;
+    if (absExp > 0n && (absNum > 1n || base.denominator > 1n)) {
+      const maxBits = Math.max(bigIntBitLength(absNum), bigIntBitLength(base.denominator));
+      if (absExp * BigInt(maxBits) > MAX_RATIONAL_POW_BITS) return null;
+    }
     try {
       return base.pow(exp.numerator);
     } catch {

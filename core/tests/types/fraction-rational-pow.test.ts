@@ -33,4 +33,29 @@ describe('rationalPow (#1551)', () => {
     expect(rationalPow(new Fraction(2n), new Fraction(1n, 2n))).toBeNull();
     expect(rationalPow(new Fraction(-4n), new Fraction(1n, 2n))).toBeNull();
   });
+
+  it('handles zero and negative exponents', () => {
+    expect(rationalPow(new Fraction(0n), new Fraction(0n))?.equals(new Fraction(1n))).toBe(true);
+    expect(rationalPow(new Fraction(0n), new Fraction(1n, 3n))?.equals(new Fraction(0n))).toBe(true);
+    expect(rationalPow(new Fraction(0n), new Fraction(-1n, 3n))).toBeNull();
+    expect(rationalPow(new Fraction(0n), new Fraction(-1n))).toBeNull();
+    expect(
+      rationalPow(new Fraction(-8n), new Fraction(-1n, 3n))?.equals(new Fraction(-1n, 2n))
+    ).toBe(true);
+    expect(
+      rationalPow(new Fraction(-8n), new Fraction(-2n, 3n))?.equals(new Fraction(1n, 4n))
+    ).toBe(true);
+  });
+
+  it('does not hang or throw on huge exponents or large prime bases', () => {
+    expect(rationalPow(new Fraction(8n), new Fraction(1_000_000_000n, 3n))).toBeNull();
+    expect(rationalPow(new Fraction(2n), new Fraction(1_000_000_000n, 1n))).toBeNull();
+    expect(
+      rationalPow(new Fraction(1n), new Fraction(1_000_000_000n, 3n))?.equals(new Fraction(1n))
+    ).toBe(true);
+    expect(
+      rationalPow(new Fraction(-1n), new Fraction(1_000_000_001n, 3n))?.equals(new Fraction(-1n))
+    ).toBe(true);
+    expect(rationalPow(new Fraction(1_000_000_000_000_000_003n), new Fraction(1n, 3n))).toBeNull();
+  });
 });
