@@ -45,6 +45,17 @@ function isTruthy(x: unknown): boolean {
   return !!x;
 }
 
+/** Truthiness of a Unit matches mathjs: test the numeric `value`, not object presence. */
+function isTruthyUnit(x: Unit): boolean {
+  const v = x.value;
+  if (v === null || v === undefined) return false;
+  if (typeof v === 'number') return isTruthyNumber(v);
+  if (typeof v === 'bigint') return v !== 0n;
+  if (v instanceof BigNumber) return isTruthyBigNumber(v);
+  if (v instanceof Complex) return isTruthyComplex(v);
+  return isTruthy(v);
+}
+
 // =============================================================================
 // not — logical NOT
 // =============================================================================
@@ -69,6 +80,8 @@ export const not = mathTyped('not', {
   BigNumber: (x: BigNumber): boolean => !isTruthyBigNumber(x),
 
   Complex: (x: Complex): boolean => !isTruthyComplex(x),
+
+  Unit: (x: Unit): boolean => !isTruthyUnit(x),
 
   'Array | Matrix': mapEachLeaf((self, x) => self(x)),
 });
@@ -99,6 +112,8 @@ export const and = mathTyped('and', {
     isTruthyBigNumber(a) && isTruthyBigNumber(b),
 
   'Complex, Complex': (a: Complex, b: Complex): boolean => isTruthyComplex(a) && isTruthyComplex(b),
+
+  'Unit, Unit': (a: Unit, b: Unit): boolean => isTruthyUnit(a) && isTruthyUnit(b),
 
   // Variadic: reduce-and over three or more arbitrary values.
   // Note: typed-function passes rest args as [[val1, val2, ...]], so rest[0]
@@ -135,6 +150,8 @@ export const or = mathTyped('or', {
     isTruthyBigNumber(a) || isTruthyBigNumber(b),
 
   'Complex, Complex': (a: Complex, b: Complex): boolean => isTruthyComplex(a) || isTruthyComplex(b),
+
+  'Unit, Unit': (a: Unit, b: Unit): boolean => isTruthyUnit(a) || isTruthyUnit(b),
 
   // Variadic: reduce-or over three or more arbitrary values.
   // Note: typed-function passes rest args as [[val1, val2, ...]], so rest[0]
@@ -173,6 +190,8 @@ export const xor = mathTyped('xor', {
   'Complex, Complex': (a: Complex, b: Complex): boolean =>
     isTruthyComplex(a) !== isTruthyComplex(b),
 
+  'Unit, Unit': (a: Unit, b: Unit): boolean => isTruthyUnit(a) !== isTruthyUnit(b),
+
   // Variadic: reduce-xor over three or more values (true when odd count are truthy).
   // Note: typed-function passes rest args as [[val1, val2, ...]], so rest[0]
   // is the flat array of remaining values.
@@ -205,32 +224,20 @@ export const xor = mathTyped('xor', {
  * ```
  */
 export const nullish = mathTyped('nullish', {
-  // Concrete numeric types: always return a (never null/undefined)
+  // Collections: factory `createNullish` (element-wise, dimension checks) — same path as `??`.
+  ...collectionBinaryRows('nullish'),
+
+  // Scalars: preserve types; no `any, any` (mathjs throws TypeError on plain objects).
   'number, any': (a: number, _b: unknown): number => a,
   'bigint, any': (a: bigint, _b: unknown): bigint => a,
   'BigNumber, any': (a: BigNumber, _b: unknown): BigNumber => a,
   'Complex, any': (a: Complex, _b: unknown): Complex => a,
-
-  // Fraction must be returned as a Fraction: without a concrete signature the
-  // typed-function conversion table converts Fraction to Complex before 'any, any'
-  // (#1555). nullish never converts its non-nullish first argument.
   'Fraction, any': (a: Fraction, _b: unknown): Fraction => a,
-
-  // Same for Unit: a non-nullish Unit is returned unchanged.
   'Unit, any': (a: Unit, _b: unknown): Unit => a,
-
-  // Explicit boolean: return a as-is (false is NOT nullish)
-  // Must be declared before 'any,any' to prevent boolean→number conversion
   'boolean, any': (a: boolean, _b: unknown): boolean => a,
-
-  // Explicit string: return a as-is ('' is NOT nullish)
-  // Must be declared before 'any,any' to prevent string→Complex conversion
   'string, any': (a: string, _b: unknown): string => a,
-
-  // Generic any,any covers null/undefined on either side.
-  // Since typed-function would convert known types above, this signature
-  // effectively receives only null, undefined, or unconvertible values.
-  'any, any': (a: unknown, b: unknown): unknown => a ?? b,
+  'null, any': (_a: null, b: unknown): unknown => b,
+  'undefined, any': (_a: undefined, b: unknown): unknown => b,
 }) as {
   <Left, Right>(left: Left, right: Right): Left extends null | undefined ? Right : Left;
   readonly signatures: Readonly<Record<string, (...args: unknown[]) => unknown>>;
