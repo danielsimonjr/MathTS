@@ -240,12 +240,6 @@ const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint
 
 type EvaluateRunner = ReturnType<typeof createEvaluate>;
 type ExpressionScope = Parameters<typeof _compileExpression>[1];
-/**
- * Internal evaluate option. Compat instance evaluate may set
- * {@link EvaluateOptions.mathjsScopedSymbols}; the public typed `evaluate` /
- * `compileExpr` and `createInstanceEvaluator` never set it.
- */
-type EvaluateCallOptions = PhysicsEvaluateOptions & { mathjsScopedSymbols?: boolean };
 
 /**
  * Evaluate with the safe or the unsafe runner of one scope pair. The module-level `evaluate`
@@ -256,17 +250,11 @@ function runEvaluate(
   unsafeRunner: EvaluateRunner,
   exprOrExprs: string | string[],
   scope: Record<string, unknown> | Scope | undefined,
-  options: EvaluateCallOptions | undefined
+  options: PhysicsEvaluateOptions | undefined
 ): unknown {
   const physics = assertPhysicsOptions(options);
   const bound = physics === undefined ? scope : physicsScope(scope, physics);
-  const inner =
-    options?.unsafe === true || options?.mathjsScopedSymbols === true
-      ? {
-          ...(options?.unsafe === true ? { unsafe: true as const } : {}),
-          ...(options?.mathjsScopedSymbols === true ? { mathjsScopedSymbols: true as const } : {}),
-        }
-      : undefined;
+  const inner = options?.unsafe === true ? { unsafe: true as const } : undefined;
   const runner = options?.unsafe === true ? unsafeRunner : safeRunner;
   if (Array.isArray(exprOrExprs)) return runner(exprOrExprs, bound, inner);
   return runner(exprOrExprs, bound, inner);
@@ -280,19 +268,14 @@ function compileInScope(
   safeScope: ExpressionScope,
   unsafeScope: ExpressionScope,
   expr: string,
-  options: EvaluateCallOptions | undefined,
+  options: PhysicsEvaluateOptions | undefined,
   parseExpression: typeof parse = parse
 ) {
   const compiled = _compileExpression(
     parseExpression,
     options?.unsafe === true ? unsafeScope : safeScope,
     expr,
-    options?.unsafe === true || options?.mathjsScopedSymbols === true
-      ? {
-          ...(options?.unsafe === true ? { unsafe: true as const } : {}),
-          ...(options?.mathjsScopedSymbols === true ? { mathjsScopedSymbols: true as const } : {}),
-        }
-      : undefined
+    options?.unsafe === true ? { unsafe: true } : undefined
   );
   const physics = assertPhysicsOptions(options);
   if (physics === undefined) return compiled;

@@ -41,11 +41,6 @@ export function getDefaultEvaluate(): ReturnType<typeof createEvaluate> {
  */
 export interface EvaluateOptions {
   unsafe?: boolean;
-  /**
-   * When `true`, a scope key bound to `undefined` shadows math constants (mathjs
-   * parity). Compat instance evaluate sets this; native evaluate leaves it off.
-   */
-  mathjsScopedSymbols?: boolean;
 }
 
 /**
@@ -306,13 +301,8 @@ export function createEvaluate(
     options?: EvaluateOptions
   ): unknown {
     const unsafe = options?.unsafe === true;
-    const mathjsScopedSymbols = options?.mathjsScopedSymbols === true;
     // Safe and unsafe compiles of the same text are distinct entries.
-    const key =
-      (unsafe ? 'u:' : 's:') +
-      (mathjsScopedSymbols ? 'm:' : '') +
-      (cacheKey ? cacheKey() + '\u0000' : '') +
-      expr;
+    const key = (unsafe ? 'u:' : 's:') + (cacheKey ? cacheKey() + '\u0000' : '') + expr;
     let compiled = cache.get(key);
     if (compiled !== undefined) {
       // refresh recency (Map iterates in insertion order)
@@ -323,7 +313,7 @@ export function createEvaluate(
       if (!unsafe) {
         validateAst(node);
       }
-      compiled = compile(node, mathNamespace, { mathjsScopedSymbols });
+      compiled = compile(node, mathNamespace);
       cache.set(key, compiled);
       if (cache.size > COMPILE_CACHE_SIZE) {
         const oldest = cache.keys().next().value;
@@ -365,8 +355,7 @@ export function compileExpressionWithDeps(
   if (!unsafe) {
     validateAst(node);
   }
-  const mathjsScopedSymbols = options?.mathjsScopedSymbols === true;
-  const compiled = compile(node, mathScope, { mathjsScopedSymbols });
+  const compiled = compile(node, mathScope);
   if (unsafe) return compiled;
   const trusted = trustedMathFunctions(mathScope);
   return {
