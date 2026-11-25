@@ -268,6 +268,13 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
 - **Re-export packages** (`parser/`, `ast/`, `evaluator/`, `units/`, `numbers/`,
   `linalg/`, `arithmetic/`, `trigonometry/`, `statistics/`, `signal/`) contain
   **no implementation** — edit the source package they re-export, not these.
+- **Conflict-resistant shared files.** `compat/src/index.ts` is wiring only: the
+  function re-export list lives in `compat/src/function-reexports.ts` (one name
+  per line, sorted) and the wrappers in `compat/src/named-instance-exports.ts`;
+  parity gap labels go into the per-issue JSON files under
+  `compat/tests/parity/known-gaps/`, and changelog entries go into
+  `changelog-fragments/`. Do not reintroduce hand-edited shared-list files —
+  parallel PRs conflict on them (see `CLAUDE.md` → compat and Versioning).
 - **Carry work to RELEASED.** Versioning is via Changesets. Tagging, GitHub Releases, and npm
   publish run only when the repository variable `RELEASES_ENABLED` is exactly `true` (unset is
   off). The version PR still opens on each push; leave it unmerged; do not set
@@ -290,6 +297,17 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
   **Then verify against the registry, not the publish log** — `npm pack` the published tarball
   into a clean dir _outside_ `~` and typecheck a real consumer against it with
   `skipLibCheck: false`. A green repo gate is not a working package.
+- **Record the changelog entry as a fragment, not a `CHANGELOG.md` edit.** Every PR that
+  changes release-relevant code adds one `changelog-fragments/YYYY-MM-DD-<slug>.md` file (one
+  `### Added|Changed|Fixed|…` heading plus its bullets; format in
+  `changelog-fragments/README.md`). Do not hand-edit `CHANGELOG.md`: the top of
+  `[Unreleased]` is one line, so parallel PRs that insert bullets there conflict and force
+  re-merges and full CI reruns. The release version PR assembles the pending fragments into
+  `CHANGELOG.md` newest first (`bun run version-packages` runs
+  `tools/release/assemble-changelog.mjs`) and deletes them. The CI gate
+  (`tools/test/check-changelog-fragment.mjs`) requires a fragment for non-docs PRs; docs-only
+  changes (markdown, `docs/`, `.github/`, `.changeset/`, this directory) are exempt, and a
+  direct `CHANGELOG.md` edit is still accepted while in-flight PRs transition.
 
 ---
 

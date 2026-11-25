@@ -93,6 +93,34 @@ The heavy gates (typecheck, tests, coverage) still run only in CI.
 - [ ] No console.log statements (except in CLI)
 - [ ] Follows existing code style
 
+### Changelog: add a fragment, do not edit `CHANGELOG.md`
+
+Every PR that changes release-relevant code records its changelog entry as one
+file in `changelog-fragments/` instead of editing `CHANGELOG.md` by hand. The
+top of the `[Unreleased]` section is a single line that every parallel PR used
+to insert into, so those hand-edits conflicted and forced re-merges and full CI
+reruns.
+
+1. Create `changelog-fragments/YYYY-MM-DD-<short-slug>.md` (the PR date).
+2. Write one `### Added|Changed|Fixed|…` heading and your bullets:
+
+   ```markdown
+   ### Fixed
+
+   - **What changed and why (#1234):** the observable behavior before and after.
+   ```
+
+3. Commit it with the PR. Do not edit `CHANGELOG.md`.
+
+The release version PR (`chore: release packages`) assembles the pending
+fragments into `CHANGELOG.md`, newest first, and deletes them. The CI gate
+(`tools/test/check-changelog-fragment.mjs`) fails a PR with no fragment unless
+every changed file is docs-only (markdown, `docs/`, `.changeset/`,
+`changelog-fragments/`, `.github/`, repo metadata dotfiles). A direct
+`CHANGELOG.md` edit is still accepted while in-flight PRs transition. Package
+`CHANGELOG.md` files stay changeset-owned: record the version bump with a
+`.changeset/*.md` file as before.
+
 ## Code Style
 
 ### TypeScript

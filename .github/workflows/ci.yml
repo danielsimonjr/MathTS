@@ -71,6 +71,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: changes
     timeout-minutes: 15
+    # pull-requests: read lets the Changelog fragment step list the PR's changed
+    # files through gh; contents: read is the workflow default, restated because
+    # a job-level permissions block replaces the workflow-level one.
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Checkout
@@ -90,6 +96,18 @@ jobs:
 
       - name: Check Bun matches the packageManager pin
         run: node tools/test/check-bun-version.mjs
+
+      # Every PR that changes release-relevant code records its changelog entry
+      # as a changelog-fragments/*.md file instead of editing CHANGELOG.md (the
+      # top of [Unreleased] is one line, so parallel hand-edits conflict). The
+      # release version PR assembles the fragments newest first. gh needs
+      # pull-requests: read, which this job grants (see its permissions block).
+      - name: Changelog fragment
+        if: github.event_name == 'pull_request' && github.head_ref != 'changeset-release/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: node tools/test/check-changelog-fragment.mjs --pr "${{ github.event.pull_request.number }}"
 
       - name: Check that the version PR versions every changed package
         if: github.event_name == 'pull_request' && github.head_ref == 'changeset-release/main'
@@ -207,6 +225,15 @@ jobs:
         run: |
           node --test tools/test/check-bundle-budget.test.mjs
           node tools/test/check-bundle-budget.mjs
+
+      # The changelog-fragment assembler and the gate that requires one fragment
+      # per release-relevant PR (docs-only PRs are exempt). The assembler itself
+      # runs only in the release version PR; here its merge logic runs under
+      # node:test with fixtures.
+      - name: Changelog fragment gate
+        run: |
+          node --test tools/release/assemble-changelog.test.mjs tools/test/check-changelog-fragment.test.mjs
+          node tools/test/check-changelog-fragment.mjs --files CHANGELOG.md
 
       # The step above is the development build (`build`: unminified). `build:prod` adds
       # --minify --treeshake and nothing else built it, so a failure there was invisible until
