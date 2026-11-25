@@ -17,7 +17,7 @@ import {
   getArrayDataType,
   isEmpty2DSize,
 } from '@danielsimonjr/mathts-core/internal';
-import { isIndex, typeOf } from '../utils/is.js';
+import { isIndex, isUnit, typeOf } from '../utils/is.js';
 import { callbackArity } from '../utils/function-source.js';
 import {
   arraySize,
@@ -768,9 +768,11 @@ Object.defineProperty(MathJSDenseMatrix.prototype, 'type', {
 
 /**
  * True when a map result is a zero that a sparse matrix does not store.
- * Matches mathjs `equalScalar(value, 0)`: number/Complex use `nearlyEqual` with
- * `config.relTol`/`absTol`; BigNumber uses exact `eq` or `nearlyEqualBigNumber` (not
- * `toNumber()`); Fraction is exact (`equals(0)` / `isZero()`). Do not call
+ * Matches mathjs `equalScalar(value, 0)` / the typed `isZero`: number/Complex use
+ * `nearlyEqual` with `config.relTol`/`absTol`; BigNumber uses exact `eq` or
+ * `nearlyEqualBigNumber` (not `toNumber()`); Fraction is exact (`equals(0)` /
+ * `isZero()`); a Unit is zero when its value is a structural zero, as mathjs
+ * `isZero` applies the test of the unit's value (`#1582`). Do not call
  * `Complex.isZero()` here: that is an exact (epsilon-0) test and would keep a
  * sub-`absTol` complex entry that mathjs drops.
  */
@@ -780,6 +782,22 @@ function isZeroScalar(value: unknown): boolean {
   if (typeof value === 'number') {
     return nearlyEqual(value, 0, relTol, absTol);
   }
+  return isStructuralZero(value);
+}
+
+/**
+ * True when a value is a structural zero that a sparse construction path does not
+ * store (`#1582`). A number uses the exact `=== 0` the store sites used before, so
+ * a number sparse matrix is unchanged — tiny values such as 1e-100 stay stored,
+ * which `tests/dogfood-1169-*` pin and mathjs (whose `isZero` applies `absTol`)
+ * would drop. Every other type follows mathjs `isZero`: BigNumber, Fraction, and
+ * Unit zeros are objects that `!== 0` kept, so they are dropped here — a Unit is
+ * zero when its value is a structural zero.
+ */
+export function isStructuralZero(value: unknown): boolean {
+  if (typeof value === 'number') return value === 0;
+  const relTol = DEFAULT_CONFIG.relTol;
+  const absTol = DEFAULT_CONFIG.absTol;
   if (typeof value === 'boolean') return value === false;
   if (typeof value === 'bigint') return value === 0n;
   if (typeof value === 'string') return nearlyEqual(Number(value), 0, relTol, absTol);
@@ -791,6 +809,10 @@ function isZeroScalar(value: unknown): boolean {
       return nearlyEqual(value.re, 0, relTol, absTol) && nearlyEqual(value.im, 0, relTol, absTol);
     }
     if (value instanceof Fraction) return value.isZero();
+    if (isUnit(value)) {
+      const unit = value as unknown as { value: unknown };
+      return unit.value !== null && unit.value !== undefined && isStructuralZero(unit.value);
+    }
     const maybeZero = value as { isZero?: () => boolean; n?: unknown };
     if (typeof maybeZero.isZero === 'function') return maybeZero.isZero();
     if ('n' in maybeZero) return Number(maybeZero.n) === 0;
@@ -1039,7 +1061,7 @@ export class MathJSSparseMatrix {
               ')'
           );
         }
-        if (v !== 0 && v != null) {
+        if (v != null && !isStructuralZero(v)) {
           values.push(v);
           index.push(i);
         }
@@ -1160,7 +1182,7 @@ export class MathJSSparseMatrix {
 
     if (pos < end && this._index[pos] === i) {
       // Entry exists at this position
-      if (value === 0) {
+      if (isStructuralZero(value)) {
         // Remove the entry
         this._index.splice(pos, 1);
         if (this._values) this._values.splice(pos, 1);
@@ -1172,7 +1194,7 @@ export class MathJSSparseMatrix {
         // Update value
         if (this._values) this._values[pos] = value;
       }
-    } else if (value !== 0) {
+    } else if (!isStructuralZero(value)) {
       // Insert new entry
       this._index.splice(pos, 0, i);
       if (this._values) this._values.splice(pos, 0, value);
@@ -1477,7 +1499,7 @@ export class MathJSSparseMatrix {
     const [rows, cols] = newSize;
     const [oldRows, oldCols] = this._size;
     const value = defaultValue || 0;
-    const fill = value !== 0;
+    const fill = !isStructuralZero(value);
     if (fill) assertAllocSize('resize', newSize);
     // A pattern matrix (no values) gets values when a nonzero entry is added: its entries are 1.
     const hasValues = this._values !== null || fill;
@@ -1639,7 +1661,7 @@ export class MathJSSparseMatrix {
       const diagIdx = j - kCol;
       if (diagIdx >= 0 && diagIdx < diagLen) {
         const v = Array.isArray(value) ? value[diagIdx] : value;
-        if (v !== 0 && v !== defaultValue) {
+        if (!isStructuralZero(v) && v !== defaultValue) {
           values.push(v);
           index.push(kRow + diagIdx);
         }
