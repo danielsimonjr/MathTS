@@ -332,6 +332,8 @@ async function parallelSum(data) {
 | `m.size()`                     | `math.size(m)` returns `[rows, cols]`             |
 | `f.n`, `f.d`                   | `f.numerator`, `f.denominator` (bigint)           |
 
+**`zpk2tf` with 2-D Matrix arguments (#1589):** compat matches mathjs 15.3.0. A non-scalar root or pole has no `.re`/`.im`, so the polynomial product multiplies `NaN + NaNi` factors; compat builds the coefficients with the complex.js `mul`/`add` semantics the oracle's Complex arithmetic uses (a NaN part counts as infinite), giving `zpk2tf(matrix([[1,2],[3,4]]), matrix([[5,6],[7,8]]))` → `[[1, Infinity + Infinityi, Infinity + Infinityi], [1, NaN + NaNi, Infinity + Infinityi]]`. 1-D results are unchanged.
+
 See [Migration Guide](../migration/guide.md) for complete details.
 
 ## Complete export index

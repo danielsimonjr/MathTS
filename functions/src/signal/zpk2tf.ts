@@ -29,7 +29,10 @@ export const createZpk2tf = /* #__PURE__ */ factory(
   dependencies,
   // The deps are untyped (`any`), so the result is declared: without it the export
   // inherits `any` from `typed(...)` instead of being a TypedFunction like the rest.
-  ({ typed, add, multiply, Complex, number }): Zpk2tfFunction => {
+  // `multiply` and `add` stay in `dependencies` (the parity surface compares
+  // `zpk2tfDependencies` with the oracle's) but are unused here: the polynomial
+  // product applies the complex.js product/sum semantics directly (#1589).
+  ({ typed, Complex, number }): Zpk2tfFunction => {
     /**
      * Compute the transfer function of a zero-pole-gain model.
      *
@@ -108,12 +111,47 @@ export const createZpk2tf = /* #__PURE__ */ factory(
         ]);
       }
 
-      // Apply gain to numerator
+      // Apply gain to numerator — through the same complex.js product the oracle's
+      // instance `multiply` resolves to for Complex operands (#1589).
       for (let i = 0; i < num.length; i++) {
-        num[i] = multiply(num[i], k) as Complex;
+        num[i] = mulComplexJS(num[i], mkComplex(k, 0));
       }
 
       return [num, den];
+    }
+
+    /**
+     * The complex sum mathjs uses: complex.js `add`. Two infinite operands (a NaN part
+     * counts as infinite) give `NaN + NaNi`, one infinite operand gives
+     * `Infinity + Infinityi`, and finite operands add componentwise (#1589).
+     */
+    function addComplexJS(a: Complex, b: Complex): Complex {
+      const tInfinite = !Number.isFinite(a.re) || !Number.isFinite(a.im);
+      const zInfinite = !Number.isFinite(b.re) || !Number.isFinite(b.im);
+      if (tInfinite || zInfinite) {
+        if (tInfinite && zInfinite) return mkComplex(NaN, NaN);
+        return mkComplex(Infinity, Infinity);
+      }
+      return mkComplex(a.re + b.re, a.im + b.im);
+    }
+
+    /**
+     * The complex product mathjs uses: complex.js `mul`, the class behind the oracle's
+     * `multiply` for Complex operands. It treats a NaN part as infinite, so a finite
+     * nonzero factor times `NaN + NaNi` is `Infinity + Infinityi` and only
+     * `Infinity × 0` is `NaN`; the plain IEEE product propagates NaN instead and made
+     * the 2-D polynomial diverge from the oracle (#1589). Finite operands follow the
+     * same algebra as the direct product, so the 1-D results are unchanged.
+     */
+    function mulComplexJS(a: Complex, b: Complex): Complex {
+      const tInfinite = !Number.isFinite(a.re) || !Number.isFinite(a.im);
+      const zInfinite = !Number.isFinite(b.re) || !Number.isFinite(b.im);
+      const tZero = a.re === 0 && a.im === 0;
+      const zZero = b.re === 0 && b.im === 0;
+      if ((tInfinite && zZero) || (zInfinite && tZero)) return mkComplex(NaN, NaN);
+      if (tInfinite || zInfinite) return mkComplex(Infinity, Infinity);
+      if (a.im === 0 && b.im === 0) return mkComplex(a.re * b.re, 0);
+      return mkComplex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
     }
 
     /**
@@ -130,7 +168,7 @@ export const createZpk2tf = /* #__PURE__ */ factory(
         c[i] = mkComplex(0, 0) as Complex;
         for (let j = 0; j < a.length; j++) {
           if (i - j >= 0 && i - j < b.length) {
-            c[i] = add(c[i], multiply(a[j], b[i - j])) as Complex;
+            c[i] = addComplexJS(c[i], mulComplexJS(a[j], b[i - j]));
           }
         }
       }
