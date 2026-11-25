@@ -19,7 +19,7 @@
 
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
-import * as all from './all-factories.js';
+import * as allFactories from './all-factories.js';
 import { shims } from './shims.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
@@ -106,6 +106,16 @@ function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig
 // =============================================================================
 // Math Instance
 // =============================================================================
+
+const fullFactoryBundle = Symbol.for('mathts.compat.all');
+
+/** The complete mathjs factory bundle, identifiable across installed package copies. */
+const all: typeof allFactories = Object.freeze(
+  Object.assign(
+    Object.defineProperty(Object.create(null), fullFactoryBundle, { value: true }),
+    allFactories
+  )
+);
 
 type CompatFactoryInput = Record<string, unknown> | readonly unknown[];
 type CompatInstanceCreateInput = CompatFactoryInput | Partial<MathJSConfig>;
@@ -380,7 +390,10 @@ export function create(
   factories: CompatFactoryInput = all,
   config: Partial<MathJSConfig> = {}
 ): MathInstance {
-  if (factories !== all) {
+  const canonical =
+    factories === all ||
+    Object.getOwnPropertyDescriptor(factories, fullFactoryBundle)?.value === true;
+  if (!canonical) {
     const selected = mathFunctions.factory_mathjsCompat.tryCreateFactoryBundle(factories, config);
     if (selected !== undefined) return selected as MathInstance;
   }
@@ -402,7 +415,7 @@ export function create(
   let decidedGeneration = -1;
   let overlayNeeded = createdWithCustomConfig;
   const fullBundle =
-    factories === all ||
+    canonical ||
     Object.entries(all).every(([name, factory]) => Reflect.get(factories, name) === factory);
   const localUnits =
     config === moduleDefaults || !fullBundle
@@ -455,9 +468,7 @@ export function create(
         ...mathFunctions,
         ...instanceSymbols,
         ...Object.fromEntries(
-          factories === all
-            ? []
-            : Object.entries(factories).filter(([key]) => !Object.hasOwn(all, key))
+          canonical ? [] : Object.entries(factories).filter(([key]) => !Object.hasOwn(all, key))
         ),
       }
     : surfaceOf(factories);
