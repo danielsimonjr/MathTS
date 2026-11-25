@@ -197,6 +197,7 @@ export type G08ZeroCase = 'acoth' | 'acsc' | 'asec' | 'none';
 /** When false, keep the factory Complex result (hand-tuned branch); when true, use complex.js on `Complex(x,0)`. */
 export type G08RecomputePolicy = (x: number) => boolean;
 
+/** Real arguments strictly between -1 and 1 use complex.js after factory complex promotion. */
 export const recomputeInsideUnitDisk: G08RecomputePolicy = (x) => x > -1 && x < 1;
 
 /** Wrap a factory so Complex and selected real promotions use the complex.js adapter. */
