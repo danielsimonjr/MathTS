@@ -798,6 +798,32 @@ export class Complex implements IComplex {
     return num.divide(denom).log().multiply(iHalf);
   }
 
+  /** Arc cotangent, with real arguments in the interval [0, π]. */
+  acot(): Complex {
+    if (this.im === 0) return new Complex(Math.atan2(1, this.re), 0);
+    if (this.re === 0 && Math.abs(this.im) === 1) {
+      return new Complex(0, -this.im * Infinity);
+    }
+    const result = this.inverse().atan();
+    if (this.re === 0 && Math.abs(this.im) < 1) {
+      // On the imaginary-axis cut, the signed real zero chooses the side.
+      return new Complex(Math.atan2(this.re, -1) / 2, result.im);
+    }
+    return result;
+  }
+
+  /** Arc secant. */
+  asec(): Complex {
+    if (this.isZero()) return new Complex(0, Infinity);
+    return this.inverse().acos();
+  }
+
+  /** Arc cosecant. */
+  acsc(): Complex {
+    if (this.isZero()) return new Complex(Math.PI / 2, Infinity);
+    return this.inverse().asin();
+  }
+
   // ============================================================
   // Inverse Hyperbolic Functions
   // ============================================================

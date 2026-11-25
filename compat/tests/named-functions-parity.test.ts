@@ -171,6 +171,40 @@ describe('named compatibility function imports', () => {
     }
   });
 
+  it('matches MathJS inverse reciprocal trigonometry on complex instances', () => {
+    const operations = ['acot', 'asec', 'acsc'] as const;
+    const inputs = [
+      [0, 0],
+      [0, 1],
+      [0, -1],
+      [-0, 0.5],
+      [0, -0.5],
+      [-2, 0],
+      [0.5, 0],
+      [2, 3],
+      [-2, 3],
+      [2, -3],
+      [-2, -3],
+    ];
+    const math = create(all);
+    for (const [real, imaginary] of inputs) {
+      const actual = math.complex(real, imaginary);
+      const expected = oracle.complex(real, imaginary) as ReturnType<typeof oracle.complex> &
+        Record<(typeof operations)[number], () => { re: number; im: number }>;
+      for (const operation of operations) {
+        const result = actual[operation]();
+        const reference = expected[operation]();
+        for (const component of ['re', 'im'] as const) {
+          if (Number.isFinite(reference[component])) {
+            expect(result[component]).toBeCloseTo(reference[component], 13);
+          } else {
+            expect(result[component]).toBe(reference[component]);
+          }
+        }
+      }
+    }
+  });
+
   it('matches the upstream results across mathematical categories', () => {
     expect(combinations(12, 3)).toBe(oracle.combinations(12, 3));
     expect(log2(16)).toBe(oracle.log2(16));
