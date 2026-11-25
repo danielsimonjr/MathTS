@@ -2,7 +2,7 @@
  * Find test files that read or execute repository Markdown / docs paths at runtime.
  * Used by docs-only-ci-guard to ensure every consumer is listed in docs-only-manifest.json.
  */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { repoRoot } from '../test/workspaces.mjs';
 
@@ -30,10 +30,7 @@ const IGNORE = new Set([
   'tools/test/classify-pr-changes.test.mjs',
 ]);
 
-/**
- * @param {string} dir
- * @param {Consumer[]} out
- */
+/** Recursively scan a directory for `*.test.ts` / `*.test.mjs` files that read Markdown at runtime. */
 function walkTests(dir, out) {
   let entries;
   try {
@@ -57,9 +54,7 @@ function walkTests(dir, out) {
   }
 }
 
-/**
- * @returns {Consumer[]}
- */
+/** Return every test file that matches {@link RUNTIME_PATTERNS}, sorted by path. */
 export function discoverMdConsumers() {
   const out = /** @type {Consumer[]} */ ([]);
   for (const root of SCAN_ROOTS) {
@@ -73,9 +68,7 @@ function readManifest() {
   return JSON.parse(readFileSync(join(repoRoot, 'tools/ci/docs-only-manifest.json'), 'utf8'));
 }
 
-/**
- * @returns {Set<string>}
- */
+/** Vitest paths listed in `tools/ci/docs-only-manifest.json` (including filtered parity entries). */
 export function manifestVitestFiles() {
   const manifest = readManifest();
   const set = new Set();
@@ -86,21 +79,19 @@ export function manifestVitestFiles() {
   return set;
 }
 
-/** @returns {Set<string>} */
+/** Manifest `excludedConsumers` paths (full CI only; not run on docs-only PRs). */
 function manifestExcludedConsumers() {
   const manifest = readManifest();
   return new Set((manifest.excludedConsumers ?? []).map((e) => e.file));
 }
 
-/**
- * @returns {string[]}
- */
-/** @returns {Set<string>} */
+/** Manifest `nodeTest` paths run via `node --test` on docs-only PRs. */
 function manifestNodeTestFiles() {
   const manifest = readManifest();
   return new Set(manifest.nodeTest ?? []);
 }
 
+/** Test files that read Markdown but are not covered by the docs-only manifest. */
 export function uncoveredMdConsumers() {
   const allowed = manifestVitestFiles();
   const excluded = manifestExcludedConsumers();

@@ -16,11 +16,7 @@ if (typeof globalThis.Bun !== 'undefined') {
 const manifest = JSON.parse(readFileSync(join(repoRoot, 'tools/ci/docs-only-manifest.json'), 'utf8'));
 const vitestBin = join(repoRoot, 'node_modules', 'vitest', 'vitest.mjs');
 
-/**
- * @param {string} label
- * @param {string[]} args
- * @param {string} [cwd]
- */
+/** Run a subprocess and exit the runner on non-zero status. */
 function run(label, args, cwd = repoRoot) {
   console.log(`\n::group::${label}`);
   const child = spawnSync(process.execPath, args, { cwd, stdio: 'inherit' });
