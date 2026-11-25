@@ -55,7 +55,7 @@ describe('full-surface differential harness (#1574)', () => {
       // runs. Keep the labels in known-gaps.json so a mismatch stays recorded; do
       // not treat an accidental match as a stale gap.
       const stale = [...ALL_GAPS].filter(
-        (l) => l.startsWith('{') && !labels.has(l) && !l.includes('pickRandom')
+        (l) => l.startsWith('{') && !labels.has(l) && !/pickRandom|\brandomInt\b|\brandom\(/.test(l)
       );
       expect(stale, 'known-gaps.json lists doc labels that now match the oracle').toEqual([]);
     }
