@@ -202,13 +202,14 @@ export function wireMathjsInstanceApi(
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
-  function rebindEvaluator(): void {
+  function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
     evaluator = createInstanceEvaluator(
       expressionLayers.mathWithTransform,
       COMPAT_INTERNAL_NAMES,
       true,
-      constants
+      constants,
+      true
     );
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
@@ -221,6 +222,7 @@ export function wireMathjsInstanceApi(
       })
     );
     instance.compileExpr = instance.compile;
+    return evaluator;
   }
 
   function mathImport(functions: unknown, options?: ImportOptions): void {
@@ -259,9 +261,9 @@ export function wireMathjsInstanceApi(
   instance.reviver = reviver;
   instance.replacer = replacer;
 
-  rebindEvaluator();
+  const initialEvaluator = rebindEvaluator();
   if (bindParse) {
-    instance.parse = new Proxy(instance.parse as (...args: unknown[]) => unknown, {
+    instance.parse = new Proxy(initialEvaluator.parse, {
       apply: (_target, receiver, args) =>
         runWithConfig(currentConfig, () => Reflect.apply(evaluator.parse, receiver, args)),
     });

@@ -774,6 +774,10 @@ const defaultCompile = ((...args: unknown[]) =>
 
 /** Parse an expression into a mathjs-compatible syntax tree. */
 const defaultParse: MathInstance['parse'] = /* #__PURE__ */ new Proxy(mathFunctions.parse, {
+  get: (target, key, receiver) =>
+    typeof key === 'string' && key.startsWith('is')
+      ? Reflect.get(getDefaultInstance().parse, key)
+      : Reflect.get(target, key, receiver),
   apply: (_target, receiver, args) => Reflect.apply(getDefaultInstance().parse, receiver, args),
 });
 

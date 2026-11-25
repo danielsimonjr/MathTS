@@ -268,10 +268,11 @@ function compileInScope(
   safeScope: ExpressionScope,
   unsafeScope: ExpressionScope,
   expr: string,
-  options: PhysicsEvaluateOptions | undefined
+  options: PhysicsEvaluateOptions | undefined,
+  parseExpression: typeof parse = parse
 ) {
   const compiled = _compileExpression(
-    parse,
+    parseExpression,
     options?.unsafe === true ? unsafeScope : safeScope,
     expr,
     options?.unsafe === true ? { unsafe: true } : undefined
@@ -660,12 +661,14 @@ function buildUnsafeScopedMathNamespace(
  *   name resolves even when it is in this list. Default: none.
  * @param matrixLiterals - Whether the host enables Matrix literals according to its live config.
  * @param constants - Optional live reads of the host's built-in constants.
+ * @param mathjsSyntax - Use the mathjs tokenizer for this instance.
  */
 export function createInstanceEvaluator(
   importedExpressionScope: Record<string, unknown>,
   hiddenNames: Iterable<string> = [],
   matrixLiterals = false,
-  constants: Readonly<Record<string, () => unknown>> = {}
+  constants: Readonly<Record<string, () => unknown>> = {},
+  mathjsSyntax = false
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
@@ -702,8 +705,12 @@ export function createInstanceEvaluator(
     Object.defineProperty(safeScope, key, { value: enabled });
     Object.defineProperty(unsafeScope, key, { value: enabled });
   }
-  const safeEvaluate = createEvaluate(parse, safeScope, configFingerprint);
-  const unsafeEvaluate = createEvaluate(parse, unsafeScope, configFingerprint);
+  const scopedParse = activatedFactories.factory_mathjsCompat.createScopedParse(
+    parseScope,
+    mathjsSyntax
+  );
+  const safeEvaluate = createEvaluate(scopedParse, safeScope, configFingerprint);
+  const unsafeEvaluate = createEvaluate(scopedParse, unsafeScope, configFingerprint);
 
   function evaluateBound(
     exprOrExprs: string | string[],
@@ -714,16 +721,12 @@ export function createInstanceEvaluator(
   }
 
   function compileBound(expr: string, options?: PhysicsEvaluateOptions) {
-    return compileInScope(safeScope, unsafeScope, expr, options);
+    return compileInScope(safeScope, unsafeScope, expr, options, scopedParse);
   }
 
-  let scopedParse: typeof parse;
   return {
     evaluate: evaluateBound as typeof evaluate,
     compile: compileBound as typeof compileExpr,
-    get parse() {
-      return (scopedParse ??=
-        activatedFactories.factory_mathjsCompat.createScopedParse(parseScope));
-    },
+    parse: scopedParse,
   };
 }

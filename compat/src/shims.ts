@@ -52,7 +52,6 @@ import {
   inv as _inv,
   pow as _pow,
   factory_pow as _factoryPow,
-  factory_sqrt as _sqrt,
   abs as _abs,
   factory_exp as _exp,
   factory_log as _log,
@@ -483,7 +482,7 @@ export const pow = withTypedSurface(function (base?: unknown, exponent?: unknown
 }, _pow) as TypedFunction;
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
-  _sqrt as (...args: unknown[]) => unknown,
+  factory_mathjsCompat.sqrt as (...args: unknown[]) => unknown,
   UNARY_NUMBER_FAST_PATH.sqrt
 ) as PublicSqrt;
 export const abs = makeUnaryFastPath(

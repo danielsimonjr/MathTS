@@ -83,7 +83,7 @@ import { createLog10 } from '../arithmetic/log10.js';
 import { createLog2 } from '../arithmetic/log2.js';
 import { createMultiplyScalar } from '../arithmetic/multiplyScalar.js';
 import { createSign } from '../arithmetic/sign.js';
-import { createSqrt } from '../arithmetic/sqrt.js';
+import { createMathjsSqrt, createSqrt } from '../arithmetic/sqrt.js';
 import { createSquare } from '../arithmetic/square.js';
 import { createSubtractScalar } from '../arithmetic/subtractScalar.js';
 import { createMathjsUnaryMinus, createUnaryMinus } from '../arithmetic/unaryMinus.js';
@@ -1974,7 +1974,7 @@ const createSelectedParse: FactoryFunction<
   Record<string, unknown>,
   ReturnType<typeof createParse>
 > = /* #__PURE__ */ factory('parse', createParse.dependencies, (deps: Record<string, unknown>) => {
-  const parse = createParse(deps);
+  const parse = createParse(Object.assign(Object.create(deps), { mathjsSyntax: true }));
   const typed = deps.typed as typeof coreTyped;
   typed.addConversion(
     { from: 'string', to: 'Node', convert: (value) => parse(value as string) },
@@ -3439,7 +3439,7 @@ function compatFactoryExports(): {
     createRe,
     createSquare,
     createSubtractScalar,
-    createSqrt,
+    createSqrt: createMathjsSqrt,
     createUnaryMinus: createMathjsUnaryMinus,
     createFormat,
     createPrint,
@@ -3736,8 +3736,11 @@ function compatFactoryExports(): {
 export const factory_mathjsCompat = {
   fractionPart,
   /** Create a parser whose nodes compile with the expression bindings of one instance. */
-  createScopedParse(mathWithTransform: Record<string, unknown>): ReturnType<typeof createParse> {
-    return createParse({ ..._parseScope, mathWithTransform });
+  createScopedParse(
+    mathWithTransform: Record<string, unknown>,
+    mathjsSyntax: boolean
+  ): ReturnType<typeof createParse> {
+    return createParse({ ..._parseScope, mathWithTransform, mathjsSyntax });
   },
   constructors: compatConstructors,
   checks,
@@ -3759,6 +3762,7 @@ export const factory_mathjsCompat = {
     typed: createTyped(factoryScope),
     factorial: factoryScope.factorial,
   }),
+  sqrt: createMathjsSqrt(factoryScope),
   lgamma: createMathJSLgamma(factoryScope as Parameters<typeof createMathJSLgamma>[0]),
   fraction: createSelectedFraction(factoryScope as Parameters<typeof createSelectedFraction>[0]),
   toBest: createMathJSToBest(factoryScope as Parameters<typeof createMathJSToBest>[0]),
