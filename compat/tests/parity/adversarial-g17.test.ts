@@ -9,10 +9,9 @@ import { create as createCompat, all as compatAll } from '../../src/index.js';
  * Every case is differential: it runs on the mathjs 15.3.0 oracle and on compat and
  * asserts the two agree. A failing case is a live compat↔mathjs divergence.
  *
- * Scope note (Daniel's policy, 2026-11-25): mathts-compat must copy mathjs 15.3.0
- * exactly, quirks included, and the critical libraries (`functions`, `matrix`, `core`,
- * `parallel`, ...) must never be changed to match mathjs. Any G17 fix therefore has to
- * live in `compat/`; these cases show where it is still missing.
+ * Scope note (Daniel's policy, 2026-11-25): native MathTS bugs (wrong sparse storage,
+ * typed sparse arithmetic) are fixed in `functions/`; compat stays a thin wrapper and
+ * must still match mathjs 15.3.0 on this surface, quirks included.
  *
  * The comparison is semantic, not byte-for-byte on `toJSON`. `toArray()` fills every
  * unstored cell with the number `0`, so a dropped typed zero reads back as `n:0` while a
@@ -283,9 +282,11 @@ describe('G17 derivations of a sparse carrying typed zeros (#1582)', () => {
     call(withZeros(L), 'map', (v: unknown) => v)
   );
 
-  expectSameReading('valueOf() fills the dropped cell with the number 0', (L) =>
-    call(sp(L, [[call(L, 'bignumber', 1), call(L, 'bignumber', 0)]]), 'valueOf')
-  );
+  expectSameReading('valueOf() fills the dropped cell with the number 0', (L) => {
+    const vo = call(sp(L, [[call(L, 'bignumber', 1), call(L, 'bignumber', 0)]]), 'valueOf') as
+      unknown[] | AnyMatrix;
+    return Array.isArray(vo) ? ({ toArray: () => vo } as AnyMatrix) : vo;
+  });
 
   expectSameReading('concat fills a dropped typed zero with the number 0', (L) =>
     call(

@@ -607,6 +607,8 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    diag: mathFunctions.diag,
+    rotationMatrix: mathFunctions.rotationMatrix,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]

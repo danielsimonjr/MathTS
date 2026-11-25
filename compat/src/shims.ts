@@ -87,6 +87,7 @@ import {
 } from '@danielsimonjr/mathts-functions';
 
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
+import { sanitizeSparseNestedInput } from './compat-sparse-matrix.js';
 import {
   DenseMatrix,
   SparseMatrix,
@@ -278,6 +279,9 @@ export function matrix(
 export function sparse(data?: number[][]): BridgeMatrix {
   if (data === undefined) {
     return _factorySparse();
+  }
+  if (Array.isArray(data)) {
+    return _factorySparse(sanitizeSparseNestedInput(data as unknown[][]));
   }
   return _factorySparse(data);
 }

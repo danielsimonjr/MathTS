@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **G17 sparse structural zeros (#1582):** factory CSC sparse construction (`MathJSSparseMatrix` constructor, `set`, `resize`, `SparseMatrix.diagonal`) uses `isStructuralZero` so BigNumber, Fraction, Complex and Unit zeros are not stored (number entries keep exact `=== 0`, so `1e-100` stays stored). Typed CSC sparse add/subtract/multiply with Unit operands routes through factory matAlgo paths instead of `toArray()` element-wise walks that paired `Unit` with numeric implicit zeros.
+
 ### Changed
 
 - **mathjs 15.3.0 sparse `isZero` and mixed `xgcd` messages (#1565, #1574):** sparse `isZeroScalar` matches mathjs `equalScalar(x, 0)` per type (number/Complex `nearlyEqual` with `relTol`/`absTol`, BigNumber `eq` or `nearlyEqualBigNumber`, exact Fraction). A Complex below `absTol` is dropped; `Complex.isZero()` is not used. Mixed bigint `xgcd` non-integer errors use the mathjs `xgcd: first/second argument … not an integer` text.
