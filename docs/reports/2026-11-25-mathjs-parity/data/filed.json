@@ -1,0 +1,289 @@
+{
+  "sandbox": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1549",
+    "number": 1549,
+    "title": "[parity] compat evaluate/parser/compile reject assignment, function definitions and in-expression simplify/derivative/parse calls that mathjs allows",
+    "sev": "P0",
+    "typ": "type:bug"
+  },
+  "shim-binding": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1550",
+    "number": 1550,
+    "title": "[parity] compat create(all) binds narrow shims/typed-surface functions instead of the mathjs-shaped factories (ceil/floor/fix digits, identity(m,n), Unit/Complex/varargs signatures)",
+    "sev": "P0",
+    "typ": "type:bug"
+  },
+  "fraction-sign": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1551",
+    "number": 1551,
+    "title": "[parity] isPositive/isNegative return false for every Fraction (read fraction.js fields s/n that MathTS Fraction does not have)",
+    "sev": "P0",
+    "typ": "type:bug"
+  },
+  "bn-unit-equal": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1552",
+    "number": 1552,
+    "title": "[parity] number:'BigNumber' config: equal/unequal of equivalent Units with BigNumber values is wrong (50cm == 0.5m is false)",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "bn-native-kernels": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1553",
+    "number": 1553,
+    "title": "[parity] number:'BigNumber' config: pow(matrix, n), sylvester and lyap throw because native DenseMatrix/schur kernels accept numbers only",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "type-collapse": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1554",
+    "number": 1554,
+    "title": "[parity] Results collapse to number instead of keeping BigNumber/Fraction (input type and config.number ignored): pinv, bernoulli, unaryPlus, compare",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "nullish-fraction": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1555",
+    "number": 1555,
+    "title": "[parity] nullish(fraction, x) returns a Complex (typed-function conversion picks the Complex signature)",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "resultset": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1556",
+    "number": 1556,
+    "title": "[parity] evaluate('1; 2') returns the last value instead of a ResultSet (block results are unwrapped)",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "index-assign-resize": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1557",
+    "number": 1557,
+    "title": "[parity] Indexed assignment into an empty matrix does not auto-resize (e = []; e[1, 1:2] = [5, 6]; e[2, :] = [7, 8] gives [7, 8])",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "trig-singular": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1558",
+    "number": 1558,
+    "title": "[parity] acoth(0), acsc(0), asec(0) return NaN where mathjs returns the complex/infinite limit",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "asech-branch": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1559",
+    "number": 1559,
+    "title": "[parity] asech(x) for x > 1 returns the conjugate branch (+1.4324i instead of mathjs -1.4324i)",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "acsch-complex": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1560",
+    "number": 1560,
+    "title": "[parity] acsch(Complex) throws 'x.acsch is not a function'",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "eigs-precision": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1561",
+    "number": 1561,
+    "title": "[parity] eigs ignores a numeric precision argument and normalizes eigenvectors (mathjs does not)",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "config-in-expr": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1562",
+    "number": 1562,
+    "title": "[parity] config() is not callable inside expressions ('config' is not a function; its value is [object Object])",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "ml-multinomial": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1563",
+    "number": 1563,
+    "title": "[parity] mathjs 15.3.0: multinomial accepts varargs and zero counts; compat throws",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "ml-catalan": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1564",
+    "number": 1564,
+    "title": "[parity] mathjs 15.3.0: catalan(bigint) returns an exact bigint; compat returns a rounded number",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "ml-sparse-zero": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1565",
+    "number": 1565,
+    "title": "[parity] mathjs 15.3.0: dotPow/dotDivide/divide of a SparseMatrix must evaluate implicit zeros (0^0, 0/0); compat drops them",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "ml-bigint-guard": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1566",
+    "number": 1566,
+    "title": "[parity] mathjs 15.3.0: implicit bigint \u2192 number conversion throws out of range; compat silently returns -Infinity",
+    "sev": "P1",
+    "typ": "type:bug"
+  },
+  "core-classes": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1567",
+    "number": 1567,
+    "title": "[parity] Core: error and internal classes not exported by the typed packages (ArgumentsError, DimensionError, IndexError, ResultSet, FibonacciHeap, ImmutableDenseMatrix, Spa)",
+    "sev": "P1",
+    "typ": "type:missing-api"
+  },
+  "core-events": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1568",
+    "number": 1568,
+    "title": "[parity] Core: no event API (on/off/once/emit) on the typed packages",
+    "sev": "P1",
+    "typ": "type:missing-api"
+  },
+  "core-all-docs-expression": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1569",
+    "number": 1569,
+    "title": "[parity] Core: no `all`, `docs` or `expression` namespace on the typed packages",
+    "sev": "P1",
+    "typ": "type:missing-api"
+  },
+  "core-factories": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1570",
+    "number": 1570,
+    "title": "[parity] Core: 261 mathjs create* factories and all 371 *Dependencies bundles exist only in mathts-compat",
+    "sev": "P1",
+    "typ": "type:missing-api"
+  },
+  "core-renamed": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1571",
+    "number": 1571,
+    "title": "[parity] Core: expression Node classes exported only as factories; lowercase constants (pi, e, tau, phi, i) only as uppercase",
+    "sev": "P2",
+    "typ": "type:missing-api"
+  },
+  "transform-map": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1572",
+    "number": 1572,
+    "title": "[parity] compat instance.expression.transform is empty (0 of 26) and mathWithTransform has 3 of 315 entries",
+    "sev": "P1",
+    "typ": "type:missing-api"
+  },
+  "release-unpublished": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1573",
+    "number": 1573,
+    "title": "[parity] Release hygiene: 29 exports on main are missing from published packages with the same version numbers; string(fraction) behavior also changed on main",
+    "sev": "P1",
+    "typ": "type:release"
+  },
+  "oracle-pin": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1574",
+    "number": 1574,
+    "title": "[parity] compat parity oracle still pinned to mathjs 15.2.0; latest is 15.3.0",
+    "sev": "P1",
+    "typ": "type:test"
+  },
+  "untested-names": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1575",
+    "number": 1575,
+    "title": "[parity] Test coverage: 12 mathjs instance names have no behavioral parity test (all, chain, create, docs, emit, expression, factory, off, on, once, replacer, reviver)",
+    "sev": "P2",
+    "typ": "type:test"
+  },
+  "docs-sandbox-claim": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1576",
+    "number": 1576,
+    "title": "[parity] Docs: migration guide says mathjs evaluate is 'sandboxed' like compat; mathjs allows assignment and in-expression calls",
+    "sev": "P2",
+    "typ": "type:docs"
+  },
+  "tex-units": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1577",
+    "number": 1577,
+    "title": "[parity] toTex: unit-named symbols and deg are not typeset like mathjs (\\mathrm{cm}, ^\\circ)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "tex-bool": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1578",
+    "number": 1578,
+    "title": "[parity] toTex of logical operators with boolean constants: compat 'true\\wedge false', mathjs 'true\\wedgefalse' (decide)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "fraction-format": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1579",
+    "number": 1579,
+    "title": "[parity] Fraction formatting differs: format(fraction(2)) is '2' (mathjs '2/1'); string(fraction(1,3)) is '0.3333333333333333' on main (mathjs '0.(3)')",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "fn-names": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1580",
+    "number": 1580,
+    "title": "[parity] Functions defined in expressions are named 'fn' instead of their declared name",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "version-string": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1581",
+    "number": 1581,
+    "title": "[parity] compat `version` is the compat package version (0.7.25); mathjs reports its own version (decide)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "sparse-zeros": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1582",
+    "number": 1582,
+    "title": "[parity] SparseMatrix keeps explicit zeros when the values are BigNumber or Unit (density 1 vs mathjs 0.5)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "mad-unit": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1583",
+    "number": 1583,
+    "title": "[parity] mad(Unit\u2026) returns the result in a different unit (400 um vs mathjs 0.0157 inch)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "algo-diffs": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1584",
+    "number": 1584,
+    "title": "[parity] schur ordering and solveODE step selection differ from mathjs (both valid; decide)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "more-correct": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1585",
+    "number": 1585,
+    "title": "[parity] compat is more accurate than mathjs: zeta, symbolicEqual and range('4:10') in BigNumber mode (decide: match vs document)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "fraction-cfg-tostring": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1586",
+    "number": 1586,
+    "title": "[parity] parse('1/3 + 1/4').toString() under number:'Fraction' prints '1 / 3 + 1 / 4'; mathjs prints '1/1 / 3/1 + 1/1 / 4/1' (decide)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "permissive": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1587",
+    "number": 1587,
+    "title": "[parity] compat accepts inputs that mathjs rejects (one-argument add/multiply/subtract, extra arguments, trig on Fractions, BigNumber-mode calls)",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "expm-array": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1588",
+    "number": 1588,
+    "title": "[parity] expm(Array) returns an Array; mathjs returns a DenseMatrix",
+    "sev": "P2",
+    "typ": "type:bug"
+  },
+  "zpk2tf-matrix": {
+    "url": "https://github.com/danielsimonjr/MathTS/issues/1589",
+    "number": 1589,
+    "title": "[parity] zpk2tf with 2-D Matrix arguments gives NaN where mathjs gives Infinity",
+    "sev": "P2",
+    "typ": "type:bug"
+  }
+}
