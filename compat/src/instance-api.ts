@@ -251,9 +251,7 @@ export function wireMathjsInstanceApi(
     );
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
-        mapExpressions(expression, (text) =>
-          evaluator.evaluate(text, scope, options)
-        )
+        mapExpressions(expression, (text) => evaluator.evaluate(text, scope, options))
     );
     instance.compile = runBound((expression: unknown, options?: PhysicsEvaluateOptions) =>
       mapExpressions(expression, (text) => {

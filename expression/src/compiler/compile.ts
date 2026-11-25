@@ -93,10 +93,7 @@ interface ObjectPropertyIndex {
  * compiled.evaluate(); // 5
  * ```
  */
-export function compile(
-  node: MathNode,
-  mathScope: Record<string, unknown>
-): CompiledExpression {
+export function compile(node: MathNode, mathScope: Record<string, unknown>): CompiledExpression {
   if (!node || typeof node !== 'object') {
     throw new TypeError(
       'compile: expected a parsed Node; use compileExpression for expression text'
@@ -492,9 +489,7 @@ function compileArrayNode(
   depth: number
 ): EvalFunction {
   const items = (node as MathNode & { items: MathNode[] }).items;
-  const evalItems: EvalFunction[] = items.map((item) =>
-    compileNode(item, math, argNames, depth)
-  );
+  const evalItems: EvalFunction[] = items.map((item) => compileNode(item, math, argNames, depth));
   const useMatrix = (math as Record<symbol, (() => boolean) | undefined>)[MATRIX_LITERALS];
   const matrix = useMatrix?.() ? (math.matrix as MathFunction) : undefined;
   return function evalArrayNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
@@ -690,9 +685,7 @@ function compileRelationalNode(
   depth: number
 ): EvalFunction {
   const relNode = node as MathNode & { params: MathNode[]; conditionals: string[] };
-  const compiled: EvalFunction[] = relNode.params.map((p) =>
-    compileNode(p, math, argNames, depth)
-  );
+  const compiled: EvalFunction[] = relNode.params.map((p) => compileNode(p, math, argNames, depth));
   const conditionals: string[] = relNode.conditionals;
 
   return function evalRelationalNode(
