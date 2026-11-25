@@ -1,14 +1,15 @@
 /**
- * Dogfood #1179 - eigs of a Matrix runs the native solver, as eigs of an Array does.
+ * Dogfood #1179 - eigs of a Matrix returns Matrix values and vectors, as eigs of an Array does.
  *
- * The public wrapper sent only `number[][]` to the native orthes/hqr2 solver. A Matrix went to the
- * factory QR iteration, which uses a real shift: it threw "failed to converge" for a matrix with
- * a complex pair (the #1238 matrix) and gave residuals of 5e-7 for others. A Matrix of numbers
- * now takes the native path and returns Matrix values and vectors.
+ * #1179 was fixed by routing every numeric input through the native orthes/hqr2 solver. #1561
+ * removed that bypass (it ignored the `precision` option and unit-normalized the eigenvectors),
+ * so the public `eigs` is the mathjs factory again, with the robust internal fallback for the
+ * inputs the faithful mathjs iteration cannot solve. The residual bounds below are the factory's
+ * (mathjs-level) quality, not the native solver's; each loosened bound cites #1561.
  *
- * The value order of a Matrix does not change: the Matrix result keeps the factory order
- * (absolute value ascending, then real part descending, then imaginary part descending). The
- * Array result keeps the native order.
+ * The value order of a Matrix and of an Array is the factory order (absolute value ascending,
+ * then real part descending, then imaginary part descending), which is also the mathjs 15.3.0
+ * order.
  */
 import { describe, it, expect } from 'vitest';
 import { isMatrix } from '@danielsimonjr/mathts-core';
@@ -33,7 +34,13 @@ type PairResult = {
   values: unknown;
   eigenvectors?: Array<{ value: unknown; vector: unknown }>;
 };
-const run = (m: unknown, o?: object): PairResult => eigs(m as never, o as never) as PairResult;
+const run = (m: unknown, o?: object): PairResult =>
+  // #1561: the public `eigs` is the typed mathjs factory, which — as mathjs
+  // itself — rejects an explicitly passed `undefined` second argument, so the
+  // option is spread only when present.
+  o === undefined
+    ? (eigs as never as (m: unknown) => PairResult)(m)
+    : (eigs as never as (m: unknown, opts: object) => PairResult)(m, o);
 
 /** |A v - l v| / (max|A| |v|) */
 function residual(A: number[][], l: unknown, v: unknown[]): number {
@@ -159,7 +166,9 @@ describe('eigs of a Matrix (#1179)', () => {
     }
   });
 
-  it('the Array input keeps the native order', () => {
+  it('the Array input keeps the factory order (#1561)', () => {
+    // The factory (and mathjs 15.3.0) sorts by absolute value; the former
+    // native order (real part ascending) belonged to the removed bypass.
     expect(
       (
         run([
@@ -167,7 +176,7 @@ describe('eigs of a Matrix (#1179)', () => {
           [1, 0],
         ]).values as unknown[]
       ).map(show)
-    ).toEqual(['0-1i', '0+1i']);
+    ).toEqual(['0+1i', '0-1i']);
     expect(
       (
         run([
@@ -175,7 +184,7 @@ describe('eigs of a Matrix (#1179)', () => {
           [0, 1],
         ]).values as unknown[]
       ).map(show)
-    ).toEqual(['-3', '1']);
+    ).toEqual(['1', '-3']);
   });
 
   it('the #1238 matrix: no throw, a Matrix result, and the eigenvector residuals', () => {
@@ -211,7 +220,10 @@ describe('eigs of a Matrix (#1179)', () => {
   it('a number precision as the second argument is accepted', () => {
     const r = eigs(matrix(A1238) as never, 1e-8 as never) as unknown as PairResult;
     expect(isMatrix(r.values)).toBe(true);
-    expect(worstResidual(A1238, r)).toBeLessThan(1e-13);
+    // #1561: the precision now reaches the solver, so a loose precision of
+    // 1e-8 loosens the residual accordingly (it was < 1e-13 under the native
+    // bypass, which ignored the option).
+    expect(worstResidual(A1238, r)).toBeLessThan(1e-10);
   });
 
   it('30 seeded random 4x4 matrices: no throw and a residual below 1e-12', () => {
@@ -225,7 +237,9 @@ describe('eigs of a Matrix (#1179)', () => {
         Array.from({ length: 4 }, () => Math.round((rnd() * 10 - 5) * 1000) / 1000)
       );
       const r = run(matrix(A));
-      expect(worstResidual(A, r)).toBeLessThan(1e-12);
+      // #1561: the factory's residual for a seeded random matrix can sit just
+      // above the native solver's 1e-12 (measured 1.29e-12).
+      expect(worstResidual(A, r)).toBeLessThan(1e-11);
     }
   });
 

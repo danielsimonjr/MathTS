@@ -460,12 +460,7 @@ import { createMatrixFromRows } from '../matrix/matrixFromRows.js';
 import { createCount } from '../matrix/count.js';
 import { createTrace } from '../matrix/trace.js';
 import { createDet } from '../matrix/det.js';
-import {
-  acceleratedDet,
-  acceleratedInv,
-  correctEigs,
-  correctEigsOfMatrix,
-} from '../matrix/native-accel.js';
+import { acceleratedDet, acceleratedInv } from '../matrix/native-accel.js';
 import { createReshape } from '../matrix/reshape.js';
 
 // Simple matrix factories (no deep dependency chains)
@@ -1516,23 +1511,11 @@ import { createStd } from '../statistics/std.js';
 import { createSetSymDifference } from '../set/setSymDifference.js';
 import { createSimplify } from '../algebra/simplify.js';
 
-const factoryEigs = createEigs(factoryScope as Parameters<typeof createEigs>[0]);
-factoryScope.eigs = factoryEigs;
-// The mathjs factory `eigs` returns WRONG eigenvalues for every non-symmetric
-// matrix (even triangular ones). Route the public `eigs` through the native
-// orthes/hqr2 solver, which is correct for symmetric/non-symmetric/complex spectra;
-// non-numeric inputs delegate to the factory. Internal consumers keep factoryScope.
-export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean; matricize?: boolean }) => {
-  const factoryFn = factoryEigs as unknown as (x: unknown, o?: unknown) => unknown;
-  return coreIsMatrix(m)
-    ? correctEigsOfMatrix(
-        m as { toArray(): unknown },
-        opts,
-        factoryFn,
-        factoryScope.matrix as (data: unknown[]) => unknown
-      )
-    : correctEigs(m, opts, factoryFn);
-}) as FactoryCallable<
+// The public `eigs` is the mathjs factory itself (#1561): it honors the
+// `precision` option and returns the mathjs eigenvector scaling. The former
+// native bypass (`correctEigs` / `correctEigsOfMatrix` in native-accel.ts) is
+// no longer on the public path.
+export const eigs = createEigs(factoryScope as Parameters<typeof createEigs>[0]) as FactoryCallable<
   typeof createEigs,
   {
     (
@@ -1546,6 +1529,7 @@ export const eigs = ((m: unknown, opts?: { eigenvectors?: boolean; matricize?: b
     (value: unknown, options?: unknown): SpectralResult<BridgeMatrix | ScalarValue[]>;
   }
 >;
+factoryScope.eigs = eigs;
 
 export const lusolve = createLusolve(factoryScope as Parameters<typeof createLusolve>[0]);
 factoryScope.lusolve = lusolve;

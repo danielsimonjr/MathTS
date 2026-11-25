@@ -113,11 +113,15 @@ export function createRealSymmetric({
     // error is relative to the largest off-diagonal entry, not to the scale:
     // a block beside a huge diagonal entry keeps its own accuracy. Where the
     // products underflow the error is 4N subnormal units (Number.MIN_VALUE).
-    // A smaller tolerance (a precision of 0, or a subnormal matrix) demands
-    // exact zeros, which the loop cannot reach.
+    // The tolerance itself is the smaller of mathjs's absolute |precision / N|
+    // and the scale-relative |precision / N| * scale (#1561): for a matrix at a
+    // subunit scale the relative form keeps the solve scale-invariant (#1243),
+    // and for a matrix at a unit-or-larger scale it is exactly mathjs's
+    // tolerance, so the rotations — and therefore the values — match the
+    // mathjs 15.3.0 oracle.
     const off = Vab[1];
     const tiny = 4 * N * Number.MIN_VALUE;
-    const e0 = Math.max(Math.abs(precision / N) * scale, Number.EPSILON * off, tiny);
+    const e0 = Math.max(Math.abs(precision / N) * Math.min(scale, 1), Number.EPSILON * off, tiny);
     let psi: number;
     let Sij: number[][] | undefined;
     if (computeVectors) {
@@ -171,14 +175,15 @@ export function createRealSymmetric({
     // initial error
     let Vab = getAijBig(x);
     // no tolerance is below one unit of the working precision, relative to
-    // the largest off-diagonal entry (see diag)
+    // the largest off-diagonal entry (see diag); the tolerance is the smaller
+    // of mathjs's absolute |precision / N| and the scale-relative form (#1561,
+    // see diag)
     const Big = scale.constructor as unknown as { precision: number };
     const unit = multiplyScalar(bignumber(`1e-${Big.precision}`), Vab[1]) as BigNumber;
-    const e0rel = multiplyScalar(
-      abs(multiplyScalar(precision, bignumber(1 / N))),
-      scale
-    ) as BigNumber;
-    const e0 = bigLt(e0rel, unit) ? unit : e0rel;
+    const absPrecOverN = abs(multiplyScalar(precision, bignumber(1 / N))) as BigNumber;
+    const e0scaled = multiplyScalar(absPrecOverN, scale) as BigNumber;
+    const e0tol = bigLt(absPrecOverN, e0scaled) ? absPrecOverN : e0scaled;
+    const e0 = bigLt(e0tol, unit) ? unit : e0tol;
     let psi: BigNumber;
     let Sij: BigNumber[][] | undefined;
     if (computeVectors) {

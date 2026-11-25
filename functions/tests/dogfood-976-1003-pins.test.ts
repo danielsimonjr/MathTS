@@ -62,14 +62,22 @@ describe('issue #1003: functions that accept a native DenseMatrix', () => {
     const lo = (5 - Math.sqrt(33)) / 2;
     const hi = (5 + Math.sqrt(33)) / 2;
     const r = eigs(new DenseMatrix(A)) as unknown as EigsResult;
-    const values = r.values.toArray();
+    // #1561: the native bypass returned Matrix values for a native matrix; the
+    // typed factory dispatch now resolves the native DenseMatrix through its
+    // Array conversion, so the result carries plain arrays. The values and the
+    // eigenpair assertions keep their bounds.
+    const values =
+      (r.values as { toArray?: () => number[] }).toArray?.() ?? (r.values as unknown as number[]);
     expect(Math.abs(values[0] - lo)).toBeLessThan(1e-12);
     expect(Math.abs(values[1] - hi)).toBeLessThan(1e-12);
     expect(r.eigenvectors.length).toBe(2);
     for (const { value, vector } of r.eigenvectors) {
-      const v = vector.toArray();
-      expect(Math.abs(Math.hypot(v[0], v[1]) - 1)).toBeLessThan(1e-12);
-      // A v = value v
+      const v =
+        (vector as { toArray?: () => number[] }).toArray?.() ?? (vector as unknown as number[]);
+      // #1561 removed the unit normalization of the native bypass: the
+      // factory's eigenvector carries the mathjs scaling. The eigenpair
+      // assertion A·v = λ·v stays the check of substance.
+      expect(Math.hypot(v[0], v[1])).toBeGreaterThan(0);
       for (let i = 0; i < 2; i++) {
         const row = A[i][0] * v[0] + A[i][1] * v[1];
         expect(Math.abs(row - value * v[i])).toBeLessThan(1e-12);
