@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **mathjs 15.3.0 G11 adversarial fixes (#1563–#1566, #1574):** mixed-type `mod`/`xgcd`/`invmod` and `stirlingS2` keep bigint results; compat `subtract` and `mod` bind mathjs factories; sparse `isZero` uses `equalScalar` tolerances; `sqrt`/`larger` refuse out-of-range bigint; `multinomial` overflow matches 15.3.0 (`NaN`).
+
 - **mathjs 15.3.0 behavior parity (#1563, #1564, #1565, #1566):** Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`.
 
 ### Fixed

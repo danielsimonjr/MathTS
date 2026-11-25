@@ -106,6 +106,27 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
      * to be exact (S(n, k) <= k^n), so the cache holds exact values for every precision. The result
      * rounds to the precision of the call.
      */
+    function tableBigInt(n: bigint, k: bigint): bigint {
+      if (k > n) throw new TypeError('k must be less than or equal to n in function stirlingS2');
+      if (k < 0n || n < 0n) {
+        throw new TypeError('Non-negative integer value expected in function stirlingS2');
+      }
+      if (k === 0n) return n === 0n ? 1n : 0n;
+      if (k === n) return 1n;
+      let prev: bigint[] = [1n];
+      const kNum = Number(k);
+      const nNum = Number(n);
+      for (let m = 1; m <= nNum; ++m) {
+        const row: bigint[] = [0n];
+        for (let i = 1; i <= m && i <= kNum; ++i) {
+          const iBig = BigInt(i);
+          row[i] = i === m ? 1n : iBig * prev[i]! + prev[i - 1]!;
+        }
+        prev = row;
+      }
+      return prev[kNum]!;
+    }
+
     function exactBig(nn: number, nk: number, compute: () => NumericValue): NumericValue {
       const C = bignumber!(1).constructor as unknown as {
         precision: number;
@@ -124,6 +145,17 @@ export const createStirlingS2 = /* #__PURE__ */ factory(
     }
 
     return typed(name, {
+      'bigint, bigint': tableBigInt,
+      'bigint, number | BigNumber': (n: bigint, k: NumericValue) => {
+        if (!isInteger(k))
+          throw new TypeError('Non-negative integer value expected in function stirlingS2');
+        return tableBigInt(n, BigInt(number(k)));
+      },
+      'number | BigNumber, bigint': (n: NumericValue, k: bigint) => {
+        if (!isInteger(n))
+          throw new TypeError('Non-negative integer value expected in function stirlingS2');
+        return tableBigInt(BigInt(number(n)), k);
+      },
       'number | BigNumber, number | BigNumber': function (
         n: NumericValue,
         k: NumericValue

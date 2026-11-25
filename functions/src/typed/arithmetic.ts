@@ -1483,6 +1483,7 @@ export const pow = mathTyped('pow', {
  */
 export const sqrt = mathTyped('sqrt', {
   Unit: (a: Unit): Unit => (factoryScope.sqrt as (value: Unit) => Unit)(a),
+  bigint: (a: i64): f64 | Complex => sqrtReal(bigintToNumber(a)),
   number: (a: f64): f64 | Complex => sqrtReal(a),
   Complex: (a: Complex): Complex => a.sqrt(),
   BigNumber: (a: BigNumber): BigNumber | Complex => sqrtBigNumberWith(a, isPredictableMode()),
@@ -2011,11 +2012,25 @@ const MOD_SCALAR_TYPES = ['number', 'bigint', 'Fraction', 'BigNumber'] as const;
  * (`mod([10, 20], 0)` is `[10, 20]`). A matrix operand gives a matrix: dense unless an operand is
  * sparse. The operands do not broadcast: arrays of different lengths throw a `RangeError`.
  */
+function modBigintCanonical(x: i64, y: i64): i64 {
+  if (y === 0n) return x;
+  const m = x % y;
+  return m !== 0n && m < 0n !== y < 0n ? m + y : m;
+}
+
 export const mod = mathTyped('mod', {
   // The kernel is shared with the factory `mod`: exact for two integers, else the mathjs
   // formula with the snapped floor.
   'number, number': (a: f64, b: f64): f64 => modWithFloor(a, b, floorNumberSnapped),
-  'bigint, bigint': (a: i64, b: i64): i64 => (b === 0n ? a : ((a % b) + b) % b),
+  'bigint, bigint': (a: i64, b: i64): i64 => modBigintCanonical(a, b),
+  'number, bigint': (n: f64, b: i64): i64 | f64 =>
+    Number.isInteger(n)
+      ? modBigintCanonical(BigInt(n), b)
+      : modWithFloor(n, bigintToNumber(b), floorNumberSnapped),
+  'bigint, number': (b: i64, n: f64): i64 | f64 =>
+    Number.isInteger(n)
+      ? modBigintCanonical(b, BigInt(n))
+      : modWithFloor(bigintToNumber(b), n, floorNumberSnapped),
   'Fraction, Fraction': (a: Fraction, b: Fraction): Fraction => (b.isZero() ? a : a.mod(b)),
   // The floored remainder of the BigNumber, with the snapped floor of the number kernel.
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): BigNumber =>
@@ -2142,32 +2157,58 @@ export const lcm = mathTyped('lcm', {
 
 const XGCD_INTEGER_MESSAGE = 'Parameters in function xgcd must be integer numbers';
 
-/** The quotient of two bigints rounded toward minus infinity, as `Math.floor(a / b)` does. */
+/** Floored quotient `a / b` for the number and BigNumber xgcd paths (not mathjs `_xgcdBigint`). */
 function floorDivBigInt(a: bigint, b: bigint): bigint {
   const q = a / b;
   return a % b !== 0n && a < 0n !== b < 0n ? q - 1n : q;
 }
 
 /**
- * Extended Euclid on bigints: `[g, x, y]` with `a * x + b * y = g` and `g >= 0`. It is the loop
- * of mathjs for numbers, with floored division, so the signs of x and y match mathjs and
- * the identity holds for a negative operand (the mathjs BigNumber loop breaks it for
- * `xgcd(12, -8)`). Bigint has no `-0`, and it stays exact above 2^53. `xgcd(0, 0)` is `[0, 0, 0]`.
+ * Extended Euclid on bigints for **number** inputs (floored division). See the comment on
+ * `xgcdBigIntMathjs` for the bigint-native path.
  */
-function xgcdBigInt(a: bigint, b: bigint): [bigint, bigint, bigint] {
+function xgcdBigIntFloored(a: bigint, b: bigint): [bigint, bigint, bigint] {
   let x = 0n;
-  let lastX = 1n;
+  let lastx = 1n;
   let y = 1n;
-  let lastY = 0n;
+  let lasty = 0n;
   while (b !== 0n) {
     const q = floorDivBigInt(a, b);
     const r = a - q * b;
-    [x, lastX] = [lastX - q * x, x];
-    [y, lastY] = [lastY - q * y, y];
+    const tx = x;
+    x = lastx - q * x;
+    lastx = tx;
+    const ty = y;
+    y = lasty - q * y;
+    lasty = ty;
     a = b;
     b = r;
   }
-  return a < 0n ? [-a, -lastX, -lastY] : [a, a === 0n ? 0n : lastX, lastY];
+  return a < 0n ? [-a, -lastx, -lasty] : [a, a !== 0n ? lastx : 0n, lasty];
+}
+
+/**
+ * mathjs 15.3.0 `_xgcdBigint` (truncating `a / b`). Used when either operand is a bigint.
+ */
+function xgcdBigIntMathjs(a: bigint, b: bigint): [bigint, bigint, bigint] {
+  // mathjs 15.3.0 `_xgcdBigint` (node_modules/mathjs/.../xgcd.js): truncating `a / b`, not floored.
+  let x = 0n;
+  let lastx = 1n;
+  let y = 1n;
+  let lasty = 0n;
+  while (b !== 0n) {
+    const q = a / b;
+    const r = a - q * b;
+    const tx = x;
+    x = lastx - q * x;
+    lastx = tx;
+    const ty = y;
+    y = lasty - q * y;
+    lasty = ty;
+    a = b;
+    b = r;
+  }
+  return a < 0n ? [-a, -lastx, -lasty] : [a, a !== 0n ? lastx : 0n, lasty];
 }
 
 /**
@@ -2178,7 +2219,7 @@ function xgcdBigInt(a: bigint, b: bigint): [bigint, bigint, bigint] {
  */
 function xgcdBigNumber(a: BigNumber, b: BigNumber): [BigNumber, BigNumber | number, BigNumber] {
   if (!a.isInteger() || !b.isInteger()) throw new Error(XGCD_INTEGER_MESSAGE);
-  const [g, x, y] = xgcdBigInt(a.toBigInt(), b.toBigInt());
+  const [g, x, y] = xgcdBigIntFloored(a.toBigInt(), b.toBigInt());
   return [BigNumber.fromBigInt(g), g === 0n ? 0 : BigNumber.fromBigInt(x), BigNumber.fromBigInt(y)];
 }
 
@@ -2196,7 +2237,7 @@ const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
  */
 function xgcdNumber(a: f64, b: f64): [f64, f64, f64] {
   if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error(XGCD_INTEGER_MESSAGE);
-  const [g, x, y] = xgcdBigInt(BigInt(a), BigInt(b));
+  const [g, x, y] = xgcdBigIntFloored(BigInt(a), BigInt(b));
   for (const c of [x, y]) {
     if (c > MAX_SAFE_BIGINT || c < -MAX_SAFE_BIGINT) {
       throw new RangeError(
@@ -2215,14 +2256,22 @@ function xgcdNumber(a: f64, b: f64): [f64, f64, f64] {
  */
 export const xgcd = mathTyped('xgcd', {
   'number, number': xgcdNumber,
-  'bigint, bigint': (a: i64, b: i64): [i64, i64, i64] => xgcdBigInt(a, b),
+  'bigint, bigint': (a: i64, b: i64): [i64, i64, i64] => xgcdBigIntMathjs(a, b),
+  'bigint, number': (a: i64, b: f64) => {
+    if (!Number.isInteger(b)) throw new Error(XGCD_INTEGER_MESSAGE);
+    return xgcdBigIntMathjs(a, BigInt(b));
+  },
+  'number, bigint': (a: f64, b: i64) => {
+    if (!Number.isInteger(a)) throw new Error(XGCD_INTEGER_MESSAGE);
+    return xgcdBigIntMathjs(BigInt(a), b);
+  },
   'BigNumber, BigNumber': xgcdBigNumber,
   'BigNumber, number': (a: BigNumber, b: f64) => xgcdBigNumber(a, BigNumber.fromNumber(b)),
   'number, BigNumber': (a: f64, b: BigNumber) => xgcdBigNumber(BigNumber.fromNumber(a), b),
   // As in mathjs, the middle result of `xgcd(0, 0)` is the number 0.
   'Fraction, Fraction': (a: Fraction, b: Fraction): [Fraction, Fraction | number, Fraction] => {
     if (!a.isInteger() || !b.isInteger()) throw new Error(XGCD_INTEGER_MESSAGE);
-    const [g, x, y] = xgcdBigInt(a.numerator, b.numerator);
+    const [g, x, y] = xgcdBigIntFloored(a.numerator, b.numerator);
     return [new Fraction(g, 1n), g === 0n ? 0 : new Fraction(x, 1n), new Fraction(y, 1n)];
   },
 });
@@ -2497,6 +2546,8 @@ export const smaller = mathTyped('smaller', {
 export const larger = mathTyped('larger', {
   'number, number': (a: f64, b: f64): boolean => a > b,
   'bigint, bigint': (a: i64, b: i64): boolean => a > b,
+  'bigint, number': (a: i64, b: f64): boolean => bigintToNumber(a) > b,
+  'number, bigint': (a: f64, b: i64): boolean => a > bigintToNumber(b),
   'Fraction, Fraction': (a: Fraction, b: Fraction): boolean => a.compare(b) > 0,
   'BigNumber, BigNumber': (a: BigNumber, b: BigNumber): boolean => a.compare(b) > 0,
   'Unit, Unit': (a: Unit, b: Unit): boolean => unitCmp(a, b) > 0,

@@ -83,6 +83,7 @@ export type PublicAbs = AbsCallable;
 
 export interface SqrtCallable {
   (a: UnitInstance): UnitInstance;
+  (a: bigint): number | Complex;
   (a: number): number | Complex;
   (a: Complex): Complex;
   (a: BigNumber): BigNumber | Complex;
