@@ -17,7 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **G07 `nullish` and logical `Unit` parity (#1555):** `mathts-compat` `create(all)` binds factory `nullish`/`not`/`and`/`or`/`xor` for mathjs 15.3.0 parity (Fraction preserved in `nullish`, element-wise collections, Unit value truthiness, `nullish({}, 2)` throws). Native `functions` typed logical unchanged. Fraction `format` (`2/1`) is G15 (#1721), not this change.
+- **G07 typed logical bugs (#1555):** `nullish` lacked a `Fraction` row, so typed-function conversion treated a Fraction as Complex; it lacked collection rows, so `nullish` on arrays was not element-wise; `not`/`and`/`or`/`xor` treated every `Unit` as truthy because `!!unit` ignores the numeric value. Typed logical now adds `Fraction` and `Unit` nullish rows, spreads `collectionBinaryRows('nullish')`, registers `Unit` truthiness from `value`, and keeps `null`/`undefined` rows before `any, any`. `nullish({}, 2)` is not changed here (mathjs 15.3.0 throws; compat factory keeps that quirk).
+
+- **G07 `nullish` and logical `Unit` compat parity (#1555):** `mathts-compat` `create(all)` binds factory `nullish`/`not`/`and`/`or`/`xor` for mathjs 15.3.0 (`nullish({}, 2)` throws). Fraction `format` (`2/1`) is G15 (#1721), not this change.
 
 - **The compat parity oracle is mathjs 15.3.0 (#1574):** `compat` pins the mathjs devDependency at 15.3.0, regenerates `compat/src/parity-names.generated.ts` from it, and a scheduled workflow (`.github/workflows/mathjs-oracle.yml`) opens an issue when npm publishes a newer mathjs. The full-instance differential harness (`compat/tests/parity/full-surface.test.ts`) compares every instance function and every embedded-docs example with the oracle under the default, `number: 'BigNumber'` and `matrix: 'Array'` configs.
 

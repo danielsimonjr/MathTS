@@ -5,8 +5,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { Complex, BigNumber } from '@danielsimonjr/mathts-core';
+import { Complex, BigNumber, Fraction } from '@danielsimonjr/mathts-core';
 import { and, or, xor, not, nullish, typedLogical } from '../src/typed/logical.js';
+import * as math from '../src/index.js';
+
+const unit = math.unit as unknown as (s: string) => unknown;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -638,6 +641,35 @@ describe('nullish', () => {
       expect(result.re).toBe(0);
       expect(result.im).toBe(0);
     });
+  });
+
+  describe('Fraction, any', () => {
+    it('keeps Fraction on the left (no Complex conversion)', () => {
+      const f = new Fraction(2, 3);
+      const result = nullish(f, null);
+      expect(result).toBeInstanceOf(Fraction);
+      expect((result as Fraction).numerator).toBe(2n);
+      expect((result as Fraction).denominator).toBe(3n);
+    });
+  });
+
+  describe('collections', () => {
+    it('nullish is element-wise on arrays', () => {
+      expect(nullish([1, null, 2], [9, 8, 7])).toEqual([1, 8, 2]);
+    });
+  });
+});
+
+describe('Unit truthiness (not object presence)', () => {
+  it('not(unit(0 m)) is true', () => {
+    expect(not(unit('0 m'))).toBe(true);
+  });
+  it('and/or/xor use unit value', () => {
+    const z = unit('0 m');
+    const nz = unit('1 m');
+    expect(and(z, nz)).toBe(false);
+    expect(or(z, nz)).toBe(true);
+    expect(xor(z, nz)).toBe(true);
   });
 });
 
