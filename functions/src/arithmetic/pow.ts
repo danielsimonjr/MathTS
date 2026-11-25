@@ -4,7 +4,7 @@ import { arraySize as size } from '../utils/array.js';
 import { powNumber } from '../plain/number/index.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { ConfigOptions } from '../core/config.js';
-import { Fraction, type BigNumber } from '@danielsimonjr/mathts-core';
+import { Fraction, rationalPow, type BigNumber } from '@danielsimonjr/mathts-core';
 import { powBigNumberWith } from '../typed/complex-promotion.js';
 import { notSquareError } from '@danielsimonjr/mathts-core/internal';
 
@@ -18,10 +18,9 @@ interface BigNumberType {
 
 interface FractionType {
   valueOf(): number;
-  pow(value: FractionType): FractionType | null;
-  equals(value: number): boolean;
-  d: bigint;
-  n: bigint;
+  pow(value: number | bigint): FractionType;
+  numerator: bigint;
+  denominator: bigint;
 }
 
 interface ComplexType {
@@ -148,10 +147,10 @@ export const createPow = /* #__PURE__ */ factory(
       ): Fraction | FractionType | number | ComplexType {
         const result =
           x instanceof Fraction && y instanceof Fraction
-            ? y.denominator === 1n
+            ? rationalPow(x, y)
+            : y.denominator === 1n
               ? x.pow(y.numerator)
-              : null
-            : x.pow(y);
+              : null;
 
         if (result != null) {
           return result;
@@ -197,8 +196,8 @@ export const createPow = /* #__PURE__ */ factory(
           const yFrac = fraction(y);
           const yNum = number(yFrac);
           if (y === yNum || Math.abs((y - yNum) / y) < 1e-14) {
-            if (yFrac.d % 2n === 1n) {
-              return (yFrac.n % 2n === 0n ? 1 : -1) * Math.pow(-x, y);
+            if (yFrac.denominator % 2n === 1n) {
+              return (yFrac.numerator % 2n === 0n ? 1 : -1) * Math.pow(-x, y);
             }
           }
         } catch {

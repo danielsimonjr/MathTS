@@ -7,7 +7,9 @@ on:
     # `cursor/p7-*` is the Phase 7 stack: every PR above P7-0 bases on its parent branch, and a
     # base filter of main alone leaves each of them without a CI run. Drop the pattern when the
     # stack has merged.
-    branches: [main, master, 'cursor/p7-*']
+    # `cursor/**` keeps stacked and proof pull requests targetable (for example a docs-only
+    # verification PR that bases on a feature branch).
+    branches: [main, master, 'cursor/p7-*', 'cursor/**']
   # A branch pushed by a bot with GITHUB_TOKEN does not fire `push` or
   # `pull_request` -- GitHub's recursion guard suppresses it. That is how the
   # Changesets release PR (`changeset-release/main`) reached BLOCKED with zero
@@ -30,10 +32,51 @@ env:
   TURBO_TELEMETRY_DISABLED: '1'
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      docs_only: ${{ steps.classify.outputs.docs_only }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Classify changed paths
+        id: classify
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! changed_output=$(git diff --name-only "$BASE_SHA...$HEAD_SHA"); then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -z "$changed_output" ]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s\n' "$changed_output" | GITHUB_EVENT_NAME=pull_request node tools/ci/classify-pr-changes.mjs >> "$GITHUB_OUTPUT"
+
   compile:
     name: Compile & Lint
     runs-on: ubuntu-latest
+    needs: changes
     timeout-minutes: 15
+    # pull-requests: read lets the Changelog fragment step list the PR's changed
+    # files through gh; contents: read is the workflow default, restated because
+    # a job-level permissions block replaces the workflow-level one.
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       - name: Checkout
@@ -54,6 +97,18 @@ jobs:
       - name: Check Bun matches the packageManager pin
         run: node tools/test/check-bun-version.mjs
 
+      # Every PR that changes release-relevant code records its changelog entry
+      # as a changelog-fragments/*.md file instead of editing CHANGELOG.md (the
+      # top of [Unreleased] is one line, so parallel hand-edits conflict). The
+      # release version PR assembles the fragments newest first. gh needs
+      # pull-requests: read, which this job grants (see its permissions block).
+      - name: Changelog fragment
+        if: github.event_name == 'pull_request' && github.head_ref != 'changeset-release/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: node tools/test/check-changelog-fragment.mjs --pr "${{ github.event.pull_request.number }}"
+
       - name: Check that the version PR versions every changed package
         if: github.event_name == 'pull_request' && github.head_ref == 'changeset-release/main'
         run: |
@@ -63,10 +118,17 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: |
+          echo "Documentation-only changes: skipping build, typecheck, packaging, and consumer checks."
+          echo "Required jobs still run; heavy steps in Test, Coverage, and Browser no-op."
+
       # `typecheck`, `test` and `test:coverage` read `dist/` of the package they check and of the
       # packages that its tests import or compile. A missing Turbo edge lets the `build` of such a
       # package clean `dist/` mid-run. The check reads the resolved task graph, so it needs no build.
       - name: Typecheck task graph
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-typecheck-graph.test.mjs
           node tools/test/check-typecheck-graph.mjs
@@ -76,18 +138,26 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
       - name: Type check
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run typecheck
 
       - name: Lint
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run lint
 
       # Guard: the pre-commit hook formats only staged files, so drift
       # accumulated unseen until this check ran nowhere. Keep it in CI.
       - name: Format check
         run: bun run format:check
+
+      - name: Docs-only classifier and manifest guard
+        run: |
+          node --test tools/test/classify-pr-changes.test.mjs
+          node --test tools/test/docs-only-ci-guard.test.mjs
 
       # The dependency-graph reports in docs/Architecture are generated and not committed
       # (.gitignore names them), so a clean checkout has none of them. This step writes them and
@@ -102,6 +172,7 @@ jobs:
       # merge that takes main's side of a deleted report brings the report back), and no tracked
       # document there has a claim row for a count that moves with a file, an export or a line.
       - name: Dependency graph and file census
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           tracked=$(git ls-files -ci --exclude-standard -- docs/Architecture)
           if [ -n "$tracked" ]; then
@@ -117,33 +188,40 @@ jobs:
           bun run check:duplicates:fast
 
       - name: Docs export-index drift check
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run docs:functions:check
 
       # The six node:test files of the dependency-graph generator. Nothing else ran them, so
       # a generator edit could break the reports (or their stable order) with every check green.
       - name: Dependency-graph generator tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run docs:deps:test
 
       - name: Browser-safety (no node leaks from browser entries)
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run check:browser-safety
 
       # esbuild platform=neutral of the published entries (#708). The source scan
       # above does not bundle dependencies; this step does.
       - name: Neutral browser bundles
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/browser-bundle-neutral.mjs
 
       # The README block of function counts states the count of the released version. The version
       # PR updates it (`version-packages` runs the sync), so a pull request does not edit it and no
       # two pull requests conflict on it.
       - name: README function stats
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/sync-readme-functions-stats.test.mjs
 
       # The generators, and the Site workflow: its deploy steps run in bash against a local
       # bare gh-pages repository and stub npm and curl programs.
       - name: Site generators and Site workflow
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/site-generators.test.mjs tools/test/site-workflow.test.mjs
 
       - name: Bundle size and tree-shake record
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-bundle-budget.test.mjs
           node tools/test/check-bundle-budget.mjs
@@ -161,9 +239,11 @@ jobs:
       # --minify --treeshake and nothing else built it, so a failure there was invisible until
       # someone ran it by hand. It runs last because it rewrites dist/ with minified output.
       - name: Build (production)
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build:prod
 
       - name: Audit (high+)
+        if: needs.changes.outputs.docs_only != 'true'
         # Bun audit covers the bun.lock tree. Same high+ floor as the old
         # `npm audit --audit-level=high` gate. Two audits run: the full tree skips each
         # advisory in tools/test/audit-ignore.json (each entry names its issue and its
@@ -173,9 +253,11 @@ jobs:
         run: node tools/test/bun-audit-retry.mjs
 
       - name: Re-export types append tool
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/append-re-export-types.test.mjs
 
       - name: Runtime dependency lock
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-runtime-deps.test.mjs
           node tools/test/check-runtime-deps.mjs
@@ -188,62 +270,78 @@ jobs:
       # are direct `node --test`, as the other `tools/test` files are. They sit just before
       # the Node 22 setup below, so none of them sees that Node.
       - name: Dependency-graph query tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run docs:graph:test
 
       - name: Roadmap check tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run docs:roadmap-check:test
 
       - name: Dist builtin scanner tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/dist-node-imports.test.mjs
 
       - name: Docs dist-freshness tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/dist-freshness.test.mjs
 
       - name: Source map backfill tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/ensure-js-sourcemaps.test.mjs
 
       - name: Bun audit retry tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/bun-audit-retry.test.mjs
 
       - name: Apt install fallback tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/apt-install.test.mjs
 
       - name: Scratch folder tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/make-scratch.test.mjs
 
       - name: Consumer npm install argument tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/npm-install-args.test.mjs
 
       - name: A/B harness tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/ab-harness.test.mjs
 
       - name: Scalar-search harness tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/scalar-search-harness.test.mjs
 
       # docs/BENCHMARK_RESULTS.md must be the render of docs/benchmarks/wasm-public-call.json.
       - name: Benchmark results generator tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/gen-benchmark-results.test.mjs
 
       # Allocation-free fixed-size kernels (functions/src/geometry/kernels.generated.ts). The
       # generator check needs no build; the zero-allocation test imports functions/dist and
       # runs on Node with --expose-gc, so it is a direct `node` call, not a vitest file.
       - name: Fixed-size kernels generator check
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node functions/scripts/gen-kernels.mjs --check
           node --test tools/test/gen-kernels.test.mjs
 
       - name: Fixed-size kernels zero-allocation test
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --expose-gc --allow-natives-syntax --max-semi-space-size=1 tools/test/kernels-alloc.test.mjs
 
       # compat create() keeps its instance and prototype levels in V8 fast mode (#1200). The
       # parity-name check needs no build, the internal-name check reads functions/dist (#1216); the fast-mode test imports compat/dist and reads
       # %HasFastProperties, so it is a direct `node` call, not a vitest file.
       - name: compat parity-names generator check
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node compat/scripts/gen-parity-names.mjs --check
           node compat/scripts/gen-internal-names.mjs --check
 
       - name: compat fast-instance test
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --allow-natives-syntax tools/test/compat-fast-instance.test.mjs
 
       # `changeset git-tag`, which the release script runs, tags HEAD with the versions it reads
@@ -253,11 +351,13 @@ jobs:
       # later: this job has no pinned Node of its own, so the two steps are last, and no other
       # step sees the change.
       - name: Setup Node.js 22 (changesets CLI)
+        if: needs.changes.outputs.docs_only != 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22.x
 
       - name: Release script tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/ensure-package-releases.test.mjs
 
       # The packaging checks below need one Node 22 (its bundled npm 10) and the development
@@ -266,9 +366,11 @@ jobs:
       # `Build (production)` above rewrote dist/ with minified output, so this step puts the
       # development build back (Turbo replays it from the local cache of the Build step).
       - name: Build (development dist for the packaging checks)
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
       - name: Public export-name lock
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-export-lock.test.mjs
           node tools/test/check-export-lock.mjs
@@ -280,6 +382,7 @@ jobs:
       # This step uses the npm 10 that Node 22 bundles, so it also proves that npm 10 users can
       # install the packed packages (no git dependencies; see check-published-deps.mjs).
       - name: Consumer type check of packed packages
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/consumer-typecheck.mjs --skip-build
 
       # The same check under moduleResolution NodeNext, which is what a Node 16+ consumer on
@@ -288,9 +391,11 @@ jobs:
       # faults that Bundler resolution accepts. Before the tsconfig.dts.base.json nodenext emit
       # it reported 60 errors (53 TS2834 + 7 TS2709); it must stay at 0.
       - name: Consumer type check of packed packages (NodeNext)
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/consumer-typecheck.mjs --skip-build --module-resolution=NodeNext
 
       - name: Packaging metadata and no-node consumer typecheck (G29)
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node tools/sync-package-packaging.mjs --check
           node tools/test/consumer-typecheck-no-node.mjs --skip-build
@@ -299,6 +404,7 @@ jobs:
       # npm pack of every public package, the evaluate bundle sizes and the README stats check.
       # They start heavy children, so they run here and not in the vitest pool (#1185).
       - name: Packaging checks (G27, G29)
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/ci-step.test.mjs
           node --test tools/test/packaging-gates.test.mjs
@@ -317,6 +423,7 @@ jobs:
   benchmark-baseline:
     name: Benchmark baseline
     runs-on: ubuntu-latest
+    needs: changes
     timeout-minutes: 45
     permissions:
       contents: read
@@ -329,20 +436,29 @@ jobs:
           # The A/B step builds the pull request base commit in a worktree, so it needs the history.
           fetch-depth: 0
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: |
+          echo "Documentation-only changes: skipping benchmark and wall-clock gates."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Setup Node.js 22
+        if: needs.changes.outputs.docs_only != 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22.x
 
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun install --frozen-lockfile
 
       - name: Build functions, matrix and compat (pulls core + wasm)
+        if: needs.changes.outputs.docs_only != 'true'
         run: >-
           bunx turbo build
           --filter=@danielsimonjr/mathts-functions
@@ -350,6 +466,7 @@ jobs:
           --filter=@danielsimonjr/mathts-compat
 
       - name: Sprint baseline fingerprints
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/sprint-baseline.test.mjs
           node tools/benchmarks/sprint-baseline.mjs --check
@@ -358,6 +475,7 @@ jobs:
       # A/A control (it must measure a ratio of about 1). It runs before the gates, so a broken
       # harness shows first.
       - name: Wall-clock perf gate tests
+        if: needs.changes.outputs.docs_only != 'true'
         run: node --test tools/test/wall-clock-perf-gate.test.mjs
 
       # Plain `node`: under `bun run` the name `node` resolves to Bun, and a gate would time Bun.
@@ -366,6 +484,7 @@ jobs:
       # bound reaches the limit. A gate that reaches its round cap with the limit still inside
       # the interval fails when its median is at or above the limit.
       - name: Wall-clock perf gates
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/run-wall-clock-gates.mjs
 
       # The gates above compare the candidate with a fixed reference implementation. Each limit
@@ -379,17 +498,17 @@ jobs:
       # tools/benchmark/ab/allowed-output-changes.json lists the case with its pull request and
       # reason.
       - name: Build every package for the A/B
-        if: github.event_name == 'pull_request'
+        if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'pull_request'
         run: bun run build
 
       - name: Build the base tree
-        if: github.event_name == 'pull_request'
+        if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: node tools/benchmark/ab/make-base.mjs --ref "$BASE_SHA"
 
       - name: Base-against-head perf gate
-        if: github.event_name == 'pull_request'
+        if: needs.changes.outputs.docs_only != 'true' && github.event_name == 'pull_request'
         run: >-
           node tools/benchmark/ab/run.mjs --slow-only --slow-limit 1.25 --engine node
           --only "median n = 100,000"
@@ -400,7 +519,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: compile
+    needs: [changes, compile]
     timeout-minutes: 20
 
     strategy:
@@ -422,25 +541,35 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Documentation-only pull request (Test 24.x)
+        if: needs.changes.outputs.docs_only == 'true' && matrix.node-version != '22.x'
+        run: |
+          echo "Documentation-only changes: vitest and doc gates run on Test (22.x) only."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Check Bun matches the packageManager pin
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-bun-version.mjs
 
       - name: Setup Node.js ${{ matrix.node-version }}
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         run: bun install --frozen-lockfile
 
       # npm 10 (bundled with Node 22) cannot install a package that has a git
       # dependency, so every published manifest must use registry specs only.
       - name: Published manifests use registry dependencies only
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-published-deps.mjs
 
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
@@ -448,22 +577,30 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build
+        if: needs.changes.outputs.docs_only != 'true' || matrix.node-version == '22.x'
         run: bun run build
+
+      # Markdown and README samples are not inert: run the pinned docs gate subset.
+      - name: Documentation gates (docs-only pull requests)
+        if: needs.changes.outputs.docs_only == 'true' && matrix.node-version == '22.x'
+        run: node tools/ci/run-docs-only-tests.mjs
 
       # Every package's tests under vitest on the matrix Node, plus the root suites
       # and the assembly Node test scripts. Prints a `[runtime-probe]` line.
       - name: Test on Node ${{ matrix.node-version }} (vitest)
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/run-vitest-node.mjs
 
       # Import each published package by name (Node resolves its `exports`) and call
       # one representative function from the built dist.
       - name: Smoke test dist on Node ${{ matrix.node-version }}
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/smoke-dist-node.mjs
 
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
-    needs: compile
+    needs: [changes, compile]
     timeout-minutes: 20
 
     steps:
@@ -472,29 +609,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: |
+          echo "Documentation-only changes: skipping coverage suite."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Check Bun matches the packageManager pin
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-bun-version.mjs
 
-      # Every PR that changes release-relevant code records its changelog entry
-      # as a changelog-fragments/*.md file instead of editing CHANGELOG.md (the
-      # top of [Unreleased] is one line, so parallel hand-edits conflict). The
-      # release version PR assembles the fragments newest first.
-      # gh needs pull-requests: read to list the PR's changed files.
-      - name: Changelog fragment
-        if: github.event_name == 'pull_request' && github.head_ref != 'changeset-release/main'
-        permissions:
-          pull-requests: read
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: node tools/test/check-changelog-fragment.mjs --pr "${{ github.event.pull_request.number }}"
-
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun install --frozen-lockfile
 
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
@@ -502,6 +633,7 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
       # The Bun-runtime suite. Every package script runs on Bun ([run] bun = true), so the
@@ -509,12 +641,14 @@ jobs:
       # Test leg (#1356). Node 22 is set up so that a tool that starts real Node sees the
       # runtime that the former Test (22.x) run of this step saw.
       - name: Setup Node.js 22
+        if: needs.changes.outputs.docs_only != 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22.x
 
       # `shell: bash` makes GitHub run this with `-eo pipefail`, so `tee` cannot mask a failure.
       - name: Test (Bun runtime)
+        if: needs.changes.outputs.docs_only != 'true'
         shell: bash
         run: bun run test 2>&1 | tee test-output.log
 
@@ -523,11 +657,13 @@ jobs:
       # tools/test/skip-baseline.json and any change, up or down, fails here. The parser's
       # own tests run first: Turbo formats its output differently here than in a terminal.
       - name: Skip budget
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-skip-budget.test.mjs
           node tools/test/check-skip-budget.mjs test-output.log
 
       - name: Test with coverage
+        if: needs.changes.outputs.docs_only != 'true'
         # ubuntu-latest (26.04) aborts this job with SIGABRT / "Out of memory"
         # when Turbo runs every package's coverage task at once (exit 137).
         run: bun run test:coverage
@@ -535,11 +671,13 @@ jobs:
           TURBO_CONCURRENCY: '2'
 
       - name: Per-package coverage floors
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           node --test tools/test/check-coverage-floors.test.mjs
           node tools/test/check-coverage-floors.mjs
 
       - name: Upload coverage to Codecov
+        if: needs.changes.outputs.docs_only != 'true'
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -549,7 +687,7 @@ jobs:
     name: Browser (WebGPU smoke)
     # Noble package list in playwright-chromium-apt-packages.mjs; ubuntu-latest may be >24.04.
     runs-on: ubuntu-24.04
-    needs: compile
+    needs: [changes, compile]
     timeout-minutes: 20
 
     steps:
@@ -558,21 +696,31 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Documentation-only pull request
+        if: needs.changes.outputs.docs_only == 'true'
+        run: |
+          echo "Documentation-only changes: skipping browser smoke tests."
+
       - name: Setup Bun
+        if: needs.changes.outputs.docs_only != 'true'
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
 
       - name: Check Bun matches the packageManager pin
+        if: needs.changes.outputs.docs_only != 'true'
         run: node tools/test/check-bun-version.mjs
 
       - name: Install Mesa lavapipe (software Vulkan adapter for WebGPU)
+        if: needs.changes.outputs.docs_only != 'true'
         run: sudo bash tools/ci/apt-install.sh install mesa-vulkan-drivers libegl1
 
       - name: Install dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun install --frozen-lockfile
 
       - name: Install Playwright OS dependencies
+        if: needs.changes.outputs.docs_only != 'true'
         run: |
           pkg_file=$(mktemp)
           node tools/ci/playwright-chromium-apt-packages.mjs >"$pkg_file"
@@ -581,6 +729,7 @@ jobs:
           sudo bash tools/ci/apt-install.sh install "${pw_pkgs[@]}"
 
       - name: Install Playwright browsers
+        if: needs.changes.outputs.docs_only != 'true'
         run: bunx --bun playwright install chromium
 
       # `bun run build` compiles the AssemblyScript wasm itself: turbo.json orders
@@ -588,9 +737,11 @@ jobs:
       # copy-wasm.mjs steps fail when the binary is missing. (A separate `build:wasm` step
       # used to paper over a race between that copy and `asc`.)
       - name: Build (required for workspace package resolution)
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run build
 
       - name: Browser smoke tests (WebGPU)
+        if: needs.changes.outputs.docs_only != 'true'
         run: bun run test:browser
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'

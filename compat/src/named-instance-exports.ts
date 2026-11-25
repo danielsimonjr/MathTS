@@ -23,6 +23,7 @@ import {
   createCompatString,
 } from './fraction-format-parity.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
+import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
 import { create, all } from './index.js';
 import type { MathInstance, MathJSConfig } from './index.js';
 
@@ -194,6 +195,38 @@ export const docs = /* #__PURE__ */ Object.fromEntries(
   Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
 );
 
+export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+
+export * from './named-symbols.js';
+export * from './native-factory-exports.js';
+export * from './constant-factory-exports.js';
+export * from './named-physical-constants.generated.js';
+
 const defaultTyped: MathInstance['typed'] =
   /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatTyped();
 export { defaultTyped as typed };
+
+/** G04 named exports — same unit-relational adapters as `create(all)` (#1552). */
+const namedUnitRelational = applyUnitRelationalParity({
+  equal: mathFunctions.equal as UnitRelationalOps['equal'],
+  unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
+  equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
+  deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
+  compare: mathFunctions.compare as UnitRelationalOps['compare'],
+  larger: mathFunctions.larger as UnitRelationalOps['larger'],
+  smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
+  largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
+  smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
+});
+
+export const {
+  equal,
+  unequal,
+  equalScalar,
+  deepEqual,
+  compare,
+  larger,
+  smaller,
+  largerEq,
+  smallerEq,
+} = namedUnitRelational;
