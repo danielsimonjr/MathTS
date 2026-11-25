@@ -81,6 +81,7 @@ function formatCompatValue(
 
 type NativeFormat = (value: unknown, options?: unknown) => string;
 
+/** Wrap the native `format` so Fraction ratios and units match mathjs 15.3.0 (#1579). */
 export function createCompatFormat(nativeFormat: NativeFormat): NativeFormat {
   return (value: unknown, options?: unknown) => formatCompatValue(value, options, nativeFormat);
 }
@@ -100,12 +101,14 @@ function stringCompatValue(value: unknown, nativeString: NativeString): string {
   return nativeString(value);
 }
 
+/** Wrap the native `string` so Fraction decimals match mathjs / fraction.js (#1579). */
 export function createCompatString(nativeString: NativeString): NativeString {
   return (value: unknown) => stringCompatValue(value, nativeString);
 }
 
 type PrintFn = (template: string, values: unknown, options?: unknown) => string;
 
+/** Wrap `print` so typed signatures and error text match mathjs (#1579). */
 export function createCompatPrint(nativePrint: PrintFn): PrintFn {
   const typed = factory_mathjsCompat.createCompatTyped();
   const printImpl: PrintFn = (template, values, options) => nativePrint(template, values, options);
@@ -159,6 +162,7 @@ export function fractionCompatConstantStringOptions(options?: StringOptions): St
   };
 }
 
+/** `node.toString()` with Fraction-config ConstantNode ratios when `number` is `Fraction`. */
 export function compatParseExpressionToString(
   node: { toString(options?: StringOptions): string },
   numberMode: string | undefined
@@ -171,6 +175,7 @@ export function compatParseExpressionToString(
 
 type ParseableNode = { toString(options?: StringOptions): string };
 
+/** Proxy a parsed node so `toString()` matches mathjs under Fraction config (#1586). */
 export function wrapParseNodeForCompatToString<T extends ParseableNode>(
   node: T,
   numberMode: string | undefined
