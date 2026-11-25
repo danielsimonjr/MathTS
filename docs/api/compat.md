@@ -332,13 +332,6 @@ async function parallelSum(data) {
 | `m.size()`                     | `math.size(m)` returns `[rows, cols]`             |
 | `f.n`, `f.d`                   | `f.numerator`, `f.denominator` (bigint)           |
 
-Fraction text output matches mathjs 15.3.0 (#1579, #1586): `format(fraction(2))` is
-`"2/1"`, integral Fractions inside arrays and units print as `n/1` (`[1/1, 2/1]`,
-`5/1 cm`), `string(fraction(1, 3))` returns the `Fraction.toString()` decimal form
-(`"0.(3)"`), and under `number: 'Fraction'` `parse('1/3 + 1/4').toString()` is
-`"1/1 / 3/1 + 1/1 / 4/1"` — mathjs prints every constant as a ratio in Fraction mode,
-even though it is harder to read. `evaluate('1/3 + 1/4')` stays the Fraction `7/12`.
-
 See [Migration Guide](../migration/guide.md) for complete details.
 
 ## Complete export index

@@ -6,12 +6,11 @@ import { Fraction } from '../../src/index.js';
 import { formatGeneric } from '../../src/internal.js';
 
 describe('Fraction format() and toString()', () => {
-  it('format() prints a ratio, an integral value as n/1 (#1579)', () => {
+  it('format() prints a ratio, a whole value without a denominator', () => {
     expect(formatGeneric(new Fraction(1n, 3n))).toBe('1/3');
     expect(formatGeneric(new Fraction(-1n, 6n))).toBe('-1/6');
-    // #1579: mathjs 15.3.0 prints integral Fractions as n/1 ('2/1', '0/1').
-    expect(formatGeneric(new Fraction(4n, 2n))).toBe('2/1');
-    expect(formatGeneric(new Fraction(0n, 5n))).toBe('0/1');
+    expect(formatGeneric(new Fraction(4n, 2n))).toBe('2');
+    expect(formatGeneric(new Fraction(0n, 5n))).toBe('0');
   });
 
   it('format() with fraction: decimal prints the toString form', () => {

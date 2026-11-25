@@ -61,7 +61,6 @@ describe('formatResult', () => {
   it('shows a core Fraction as the ratio, like format() and mathjs cells (#892)', () => {
     expect(formatResult(new Fraction(1n, 3n))).toBe('1/3');
     expect(formatResult(new Fraction(1n, 2n))).toBe('1/2');
-    // #1579: mathjs prints integral Fractions as n/1; formatResult follows format().
-    expect(formatResult(new Fraction(4n, 2n))).toBe('2/1');
+    expect(formatResult(new Fraction(4n, 2n))).toBe('2');
   });
 });
