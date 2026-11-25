@@ -8,9 +8,11 @@
  * live here now; `src/index.ts` only re-exports them. Add a new wrapper group
  * as its own file under `src/` and re-export it from `src/index.ts`.
  *
- * This module intentionally imports `create` and `all` from `./index.js` in a
- * module cycle: its module body never touches them (only the lazy
- * `getDefaultInstance` does), so either evaluation order is safe.
+ * `create` and `all` live in `src/index.js`; index binds them at module scope
+ * with `bindDefaultInstanceSource`, so this module holds no runtime import of
+ * `./index.js` and the module graph stays free of a runtime cycle (only the
+ * `MathInstance`/`MathJSConfig` types come from there, as type-only imports).
+ * `getDefaultInstance` runs lazily, long after the bind.
  *
  * @packageDocumentation
  */
@@ -24,8 +26,25 @@ import {
 } from './fraction-format-parity.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
-import { create, all } from './index.js';
 import type { MathInstance, MathJSConfig } from './index.js';
+
+type CompatFactoryInput = Record<string, unknown> | readonly unknown[];
+type CompatCreate = (
+  factories?: CompatFactoryInput,
+  config?: Partial<MathJSConfig>
+) => MathInstance;
+
+let createInstance: CompatCreate | undefined;
+let allBundle: CompatFactoryInput | undefined;
+
+/**
+ * Hand `create` and `all` over from `src/index.ts`, which calls this at module
+ * scope right after their definitions. Called before any wrapper can run.
+ */
+export function bindDefaultInstanceSource(create: CompatCreate, all: CompatFactoryInput): void {
+  createInstance = create;
+  allBundle = all;
+}
 
 const moduleDefaults = {
   relTol: 1e-12,
@@ -44,7 +63,10 @@ export { moduleDefaults };
 let defaultInstance: MathInstance | undefined;
 
 function getDefaultInstance(): MathInstance {
-  return (defaultInstance ??= create(all, moduleDefaults));
+  if (!createInstance || !allBundle) {
+    throw new Error('compat default instance source is not bound by src/index.ts');
+  }
+  return (defaultInstance ??= createInstance(allBundle, moduleDefaults));
 }
 
 /** Evaluate an expression or a collection in the default compatibility instance. */

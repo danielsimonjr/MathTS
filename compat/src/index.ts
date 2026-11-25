@@ -35,6 +35,7 @@ import type {
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import {
+  bindDefaultInstanceSource,
   Chain,
   chain,
   compile,
@@ -845,6 +846,11 @@ export function create(
  * Use with `create(all)` to get a fully-featured math instance.
  */
 export { all };
+
+// The default-instance wrappers of named-instance-exports.ts build their lazy
+// instance through `create` and `all`; bind them here so that module keeps no
+// runtime import of this one (the Architecture docs pin 2 runtime cycles).
+bindDefaultInstanceSource(create, all);
 
 // =============================================================================
 // Re-exports for direct use
