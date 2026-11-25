@@ -92,19 +92,14 @@ describe('G08 differential grid', () => {
   });
 });
 
-// Native finding (#1560): `functions` `acsch` Complex calls `x.acsch()` but core
-// has no such method; compat overrides `acsch` and never hits that path on `create(all)`.
-describe('G08 native finding (compat-only fix)', () => {
-  it('documents functions acsch Complex calls x.acsch() missing on core Complex', () => {
+// Native #1560 fix: `acsch` Complex uses `inverse().asinh()`, not a missing `x.acsch()`.
+describe('G08 native acsch wiring', () => {
+  it('functions acsch Complex path does not call x.acsch()', () => {
     const src = readFileSync(
       join(import.meta.dirname, '..', '..', '..', 'functions', 'src', 'trigonometry', 'acsch.ts'),
       'utf8'
     );
-    const complexTs = readFileSync(
-      join(import.meta.dirname, '..', '..', '..', 'core', 'src', 'types', 'complex.ts'),
-      'utf8'
-    );
-    expect(/\.\s*acsch\s*\(/.test(src)).toBe(true);
-    expect(/acsch\s*\(/.test(complexTs)).toBe(false);
+    expect(src.includes('x.acsch()')).toBe(false);
+    expect(src.includes('inverse().asinh()')).toBe(true);
   });
 });

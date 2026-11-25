@@ -53,6 +53,9 @@ export const createAcoth = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: function (x: number) {
+        if (Object.is(x, 0)) {
+          return new Complex(0, Math.PI / 2);
+        }
         if (x >= 1 || x <= -1 || config.predictable) {
           return acothNumber(x);
         }

@@ -54,6 +54,9 @@ export const createAcsc = /* #__PURE__ */ factory(
      */
     return typed(name, {
       number: function (x: number) {
+        if (Object.is(x, 0)) {
+          return new Complex(0, Infinity);
+        }
         if (x <= -1 || x >= 1 || config.predictable) {
           return acscNumber(x);
         }

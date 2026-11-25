@@ -230,6 +230,9 @@ export function staysRealAbsAtLeastOne(x: number): boolean {
 
 /** acsc(x) = asin(1/x). Real for |x| >= 1; those inputs never read config. */
 export function acscReal(x: number): number | Complex {
+  if (Object.is(x, 0)) {
+    return new Complex(0, Infinity);
+  }
   if (staysRealAbsAtLeastOne(x)) {
     return Math.asin(1 / x);
   }
@@ -238,6 +241,9 @@ export function acscReal(x: number): number | Complex {
 
 /** asec(x) = acos(1/x). Real for |x| >= 1; those inputs never read config. */
 export function asecReal(x: number): number | Complex {
+  if (Object.is(x, 0)) {
+    return new Complex(0, Infinity);
+  }
   if (staysRealAbsAtLeastOne(x)) {
     return Math.acos(1 / x);
   }
