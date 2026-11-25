@@ -80,7 +80,7 @@
     },
     "compat": {
       "name": "@danielsimonjr/mathts-compat",
-      "version": "0.7.24",
+      "version": "0.7.25",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.30.1",
         "@danielsimonjr/mathts-expression": "^0.14.4",
@@ -99,7 +99,7 @@
     },
     "core": {
       "name": "@danielsimonjr/mathts-core",
-      "version": "0.30.2",
+      "version": "0.30.3",
       "dependencies": {
         "typed-function": "npm:@danielsimonjr/typed-function@5.0.0-alpha.4",
       },
@@ -141,7 +141,7 @@
     },
     "functions": {
       "name": "@danielsimonjr/mathts-functions",
-      "version": "0.89.21",
+      "version": "0.89.22",
       "dependencies": {
         "@danielsimonjr/mathts-core": "^0.30.1",
         "@danielsimonjr/mathts-expression": "^0.14.4",

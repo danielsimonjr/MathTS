@@ -1,5 +1,13 @@
 # @danielsimonjr/mathts-functions
 
+## 0.89.22
+
+### Patch Changes
+
+- 1fa2ede: Support reading and replacing indexed subsets of sparse compatibility matrices while preserving sparse storage.
+- Updated dependencies [1fa2ede]
+  - @danielsimonjr/mathts-core@0.30.3
+
 ## 0.89.21
 
 ### Patch Changes

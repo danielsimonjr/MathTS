@@ -1,5 +1,12 @@
 # @danielsimonjr/mathts-core
 
+## 0.30.3
+
+### Patch Changes
+
+- 1fa2ede: Add MathJS-compatible toVector, isFinite, and expm1 methods on complex numbers.
+  Add acot, asec, and acsc instance methods with the MathJS real-axis and origin conventions.
+
 ## 0.30.2
 
 ### Patch Changes
