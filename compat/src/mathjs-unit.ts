@@ -163,3 +163,31 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
     update,
   } as T;
 }
+
+/**
+ * Per-instance constructor that does not rewrite `Base.isValuelessUnit` (#1557).
+ * G14 pins the mathjs catalog on the instance Unit via {@link wrapCompatUnitClass};
+ * this wrapper still exists so `create(all)` and isolation tests do not mutate
+ * the native `Unit` class. `'d'` stays false even if a caller passes core `Unit`.
+ */
+type CompatUnitConstructable = (new (...args: never[]) => unknown) & {
+  isValuelessUnit: (name: string) => boolean;
+};
+
+/** Return a real constructor that delegates to `Base` without rewriting `Base`. */
+export function wrapCompatUnitConstructor<T extends CompatUnitConstructable>(Base: T): T {
+  const baseIsValuelessUnit = Base.isValuelessUnit.bind(Base);
+
+  function CompatUnit(this: unknown, ...args: unknown[]): unknown {
+    return Reflect.construct(Base, args, new.target ?? CompatUnit);
+  }
+
+  Object.setPrototypeOf(CompatUnit, Base);
+  CompatUnit.prototype = Base.prototype;
+  Object.defineProperty(CompatUnit, 'name', { value: Base.name });
+  CompatUnit.isValuelessUnit = (name: string): boolean => {
+    if (name === 'd') return false;
+    return baseIsValuelessUnit(name);
+  };
+  return CompatUnit as unknown as T;
+}

@@ -741,6 +741,10 @@ export function create(
       expressionConstants[name] = () => instance[name];
   }
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
+  // `config` inside an expression is the instance's config function (#1562):
+  // `evaluate('config()')` reads the fields and
+  // `evaluate('config({number: "Fraction"})')` updates that instance.
+  expressionConstants.config = () => instance.config;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>

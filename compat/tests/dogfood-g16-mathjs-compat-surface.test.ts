@@ -85,11 +85,22 @@ describe('G16 dogfood — mathjs compat surface', () => {
     expect(fMt.toString()).toBe('0.(3)');
   });
 
-  it('G22 — instance import/typed/compile stay out of safe evaluate', () => {
+  it('G22 — the safe policy keeps import/typed/compile out of evaluate', () => {
+    // #1549: compat's default policy follows mathjs, where these names are
+    // instance functions. The typed-API hardening is the `{ safe: true }` opt-in,
+    // and the denylist stays unreachable there even when imported.
     const mt = create(all);
-    expect(() => mt.evaluate('import')).toThrow(/Undefined symbol "import"/);
-    expect(() => mt.evaluate('typed')).toThrow(/Undefined symbol "typed"/);
-    expect(() => mt.evaluate('compile')).toThrow(/Undefined symbol "compile"/);
+    const safe = (expr: string) =>
+      (mt.evaluate as (e: string, s?: unknown, o?: { safe: boolean }) => unknown)(
+        expr,
+        {},
+        {
+          safe: true,
+        }
+      );
+    expect(() => safe('import')).toThrow(/Undefined symbol "import"/);
+    expect(() => safe('typed')).toThrow(/Undefined symbol "typed"/);
+    expect(() => safe('compile')).toThrow(/Undefined symbol "compile"/);
     mt.import(
       {
         parse: () => 'leaked',
@@ -100,12 +111,18 @@ describe('G16 dogfood — mathjs compat surface', () => {
       { override: true }
     );
     expect((mt.parse as unknown as () => string)()).toBe('leaked');
-    expect(() => mt.evaluate('parse("1+1")')).toThrow();
-    expect(mt.evaluate('parse("1+1")', {}, { unsafe: true })).not.toBe('leaked');
-    expect(() => mt.evaluate('map([1], x ? parse : 0)')).toThrow(/Undefined symbol parse/);
-    const unsafeParsed = mt.evaluate('parse("1+1")', {}, { unsafe: true }) as {
-      toString(): string;
-    };
+    expect(() => safe('parse("1+1")')).toThrow();
+    expect(() => safe('map([1], x ? parse : 0)')).toThrow(/Undefined symbol parse/);
+    // The default (mathjs) policy resolves the module parse, not the planted import.
+    const parsed = (mt.evaluate as (e: string) => { toString(): string })('parse("1+1")');
+    expect(parsed.toString()).toBe('1 + 1');
+    const unsafeParsed = (
+      mt.evaluate as unknown as (
+        e: string,
+        s?: unknown,
+        o?: { unsafe: boolean }
+      ) => { toString(): string }
+    )('parse("1+1")', {}, { unsafe: true });
     expect(unsafeParsed.toString()).toBe('1 + 1');
   });
 
@@ -130,25 +147,32 @@ describe('G16 dogfood — mathjs compat surface', () => {
     mt.import(planted, { override: true });
 
     for (const name of denied) {
-      // `chain` is also the surveyor's-chain unit. The expression language keeps
-      // that unit and must not resolve the imported function of the same name.
+      // #1549: the denylist holds under the `{ safe: true }` opt-in, not the
+      // mathjs default. `chain` is also the surveyor's-chain unit; the safe
+      // policy keeps the unit and must not resolve the imported function.
+      const safe = (expr: string) =>
+        (mt.evaluate as (e: string, s?: unknown, o?: { safe: boolean }) => unknown)(
+          expr,
+          {},
+          {
+            safe: true,
+          }
+        );
       if (name === 'chain') {
-        const unit = mt.evaluate('chain');
+        const unit = safe('chain');
         expect(typeof unit, name).not.toBe('function');
         expect(String(unit), name).toMatch(/chain/i);
       } else {
-        expect(() => mt.evaluate(name), name).toThrow(/Undefined symbol/);
+        expect(() => safe(name), name).toThrow(/Undefined symbol/);
       }
-      expect(() => mt.evaluate(`map([1], x ? ${name} : 0)`), 'map ' + name).toThrow(
-        /Undefined symbol/
-      );
-      expect(() => mt.evaluate(`filter([1], x ? ${name} : 0)`), 'filter ' + name).toThrow(
+      expect(() => safe(`map([1], x ? ${name} : 0)`), 'map ' + name).toThrow(/Undefined symbol/);
+      expect(() => safe(`filter([1], x ? ${name} : 0)`), 'filter ' + name).toThrow(
         /Undefined symbol/
       );
       const escaped = [...name]
         .map((ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'))
         .join('');
-      const viaMember = mt.evaluate(`mathWithTransform["${escaped}"]`);
+      const viaMember = safe(`mathWithTransform["${escaped}"]`);
       expect(viaMember, name).not.toBeTypeOf('function');
       expect(viaMember, name).not.toBe('leaked-' + name);
     }

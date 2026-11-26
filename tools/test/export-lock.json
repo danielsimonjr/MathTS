@@ -8083,6 +8083,9 @@
       "EvaluateOptions": {
         "kind": "type"
       },
+      "EvaluatePolicy": {
+        "kind": "type"
+      },
       "FunctionAssignmentNode": {
         "kind": "function"
       },
@@ -8379,6 +8382,9 @@
       },
       "properties": {
         "kind": "object"
+      },
+      "resolveMode": {
+        "kind": "function"
       },
       "scalarCanonical": {
         "kind": "function"
@@ -8447,6 +8453,9 @@
       "EvaluateOptions": {
         "kind": "type"
       },
+      "EvaluatePolicy": {
+        "kind": "type"
+      },
       "FunctionAssignmentNode": {
         "kind": "type"
       },
@@ -8743,6 +8752,9 @@
       },
       "properties": {
         "kind": "object"
+      },
+      "resolveMode": {
+        "kind": "type"
       },
       "scalarCanonical": {
         "kind": "type"
@@ -9113,6 +9125,9 @@
       "EvaluateOptions": {
         "kind": "type"
       },
+      "EvaluatePolicy": {
+        "kind": "type"
+      },
       "FunctionAssignmentNode": {
         "kind": "type"
       },
@@ -9408,6 +9423,9 @@
         "kind": "type"
       },
       "properties": {
+        "kind": "type"
+      },
+      "resolveMode": {
         "kind": "type"
       },
       "scalarCanonical": {

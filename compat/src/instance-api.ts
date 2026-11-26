@@ -27,8 +27,16 @@ import {
   reviveInstanceValue,
 } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
-import { patchParseForMathjsToTex } from './totex-parity.js';
+import {
+  createMathjsExpressionBindings,
+  type CompatExpressionApi,
+} from './mathjs-expression-bindings.js';
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
+import { wrapCompatUnitConstructor } from './mathjs-unit.js';
+import { patchParseForMathjsToTex } from './totex-parity.js';
+
+/** Compat instance evaluate options: adds `{ safe: true }` mathjs opt-in (#1549). */
+export type CompatEvaluateOptions = PhysicsEvaluateOptions & { safe?: boolean };
 
 type MathNamespace = Parameters<typeof importFactory>[2];
 type ImportableFactories = Parameters<typeof importFactory>[3];
@@ -163,7 +171,13 @@ export function wireMathjsInstanceApi(
   });
   const expressionLayers: CompatExpressionLayers = {
     transform: {},
-    mathWithTransform: { num: instance.num, den: instance.den },
+    mathWithTransform: {
+      num: instance.num,
+      den: instance.den,
+      // mathjs 15.3.0: every block evaluates to a ResultSet (#1556) — compat only.
+      compatBlockResultSet: true,
+      ResultSet: (instance as { ResultSet?: unknown }).ResultSet,
+    },
   };
 
   const instanceTyped = factory_mathjsCompat.createCompatTyped();
@@ -194,10 +208,11 @@ export function wireMathjsInstanceApi(
     }
   }
 
-  const UnitCtor = instance.Unit as { isValuelessUnit: (name: string) => boolean } | undefined;
-  if (UnitCtor?.isValuelessUnit) {
-    mathNs.Unit = UnitCtor;
-    expressionLayers.mathWithTransform.Unit = UnitCtor;
+  const UnitCtor = instance.Unit as Parameters<typeof wrapCompatUnitConstructor>[0] | undefined;
+  if (typeof UnitCtor === 'function' && typeof UnitCtor.isValuelessUnit === 'function') {
+    const mathjsUnit = wrapCompatUnitConstructor(UnitCtor);
+    mathNs.Unit = mathjsUnit;
+    expressionLayers.mathWithTransform.Unit = mathjsUnit;
   }
 
   const importedFactories: ImportableFactories = {};
@@ -211,6 +226,18 @@ export function wireMathjsInstanceApi(
   );
 
   let evaluator: InstanceEvaluator;
+  const expressionApi: CompatExpressionApi = {
+    evaluate() {
+      throw new Error('compat expression API not wired yet');
+    },
+    compile() {
+      throw new Error('compat expression API not wired yet');
+    },
+    parser() {
+      throw new Error('compat expression API not wired yet');
+    },
+  };
+  const mathjsExpressionBindings = createMathjsExpressionBindings(() => expressionApi);
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
@@ -226,6 +253,22 @@ export function wireMathjsInstanceApi(
         delete expressionLayers.mathWithTransform[name];
       }
     }
+  }
+
+  /**
+   * Compat runs the mathjs policy by default (#1549): no AST validator, no
+   * result sanitizer, and the mathjs scope. `{ safe: true }` opts back into
+   * the typed-API hardening for that call.
+   */
+  function policyOptions(options?: CompatEvaluateOptions): PhysicsEvaluateOptions | undefined {
+    if (options?.safe === true && options?.unsafe === true) {
+      throw new TypeError('Pass either `{ safe: true }` or `{ unsafe: true }`, not both');
+    }
+    if (options?.safe === true) {
+      const { safe: _safe, ...rest } = options;
+      return rest;
+    }
+    return { ...options, unsafe: true };
   }
 
   function patchEvaluatorToTex(bound: InstanceEvaluator): void {
@@ -281,25 +324,34 @@ export function wireMathjsInstanceApi(
       true,
       constants,
       true,
-      compatDecimalResult
+      compatDecimalResult,
+      mathjsExpressionBindings
     );
     patchEvaluatorToTex(evaluator);
     const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
       entries?: unknown[]
     ) => unknown;
     instance.evaluate = runBound(
-      (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
+      (expression: unknown, scope?: ExpressionScope, options?: CompatEvaluateOptions) =>
         mapExpressions(expression, (text) =>
-          wrapBlockArrayAsResultSet(evaluator.evaluate(text, scope, options), text, ResultSetCtor)
+          wrapBlockArrayAsResultSet(
+            evaluator.evaluate(text, scope, policyOptions(options)),
+            text,
+            ResultSetCtor
+          )
         )
     );
-    instance.compile = runBound((expression: unknown, options?: PhysicsEvaluateOptions) =>
+    instance.compile = runBound((expression: unknown, options?: CompatEvaluateOptions) =>
       mapExpressions(expression, (text) => {
-        const compiled = evaluator.compile(text, options);
+        const compiled = evaluator.compile(text, policyOptions(options));
         return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
       })
     );
     instance.compileExpr = instance.compile;
+    expressionApi.evaluate = (expr, scope, options) =>
+      (instance.evaluate as CompatEvaluate)(expr, scope, options);
+    expressionApi.compile = (expr, options) => (instance.compile as CompatCompile)(expr, options);
+    expressionApi.parser = (options) => new ParserClass(options);
     rebindInstanceHelp();
     return evaluator;
   }
@@ -321,7 +373,7 @@ export function wireMathjsInstanceApi(
   // names (#1216).
   function Parser(
     this: object,
-    options?: PhysicsEvaluateOptions
+    options?: CompatEvaluateOptions
   ): ReturnType<typeof functionsParser> {
     const made = functionsParser(options);
     made.evaluate = (expr: string): unknown =>

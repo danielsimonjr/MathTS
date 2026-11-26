@@ -160,6 +160,9 @@ export const createFunctionAssignmentNode = /* #__PURE__ */ factory(
             syntax?: string;
             expr?: string;
           };
+          // The declared name is the function's `.name` (#1580): typed-function
+          // returns an anonymous function whose name would stay `fn`.
+          Object.defineProperty(fn, 'name', { value: name, configurable: true });
           fn.syntax = syntax;
           fn.expr = expr.toString();
 
