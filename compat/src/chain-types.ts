@@ -27,6 +27,7 @@ export interface ChainUnwrap {
   value: unknown;
 }
 
+/** Instance `format` callback used for `Chain.toString()` parity with mathjs (#1575 G20). */
 export type FormatFn = (value: unknown, options?: Record<string, unknown>) => string;
 
 /** The slice of the core typed dispatcher a chain needs: recognize typed functions
