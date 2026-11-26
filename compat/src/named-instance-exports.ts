@@ -250,9 +250,7 @@ export function g18InstanceOverrides(config: () => G18ParityConfig): {
   };
 }
 
-const namedZeta = createMathjsZeta(
-  mathjsZetaDeps(() => mathFunctions.config() as G18ParityConfig)
-);
+const namedZeta = createMathjsZeta(mathjsZetaDeps(() => mathFunctions.config() as G18ParityConfig));
 const namedSymbolicEqual = createMathjsSymbolicEqual({ typed: g18Typed });
 const namedRange = createMathjsRange({
   nativeRange: mathFunctions.range as (...args: unknown[]) => unknown,
