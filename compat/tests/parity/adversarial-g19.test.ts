@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
 import { create, all } from 'mathjs';
 import { create as createCompat, all as compatAll } from '../../src/index.js';
 import { pair, show } from './oracle.js';
 import { docsExamples, sweepDocs, outcome, DOC_CONFIGS } from './sweep.js';
+import { ALL_GAPS } from './known-gaps/index.js';
 
 /**
  * Adversarial probes for the G19 `zpk2tf` 2-D PR (#1589, head `cd3b24d4`).
@@ -199,26 +199,17 @@ describe('F3: zpk2tf gain type acceptance diverges from the oracle', () => {
 });
 
 /**
- * F4 — the PR left stale `known-gaps.json` entries, and the harness cannot see them.
+ * F4 — a listed `zpk2tf` doc label that meanwhile matches must fail the harness.
  *
- * The G19 diff does not touch `compat/tests/parity/known-gaps.json`, which still lists nine
- * `zpk2tf` doc-example labels. On a clean oracle eight of the nine now match: the PR fixed them.
  * `full-surface.test.ts` is supposed to fail on such a stale key ("a listed label that meanwhile
- * matches fails too, so the gap list cannot rot"), but `sweepDocs` evaluates every embedded-doc
- * example on one shared instance, and the `config` docs run `config({number: "Fraction"})`, which
- * reconfigures the shared oracle mid-sweep. From then on the oracle's `zpk2tf` coerces its `1`
- * gain to a Fraction and throws, so the labels still "diverge" and the staleness check passes.
+ * matches fails too, so the gap list cannot rot"), but a shared-instance sweep used to let
+ * `config({number: "Fraction"})` leak into later `zpk2tf` examples. `sweepDocs` now uses a fresh
+ * pair per example and skips stateful `config` docs.
  *
- * Two assertions: (a) a clean, single-config sweep of the zpk2tf examples matches the oracle for
- * the labels the gap list calls divergences; (b) the shared oracle must not change behavior
- * because a doc example reconfigured it. Both fail on the PR head.
+ * Two assertions: (a) a clean, single-config sweep of the zpk2tf examples matches the oracle;
+ * (b) the shared oracle must not change behavior because a doc example reconfigured it.
  */
 describe('F4: zpk2tf known-gaps entries are stale, and the sweep masks it via config()', () => {
-  const GAPS: Record<string, string[]> = JSON.parse(
-    readFileSync(new URL('./known-gaps.json', import.meta.url), 'utf8')
-  ) as Record<string, string[]>;
-  const ALL_GAPS = new Set(Object.values(GAPS).flat());
-
   it('every recorded zpk2tf doc-example gap still diverges on a clean instance', async () => {
     const { perName } = await docsExamples();
     const examples = perName.get('zpk2tf') ?? [];
@@ -238,7 +229,7 @@ describe('F4: zpk2tf known-gaps entries are stale, and the sweep masks it via co
 
     const recorded = [...ALL_GAPS].filter((l) => l.startsWith('{') && l.includes('zpk2tf('));
     const stale = recorded.filter((l) => !stillDiverging.has(l));
-    expect(stale, 'known-gaps.json lists zpk2tf doc labels that now match the oracle').toEqual([]);
+    expect(stale, 'known-gaps/ lists zpk2tf doc labels that now match the oracle').toEqual([]);
     expect(
       stillDiverging.size,
       'zpk2tf doc examples must not diverge on a clean instance after #1589'
