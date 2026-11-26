@@ -115,7 +115,7 @@ Hard dependencies copied from issue text:
 
 ## Super-Team execution
 
-`grok-4.7` writes the plan. `gemini-4-neon` reviews and fixes the plan. `composer-2.5` builds the implementation PR. `grok-4.6` challenges it. `gemini-4-neon` reviews and fixes the PR directly. Squash-merge on green. Keep the branch.
+`grok-4.7` writes the plan. `gemini-4-neon` reviews and fixes the plan. `composer-2.5` builds the implementation PR. `grok-4.6` challenges it. `gemini-4-neon` reviews and fixes the PR directly. Squash-merge on green. Keep the branch. Docs-only PRs skip heavy CI wait.
 
 ## Phases and waves
 
