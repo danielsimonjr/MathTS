@@ -72,6 +72,14 @@ import {
   withInvalidNumericStringGuard,
   withRawSingleValue,
 } from './mathjs-parity-g02.js';
+import {
+  createCompatNumeric,
+  createCompatRandomInstance,
+  withBitNotIntegerMessage,
+  withMathjsNormMatrixRules,
+  withMatrixMapHintOnUnary,
+} from './mathjs-parity-errors.js';
+import { isComplex, isUnit } from '@danielsimonjr/mathts-core';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
@@ -733,7 +741,7 @@ export function create(
     sqrt: withFractionRejection(shims.sqrt),
     abs: shims.abs,
     // #1587: a Fraction argument throws the mathjs conversion error.
-    exp: withFractionRejection(shims.exp),
+    exp: withMatrixMapHintOnUnary('exp', withFractionRejection(shims.exp)),
     log: withFractionRejection(shims.log),
 
     // Trigonometry — #1587: a Fraction argument throws the mathjs conversion error.
@@ -870,9 +878,9 @@ export function create(
     csc: withFractionRejection(mathFunctions.factory_csc),
     bernoulli: compatBernoulli,
     cube: mathFunctions.factory_cube,
-    expm1: withFractionRejection(mathFunctions.factory_expm1),
+    expm1: withMatrixMapHintOnUnary('expm1', withFractionRejection(mathFunctions.factory_expm1)),
     erf: compatErf,
-    gamma: withFractionRejection(compatGamma),
+    gamma: withMatrixMapHintOnUnary('gamma', withFractionRejection(compatGamma)),
     sec: withFractionRejection(mathFunctions.factory_sec),
     sinh: withFractionRejection(mathFunctions.factory_sinh),
     square: mathFunctions.factory_square,
@@ -918,6 +926,41 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    hypot: mathFunctions.factory_hypot,
+    bitAnd: withFixedArity('bitAnd', 2, mathFunctions.bitAnd),
+    bitOr: withFixedArity('bitOr', 2, mathFunctions.bitOr),
+    bitXor: withFixedArity('bitXor', 2, mathFunctions.bitXor),
+    leftShift: withFixedArity('leftShift', 2, mathFunctions.leftShift),
+    rightArithShift: withFixedArity('rightArithShift', 2, mathFunctions.rightArithShift),
+    rightLogShift: withFixedArity('rightLogShift', 2, mathFunctions.rightLogShift),
+    bitNot: withFixedArity('bitNot', 1, withBitNotIntegerMessage(mathFunctions.bitNot)),
+    norm: withMathjsNormMatrixRules(mathFunctions.norm as (...args: unknown[]) => unknown),
+    typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
+    number: withFixedArity('number', 1, mathFunctions.number),
+    numeric: createCompatNumeric(mathFunctions.numeric as (...args: unknown[]) => unknown),
+    boolean: withFixedArity('boolean', 1, (...args: unknown[]) => {
+      if (args.length === 1 && isComplex(args[0])) {
+        throw new TypeError(
+          'Unexpected type of argument in function boolean ' +
+            '(expected: number or BigNumber or string or Array or Matrix or boolean or null or bigint or Fraction, ' +
+            'actual: Complex, index: 0)'
+        );
+      }
+      if (args.length === 1 && isUnit(args[0])) {
+        throw new TypeError(
+          'Unexpected type of argument in function boolean (expected: number or BigNumber or string or Array or Matrix or boolean or null or bigint or Fraction, actual: Unit, index: 0)'
+        );
+      }
+      return mathFunctions.boolean(...args);
+    }),
+    bigint: withFixedArity('bigint', 1, (...args: unknown[]) => {
+      if (args.length === 1 && isComplex(args[0])) {
+        throw new TypeError(
+          'Unexpected type of argument in function bigint (expected: number or BigNumber or bigint or Fraction or string or Array or Matrix or boolean or null, actual: Complex, index: 0)'
+        );
+      }
+      return (mathFunctions.bigint as (...a: unknown[]) => unknown)(...args);
+    }),
     ...g18Surface,
     nullish: g07Logical.nullish,
     not: g07Logical.not,
@@ -932,6 +975,9 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   ) as (keyof typeof compatDefaultOverrides)[];
   for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
+  // `instanceSymbols.random` replaces `mathFunctions.random`; plain wrapper so typed
+  // signatures do not bypass parity guards (#1773).
+  flat.random = createCompatRandomInstance(flat.random as (...args: unknown[]) => unknown);
   if (localUnits) flat.Unit = localUnits.Unit;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
@@ -1125,6 +1171,11 @@ export function create(
 
   // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
   instance.DimensionError = instanceSymbols.DimensionError;
+
+  // Parity wrappers on `flat.random` can be bypassed when the instance own-key
+  // loop materialises a typed-function reference; re-apply after wiring (#1773).
+  instance.random = flat.random;
+  expressionConstants.random = () => instance.random;
 
   return instance as unknown as MathInstance;
 }

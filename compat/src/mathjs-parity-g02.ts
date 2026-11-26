@@ -175,6 +175,20 @@ export function withFixedArity(
   });
 }
 
+/** Reject calls with more than `max` positional arguments (mathjs overload families). */
+export function withMaxArity(
+  name: string,
+  max: number,
+  fn: UnaryLike
+): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length > max) {
+      throw tooManyArgumentsError(name, max, args.length);
+    }
+    return apply(fn, args);
+  });
+}
+
 // =============================================================================
 // #1587 — Fraction rejection on the trigonometric / log / exp surface
 // =============================================================================
