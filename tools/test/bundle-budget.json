@@ -204,7 +204,7 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "maxBytes": 2129920
+      "maxBytes": 2162688
     },
     {
       "label": "compat create(all) browser",

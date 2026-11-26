@@ -34,7 +34,7 @@ function apply(fn: UnaryLike, args: unknown[]): unknown {
  * Copy the `name` and `length` of the wrapped function onto the wrapper, so
  * instance wrappers keep the typed-function surface the isolation tests pin.
  */
-function keepSurface<T extends (...args: unknown[]) => unknown>(from: UnaryLike, to: T): T {
+export function keepSurface<T extends (...args: unknown[]) => unknown>(from: UnaryLike, to: T): T {
   try {
     Object.defineProperty(to, 'name', { value: from.name, configurable: true });
     Object.defineProperty(to, 'length', { value: from.length, configurable: true });

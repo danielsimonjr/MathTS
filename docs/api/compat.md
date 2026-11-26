@@ -397,6 +397,21 @@ finite in both libraries; only `zeta(1 + 2i)` is NaN in mathjs).
 Compat matches mathjs `1.0823232498396`. Native MathTS returns
 `1.0823232337111`, closer to π⁴/90.
 
+### `bernoulli(1e6)`
+
+Compat delegates the number path to native `functions` `bernoulli`, which returns
+`-Infinity` for very large indexes where mathjs 15.3.0 returns `NaN` (float
+recurrence overflow). Small and moderate indexes match, and the Fraction /
+BigNumber / bigint paths (compat adapters, #1554) match exactly.
+
+### `pinv(sparse([[0, 1]]))`
+
+A sparse 1×2 vector: mathjs throws
+`Cannot calculate inverse, determinant is zero`; the compat surface keeps the
+native `matrix` result (a transposed sparse matrix). Dense and Array inputs,
+and the BigNumber / Fraction / Complex scalar paths (compat adapters, #1554),
+match mathjs.
+
 ### `symbolicEqual`
 
 Compat uses mathjs’s simplify-only equality (no exact-polynomial shortcuts).
