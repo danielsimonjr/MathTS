@@ -32,7 +32,7 @@ import { repoRoot, workspaceDirs } from './workspaces.mjs';
  * @returns {string | null} frontmatter body, or null when absent or invalid
  */
 export function extractChangesetFrontmatter(text) {
-  const lines = text.replace(/^\uFEFF/, '').split('\n');
+  const lines = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   if (lines[0]?.trim() !== '---') return null;
   for (let i = 1; i < lines.length; i++) {
     if (lines[i].trim() === '---') return lines.slice(1, i).join('\n');
@@ -103,6 +103,23 @@ export function entryPathForSubpath(pkgDir, subpath, map) {
   if (typeof specifier !== 'string') return null;
   if (specifier.endsWith('package.json')) return null;
   return join(pkgDir, specifier);
+}
+
+/**
+ * True when a subpath or its entry files are worker scripts. Those entries need a
+ * Worker global this checker does not provide, so a *both-sides* import failure is
+ * not a surface regression. Non-worker subpaths must still fail when both imports fail.
+ * @param {string} subpath
+ * @param {string | null} builtEntry
+ * @param {string | null} publishedEntry
+ */
+export function isWorkerLikeEntry(subpath, builtEntry, publishedEntry) {
+  const haystacks = [subpath, builtEntry, publishedEntry].filter(
+    (value) => typeof value === 'string' && value.length > 0
+  );
+  return haystacks.some((value) =>
+    /(^|[\\/])worker(\.|$|[\\/])|\.worker(\.|$|[\\/])/i.test(value.replace(/\\/g, '/'))
+  );
 }
 
 /**
@@ -234,9 +251,16 @@ export async function compareAllExportSubpaths(builtPkgDir, publishedPkgDir) {
       try {
         await collectExports(publishedEntry);
         parts.push(`${key}: failed to import built entry (${builtMessage})`);
-      } catch {
-        // Both entries need a runtime this check does not provide (e.g. a worker entry).
-        continue;
+      } catch (publishedError) {
+        if (isWorkerLikeEntry(key, builtEntry, publishedEntry)) {
+          // Worker entries skip when both sides fail in this checker.
+          continue;
+        }
+        const publishedMessage =
+          publishedError instanceof Error ? publishedError.message : String(publishedError);
+        parts.push(
+          `${key}: failed to import built entry (${builtMessage}) and published entry (${publishedMessage})`
+        );
       }
       continue;
     }
@@ -300,6 +324,7 @@ export async function run(root = repoRoot, options = {}) {
   const skipped = [];
   let compared = 0;
   let registryUnavailableSkips = 0;
+  let privateSkips = 0;
   const scratch = mkdtempSync(join(tmpdir(), 'check-surface-'));
   mkdirSync(join(scratch, 'tarball'));
   const repoModules = join(repoRoot, 'node_modules');
@@ -318,7 +343,9 @@ export async function run(root = repoRoot, options = {}) {
       }
       if (verdict.verdict === 'skip') {
         skipped.push(`${dir}: ${verdict.detail}`);
-        if (
+        if (verdict.detail === 'private package') {
+          privateSkips++;
+        } else if (
           verdict.detail === 'version not on the registry' ||
           verdict.detail === 'no local tarball (offline)'
         ) {
@@ -336,12 +363,17 @@ export async function run(root = repoRoot, options = {}) {
           'Add a changeset that names this package.'
       );
     }
-    if (compared === 0 && registryUnavailableSkips === 0) {
-      failures.push(
-        'No workspace package was compared against a published tarball at the same version ' +
-          '(every package was skipped or the workspace is empty). Re-run after `bun run build`, ' +
-          'or fix skip reasons above.'
-      );
+    if (compared === 0) {
+      const comparableSkips = skipped.length - privateSkips;
+      const everyComparableSkipIsRegistryUnavailable =
+        comparableSkips > 0 && registryUnavailableSkips === comparableSkips;
+      if (!everyComparableSkipIsRegistryUnavailable) {
+        failures.push(
+          'No workspace package was compared against a published tarball at the same version ' +
+            '(every package was skipped or the workspace is empty). Re-run after `bun run build`, ' +
+            'or fix skip reasons above.'
+        );
+      }
     }
   } finally {
     rmSync(scratch, { recursive: true, force: true });

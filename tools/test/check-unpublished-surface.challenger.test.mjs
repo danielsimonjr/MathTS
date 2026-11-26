@@ -35,7 +35,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { run } from './check-unpublished-surface.mjs';
+import {
+  changesetNames,
+  extractChangesetFrontmatter,
+  run,
+} from './check-unpublished-surface.mjs';
 
 const NAME = '@danielsimonjr/mathts-fake-a';
 const VERSION = '1.2.3';
@@ -441,6 +445,224 @@ test('DEFECT: the unit test is not run by any CI step', () => {
     /check-unpublished-surface\.test\.mjs/,
     'compile & lint must run `node --test tools/test/check-unpublished-surface.test.mjs`'
   );
+});
+
+test('worker entries skip when both sides fail; a non-worker both-fail is drift', async () => {
+  const boom = 'throw new Error("needs Worker")\n';
+  const workerFixture = makeFixture({
+    built: ['a'],
+    published: ['a'],
+    builtExports: { '.': './dist/index.js', './worker': { import: './dist/worker.js' } },
+    publishedExports: { '.': './dist/index.js', './worker': { import: './dist/worker.js' } },
+    builtSub: { worker: [] },
+    publishedSub: { worker: [] },
+  });
+  writeFileSync(join(workerFixture.root, 'fake-a', 'dist', 'worker.js'), boom);
+  const packSrc = mkdtempSync(join(tmpdir(), 'g21-worker-pack-'));
+  mkdirSync(join(packSrc, 'package', 'dist'), { recursive: true });
+  writeFileSync(
+    join(packSrc, 'package', 'package.json'),
+    JSON.stringify({
+      name: NAME,
+      version: VERSION,
+      type: 'module',
+      exports: { '.': './dist/index.js', './worker': { import: './dist/worker.js' } },
+    })
+  );
+  writeFileSync(join(packSrc, 'package', 'dist', 'index.js'), 'export const a = 1;\n');
+  writeFileSync(join(packSrc, 'package', 'dist', 'worker.js'), boom);
+  execFileSync('tar', [
+    '-czf',
+    join(workerFixture.registryDir, 'mathts-fake-a-1.2.3.tgz'),
+    '-C',
+    packSrc,
+    '.',
+  ]);
+  rmSync(packSrc, { recursive: true, force: true });
+  try {
+    const { failures } = await runFixture(workerFixture);
+    assert.deepEqual(failures, [], `worker both-fail must skip; got ${JSON.stringify(failures)}`);
+  } finally {
+    workerFixture.dispose();
+  }
+
+  const evaluateFixture = makeFixture({
+    built: ['a'],
+    published: ['a'],
+    builtExports: { '.': './dist/index.js', './evaluate': { import: './dist/evaluate.js' } },
+    publishedExports: { '.': './dist/index.js', './evaluate': { import: './dist/evaluate.js' } },
+    builtSub: { evaluate: [] },
+    publishedSub: { evaluate: [] },
+  });
+  writeFileSync(join(evaluateFixture.root, 'fake-a', 'dist', 'evaluate.js'), boom);
+  const packSrc2 = mkdtempSync(join(tmpdir(), 'g21-eval-pack-'));
+  mkdirSync(join(packSrc2, 'package', 'dist'), { recursive: true });
+  writeFileSync(
+    join(packSrc2, 'package', 'package.json'),
+    JSON.stringify({
+      name: NAME,
+      version: VERSION,
+      type: 'module',
+      exports: { '.': './dist/index.js', './evaluate': { import: './dist/evaluate.js' } },
+    })
+  );
+  writeFileSync(join(packSrc2, 'package', 'dist', 'index.js'), 'export const a = 1;\n');
+  writeFileSync(join(packSrc2, 'package', 'dist', 'evaluate.js'), boom);
+  execFileSync('tar', [
+    '-czf',
+    join(evaluateFixture.registryDir, 'mathts-fake-a-1.2.3.tgz'),
+    '-C',
+    packSrc2,
+    '.',
+  ]);
+  rmSync(packSrc2, { recursive: true, force: true });
+  try {
+    const { failures } = await runFixture(evaluateFixture);
+    assert.equal(
+      failures.length,
+      1,
+      'a non-worker subpath that fails to import on both sides is not a worker skip: ' +
+        JSON.stringify(failures)
+    );
+    assert.match(failures[0], /\.\/evaluate/);
+  } finally {
+    evaluateFixture.dispose();
+  }
+});
+
+test('one-sided import failure is reported even on a worker subpath', async () => {
+  const fixture = makeFixture({
+    built: ['a'],
+    published: ['a'],
+    builtExports: { '.': './dist/index.js', './worker': { import: './dist/worker.js' } },
+    publishedExports: { '.': './dist/index.js', './worker': { import: './dist/worker.js' } },
+    builtSub: { worker: ['w'] },
+    publishedSub: { worker: [] },
+  });
+  writeFileSync(
+    join(fixture.root, 'fake-a', 'dist', 'worker.js'),
+    'throw new Error("built worker boom")\n'
+  );
+  const packSrc = mkdtempSync(join(tmpdir(), 'g21-oneside-pack-'));
+  mkdirSync(join(packSrc, 'package', 'dist'), { recursive: true });
+  writeFileSync(
+    join(packSrc, 'package', 'package.json'),
+    JSON.stringify({
+      name: NAME,
+      version: VERSION,
+      type: 'module',
+      exports: { '.': './dist/index.js', './worker': { import: './dist/worker.js' } },
+    })
+  );
+  writeFileSync(join(packSrc, 'package', 'dist', 'index.js'), 'export const a = 1;\n');
+  writeFileSync(join(packSrc, 'package', 'dist', 'worker.js'), 'export const w = 1;\n');
+  execFileSync('tar', [
+    '-czf',
+    join(fixture.registryDir, 'mathts-fake-a-1.2.3.tgz'),
+    '-C',
+    packSrc,
+    '.',
+  ]);
+  rmSync(packSrc, { recursive: true, force: true });
+  try {
+    const { failures } = await runFixture(fixture);
+    assert.equal(
+      failures.length,
+      1,
+      `only the built worker failed; must report, not skip: ${JSON.stringify(failures)}`
+    );
+    assert.match(failures[0], /failed to import built entry/);
+  } finally {
+    fixture.dispose();
+  }
+});
+
+test('compared === 0 fails when any skip is not a registry miss', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'g21-mixed-skip-'));
+  const registryDir = mkdtempSync(join(tmpdir(), 'g21-mixed-skip-reg-'));
+  writeFileSync(
+    join(root, 'package.json'),
+    JSON.stringify({ workspaces: ['no-dist', 'unpublished'] })
+  );
+  mkdirSync(join(root, '.changeset'));
+  mkdirSync(join(root, 'no-dist'));
+  writeFileSync(
+    join(root, 'no-dist', 'package.json'),
+    JSON.stringify({
+      name: '@danielsimonjr/mathts-no-dist',
+      version: VERSION,
+      type: 'module',
+      exports: './dist/index.js',
+    })
+  );
+  mkdirSync(join(root, 'unpublished', 'dist'), { recursive: true });
+  writeFileSync(
+    join(root, 'unpublished', 'package.json'),
+    JSON.stringify({
+      name: '@danielsimonjr/mathts-unpublished',
+      version: VERSION,
+      type: 'module',
+      exports: './dist/index.js',
+    })
+  );
+  writeFileSync(join(root, 'unpublished', 'dist', 'index.js'), 'export const a = 1;\n');
+  process.env.CHECK_SURFACE_OFFLINE = '1';
+  process.env.CHECK_SURFACE_REGISTRY_DIR = registryDir;
+  try {
+    const { failures, compared } = await run(root);
+    assert.equal(compared, 0);
+    assert.ok(
+      failures.length > 0,
+      'one registry-unavailable skip must not hide a "no built entry" skip when nothing compared: ' +
+        JSON.stringify(failures)
+    );
+  } finally {
+    delete process.env.CHECK_SURFACE_OFFLINE;
+    delete process.env.CHECK_SURFACE_REGISTRY_DIR;
+    rmSync(root, { recursive: true, force: true });
+    rmSync(registryDir, { recursive: true, force: true });
+  }
+});
+
+test('extractChangesetFrontmatter handles CRLF, quotes, comments, empty, and prose', () => {
+  assert.equal(
+    extractChangesetFrontmatter("---\r\n'@danielsimonjr/mathts-core': patch\r\n---\r\n\nbody\r\n"),
+    "'@danielsimonjr/mathts-core': patch"
+  );
+  assert.equal(
+    extractChangesetFrontmatter('---\n"@danielsimonjr/mathts-core": minor\n---\n\n'),
+    '"@danielsimonjr/mathts-core": minor'
+  );
+  const withComment = extractChangesetFrontmatter(
+    "---\n# not a package\n'@danielsimonjr/mathts-functions': patch\n---\n"
+  );
+  assert.equal(withComment, "# not a package\n'@danielsimonjr/mathts-functions': patch");
+  assert.equal(extractChangesetFrontmatter('---\n---\n\nempty frontmatter\n'), '');
+  assert.equal(
+    extractChangesetFrontmatter('No frontmatter, just a note about @danielsimonjr/mathts-core.\n'),
+    null
+  );
+
+  const root = mkdtempSync(join(tmpdir(), 'g21-fm-names-'));
+  mkdirSync(join(root, '.changeset'));
+  writeFileSync(
+    join(root, '.changeset', 'quoted.md'),
+    '---\r\n"@danielsimonjr/mathts-core": patch\r\n---\r\n\nbody\n'
+  );
+  writeFileSync(
+    join(root, '.changeset', 'unquoted.md'),
+    '---\nmathts-functions: minor\n---\n\nbody\n'
+  );
+  writeFileSync(join(root, '.changeset', 'empty.md'), '---\n---\n\nempty\n');
+  writeFileSync(join(root, '.changeset', 'prose.md'), 'mentions @danielsimonjr/mathts-compat\n');
+  try {
+    const names = changesetNames(root);
+    assert.ok(names.has('@danielsimonjr/mathts-core'), [...names].join(','));
+    assert.ok(names.has('@danielsimonjr/mathts-functions'), [...names].join(','));
+    assert.equal(names.has('@danielsimonjr/mathts-compat'), false);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('README.md in .changeset/ never exempts anything (property held)', async () => {
