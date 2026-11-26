@@ -61,17 +61,30 @@ import {
   createCompatMathjsStatistics,
   createForeignScalarConverter,
   isComplexLike as g02IsComplexLike,
+  keepSurface,
+  tooManyArgumentsError,
   withComplexOrderingGuard,
   withConvertedScalars,
   withCountBoolean,
   withFixedArity,
   withIdentityValidation,
+  withMaxArity,
   withRoundDigitsGuard,
   withSingleNumericStringGuard,
   withFractionRejection,
   withInvalidNumericStringGuard,
   withRawSingleValue,
 } from './mathjs-parity-g02.js';
+import {
+  createCompatNumeric,
+  createCompatRandomInstance,
+  withBitNotIntegerMessage,
+  withCompatBitNotInfiniteBigNumber,
+  withCompatBitwiseInfiniteBigNumberBinary,
+  withMathjsNormMatrixRules,
+  withMatrixMapHintOnUnary,
+} from './mathjs-parity-errors.js';
+import { isComplex, isUnit } from '@danielsimonjr/mathts-core';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
@@ -733,7 +746,7 @@ export function create(
     sqrt: withFractionRejection(shims.sqrt),
     abs: shims.abs,
     // #1587: a Fraction argument throws the mathjs conversion error.
-    exp: withFractionRejection(shims.exp),
+    exp: withMatrixMapHintOnUnary('exp', withFractionRejection(shims.exp)),
     log: withFractionRejection(shims.log),
 
     // Trigonometry — #1587: a Fraction argument throws the mathjs conversion error.
@@ -870,9 +883,9 @@ export function create(
     csc: withFractionRejection(mathFunctions.factory_csc),
     bernoulli: compatBernoulli,
     cube: mathFunctions.factory_cube,
-    expm1: withFractionRejection(mathFunctions.factory_expm1),
+    expm1: withMatrixMapHintOnUnary('expm1', withFractionRejection(mathFunctions.factory_expm1)),
     erf: compatErf,
-    gamma: withFractionRejection(compatGamma),
+    gamma: withMatrixMapHintOnUnary('gamma', withFractionRejection(compatGamma)),
     sec: withFractionRejection(mathFunctions.factory_sec),
     sinh: withFractionRejection(mathFunctions.factory_sinh),
     square: mathFunctions.factory_square,
@@ -918,6 +931,73 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    hypot: mathFunctions.factory_hypot,
+    bitAnd: withFixedArity(
+      'bitAnd',
+      2,
+      withCompatBitwiseInfiniteBigNumberBinary(mathFunctions.bitAnd, 'and')
+    ),
+    bitOr: withFixedArity(
+      'bitOr',
+      2,
+      withCompatBitwiseInfiniteBigNumberBinary(mathFunctions.bitOr, 'or')
+    ),
+    bitXor: withFixedArity(
+      'bitXor',
+      2,
+      withCompatBitwiseInfiniteBigNumberBinary(mathFunctions.bitXor, 'xor')
+    ),
+    leftShift: withFixedArity('leftShift', 2, mathFunctions.leftShift),
+    rightArithShift: withFixedArity('rightArithShift', 2, mathFunctions.rightArithShift),
+    rightLogShift: withFixedArity('rightLogShift', 2, mathFunctions.rightLogShift),
+    bitNot: withFixedArity(
+      'bitNot',
+      1,
+      withBitNotIntegerMessage(
+        withCompatBitNotInfiniteBigNumber(mathFunctions.bitNot as (...args: unknown[]) => unknown)
+      )
+    ),
+    norm: withMathjsNormMatrixRules(mathFunctions.norm as (...args: unknown[]) => unknown),
+    typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
+    number: keepSurface(mathFunctions.number, (...args: unknown[]) => {
+      if (args.length === 0) return 0;
+      if (args.length === 1) return mathFunctions.number(args[0]);
+      if (isUnit(args[0])) {
+        if (args.length > 2) throw tooManyArgumentsError('number', 2, args.length);
+        const unitArg = args[0] as { toNumeric(u?: unknown): unknown };
+        if (typeof args[1] === 'string' || isUnit(args[1])) {
+          return Number(unitArg.toNumeric(args[1]));
+        }
+        return (mathFunctions.number as (...a: unknown[]) => unknown)(...args);
+      }
+      throw tooManyArgumentsError('number', 1, args.length);
+    }),
+    numeric: createCompatNumeric(mathFunctions.numeric as (...args: unknown[]) => unknown),
+    boolean: withMaxArity('boolean', 1, (...args: unknown[]) => {
+      if (args.length === 0) return false;
+      if (args.length === 1 && isComplex(args[0])) {
+        throw new TypeError(
+          'Unexpected type of argument in function boolean ' +
+            '(expected: number or BigNumber or string or Array or Matrix or boolean or null or bigint or Fraction, ' +
+            'actual: Complex, index: 0)'
+        );
+      }
+      if (args.length === 1 && isUnit(args[0])) {
+        throw new TypeError(
+          'Unexpected type of argument in function boolean (expected: number or BigNumber or string or Array or Matrix or boolean or null or bigint or Fraction, actual: Unit, index: 0)'
+        );
+      }
+      return mathFunctions.boolean(...args);
+    }),
+    bigint: withMaxArity('bigint', 1, (...args: unknown[]) => {
+      if (args.length === 0) return 0n;
+      if (args.length === 1 && isComplex(args[0])) {
+        throw new TypeError(
+          'Unexpected type of argument in function bigint (expected: number or BigNumber or bigint or Fraction or string or Array or Matrix or boolean or null, actual: Complex, index: 0)'
+        );
+      }
+      return (mathFunctions.bigint as (...a: unknown[]) => unknown)(...args);
+    }),
     ...g18Surface,
     nullish: g07Logical.nullish,
     not: g07Logical.not,
@@ -1123,8 +1203,21 @@ export function create(
   instance.chain = chainApi.chain;
   if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
 
-  // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
+  // mathjs shares error constructors on the module and on each instance (#G12 F4, #1773).
   instance.DimensionError = instanceSymbols.DimensionError;
+  instance.ArgumentsError = instanceSymbols.ArgumentsError;
+  instance.IndexError = instanceSymbols.IndexError;
+
+  // Arity / BigNumber guards must wrap the config-scoped seeded `random`, not the
+  // module typed-function (re-apply after wiring — own-key materialisation bypasses `flat`) (#1773).
+  if (typeof instance.random === 'function') {
+    const guardedRandom = createCompatRandomInstance(
+      instance.random as (...args: unknown[]) => unknown
+    );
+    instance.random = guardedRandom;
+    flat.random = guardedRandom;
+    expressionConstants.random = () => instance.random;
+  }
 
   return instance as unknown as MathInstance;
 }

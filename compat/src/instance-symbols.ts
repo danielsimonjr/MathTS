@@ -52,6 +52,7 @@ const CompatRange = newOperatorGuard(Range);
 const CompatSpa = newOperatorGuard(constructors.Spa);
 const CompatArgumentsError = newOperatorGuard(constructors.ArgumentsError);
 const CompatDimensionError = newOperatorGuard(DimensionError);
+const CompatIndexError = newOperatorGuard(IndexError);
 
 type NativeCompatSymbols = {
   Help: typeof Help;
@@ -136,7 +137,7 @@ export const instanceSymbols: typeof factory_mathjsCompat.constructors &
   Range: CompatRange,
   Matrix,
   DimensionError: CompatDimensionError,
-  IndexError,
+  IndexError: CompatIndexError,
   factory,
   PI: Math.PI,
   E: Math.E,

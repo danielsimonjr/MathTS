@@ -1,5 +1,9 @@
 import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
-import { tooFewArgumentsError, tooManyArgumentsError } from './mathjs-parity-g02.js';
+import {
+  tooFewArgumentsError,
+  tooManyArgumentsError,
+  withFixedArity,
+} from './mathjs-parity-g02.js';
 /**
  * mathjs Compatibility Shims
  *
@@ -113,6 +117,8 @@ import {
 } from '@danielsimonjr/mathts-matrix';
 import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
 import { mapDivideBroadcastError, mapElementwiseBroadcastError } from './g12-mathjs-parity.js';
+import { withPublicFactoryScalar } from './mathjs-parity-errors.js';
+import { subtractScalar as _factorySubtractScalar } from '@danielsimonjr/mathts-functions';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -371,6 +377,15 @@ const hasNonNumberEntry = (x: unknown): boolean => {
   );
 };
 
+const coerceNumericStringOperand = (x: unknown): unknown =>
+  typeof x === 'string' ? _number(x) : x;
+
+const callWithNumericStringOperands = (
+  fn: (a: unknown, b: unknown) => unknown,
+  a: unknown,
+  b: unknown
+): unknown => fn(coerceNumericStringOperand(a), coerceNumericStringOperand(b));
+
 const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
   matrixFn: (a: unknown, b: unknown) => unknown,
@@ -399,10 +414,26 @@ const applyArithmetic = (
     if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
       return unwrap(scalarFn(a, b));
     }
-    if (!matrixPackageCanTake(a, b, elementwise)) return unwrap(scalarFn(a, b));
+    if (!matrixPackageCanTake(a, b, elementwise)) {
+      if (
+        complexFn &&
+        (Array.isArray(a) ||
+          Array.isArray(b) ||
+          isMatrixLike(a) ||
+          isMatrixLike(b) ||
+          isCompatBridgeMatrix(a) ||
+          isCompatBridgeMatrix(b))
+      ) {
+        return unwrap(callWithNumericStringOperands(complexFn, a, b));
+      }
+      return unwrap(scalarFn(a, b));
+    }
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
     return unwrap(matrixFn(aa, bb));
+  }
+  if ((Array.isArray(a) || Array.isArray(b)) && complexFn) {
+    return unwrap(callWithNumericStringOperands(complexFn, a, b));
   }
   return compatDecimalResult(scalarFn(a, b));
 };
@@ -503,6 +534,39 @@ const _compatAdd = withMathjsComplexBinary(_add as BinaryArithmetic, 'add');
 const _compatSubtract = withMathjsComplexBinary(_subtract as BinaryArithmetic, 'sub');
 const _compatMultiply = withMathjsComplexBinary(_multiply as BinaryArithmetic, 'mul');
 
+const publicAddScalar = withPublicFactoryScalar('add', 'addScalar', _addScalar as BinaryArithmetic);
+const publicMultiplyScalar = withPublicFactoryScalar(
+  'multiply',
+  'multiplyScalar',
+  _multiplyScalar as BinaryArithmetic,
+  {
+    guardFractionBigNumber: true,
+  }
+);
+const publicSubtractScalar = withPublicFactoryScalar(
+  'subtract',
+  'subtractScalar',
+  _factorySubtractScalar as BinaryArithmetic
+);
+
+/** Factory scalars reject matrix operands; typed `add`/`multiply`/`subtract` keep Matrix results (#993). */
+const useTypedArithmeticForPair = (a: unknown, b: unknown): boolean =>
+  isCompatBridgeMatrix(a) || isCompatBridgeMatrix(b) || isBoxedMatrix(a) || isBoxedMatrix(b);
+
+const addPairScalars = (a: unknown, b: unknown): unknown =>
+  useTypedArithmeticForPair(a, b) ? _add(a, b) : publicAddScalar(a, b);
+
+const multiplyPairScalars = (a: unknown, b: unknown): unknown => {
+  if (useTypedArithmeticForPair(a, b)) return _multiply(a, b);
+  if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
+    return _multiply(a, b);
+  }
+  return publicMultiplyScalar(a, b);
+};
+
+const subtractPairScalars = (a: unknown, b: unknown): unknown =>
+  useTypedArithmeticForPair(a, b) ? _subtract(a, b) : publicSubtractScalar(a, b);
+
 function isProtoSparseMatrix(x: unknown): boolean {
   return (
     typeof x === 'object' &&
@@ -518,7 +582,7 @@ const subtractPair = (a: unknown, b: unknown): unknown => {
   if (isDenseMatrix(a) || isDenseMatrix(b)) return _matSubtract(a, b);
   if (typeof a === 'bigint' || typeof b === 'bigint') return _factorySubtract(a, b);
   return applyArithmetic(
-    _subtract as (a: unknown, b: unknown) => unknown,
+    subtractPairScalars,
     _matSubtract as (a: unknown, b: unknown) => unknown,
     a,
     b,
@@ -529,7 +593,7 @@ const subtractPair = (a: unknown, b: unknown): unknown => {
 
 const addCore = makeArithmetic(
   'add',
-  withNumericText(_add as BinaryArithmetic, _addScalar),
+  withNumericText(addPairScalars, addPairScalars),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b,
@@ -552,17 +616,20 @@ export const subtract = withTypedSurface(function (a?: unknown, b?: unknown): un
 }, _subtract) as typeof _subtract;
 export const multiply = makeArithmetic(
   'multiply',
-  withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
+  withNumericText(multiplyPairScalars, multiplyPairScalars),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
   (a, b) => a * b,
   _compatMultiply
 ) as NumericStringArithmetic & typeof _multiply;
 const _dotMultiplyComplex = withMathjsComplexBinary(_dotMultiply as BinaryArithmetic, 'mul');
-const compatDotMultiply = withTypedSurface(function (a: unknown, b: unknown): unknown {
-  if (isComplex(a) || isComplex(b)) return _dotMultiplyComplex(a, b);
-  return _dotMultiply(a, b);
-}, _dotMultiply) as typeof _dotMultiply;
+const compatDotMultiply = withTypedSurface(
+  withFixedArity('dotMultiply', 2, function dotMultiplyCompat(a: unknown, b: unknown): unknown {
+    if (isComplex(a) || isComplex(b)) return _dotMultiplyComplex(a, b);
+    return _dotMultiply(a, b);
+  }),
+  _dotMultiply
+) as typeof _dotMultiply;
 /**
  * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
  * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed
