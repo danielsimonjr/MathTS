@@ -34,7 +34,11 @@ import type {
   Fraction,
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
-import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
+import {
+  wireMathjsInstanceApi,
+  type CompatExpressionLayers,
+  type WiredCompatInstance,
+} from './instance-api.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
@@ -164,6 +168,8 @@ interface MathInstanceOverrides {
   on: WiredCompatInstance['on'];
   off: WiredCompatInstance['off'];
   once: WiredCompatInstance['once'];
+  /** mathjs expression API: the transform functions and the mathWithTransform scope (#1572). */
+  expression: CompatExpressionLayers;
 
   // Configuration
   config: ((newConfig?: Partial<MathJSConfig>) => MathJSConfig) &

@@ -9,6 +9,7 @@
  * implementation), rather than importing a parallel implementation layer.
  */
 export { createAndTransform } from './and.transform.js';
+export { createApplyTransform } from './apply.transform.js';
 export { createBitAndTransform } from './bitAnd.transform.js';
 export { createBitOrTransform } from './bitOr.transform.js';
 export { createColumnTransform } from './column.transform.js';
