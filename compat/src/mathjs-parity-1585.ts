@@ -210,7 +210,7 @@ interface RangeDeps {
  * (`_strRange` passes it to `_out`, not `_range`). Mirror that quirk only.
  */
 export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unknown {
-  const { nativeRange, config, typed } = deps;
+  const { nativeRange, typed } = deps;
   const applyQuirk = function applyQuirk(this: unknown, ...args: unknown[]): unknown {
     if (typeof args[0] === 'string') {
       if (args.length === 1) return nativeRange.call(this, args[0]);
