@@ -9,11 +9,11 @@
  *
  * 1. `vitest run` in every workspace package that has a `vitest.config.ts`. The package config
  *    supplies the vitest equivalent of its Bun-only setup (`define` for `__PKG_VERSION__`, and
- *    a separate snapshot path in `plot`). `functions` runs first. On Node 24+ it is one
- *    unsharded process with `--maxWorkers` equal to machine parallelism (CI Test 24.x:
- *    271 s vs 361–411 s for 4 shards × 1 worker). On Node 22 it is four `--shard=k/4` runs
- *    at the same worker cap as other items (CI: unsharded 441 s, slower than the shards).
- *    Every test file still runs exactly once.
+ *    a separate snapshot path in `plot`). On Node 24+ `functions` runs first as one unsharded
+ *    process with `--maxWorkers` equal to machine parallelism (CI Test 24.x: 234 s). On Node 22
+ *    it is four `--shard=k/4` runs mixed with the other packages at the same concurrency (do
+ *    not fill every slot with shards first: that serializes the rest of the suite). Every test
+ *    file still runs exactly once.
  * 2. `vitest run` with the root `vitest.config.ts` (`tests/integration`, `tests/wasm`).
  * 3. The standalone Node test scripts of packages without a vitest config (`assembly`): every
  *    `node <file>` command in its `test` and `test:diff` scripts.
@@ -193,12 +193,14 @@ const tempDir = mkdtempSync(join(tmpdir(), 'run-vitest-node-'));
 /** @type {{ label: string, ok: boolean, status: number | string, durationMs: number }[]} */
 const results = new Array(items.length);
 /**
- * Two phases: `functions` first (sharded on Node 22, unsharded on Node 24+), then everything
- * else at RUN_VITEST_NODE_CONCURRENCY with the per-item worker cap.
+ * Node 24+: `functions` first (one process, all CPUs), then the rest at concurrency.
+ * Node 22: every item in one pool so shards overlap short packages (workflow wall is max(22,24)).
  */
 const isFunctionsItem = (item) => item.label.startsWith('vitest functions');
 const functionIdx = items.map((_, i) => i).filter((i) => isFunctionsItem(items[i]));
 const restIdx = items.map((_, i) => i).filter((i) => !isFunctionsItem(items[i]));
+const allIdx = items.map((_, i) => i);
+const suiteStarted = performance.now();
 
 async function runIndices(indices, phaseConcurrency) {
   let next = 0;
@@ -213,8 +215,13 @@ async function runIndices(indices, phaseConcurrency) {
   if (n > 0) await Promise.all(Array.from({ length: n }, () => worker()));
 }
 
-await runIndices(functionIdx, shardFunctions ? concurrency : 1);
-await runIndices(restIdx, concurrency);
+if (shardFunctions) {
+  await runIndices(allIdx, concurrency);
+} else {
+  await runIndices(functionIdx, 1);
+  await runIndices(restIdx, concurrency);
+}
+const suiteMs = performance.now() - suiteStarted;
 
 for (let i = 0; i < items.length; i++) {
   await writeStdout(`\n::group::${items[i].label} (node ${process.version})\n`);
@@ -226,10 +233,9 @@ for (let i = 0; i < items.length; i++) {
 rmSync(tempDir, { recursive: true, force: true });
 
 const failed = results.filter((r) => !r.ok).length;
-const totalMs = results.reduce((sum, r) => sum + r.durationMs, 0);
 
 await writeStdout(
-  `\nrun-vitest-node summary (node ${process.version}, wall ${formatDuration(totalMs)}):\n`
+  `\nrun-vitest-node summary (node ${process.version}, wall ${formatDuration(suiteMs)}):\n`
 );
 const labelWidth = Math.max(...results.map((r) => r.label.length), 'label'.length);
 await writeStdout(`${'status'.padEnd(6)} ${'time'.padStart(8)}  ${'item'.padEnd(labelWidth)}\n`);

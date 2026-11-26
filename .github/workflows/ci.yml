@@ -289,10 +289,10 @@ jobs:
       # Test (24.x) run for the whole suite. These checks pin it with fixtures, before any
       # test runs: the summary and a failing item's output survive a multi-megabyte dump on
       # a pipe, its children carry a worker cap so concurrency x workers fits the runner,
-      # functions runs first (sharded on Node 22, unsharded on Node 24+), then other
-      # packages concurrently; the four shards partition every test file exactly once, the
-      # coverage suite covers every package the plain suite covers, and prepush never
-      # reports a skipped gate as passing.
+      # functions is sharded on Node 22 (mixed with other packages) and unsharded-first on
+      # Node 24+; the four shards partition every test file exactly once, the coverage suite
+      # covers every package the plain suite covers, and prepush never reports a skipped
+      # gate as passing.
       - name: Vitest runner and coverage-scope tests
         if: needs.changes.outputs.docs_only != 'true'
         run: |

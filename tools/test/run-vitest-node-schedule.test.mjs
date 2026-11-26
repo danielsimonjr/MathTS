@@ -89,10 +89,12 @@ test('functions starts first with the Node-major worker layout', async () => {
       .filter(Boolean)
       .map((line) => JSON.parse(line));
     if (nodeMajor < 24) {
-      assert.ok(argvs.length >= 5, `expected 4 shards + core + root, got ${argvs.length}`);
+      assert.ok(argvs.length >= 5, `expected core + 4 shards + root, got ${argvs.length}`);
+      const shardArgvs = argvs.filter((argv) => argv.some((a) => String(a).startsWith('--shard=')));
+      assert.equal(shardArgvs.length, 4, 'Node 22 must spawn four functions shards');
       assert.ok(
-        argvs.slice(0, 4).every((argv) => argv.some((a) => String(a).startsWith('--shard='))),
-        'Node 22 must spawn the four functions shards first'
+        shardArgvs.every((argv) => workerCapFrom(argv) === 1),
+        'Node 22 shards use the per-item worker cap'
       );
     } else {
       assert.equal(argvs.length, 3, 'functions + core + root');
