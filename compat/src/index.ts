@@ -65,6 +65,7 @@ import {
   withRoundDigitsGuard,
   withSingleNumericStringGuard,
   withFractionRejection,
+  withInvalidNumericStringGuard,
   withRawSingleValue,
 } from './mathjs-parity-g02.js';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
@@ -575,9 +576,11 @@ export function create(
       precision: () => currentConfig.precision ?? 64,
     }
   );
-  const compatUnaryPlus = withConvertedScalars(
-    convertForeignScalar,
-    mathFunctions.factory_unaryPlus as (...args: unknown[]) => unknown
+  const compatUnaryPlus = withInvalidNumericStringGuard(
+    withConvertedScalars(
+      convertForeignScalar,
+      mathFunctions.factory_unaryPlus as (...args: unknown[]) => unknown
+    )
   );
 
   // The overlay decision diffs every config key. Each wrapped call used to repeat that
