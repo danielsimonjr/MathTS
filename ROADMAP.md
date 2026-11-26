@@ -5,7 +5,7 @@ WebWorker acceleration, plus a reactive YAML-based **Scientific Workbook** (`.mt
 system. This document is **forward-looking**: what's planned and why. Shipped history
 lives in per-package `CHANGELOG.md` files and in `TODO.md` (the working tracker).
 
-_Last updated: 2026-11-04._
+_Last updated: 2026-11-26._
 
 > **Process:** features follow the lifecycle in [`docs/FEATURE_WORKFLOW.md`](docs/FEATURE_WORKFLOW.md)
 > — idea → (lightweight brainstorm + CDG placement probe) → ROADMAP entry →
@@ -25,6 +25,27 @@ _Last updated: 2026-11-04._
   (enforced by `bun run docs:deps`) on every change.
 
 ## Near-term (active)
+
+### Post-compat-release parity roadmap
+
+The mathjs 15.3.0 compat full-suite is the prerequisite milestone
+([`docs/superpowers/plans/2026-11-26-mathjs-full-suite-plan.md`](docs/superpowers/plans/2026-11-26-mathjs-full-suite-plan.md),
+`@danielsimonjr/mathts-compat`). Everything else that was open on 2026-11-26
+is sequenced in
+[`docs/superpowers/plans/2026-11-26-future-features-parity-roadmap-plan.md`](docs/superpowers/plans/2026-11-26-future-features-parity-roadmap-plan.md).
+
+That plan accounts for all **145** open issues at snapshot time:
+
+| Phase        | What                                                                                                                                                                                              | Issues                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Prerequisite | mathjs 15.3.0 compat full-suite (other plan)                                                                                                                                                      | #1773, #1776–#1794 (20)                                                 |
+| Phase 0      | Immediately after the compat release: drop `mathjs` filenames outside `compat/`, and land the unified `core/src/error/` hierarchy plus `messages.ts`                                              | #1800, #1799                                                            |
+| Phase 1      | Foundations: numbers, arithmetic, trigonometry, unit registry, sparse matrix, tensor, array language                                                                                              | #1602, #1604–#1613, #1706–#1710                                         |
+| Phase 2      | Numerical correctness and breadth: statistics, signal, specials, polynomials, quadrature, ODE, optimization, interpolation, linalg, geometry, graphs, discrete math, control, PDE, finance, image | #1592–#1596, #1599, #1601, #1603, #1614–#1617, #1627–#1643, #1655–#1705 |
+| Phase 3      | Symbolic: CAS bugs and breadth, expression language, symbolic regression (except throughput)                                                                                                      | #1597, #1598, #1600, #1618–#1626, #1644–#1648, #1650–#1654, #1711       |
+| Phase 4      | Throughput, compat convention flags, plot helpers, close the six-system tracker                                                                                                                   | #1649, #1712, #1713, #1714                                              |
+
+Native packages (`core`, `typed-function`, `matrix`, `functions`, `workerpool`, `gpu`, `parallel`) stay MathTS-native. Reference-system quirks that disagree with NumPy/SciPy stay in `compat/`.
 
 ### Scientific Workbook capabilities
 
