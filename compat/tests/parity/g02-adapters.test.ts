@@ -198,7 +198,9 @@ describe('G02 wrapper primitives', () => {
       'Parameters in function identity must be positive integers'
     );
     // numeric strings and bigints convert before the check
-    expect(() => ident('2', 0)).toThrow('Parameters in function identity must be positive integers');
+    expect(() => ident('2', 0)).toThrow(
+      'Parameters in function identity must be positive integers'
+    );
     expect(() => ident(2n, 0)).toThrow('Parameters in function identity must be positive integers');
     // BigNumbers convert through toNumber
     expect(ident(new BigNumber(2), 'dense')).toBe('2|dense');
@@ -236,7 +238,9 @@ describe('G02 wrapper primitives', () => {
 
 describe('G02 compat mad internals', () => {
   const N = (v: unknown): number =>
-    typeof v === 'object' && v !== null ? Number((v as { valueOf(): unknown }).valueOf()) : Number(v);
+    typeof v === 'object' && v !== null
+      ? Number((v as { valueOf(): unknown }).valueOf())
+      : Number(v);
   const mad = createCompatMad({
     subtract: (a: unknown, b: unknown) => N(a) - N(b),
     abs: (x: unknown) => Math.abs(N(x)),

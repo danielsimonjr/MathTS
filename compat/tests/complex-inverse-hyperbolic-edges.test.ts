@@ -91,7 +91,12 @@ describe('G08 inverse-hyperbolic adapter edges (branch coverage)', () => {
   });
 
   it('asech covers the origin and the ordinary paths', () => {
-    for (const z of [new Complex(0, 0), new Complex(0.5, 0), new Complex(2, 3), new Complex(1e9, 1e9)]) {
+    for (const z of [
+      new Complex(0, 0),
+      new Complex(0.5, 0),
+      new Complex(2, 3),
+      new Complex(1e9, 1e9),
+    ]) {
       expect(isComplexShape(complexJsAsech(z))).toBe(true);
     }
     const origin = complexJsAsech(new Complex(0, 0)) as Complex;
@@ -99,7 +104,12 @@ describe('G08 inverse-hyperbolic adapter edges (branch coverage)', () => {
   });
 
   it('acsc and asec cover the origin and the ordinary paths', () => {
-    for (const z of [new Complex(0, 0), new Complex(2, 3), new Complex(2, 0), new Complex(1e9, 1e9)]) {
+    for (const z of [
+      new Complex(0, 0),
+      new Complex(2, 3),
+      new Complex(2, 0),
+      new Complex(1e9, 1e9),
+    ]) {
       expect(isComplexShape(complexJsAcsc(z))).toBe(true);
       expect(isComplexShape(complexJsAsec(z))).toBe(true);
     }

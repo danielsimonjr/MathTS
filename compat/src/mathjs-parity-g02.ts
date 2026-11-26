@@ -424,10 +424,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
     // scalar (number, Unit, Complex, …) pulls the list into numbers, mathjs's
     // lowest-index bigint conversion.
     const hasOther = flat.some(
-      (v) =>
-        typeof v !== 'bigint' &&
-        v !== null &&
-        (typeof v !== 'object' || !isMatrixLikeValue(v))
+      (v) => typeof v !== 'bigint' && v !== null && (typeof v !== 'object' || !isMatrixLikeValue(v))
     );
     if (!hasOther) return flat;
     return flat.map((v) => (typeof v === 'bigint' ? Number(v) : v));
