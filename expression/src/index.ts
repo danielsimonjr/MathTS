@@ -15,6 +15,13 @@ export * from './Parser.js';
 export { createParser } from './function/parser.js';
 export * from './Help.js';
 export { embeddedDocs } from './embeddedDocs/embeddedDocs.js';
+// The mathjs name for the embedded-docs map (#1569): same object as `embeddedDocs`.
+export { embeddedDocs as docs } from './embeddedDocs/embeddedDocs.js';
+// The canonical block-result and node classes (#1567, #1571), in addition to the
+// `create<X>` factories. `Parser` comes from the `./Parser.js` barrel above.
+export { ResultSet } from './ResultSet.js';
+export type { ResultSetJSON } from './ResultSet.js';
+export * from './node/classes.js';
 export * from './compiler/index.js';
 export * from './evaluator/index.js';
 export { defaultMathScope } from './default-instance.js';

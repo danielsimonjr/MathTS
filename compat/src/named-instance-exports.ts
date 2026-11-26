@@ -16,8 +16,8 @@
  * @packageDocumentation
  */
 import type { mathTyped } from '@danielsimonjr/mathts-core';
-import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import mathjsDocs1530 from './mathjs-docs-15.3.0.generated.json' with { type: 'json' };
 import {
   parser as functionsParser,
   type PhysicsEvaluateOptions,
@@ -35,7 +35,6 @@ import {
   createMathjsSymbolicEqual,
   createMathjsZeta,
 } from './mathjs-parity-1585.js';
-import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
 
 let createInstance:
@@ -275,10 +274,8 @@ export {
   namedZeta as zeta,
 };
 
-/** Embedded documentation for names in the MathJS compatibility surface. */
-export const docs = /* #__PURE__ */ Object.fromEntries(
-  Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
-);
+/** Embedded documentation — byte-identical to mathjs 15.3.0 `create(all).docs` (#G12 F5). */
+export const docs = mathjsDocs1530 as Record<string, unknown>;
 
 export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
 

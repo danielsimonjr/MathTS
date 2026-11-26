@@ -9,14 +9,19 @@
  * @module @danielsimonjr/mathts-core/types/unit/unit-types
  */
 import type { ExactScale } from './exact-scale.js';
-import type { Complex } from '../../is.js';
+import type { Complex as ComplexShape } from '../../is.js';
+import type { BigNumber } from '../bignumber.js';
+import type { Complex } from '../complex.js';
+import type { Fraction } from '../fraction.js';
 
 /** A complex number value (re/im pair), as produced by the `Complex` type. */
-export type ComplexValue = Complex;
+export type ComplexValue = ComplexShape;
 
 /**
  * Minimal structural view of a BigNumber value: only the instance methods that
- * the Unit factory actually calls when computing angle constants.
+ * the Unit factory actually calls when computing angle constants. Not the
+ * constructor argument type — live `BigNumber` is not assignable here because
+ * `div`/`times` take a narrower operand than this duck type.
  */
 export interface BigNumberValue {
   div(other: BigNumberValue | number | string): BigNumberValue;
@@ -31,12 +36,12 @@ export interface FractionValue {
 }
 
 /**
- * Any numeric value a Unit can carry. Mirrors what `isNumeric`/`isComplex`
- * accept at the constructor boundary (number, bigint, boolean, BigNumber,
- * Fraction, Complex). Boolean/bigint flow through unchanged for valueless
- * units and are coerced by the scalar operations otherwise.
+ * Any numeric value a Unit can carry. This is the live runtime types
+ * (`NumericScalar` plus boolean), not the duck types `BigNumberValue` /
+ * `FractionValue`. Those duck types reject the classes: `BigNumber.div` is
+ * contravariant in its operand, and `Fraction` has no `n`/`d`/`s` numbers.
  */
-export type Numeric = number | bigint | boolean | BigNumberValue | FractionValue | ComplexValue;
+export type Numeric = number | bigint | boolean | BigNumber | Fraction | Complex;
 
 /** A prefix definition such as `{ name: 'k', value: 1e3, scientific: true }`. */
 export interface PrefixDef {
@@ -173,12 +178,12 @@ export interface ComplexConstructor {
 
 /** Constructor for BigNumber values. */
 export interface BigNumberConstructor {
-  new (value: number | string): BigNumberValue;
+  new (value: number | string): BigNumber;
 }
 
 /** Constructor for Fraction values. */
 export interface FractionConstructor {
-  new (value: Numeric | string | bigint, denominator?: number | bigint): FractionValue;
+  new (value: Numeric | string | bigint, denominator?: number | bigint): Fraction;
 }
 
 /** `subtractScalar` is polymorphic: it also subtracts two Units (in splitUnit). */

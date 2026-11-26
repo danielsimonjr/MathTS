@@ -1259,14 +1259,15 @@ import { createImmutableDenseMatrixClass } from '../type/matrix/ImmutableDenseMa
 const _Unit = createUnitClass(factoryScope as Parameters<typeof createUnitClass>[0]);
 factoryScope.Unit = _Unit;
 
-const _FibonacciHeap = createFibonacciHeapClass(
+const _FibonacciHeap: ReturnType<typeof createFibonacciHeapClass> = createFibonacciHeapClass(
   factoryScope as Parameters<typeof createFibonacciHeapClass>[0]
 );
 factoryScope.FibonacciHeap = _FibonacciHeap;
 
-const _ImmutableDenseMatrix = createImmutableDenseMatrixClass(
-  factoryScope as Parameters<typeof createImmutableDenseMatrixClass>[0]
-);
+const _ImmutableDenseMatrix: ReturnType<typeof createImmutableDenseMatrixClass> =
+  createImmutableDenseMatrixClass(
+    factoryScope as Parameters<typeof createImmutableDenseMatrixClass>[0]
+  );
 factoryScope.ImmutableDenseMatrix = _ImmutableDenseMatrix;
 
 // Upgrade add/multiply from scalar stubs to full typed implementations
@@ -1375,8 +1376,19 @@ import { createZeta } from '../special/zeta.js';
 import { createIndex as createIndexFn } from '../type/matrix/function/index.js';
 
 // Spa needs FibonacciHeap
-const _Spa = createSpaClass(factoryScope as Parameters<typeof createSpaClass>[0]);
+const _Spa: ReturnType<typeof createSpaClass> = createSpaClass(
+  factoryScope as Parameters<typeof createSpaClass>[0]
+);
 factoryScope.Spa = _Spa;
+
+// The ready-made mathjs classes (#1567): one class identity per name, exported
+// from the package entry, so typed-API users can `instanceof`-check and construct
+// them the way mathjs does. These are the same instances the factoryScope uses.
+export {
+  _FibonacciHeap as FibonacciHeap,
+  _ImmutableDenseMatrix as ImmutableDenseMatrix,
+  _Spa as Spa,
+};
 
 export const column = createColumn(
   factoryScope as Parameters<typeof createColumn>[0]
@@ -3994,6 +4006,78 @@ function compatFactoryExports(): {
     createTyped,
   };
 }
+
+/**
+ * mathjs-named aliases of the 63 factories that exist as `factory_<name>` (#1570,
+ * decision (b) plus aliases). Same function objects — `createAbs === factory_abs`.
+ * mathjs-style tree-shaken `create*` / `*Dependencies` building for the factories
+ * that do NOT exist here stays a compat feature (see docs/migration-guide.md).
+ */
+export {
+  factory_abs as createAbs,
+  factory_acos as createAcos,
+  factory_acosh as createAcosh,
+  factory_acot as createAcot,
+  factory_acsc as createAcsc,
+  factory_asec as createAsec,
+  factory_asin as createAsin,
+  factory_asinh as createAsinh,
+  factory_atan as createAtan,
+  factory_atan2 as createAtan2,
+  factory_atanh as createAtanh,
+  factory_cbrt as createCbrt,
+  factory_ceil as createCeil,
+  factory_compare as createCompare,
+  factory_cos as createCos,
+  factory_cosh as createCosh,
+  factory_cot as createCot,
+  factory_createUnit as createCreateUnit,
+  factory_csc as createCsc,
+  factory_ctranspose as createCtranspose,
+  factory_cube as createCube,
+  factory_divide as createDivide,
+  factory_dot as createDot,
+  factory_equal as createEqual,
+  factory_exp as createExp,
+  factory_expm1 as createExpm1,
+  factory_fix as createFix,
+  factory_floor as createFloor,
+  factory_gcd as createGcd,
+  factory_hypot as createHypot,
+  factory_larger as createLarger,
+  factory_largerEq as createLargerEq,
+  factory_lcm as createLcm,
+  factory_log as createLog,
+  factory_log10 as createLog10,
+  factory_log1p as createLog1p,
+  factory_log2 as createLog2,
+  factory_max as createMax,
+  factory_mean as createMean,
+  factory_min as createMin,
+  factory_mod as createMod,
+  factory_norm as createNorm,
+  factory_nthRoot as createNthRoot,
+  factory_pow as createPow,
+  factory_round as createRound,
+  factory_sec as createSec,
+  factory_sign as createSign,
+  factory_sin as createSin,
+  factory_sinh as createSinh,
+  factory_smaller as createSmaller,
+  factory_smallerEq as createSmallerEq,
+  factory_sqrt as createSqrt,
+  factory_square as createSquare,
+  factory_std as createStd,
+  factory_subtract as createSubtract,
+  factory_sum as createSum,
+  factory_tan as createTan,
+  factory_tanh as createTanh,
+  factory_transpose as createTranspose,
+  factory_unaryMinus as createUnaryMinus,
+  factory_unaryPlus as createUnaryPlus,
+  factory_variance as createVariance,
+  factory_xgcd as createXgcd,
+};
 
 /** Internal host bindings for the mathjs compatibility package. */
 export const factory_mathjsCompat = {
