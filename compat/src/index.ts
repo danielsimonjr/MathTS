@@ -27,7 +27,9 @@ import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
-import { createChain } from './chain.js';
+import { chainTypedFromInstance, createChain } from './chain.js';
+import { assertValidCreateFactories, isCompatFactory } from './create-factory-validation.js';
+import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
 import { compatConstantReaders, type CompatConstantName } from './instance-constants.js';
 import type {
   BigNumber as ConfiguredBigNumber,
@@ -35,7 +37,11 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { Fraction, Complex as CompatComplex } from '@danielsimonjr/mathts-core';
-import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
+import {
+  isCompatMathInstance,
+  wireMathjsInstanceApi,
+  type WiredCompatInstance,
+} from './instance-api.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
@@ -487,6 +493,12 @@ export function create(
   if (!canonical) {
     const selected = mathFunctions.factory_mathjsCompat.tryCreateFactoryBundle(factories, config);
     if (selected !== undefined) return selected as MathInstance;
+    const explicitConfig = arguments.length >= 2;
+    const rejectNonFactoryImports =
+      (explicitConfig || Array.isArray(factories)) && !isCompatMathInstance(factories);
+    if (rejectNonFactoryImports) {
+      assertValidCreateFactories(factories);
+    }
   }
 
   const defaultsAtCreate: MathJSConfig = {
@@ -580,18 +592,24 @@ export function create(
     input?: CompatInstanceCreateInput,
     options?: Partial<MathJSConfig>
   ): MathInstance {
-    if (input === undefined) return create(options === undefined ? factories : all, options);
-    if (
-      options === undefined &&
-      !Array.isArray(input) &&
-      Object.keys(input).every(
-        (name) =>
-          Object.hasOwn(configBaseline, name) && typeof Reflect.get(input, name) !== 'function'
-      )
-    ) {
-      return create(factories, input as Partial<MathJSConfig>);
+    if (input === undefined) {
+      return options === undefined ? create(factories) : create(factories, options);
     }
-    return create(input as CompatFactoryInput, options);
+    if (options !== undefined) {
+      const flatValues = Object.values(deepFlatten(input as Record<string, unknown>));
+      const factoryBundle =
+        flatValues.length > 0 && flatValues.every((value) => isCompatFactory(value));
+      if (factoryBundle) {
+        return create(input as CompatFactoryInput, options);
+      }
+      const child = create(factories, options);
+      (child.import as (bindings: unknown) => void)(input);
+      return child;
+    }
+    if (Array.isArray(input)) {
+      return create(input as CompatFactoryInput, {});
+    }
+    return create(factories, input as Partial<MathJSConfig>);
   }
 
   // Mixed namespaces may extend a spread of all with ordinary functions or values.
@@ -642,6 +660,10 @@ export function create(
     // Type creation
     complex: shims.complex,
     fraction: shims.fraction,
+    typeOf: ((value: unknown) =>
+      shims.isFraction(value)
+        ? 'Fraction'
+        : (mathFunctions.typeOf as (v: unknown) => string)(value)) as typeof mathFunctions.typeOf,
     bignumber: shims.bignumber,
     matrix: shims.matrix,
     sparse: shims.sparse,
@@ -817,7 +839,24 @@ export function create(
     mad: compatMad,
     expm: compatExpm,
     bignumber: shims.bignumber,
-    format: namedFormat,
+    format: ((value: unknown, options?: Record<string, unknown> | number) => {
+      let merged: Record<string, unknown>;
+      if (options === undefined) {
+        merged =
+          currentConfig.precision !== undefined ? { precision: currentConfig.precision } : {};
+      } else if (typeof options === 'number') {
+        merged = { precision: options };
+      } else {
+        merged = { ...options };
+        if (merged.precision === undefined && currentConfig.precision !== undefined) {
+          merged.precision = currentConfig.precision;
+        }
+      }
+      const formatImpl = namedFormat;
+      return usesOverlay()
+        ? (mathFunctions.runWithConfig(currentConfig, () => formatImpl(value, merged)) as string)
+        : (formatImpl(value, merged) as string);
+    }) as typeof namedFormat,
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,
@@ -930,6 +969,7 @@ export function create(
     key !== 'config' &&
     key !== 'create' &&
     key !== 'chain' &&
+    key !== 'format' &&
     !HOT_SCALAR_SHIM_KEYS.has(key);
 
   inheritedKeys.forEach((key, index) => {
@@ -1008,11 +1048,6 @@ export function create(
   // (import, evaluate, compile, ...) become own keys; compileExpr is not a mathjs name,
   // so its assignment goes to the setter of its prototype level.
 
-  // GC12 — fluent chain API (math.chain(x).add(3).done()).
-  const chainApi = createChain(instance);
-  instance.chain = chainApi.chain;
-  if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
-
   // Only the parser of the functions namespace is bound to the instance: a parser that
   // the caller supplies stays as given (#1250).
   wireMathjsInstanceApi(
@@ -1027,6 +1062,20 @@ export function create(
       )
     )
   );
+
+  // GC12 — fluent chain API after the instance API is wired (typed, on, format).
+  const chainApi = createChain(instance, {
+    format: (value, options) =>
+      (instance.format as (v: unknown, o?: Record<string, unknown>) => string)(
+        value,
+        options as Record<string, unknown> | undefined
+      ),
+    typed: chainTypedFromInstance(instance.typed),
+    on: instance.on as (event: string, callback: (...args: unknown[]) => void) => void,
+  });
+  instance.chain = chainApi.chain;
+  if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
+
   // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
   instance.DimensionError = instanceSymbols.DimensionError;
 

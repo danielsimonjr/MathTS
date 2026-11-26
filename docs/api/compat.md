@@ -424,7 +424,7 @@ honours `includeEnd` on those paths.
 **Dependencies** (1):
 `createTyped`
 
-**Factory / uncategorized** (672):
+**Factory / uncategorized** (671):
 `abs`
 `acos`
 `acosh`
@@ -459,7 +459,6 @@ honours `includeEnd` on those paths.
 `cbrt`
 `ceil`
 `chain`
-`Chain`
 `clone`
 `column`
 `combinations`
@@ -1555,13 +1554,14 @@ honours `includeEnd` on those paths.
 `zetaDependencies`
 `zpk2tfDependencies`
 
-### Classes & types (29)
+### Classes & types (30)
 
 `AccessorNode`
 `ArrayNode`
 `AssignmentNode`
 `BigNumber`
 `BlockNode`
+`Chain`
 `Complex`
 `ConditionalNode`
 `ConstantNode`

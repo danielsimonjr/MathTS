@@ -44,6 +44,7 @@ import type {
 } from '@danielsimonjr/mathts-functions';
 
 import { withMathjsComplexBinary } from './mathjs-complex.js';
+import { ensureMathjsFractionToJson } from './fraction-mathjs-json.js';
 import { compatComplexPow } from './mathjs-compat-pow.js';
 import {
   add as _add,
@@ -162,10 +163,16 @@ interface CompatFraction {
  * returned unchanged (#1033), and a BigNumber, a bigint, null, an object `{ n, d }`, a Unit, an
  * Array and a Matrix convert, as in mathjs.
  */
-export const fraction = mathTyped('fraction', factory_mathjsCompat.fraction as never, {
+const fractionCore = mathTyped('fraction', factory_mathjsCompat.fraction as never, {
   '': () => new Fraction(0, 1),
   undefined: () => new Fraction(0, 1),
 }) as unknown as CompatFraction;
+
+function fractionExport(this: unknown, ...args: unknown[]): unknown {
+  return ensureMathjsFractionToJson(Reflect.apply(fractionCore, this, args));
+}
+
+export const fraction = Object.assign(fractionExport, fractionCore) as CompatFraction;
 
 const compatBignumber = factory_mathjsCompat.compatFactoryExports().createBignumber({
   typed: factory_mathjsCompat.createCompatTyped(),

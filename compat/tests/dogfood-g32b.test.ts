@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import * as oracle from 'mathjs';
 import { create, all } from '../src/index.js';
 import { fraction } from '../src/shims.js';
+import { withMathjsFractionJson } from '../src/fraction-mathjs-json.js';
 import { Fraction } from '@danielsimonjr/mathts-core';
 
 type UnitOut = { toString(): string; toNumber(): number };
@@ -26,10 +27,12 @@ describe('dogfood G32b formatting and units', () => {
     const third = mt.fraction(1, 3) as unknown as { n: number; d: number };
     expect(String(third)).toBe('0.(3)');
     const j = JSON.parse(JSON.stringify(third));
-    expect(j).toEqual({ mathjs: 'Fraction', n: 1, d: 3 });
-    const huge = new Fraction(2n ** 60n, 3n).toJSON();
+    expect(j).toEqual({ mathjs: 'Fraction', n: '1', d: '3' });
+    const huge = JSON.parse(
+      JSON.stringify(withMathjsFractionJson(new Fraction(2n ** 60n, 3n)))
+    ) as { n: string; d: string };
     expect(huge.n).toBe((2n ** 60n).toString());
-    expect(huge.d).toBe(3);
+    expect(huge.d).toBe('3');
   });
 
   it('size returns an Array in both matrix modes, as in mathjs 15', () => {

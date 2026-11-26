@@ -175,7 +175,10 @@ function formatCompatValue(value: unknown, options: unknown, nativeFormat: Nativ
 
 /** Wrap the native `format` so Fraction ratios and units match mathjs 15.3.0 (#1579). */
 export function createCompatFormat(nativeFormat: NativeFormat): NativeFormat {
-  return (value: unknown, options?: unknown) => formatCompatValue(value, options, nativeFormat);
+  return (value: unknown, options?: unknown) => {
+    const normalized = typeof options === 'number' ? { precision: options } : options;
+    return formatCompatValue(value, normalized, nativeFormat);
+  };
 }
 
 type NativeString = (value: unknown) => unknown;
