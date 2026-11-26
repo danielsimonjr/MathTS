@@ -292,9 +292,9 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-expression` (81 exports).
+> `@danielsimonjr/mathts-expression` (82 exports).
 
-### Functions (74)
+### Functions (75)
 
 `compile`
 `compileExpression`
@@ -359,6 +359,7 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 `mathMLDocument`
 `mathMLError`
 `parse`
+`resolveMode`
 `ScalarBuildError`
 `scalarCanonical`
 `scalarCanonicalKey`
