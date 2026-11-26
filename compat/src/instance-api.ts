@@ -370,6 +370,13 @@ export function wireMathjsInstanceApi(
       // mathjs 15.3.0: every block evaluates to a ResultSet (#1556) — compat only.
       compatBlockResultSet: true,
     };
+    // Expression `apply` is the one-based transform (`expression.transform.apply`),
+    // not the programmatic alias `mapSlices` (`formerly: 'apply'`). The module math
+    // scope only overlays the other 25 transforms; mirror mathjs by wiring apply here.
+    const applyTransform = expressionLayers.transform.apply;
+    if (typeof applyTransform === 'function') {
+      scope.apply = applyTransform;
+    }
     if (typeof instance.num === 'function') scope.num = instance.num;
     if (typeof instance.den === 'function') scope.den = instance.den;
     if (wrappedUnit !== undefined) scope.Unit = wrappedUnit;

@@ -108,6 +108,11 @@ function isSafeProperty(object: unknown, prop: unknown): boolean {
   // UNSAFE: inherited from Function prototype
   // e.g call, apply
   if ((prop as string) in Function.prototype) {
+    // mathjs names the one-based slice transform `apply` on mathWithTransform; it
+    // must resolve in parse().evaluate() while inherited Function#apply stays blocked.
+    if (prop === 'apply' && hasOwnProperty(object, 'apply')) {
+      return true;
+    }
     // 'in' is used instead of hasOwnProperty for nodejs v0.10
     // which is inconsistent on root prototypes. It is safe
     // here because Function.prototype is a root object
