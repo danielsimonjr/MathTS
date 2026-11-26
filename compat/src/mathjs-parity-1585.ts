@@ -219,9 +219,17 @@ export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unkn
   };
   // Colon / `diag(1:3)` go through the typed `range` signatures on the instance.
   // A bare wrapper dropped them and every range doc example diverged.
-  const native = nativeRange as { signatures?: unknown; name?: string };
-  if (native.signatures !== undefined) {
-    (range as unknown as { signatures: unknown }).signatures = native.signatures;
+  const native = nativeRange as {
+    signatures?: unknown;
+    _typedFunctionData?: unknown;
+  };
+  const tagged = range as unknown as {
+    signatures?: unknown;
+    _typedFunctionData?: unknown;
+  };
+  if (native.signatures !== undefined) tagged.signatures = native.signatures;
+  if (native._typedFunctionData !== undefined) {
+    tagged._typedFunctionData = native._typedFunctionData;
   }
   return range;
 }
