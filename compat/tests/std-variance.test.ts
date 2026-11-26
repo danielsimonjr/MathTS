@@ -76,9 +76,12 @@ describe('#1280 compat std and variance are the functions implementations', () =
     const sparseRef = mathjs.std(mathjs.sparse(m), 1) as unknown as { toArray(): number[][] };
     expect(sparse.toArray()).toEqual(sparseRef.toArray());
     expect(sparse.storage()).toBe('sparse');
-    const varRef = mathjsVariance(mathjsMatrix(m), 0) as unknown as { toArray(): number[] };
-    const varDense = varianceOf(math.matrix(m), 0) as { toArray(): number[] };
-    expect(varDense.toArray()).toEqual(varRef.toArray());
+    // #1550/#1587: variance(A, dim) is a Matrix, as in mathjs (the compat fold
+    // used to return the bare Array).
+    const varianceRef = mathjsVariance(mathjsMatrix(m), 0) as unknown as { toArray(): number[] };
+    expect((varianceOf(math.matrix(m), 0) as { toArray(): number[] }).toArray()).toEqual(
+      varianceRef.toArray()
+    );
   });
   it('the variadic form std(1, 2, 4) (0 before)', () => {
     expect(rel(stdOf(1, 2, 4) as number, mathjs.std(1, 2, 4))).toBeLessThan(EPS4);

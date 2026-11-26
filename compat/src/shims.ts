@@ -493,6 +493,9 @@ function isProtoSparseMatrix(x: unknown): boolean {
 
 const subtractPair = (a: unknown, b: unknown): unknown => {
   if (isProtoSparseMatrix(a) || isProtoSparseMatrix(b)) return _factorySubtract(a, b);
+  // A native-class DenseMatrix operand takes the matrix package (the scalar
+  // broadcast included), as the variadic fold routed it before (#1337).
+  if (isDenseMatrix(a) || isDenseMatrix(b)) return _matSubtract(a, b);
   if (typeof a === 'bigint' || typeof b === 'bigint') return _factorySubtract(a, b);
   return applyArithmetic(
     _subtract as (a: unknown, b: unknown) => unknown,
