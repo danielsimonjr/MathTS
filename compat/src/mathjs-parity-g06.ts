@@ -10,9 +10,11 @@
  */
 
 import {
+  FRACTION_TO_BIGNUMBER_ERROR,
   isBigNumberLike,
   isComplexLike,
   isFractionLike,
+  isMatrixLikeValue,
   isOwnBigNumber,
   keepSurface,
 } from './mathjs-parity-g02.js';
@@ -35,6 +37,38 @@ export const BERNOULLI_INDEX_ERROR = 'Bernoulli index must be nonnegative intege
 /** mathjs `compare` throws this for any Complex operand. */
 export const COMPLEX_ORDERING_ERROR = 'No ordering relation is defined for complex numbers';
 
+/** mathjs `pinv` / `inv` singular-matrix message (factory rank-factorization path). */
+export const PINV_DETERMINANT_ZERO = 'Cannot calculate inverse, determinant is zero';
+
+type Scalar = unknown;
+type ScalarMatrix = Scalar[] | Scalar[][];
+
+function isNumberNestedMatrix(x: unknown): boolean {
+  if (!Array.isArray(x)) return false;
+  const visit = (entry: unknown): boolean => {
+    if (typeof entry === 'number') return true;
+    if (Array.isArray(entry)) return entry.every(visit);
+    return false;
+  };
+  return visit(x);
+}
+
+function matrixData(x: unknown, isMatrix: (v: unknown) => boolean): Scalar[][] | null {
+  if (Array.isArray(x)) return x as Scalar[][];
+  if (isMatrix(x)) return (x as { valueOf: () => Scalar[][] }).valueOf();
+  return null;
+}
+
+function nestedArraySize(x: ScalarMatrix): number[] {
+  const s: number[] = [];
+  let current: unknown = x;
+  while (Array.isArray(current)) {
+    s.push(current.length);
+    current = current[0];
+  }
+  return s;
+}
+
 // =============================================================================
 // #1554 — pinv keeps the scalar type
 // =============================================================================
@@ -47,6 +81,16 @@ export interface CompatPinvDependencies {
   divide: AnyFn;
   /** The compat `equal`, used for the scalar zero check. */
   equal: AnyFn;
+  inv: AnyFn;
+  deepEqual: AnyFn;
+  dotDivide: AnyFn;
+  dot: AnyFn;
+  ctranspose: AnyFn;
+  multiply: AnyFn;
+  add: AnyFn;
+  matrix: (data: unknown, storage?: 'dense' | 'sparse') => unknown;
+  complex: (re: number, im: number) => unknown;
+  isMatrix: (x: unknown) => boolean;
 }
 
 function isScalarObject(x: unknown): boolean {
@@ -60,6 +104,126 @@ function isScalarObject(x: unknown): boolean {
  * becomes a number and a Complex is rejected. Arrays and matrices delegate to
  * the native function (their element types already survive there).
  */
+function mathjsPinvMatrix(
+  x: unknown,
+  deps: CompatPinvDependencies
+): Scalar | Scalar[] | Scalar[][] | unknown {
+  const {
+    inv,
+    deepEqual,
+    equal,
+    dotDivide,
+    dot,
+    ctranspose,
+    multiply,
+    add,
+    matrix,
+    complex,
+    isMatrix,
+  } = deps;
+  const Complex = (re: number, im: number) => complex(re, im);
+  const size = isMatrix(x)
+    ? (x as { size: () => number[] }).size()
+    : nestedArraySize(x as ScalarMatrix);
+  const isZero = (s: Scalar): boolean =>
+    equal(add(s, Complex(1, 1)), add(0, Complex(1, 1))) === true;
+  const isZeros = (arr: unknown): boolean =>
+    deepEqual(add(arr, Complex(1, 1)), add(multiply(arr, 0), Complex(1, 1))) === true;
+
+  const _pinv = (mat: Scalar[][], rows: number, cols: number): Scalar[][] => {
+    const { C, F } = _rankFact(mat, rows, cols);
+    const Cpinv = multiply(inv(multiply(ctranspose(C), C)), ctranspose(C));
+    const Fpinv = multiply(ctranspose(F), inv(multiply(F, ctranspose(F))));
+    return multiply(Fpinv, Cpinv) as Scalar[][];
+  };
+
+  function _rankFact(
+    mat: Scalar[][],
+    rows: number,
+    cols: number
+  ): { C: Scalar[][]; F: Scalar[][] } {
+    const rref = _rref(mat, rows, cols);
+    const C = mat.map((row) =>
+      row.filter((_, j) => j < rows && !isZero(dot(rref[j], rref[j]) as Scalar))
+    );
+    const F = rref.filter((_, i) => !isZero(dot(rref[i], rref[i]) as Scalar));
+    return { C, F };
+  }
+
+  function _rref(mat: Scalar[][], rows: number, cols: number): Scalar[][] {
+    const M = mat.map((row) => row.slice());
+    let lead = 0;
+    for (let r = 0; r < rows; r++) {
+      if (cols <= lead) {
+        return M;
+      }
+      let i = r;
+      while (isZero(M[i]![lead]!)) {
+        i++;
+        if (rows === i) {
+          i = r;
+          lead++;
+          if (cols === lead) {
+            return M;
+          }
+        }
+      }
+      [M[i], M[r]] = [M[r]!, M[i]!];
+      const val = M[r]![lead]!;
+      for (let j = 0; j < cols; j++) {
+        M[r]![j] = dotDivide(M[r]![j], val) as Scalar;
+      }
+      for (let ri = 0; ri < rows; ri++) {
+        if (ri === r) continue;
+        let piv = M[ri]![lead]!;
+        for (let j = 0; j < cols; j++) {
+          M[ri]![j] = add(M[ri]![j], multiply(-1, multiply(piv, M[r]![j]!))) as Scalar;
+        }
+      }
+      lead++;
+    }
+    return M;
+  }
+
+  switch (size.length) {
+    case 1: {
+      if (isZeros(x)) return ctranspose(x);
+      if (size[0] === 1) {
+        return inv(x);
+      }
+      return dotDivide(ctranspose(x), dot(x, x));
+    }
+    case 2: {
+      if (isZeros(x)) return ctranspose(x);
+      const rows = size[0]!;
+      const cols = size[1]!;
+      if (rows === cols) {
+        try {
+          return inv(x);
+        } catch (err) {
+          if (
+            err instanceof Error &&
+            err.message.match(/Cannot calculate inverse, determinant is zero/)
+          ) {
+            /* fall through to _pinv like mathjs */
+          } else {
+            throw err;
+          }
+        }
+      }
+      const data = isMatrix(x) ? (x as { valueOf: () => Scalar[][] }).valueOf() : (x as Scalar[][]);
+      const result = _pinv(data, rows, cols);
+      if (isMatrix(x)) {
+        const storage = (x as { storage: () => string }).storage() as 'dense' | 'sparse';
+        return matrix(result, storage);
+      }
+      return result;
+    }
+    default:
+      throw new RangeError(`Matrix must be two dimensional (size: ${size.join(' x ')})`);
+  }
+}
+
 export function createCompatPinv(native: AnyFn, deps: CompatPinvDependencies): AnyFn {
   const { convert, divide, equal } = deps;
   return keepSurface(native, (...args: unknown[]): unknown => {
@@ -68,6 +232,13 @@ export function createCompatPinv(native: AnyFn, deps: CompatPinvDependencies): A
       return native(...converted);
     }
     const x = converted[0];
+    if (isMatrixLikeValue(x)) {
+      const data = matrixData(x, deps.isMatrix);
+      if (data !== null && isNumberNestedMatrix(data)) {
+        return mathjsPinvMatrix(x, deps);
+      }
+      return native(x);
+    }
     if (isScalarObject(x)) {
       if (equal(x, 0) === true) return x;
       return divide(1, x);
@@ -112,6 +283,9 @@ function bernoulliCore<T>(
   times: (a: T, b: T) => T,
   divide: (a: T, b: T) => T
 ): T {
+  if (index === 0) return promote(1);
+  if (index === 1) return divide(promote(-1), promote(2));
+  if (index % 2 === 1) return promote(0);
   const one = promote(1);
   if (cache.length === 1) {
     cache.push([divide(one, promote(-3)), divide(one, promote(-2)), divide(one, promote(6))]);
@@ -137,6 +311,8 @@ function bernoulliCore<T>(
 
 /** The exact Fraction bernoulli cache (mathjs `fractionCache`). */
 const fractionCache: (BernoulliTriple<CompatFractionType> | undefined)[] = [undefined];
+/** The float bernoulli cache (mathjs `numberCache`). */
+const numberCache: (BernoulliTriple<number> | undefined)[] = [undefined];
 /** The BigNumber bernoulli caches, one per precision (mathjs `bigCache`). */
 const bigCaches = new Map<number, (BernoulliTriple<CompatBigNumberType> | undefined)[]>();
 
@@ -180,6 +356,15 @@ export function createCompatBernoulli(native: AnyFn, deps: CompatBernoulliDepend
       (a, b) => a.div(b) as CompatBigNumberType
     );
   };
+  const bernoulliNumber = (index: number): number =>
+    bernoulliCore(
+      index,
+      (n) => n,
+      numberCache,
+      (a, b) => a + b,
+      (a, b) => a * b,
+      (a, b) => a / b
+    );
   return keepSurface(native, (...args: unknown[]): unknown => {
     const converted = args.map(convert);
     if (converted.length !== 1) {
@@ -187,7 +372,7 @@ export function createCompatBernoulli(native: AnyFn, deps: CompatBernoulliDepend
     }
     const x = converted[0];
     if (typeof x === 'number') {
-      return native(bernoulliIndex(x));
+      return bernoulliNumber(bernoulliIndex(x));
     }
     if (typeof x === 'bigint' || isFractionLike(x)) {
       return bernoulliFraction(bernoulliIndex(x));
@@ -209,11 +394,22 @@ export function createCompatBernoulli(native: AnyFn, deps: CompatBernoulliDepend
  * generic argument error instead. The wrapper converts the foreign scalars
  * first, then raises the mathjs error.
  */
+function hasBigNumberLike(x: unknown): boolean {
+  return isOwnBigNumber(x) || isBigNumberLike(x);
+}
+
+function mixedFractionBigNumber(a: unknown, b: unknown): boolean {
+  return (hasBigNumberLike(a) && isFractionLike(b)) || (isFractionLike(a) && hasBigNumberLike(b));
+}
+
 export function createCompatCompare(native: AnyFn, convert: (v: unknown) => unknown): AnyFn {
   return keepSurface(native, (...args: unknown[]): unknown => {
     const converted = args.map(convert);
     for (const arg of converted) {
       if (isComplexLike(arg)) throw new TypeError(COMPLEX_ORDERING_ERROR);
+    }
+    if (converted.length >= 2 && mixedFractionBigNumber(converted[0], converted[1])) {
+      throw new TypeError(FRACTION_TO_BIGNUMBER_ERROR);
     }
     return native(...converted);
   });

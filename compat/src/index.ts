@@ -549,6 +549,16 @@ export function create(
     convert: convertForeignScalar,
     divide: shims.divide as (...args: unknown[]) => unknown,
     equal: mathFunctions.equal as (...args: unknown[]) => unknown,
+    inv: mathFunctions.inv as (...args: unknown[]) => unknown,
+    deepEqual: mathFunctions.deepEqual as (...args: unknown[]) => unknown,
+    dotDivide: mathFunctions.dotDivide as (...args: unknown[]) => unknown,
+    dot: mathFunctions.dot as (...args: unknown[]) => unknown,
+    ctranspose: mathFunctions.ctranspose as (...args: unknown[]) => unknown,
+    multiply: shims.multiply as (...args: unknown[]) => unknown,
+    add: shims.add as (...args: unknown[]) => unknown,
+    matrix: shims.matrix as (data: unknown, storage?: 'dense' | 'sparse') => unknown,
+    complex: shims.complex as (re: number, im: number) => unknown,
+    isMatrix: shims.isMatrix as (x: unknown) => boolean,
   });
   const compatBernoulli = createCompatBernoulli(
     mathFunctions.bernoulli as (...args: unknown[]) => unknown,
