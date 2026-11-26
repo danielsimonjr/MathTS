@@ -473,7 +473,11 @@
     },
     {
       "names": ["createChain"],
-      "filesGlob": ["compat/src/chain.ts"],
+      "filesGlob": [
+        "compat/src/chain-create.ts",
+        "compat/src/chain-types.ts",
+        "compat/src/chain-methods.ts"
+      ],
       "reason": "distinct chain surfaces (mirrors the already-allowlisted Chain type split): compat/src/chain.ts's createChain builds the real done/valueOf method-chaining proxy; functions/src/type/chain/function/chain.ts's (left canonical) is the mathjs `Chain` factory. 2026-07 dedup campaign, closing tail slice."
     },
     {

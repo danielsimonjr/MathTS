@@ -22,7 +22,7 @@ import {
   parser as functionsParser,
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
-import { createChain } from './chain.js';
+import { createChain } from './chain-create.js';
 import type { BoundInstanceConfig, CompatCreate, CompatFactoryInput } from './compat-types.js';
 import {
   createCompatFormat,

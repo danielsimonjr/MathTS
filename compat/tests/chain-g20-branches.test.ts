@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
-import { chainTypedFromInstance } from '../src/chain.js';
+import { chainTypedFromInstance } from '../src/chain-create.js';
 
 describe('G20 chain implementation branches (#1575)', () => {
   it('chainTypedFromInstance rejects non-typed values', () => {
@@ -30,6 +30,6 @@ describe('G20 chain implementation branches (#1575)', () => {
     const revived = ChainCtor.fromJSON({ value: 7 });
     expect(revived.done()).toBe(7);
     const bareCall = ChainCtor as unknown as (value?: unknown) => unknown;
-    expect(() => bareCall(3)).toThrow(/Constructor must be called with 'new'/);
+    expect(() => bareCall(3)).toThrow(/Constructor must be called with the new operator/);
   });
 });

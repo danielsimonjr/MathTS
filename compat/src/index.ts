@@ -27,7 +27,7 @@ import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
-import { chainTypedFromInstance, createChain } from './chain.js';
+import { chainTypedFromInstance, createChain } from './chain-create.js';
 import { normalizeCompatFormatOptions } from './fraction-format-parity.js';
 import { assertValidCreateFactories, isCompatFactory } from './create-factory-validation.js';
 import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
