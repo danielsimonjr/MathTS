@@ -348,7 +348,11 @@ describe('Complex', () => {
 
       const asec0 = new Complex(0, 0).asec();
       expect(asec0.re).toBe(0);
-      expect(asec0.im).toBe(-Infinity);
+      // complex.js 2.4.2 — the library of the mathjs 15.3.0 oracle — special-cases
+      // asec(0) to +i∞, and compat/tests/named-functions-parity.test.ts pins the
+      // instance method against it. (C99 cacos(+∞) would be −i∞; the native
+      // functions factory keeps that value on its own acos path.)
+      expect(asec0.im).toBe(Infinity);
     });
   });
 
