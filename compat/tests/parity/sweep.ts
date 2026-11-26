@@ -201,7 +201,10 @@ export function sweepPool(options?: { only?: string[] }): {
     if (typeof fnO !== 'function' || typeof fnC !== 'function') continue;
     const declared = fnO.length ?? 0;
     const widths = new Set<number>([Math.max(declared, 1)]);
-    if (declared > 1) widths.add(1);
+    // Extra unary width only for a targeted `only` sweep (G18 F2: zeta.length is 2
+    // but mathjs still accepts one argument). The full-surface pool stays on the
+    // declared arity so Test stays inside the 20-minute job wall.
+    if (declared > 1 && options?.only) widths.add(1);
     const seen = new Set<number>();
     arities.set(name, seen);
     const useCompatPool = FACTORY_TYPED_POOL_OPS.has(name);
