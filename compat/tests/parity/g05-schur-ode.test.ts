@@ -146,4 +146,18 @@ describe('G05 solveODE step selection (#1584)', () => {
     const final = sol.y[sol.y.length - 1];
     expect(Math.abs(final - Math.E)).toBeLessThan(1e-4);
   });
+
+  it('schur throws on missing, extra, and non-matrix arguments', () => {
+    expect(() => (compat.schur as () => unknown)()).toThrow(/Too few arguments/);
+    expect(() => compat.schur(1)).toThrow(/Unexpected type of argument/);
+    expect(() =>
+      (compat.schur as (a: unknown, b: unknown) => unknown)(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        0
+      )
+    ).toThrow(/Too many arguments/);
+  });
 });
