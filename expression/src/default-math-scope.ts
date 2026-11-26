@@ -75,27 +75,11 @@ export const EXPRESSION_SCOPE_OMIT: ReadonlySet<string> = new Set([
 const SAFE_SCOPE_OMIT: readonly string[] = [...EXPRESSION_SCOPE_OMIT, 'config', 'numeric'];
 
 /**
- * Result container that a block of statements returns (#1556). It has the shape
- * of the `ResultSet` type: `entries`, the `isResultSet` constructor flag, and
- * `valueOf` / `toString` like mathjs. The scope carries the constructor, so the
- * compiler can build a ResultSet for every block.
+ * Canonical block ResultSet (#1567). Re-exported so existing default-scope
+ * imports keep working; G01 still only constructs it when `compatBlockResultSet`
+ * is set on the compiler math overlay.
  */
-export class ResultSet {
-  entries: unknown[];
-  constructor(entries: unknown[]) {
-    this.entries = entries;
-  }
-  /** The type guard `isResultSet` reads this flag from the constructor prototype. */
-  get isResultSet(): true {
-    return true;
-  }
-  valueOf(): unknown[] {
-    return this.entries;
-  }
-  toString(): string {
-    return '[' + this.entries.map(String).join(', ') + ']';
-  }
-}
+export { ResultSet } from './ResultSet.js';
 
 const expressionViews = new WeakMap<object, Record<string, unknown>>();
 
