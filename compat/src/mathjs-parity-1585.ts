@@ -212,17 +212,9 @@ interface RangeDeps {
 export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unknown {
   const { nativeRange, config, typed } = deps;
   const applyQuirk = function applyQuirk(this: unknown, ...args: unknown[]): unknown {
-    if (config().number === 'BigNumber' && typeof args[0] === 'string') {
+    if (typeof args[0] === 'string') {
       if (args.length === 1) return nativeRange.call(this, args[0]);
       if (args.length === 2 && typeof args[1] === 'boolean') return nativeRange.call(this, args[0]);
-    }
-    // mathjs evaluate / colon RangeNodes pass two or three values without
-    // includeEnd and still include the end. Native `_range` defaults false.
-    if (args.length === 2 && typeof args[1] !== 'boolean') {
-      return nativeRange.call(this, args[0], args[1], true);
-    }
-    if (args.length === 3 && typeof args[2] !== 'boolean') {
-      return nativeRange.call(this, args[0], args[1], args[2], true);
     }
     return nativeRange.apply(this, args);
   };
