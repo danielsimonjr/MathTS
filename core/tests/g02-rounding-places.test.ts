@@ -40,6 +40,22 @@ describe('Fraction.ceil / Fraction.floor with places (#1550)', () => {
     expect(() => new Fraction(1234n, 1n).floor(-2)).toThrow(RangeError);
     expect(() => new Fraction(1250n, 1n).ceil(-2)).toThrow(RangeError);
   });
+
+  it('a non-integer, NaN, or infinite places count throws, as fraction.js does', () => {
+    // fraction.js: `10n ** BigInt(places || 0)` — BigInt rejects a non-integer
+    // with RangeError (including 1.5, NaN, and ±Infinity).
+    expect(() => new Fraction(1n, 3n).ceil(1.5)).toThrow(RangeError);
+    expect(() => new Fraction(1n, 3n).floor(Number.NaN)).toThrow(RangeError);
+    expect(() => new Fraction(1n, 3n).ceil(Number.POSITIVE_INFINITY)).toThrow(RangeError);
+    expect(() => new Fraction(1n, 3n).floor(Number.NEGATIVE_INFINITY)).toThrow(RangeError);
+  });
+
+  it('places=0 is the integer bound even when passed explicitly', () => {
+    expect(new Fraction(1n, 3n).ceil(0)).toMatchObject({ numerator: 1n, denominator: 1n });
+    expect(new Fraction(1n, 3n).floor(0)).toMatchObject({ numerator: 0n, denominator: 1n });
+    expect(new Fraction(-1n, 3n).ceil(0)).toMatchObject({ numerator: 0n, denominator: 1n });
+    expect(new Fraction(-1n, 3n).floor(0)).toMatchObject({ numerator: -1n, denominator: 1n });
+  });
 });
 
 describe('Complex.ceil / Complex.floor with decimals (#1550)', () => {
@@ -71,5 +87,22 @@ describe('Complex.ceil / Complex.floor with decimals (#1550)', () => {
     expect(new Complex(1.5, -2.5).ceil().im).toBe(-2);
     expect(new Complex(1.5, -2.5).floor().re).toBe(1);
     expect(new Complex(1.5, -2.5).floor().im).toBe(-3);
+  });
+
+  it('decimals=0 passed explicitly matches the no-argument form', () => {
+    const a = new Complex(1.5, -2.5);
+    expect(a.ceil(0).re).toBe(a.ceil().re);
+    expect(a.ceil(0).im).toBe(a.ceil().im);
+    expect(a.floor(0).re).toBe(a.floor().re);
+    expect(a.floor(0).im).toBe(a.floor().im);
+  });
+
+  it('NaN and Infinity decimals follow complex.js (scale by 10^n)', () => {
+    const nanCeil = new Complex(1.5, -2.5).ceil(Number.NaN);
+    expect(Number.isNaN(nanCeil.re)).toBe(true);
+    expect(Number.isNaN(nanCeil.im)).toBe(true);
+    const infFloor = new Complex(1.5, -2.5).floor(Number.POSITIVE_INFINITY);
+    expect(Number.isNaN(infFloor.re)).toBe(true);
+    expect(Number.isNaN(infFloor.im)).toBe(true);
   });
 });

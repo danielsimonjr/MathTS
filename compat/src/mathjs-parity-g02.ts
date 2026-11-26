@@ -708,7 +708,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
       let w = to;
       const pivot = arr[Math.floor(Math.random() * (to - from + 1)) + from] as unknown;
       while (r < w) {
-        if (compareFn(arr[r] as never, pivot as never) >= 0) {
+        if (compareFn(arr[r], pivot) >= 0) {
           const tmp = arr[w];
           arr[w] = arr[r];
           arr[r] = tmp;
@@ -717,7 +717,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
           ++r;
         }
       }
-      if (compareFn(arr[r] as never, pivot as never) > 0) --r;
+      if (compareFn(arr[r], pivot) > 0) --r;
       if (k <= r) to = r;
       else from = r + 1;
     }
@@ -733,7 +733,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
       const right = partitionSelect(list, mid + 1);
       let left = list[mid];
       for (let i = 0; i < mid; ++i) {
-        if (compareFn(list[i] as never, left as never) > 0) left = list[i];
+        if (compareFn(list[i], left) > 0) left = list[i];
       }
       const sum = apply(add, [left, right]);
       return apply(divide, [sum, typeof sum === 'bigint' ? 2n : 2]);

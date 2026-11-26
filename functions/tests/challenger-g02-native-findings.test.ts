@@ -38,21 +38,24 @@ describe('N1: the variance and std of Complex data are real (NumPy), not mathjs 
     const v = variance(new Complex(1, 2), 2);
     expect(v).not.toBeInstanceOf(Complex);
     expect(typeof v).toBe('number');
-    expect(v as number).toBe(2.5);
+    if (typeof v !== 'number') throw new Error('expected a number');
+    expect(v).toBe(2.5);
   });
 
   it('variance of a Complex list is a real, non-negative number', () => {
     // np.var([1+0j, 0+1j, -1+2j], ddof=1) == 2.0
     const v = variance([new Complex(1, 0), new Complex(0, 1), new Complex(-1, 2)]);
     expect(typeof v).toBe('number');
-    expect(v as number).toBeCloseTo(2, 12);
+    if (typeof v !== 'number') throw new Error('expected a number');
+    expect(v).toBeCloseTo(2, 12);
   });
 
   it('std of a Complex list is the real NumPy value', () => {
     // np.std([1+2j, 3+4j], ddof=1) == 2.0
     const s = std([new Complex(1, 2), new Complex(3, 4)]);
     expect(typeof s).toBe('number');
-    expect(s as number).toBeCloseTo(2, 12);
+    if (typeof s !== 'number') throw new Error('expected a number');
+    expect(s).toBeCloseTo(2, 12);
   });
 });
 
@@ -77,7 +80,8 @@ describe('N2: the published variance/std overloads keep their number returns', (
       expect(rest, `${name}Callable has a rest overload`).toBeDefined();
       // The values of a varargs reduction are numbers at runtime; publishing `unknown`
       // forces every consumer to cast (the two edited native tests do exactly that).
-      expect(rest as string).toContain('): number;');
+      if (rest === undefined) throw new Error(`${name}Callable is missing a rest overload`);
+      expect(rest).toContain('): number;');
     }
   });
 

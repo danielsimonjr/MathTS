@@ -12,9 +12,7 @@
  * changing a critical library to match mathjs; the adapter belongs in compat.
  */
 import { describe, expect, it } from 'vitest';
-import { pair, show } from './oracle.js';
-
-type Lib = Record<string, unknown>;
+import { pair, show, type HarnessInstance } from './oracle.js';
 
 type Outcome = { value: string } | { error: string; message: string };
 
@@ -23,12 +21,12 @@ const firstClause = (message: string): string => {
   return i === -1 ? message : message.slice(0, i + 1);
 };
 
-function outcome(L: Lib, run: (l: Lib) => unknown): Outcome {
+function outcome(L: HarnessInstance, run: (l: HarnessInstance) => unknown): Outcome {
   try {
     const v = run(L);
-    return { value: show(L as never, v) };
+    return { value: show(L, v) };
   } catch (e) {
-    const err = e as Error;
+    const err = e instanceof Error ? e : new Error(String(e));
     return { error: err.name, message: firstClause(err.message) };
   }
 }
@@ -37,11 +35,11 @@ function outcome(L: Lib, run: (l: Lib) => unknown): Outcome {
 function expectSameAsOracle(
   label: string,
   config: Record<string, unknown>,
-  run: (l: Lib) => unknown
+  run: (l: HarnessInstance) => unknown
 ): void {
   const { mathjs, compat } = pair(config);
-  const oracle = outcome(mathjs as unknown as Lib, run);
-  const actual = outcome(compat as unknown as Lib, run);
+  const oracle = outcome(mathjs, run);
+  const actual = outcome(compat, run);
   expect(actual, label).toEqual(oracle);
 }
 
