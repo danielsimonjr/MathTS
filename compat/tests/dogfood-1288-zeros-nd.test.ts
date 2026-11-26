@@ -132,22 +132,22 @@ describe('compat zeros and ones with a format (#1288)', () => {
 });
 
 describe('direct zeros and ones imports keep the native forms (#1288)', () => {
-  it('zeros(n) and ones(n) are number[] of length n', () => {
-    expect(zeros(3)).toEqual([0, 0, 0]);
-    expect(ones(3)).toEqual([1, 1, 1]);
-    expect(zeros(0)).toEqual([]);
-    expect(Array.isArray(zeros(3))).toBe(true);
+  it('zeros(n) and ones(n) are the mathjs Matrix of size [n] (#1550)', () => {
+    // #1550: `zeros`/`ones` bind the mathjs-shaped factories, so a single size
+    // returns a Matrix under the default config, as in mathjs.
+    expect(sizeOf(zeros(3))).toEqual([3]);
+    expect(nested(zeros(3))).toEqual(nested(mj.zeros(3)));
+    expect(nested(ones(3))).toEqual(nested(mj.ones(3)));
+    expect(sizeOf(zeros(0))).toEqual([0]);
   });
 
-  it('zeros(r, c) and ones(r, c) are native DenseMatrix of r x c', () => {
+  it('zeros(r, c) and ones(r, c) are matrices of r x c (#1550)', () => {
     const z = zeros(2, 3);
     const o = ones(2, 3);
-    expect(z).toBeInstanceOf(DenseMatrix);
-    expect(o).toBeInstanceOf(DenseMatrix);
-    expect((z as DenseMatrix).rows).toBe(2);
-    expect((z as DenseMatrix).cols).toBe(3);
-    expect((z as DenseMatrix).toArray()).toEqual(nested(mj.zeros(2, 3)));
-    expect((o as DenseMatrix).toArray()).toEqual(nested(mj.ones(2, 3)));
+    expect(sizeOf(z)).toEqual([2, 3]);
+    expect(sizeOf(o)).toEqual([2, 3]);
+    expect(nested(z)).toEqual(nested(mj.zeros(2, 3)));
+    expect(nested(o)).toEqual(nested(mj.ones(2, 3)));
   });
 });
 

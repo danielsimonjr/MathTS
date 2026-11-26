@@ -273,7 +273,9 @@ describe('@danielsimonjr/mathts-compat', () => {
     });
 
     it('identity() should create identity matrix', () => {
-      const I = identity(3);
+      // #1550: the mathjs-shaped factory; the compat instance type is the
+      // portable TypedFunction surface, so the matrix shape is asserted here.
+      const I = identity(3) as DenseMatrix;
 
       expect(I.get(0, 0)).toBe(1);
       expect(I.get(1, 1)).toBe(1);
@@ -282,8 +284,11 @@ describe('@danielsimonjr/mathts-compat', () => {
     });
 
     it('zeros() should create zero matrix', () => {
-      const z = zeros(2, 3);
-      if (!(z instanceof DenseMatrix)) throw new TypeError('zeros(r, c) must return a DenseMatrix');
+      const z = zeros(2, 3) as DenseMatrix;
+      // #1550: the mathjs-shaped factory returns the mathjs DenseMatrix kind.
+      expect(
+        (z as unknown as { isDenseMatrix?: boolean }).isDenseMatrix ?? z instanceof DenseMatrix
+      ).toBe(true);
 
       expect(z.rows).toBe(2);
       expect(z.cols).toBe(3);
@@ -291,8 +296,11 @@ describe('@danielsimonjr/mathts-compat', () => {
     });
 
     it('ones() should create ones matrix', () => {
-      const o = ones(2, 2);
-      if (!(o instanceof DenseMatrix)) throw new TypeError('ones(r, c) must return a DenseMatrix');
+      const o = ones(2, 2) as DenseMatrix;
+      // #1550: the mathjs-shaped factory returns the mathjs DenseMatrix kind.
+      expect(
+        (o as unknown as { isDenseMatrix?: boolean }).isDenseMatrix ?? o instanceof DenseMatrix
+      ).toBe(true);
 
       expect(o.get(0, 0)).toBe(1);
       expect(o.get(1, 1)).toBe(1);

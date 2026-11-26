@@ -28,11 +28,12 @@ const I2 = [
 
 describe('#1278 compat pow of an empty matrix', () => {
   it('T13 a native 0 x 0 matrix and the expression give a 0 x 0 matrix', () => {
-    for (const r of [
-      m.pow(DenseMatrix.zeros(0, 0), 2),
-      m.pow(m.identity(0), 2),
-      m.evaluate('zeros(0, 0)^2'),
-    ]) {
+    // #1550: `identity(0)` throws the mathjs validation error now, so the
+    // identity row of the old table is a throw on the compat surface too.
+    expect(() => m.pow(m.identity(0), 2)).toThrow(
+      'Parameters in function identity must be positive integers'
+    );
+    for (const r of [m.pow(DenseMatrix.zeros(0, 0), 2), m.evaluate('zeros(0, 0)^2')]) {
       expect(Array.isArray(r)).toBe(false);
       expect(sz(r)).toEqual([0, 0]);
     }
