@@ -454,7 +454,10 @@ export function createCompatMathjsStatistics(
       // whole, which drives the whole computation).
       const flat: unknown[] = [];
       flattenScalars(args, flat);
-      if (flat.some(isComplexLike) && !flat.some((v) => isMatrixLikeValue(v) && !Array.isArray(v))) {
+      if (
+        flat.some(isComplexLike) &&
+        !flat.some((v) => isMatrixLikeValue(v) && !Array.isArray(v))
+      ) {
         return complexVariance(flat, 'unbiased');
       }
       return reboxMatrixStatistics(args, apply(native, [args]), deps.matrix);
@@ -899,7 +902,11 @@ export function createCompatGammaBigNumberGuard(
  */
 export function withSingleNumericStringGuard(fn: UnaryLike): (...args: unknown[]) => unknown {
   return keepSurface(fn, (...args: unknown[]): unknown => {
-    if (args.length === 1 && typeof args[0] === 'string' && (args[0].trim() === '' || Number.isNaN(Number(args[0])))) {
+    if (
+      args.length === 1 &&
+      typeof args[0] === 'string' &&
+      (args[0].trim() === '' || Number.isNaN(Number(args[0])))
+    ) {
       throw invalidNumericStringError(args[0]);
     }
     return apply(fn, args);
