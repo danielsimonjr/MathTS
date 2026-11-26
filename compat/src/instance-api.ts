@@ -32,7 +32,8 @@ import {
   type CompatExpressionApi,
 } from './mathjs-expression-bindings.js';
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
-import { wrapCompatUnitConstructor, type CompatUnitConstructorLike } from './mathjs-unit.js';
+import { wrapCompatUnitConstructor } from './mathjs-unit.js';
+import { patchParseForMathjsToTex } from './totex-parity.js';
 
 /** Compat instance evaluate options: adds `{ safe: true }` mathjs opt-in (#1549). */
 export type CompatEvaluateOptions = PhysicsEvaluateOptions & { safe?: boolean };
@@ -207,7 +208,7 @@ export function wireMathjsInstanceApi(
     }
   }
 
-  const UnitCtor = instance.Unit as CompatUnitConstructorLike | undefined;
+  const UnitCtor = instance.Unit as Parameters<typeof wrapCompatUnitConstructor>[0] | undefined;
   if (typeof UnitCtor === 'function' && typeof UnitCtor.isValuelessUnit === 'function') {
     const mathjsUnit = wrapCompatUnitConstructor(UnitCtor);
     mathNs.Unit = mathjsUnit;
@@ -256,6 +257,22 @@ export function wireMathjsInstanceApi(
     return { ...options, unsafe: true };
   }
 
+  function patchEvaluatorToTex(bound: InstanceEvaluator): void {
+    const unit = instance.Unit as { isValuelessUnit?: (name: string) => boolean } | undefined;
+    if (typeof unit?.isValuelessUnit !== 'function') return;
+    const originalParse = bound.parse;
+    const patched = patchParseForMathjsToTex(
+      originalParse.bind(bound),
+      instance as Record<string, unknown>,
+      unit as { isValuelessUnit: (name: string) => boolean }
+    );
+    // Copy `isValidLatinOrGreek` / other parse statics from the *scoped* parser
+    // (mathjsSyntax). Assigning `functionsParse` overwrote those with the typed
+    // namespace parser, so `compat.parse.isValidLatinOrGreek('×')` became false.
+    Object.assign(patched, originalParse);
+    bound.parse = patched as typeof bound.parse;
+  }
+
   function resolveHelpName(search: unknown): string {
     if (typeof search === 'string') return search;
     const mwt = expressionLayers.mathWithTransform;
@@ -295,6 +312,7 @@ export function wireMathjsInstanceApi(
       compatDecimalResult,
       mathjsExpressionBindings
     );
+    patchEvaluatorToTex(evaluator);
     const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
       entries?: unknown[]
     ) => unknown;
