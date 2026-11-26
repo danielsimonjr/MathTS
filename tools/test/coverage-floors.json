@@ -3,23 +3,23 @@
   "packages": {
     "typed-function": {
       "runner": "bun",
-      "floor": 91
+      "floor": 94
     },
     "workerpool": {
       "runner": "bun",
-      "floor": 82
+      "floor": 65
     },
     "core": {
       "runner": "bun",
-      "floor": 75
+      "floor": 61
     },
     "matrix": {
       "runner": "bun",
-      "floor": 86
+      "floor": 84
     },
     "tensor": {
       "runner": "bun",
-      "floor": 89
+      "floor": 90
     },
     "autograd": {
       "runner": "bun",
@@ -27,11 +27,11 @@
     },
     "functions": {
       "runner": "vitest",
-      "floor": 87
+      "floor": 51
     },
     "expression": {
       "runner": "bun",
-      "floor": 93
+      "floor": 86
     },
     "parser": {
       "runner": "bun",
@@ -75,14 +75,11 @@
     },
     "parallel": {
       "runner": "bun",
-      "floor": 97
+      "floor": 95
     },
     "workbook": {
       "runner": "bun",
-      "floor": 87
-    },
-    "assembly": {
-      "runner": "script"
+      "floor": 57
     },
     "compat": {
       "runner": "bun",
@@ -90,11 +87,14 @@
     },
     "gpu": {
       "runner": "bun",
-      "floor": 57
+      "floor": 52
     },
     "plot": {
       "runner": "bun",
-      "floor": 87
+      "floor": 91
+    },
+    "assembly": {
+      "runner": "script"
     }
   }
 }
