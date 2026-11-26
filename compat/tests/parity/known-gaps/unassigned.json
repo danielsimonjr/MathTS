@@ -2726,7 +2726,6 @@
   "{\"number\":\"BigNumber\"} random([2, 3])",
   "{\"number\":\"BigNumber\"} randomInt(10, 20)",
   "{\"number\":\"BigNumber\"} randomInt([2, 3], 10)",
-  "{\"number\":\"BigNumber\"} range(\"4:10\")",
   "{\"number\":\"BigNumber\"} rotate([1, 0, 0], unit(\"90deg\"), [0, 0, 1])",
   "{\"number\":\"BigNumber\"} rotate([1, 0], pi / 2)",
   "{\"number\":\"BigNumber\"} rotate(matrix([1, 0, 0]), unit(\"90deg\"), matrix([0, 0, 1]))",

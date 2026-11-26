@@ -32,6 +32,7 @@ import {
 import { instanceSymbols } from './instance-symbols.js';
 import {
   createMathjsRange,
+  createMathjsRangeEvaluate,
   createMathjsSymbolicEqual,
   createMathjsZeta,
 } from './mathjs-parity-1585.js';
@@ -240,15 +241,18 @@ export function g18InstanceOverrides(config: () => G18ParityConfig): {
   zeta: ReturnType<typeof createMathjsZeta>;
   symbolicEqual: ReturnType<typeof createMathjsSymbolicEqual>;
   range: ReturnType<typeof createMathjsRange>;
+  rangeEvaluate: ReturnType<typeof createMathjsRangeEvaluate>;
 } {
+  const range = createMathjsRange({
+    nativeRange: mathFunctions.range as RangeFn,
+    config,
+    typed: g18Typed,
+  });
   return {
     zeta: createMathjsZeta(mathjsZetaDeps(config)),
     symbolicEqual: createMathjsSymbolicEqual({ typed: g18Typed }),
-    range: createMathjsRange({
-      nativeRange: mathFunctions.range as RangeFn,
-      config,
-      typed: g18Typed,
-    }),
+    range,
+    rangeEvaluate: createMathjsRangeEvaluate(range, g18Typed),
   };
 }
 

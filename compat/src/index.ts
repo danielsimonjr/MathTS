@@ -645,6 +645,9 @@ export function create(
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
   const g07Logical = createG07LogicalParity();
+  const { rangeEvaluate: g18RangeEvaluate, ...g18Surface } = g18InstanceOverrides(
+    () => currentConfig
+  );
   const compatDefaultOverrides = {
     acosh: mathFunctions.factory_acosh,
     acot: mathFunctions.factory_acot,
@@ -678,7 +681,7 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
-    ...g18InstanceOverrides(() => currentConfig),
+    ...g18Surface,
     nullish: g07Logical.nullish,
     not: g07Logical.not,
     and: g07Logical.and,
@@ -705,7 +708,13 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
-  for (const name of overriddenNames) expressionConstants[name] = () => instance[name];
+  for (const name of overriddenNames) {
+    if (name === 'range') {
+      expressionConstants.range = () => g18RangeEvaluate;
+      continue;
+    }
+    expressionConstants[name] = () => instance[name];
+  }
   if (originalSurface.add === mathFunctions.add) expressionConstants.add = () => instance.add;
   if (originalSurface.multiply === mathFunctions.multiply) {
     expressionConstants.multiply = () => instance.multiply;

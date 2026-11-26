@@ -210,13 +210,50 @@ interface RangeDeps {
  * (`_strRange` passes it to `_out`, not `_range`). Mirror that quirk only.
  */
 export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unknown {
-  const { nativeRange } = deps;
+  const { nativeRange, config } = deps;
   return new Proxy(nativeRange, {
     apply(target, thisArg, argArray: unknown[]): unknown {
-      if (typeof argArray[0] === 'string') {
+      // mathjs `_strRange` ignores includeEnd for BigNumber only.
+      // Number string ranges honor includeEnd (evaluate appends true).
+      if (
+        config().number === 'BigNumber' &&
+        typeof argArray[0] === 'string' &&
+        (argArray.length === 1 || typeof argArray[1] === 'boolean')
+      ) {
         return target.call(thisArg, argArray[0]);
       }
       return target.apply(thisArg, argArray);
+    },
+    getOwnPropertyDescriptor(target, prop) {
+      return Reflect.getOwnPropertyDescriptor(target, prop);
+    },
+    has(target, prop) {
+      return Reflect.has(target, prop);
+    },
+    ownKeys(target) {
+      return Reflect.ownKeys(target);
+    },
+  });
+}
+
+/**
+ * Expression-only wrapper: same includeEnd=true injection as
+ * `createRangeTransform`, calling the G18 range proxy so BigNumber string
+ * evaluate matches mathjs without replacing instance.range (direct calls).
+ */
+export function createMathjsRangeEvaluate(
+  range: (...args: unknown[]) => unknown,
+  typed: CompatTyped
+): (...args: unknown[]) => unknown {
+  return (
+    typed as unknown as (
+      name: string,
+      sigs: Record<string, (args: unknown[]) => unknown>
+    ) => (...args: unknown[]) => unknown
+  )('range', {
+    '...any': function (this: unknown, args: unknown[]): unknown {
+      const callArgs = typeof args[args.length - 1] === 'boolean' ? args : [...args, true];
+      return range.apply(this, callArgs);
     },
   });
 }
