@@ -51,7 +51,7 @@
     "assembly/build/mathts-debug.wasm": 135168,
     "assembly/build/mathts-debug.js": 104448,
     "assembly/package.json": 3584,
-    "compat/dist/index.js": 221184,
+    "compat/dist/index.js": 229376,
     "compat/package.json": 2560,
     "gpu/dist/index.js": 18432,
     "gpu/package.json": 2304,
@@ -180,13 +180,13 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "maxBytes": 1409024
+      "maxBytes": 1441792
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "maxBytes": 1409024
+      "maxBytes": 1441792
     },
     {
       "label": "functions barrel evaluate",
@@ -198,7 +198,7 @@
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "maxBytes": 278528
+      "maxBytes": 282624
     },
     {
       "label": "compat create(all)",
@@ -210,7 +210,7 @@
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "maxBytes": 2064384
+      "maxBytes": 2097152
     }
   ]
 }
