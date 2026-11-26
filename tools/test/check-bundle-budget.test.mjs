@@ -6,15 +6,17 @@ import { basename, dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
+  ceilingFor,
   compareBudget,
   duplicateInstalls,
-  exceedsTolerance,
+  exceedsCeiling,
+  loosenedCeilingFailure,
   measureBudget,
+  minimumBytesForCeiling,
   staticClosure,
 } from './check-bundle-budget.mjs';
 
 const checker = join(dirname(fileURLToPath(import.meta.url)), 'check-bundle-budget.mjs');
-const TOLERANCE = { bytes: 512, ratio: 0.01 };
 
 /**
  * One package whose entry imports a hash-named chunk, as tsdown emits for `core`. `alpha` is small;
@@ -46,12 +48,74 @@ function makeFixture({ keepBeta = false } = {}) {
   return { root, write, lock, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
-test('exceedsTolerance uses the larger of bytes and ratio, in both directions', () => {
-  assert.equal(exceedsTolerance(10_000, 10_400, TOLERANCE), false);
-  assert.equal(exceedsTolerance(10_000, 9_400, TOLERANCE), true);
-  assert.equal(exceedsTolerance(10_000, 10_600, TOLERANCE), true);
-  assert.equal(exceedsTolerance(1_000_000, 1_009_000, TOLERANCE), false);
-  assert.equal(exceedsTolerance(1_000_000, 1_011_000, TOLERANCE), true);
+test('ceilingFor leaves at least one byte and at most one step of headroom', () => {
+  for (const bytes of [1, 255, 256, 257, 2048, 2200, 10_000, 100_000, 2_359_674]) {
+    const ceiling = ceilingFor(bytes);
+    assert.ok(ceiling > bytes, `${bytes}: ceiling ${ceiling} must exceed the size`);
+    assert.ok(
+      ceiling - bytes <= Math.max(256, bytes * 0.05),
+      `${bytes}: headroom ${ceiling - bytes} must stay near one step`
+    );
+  }
+});
+
+test('ceilingFor is deterministic and monotonic in the measured size', () => {
+  assert.equal(ceilingFor(100_000), ceilingFor(100_000));
+  assert.ok(ceilingFor(100_000) <= ceilingFor(101_000));
+  assert.ok(ceilingFor(101_000) <= ceilingFor(200_000));
+});
+
+test('exceedsCeiling is one-sided: any growth past the ceiling fails, a shrink never does', () => {
+  assert.equal(exceedsCeiling(10_000, 10_000), false);
+  assert.equal(exceedsCeiling(10_000, 10_001), true);
+  assert.equal(exceedsCeiling(10_000, 5_000), false);
+});
+
+test('minimumBytesForCeiling inverts ceilingFor for representative sizes', () => {
+  for (const bytes of [1, 255, 256, 10_000, 100_000, 2_359_674]) {
+    const ceiling = ceilingFor(bytes);
+    const recorded = minimumBytesForCeiling(ceiling);
+    assert.equal(ceilingFor(recorded), ceiling, `${bytes}: recorded ${recorded}`);
+    assert.ok(recorded <= bytes, `${bytes}: recorded must be at most the measured size`);
+  }
+});
+
+test('a loosened ceiling in the budget file fails', () => {
+  const live = { files: { 'core/dist/index.js': 270_000 }, entries: {}, bundles: [] };
+  const budget = { files: { 'core/dist/index.js': 27_000_000 }, entries: {}, bundles: [] };
+  const failures = compareBudget(live, budget);
+  assert.ok(
+    failures.some((f) => /core\/dist\/index\.js/.test(f)),
+  );
+  assert.ok(loosenedCeilingFailure('core/dist/index.js', 27_000_000, 270_000) !== null);
+});
+
+test('a bundle case removed from the budget fails the check', () => {
+  const live = {
+    files: {},
+    entries: {},
+    bundles: [
+      { label: 'functions barrel evaluate', bytes: 1_500_000, import: 'x', platform: 'node' },
+    ],
+  };
+  const budget = { files: {}, entries: {}, bundles: [] };
+  const failures = compareBudget(live, budget);
+  assert.ok(failures.some((f) => /functions barrel evaluate/.test(f)));
+});
+
+test('a bundle case with no recorded ceiling fails instead of being unenforced', () => {
+  const live = {
+    files: {},
+    entries: {},
+    bundles: [{ label: 'compat create(all)', bytes: 9_000_000, import: 'x', platform: 'node' }],
+  };
+  const budget = {
+    files: {},
+    entries: {},
+    bundles: [{ label: 'compat create(all)', import: 'x', platform: 'node' }],
+  };
+  const failures = compareBudget(live, budget);
+  assert.ok(failures.length > 0);
 });
 
 test('an entry is sized together with the chunk it imports', () => {
@@ -87,13 +151,12 @@ test('load-time use of the other export defeats tree-shaking', () => {
   }
 });
 
-test('compareBudget fails on growth, shrinkage, a new file and a tree-shake flip', () => {
+test('compareBudget fails on growth past the ceiling, a new file and a tree-shake flip', () => {
   const live = {
     files: { 'a.js': 10_000, 'new.js': 5 },
     entries: { 'a.js': { export: 'x', treeShake: false } },
   };
   const budget = {
-    tolerance: TOLERANCE,
     files: { 'a.js': 10_000 },
     entries: { 'a.js': { export: 'x', treeShake: true } },
   };
@@ -101,31 +164,33 @@ test('compareBudget fails on growth, shrinkage, a new file and a tree-shake flip
   assert.ok(failures.some((f) => /new\.js: built but not in the budget/.test(f)));
   assert.ok(failures.some((f) => /treeShake flipped true -> false/.test(f)));
 
+  // A size at or under the ceiling passes, and so does a shrink: ceilings that move
+  // with every size wiggle are the exact-byte conflict this budget exists to end.
   assert.deepEqual(
     compareBudget(
-      { files: { 'a.js': 10_300 }, entries: {} },
-      { tolerance: TOLERANCE, files: { 'a.js': 10_000 }, entries: {} }
+      { files: { 'a.js': 10_000 }, entries: {} },
+      { files: { 'a.js': 10_000 }, entries: {} }
+    ),
+    []
+  );
+  assert.deepEqual(
+    compareBudget(
+      { files: { 'a.js': 9_000 }, entries: {} },
+      { files: { 'a.js': 10_000 }, entries: {} }
     ),
     []
   );
   assert.match(
     compareBudget(
       { files: { 'a.js': 11_000 }, entries: {} },
-      { tolerance: TOLERANCE, files: { 'a.js': 10_000 }, entries: {} }
+      { files: { 'a.js': 10_000 }, entries: {} }
     )[0],
-    /11000 bytes, budget 10000/
-  );
-  assert.match(
-    compareBudget(
-      { files: { 'a.js': 9_000 }, entries: {} },
-      { tolerance: TOLERANCE, files: { 'a.js': 10_000 }, entries: {} }
-    )[0],
-    /9000 bytes, budget 10000/
+    /11000 bytes, ceiling 10000/
   );
   assert.match(
     compareBudget(
       { files: {}, entries: { 'a.js': { export: 'x', treeShake: true } } },
-      { tolerance: TOLERANCE, files: {}, entries: { 'a.js': { export: 'x', treeShake: false } } }
+      { files: {}, entries: { 'a.js': { export: 'x', treeShake: false } } }
     )[0],
     /improved false -> true/
   );
@@ -133,7 +198,6 @@ test('compareBudget fails on growth, shrinkage, a new file and a tree-shake flip
 
 test('a sentinel that appears in a tree-shaking entry fails', () => {
   const budget = {
-    tolerance: TOLERANCE,
     files: {},
     entries: {
       'a.js': { export: 'x', treeShake: true, sentinel: 'kilogram', sentinelPresent: false },
@@ -148,17 +212,7 @@ test('a sentinel that appears in a tree-shaking entry fails', () => {
   assert.match(compareBudget(live, budget)[0], /sentinel kilogram appeared/);
 });
 
-test('a loosened tolerance in the budget file fails', () => {
-  const live = { files: {}, entries: {} };
-  const failures = compareBudget(live, {
-    tolerance: { bytes: 1e9, ratio: 1 },
-    files: {},
-    entries: {},
-  });
-  assert.match(failures[0], /tolerance must stay/);
-});
-
-test('the CLI writes a budget, accepts it, then rejects a grown chunk', () => {
+test('the CLI writes a budget, accepts it, accepts a shrink, then rejects a grown chunk', () => {
   const fx = makeFixture();
   try {
     const lockPath = join(fx.root, 'lock.json');
@@ -177,11 +231,18 @@ test('the CLI writes a budget, accepts it, then rejects a grown chunk', () => {
 
     fx.write(
       'pkg/dist/chunk-abc123.js',
+      `export const alpha = () => ${JSON.stringify('g'.repeat(100))};\nexport const beta = () => 2;\n`
+    );
+    assert.equal(run().status, 0, 'a shrink passes; the ceiling rarely changes');
+
+    fx.write(
+      'pkg/dist/chunk-abc123.js',
       `export const alpha = () => ${JSON.stringify('g'.repeat(9000))};\nexport const beta = () => 2;\n`
     );
     const grown = run();
     assert.equal(grown.status, 1);
-    assert.match(grown.stderr, /pkg\/dist\/index\.js: \d+ bytes, budget \d+/);
+    assert.match(grown.stderr, /pkg\/dist\/index\.js: \d+ bytes, ceiling \d+/);
+    assert.match(grown.stderr, /--write/);
   } finally {
     fx.cleanup();
   }
@@ -240,10 +301,20 @@ test('duplicateInstalls reads scoped names and ignores workspace sources', () =>
   try {
     for (const dir of ['node_modules/@s/p', 'x/node_modules/@s/p']) {
       mkdirSync(join(root, dir), { recursive: true });
-      writeFileSync(join(root, dir, 'package.json'), JSON.stringify({ name: '@s/p', version: '3.0.0' }));
+      writeFileSync(
+        join(root, dir, 'package.json'),
+        JSON.stringify({ name: '@s/p', version: '3.0.0' })
+      );
     }
-    const dups = duplicateInstalls(root, ['node_modules/@s/p/a.js', 'x/node_modules/@s/p/b.js', 'packages/w/dist/i.js']);
-    assert.deepEqual(dups.map((d) => d.name), ['@s/p']);
+    const dups = duplicateInstalls(root, [
+      'node_modules/@s/p/a.js',
+      'x/node_modules/@s/p/b.js',
+      'packages/w/dist/i.js',
+    ]);
+    assert.deepEqual(
+      dups.map((d) => d.name),
+      ['@s/p']
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

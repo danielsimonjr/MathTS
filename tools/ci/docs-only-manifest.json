@@ -43,6 +43,10 @@
       "reason": "Generator unit tests use fixture markdown under a temp dir."
     },
     {
+      "file": "tools/test/check-changelog-fragment.test.mjs",
+      "reason": "Docs-only classifier test: the string docs/api/functions.md is a classification input, not a docs read."
+    },
+    {
       "file": "compat/tests/parity/adversarial-g01.test.ts",
       "reason": "G01 adversarial uses sweepDocs against mathjs embedded docs; full CI Test job only."
     }
