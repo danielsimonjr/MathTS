@@ -101,7 +101,10 @@ type CompatParser = ReturnType<typeof functionsParser>;
 
 /** Stateful expression parser for the default compatibility instance. */
 export const Parser = function Parser(options?: PhysicsEvaluateOptions): CompatParser {
-  if (new.target === undefined) throw new TypeError('Parser must be constructed with new');
+  // mathjs 15.3.0 throws this SyntaxError on a new-less call (#1774).
+  if (new.target === undefined) {
+    throw new SyntaxError('Constructor must be called with the new operator');
+  }
   return Reflect.construct(getDefaultInstance().Parser as typeof Parser, [options], new.target);
 } as unknown as { new (options?: PhysicsEvaluateOptions): CompatParser };
 

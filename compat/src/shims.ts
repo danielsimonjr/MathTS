@@ -363,6 +363,14 @@ const matrixPackageCanTake = (a: unknown, b: unknown, elementwise: boolean): boo
   return !(elementwise && sa !== null && sb !== null && (sa[0] !== sb[0] || sa[1] !== sb[1]));
 };
 
+/** True when a nested array holds a leaf the numeric backend cannot take (#1774). */
+const hasNonNumberEntry = (x: unknown): boolean => {
+  if (!Array.isArray(x)) return false;
+  return x.some((entry) =>
+    Array.isArray(entry) ? hasNonNumberEntry(entry) : typeof entry !== 'number'
+  );
+};
+
 const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
   matrixFn: (a: unknown, b: unknown) => unknown,
@@ -386,6 +394,11 @@ const applyArithmetic = (
     return compatDecimalResult(complexFn(a, b));
   }
   if (isMatrixLike(a) || isMatrixLike(b)) {
+    // A nested array with a BigNumber / Fraction / Complex leaf leaves the
+    // numeric backend; the typed function keeps the scalar type (#1774).
+    if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
+      return unwrap(scalarFn(a, b));
+    }
     if (!matrixPackageCanTake(a, b, elementwise)) return unwrap(scalarFn(a, b));
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
