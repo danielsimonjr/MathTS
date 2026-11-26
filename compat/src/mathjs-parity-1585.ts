@@ -210,25 +210,13 @@ interface RangeDeps {
  * (`_strRange` passes it to `_out`, not `_range`). Mirror that quirk only.
  */
 export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unknown {
-  const { nativeRange, typed } = deps;
-  const signatures = nativeRange.signatures ?? {};
-  const mapped: Record<string, (...args: unknown[]) => unknown> = {};
-  for (const name of Object.keys(signatures)) {
-    const orig = signatures[name];
-    if (name === 'string' || name === 'string,boolean') {
-      mapped[name] = function (this: unknown, str: unknown): unknown {
-        return nativeRange.call(this, str);
-      };
-      continue;
-    }
-    mapped[name] =
-      typeof orig === 'function'
-        ? (orig as (...args: unknown[]) => unknown)
-        : function (this: unknown, ...args: unknown[]): unknown {
-            return nativeRange.apply(this, args);
-          };
-  }
-  return (
-    typed as unknown as (name: string, sigs: typeof mapped) => (...args: unknown[]) => unknown
-  )('range', mapped);
+  const { nativeRange } = deps;
+  return new Proxy(nativeRange, {
+    apply(target, thisArg, argArray: unknown[]): unknown {
+      if (typeof argArray[0] === 'string') {
+        return target.call(thisArg, argArray[0]);
+      }
+      return target.apply(thisArg, argArray);
+    },
+  });
 }
