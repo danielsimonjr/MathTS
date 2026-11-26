@@ -121,6 +121,7 @@ describe('g18 adversarial: range and bookkeeping', () => {
   });
 
   it('F7: known-gaps drops #1585 zeta/symbolicEqual doc examples', () => {
+    // Split per-issue JSON under known-gaps/; GAPS is the merged record.
     const gaps = GAPS;
     const flat = new Set(Object.values(gaps).flat());
     const removed = [
