@@ -246,9 +246,24 @@ function stringCompatValue(value: unknown, nativeString: NativeString): unknown 
   return nativeString(value);
 }
 
-/** Wrap the native `string` so Fraction decimals match mathjs / fraction.js (#1579). */
+/**
+ * Wrap the native `string` so it matches mathjs 15.3.0 (#1775): no arguments
+ * returns `''` (the typed `''` signature of `createString`), and more than one
+ * argument throws the typed-function "Too many arguments" TypeError instead of
+ * silently converting the first argument. Fraction decimals keep the #1579
+ * parity wrapper.
+ */
 export function createCompatString(nativeString: NativeString): NativeString {
-  return (value: unknown) => stringCompatValue(value, nativeString);
+  const wrapped = (...args: unknown[]): unknown => {
+    if (args.length === 0) return '';
+    if (args.length > 1) {
+      throw new TypeError(
+        `Too many arguments in function string (expected: 1, actual: ${args.length})`
+      );
+    }
+    return stringCompatValue(args[0], nativeString);
+  };
+  return Object.assign(wrapped, nativeString) as NativeString;
 }
 
 type PrintFn = (template: string, values: unknown, options?: unknown) => string;
