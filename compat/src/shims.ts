@@ -52,7 +52,6 @@ import {
   divide as _divide,
   factory_divide as _factoryDivide,
   inv as _inv,
-  pow as _pow,
   factory_pow as _factoryPow,
   abs as _abs,
   factory_exp as _exp,
@@ -84,9 +83,15 @@ import {
   size as _size,
   factory_mathjsCompat,
   complex as _complex,
+  config,
+  isPositive as _isPositive,
+  isNegative as _isNegative,
+  isInteger as _isInteger,
+  fix as _fix,
 } from '@danielsimonjr/mathts-functions';
-
+import { mathjsPowFractionPair } from './mathjs-fraction-pow.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
+import { sanitizeSparseNestedInput } from './compat-sparse-matrix.js';
 import {
   DenseMatrix,
   SparseMatrix,
@@ -279,6 +284,9 @@ export function matrix(
 export function sparse(data?: number[][]): BridgeMatrix {
   if (data === undefined) {
     return _factorySparse();
+  }
+  if (Array.isArray(data)) {
+    return _factorySparse(sanitizeSparseNestedInput(data as unknown[][]));
   }
   return _factorySparse(data);
 }
@@ -489,20 +497,45 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
     mapDivideBroadcastError(err, b);
   }
 }, _divide) as TypedFunction;
-export const pow = withTypedSurface(function (base?: unknown, exponent?: unknown): unknown {
-  if (
-    arguments.length === 2 &&
-    (Array.isArray(base) || isCompatBridgeMatrix(base)) &&
-    (typeof exponent === 'number' ||
-      typeof exponent === 'bigint' ||
-      isBigNumber(exponent) ||
-      isFraction(exponent)) &&
-    Number(exponent) < 0
-  ) {
-    return _factoryPow(base, exponent);
+function powWithFractionOperands(base: unknown, exponent: unknown, predictable: boolean): unknown {
+  const toFractionOperand = (v: unknown): Fraction | null => {
+    if (isFraction(v)) return v;
+    if (typeof v === 'number' && Number.isFinite(v)) return fraction(v);
+    return null;
+  };
+  const b = toFractionOperand(base);
+  const e = toFractionOperand(exponent);
+  if (b != null && e != null) {
+    return mathjsPowFractionPair(b, e, predictable, (n) => fraction(n));
   }
-  return _pow.apply(undefined, arguments as unknown as unknown[]);
-}, _pow) as TypedFunction;
+  return _factoryPow(base, exponent);
+}
+
+/**
+ * Adapter over native `factory_pow`: mathjs principal Complex roots (and
+ * `predictable` throws) for a negative Fraction with a non-integer exponent.
+ */
+export function createCompatPow(predictable: () => boolean): TypedFunction {
+  return withTypedSurface(
+    function (base?: unknown, exponent?: unknown): unknown {
+      if (arguments.length === 2 && (isFraction(base) || isFraction(exponent))) {
+        return powWithFractionOperands(base, exponent, Boolean(predictable()));
+      }
+      return _factoryPow.apply(undefined, arguments as unknown as unknown[]);
+    },
+    _factoryPow as unknown as TypedFunction
+  ) as TypedFunction;
+}
+
+/** Default `pow` shim (singleton config); instances should use `createCompatPow`. */
+export const pow = createCompatPow(() => Boolean(config().predictable));
+
+/** Native Fraction predicates (sign/integrality from `numerator` / `denominator`). */
+export const isPositive = _isPositive as unknown as TypedFunction;
+export const isNegative = _isNegative as unknown as TypedFunction;
+export const isInteger = _isInteger as unknown as TypedFunction;
+export const fix = _fix as unknown as TypedFunction;
+
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
   factory_mathjsCompat.sqrt as (...args: unknown[]) => unknown,
@@ -796,6 +829,10 @@ const _shims = {
   multiply,
   divide,
   pow,
+  isPositive,
+  isNegative,
+  isInteger,
+  fix,
   sqrt,
   abs,
   exp,

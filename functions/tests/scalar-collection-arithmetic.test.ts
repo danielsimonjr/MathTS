@@ -141,10 +141,11 @@ describe('a scalar and a matrix keep the matrix type and the storage (#911)', ()
     ]);
     const expected = {
       storage: 'sparse',
-      // A Unit has no implicit zero: each cell reads `0 m`, so the cells stay uniform.
+      // #1582: a Unit whose value is a structural zero is not stored, as mathjs 15.3.0
+      // does — the zero cells read back as the plain `0`, not `0 m`.
       rows: [
-        ['2 m', '0 m'],
-        ['0 m', '4 m'],
+        ['2 m', '0'],
+        ['0', '4 m'],
       ],
     };
     expect(matrixTexts(ops.multiply(m(2), a))).toEqual(expected);
@@ -158,9 +159,11 @@ describe('a scalar and a matrix keep the matrix type and the storage (#911)', ()
     ]);
     expect(matrixTexts(ops.divide(a, m(2)))).toEqual({
       storage: 'sparse',
+      // #1582: the Unit zeros (`0 m^-1`) are structural zeros and are not stored,
+      // as mathjs 15.3.0 does.
       rows: [
-        ['1 m^-1', '0 m^-1'],
-        ['0 m^-1', '2 m^-1'],
+        ['1 m^-1', '0'],
+        ['0', '2 m^-1'],
       ],
     });
     expect(matrixTexts(ops.divide(a, 2))).toEqual({

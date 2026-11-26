@@ -28,7 +28,7 @@ function countsFromReference(referenceText) {
   const exports = indexText.match(/\((\d+) exports\)/);
   assert.ok(exports, 'reference index has no "(N exports)" header');
   const section = indexText.split('### Functions by category')[1]?.split(/\n### /)[0] ?? '';
-  const labels = [...section.matchAll(/^\*\*(.+?)\*\* \(\d+\): /gm)].map((m) => m[1]);
+  const labels = [...section.matchAll(/^\*\*(.+?)\*\* \(\d+\):/gm)].map((m) => m[1]);
   return {
     exports: Number(exports[1]),
     groups: labels.length,
@@ -220,6 +220,25 @@ test('reference-index counts the named categories and leaves out the catch-all g
       ),
     /ref\.md has no "\(N exports\)" header or no "### Functions by category" block/
   );
+});
+
+test('reference-index reads one backtick-name per line after the group heading', () => {
+  const text = [
+    '## Complete export index',
+    '(3 exports)',
+    '### Functions by category',
+    '**A** (2):',
+    '`add`',
+    '`sub`',
+    '',
+    '**B** (1):',
+    '`mean`',
+  ].join('\n');
+  const parsed = parseReferenceIndex(text);
+  assert.equal(parsed.exportTotal, 3);
+  assert.equal(parsed.categoryCount, 2);
+  assert.deepEqual(parsed.domains.get('A'), ['add', 'sub']);
+  assert.deepEqual(parsed.domains.get('B'), ['mean']);
 });
 
 test('the generated reference writes the catch-all label that the readers match', () => {

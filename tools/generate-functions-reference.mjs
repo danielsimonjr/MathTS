@@ -53,10 +53,13 @@ const TARGETS = [
 
 const norm = (s) => s.replace(/\r\n/g, '\n');
 const fmt = (arr) => arr.slice().sort((a, b) => a.localeCompare(b));
+/** One backtick-name per line so parallel PRs that add different exports land
+ *  in separate hunks. A comma-joined line made `docs/api/compat.md` conflict.
+ *  `docs:functions:check` still requires a byte-equal regeneration. */
 const code = (arr) =>
   fmt(arr)
     .map((n) => `\`${n}\``)
-    .join(', ');
+    .join('\n');
 const PASCAL = /^[A-Z][A-Za-z0-9]*$/;
 
 /**
@@ -422,10 +425,10 @@ function buildIndexBlock(mod, pkg, domains) {
       ? [...domains.order, OTHER].filter((c) => byCategory.has(c))
       : [...byCategory.keys()].sort();
     for (const cat of cats) {
-      out += `**${cat}** (${byCategory.get(cat).length}): ${code(byCategory.get(cat))}\n\n`;
+        out += `**${cat}** (${byCategory.get(cat).length}):\n${code(byCategory.get(cat))}\n\n`;
     }
     if (uncategorizedFns.length) {
-      out += `**Factory / uncategorized** (${uncategorizedFns.length}): ${code(uncategorizedFns)}\n\n`;
+      out += `**Factory / uncategorized** (${uncategorizedFns.length}):\n${code(uncategorizedFns)}\n\n`;
     }
   } else if (uncategorizedFns.length) {
     out += `### Functions (${uncategorizedFns.length})\n\n${code(uncategorizedFns)}\n\n`;

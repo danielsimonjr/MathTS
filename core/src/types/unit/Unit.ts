@@ -1735,7 +1735,9 @@ const buildUnitClass =
      * @return true if both units are equal
      */
     Unit.prototype.equals = function (this: UnitInstance, other: UnitInstance): boolean {
-      return this.equalBase(other) && equal(this.value, other.value);
+      if (!this.equalBase(other)) return false;
+      // Affine units (degC/degF) store a scale-only `.value`; compare absolute SI.
+      return equal(this.toSI().value, other.toSI().value);
     };
 
     /**
@@ -3201,7 +3203,7 @@ const buildUnitClass =
       BigNumber: function (x: Numeric): Numeric {
         const fx = x as FractionValue;
         if (fx?.isFraction) {
-          return new BigNumber(String(fx.n)).div(String(fx.d)).times(String(fx.s));
+          return new BigNumber(String(fx.numerator)).div(String(fx.denominator));
         }
         // `+ ''` stringifies via ToPrimitive exactly as before; the cast is
         // type-only (operand may be number/BigNumber at runtime).

@@ -566,12 +566,14 @@
 
       - **`parallel`** — `ComputePool` may dispatch to worker threads when the typed
         path passes an **op name** and length meets that op's `DEFAULT_THRESHOLD_BY_OP`
-        entry (for example `matmul` at 4,096 via `poolOptions(..., 'matmul')`). When
+        entry (for example `matmul` at 7,077,888 multiply-adds via
+        `poolOptions(..., 'matmul')` — 192³, the smallest measured size where workers
+        took at most 0.90 of the sequential time). When
         the path calls `shouldParallelize(n)` **without** an op name, only the
         **50,000-element global fallback** applies — even if the map lists a different
         threshold for that symbol (`erfc`, `spectrogram`, … are never passed by name).
         Ops absent from the map also use the 50,000 fallback when called namelessly
-        (`cube`, `round`, `sec`, …).
+        (`parallelConv` → `computePool.fftBatch` is the one live example).
       - **`parallel†`** — the pool op is `'never'` in `DEFAULT_THRESHOLD_BY_OP`, so
         workers are not used when that **op name** is passed to `shouldParallelize`
         (inline JS). Some rows still show `parallel†` while a nameless
@@ -606,11 +608,15 @@
       > `backendManager.multiply` — `wasm-pairing.md` (generated, not committed)
       > / [`backends.md`](../backends.md).
 
-      > **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 219.** The
-      > generated report `webgpu-pairing.md` (not committed; `bun run docs:deps` writes it) lists **9 standalone
-      > functions** that route to the GPU (`fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`,
-      > `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `fftGpuDispatch`, and the
-      > four `gpu*` matrix helpers) plus **2 typed-dispatch functions** — `parallelFFT` and
+      > **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 215.** The
+      > generated report `webgpu-pairing.md` (not committed; `bun run docs:deps` writes it) lists the
+      > standalone functions that route to the GPU (`fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`,
+      > `fftGpuDispatch`, and the four `gpu*` matrix helpers — 7 in the generated report; the two
+      > internal dispatchers `elementwiseChainGpuDispatch` /
+      > `elementwiseChainReduceGpuDispatch` behind the fused chain are missed by its scanner, so the
+      > code-verified count is 9 — see
+      > `docs/superpowers/optimization/README.md`, mismatch M6) plus **2 typed-dispatch functions** —
+      > `parallelFFT` and
       > `parallelIFFT`, which reach the GPU through `fftGpuDispatch` when you have opted in.
       >
       > That 2 is the honest number, and it should stay small. A GPU dispatch costs an upload and a
@@ -696,41 +702,41 @@
 
       ## Arithmetic
 
-      | Function         | Description                                                                                                                          | Types                                             | Accel                          |
-      | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------------ |
-      | `add(a, b)`      | Addition                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-      | `subtract(a, b)` | Subtraction                                                                                                                          | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-      | `multiply(a, b)` | Multiplication / matrix product                                                                                                      | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-      | `divide(a, b)`   | Division                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-      | `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-      | `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —                              |
-      | `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | parallel†, WASM (≥1024)        |
-      | `sign(x)`        | Sign of x: -1, 0, or 1 (nameless `shouldParallelize` at 50k; map `sign` is `'never'`)                                                | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
-      | `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | —                              |
-      | `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | parallel†                      |
-      | `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-      | `cube(x)`        | `x³`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
-      | `cbrt(x)`        | Cube root                                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel                       |
-      | `nthRoot(x, n)`  | nth root                                                                                                                             | number, Complex                                   | —                              |
-      | `exp(x)`         | `e^x`                                                                                                                                | number, Complex, BigNumber, Float64Array          | parallel†                      |
-      | `expm1(x)`       | `e^x - 1` (stable near 0)                                                                                                            | number, Complex, Float64Array                     | parallel                       |
-      | `log(x[, base])` | Natural log (or log base)                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel†, WASM (≥16384)       |
-      | `log2(x)`        | Base-2 logarithm                                                                                                                     | number, Complex, BigNumber, Float64Array          | parallel                       |
-      | `log10(x)`       | Base-10 logarithm                                                                                                                    | number, Complex, BigNumber, Float64Array          | parallel, WASM (≥1024)         |
-      | `log1p(x)`       | `ln(1 + x)` (stable near 0)                                                                                                          | number, Complex, Float64Array                     | parallel, WASM ([1024, 16384)) |
-      | `round(x[, n])`  | Round to n digits                                                                                                                    | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
-      | `floor(x)`       | Round down                                                                                                                           | number, Complex, Fraction, Float64Array           | parallel                       |
-      | `ceil(x)`        | Round up                                                                                                                             | number, Complex, Fraction, Float64Array           | parallel                       |
-      | `fix(x)`         | Round toward zero                                                                                                                    | number, Complex, Fraction, Float64Array           | parallel                       |
-      | `mod(a, b)`      | Modulo `a % b` (sign of `b`; `b = 0` returns `a`); an Array or a matrix applies it to each element                                   | number, bigint, Fraction, BigNumber, Array        | —                              |
-      | `gcd(a, b)`      | Greatest common divisor                                                                                                              | number, bigint                                    | —                              |
-      | `lcm(a, b)`      | Least common multiple                                                                                                                | number, bigint                                    | —                              |
-      | `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`                                                                                                          | number                                            | —                              |
-      | `norm(x[, p])`   | p-norm                                                                                                                               | number, Float64Array, DenseMatrix                 | parallel†                      |
-      | `dot(a, b)`      | Vector dot product                                                                                                                   | Float64Array, array                               | parallel†                      |
-      | `outer(a, b)`    | Vector outer product                                                                                                                 | Float64Array, array                               | parallel†                      |
-      | `matmul(A, B)`   | Matrix multiplication                                                                                                                | Float64Array, DenseMatrix                         | parallel                       |
-      | `matvec(A, x)`   | Matrix–vector product                                                                                                                | Float64Array, DenseMatrix                         | parallel†                      |
+      | Function         | Description                                                                                                                          | Types                                             | Accel                    |
+      | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------ |
+      | `add(a, b)`      | Addition                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `subtract(a, b)` | Subtraction                                                                                                                          | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `multiply(a, b)` | Multiplication / matrix product                                                                                                      | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `divide(a, b)`   | Division                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —                        |
+      | `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | WASM (≥1024)             |
+      | `sign(x)`        | Sign of x: -1, 0, or 1                                                                                                               | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | WASM (GEMM, matrix path) |
+      | `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | —                        |
+      | `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `cube(x)`        | `x³`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `cbrt(x)`        | Cube root                                                                                                                            | number, Complex, BigNumber, Float64Array          | —                        |
+      | `nthRoot(x, n)`  | nth root                                                                                                                             | number, Complex                                   | —                        |
+      | `exp(x)`         | `e^x`                                                                                                                                | number, Complex, BigNumber, Float64Array          | —                        |
+      | `expm1(x)`       | `e^x - 1` (stable near 0)                                                                                                            | number, Complex, Float64Array                     | —                        |
+      | `log(x[, base])` | Natural log (or log base)                                                                                                            | number, Complex, BigNumber, Float64Array          | WASM (≥16384)            |
+      | `log2(x)`        | Base-2 logarithm                                                                                                                     | number, Complex, BigNumber, Float64Array          | —                        |
+      | `log10(x)`       | Base-10 logarithm                                                                                                                    | number, Complex, BigNumber, Float64Array          | WASM (≥1024)             |
+      | `log1p(x)`       | `ln(1 + x)` (stable near 0)                                                                                                          | number, Complex, Float64Array                     | WASM ([1024, 16384))     |
+      | `round(x[, n])`  | Round to n digits                                                                                                                    | number, bigint, Complex, Fraction, Float64Array   | —                        |
+      | `floor(x)`       | Round down                                                                                                                           | number, Complex, Fraction, Float64Array           | —                        |
+      | `ceil(x)`        | Round up                                                                                                                             | number, Complex, Fraction, Float64Array           | —                        |
+      | `fix(x)`         | Round toward zero                                                                                                                    | number, Complex, Fraction, Float64Array           | —                        |
+      | `mod(a, b)`      | Modulo `a % b` (sign of `b`; `b = 0` returns `a`); an Array or a matrix applies it to each element                                   | number, bigint, Fraction, BigNumber, Array        | —                        |
+      | `gcd(a, b)`      | Greatest common divisor                                                                                                              | number, bigint                                    | —                        |
+      | `lcm(a, b)`      | Least common multiple                                                                                                                | number, bigint                                    | —                        |
+      | `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`                                                                                                          | number                                            | —                        |
+      | `norm(x[, p])`   | p-norm                                                                                                                               | number, Float64Array, DenseMatrix                 | —                        |
+      | `dot(a, b)`      | Vector dot product                                                                                                                   | Float64Array, array                               | —                        |
+      | `outer(a, b)`    | Vector outer product                                                                                                                 | Float64Array, array                               | —                        |
+      | `matmul(A, B)`   | Matrix multiplication                                                                                                                | Float64Array, DenseMatrix                         | —                        |
+      | `matvec(A, x)`   | Matrix–vector product                                                                                                                | Float64Array, DenseMatrix                         | —                        |
 
       The factory layer additionally provides scalar variants used internally and by
       the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
@@ -848,7 +854,7 @@
 
       | Function                         | Description                                      | Accel                   |
       | -------------------------------- | ------------------------------------------------ | ----------------------- |
-      | `sin(x)`                         | Sine                                             | WASM ([1024, 131072))   |
+      | `sin(x)`                         | Sine                                             | WASM ([16384, 65536))   |
       | `cos(x)`                         | Cosine                                           | WASM (≥16384)           |
       | `tan(x)`                         | Tangent                                          | —                       |
       | `csc(x)` `cot(x)`                | Cosecant, cotangent                              | —                       |
@@ -2839,10 +2845,13 @@
       ## Signal Processing
 
       `parallelFFT`, `parallelIFFT`, `parallelConv`, and related `parallel*` helpers may
-      return a `Promise`, but FFT/conv op thresholds in `ComputePool` are `'never'`
-      today — they run the sequential radix-2 / FFT convolution core inline unless a
-      future threshold retune enables workers. Optional WebGPU FFT (`enableGpu()`, power-of-two
-      n ≥ 262 144) is separate from the worker pool.
+      return a `Promise`. The **named** FFT ops are `'never'` in `ComputePool`
+      (`parallelFFT`, `parallelConv`, `fft2d`), so the radix-2 core runs inline — but
+      `parallelConv` / `parallelXCorr` / `parallelAutoCorr` additionally gate a worker
+      `fftBatch` through a **nameless** `shouldParallelize(2·nextPow2(len))` call, so
+      those three DO engage workers once the padded length reaches the 50,000-element
+      global fallback. Optional WebGPU FFT (`enableGpu()`, power-of-two
+      n ≥ 262 144) is separate from the worker pool.
 
       | Function                                        | Description                                                                                                                                                                                            | Accel           |
       | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
@@ -2850,9 +2859,9 @@
       | `parallelIFFT(X)`                               | Inverse FFT → `{ real, imag }`                                                                                                                                                                         | parallel†, GPU‡ |
       | `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                                                                                                                                                                                 | parallel†       |
       | `parallelFFTPower(x)`                           | FFT power spectrum                                                                                                                                                                                     | parallel†       |
-      | `parallelConv(a, b)`                            | Convolution → `Promise<Float64Array>`                                                                                                                                                                  | parallel†       |
-      | `parallelXCorr(a, b)`                           | Cross-correlation → `Promise<Float64Array>`                                                                                                                                                            | parallel†       |
-      | `parallelAutoCorr(a)`                           | Auto-correlation → `Promise<Float64Array>`                                                                                                                                                             | parallel†       |
+      | `parallelConv(a, b)`                            | Convolution → `Promise<Float64Array>`                                                                                                                                                                  | parallel        |
+      | `parallelXCorr(a, b)`                           | Cross-correlation → `Promise<Float64Array>`                                                                                                                                                            | parallel        |
+      | `parallelAutoCorr(a)`                           | Auto-correlation → `Promise<Float64Array>`                                                                                                                                                             | parallel        |
       | `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                                                                                   | —               |
       | `fft2d(matrix)`                                 | 2D FFT (synchronous; for worker threads use `computePool.fftBatch`)                                                                                                                                    | —               |
       | `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                                                                                           | —               |
@@ -3368,37 +3377,39 @@
 
       ## Hypothesis Tests
 
-      All return structured result objects.
+      All return structured result objects. Four tests — `chiSquareTest`, `kolmogorovSmirnovTest`,
+      `mannWhitneyTest`, and `shapiroWilkTest` — dispatch to the worker pool for `n ≥ 4096` (named ops
+      in `DEFAULT_THRESHOLD_BY_OP`; `functions/src/typed/hypothesis.ts`); below that they run inline.
 
-      | Function                                               | Returns                              | Description                                                                                                                                                                                                    |
-      | ------------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-      | `studentTTest(sample1[, sample2])`                     | `TTestResult`                        | One/two-sample t-test                                                                                                                                                                                          |
-      | `chiSquareTest(observed, expected)`                    | `ChiSquareResult`                    | Chi-square goodness-of-fit (1D) or plain independence test (2D); complementary to (not a duplicate of) `chi2Contingency`, which adds Yates correction, expected counts, and Cramer's V                         |
-      | `anova(groups)`                                        | `AnovaResult`                        | One-way ANOVA                                                                                                                                                                                                  |
-      | `kolmogorovSmirnovTest(sample[, sample2])`             | `KSTestResult`                       | K-S test                                                                                                                                                                                                       |
-      | `mannWhitneyTest(sample1, sample2)`                    | `MannWhitneyResult`                  | Mann–Whitney U test                                                                                                                                                                                            |
-      | `shapiroWilkTest(sample)`                              | `ShapiroWilkResult`                  | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8)                                                                                                        |
-      | `principalComponentAnalysis(data[, k])`                | `PCAResult`                          | PCA                                                                                                                                                                                                            |
-      | `fTest(x, y)`                                          | `FTestResult`                        | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                                                                         |
-      | `jarqueBera(x)`                                        | `JarqueBeraResult`                   | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                                                                    |
-      | `kruskalWallis(...groups)`                             | `KruskalResult`                      | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                                                                    |
-      | `wilcoxon(x[, y])`                                     | `WilcoxonResult`                     | Wilcoxon signed-rank test (paired/one-sample); matches `scipy.stats.wilcoxon` defaults (SciPy 1.16)                                                                                                            |
-      | `fisherExact(table)`                                   | `FisherExactResult`                  | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                                                                       |
-      | `tukeyHSD(groups[, alpha])`                            | `TukeyComparison[]`                  | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                                                                   |
-      | `chi2Contingency(table[, opts])`                       | `Chi2ContingencyResult`              | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                                               |
-      | `multipleTest(pValues, method)`                        | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`; equivalent alias of `multipleComparison` (same algorithm) |
-      | `multipleComparison(pValues[, method])`                | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`, default `'bh'`); equivalent alias of `multipleTest` (same algorithm, `statsmodels`-parity naming)                                         |
-      | `kendallTauTest(x, y)`                                 | `KendallTauTestResult`               | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names                           |
-      | `mcnemar(table[, opts])`                               | `McNemarResult`                      | McNemar's test on a 2×2 paired table; `chi2 = (\|b−c\| − correction)²/(b+c)` (continuity correction default on); matches `statsmodels` `mcnemar`                                                               |
-      | `wilsonInterval(successes, n[, confidence])`           | `{ lower, upper }`                   | Wilson score interval for a binomial proportion; bounds exactly 0 and 1 at 0 and n successes; matches `statsmodels` `proportion_confint(method='wilson')`                                                      |
-      | `newcombePairedInterval({ a, b, c, d }[, confidence])` | `{ diff, lower, upper }`             | Newcombe (1998) method 10 interval for the paired difference `(b − c)/n`, from two Wilson intervals and a continuity-corrected φ                                                                               |
-      | `cohensKappa(matrix)`                                  | `number`                             | Cohen's κ for a square agreement matrix of counts; NaN when chance agreement is 1; matches `statsmodels` `cohens_kappa`                                                                                        |
-      | `cochranQ(data)`                                       | `CochranQResult`                     | Cochran's Q test — McNemar generalized to `k > 2` matched binary treatments; `dof = k − 1`; matches `statsmodels` `cochrans_q`                                                                                 |
-      | `signTest(x[, median])`                                | `{ statistic, pValue, nPos, nNeg }`  | Exact binomial sign test about `median` (default 0); values equal to the median are dropped                                                                                                                    |
-      | `runsTest(x[, { cutoff }])`                            | `{ runs, z, pValue }`                | Wald–Wolfowitz runs test on booleans, or on numbers dichotomized at `cutoff` (default the median, ties dropped); normal approximation, if every value falls on one side the result is `z = NaN`, `p = 1`       |
-      | `moodMedianTest(groups)`                               | `{ statistic, pValue, grandMedian }` | Mood's median test: chi-square on above / below-grand-median counts across groups                                                                                                                              |
-      | `powerDivergence(observed[, expected, lambda])`        | `{ statistic, pValue }`              | Cressie–Read power-divergence statistic; `lambda = 1` (default) is Pearson chi-square, `0` the G-test; `−1` is singular and throws `RangeError`; zero observed counts contribute 0 at `lambda = 0`             |
-      | `gTest(observed[, expected])`                          | `{ statistic, pValue }`              | Log-likelihood-ratio G-test (power divergence at `lambda = 0`); `expected` defaults to uniform                                                                                                                 |
+      | Function                                               | Returns                              | Description                                                                                                                                                                                                    | Accel               |
+      | ------------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+      | `studentTTest(sample1[, sample2])`                     | `TTestResult`                        | One/two-sample t-test                                                                                                                                                                                          | —                   |
+      | `chiSquareTest(observed, expected)`                    | `ChiSquareResult`                    | Chi-square goodness-of-fit (1D) or plain independence test (2D); complementary to (not a duplicate of) `chi2Contingency`, which adds Yates correction, expected counts, and Cramer's V                         | parallel (n ≥ 4096) |
+      | `anova(groups)`                                        | `AnovaResult`                        | One-way ANOVA                                                                                                                                                                                                  | —                   |
+      | `kolmogorovSmirnovTest(sample[, sample2])`             | `KSTestResult`                       | K-S test                                                                                                                                                                                                       | parallel (n ≥ 4096) |
+      | `mannWhitneyTest(sample1, sample2)`                    | `MannWhitneyResult`                  | Mann–Whitney U test                                                                                                                                                                                            | parallel (n ≥ 4096) |
+      | `shapiroWilkTest(sample)`                              | `ShapiroWilkResult`                  | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8)                                                                                                        | parallel (n ≥ 4096) |
+      | `principalComponentAnalysis(data[, k])`                | `PCAResult`                          | PCA                                                                                                                                                                                                            | —                   |
+      | `fTest(x, y)`                                          | `FTestResult`                        | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                                                                         | —                   |
+      | `jarqueBera(x)`                                        | `JarqueBeraResult`                   | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                                                                    | —                   |
+      | `kruskalWallis(...groups)`                             | `KruskalResult`                      | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                                                                    | —                   |
+      | `wilcoxon(x[, y])`                                     | `WilcoxonResult`                     | Wilcoxon signed-rank test (paired/one-sample); matches `scipy.stats.wilcoxon` defaults (SciPy 1.16)                                                                                                            | —                   |
+      | `fisherExact(table)`                                   | `FisherExactResult`                  | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                                                                       | —                   |
+      | `tukeyHSD(groups[, alpha])`                            | `TukeyComparison[]`                  | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                                                                   | —                   |
+      | `chi2Contingency(table[, opts])`                       | `Chi2ContingencyResult`              | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                                               | —                   |
+      | `multipleTest(pValues, method)`                        | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`; equivalent alias of `multipleComparison` (same algorithm) | —                   |
+      | `multipleComparison(pValues[, method])`                | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`, default `'bh'`); equivalent alias of `multipleTest` (same algorithm, `statsmodels`-parity naming)                                         | —                   |
+      | `kendallTauTest(x, y)`                                 | `KendallTauTestResult`               | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names                           | —                   |
+      | `mcnemar(table[, opts])`                               | `McNemarResult`                      | McNemar's test on a 2×2 paired table; `chi2 = (\|b−c\| − correction)²/(b+c)` (continuity correction default on); matches `statsmodels` `mcnemar`                                                               | —                   |
+      | `wilsonInterval(successes, n[, confidence])`           | `{ lower, upper }`                   | Wilson score interval for a binomial proportion; bounds exactly 0 and 1 at 0 and n successes; matches `statsmodels` `proportion_confint(method='wilson')`                                                      | —                   |
+      | `newcombePairedInterval({ a, b, c, d }[, confidence])` | `{ diff, lower, upper }`             | Newcombe (1998) method 10 interval for the paired difference `(b − c)/n`, from two Wilson intervals and a continuity-corrected φ                                                                               | —                   |
+      | `cohensKappa(matrix)`                                  | `number`                             | Cohen's κ for a square agreement matrix of counts; NaN when chance agreement is 1; matches `statsmodels` `cohens_kappa`                                                                                        | —                   |
+      | `cochranQ(data)`                                       | `CochranQResult`                     | Cochran's Q test — McNemar generalized to `k > 2` matched binary treatments; `dof = k − 1`; matches `statsmodels` `cochrans_q`                                                                                 | —                   |
+      | `signTest(x[, median])`                                | `{ statistic, pValue, nPos, nNeg }`  | Exact binomial sign test about `median` (default 0); values equal to the median are dropped                                                                                                                    | —                   |
+      | `runsTest(x[, { cutoff }])`                            | `{ runs, z, pValue }`                | Wald–Wolfowitz runs test on booleans, or on numbers dichotomized at `cutoff` (default the median, ties dropped); normal approximation, if every value falls on one side the result is `z = NaN`, `p = 1`       | —                   |
+      | `moodMedianTest(groups)`                               | `{ statistic, pValue, grandMedian }` | Mood's median test: chi-square on above / below-grand-median counts across groups                                                                                                                              | —                   |
+      | `powerDivergence(observed[, expected, lambda])`        | `{ statistic, pValue }`              | Cressie–Read power-divergence statistic; `lambda = 1` (default) is Pearson chi-square, `0` the G-test; `−1` is singular and throws `RangeError`; zero observed counts contribute 0 at `lambda = 0`             | —                   |
+      | `gTest(observed[, expected])`                          | `{ statistic, pValue }`              | Log-likelihood-ratio G-test (power divergence at `lambda = 0`); `expected` defaults to uniform                                                                                                                 | —                   |
 
       ### Details
 
@@ -3856,81 +3867,1577 @@
 
       ### Functions by category
 
-      **Numerical accuracy — what we guarantee** (7): `fsum`, `mean`, `norm`, `sqrt`, `std`, `sum`, `variance`
+      **Numerical accuracy — what we guarantee** (7):
+      `fsum`
+      `mean`
+      `norm`
+      `sqrt`
+      `std`
+      `sum`
+      `variance`
 
-      **Arithmetic** (43): `abs`, `add`, `addScalar`, `cbrt`, `ceil`, `clamp`, `cube`, `divide`, `divideScalar`, `dot`, `dotDivide`, `dotMultiply`, `dotPow`, `exp`, `expm1`, `fix`, `floor`, `gcd`, `invmod`, `lcm`, `log`, `log10`, `log1p`, `log2`, `matmul`, `matrixPower`, `matvec`, `mod`, `multiply`, `multiplyScalar`, `nthRoot`, `nthRoots`, `outer`, `pow`, `round`, `sigmoid`, `sign`, `square`, `subtract`, `subtractScalar`, `unaryMinus`, `unaryPlus`, `xgcd`
+      **Arithmetic** (43):
+      `abs`
+      `add`
+      `addScalar`
+      `cbrt`
+      `ceil`
+      `clamp`
+      `cube`
+      `divide`
+      `divideScalar`
+      `dot`
+      `dotDivide`
+      `dotMultiply`
+      `dotPow`
+      `exp`
+      `expm1`
+      `fix`
+      `floor`
+      `gcd`
+      `invmod`
+      `lcm`
+      `log`
+      `log10`
+      `log1p`
+      `log2`
+      `matmul`
+      `matrixPower`
+      `matvec`
+      `mod`
+      `multiply`
+      `multiplyScalar`
+      `nthRoot`
+      `nthRoots`
+      `outer`
+      `pow`
+      `round`
+      `sigmoid`
+      `sign`
+      `square`
+      `subtract`
+      `subtractScalar`
+      `unaryMinus`
+      `unaryPlus`
+      `xgcd`
 
-      **Relational & Comparison** (13): `compare`, `compareNatural`, `compareText`, `compareUnits`, `deepEqual`, `equal`, `equalScalar`, `equalText`, `larger`, `largerEq`, `smaller`, `smallerEq`, `unequal`
+      **Relational & Comparison** (13):
+      `compare`
+      `compareNatural`
+      `compareText`
+      `compareUnits`
+      `deepEqual`
+      `equal`
+      `equalScalar`
+      `equalText`
+      `larger`
+      `largerEq`
+      `smaller`
+      `smallerEq`
+      `unequal`
 
-      **Trigonometry** (29): `acos`, `acosh`, `acot`, `acoth`, `acsc`, `acsch`, `asec`, `asech`, `asin`, `asinh`, `atan`, `atan2`, `atanh`, `cos`, `cosh`, `cot`, `coth`, `csc`, `csch`, `hypot`, `number`, `sec`, `sech`, `sin`, `sinh`, `tan`, `tanh`, `toDegrees`, `toRadians`
+      **Trigonometry** (29):
+      `acos`
+      `acosh`
+      `acot`
+      `acoth`
+      `acsc`
+      `acsch`
+      `asec`
+      `asech`
+      `asin`
+      `asinh`
+      `atan`
+      `atan2`
+      `atanh`
+      `cos`
+      `cosh`
+      `cot`
+      `coth`
+      `csc`
+      `csch`
+      `hypot`
+      `number`
+      `sec`
+      `sech`
+      `sin`
+      `sinh`
+      `tan`
+      `tanh`
+      `toDegrees`
+      `toRadians`
 
-      **Logical & Bitwise** (14): `and`, `bigint`, `bitAnd`, `bitNot`, `bitOr`, `bitXor`, `leftShift`, `not`, `nullish`, `or`, `re`, `rightArithShift`, `rightLogShift`, `xor`
+      **Logical & Bitwise** (14):
+      `and`
+      `bigint`
+      `bitAnd`
+      `bitNot`
+      `bitOr`
+      `bitXor`
+      `leftShift`
+      `not`
+      `nullish`
+      `or`
+      `re`
+      `rightArithShift`
+      `rightLogShift`
+      `xor`
 
-      **Special Functions** (99): `airyAi`, `airyBi`, `barnesG`, `bernoulliPolynomial`, `besselI`, `besselJ`, `besselJ0`, `besselJ1`, `besselJZeros`, `besselK`, `besselY`, `besselY0`, `besselY1`, `beta`, `betainc`, `carlsonRC`, `carlsonRD`, `carlsonRF`, `carlsonRJ`, `chebyshevT`, `clebschGordan`, `coshIntegral`, `cosIntegral`, `coulombF`, `coulombFG`, `coulombG`, `dawson`, `digamma`, `dirichletEta`, `ellipticE`, `ellipticEIncomplete`, `ellipticF`, `ellipticK`, `ellipticPi`, `erf`, `erfc`, `erfcinv`, `erfcScalar`, `erfcx`, `erfi`, `erfinv`, `eulerPolynomial`, `expIntegralE1`, `expIntegralEi`, `expn`, `ferrersP`, `fresnelC`, `fresnelS`, `gamma`, `gammainc`, `gammaincp`, `gegenbauerC`, `hankelH1`, `hankelH2`, `hermiteH`, `hurwitzZeta`, `hyp0f1`, `hyp1f1`, `hyp2f1`, `jacobiCN`, `jacobiDN`, `jacobiP`, `jacobiSN`, `kelvinBei`, `kelvinBer`, `laguerreL`, `lambertW`, `legendreP`, `lerchPhi`, `lgamma`, `loadWasm`, `logIntegral`, `mathieuA`, `mathieuB`, `mathieuCe`, `mathieuSe`, `parabolicCylinderD`, `pFq`, `polygamma`, `polylog`, `riemannSiegelZ`, `siegelZ`, `sinhIntegral`, `sinIntegral`, `sphericalBesselI`, `sphericalBesselJ`, `sphericalBesselK`, `sphericalBesselY`, `sphericalHarmonic`, `spheroidalAngular`, `spheroidalCharacteristic`, `spheroidalLambda`, `spheroidalRadial`, `struveH`, `struveL`, `trigamma`, `wigner3j`, `wigner6j`, `zeta`
+      **Special Functions** (99):
+      `airyAi`
+      `airyBi`
+      `barnesG`
+      `bernoulliPolynomial`
+      `besselI`
+      `besselJ`
+      `besselJ0`
+      `besselJ1`
+      `besselJZeros`
+      `besselK`
+      `besselY`
+      `besselY0`
+      `besselY1`
+      `beta`
+      `betainc`
+      `carlsonRC`
+      `carlsonRD`
+      `carlsonRF`
+      `carlsonRJ`
+      `chebyshevT`
+      `clebschGordan`
+      `coshIntegral`
+      `cosIntegral`
+      `coulombF`
+      `coulombFG`
+      `coulombG`
+      `dawson`
+      `digamma`
+      `dirichletEta`
+      `ellipticE`
+      `ellipticEIncomplete`
+      `ellipticF`
+      `ellipticK`
+      `ellipticPi`
+      `erf`
+      `erfc`
+      `erfcinv`
+      `erfcScalar`
+      `erfcx`
+      `erfi`
+      `erfinv`
+      `eulerPolynomial`
+      `expIntegralE1`
+      `expIntegralEi`
+      `expn`
+      `ferrersP`
+      `fresnelC`
+      `fresnelS`
+      `gamma`
+      `gammainc`
+      `gammaincp`
+      `gegenbauerC`
+      `hankelH1`
+      `hankelH2`
+      `hermiteH`
+      `hurwitzZeta`
+      `hyp0f1`
+      `hyp1f1`
+      `hyp2f1`
+      `jacobiCN`
+      `jacobiDN`
+      `jacobiP`
+      `jacobiSN`
+      `kelvinBei`
+      `kelvinBer`
+      `laguerreL`
+      `lambertW`
+      `legendreP`
+      `lerchPhi`
+      `lgamma`
+      `loadWasm`
+      `logIntegral`
+      `mathieuA`
+      `mathieuB`
+      `mathieuCe`
+      `mathieuSe`
+      `parabolicCylinderD`
+      `pFq`
+      `polygamma`
+      `polylog`
+      `riemannSiegelZ`
+      `siegelZ`
+      `sinhIntegral`
+      `sinIntegral`
+      `sphericalBesselI`
+      `sphericalBesselJ`
+      `sphericalBesselK`
+      `sphericalBesselY`
+      `sphericalHarmonic`
+      `spheroidalAngular`
+      `spheroidalCharacteristic`
+      `spheroidalLambda`
+      `spheroidalRadial`
+      `struveH`
+      `struveL`
+      `trigamma`
+      `wigner3j`
+      `wigner6j`
+      `zeta`
 
-      **Combinatorics & Number Theory** (83): `bellNumbers`, `bernoulli`, `bigOmega`, `binomialMod`, `carmichaelLambda`, `catalan`, `chineseRemainder`, `collatzSteps`, `combinations`, `combinationsGen`, `combinationsWithRep`, `composition`, `compositionsGen`, `continuedFraction`, `delannoy`, `digitalRoot`, `digitSum`, `discreteLog`, `divisors`, `divisorSigma`, `doubleFactorial`, `egyptianFraction`, `eulerianNumber`, `eulerNumbers`, `eulerPhi`, `factorial`, `fallingFactorial`, `fareySequence`, `fibonacci`, `frobeniusNumber`, `grayCode`, `harmonicNumber`, `hermiteNormalForm`, `integerDigits`, `integerNthRoot`, `integerPartitionsGen`, `integerSqrt`, `isCarmichael`, `isPerfect`, `isPerfectPower`, `isPrimePower`, `isSquarefree`, `jacobiSymbol`, `kroneckerSymbol`, `lahNumber`, `legendreSymbol`, `linearDiophantine`, `liouvilleLambda`, `lll`, `lucas`, `lucasL`, `mertens`, `modPow`, `moebiusMu`, `motzkin`, `multinomial`, `multiplicativeOrder`, `narayana`, `nextPrime`, `partitions`, `pell`, `pellSolve`, `permutations`, `permutationsGen`, `prevPrime`, `prime`, `primeFactors`, `primePi`, `primitiveRoot`, `primorial`, `radical`, `risingFactorial`, `schroder`, `smallOmega`, `smithNormalForm`, `sqrtMod`, `stirlingS1`, `stirlingS2`, `subfactorial`, `sumOfTwoSquares`, `tribonacci`, `vonMangoldt`, `zeckendorf`
+      **Combinatorics & Number Theory** (83):
+      `bellNumbers`
+      `bernoulli`
+      `bigOmega`
+      `binomialMod`
+      `carmichaelLambda`
+      `catalan`
+      `chineseRemainder`
+      `collatzSteps`
+      `combinations`
+      `combinationsGen`
+      `combinationsWithRep`
+      `composition`
+      `compositionsGen`
+      `continuedFraction`
+      `delannoy`
+      `digitalRoot`
+      `digitSum`
+      `discreteLog`
+      `divisors`
+      `divisorSigma`
+      `doubleFactorial`
+      `egyptianFraction`
+      `eulerianNumber`
+      `eulerNumbers`
+      `eulerPhi`
+      `factorial`
+      `fallingFactorial`
+      `fareySequence`
+      `fibonacci`
+      `frobeniusNumber`
+      `grayCode`
+      `harmonicNumber`
+      `hermiteNormalForm`
+      `integerDigits`
+      `integerNthRoot`
+      `integerPartitionsGen`
+      `integerSqrt`
+      `isCarmichael`
+      `isPerfect`
+      `isPerfectPower`
+      `isPrimePower`
+      `isSquarefree`
+      `jacobiSymbol`
+      `kroneckerSymbol`
+      `lahNumber`
+      `legendreSymbol`
+      `linearDiophantine`
+      `liouvilleLambda`
+      `lll`
+      `lucas`
+      `lucasL`
+      `mertens`
+      `modPow`
+      `moebiusMu`
+      `motzkin`
+      `multinomial`
+      `multiplicativeOrder`
+      `narayana`
+      `nextPrime`
+      `partitions`
+      `pell`
+      `pellSolve`
+      `permutations`
+      `permutationsGen`
+      `prevPrime`
+      `prime`
+      `primeFactors`
+      `primePi`
+      `primitiveRoot`
+      `primorial`
+      `radical`
+      `risingFactorial`
+      `schroder`
+      `smallOmega`
+      `smithNormalForm`
+      `sqrtMod`
+      `stirlingS1`
+      `stirlingS2`
+      `subfactorial`
+      `sumOfTwoSquares`
+      `tribonacci`
+      `vonMangoldt`
+      `zeckendorf`
 
-      **Statistics** (110): `acf`, `adfuller`, `bootstrapCI`, `cohensD`, `corr`, `corrcoef`, `cov`, `cummax`, `cummin`, `cumprod`, `cumsum`, `cumtrapz`, `dbscan`, `describe`, `detrend`, `durbinWatson`, `ecdf`, `elasticNet`, `energyDistance`, `etaSquared`, `ewma`, `fitDistribution`, `gaussianProcessRegression`, `glassDelta`, `glm`, `gmean`, `gpRegression`, `gstd`, `gzscore`, `hedgesG`, `histogram`, `hmean`, `iqr`, `jackknife`, `kendalltau`, `kendallTau`, `kmeans`, `knnClassify`, `knnRegress`, `kurtosis`, `lasso`, `linearRegression`, `linregress`, `ljungBox`, `logisticRegression`, `logsumexp`, `mad`, `mahalanobis`, `max`, `maxSelect`, `meanCI`, `median`, `medianSelect`, `min`, `minSelect`, `mode`, `moment`, `movingAverage`, `mutualInformation`, `mvnPdf`, `mvnSample`, `ols`, `pacf`, `parallelStatCorr`, `parallelStatCumsum`, `parallelStatDistance`, `parallelStatHistogram`, `parallelStatMAD`, `parallelStatMax`, `parallelStatMean`, `parallelStatMeanAD`, `parallelStatMedian`, `parallelStatMin`, `parallelStatMinMax`, `parallelStatMode`, `parallelStatNorm`, `parallelStatPercentile`, `parallelStatProd`, `parallelStatQuantile`, `parallelStatStd`, `parallelStatSum`, `parallelStatVariance`, `partialCorrelation`, `pearsonr`, `pmean`, `prod`, `proportionCI`, `ptp`, `quantileSeq`, `quickSelect`, `rankBiserial`, `rankdata`, `ridge`, `sem`, `siegelSlopes`, `skewness`, `softmax`, `spearman`, `spearmanr`, `spectralClustering`, `theilSen`, `trimmedMean`, `tTestPower`, `variation`, `wassersteinDistance`, `weightedMean`, `weightedMedian`, `weightedQuantile`, `weightedVariance`, `zscore`
+      **Statistics** (110):
+      `acf`
+      `adfuller`
+      `bootstrapCI`
+      `cohensD`
+      `corr`
+      `corrcoef`
+      `cov`
+      `cummax`
+      `cummin`
+      `cumprod`
+      `cumsum`
+      `cumtrapz`
+      `dbscan`
+      `describe`
+      `detrend`
+      `durbinWatson`
+      `ecdf`
+      `elasticNet`
+      `energyDistance`
+      `etaSquared`
+      `ewma`
+      `fitDistribution`
+      `gaussianProcessRegression`
+      `glassDelta`
+      `glm`
+      `gmean`
+      `gpRegression`
+      `gstd`
+      `gzscore`
+      `hedgesG`
+      `histogram`
+      `hmean`
+      `iqr`
+      `jackknife`
+      `kendalltau`
+      `kendallTau`
+      `kmeans`
+      `knnClassify`
+      `knnRegress`
+      `kurtosis`
+      `lasso`
+      `linearRegression`
+      `linregress`
+      `ljungBox`
+      `logisticRegression`
+      `logsumexp`
+      `mad`
+      `mahalanobis`
+      `max`
+      `maxSelect`
+      `meanCI`
+      `median`
+      `medianSelect`
+      `min`
+      `minSelect`
+      `mode`
+      `moment`
+      `movingAverage`
+      `mutualInformation`
+      `mvnPdf`
+      `mvnSample`
+      `ols`
+      `pacf`
+      `parallelStatCorr`
+      `parallelStatCumsum`
+      `parallelStatDistance`
+      `parallelStatHistogram`
+      `parallelStatMAD`
+      `parallelStatMax`
+      `parallelStatMean`
+      `parallelStatMeanAD`
+      `parallelStatMedian`
+      `parallelStatMin`
+      `parallelStatMinMax`
+      `parallelStatMode`
+      `parallelStatNorm`
+      `parallelStatPercentile`
+      `parallelStatProd`
+      `parallelStatQuantile`
+      `parallelStatStd`
+      `parallelStatSum`
+      `parallelStatVariance`
+      `partialCorrelation`
+      `pearsonr`
+      `pmean`
+      `prod`
+      `proportionCI`
+      `ptp`
+      `quantileSeq`
+      `quickSelect`
+      `rankBiserial`
+      `rankdata`
+      `ridge`
+      `sem`
+      `siegelSlopes`
+      `skewness`
+      `softmax`
+      `spearman`
+      `spearmanr`
+      `spectralClustering`
+      `theilSen`
+      `trimmedMean`
+      `tTestPower`
+      `variation`
+      `wassersteinDistance`
+      `weightedMean`
+      `weightedMedian`
+      `weightedQuantile`
+      `weightedVariance`
+      `zscore`
 
-      **Probability Distributions** (91): `bernoulliPMF`, `betaCDF`, `betaDist`, `betaPDF`, `betaQuantile`, `binomialDist`, `binomialPMF`, `cauchyCDF`, `cauchyPDF`, `cauchyQuantile`, `chiSquaredCDF`, `chiSquaredDist`, `chiSquaredQuantile`, `chiSquaredSF`, `circmean`, `circstd`, `circvar`, `dirichletPdf`, `dirichletSample`, `discreteUniformDist`, `entropy`, `exponentialCDF`, `exponentialDist`, `exponentialPDF`, `fCDF`, `fDist`, `fQuantile`, `fSF`, `gammaCDF`, `gammaDist`, `gammaPDF`, `gammaQuantile`, `gaussianKDE`, `geometricPMF`, `gevCDF`, `gevPDF`, `gumbelDist`, `hypergeometricDist`, `inverseGammaCDF`, `inverseGammaPDF`, `invGaussDist`, `jsDivergence`, `kldivergence`, `laplaceCDF`, `laplacePDF`, `laplaceQuantile`, `logisticCDF`, `logisticPDF`, `logisticQuantile`, `logNormalDist`, `multivariateNormal`, `nakagamiPDF`, `negativeBinomialDist`, `noncentralChi2CDF`, `noncentralChi2PDF`, `noncentralFCDF`, `noncentralTCDF`, `normalCDF`, `normalDist`, `normalPDF`, `normalQuantile`, `owensT`, `paretoDist`, `pickRandom`, `poissonDist`, `poissonPMF`, `random`, `randomInt`, `rayleighDist`, `ricePDF`, `seedProbabilityRng`, `skellamPMF`, `skewNormalCDF`, `skewNormalPDF`, `string`, `studentizedRangeCDF`, `studentizedRangeQuantile`, `studentTCDF`, `studentTPDF`, `studentTQuantile`, `studentTTwoSidedP`, `tDist`, `triangularDist`, `truncatedNormalCDF`, `truncatedNormalMean`, `truncatedNormalPDF`, `uniformDist`, `vonMisesPDF`, `weibullDist`, `wishartSample`, `zipfPMF`
+      **Probability Distributions** (91):
+      `bernoulliPMF`
+      `betaCDF`
+      `betaDist`
+      `betaPDF`
+      `betaQuantile`
+      `binomialDist`
+      `binomialPMF`
+      `cauchyCDF`
+      `cauchyPDF`
+      `cauchyQuantile`
+      `chiSquaredCDF`
+      `chiSquaredDist`
+      `chiSquaredQuantile`
+      `chiSquaredSF`
+      `circmean`
+      `circstd`
+      `circvar`
+      `dirichletPdf`
+      `dirichletSample`
+      `discreteUniformDist`
+      `entropy`
+      `exponentialCDF`
+      `exponentialDist`
+      `exponentialPDF`
+      `fCDF`
+      `fDist`
+      `fQuantile`
+      `fSF`
+      `gammaCDF`
+      `gammaDist`
+      `gammaPDF`
+      `gammaQuantile`
+      `gaussianKDE`
+      `geometricPMF`
+      `gevCDF`
+      `gevPDF`
+      `gumbelDist`
+      `hypergeometricDist`
+      `inverseGammaCDF`
+      `inverseGammaPDF`
+      `invGaussDist`
+      `jsDivergence`
+      `kldivergence`
+      `laplaceCDF`
+      `laplacePDF`
+      `laplaceQuantile`
+      `logisticCDF`
+      `logisticPDF`
+      `logisticQuantile`
+      `logNormalDist`
+      `multivariateNormal`
+      `nakagamiPDF`
+      `negativeBinomialDist`
+      `noncentralChi2CDF`
+      `noncentralChi2PDF`
+      `noncentralFCDF`
+      `noncentralTCDF`
+      `normalCDF`
+      `normalDist`
+      `normalPDF`
+      `normalQuantile`
+      `owensT`
+      `paretoDist`
+      `pickRandom`
+      `poissonDist`
+      `poissonPMF`
+      `random`
+      `randomInt`
+      `rayleighDist`
+      `ricePDF`
+      `seedProbabilityRng`
+      `skellamPMF`
+      `skewNormalCDF`
+      `skewNormalPDF`
+      `string`
+      `studentizedRangeCDF`
+      `studentizedRangeQuantile`
+      `studentTCDF`
+      `studentTPDF`
+      `studentTQuantile`
+      `studentTTwoSidedP`
+      `tDist`
+      `triangularDist`
+      `truncatedNormalCDF`
+      `truncatedNormalMean`
+      `truncatedNormalPDF`
+      `uniformDist`
+      `vonMisesPDF`
+      `weibullDist`
+      `wishartSample`
+      `zipfPMF`
 
-      **Linear Algebra** (122): `bicgstab`, `blockDiag`, `care`, `cg`, `characteristicPolynomial`, `cholesky`, `choleskyDowndate`, `choleskyUpdate`, `circulant`, `companion`, `cond`, `condest`, `cosm`, `cross`, `csAmd`, `csChol`, `csCounts`, `csLu`, `csSpsolve`, `csSqr`, `csSymperm`, `ctranspose`, `dare`, `det`, `dftMatrix`, `diag`, `disableGpu`, `dlyap`, `eigs`, `eigsh`, `eigvals`, `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `enableGpu`, `expm`, `fftGpuDispatch`, `fiedlerMatrix`, `fractionalMatrixPower`, `funm`, `fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`, `generalizedEig`, `gmres`, `gpuAdd`, `gpuMatmul`, `gpuScale`, `gpuTranspose`, `hadamardMatrix`, `hankelMatrix`, `helmertMatrix`, `hessenbergForm`, `hilbertMatrix`, `incompleteCholesky`, `incompleteLU`, `inv`, `invHilbertMatrix`, `isGpuEnabled`, `jordanForm`, `khatriRao`, `kron`, `laplacianMatrix`, `ldl`, `leslieMatrix`, `linsolve`, `logdet`, `lowRankApprox`, `lq`, `lsolve`, `lsolveAll`, `lup`, `lusolve`, `lyap`, `matrixExpm`, `matrixLog`, `matrixLogm`, `matrixPinv`, `matrixRank`, `matrixSqrtm`, `minres`, `norm2`, `normFro`, `orth`, `parallelFFT`, `parallelIFFT`, `pascalMatrix`, `pinv`, `polarDecomposition`, `powerIteration`, `ql`, `qr`, `qrPivoted`, `qz`, `rank`, `rationalNullspace`, `reduce`, `resetGpuElementwise`, `resetGpuFft`, `rotate`, `rotationMatrix`, `rowReduce`, `rq`, `schur`, `signm`, `singularValues`, `sinm`, `slu`, `solveBanded`, `sqrtm`, `subspaceAngles`, `svd`, `svds`, `sylvester`, `thomasSolve`, `toeplitz`, `toeplitzSolve`, `trace`, `transpose`, `tril`, `triu`, `usolve`, `usolveAll`, `vander`
+      **Linear Algebra** (122):
+      `bicgstab`
+      `blockDiag`
+      `care`
+      `cg`
+      `characteristicPolynomial`
+      `cholesky`
+      `choleskyDowndate`
+      `choleskyUpdate`
+      `circulant`
+      `companion`
+      `cond`
+      `condest`
+      `cosm`
+      `cross`
+      `csAmd`
+      `csChol`
+      `csCounts`
+      `csLu`
+      `csSpsolve`
+      `csSqr`
+      `csSymperm`
+      `ctranspose`
+      `dare`
+      `det`
+      `dftMatrix`
+      `diag`
+      `disableGpu`
+      `dlyap`
+      `eigs`
+      `eigsh`
+      `eigvals`
+      `elementwiseChainGpuDispatch`
+      `elementwiseChainReduceGpuDispatch`
+      `enableGpu`
+      `expm`
+      `fftGpuDispatch`
+      `fiedlerMatrix`
+      `fractionalMatrixPower`
+      `funm`
+      `fuseUnaryChainAsync`
+      `fuseUnaryChainReduceAsync`
+      `generalizedEig`
+      `gmres`
+      `gpuAdd`
+      `gpuMatmul`
+      `gpuScale`
+      `gpuTranspose`
+      `hadamardMatrix`
+      `hankelMatrix`
+      `helmertMatrix`
+      `hessenbergForm`
+      `hilbertMatrix`
+      `incompleteCholesky`
+      `incompleteLU`
+      `inv`
+      `invHilbertMatrix`
+      `isGpuEnabled`
+      `jordanForm`
+      `khatriRao`
+      `kron`
+      `laplacianMatrix`
+      `ldl`
+      `leslieMatrix`
+      `linsolve`
+      `logdet`
+      `lowRankApprox`
+      `lq`
+      `lsolve`
+      `lsolveAll`
+      `lup`
+      `lusolve`
+      `lyap`
+      `matrixExpm`
+      `matrixLog`
+      `matrixLogm`
+      `matrixPinv`
+      `matrixRank`
+      `matrixSqrtm`
+      `minres`
+      `norm2`
+      `normFro`
+      `orth`
+      `parallelFFT`
+      `parallelIFFT`
+      `pascalMatrix`
+      `pinv`
+      `polarDecomposition`
+      `powerIteration`
+      `ql`
+      `qr`
+      `qrPivoted`
+      `qz`
+      `rank`
+      `rationalNullspace`
+      `reduce`
+      `resetGpuElementwise`
+      `resetGpuFft`
+      `rotate`
+      `rotationMatrix`
+      `rowReduce`
+      `rq`
+      `schur`
+      `signm`
+      `singularValues`
+      `sinm`
+      `slu`
+      `solveBanded`
+      `sqrtm`
+      `subspaceAngles`
+      `svd`
+      `svds`
+      `sylvester`
+      `thomasSolve`
+      `toeplitz`
+      `toeplitzSolve`
+      `trace`
+      `transpose`
+      `tril`
+      `triu`
+      `usolve`
+      `usolveAll`
+      `vander`
 
-      **Matrix Construction & Manipulation** (28): `apply`, `column`, `concat`, `count`, `diff`, `filter`, `flatten`, `forEach`, `getMatrixDataType`, `identity`, `index`, `indexFn`, `map`, `mapSlices`, `matrixFromColumns`, `matrixFromFunction`, `matrixFromRows`, `ones`, `partitionSelect`, `range`, `reshape`, `resize`, `row`, `size`, `sort`, `squeeze`, `subset`, `zeros`
+      **Matrix Construction & Manipulation** (28):
+      `apply`
+      `column`
+      `concat`
+      `count`
+      `diff`
+      `filter`
+      `flatten`
+      `forEach`
+      `getMatrixDataType`
+      `identity`
+      `index`
+      `indexFn`
+      `map`
+      `mapSlices`
+      `matrixFromColumns`
+      `matrixFromFunction`
+      `matrixFromRows`
+      `ones`
+      `partitionSelect`
+      `range`
+      `reshape`
+      `resize`
+      `row`
+      `size`
+      `sort`
+      `squeeze`
+      `subset`
+      `zeros`
 
-      **Algebra** (50): `apart`, `cancel`, `coefficientList`, `collect`, `combine`, `complexExpand`, `degree`, `derivative`, `descartesSignChanges`, `differences`, `discriminant`, `element`, `eliminate`, `expand`, `expToTrig`, `factor`, `fullSimplify`, `functionExpand`, `isolateRealRoots`, `leafCount`, `normalForm`, `parse`, `polyadd`, `polyder`, `polymul`, `polynomialGCD`, `polynomialLCM`, `polynomialQuotient`, `polynomialRemainder`, `polynomialRoot`, `polyval`, `powerExpand`, `rationalize`, `realRoots`, `resolve`, `resultant`, `simplify`, `simplifyConstant`, `simplifyCore`, `sturmRootCount`, `sturmSequence`, `substitute`, `symbolicEqual`, `symbolicPartialDerivative`, `tangentLine`, `together`, `trigExpand`, `trigReduce`, `trigToExp`, `variables`
+      **Algebra** (50):
+      `apart`
+      `cancel`
+      `coefficientList`
+      `collect`
+      `combine`
+      `complexExpand`
+      `degree`
+      `derivative`
+      `descartesSignChanges`
+      `differences`
+      `discriminant`
+      `element`
+      `eliminate`
+      `expand`
+      `expToTrig`
+      `factor`
+      `fullSimplify`
+      `functionExpand`
+      `isolateRealRoots`
+      `leafCount`
+      `normalForm`
+      `parse`
+      `polyadd`
+      `polyder`
+      `polymul`
+      `polynomialGCD`
+      `polynomialLCM`
+      `polynomialQuotient`
+      `polynomialRemainder`
+      `polynomialRoot`
+      `polyval`
+      `powerExpand`
+      `rationalize`
+      `realRoots`
+      `resolve`
+      `resultant`
+      `simplify`
+      `simplifyConstant`
+      `simplifyCore`
+      `sturmRootCount`
+      `sturmSequence`
+      `substitute`
+      `symbolicEqual`
+      `symbolicPartialDerivative`
+      `tangentLine`
+      `together`
+      `trigExpand`
+      `trigReduce`
+      `trigToExp`
+      `variables`
 
-      **Computer Algebra System (CAS)** (39): `assume`, `asymptotic`, `casDerivative`, `casExpand`, `casFactor`, `casSimplify`, `clearAssumptions`, `curl`, `directionalDerivative`, `divergence`, `fourierSeries`, `getAssumptions`, `gradientSymbolic`, `groebnerBasis`, `implicitDiff`, `integrate`, `inverseLaplace`, `inverseLaplaceTransform`, `jacobian`, `laplace`, `laplacian`, `limit`, `minimalPolynomial`, `multivariateTaylor`, `odeGeneral`, `partialDerivative`, `piecewise`, `PolynomialDegreeError`, `PolynomialSizeError`, `series`, `seriesCoefficient`, `solve`, `solveExact`, `summation`, `symbolicIntegral`, `symbolicProduct`, `taylor`, `toRadicals`, `zTransform`
+      **Computer Algebra System (CAS)** (39):
+      `assume`
+      `asymptotic`
+      `casDerivative`
+      `casExpand`
+      `casFactor`
+      `casSimplify`
+      `clearAssumptions`
+      `curl`
+      `directionalDerivative`
+      `divergence`
+      `fourierSeries`
+      `getAssumptions`
+      `gradientSymbolic`
+      `groebnerBasis`
+      `implicitDiff`
+      `integrate`
+      `inverseLaplace`
+      `inverseLaplaceTransform`
+      `jacobian`
+      `laplace`
+      `laplacian`
+      `limit`
+      `minimalPolynomial`
+      `multivariateTaylor`
+      `odeGeneral`
+      `partialDerivative`
+      `piecewise`
+      `PolynomialDegreeError`
+      `PolynomialSizeError`
+      `series`
+      `seriesCoefficient`
+      `solve`
+      `solveExact`
+      `summation`
+      `symbolicIntegral`
+      `symbolicProduct`
+      `taylor`
+      `toRadicals`
+      `zTransform`
 
-      **Numerical Integration** (24): `clenshawCurtis`, `dblquad`, `gaussHermiteIntegrate`, `gaussLaguerreIntegrate`, `gaussQuad`, `monteCarloIntegrate`, `nintegrate`, `parallelGaussQuad`, `parallelRomberg`, `quad`, `romberg`, `rootsChebyshevT`, `rootsChebyshevU`, `rootsHermite`, `rootsJacobi`, `rootsLaguerre`, `rootsLegendre`, `simpson`, `simpsonF64`, `simpsons`, `tanhSinh`, `tplquad`, `trapz`, `trapzF64`
+      **Numerical Integration** (24):
+      `clenshawCurtis`
+      `dblquad`
+      `gaussHermiteIntegrate`
+      `gaussLaguerreIntegrate`
+      `gaussQuad`
+      `monteCarloIntegrate`
+      `nintegrate`
+      `parallelGaussQuad`
+      `parallelRomberg`
+      `quad`
+      `romberg`
+      `rootsChebyshevT`
+      `rootsChebyshevU`
+      `rootsHermite`
+      `rootsJacobi`
+      `rootsLaguerre`
+      `rootsLegendre`
+      `simpson`
+      `simpsonF64`
+      `simpsons`
+      `tanhSinh`
+      `tplquad`
+      `trapz`
+      `trapzF64`
 
-      **Interpolation & Curve Fitting** (26): `bezierCurve`, `bspline`, `bsplineEval`, `bsplineFit`, `chebyshevApprox`, `chebyshevFit`, `cspline`, `cubicSpline`, `curvefit`, `expfit`, `griddata`, `hermiteInterp`, `interpn`, `interpolate`, `lagrangeInterp`, `legendreFit`, `linearInterp`, `loess`, `logfit`, `newtonInterp`, `padeApproximant`, `pchip`, `pchipInterp`, `polyFit`, `powerfit`, `rbfInterpolate`
+      **Interpolation & Curve Fitting** (26):
+      `bezierCurve`
+      `bspline`
+      `bsplineEval`
+      `bsplineFit`
+      `chebyshevApprox`
+      `chebyshevFit`
+      `cspline`
+      `cubicSpline`
+      `curvefit`
+      `expfit`
+      `griddata`
+      `hermiteInterp`
+      `interpn`
+      `interpolate`
+      `lagrangeInterp`
+      `legendreFit`
+      `linearInterp`
+      `loess`
+      `logfit`
+      `newtonInterp`
+      `padeApproximant`
+      `pchip`
+      `pchipInterp`
+      `polyFit`
+      `powerfit`
+      `rbfInterpolate`
 
-      **Numerical Methods** (47): `bfgs`, `derivativeAt`, `differentialEvolution`, `eventDetection`, `findRoot`, `finiteDifferenceCoefficients`, `fixedPoint`, `fsolve`, `gaussLegendre4`, `GL4ConvergenceError`, `globalMinimize`, `gradient`, `gradientAt`, `gradientDescent`, `halley`, `hessian`, `interval`, `leastSquares`, `levenbergMarquardt`, `linprog`, `lsqBounded`, `maximize`, `minimize`, `minimizeConstrained`, `minimizeScalar`, `nelderMead`, `newton`, `nnls`, `nullspace`, `numericJacobian`, `odeAdaptiveStep`, `propagateUncertainty`, `quadprog`, `residue`, `ridders`, `root`, `secant`, `simulatedAnnealing`, `solveBVP`, `solveDAE`, `solveDDE`, `solveODE`, `solveODESystem`, `solveParabolicPDE`, `solvePDE`, `stiffODESolver`, `valueAndDerivativeAt`
+      **Numerical Methods** (47):
+      `bfgs`
+      `derivativeAt`
+      `differentialEvolution`
+      `eventDetection`
+      `findRoot`
+      `finiteDifferenceCoefficients`
+      `fixedPoint`
+      `fsolve`
+      `gaussLegendre4`
+      `GL4ConvergenceError`
+      `globalMinimize`
+      `gradient`
+      `gradientAt`
+      `gradientDescent`
+      `halley`
+      `hessian`
+      `interval`
+      `leastSquares`
+      `levenbergMarquardt`
+      `linprog`
+      `lsqBounded`
+      `maximize`
+      `minimize`
+      `minimizeConstrained`
+      `minimizeScalar`
+      `nelderMead`
+      `newton`
+      `nnls`
+      `nullspace`
+      `numericJacobian`
+      `odeAdaptiveStep`
+      `propagateUncertainty`
+      `quadprog`
+      `residue`
+      `ridders`
+      `root`
+      `secant`
+      `simulatedAnnealing`
+      `solveBVP`
+      `solveDAE`
+      `solveDDE`
+      `solveODE`
+      `solveODESystem`
+      `solveParabolicPDE`
+      `solvePDE`
+      `stiffODESolver`
+      `valueAndDerivativeAt`
 
-      **Signal Processing** (103): `autoCorrelation`, `bandpassFilter`, `bartlettPSD`, `bilinear`, `blackmanHarrisWindow`, `bohmanWindow`, `butter`, `buttord`, `cheby1`, `cheby2`, `chirp`, `chirpZTransform`, `coherence`, `cont2discrete`, `conv2`, `convolve`, `correlate`, `cosineWindow`, `crossCorrelation`, `csd`, `cwt`, `dct`, `decimate`, `deconvolve`, `dst`, `dtw`, `dwt`, `ellip`, `exponentialWindow`, `fft`, `fft2d`, `fftfreq`, `fftn`, `fftshift`, `filtfilt`, `findPeaks`, `firls`, `firwin`, `firwinBandpass`, `flattopWindow`, `fourier`, `freqz`, `gaussianWindow`, `gaussPulse`, `getWindow`, `goertzel`, `groupDelay`, `highpassFilter`, `hilbertTransform`, `idct`, `idst`, `idwt`, `ifft`, `ifftshift`, `iirNotch`, `iirPeak`, `impulseResponse`, `invFourier`, `irfft`, `istft`, `kaiserWindow`, `lfilter`, `lfilterZi`, `lombScargle`, `lowpassFilter`, `medfilt`, `multiTaperPSD`, `nuttallWindow`, `parallelAutoCorr`, `parallelConv`, `parallelFFTMagnitude`, `parallelFFTPower`, `parallelXCorr`, `parzenWindow`, `peakWidths`, `periodogram`, `remez`, `resample`, `rfft`, `rfftfreq`, `savgol`, `sawtooth`, `sinc`, `sos2tf`, `sosfilt`, `spectrogram`, `squareWave`, `ss2tf`, `stepResponse`, `stft`, `sweepPoly`, `tf2ss`, `tf2zpk`, `tukeyWindow`, `unitImpulse`, `unwrapPhase`, `wavedec`, `waverec`, `welchPSD`, `wiener`, `windowFunction`, `zpk2sos`, `zpk2tf`
+      **Signal Processing** (103):
+      `autoCorrelation`
+      `bandpassFilter`
+      `bartlettPSD`
+      `bilinear`
+      `blackmanHarrisWindow`
+      `bohmanWindow`
+      `butter`
+      `buttord`
+      `cheby1`
+      `cheby2`
+      `chirp`
+      `chirpZTransform`
+      `coherence`
+      `cont2discrete`
+      `conv2`
+      `convolve`
+      `correlate`
+      `cosineWindow`
+      `crossCorrelation`
+      `csd`
+      `cwt`
+      `dct`
+      `decimate`
+      `deconvolve`
+      `dst`
+      `dtw`
+      `dwt`
+      `ellip`
+      `exponentialWindow`
+      `fft`
+      `fft2d`
+      `fftfreq`
+      `fftn`
+      `fftshift`
+      `filtfilt`
+      `findPeaks`
+      `firls`
+      `firwin`
+      `firwinBandpass`
+      `flattopWindow`
+      `fourier`
+      `freqz`
+      `gaussianWindow`
+      `gaussPulse`
+      `getWindow`
+      `goertzel`
+      `groupDelay`
+      `highpassFilter`
+      `hilbertTransform`
+      `idct`
+      `idst`
+      `idwt`
+      `ifft`
+      `ifftshift`
+      `iirNotch`
+      `iirPeak`
+      `impulseResponse`
+      `invFourier`
+      `irfft`
+      `istft`
+      `kaiserWindow`
+      `lfilter`
+      `lfilterZi`
+      `lombScargle`
+      `lowpassFilter`
+      `medfilt`
+      `multiTaperPSD`
+      `nuttallWindow`
+      `parallelAutoCorr`
+      `parallelConv`
+      `parallelFFTMagnitude`
+      `parallelFFTPower`
+      `parallelXCorr`
+      `parzenWindow`
+      `peakWidths`
+      `periodogram`
+      `remez`
+      `resample`
+      `rfft`
+      `rfftfreq`
+      `savgol`
+      `sawtooth`
+      `sinc`
+      `sos2tf`
+      `sosfilt`
+      `spectrogram`
+      `squareWave`
+      `ss2tf`
+      `stepResponse`
+      `stft`
+      `sweepPoly`
+      `tf2ss`
+      `tf2zpk`
+      `tukeyWindow`
+      `unitImpulse`
+      `unwrapPhase`
+      `wavedec`
+      `waverec`
+      `welchPSD`
+      `wiener`
+      `windowFunction`
+      `zpk2sos`
+      `zpk2tf`
 
-      **Geometry** (83): `alphaShape`, `angle2D`, `angle3D`, `arcLength`, `area`, `barycentricCoordinates`, `boundingBox`, `catmullRom`, `centroid`, `chebyshevDistance`, `closestPair`, `conj`, `convexHull`, `convexHull2D`, `convexHull3D`, `coordinateTransform`, `cross3D`, `curvature`, `delaunay`, `delaunayTriangulation`, `distance`, `distance2D`, `distance3D`, `distanceMatrix`, `distanceND`, `distancePointToLine2D`, `dot3D`, `douglasPeucker`, `earClipping`, `frechetDistance`, `halfspaceIntersection`, `hausdorffDistance`, `haversine`, `inCircle`, `intersect`, `intersectLines2D`, `intersectSegments2D`, `kdTree`, `kdTreeKNN`, `kdTreeNearest`, `kdTreeRadius`, `manhattanDistance`, `massProperties`, `minimumEnclosingCircle`, `minkowskiDistance`, `minkowskiSum`, `nearestNeighbor`, `orient2D`, `orient3D`, `pointInPolygon`, `pointInTriangle`, `polygonArea`, `polygonClip`, `polygonIsConvex`, `polygonPerimeter`, `procrustes`, `projectVector`, `quaternionConjugate`, `quaternionExp`, `quaternionFromAxisAngle`, `quaternionFromEuler`, `quaternionFromRotationMatrix`, `quaternionInverse`, `quaternionLog`, `quaternionMultiply`, `quaternionNormalize`, `quaternionPow`, `quaternionRotate`, `quaternionSlerp`, `quaternionToAxisAngle`, `quaternionToEuler`, `quaternionToRotationMatrix`, `rayPlaneIntersect`, `rayTriangleIntersect`, `reflectVector`, `rotateVector2D`, `rotateVector3D`, `segmentSegmentClosest`, `slerp`, `sphericalVoronoi`, `triangleArea`, `voronoi`, `voronoiDiagram`
+      **Geometry** (83):
+      `alphaShape`
+      `angle2D`
+      `angle3D`
+      `arcLength`
+      `area`
+      `barycentricCoordinates`
+      `boundingBox`
+      `catmullRom`
+      `centroid`
+      `chebyshevDistance`
+      `closestPair`
+      `conj`
+      `convexHull`
+      `convexHull2D`
+      `convexHull3D`
+      `coordinateTransform`
+      `cross3D`
+      `curvature`
+      `delaunay`
+      `delaunayTriangulation`
+      `distance`
+      `distance2D`
+      `distance3D`
+      `distanceMatrix`
+      `distanceND`
+      `distancePointToLine2D`
+      `dot3D`
+      `douglasPeucker`
+      `earClipping`
+      `frechetDistance`
+      `halfspaceIntersection`
+      `hausdorffDistance`
+      `haversine`
+      `inCircle`
+      `intersect`
+      `intersectLines2D`
+      `intersectSegments2D`
+      `kdTree`
+      `kdTreeKNN`
+      `kdTreeNearest`
+      `kdTreeRadius`
+      `manhattanDistance`
+      `massProperties`
+      `minimumEnclosingCircle`
+      `minkowskiDistance`
+      `minkowskiSum`
+      `nearestNeighbor`
+      `orient2D`
+      `orient3D`
+      `pointInPolygon`
+      `pointInTriangle`
+      `polygonArea`
+      `polygonClip`
+      `polygonIsConvex`
+      `polygonPerimeter`
+      `procrustes`
+      `projectVector`
+      `quaternionConjugate`
+      `quaternionExp`
+      `quaternionFromAxisAngle`
+      `quaternionFromEuler`
+      `quaternionFromRotationMatrix`
+      `quaternionInverse`
+      `quaternionLog`
+      `quaternionMultiply`
+      `quaternionNormalize`
+      `quaternionPow`
+      `quaternionRotate`
+      `quaternionSlerp`
+      `quaternionToAxisAngle`
+      `quaternionToEuler`
+      `quaternionToRotationMatrix`
+      `rayPlaneIntersect`
+      `rayTriangleIntersect`
+      `reflectVector`
+      `rotateVector2D`
+      `rotateVector3D`
+      `segmentSegmentClosest`
+      `slerp`
+      `sphericalVoronoi`
+      `triangleArea`
+      `voronoi`
+      `voronoiDiagram`
 
-      **Graph Theory** (26): `adjacencyMatrix`, `astar`, `bellmanFord`, `betweennessCentrality`, `bfs`, `closenessCentrality`, `connectedComponents`, `dfs`, `eigenvectorCentrality`, `floydWarshall`, `graphColoring`, `graphDistance`, `harmonicCentrality`, `hungarian`, `isConnected`, `isIsomorphic`, `katzCentrality`, `louvainCommunities`, `maxClique`, `maxFlow`, `minCut`, `minimumSpanningTree`, `pageRank`, `shortestPath`, `stronglyConnectedComponents`, `topologicalSort`
+      **Graph Theory** (26):
+      `adjacencyMatrix`
+      `astar`
+      `bellmanFord`
+      `betweennessCentrality`
+      `bfs`
+      `closenessCentrality`
+      `connectedComponents`
+      `dfs`
+      `eigenvectorCentrality`
+      `floydWarshall`
+      `graphColoring`
+      `graphDistance`
+      `harmonicCentrality`
+      `hungarian`
+      `isConnected`
+      `isIsomorphic`
+      `katzCentrality`
+      `louvainCommunities`
+      `maxClique`
+      `maxFlow`
+      `minCut`
+      `minimumSpanningTree`
+      `pageRank`
+      `shortestPath`
+      `stronglyConnectedComponents`
+      `topologicalSort`
 
-      **Hypothesis Tests** (39): `andersonDarlingTest`, `anova`, `anova2`, `bartlettTest`, `binomialTest`, `chi2Contingency`, `chiSquareTest`, `cochranQ`, `cohensKappa`, `dagostinoTest`, `fisherExact`, `friedmanTest`, `fTest`, `gTest`, `hotellingT2`, `jarqueBera`, `kendallTauTest`, `kolmogorovSmirnov2Test`, `kolmogorovSmirnovTest`, `kruskalWallis`, `leveneTest`, `mannWhitneyTest`, `mcnemar`, `moodMedianTest`, `multipleComparison`, `multipleTest`, `newcombePairedInterval`, `permutationTest`, `powerDivergence`, `principalComponentAnalysis`, `proportionZTest`, `runsTest`, `shapiroWilkTest`, `signTest`, `studentTTest`, `studentTTestPaired`, `tukeyHSD`, `wilcoxon`, `wilsonInterval`
+      **Hypothesis Tests** (39):
+      `andersonDarlingTest`
+      `anova`
+      `anova2`
+      `bartlettTest`
+      `binomialTest`
+      `chi2Contingency`
+      `chiSquareTest`
+      `cochranQ`
+      `cohensKappa`
+      `dagostinoTest`
+      `fisherExact`
+      `friedmanTest`
+      `fTest`
+      `gTest`
+      `hotellingT2`
+      `jarqueBera`
+      `kendallTauTest`
+      `kolmogorovSmirnov2Test`
+      `kolmogorovSmirnovTest`
+      `kruskalWallis`
+      `leveneTest`
+      `mannWhitneyTest`
+      `mcnemar`
+      `moodMedianTest`
+      `multipleComparison`
+      `multipleTest`
+      `newcombePairedInterval`
+      `permutationTest`
+      `powerDivergence`
+      `principalComponentAnalysis`
+      `proportionZTest`
+      `runsTest`
+      `shapiroWilkTest`
+      `signTest`
+      `studentTTest`
+      `studentTTestPaired`
+      `tukeyHSD`
+      `wilcoxon`
+      `wilsonInterval`
 
-      **Set Operations** (13): `setCartesian`, `setDifference`, `setDisjoint`, `setDistinct`, `setEqual`, `setIntersect`, `setIsSubset`, `setIsSuperset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, `setUnion`
+      **Set Operations** (13):
+      `setCartesian`
+      `setDifference`
+      `setDisjoint`
+      `setDistinct`
+      `setEqual`
+      `setIntersect`
+      `setIsSubset`
+      `setIsSuperset`
+      `setMultiplicity`
+      `setPowerset`
+      `setSize`
+      `setSymDifference`
+      `setUnion`
 
-      **Units** (6): `createUnit`, `splitUnit`, `to`, `toBest`, `unit`, `unitToRationalDimension`
+      **Units** (6):
+      `createUnit`
+      `splitUnit`
+      `to`
+      `toBest`
+      `unit`
+      `unitToRationalDimension`
 
-      **Complex Number Utilities** (4): `arg`, `complexCos`, `complexSin`, `im`
+      **Complex Number Utilities** (4):
+      `arg`
+      `complexCos`
+      `complexSin`
+      `im`
 
-      **Type Conversion** (8): `bignumber`, `boolean`, `complex`, `fraction`, `matrix`, `numeric`, `parseNumberWithConfig`, `sparse`
+      **Type Conversion** (8):
+      `bignumber`
+      `boolean`
+      `complex`
+      `fraction`
+      `matrix`
+      `numeric`
+      `parseNumberWithConfig`
+      `sparse`
 
-      **Type Checking & Utilities** (23): `bin`, `chain`, `clone`, `config`, `format`, `fuseUnaryChain`, `hasNumericValue`, `help`, `hex`, `isBounded`, `isFinite`, `isInteger`, `isNaN`, `isNegative`, `isNumeric`, `isPositive`, `isPrime`, `isZero`, `oct`, `print`, `runWithConfig`, `typeOf`, `validateClosureSource`
+      **Type Checking & Utilities** (23):
+      `bin`
+      `chain`
+      `clone`
+      `config`
+      `format`
+      `fuseUnaryChain`
+      `hasNumericValue`
+      `help`
+      `hex`
+      `isBounded`
+      `isFinite`
+      `isInteger`
+      `isNaN`
+      `isNegative`
+      `isNumeric`
+      `isPositive`
+      `isPrime`
+      `isZero`
+      `oct`
+      `print`
+      `runWithConfig`
+      `typeOf`
+      `validateClosureSource`
 
-      **Expression Evaluation** (40): `addNode`, `compileExpr`, `compileScalar`, `compileScalarGradient`, `crossoverSubtrees`, `deleteNode`, `evaluate`, `evaluateScalar`, `fitScalarParameters`, `frontToJson`, `frontToLatexTable`, `identityMutation`, `inferScalarDimension`, `insertNode`, `mutateConstant`, `mutateFeature`, `mutateOperator`, `nodeToScalar`, `numericallyEquivalent`, `NumericEquivalenceError`, `paretoFront`, `ParetoFrontError`, `parser`, `physicsScope`, `randomizeTree`, `replacer`, `reviver`, `rotateTree`, `runScalarSearch`, `ScalarEvalError`, `scalarToNode`, `scalarToTex`, `scoreFront`, `searchScalars`, `selectFrontModel`, `simplifyConstants`, `simplifyScalar`, `solveParameterDimensions`, `swapOperands`, `weightedMutation`
+      **Expression Evaluation** (40):
+      `addNode`
+      `compileExpr`
+      `compileScalar`
+      `compileScalarGradient`
+      `crossoverSubtrees`
+      `deleteNode`
+      `evaluate`
+      `evaluateScalar`
+      `fitScalarParameters`
+      `frontToJson`
+      `frontToLatexTable`
+      `identityMutation`
+      `inferScalarDimension`
+      `insertNode`
+      `mutateConstant`
+      `mutateFeature`
+      `mutateOperator`
+      `nodeToScalar`
+      `numericallyEquivalent`
+      `NumericEquivalenceError`
+      `paretoFront`
+      `ParetoFrontError`
+      `parser`
+      `physicsScope`
+      `randomizeTree`
+      `replacer`
+      `reviver`
+      `rotateTree`
+      `runScalarSearch`
+      `ScalarEvalError`
+      `scalarToNode`
+      `scalarToTex`
+      `scoreFront`
+      `searchScalars`
+      `selectFrontModel`
+      `simplifyConstants`
+      `simplifyScalar`
+      `solveParameterDimensions`
+      `swapOperands`
+      `weightedMutation`
 
-      **Parallel Execution Model** (10): `getComputePool`, `initializePool`, `initializeSignal`, `initializeStatistics`, `isGpuChainSupported`, `isWasmLoaded`, `shouldParallelize`, `terminatePool`, `terminateSignal`, `terminateStatistics`
+      **Parallel Execution Model** (10):
+      `getComputePool`
+      `initializePool`
+      `initializeSignal`
+      `initializeStatistics`
+      `isGpuChainSupported`
+      `isWasmLoaded`
+      `shouldParallelize`
+      `terminatePool`
+      `terminateSignal`
+      `terminateStatistics`
 
-      **Other exports (uncategorized)** (160): `ArgumentsError`, `compile`, `createAbs`, `createAcos`, `createAcosh`, `createAcot`, `createAcsc`, `createAsec`, `createAsin`, `createAsinh`, `createAtan`, `createAtan2`, `createAtanh`, `createCbrt`, `createCeil`, `createCompare`, `createCos`, `createCosh`, `createCot`, `createCreateUnit`, `createCsc`, `createCtranspose`, `createCube`, `createDivide`, `createDot`, `createEqual`, `createExp`, `createExpm1`, `createFix`, `createFloor`, `createGcd`, `createHypot`, `createInstanceEvaluator`, `createLarger`, `createLargerEq`, `createLcm`, `createLog`, `createLog10`, `createLog1p`, `createLog2`, `createMax`, `createMean`, `createMin`, `createMod`, `createNorm`, `createNthRoot`, `createPow`, `createRound`, `createSec`, `createSign`, `createSin`, `createSinh`, `createSmaller`, `createSmallerEq`, `createSqrt`, `createSquare`, `createStd`, `createSubtract`, `createSum`, `createTan`, `createTanh`, `createTranspose`, `createUnaryMinus`, `createUnaryPlus`, `createVariance`, `createXgcd`, `den`, `eigSym3`, `frustumContainsPoint`, `frustumFromMatrix`, `frustumIntersectsAabb`, `frustumIntersectsSphere`, `importFactory`, `isAccessorNode`, `isArray`, `isArrayNode`, `isAssignmentNode`, `isBigInt`, `isBigNumber`, `isBlockNode`, `isBoolean`, `isChain`, `isCollection`, `isComplex`, `isConditionalNode`, `isConstantNode`, `isDate`, `isDenseMatrix`, `isFraction`, `isFunction`, `isFunctionAssignmentNode`, `isFunctionNode`, `isHelp`, `isIndex`, `isIndexNode`, `isMap`, `isMatrix`, `isNode`, `isNull`, `isNumber`, `isObject`, `isObjectNode`, `isObjectWrappingMap`, `isOperatorNode`, `isParenthesisNode`, `isPartitionedMap`, `isRange`, `isRangeNode`, `isRegExp`, `isRelationalNode`, `isResultSet`, `isSparseMatrix`, `isString`, `isSymbolNode`, `isUndefined`, `isUnit`, `lstsq`, `mat3Inverse`, `mat3Multiply`, `mat3MulVec`, `mat3ToQuat`, `mat3Transpose`, `mat4Compose`, `mat4Decompose`, `mat4Determinant`, `mat4Invert`, `mat4LookAt`, `mat4Multiply`, `mat4Orthographic`, `mat4Perspective`, `nanmean`, `nanmedian`, `nanstd`, `nanvariance`, `NoClosedFormError`, `num`, `parallelAxis`, `quatConjugate`, `quatIntegrate`, `quatMultiply`, `quatNormalize`, `quatRotate`, `rotateTensor`, `solveBoxLcp`, `vec2Add`, `vec2Dot`, `vec2Length`, `vec2Normalize`, `vec2Scale`, `vec2ScaleAndAdd`, `vec2Sub`, `vec3Add`, `vec3Cross`, `vec3Dot`, `vec3Length`, `vec3Normalize`, `vec3Scale`, `vec3ScaleAndAdd`, `vec3Sub`, `workerKernel`
+      **Other exports (uncategorized)** (160):
+      `ArgumentsError`
+      `compile`
+      `createAbs`
+      `createAcos`
+      `createAcosh`
+      `createAcot`
+      `createAcsc`
+      `createAsec`
+      `createAsin`
+      `createAsinh`
+      `createAtan`
+      `createAtan2`
+      `createAtanh`
+      `createCbrt`
+      `createCeil`
+      `createCompare`
+      `createCos`
+      `createCosh`
+      `createCot`
+      `createCreateUnit`
+      `createCsc`
+      `createCtranspose`
+      `createCube`
+      `createDivide`
+      `createDot`
+      `createEqual`
+      `createExp`
+      `createExpm1`
+      `createFix`
+      `createFloor`
+      `createGcd`
+      `createHypot`
+      `createInstanceEvaluator`
+      `createLarger`
+      `createLargerEq`
+      `createLcm`
+      `createLog`
+      `createLog10`
+      `createLog1p`
+      `createLog2`
+      `createMax`
+      `createMean`
+      `createMin`
+      `createMod`
+      `createNorm`
+      `createNthRoot`
+      `createPow`
+      `createRound`
+      `createSec`
+      `createSign`
+      `createSin`
+      `createSinh`
+      `createSmaller`
+      `createSmallerEq`
+      `createSqrt`
+      `createSquare`
+      `createStd`
+      `createSubtract`
+      `createSum`
+      `createTan`
+      `createTanh`
+      `createTranspose`
+      `createUnaryMinus`
+      `createUnaryPlus`
+      `createVariance`
+      `createXgcd`
+      `den`
+      `eigSym3`
+      `frustumContainsPoint`
+      `frustumFromMatrix`
+      `frustumIntersectsAabb`
+      `frustumIntersectsSphere`
+      `importFactory`
+      `isAccessorNode`
+      `isArray`
+      `isArrayNode`
+      `isAssignmentNode`
+      `isBigInt`
+      `isBigNumber`
+      `isBlockNode`
+      `isBoolean`
+      `isChain`
+      `isCollection`
+      `isComplex`
+      `isConditionalNode`
+      `isConstantNode`
+      `isDate`
+      `isDenseMatrix`
+      `isFraction`
+      `isFunction`
+      `isFunctionAssignmentNode`
+      `isFunctionNode`
+      `isHelp`
+      `isIndex`
+      `isIndexNode`
+      `isMap`
+      `isMatrix`
+      `isNode`
+      `isNull`
+      `isNumber`
+      `isObject`
+      `isObjectNode`
+      `isObjectWrappingMap`
+      `isOperatorNode`
+      `isParenthesisNode`
+      `isPartitionedMap`
+      `isRange`
+      `isRangeNode`
+      `isRegExp`
+      `isRelationalNode`
+      `isResultSet`
+      `isSparseMatrix`
+      `isString`
+      `isSymbolNode`
+      `isUndefined`
+      `isUnit`
+      `lstsq`
+      `mat3Inverse`
+      `mat3Multiply`
+      `mat3MulVec`
+      `mat3ToQuat`
+      `mat3Transpose`
+      `mat4Compose`
+      `mat4Decompose`
+      `mat4Determinant`
+      `mat4Invert`
+      `mat4LookAt`
+      `mat4Multiply`
+      `mat4Orthographic`
+      `mat4Perspective`
+      `nanmean`
+      `nanmedian`
+      `nanstd`
+      `nanvariance`
+      `NoClosedFormError`
+      `num`
+      `parallelAxis`
+      `quatConjugate`
+      `quatIntegrate`
+      `quatMultiply`
+      `quatNormalize`
+      `quatRotate`
+      `rotateTensor`
+      `solveBoxLcp`
+      `vec2Add`
+      `vec2Dot`
+      `vec2Length`
+      `vec2Normalize`
+      `vec2Scale`
+      `vec2ScaleAndAdd`
+      `vec2Sub`
+      `vec3Add`
+      `vec3Cross`
+      `vec3Dot`
+      `vec3Length`
+      `vec3Normalize`
+      `vec3Scale`
+      `vec3ScaleAndAdd`
+      `vec3Sub`
+      `workerKernel`
 
       ### Constants & values (73)
 
-      `ARRAY_WORKER_THRESHOLD`, `atomicMass`, `avogadro`, `bohrMagneton`, `bohrRadius`, `boltzmann`, `CAS_BATCH_THRESHOLD`, `CENTRALITY_WORKER_THRESHOLD`, `classicalElectronRadius`, `conductanceQuantum`, `coulomb`, `coulombConstant`, `DEFAULT_MUTATION_WEIGHTS`, `deuteronMass`, `DIST_WORKER_THRESHOLD`, `EARTH_RADIUS_KM`, `efimovFactor`, `electricConstant`, `electronMass`, `elementaryCharge`, `EVALUATE_SCOPE_OMIT`, `faraday`, `fermiCoupling`, `fineStructure`, `firstRadiation`, `gasConstant`, `GAUSS_WORKER_THRESHOLD`, `GL4_A`, `GL4_B`, `GL4_C`, `GPU_ELEMENTWISE_OPS`, `GPU_MIN_ELEMENTS`, `GPU_REDUCE_OPS`, `gravitationConstant`, `gravity`, `hartreeEnergy`, `inverseConductanceQuantum`, `josephson`, `klitzing`, `loschmidt`, `magneticConstant`, `magneticFluxQuantum`, `MASS_PROPERTY_SHAPES`, `molarMass`, `molarMassC12`, `molarPlanckConstant`, `molarVolume`, `MUTATE_CONSTANT_NEGATE_PROBABILITY`, `neutronMass`, `nodeOperations`, `nuclearMagneton`, `planckCharge`, `planckConstant`, `planckLength`, `planckMass`, `planckTemperature`, `planckTime`, `protonMass`, `quantumOfCirculation`, `reducedPlanckConstant`, `rydberg`, `sackurTetrode`, `scalar`, `secondRadiation`, `simplifyUtil`, `spectralRadiance`, `speedOfLight`, `stefanBoltzmann`, `thomsonCrossSection`, `vacuumImpedance`, `WASM_INTERP_THRESHOLD`, `weakMixingAngle`, `wienDisplacement`
+      `ARRAY_WORKER_THRESHOLD`
+      `atomicMass`
+      `avogadro`
+      `bohrMagneton`
+      `bohrRadius`
+      `boltzmann`
+      `CAS_BATCH_THRESHOLD`
+      `CENTRALITY_WORKER_THRESHOLD`
+      `classicalElectronRadius`
+      `conductanceQuantum`
+      `coulomb`
+      `coulombConstant`
+      `DEFAULT_MUTATION_WEIGHTS`
+      `deuteronMass`
+      `DIST_WORKER_THRESHOLD`
+      `EARTH_RADIUS_KM`
+      `efimovFactor`
+      `electricConstant`
+      `electronMass`
+      `elementaryCharge`
+      `EVALUATE_SCOPE_OMIT`
+      `faraday`
+      `fermiCoupling`
+      `fineStructure`
+      `firstRadiation`
+      `gasConstant`
+      `GAUSS_WORKER_THRESHOLD`
+      `GL4_A`
+      `GL4_B`
+      `GL4_C`
+      `GPU_ELEMENTWISE_OPS`
+      `GPU_MIN_ELEMENTS`
+      `GPU_REDUCE_OPS`
+      `gravitationConstant`
+      `gravity`
+      `hartreeEnergy`
+      `inverseConductanceQuantum`
+      `josephson`
+      `klitzing`
+      `loschmidt`
+      `magneticConstant`
+      `magneticFluxQuantum`
+      `MASS_PROPERTY_SHAPES`
+      `molarMass`
+      `molarMassC12`
+      `molarPlanckConstant`
+      `molarVolume`
+      `MUTATE_CONSTANT_NEGATE_PROBABILITY`
+      `neutronMass`
+      `nodeOperations`
+      `nuclearMagneton`
+      `planckCharge`
+      `planckConstant`
+      `planckLength`
+      `planckMass`
+      `planckTemperature`
+      `planckTime`
+      `protonMass`
+      `quantumOfCirculation`
+      `reducedPlanckConstant`
+      `rydberg`
+      `sackurTetrode`
+      `scalar`
+      `secondRadiation`
+      `simplifyUtil`
+      `spectralRadiance`
+      `speedOfLight`
+      `stefanBoltzmann`
+      `thomsonCrossSection`
+      `vacuumImpedance`
+      `WASM_INTERP_THRESHOLD`
+      `weakMixingAngle`
+      `wienDisplacement`
 
       ### Classes & types (6)
 
-      `Chain`, `FibonacciHeap`, `Help`, `ImmutableDenseMatrix`, `Interval`, `Spa`
+      `Chain`
+      `FibonacciHeap`
+      `Help`
+      `ImmutableDenseMatrix`
+      `Interval`
+      `Spa`
 
       ### Factory-shadowed (`factory_*`, 65)
 
       These duplicate a typed export under a `factory_` prefix.
 
-      `factory_abs`, `factory_acos`, `factory_acosh`, `factory_acot`, `factory_acsc`, `factory_asec`, `factory_asin`, `factory_asinh`, `factory_atan`, `factory_atan2`, `factory_atanh`, `factory_cbrt`, `factory_ceil`, `factory_compare`, `factory_cos`, `factory_cosh`, `factory_cot`, `factory_createUnit`, `factory_csc`, `factory_ctranspose`, `factory_cube`, `factory_cumsum`, `factory_divide`, `factory_dot`, `factory_equal`, `factory_exp`, `factory_expm1`, `factory_fix`, `factory_floor`, `factory_gcd`, `factory_hypot`, `factory_larger`, `factory_largerEq`, `factory_lcm`, `factory_log`, `factory_log10`, `factory_log1p`, `factory_log2`, `factory_mathjsCompat`, `factory_max`, `factory_mean`, `factory_min`, `factory_mod`, `factory_norm`, `factory_nthRoot`, `factory_pow`, `factory_round`, `factory_sec`, `factory_sign`, `factory_sin`, `factory_sinh`, `factory_smaller`, `factory_smallerEq`, `factory_sqrt`, `factory_square`, `factory_std`, `factory_subtract`, `factory_sum`, `factory_tan`, `factory_tanh`, `factory_transpose`, `factory_unaryMinus`, `factory_unaryPlus`, `factory_variance`, `factory_xgcd`
+      `factory_abs`
+      `factory_acos`
+      `factory_acosh`
+      `factory_acot`
+      `factory_acsc`
+      `factory_asec`
+      `factory_asin`
+      `factory_asinh`
+      `factory_atan`
+      `factory_atan2`
+      `factory_atanh`
+      `factory_cbrt`
+      `factory_ceil`
+      `factory_compare`
+      `factory_cos`
+      `factory_cosh`
+      `factory_cot`
+      `factory_createUnit`
+      `factory_csc`
+      `factory_ctranspose`
+      `factory_cube`
+      `factory_cumsum`
+      `factory_divide`
+      `factory_dot`
+      `factory_equal`
+      `factory_exp`
+      `factory_expm1`
+      `factory_fix`
+      `factory_floor`
+      `factory_gcd`
+      `factory_hypot`
+      `factory_larger`
+      `factory_largerEq`
+      `factory_lcm`
+      `factory_log`
+      `factory_log10`
+      `factory_log1p`
+      `factory_log2`
+      `factory_mathjsCompat`
+      `factory_max`
+      `factory_mean`
+      `factory_min`
+      `factory_mod`
+      `factory_norm`
+      `factory_nthRoot`
+      `factory_pow`
+      `factory_round`
+      `factory_sec`
+      `factory_sign`
+      `factory_sin`
+      `factory_sinh`
+      `factory_smaller`
+      `factory_smallerEq`
+      `factory_sqrt`
+      `factory_square`
+      `factory_std`
+      `factory_subtract`
+      `factory_sum`
+      `factory_tan`
+      `factory_tanh`
+      `factory_transpose`
+      `factory_unaryMinus`
+      `factory_unaryPlus`
+      `factory_variance`
+      `factory_xgcd`
 
       ### Namespace aggregates (16)
 
       Per-category objects bundling the functions above.
 
-      `typedAlgebra`, `typedArithmetic`, `typedBitwise`, `typedComplex`, `typedDistributions`, `typedFunctions`, `typedLogical`, `typedProbability`, `typedRelational`, `typedSet`, `typedSignal`, `typedSpecial`, `typedStatistics`, `typedString`, `typedTrigonometry`, `typedUnit`
+      `typedAlgebra`
+      `typedArithmetic`
+      `typedBitwise`
+      `typedComplex`
+      `typedDistributions`
+      `typedFunctions`
+      `typedLogical`
+      `typedProbability`
+      `typedRelational`
+      `typedSet`
+      `typedSignal`
+      `typedSpecial`
+      `typedStatistics`
+      `typedString`
+      `typedTrigonometry`
+      `typedUnit`
 
       <!-- END GENERATED EXPORT INDEX -->
     </script>

@@ -10,8 +10,8 @@
  *   docs/reference/functions.md   curated `## <Domain>` tables (signature, description,
  *                                 types, acceleration) + the generated export index block,
  *                                 read through tools/reference-index.mjs: its
- *                                 "**Domain** (n): `a`, `b`" lines are the category
- *                                 membership, its "(n exports)" header is the export
+ *                                 "**Domain** (n):" groups (one name per line) are the
+ *                                 category membership, its "(n exports)" header is the export
  *                                 count, and the category count is derived there once
  *                                 (the README sync tool reads the same module).
  *   functions/package.json        package name and version shown in the hero.

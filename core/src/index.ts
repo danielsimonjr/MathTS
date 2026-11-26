@@ -64,6 +64,7 @@ export { IndexError, createIndexError } from './error/IndexError.js';
 // Fractions (exact rationals)
 export {
   Fraction,
+  rationalPow,
   isFraction,
   FRACTION_ZERO,
   FRACTION_ONE,

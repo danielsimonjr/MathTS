@@ -1,0 +1,50 @@
+{
+  "note": "Documentation-only CI runs this subset from the Test (22.x) job after bun run build, plus the nodeTest and commands entries. excludedConsumers are md-reading tests that run only on full CI (see reason).",
+  "vitest": [
+    "tests/docs/readme-fences.test.ts",
+    "tests/docs/async-samples.test.ts",
+    "tests/integration/examples-smoke.test.ts",
+    "tests/integration/export-index-completeness.test.ts",
+    "tests/integration/dogfood-g27-packaging.test.ts",
+    "functions/tests/docs-reference-completeness.test.ts",
+    "functions/tests/docs-sync.test.ts",
+    "functions/tests/docs-partial-derivative-example.test.ts",
+    "functions/tests/deterministic.test.ts",
+    "evaluator/tests/dogfood-796.test.ts",
+    "expression/tests/dogfood-g20-parser-evaluator.test.ts",
+    "functions/tests/dogfood-g22-expression-sandbox.test.ts",
+    "parser/tests/dogfood-715.test.ts",
+    "units/tests/value-contract.test.ts",
+    {
+      "file": "compat/tests/parity/full-surface.test.ts",
+      "testNamePattern": "embedded-docs|intentional divergences"
+    }
+  ],
+  "nodeTest": ["tools/test/sync-readme-functions-stats.test.mjs"],
+  "commands": [
+    "node tools/sync-readme-functions-stats.mjs --check",
+    "bun run docs:functions:check"
+  ],
+  "excludedConsumers": [
+    {
+      "file": "tools/test/check-typecheck-graph.test.mjs",
+      "reason": "Fixture source mentions README paths; not a docs gate."
+    },
+    {
+      "file": "tools/test/packaging-gates.test.mjs",
+      "reason": "Full CI Compile & Lint packaging step; packed tarball README checks."
+    },
+    {
+      "file": "tools/test/packed-consumer.test.mjs",
+      "reason": "Full CI consumer-typecheck; packed README fence execution."
+    },
+    {
+      "file": "tools/test/site-generators.test.mjs",
+      "reason": "Generator unit tests use fixture markdown under a temp dir."
+    },
+    {
+      "file": "tools/test/check-changelog-fragment.test.mjs",
+      "reason": "Docs-only classifier test: the string docs/api/functions.md is a classification input, not a docs read."
+    }
+  ]
+}

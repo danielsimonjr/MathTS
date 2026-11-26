@@ -1,4 +1,5 @@
 import { compatDecimalResult } from './bignumber.js';
+import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
 /**
  * mathjs instance methods on `create(all)`: import, typed, compile, and
  * expression scope wired for per-instance evaluate.
@@ -6,15 +7,18 @@ import { compatDecimalResult } from './bignumber.js';
 
 import type { mathTyped } from '@danielsimonjr/mathts-core';
 import { deepMap, isMatrix } from '@danielsimonjr/mathts-core/internal';
+import { createHelpClass } from '@danielsimonjr/mathts-expression';
 import {
   createInstanceEvaluator,
   factory_mathjsCompat,
   EVALUATE_SCOPE_OMIT,
+  help as nativeHelp,
   parser as functionsParser,
   runWithConfig,
   type BridgeMatrix,
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
+import { createCompatHelpEvaluate } from './help-evaluate.js';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
 import {
@@ -209,6 +213,34 @@ export function wireMathjsInstanceApi(
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
+  function resolveHelpName(search: unknown): string {
+    if (typeof search === 'string') return search;
+    const mwt = expressionLayers.mathWithTransform;
+    if (typeof search === 'function') {
+      const found = Object.keys(mwt).find((key) => mwt[key] === search);
+      if (found !== undefined) return found;
+      throw new Error(`No documentation found on "${search.name}"`);
+    }
+    throw new Error(`No documentation found on "${String(search)}"`);
+  }
+
+  function rebindInstanceHelp(): void {
+    const instEvaluate = instance.evaluate as WiredCompatInstance['evaluate'];
+    const helpEvaluate = createCompatHelpEvaluate(
+      (expr, scope) => instEvaluate(expr, scope) as unknown,
+      () => {
+        const cfg = instance.config;
+        return typeof cfg === 'function'
+          ? ({ ...(cfg as () => Record<string, unknown>)() } as Record<string, unknown>)
+          : {};
+      }
+    );
+    type HelpCtor = new (doc: unknown) => unknown;
+    const Help = createHelpClass({ evaluate: helpEvaluate }) as unknown as HelpCtor;
+    instance.Help = Help;
+    instance.help = (search: unknown) => new Help(nativeHelp(resolveHelpName(search)).doc);
+  }
+
   function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
     evaluator = createInstanceEvaluator(
@@ -235,6 +267,7 @@ export function wireMathjsInstanceApi(
       })
     );
     instance.compileExpr = instance.compile;
+    rebindInstanceHelp();
     return evaluator;
   }
 
@@ -278,8 +311,15 @@ export function wireMathjsInstanceApi(
   const initialEvaluator = rebindEvaluator();
   if (bindParse) {
     instance.parse = new Proxy(initialEvaluator.parse, {
-      apply: (_target, receiver, args) =>
-        runWithConfig(currentConfig, () => Reflect.apply(evaluator.parse, receiver, args)),
+      apply: (_target, receiver, args) => {
+        const node = runWithConfig(currentConfig, () =>
+          Reflect.apply(evaluator.parse, receiver, args)
+        );
+        return wrapParseNodeForCompatToString(
+          node as { toString(options?: unknown): string },
+          currentConfig.number as string | undefined
+        );
+      },
     });
   }
 

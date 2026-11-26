@@ -1,3 +1,4 @@
+import { isStructuralZero } from '../factories/matrix-bridge.js';
 import { buildSparseCscFromEntries } from './sparse-csc-tail.js';
 
 interface Matrix {
@@ -31,7 +32,7 @@ interface SizeFunction {
 /**
  * Build a sparse CSC matrix from a list of column or row vectors (zeros omitted).
  * Resolves `axis` once so the entry loop does not re-test the string.
- * Length-mismatch text, zero-skip (`val !== 0`, so NaN is kept), and CSC
+ * Length-mismatch text, zero-skip (`isStructuralZero`, so NaN is kept), and CSC
  * assembly match the former `_createSparseMatrixFromColumns` / `…FromRows`.
  * @internal Module export only — not on the package barrel.
  * @param arr Column or row vectors (caller guarantees `arr.length >= 1`).
@@ -78,14 +79,14 @@ export function sparseMatrixFromVectors(
         }
         const row = isColumn ? along : j;
         const col = isColumn ? j : along;
-        if (val !== 0) {
+        if (!isStructuralZero(val)) {
           entries.push({ row, col, value: val });
         }
       });
     } else {
       const f = flatten(vec);
       for (let k = 0; k < len; k++) {
-        if (f[k] !== 0) {
+        if (!isStructuralZero(f[k])) {
           const row = isColumn ? k : j;
           const col = isColumn ? j : k;
           entries.push({ row, col, value: f[k] });

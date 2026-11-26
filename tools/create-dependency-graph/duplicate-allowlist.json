@@ -504,6 +504,11 @@
       "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) \u2014 self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r\u00d7c matrix (fixed 2026-07-18 floor-decisions slice \u2014 formerly an n\u00d7n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
     },
     {
+      "names": ["fix", "isPositive", "isNegative", "isInteger"],
+      "filesGlob": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
+      "reason": "compat mathjs-API shims (#1551): compat/src/shims.ts wraps the functions factories with MathTS Fraction API leaves (isPositive/isNegative/isInteger/fix on numerator/denominator); functions/src/factories/index.ts remains the mathjs factory graph. Pinned in compat/tests/parity/g03-fraction-sign.test.ts and adversarial-g03.test.ts."
+    },
+    {
       "names": ["add", "multiply"],
       "filesGlob": [
         "compat/src/shims.ts",
