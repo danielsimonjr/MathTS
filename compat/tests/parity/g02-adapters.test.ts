@@ -150,7 +150,12 @@ describe('G02 wrapper primitives', () => {
     const count = withCountBoolean(join);
     expect(count(true)).toBe('true');
     expect(count('abcd')).toBe('abcd');
-    expect(count(false, 1)).toBe('false|1');
+    // more than one argument: the one-argument form is evaluated first, then
+    // the mathjs too-many error (count(true) converts, so (true, true) is
+    // 'Too many'; count(0) fails the type test, so (0, 0) is the type error).
+    expect(() => count(false, 1)).toThrow(
+      'Too many arguments in function count (expected: 1, actual: 2)'
+    );
   });
 
   it('withRawSingleValue passes a lone boolean or complex-like value through', () => {
@@ -266,7 +271,10 @@ describe('G02 compat mad internals', () => {
   it('normalizes strings and mixed bigints to numbers', () => {
     // a numeric string converts; a non-numeric one throws the mathjs Error
     expect(mad('2', 0)).toBe(1);
-    expect(() => mad('abc', 0)).toThrow('String "abc" is not a valid number');
+    // a string among several converts through compare/add: the mathjs
+    // conversion Error (the lone-string form takes the unaryPlus SyntaxError,
+    // pinned in challenger-g02-compat.test.ts C9).
+    expect(() => mad('abc', 0)).toThrow('Cannot convert "abc" to a number');
     expect(mad(2n, 0)).toBe(1);
     // a null element does not pull the list into numbers
     expect(mad(2n, null)).toBe(1);

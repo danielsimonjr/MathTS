@@ -53,8 +53,8 @@ import {
   withCountBoolean,
   withFixedArity,
   withIdentityValidation,
-  withInvalidNumericStringGuard,
   withRoundDigitsGuard,
+  withSingleNumericStringGuard,
   withFractionRejection,
   withRawSingleValue,
 } from './mathjs-parity-g02.js';
@@ -525,7 +525,8 @@ export function create(
   );
   const compatErf = createCompatErfExpression(mathFunctions.erf as (...args: unknown[]) => unknown);
   const compatGamma = createCompatGammaBigNumberGuard(
-    mathFunctions.gamma as (...args: unknown[]) => unknown
+    mathFunctions.gamma as (...args: unknown[]) => unknown,
+    convertForeignScalar
   );
 
   // The overlay decision diffs every config key. Each wrapped call used to repeat that
@@ -665,7 +666,7 @@ export function create(
     atan2: withFractionRejection(shims.atan2),
 
     // Statistics
-    sum: withInvalidNumericStringGuard(withRawSingleValue(shims.sum)),
+    sum: withSingleNumericStringGuard(withRawSingleValue(shims.sum)),
     mean: shims.mean,
     std: compatStd,
     variance: compatVariance,
@@ -800,7 +801,7 @@ export function create(
     unaryPlus: mathFunctions.factory_unaryPlus,
     nthRoot: mathFunctions.factory_nthRoot,
     // #1587: count of a boolean is the string length; size/inv take one argument.
-    count: withFixedArity('count', 1, withCountBoolean(mathFunctions.count)),
+    count: withCountBoolean(mathFunctions.count),
     size: withFixedArity('size', 1, mathFunctions.size),
     inv: withFixedArity('inv', 1, mathFunctions.inv),
     // #1583 / #1588: the mathjs-shaped mad and the Matrix-returning expm.

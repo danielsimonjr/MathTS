@@ -205,6 +205,14 @@ export function withFractionRejection(fn: UnaryLike): (...args: unknown[]) => un
  */
 export function withCountBoolean(fn: UnaryLike): (...args: unknown[]) => unknown {
   return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length > 1) {
+      // mathjs count takes one argument: its typed dispatch reports the
+      // one-argument signature's own error first (a type error for a bad
+      // value, the too-many error for a valid one), so evaluate args[0] with
+      // the boolean conversion the one-argument form applies.
+      apply(fn, [typeof args[0] === 'boolean' ? String(args[0]) : args[0]]);
+      throw tooManyArgumentsError('count', 1, args.length);
+    }
     if (args.length === 1 && typeof args[0] === 'boolean') return apply(fn, [String(args[0])]);
     return apply(fn, args);
   });
@@ -338,6 +346,11 @@ function reboxMatrixStatistics(
 
 type StatisticsNormalization = 'unbiased' | 'uncorrected' | 'biased';
 
+/**
+ * The scalar operations the mathjs-shaped complex statistics path needs,
+ * taken from the compat instance surface (the matrix factory re-boxes a
+ * matrix result).
+ */
 export interface CompatStatisticsDeps {
   add: UnaryLike;
   subtract: UnaryLike;
@@ -369,7 +382,16 @@ function mathjsComplexVariance(
     case 'biased':
       return apply(divide, [sqSum, n + 1]);
     default:
-      return n === 1 ? apply(multiply, [sqSum, 0]) : apply(divide, [sqSum, n - 1]);
+      // A single value has no deviation: mathjs returns its numeric zero (a
+      // BigNumber zero for BigNumber data, the number 0 otherwise — also for a
+      // lone Complex, whose squared deviation is the complex zero).
+      if (n === 1) {
+        if (isBigNumberLike(sqSum) || isOwnBigNumber(sqSum)) {
+          return apply(multiply, [sqSum, 0]);
+        }
+        return 0;
+      }
+      return apply(divide, [sqSum, n - 1]);
   }
 }
 
@@ -388,52 +410,60 @@ export function createCompatMathjsStatistics(
   const isNorm = (x: unknown): x is StatisticsNormalization =>
     x === 'unbiased' || x === 'uncorrected' || x === 'biased';
 
+  /** The mathjs complex path (`diff * diff`, no conjugation), sqrt for std. */
+  const complexVariance = (values: unknown[], normalization: StatisticsNormalization): unknown => {
+    const variance = mathjsComplexVariance(values, normalization, deps);
+    return name === 'std' ? apply(deps.sqrt, [variance]) : variance;
+  };
+
   return keepSurface(native, (...args: unknown[]): unknown => {
+    // mathjs rejects the empty forms before any dispatch: no argument is the
+    // typed-function rest error, an empty Array is the statistics SyntaxError.
+    if (args.length === 0) {
+      throw new TypeError(`Too few arguments in function ${name} (expected: any, index: 0)`);
+    }
     if (args.length === 1 && Array.isArray(args[0]) && args[0].length === 0) {
       throw statisticsEmptyParametersError(name);
     }
-
-    let nativeArgs = args;
-    let normalization: StatisticsNormalization = 'unbiased';
-
     if (args.length > 0 && isMatrixLikeValue(args[0])) {
-      if (args.length === 1) nativeArgs = args;
-      else if (args.length === 2 && typeof args[1] === 'string') {
-        normalization = args[1] as StatisticsNormalization;
-        nativeArgs = args;
-      } else if (args.length === 2 && isDim(args[1])) nativeArgs = args;
-      else if (args.length === 3 && isDim(args[1]) && typeof args[2] === 'string') {
-        normalization = args[2] as StatisticsNormalization;
-        nativeArgs = args;
-      } else nativeArgs = [args];
-    } else if (
-      args.length > 1 &&
-      !(args.length === 2 && typeof args[1] === 'string' && isNorm(args[1]))
-    ) {
-      nativeArgs = [args];
-    } else if (args.length === 2 && isNorm(args[1])) {
-      normalization = args[1];
-      nativeArgs = [args[0]];
-    }
-
-    const collection =
-      nativeArgs.length === 1 && Array.isArray(nativeArgs[0])
-        ? nativeArgs[0]
-        : nativeArgs.length === 1
-          ? [nativeArgs[0]]
-          : null;
-    if (collection !== null) {
-      const flat: unknown[] = [];
-      flattenScalars(collection, flat);
-      if (flat.length === 0) throw statisticsEmptyParametersError(name);
-      if (flat.some(isComplexLike)) {
-        const variance = mathjsComplexVariance(flat, normalization, deps);
-        return name === 'std' ? apply(deps.sqrt, [variance]) : variance;
+      // The signature forms: (A), (A, normalization), (A, dim) and
+      // (A, dim, normalization). A normalization string that mathjs would
+      // reject keeps the native rejection.
+      if (args.length === 2 && typeof args[1] === 'string') {
+        if (!isNorm(args[1])) return apply(native, args);
+        const flat: unknown[] = [];
+        flattenScalars(args[0], flat);
+        if (flat.some(isComplexLike)) return complexVariance(flat, args[1]);
+        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
       }
+      if (args.length === 3 && isDim(args[1]) && typeof args[2] === 'string') {
+        if (!isNorm(args[2])) return apply(native, args);
+        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+      }
+      if (args.length === 1) {
+        const flat: unknown[] = [];
+        flattenScalars(args[0], flat);
+        if (flat.some(isComplexLike)) return complexVariance(flat, 'unbiased');
+        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+      }
+      if (args.length === 2 && isDim(args[1])) {
+        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+      }
+      // The untyped rest with collections: the argument list itself is the
+      // collection (mathjs flattens plain arrays and keeps matrix elements
+      // whole, which drives the whole computation).
+      const flat: unknown[] = [];
+      flattenScalars(args, flat);
+      if (flat.some(isComplexLike) && !flat.some((v) => isMatrixLikeValue(v) && !Array.isArray(v))) {
+        return complexVariance(flat, 'unbiased');
+      }
+      return reboxMatrixStatistics(args, apply(native, [args]), deps.matrix);
     }
-
-    const result = apply(native, nativeArgs);
-    return reboxMatrixStatistics(args, result, deps.matrix);
+    // Scalar variadic: mathjs treats every argument as one value of the list.
+    if (args.some(isComplexLike)) {
+      return complexVariance(args, 'unbiased');
+    }
+    return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
   });
 }
 
@@ -593,11 +623,15 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
    * conversions; a non-numeric string throws the mathjs conversion Error);
    * everything else goes through the shared foreign-scalar converter.
    */
-  function toCompatValue(v: unknown): unknown {
+  function toCompatValue(v: unknown, single: boolean): unknown {
     if (typeof v === 'string') {
       const n = Number(v);
       if (v.trim() !== '' && !Number.isNaN(n)) return n;
-      throw invalidNumericStringError(v);
+      // mathjs converts a string through the value's own path: a lone string
+      // goes through unaryPlus (SyntaxError), a string among several goes
+      // through compare/add (the conversion Error).
+      if (single) throw invalidNumericStringError(v);
+      throw new Error(`Cannot convert "${v}" to a number`);
     }
     return convert(v);
   }
@@ -694,7 +728,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
     if (flat.length === 0) {
       throw new Error('Cannot calculate median absolute deviation (mad) of an empty array');
     }
-    const values = normalizeNumbers(flat.map(toCompatValue));
+    const values = normalizeNumbers(flat.map((v) => toCompatValue(v, flat.length === 1)));
     assertNoComplexOrdering(values);
     try {
       const med = medianShape([...values]);
@@ -750,6 +784,20 @@ export function withIdentityValidation(fn: UnaryLike): (...args: unknown[]) => u
       (args.length === 2 && isNum(args[0]) && (isStr(args[1]) || isNum(args[1]))) ||
       (args.length === 2 && (isArr(args[0]) || isMat(args[0])) && isStr(args[1])) ||
       (args.length === 3 && isNum(args[0]) && isNum(args[1]) && isStr(args[2]));
+    if (
+      !matchesShape &&
+      args.length === 3 &&
+      isNum(args[0]) &&
+      isNum(args[1]) &&
+      typeof args[2] !== 'string'
+    ) {
+      // mathjs reports the third parameter against its 'string or boolean'
+      // union before the arity problem surfaces.
+      throw new TypeError(
+        `Unexpected type of argument in function identity (expected: string or boolean, ` +
+          `actual: ${typeof args[2] === 'number' ? 'number' : typeof args[2]}, index: 2)`
+      );
+    }
     if (matchesShape) {
       const sizes: unknown[] = [];
       if (args.length > 0 && isArr(args[0])) {
@@ -826,13 +874,34 @@ export function createCompatErfExpression(native: UnaryLike): (...args: unknown[
 
 /** mathjs instance `gamma` on a non-integer BigNumber (#1587). */
 export function createCompatGammaBigNumberGuard(
-  native: UnaryLike
+  native: UnaryLike,
+  convert: (v: unknown) => unknown
 ): (...args: unknown[]) => unknown {
   return keepSurface(native, (...args: unknown[]): unknown => {
-    if (args.length >= 1 && isOwnBigNumber(args[0])) {
-      const bn = args[0] as CompatBigNumberType;
+    if (args.length >= 1 && (isOwnBigNumber(args[0]) || isBigNumberLike(args[0]))) {
+      // mathjs `gamma` of a BigNumber requires an integer ("Integer BigNumber
+      // expected", its decimal configuration); a foreign decimal converts to
+      // the compat class first, so the native call accepts it.
+      const bn = convert(args[0]) as CompatBigNumberType;
       if (bn.isFinite() && !bn.isInteger()) throw new Error('Integer BigNumber expected');
+      return apply(native, [bn]);
     }
     return apply(native, args);
+  });
+}
+
+/**
+ * mathjs converts a lone string argument of `sum` at the end of the reduction
+ * (`numeric(sum, config)`), which raises its SyntaxError; the compat typed
+ * surface converts earlier and raises its own Error. Only the single-argument
+ * form takes this path — a string among several goes through compare/add and
+ * keeps the conversion Error.
+ */
+export function withSingleNumericStringGuard(fn: UnaryLike): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length === 1 && typeof args[0] === 'string' && (args[0].trim() === '' || Number.isNaN(Number(args[0])))) {
+      throw invalidNumericStringError(args[0]);
+    }
+    return apply(fn, args);
   });
 }
