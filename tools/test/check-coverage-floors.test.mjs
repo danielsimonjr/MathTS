@@ -8,6 +8,7 @@ import {
   floorFromMeasured,
   linePercentFromTotals,
   parseLcovLineTotals,
+  runnerForScript,
 } from './check-coverage-floors.mjs';
 
 test('parseLcovLineTotals sums LF and LH records', () => {
@@ -49,4 +50,11 @@ test('checkLcovAgainstFloor fails when LF is zero', () => {
   const result = checkLcovAgainstFloor(lcov, 0);
   assert.equal(result.ok, false);
   assert.match(result.message ?? '', /LF:0/);
+});
+
+test('runnerForScript classes a no-coverage-reporter script as script-only', () => {
+  assert.equal(runnerForScript('bun test --isolate --timeout 30000 --coverage'), 'bun');
+  assert.equal(runnerForScript('vitest run --coverage'), 'vitest');
+  // assembly: the suite runs, but no lcov is produced, so the gate pins presence only.
+  assert.equal(runnerForScript('node tests/run.js && node tests/polynomial.test.mjs'), 'script');
 });
