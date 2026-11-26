@@ -41,6 +41,7 @@ import { Fraction, Complex as CompatComplex } from '@danielsimonjr/mathts-core';
 import {
   isCompatMathInstance,
   wireMathjsInstanceApi,
+  type CompatExpressionLayers,
   type WiredCompatInstance,
 } from './instance-api.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
@@ -67,6 +68,12 @@ import {
 } from './mathjs-parity-g02.js';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
+import {
+  compatMathjsLyap,
+  compatMathjsSchur,
+  compatMathjsSolveODE,
+  compatMathjsSylvester,
+} from './mathjs-parity-g05.js';
 import {
   bindDefaultInstanceSource,
   Chain,
@@ -192,6 +199,8 @@ interface MathInstanceOverrides {
   on: WiredCompatInstance['on'];
   off: WiredCompatInstance['off'];
   once: WiredCompatInstance['once'];
+  /** mathjs expression API: the transform functions and the mathWithTransform scope (#1572). */
+  expression: CompatExpressionLayers;
 
   // Configuration
   config: ((newConfig?: Partial<MathJSConfig>) => MathJSConfig) &
@@ -769,6 +778,13 @@ export function create(
     // #1561 — mathjs 15.3.0 eigs (precision, vector scale, value order); native solver stays in functions.
     eigs: compatMathjsEigs,
 
+    // #1553 / #1584 — mathjs 15.3.0 schur/sylvester/lyap/solveODE; the native
+    // Francis-QR schur and scipy-style solveODE stay in matrix/functions.
+    schur: bindShim(compatMathjsSchur),
+    sylvester: bindShim(compatMathjsSylvester),
+    lyap: bindShim(compatMathjsLyap),
+    solveODE: bindShim(compatMathjsSolveODE),
+
     // Placeholder; rebound below once `instance` exists so chain methods can
     // resolve against the full surfaced namespace.
     chain: (() => {
@@ -1135,6 +1151,12 @@ export { Parser } from './named-instance-exports.js';
 
 export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
 export { compatMathjsEigs as eigs };
+export {
+  compatMathjsLyap as lyap,
+  compatMathjsSchur as schur,
+  compatMathjsSolveODE as solveODE,
+  compatMathjsSylvester as sylvester,
+};
 
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';

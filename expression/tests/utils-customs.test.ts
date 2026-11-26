@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  getMathNamespaceBinding,
   getSafeProperty,
   setSafeProperty,
   isSafeProperty,
@@ -67,6 +68,14 @@ describe('utils/customs - isSafeProperty', () => {
       a = 1;
     }
     expect(isSafeProperty(new Foo(), 'a')).toBe(false);
+  });
+});
+
+describe('utils/customs - getMathNamespaceBinding', () => {
+  it('reads own apply on the math namespace (#1572)', () => {
+    const applyFn = () => 0;
+    expect(getMathNamespaceBinding({ apply: applyFn }, 'apply')).toBe(applyFn);
+    expect(() => getMathNamespaceBinding({}, 'apply')).toThrow(/No access to property/);
   });
 });
 

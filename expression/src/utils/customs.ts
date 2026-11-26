@@ -117,6 +117,23 @@ function isSafeProperty(object: unknown, prop: unknown): boolean {
 }
 
 /**
+ * Read a binding from the expression math namespace. The transform name `apply`
+ * is an own property on mathWithTransform; it must resolve in parsed ASTs while
+ * user objects still cannot read inherited Function#apply as a property.
+ */
+function getMathNamespaceBinding(object: unknown, prop: unknown): unknown {
+  const key = prop as string;
+  if (
+    key === 'apply' &&
+    isPlainObject(object) &&
+    Object.prototype.hasOwnProperty.call(object, key)
+  ) {
+    return (object as Record<string, unknown>)[key];
+  }
+  return getSafeProperty(object, prop);
+}
+
+/**
  * Validate whether a method is safe.
  * Throws an error when that's not the case.
  * @param {Object} object
@@ -238,7 +255,7 @@ const safeNativeMethods = {
   toLocaleString: true,
 };
 
-export { getSafeProperty };
+export { getSafeProperty, getMathNamespaceBinding };
 export { setSafeProperty };
 export { isSafeProperty };
 export { getSafeMethod };

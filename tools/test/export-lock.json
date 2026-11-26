@@ -8194,6 +8194,9 @@
       "createAndTransform": {
         "kind": "function"
       },
+      "createApplyTransform": {
+        "kind": "function"
+      },
       "createArrayNode": {
         "kind": "function"
       },
@@ -8562,6 +8565,9 @@
         "kind": "function"
       },
       "createAndTransform": {
+        "kind": "type"
+      },
+      "createApplyTransform": {
         "kind": "type"
       },
       "createArrayNode": {
@@ -9234,6 +9240,9 @@
         "kind": "function"
       },
       "createAndTransform": {
+        "kind": "type"
+      },
+      "createApplyTransform": {
         "kind": "type"
       },
       "createArrayNode": {
