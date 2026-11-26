@@ -15,6 +15,7 @@ import { sweepPool } from './sweep.js';
  */
 
 type Instance = ReturnType<typeof createCompat> & OracleInstance;
+type ShowInstance = Parameters<typeof show>[0];
 type Run = (L: Record<string, unknown>) => unknown;
 const run =
   (fn: (L: Instance) => unknown): Run =>
@@ -30,14 +31,18 @@ describe('g18 adversarial: zeta and symbolicEqual parity', () => {
     expect(doc).not.toMatch(/exact value `1\/120` to full\s+double precision/);
     const L = createCompat(compatAll, {});
     const O = create(all, {});
-    expect(show(L as never, L.zeta(-3))).toBe(show(O as never, O.zeta(-3)));
+    expect(show(L as unknown as ShowInstance, L.zeta(-3))).toBe(
+      show(O as unknown as ShowInstance, O.zeta(-3))
+    );
   });
 
   it('F2: pool sweep actually calls unary zeta', () => {
     const O = create(all, {});
     const L = createCompat(compatAll, {});
     expect(O.zeta.length).toBe(2);
-    expect(show(L as never, L.zeta(-3))).toBe(show(O as never, O.zeta(-3)));
+    expect(show(L as unknown as ShowInstance, L.zeta(-3))).toBe(
+      show(O as unknown as ShowInstance, O.zeta(-3))
+    );
     const { labels, arities } = sweepPool({ only: ['zeta'] });
     expect([...(arities.get('zeta') ?? [])]).toEqual(expect.arrayContaining([1, 2]));
     expect(labels.has('zeta: (number -3)')).toBe(false);
@@ -59,8 +64,10 @@ describe('g18 adversarial: zeta and symbolicEqual parity', () => {
   it('F4: zeta(Fraction) throws on compat like mathjs', () => {
     const L = createCompat(compatAll, {});
     const O = create(all, {});
-    expect(() => O.zeta(O.fraction(4, 1) as never)).toThrow();
-    expect(() => L.zeta(L.fraction(4, 1) as never)).toThrow();
+    const oracleZeta = O.zeta as (s: unknown) => unknown;
+    const compatZeta = L.zeta as (s: unknown) => unknown;
+    expect(() => oracleZeta(O.fraction(4, 1))).toThrow();
+    expect(() => compatZeta(L.fraction(4, 1))).toThrow();
   });
 
   it('F5: zeta(bigint) matches mathjs type and value', () => {

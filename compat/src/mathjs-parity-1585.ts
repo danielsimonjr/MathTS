@@ -15,21 +15,24 @@ type NumericValue =
 
 type CompatTyped = { (...args: unknown[]): unknown };
 
+type ZetaOp = (...args: never[]) => unknown;
+type NumericOp = (...args: NumericValue[]) => NumericValue;
+
 interface ZetaDeps {
   typed: CompatTyped;
   config: () => ParityConfig;
-  multiply: (...args: NumericValue[]) => NumericValue;
-  pow: (...args: NumericValue[]) => NumericValue;
-  divide: (...args: NumericValue[]) => NumericValue;
-  factorial: (...args: NumericValue[]) => NumericValue;
+  multiply: ZetaOp;
+  pow: ZetaOp;
+  divide: ZetaOp;
+  factorial: ZetaOp;
   equal: (a: unknown, b: unknown) => boolean;
   smallerEq: (a: unknown, b: unknown) => boolean;
   isBounded: (x: unknown) => boolean;
   isNegative: (x: unknown) => boolean;
-  gamma: (...args: NumericValue[]) => NumericValue;
-  sin: (...args: NumericValue[]) => NumericValue;
-  subtract: (...args: NumericValue[]) => NumericValue;
-  add: (...args: NumericValue[]) => NumericValue;
+  gamma: ZetaOp;
+  sin: ZetaOp;
+  subtract: ZetaOp;
+  add: ZetaOp;
   Complex: new (re: number, im?: number) => { re: number; im: number };
   BigNumber: new (value: number | string) => unknown;
   pi: number | unknown;
@@ -37,25 +40,15 @@ interface ZetaDeps {
 
 /** Riemann zeta as implemented in mathjs 15.3.0 (`function/special/zeta.js`). */
 export function createMathjsZeta(deps: ZetaDeps): CompatTyped {
-  const {
-    typed,
-    config,
-    multiply,
-    pow,
-    divide,
-    factorial,
-    equal,
-    smallerEq,
-    isBounded,
-    isNegative,
-    gamma,
-    sin,
-    subtract,
-    add,
-    Complex,
-    BigNumber,
-    pi,
-  } = deps;
+  const { typed, config, equal, smallerEq, isBounded, isNegative, Complex, BigNumber, pi } = deps;
+  const multiply = deps.multiply as unknown as NumericOp;
+  const pow = deps.pow as unknown as NumericOp;
+  const divide = deps.divide as unknown as NumericOp;
+  const factorial = deps.factorial as unknown as NumericOp;
+  const gamma = deps.gamma as unknown as NumericOp;
+  const sin = deps.sin as unknown as NumericOp;
+  const subtract = deps.subtract as unknown as NumericOp;
+  const add = deps.add as unknown as NumericOp;
 
   function d(k: NumericValue, n: NumericValue): NumericValue {
     let S = k;
