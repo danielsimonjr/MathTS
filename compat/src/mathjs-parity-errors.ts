@@ -180,6 +180,57 @@ export function withMatrixMapHintOnUnary(
   };
 }
 
+type BitwiseBinaryOp = 'and' | 'or' | 'xor';
+
+/** mathjs bitwise binary ops on infinite BigNumbers (#1097). */
+export function withCompatBitwiseInfiniteBigNumberBinary(
+  fn: (a: unknown, b: unknown) => unknown,
+  op: BitwiseBinaryOp
+): (a: unknown, b: unknown) => unknown {
+  const asBigNumber = (x: unknown): BigNumber | null => {
+    if (isBigNumber(x)) return x;
+    if (typeof x === 'object' && x !== null && (x as BigNumber).isBigNumber === true) {
+      return x as BigNumber;
+    }
+    return null;
+  };
+  return (a: unknown, b: unknown): unknown => {
+    const aa = asBigNumber(a);
+    const bb = asBigNumber(b);
+    if (!aa || !bb) return fn(a, b);
+    const aInf = !aa.isFinite();
+    const bInf = !bb.isFinite();
+    if (!aInf && !bInf) return fn(a, b);
+    const finite = aInf ? bb : aa;
+    const infinite = aInf ? aa : bb;
+    if (op === 'and') return finite;
+    if (op === 'or') return infinite;
+    if (op === 'xor') {
+      if (finite.eq(-1)) return infinite.neg();
+      return infinite;
+    }
+    return fn(a, b);
+  };
+}
+
+/** mathjs keeps infinite BigNumber operands under bitwise `bitNot` (#1097). */
+export function withCompatBitNotInfiniteBigNumber(
+  fn: (...args: unknown[]) => unknown
+): (...args: unknown[]) => unknown {
+  return (x: unknown): unknown => {
+    if (
+      isBigNumber(x) ||
+      (typeof x === 'object' && x !== null && (x as BigNumber).isBigNumber === true)
+    ) {
+      const bn = x as BigNumber;
+      if (!bn.isFinite()) {
+        return bn.neg();
+      }
+    }
+    return fn(x);
+  };
+}
+
 /** mathjs `bitNot` uses singular `Integer expected`; other bitwise ops use `Integers`. */
 export function withBitNotIntegerMessage(
   fn: (...args: unknown[]) => unknown
@@ -250,7 +301,7 @@ export function createCompatNumeric(
 export function createCompatRandomInstance(
   typedRandom: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
-  const random = (...args: unknown[]): unknown => {
+  function random(this: unknown, ...args: unknown[]): unknown {
     if (args.length > 3) {
       throw tooManyArgumentsError('random', 3, args.length);
     }
@@ -262,8 +313,8 @@ export function createCompatRandomInstance(
         );
       }
     }
-    return typedRandom(...args);
-  };
+    return typedRandom.apply(this, args);
+  }
   try {
     Object.defineProperty(random, 'name', { value: 'random', configurable: true });
   } catch {

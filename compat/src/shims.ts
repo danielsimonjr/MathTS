@@ -377,6 +377,15 @@ const hasNonNumberEntry = (x: unknown): boolean => {
   );
 };
 
+const coerceNumericStringOperand = (x: unknown): unknown =>
+  typeof x === 'string' ? _number(x) : x;
+
+const callWithNumericStringOperands = (
+  fn: (a: unknown, b: unknown) => unknown,
+  a: unknown,
+  b: unknown
+): unknown => fn(coerceNumericStringOperand(a), coerceNumericStringOperand(b));
+
 const applyArithmetic = (
   scalarFn: (a: unknown, b: unknown) => unknown,
   matrixFn: (a: unknown, b: unknown) => unknown,
@@ -393,7 +402,6 @@ const applyArithmetic = (
     if (complexFn && (isComplex(boxedA) || isComplex(boxedB))) {
       return compatDecimalResult(complexFn(boxedA, boxedB));
     }
-    if (complexFn) return unwrap(complexFn(boxedA, boxedB));
     return scalarFn(boxedA, boxedB);
   }
   // Riemann-sphere only for Complex scalars; number/BigNumber/bigint stay native.
@@ -416,7 +424,7 @@ const applyArithmetic = (
           isCompatBridgeMatrix(a) ||
           isCompatBridgeMatrix(b))
       ) {
-        return unwrap(complexFn(a, b));
+        return unwrap(callWithNumericStringOperands(complexFn, a, b));
       }
       return unwrap(scalarFn(a, b));
     }
@@ -425,7 +433,7 @@ const applyArithmetic = (
     return unwrap(matrixFn(aa, bb));
   }
   if ((Array.isArray(a) || Array.isArray(b)) && complexFn) {
-    return unwrap(complexFn(a, b));
+    return unwrap(callWithNumericStringOperands(complexFn, a, b));
   }
   return compatDecimalResult(scalarFn(a, b));
 };
@@ -541,6 +549,24 @@ const publicSubtractScalar = withPublicFactoryScalar(
   _factorySubtractScalar as BinaryArithmetic
 );
 
+/** Factory scalars reject matrix operands; typed `add`/`multiply`/`subtract` keep Matrix results (#993). */
+const useTypedArithmeticForPair = (a: unknown, b: unknown): boolean =>
+  isCompatBridgeMatrix(a) || isCompatBridgeMatrix(b) || isBoxedMatrix(a) || isBoxedMatrix(b);
+
+const addPairScalars = (a: unknown, b: unknown): unknown =>
+  useTypedArithmeticForPair(a, b) ? _add(a, b) : publicAddScalar(a, b);
+
+const multiplyPairScalars = (a: unknown, b: unknown): unknown => {
+  if (useTypedArithmeticForPair(a, b)) return _multiply(a, b);
+  if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
+    return _multiply(a, b);
+  }
+  return publicMultiplyScalar(a, b);
+};
+
+const subtractPairScalars = (a: unknown, b: unknown): unknown =>
+  useTypedArithmeticForPair(a, b) ? _subtract(a, b) : publicSubtractScalar(a, b);
+
 function isProtoSparseMatrix(x: unknown): boolean {
   return (
     typeof x === 'object' &&
@@ -556,7 +582,7 @@ const subtractPair = (a: unknown, b: unknown): unknown => {
   if (isDenseMatrix(a) || isDenseMatrix(b)) return _matSubtract(a, b);
   if (typeof a === 'bigint' || typeof b === 'bigint') return _factorySubtract(a, b);
   return applyArithmetic(
-    publicSubtractScalar,
+    subtractPairScalars,
     _matSubtract as (a: unknown, b: unknown) => unknown,
     a,
     b,
@@ -567,7 +593,7 @@ const subtractPair = (a: unknown, b: unknown): unknown => {
 
 const addCore = makeArithmetic(
   'add',
-  withNumericText(publicAddScalar, publicAddScalar),
+  withNumericText(addPairScalars, addPairScalars),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
   (a, b) => a + b,
@@ -590,7 +616,7 @@ export const subtract = withTypedSurface(function (a?: unknown, b?: unknown): un
 }, _subtract) as typeof _subtract;
 export const multiply = makeArithmetic(
   'multiply',
-  withNumericText(publicMultiplyScalar, publicMultiplyScalar),
+  withNumericText(multiplyPairScalars, multiplyPairScalars),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
   (a, b) => a * b,

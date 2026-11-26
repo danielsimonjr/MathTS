@@ -76,6 +76,8 @@ import {
   createCompatNumeric,
   createCompatRandomInstance,
   withBitNotIntegerMessage,
+  withCompatBitNotInfiniteBigNumber,
+  withCompatBitwiseInfiniteBigNumberBinary,
   withMathjsNormMatrixRules,
   withMatrixMapHintOnUnary,
 } from './mathjs-parity-errors.js';
@@ -927,13 +929,31 @@ export function create(
     permutations: namedPermutations,
     lgamma: namedLgamma,
     hypot: mathFunctions.factory_hypot,
-    bitAnd: withFixedArity('bitAnd', 2, mathFunctions.bitAnd),
-    bitOr: withFixedArity('bitOr', 2, mathFunctions.bitOr),
-    bitXor: withFixedArity('bitXor', 2, mathFunctions.bitXor),
+    bitAnd: withFixedArity(
+      'bitAnd',
+      2,
+      withCompatBitwiseInfiniteBigNumberBinary(mathFunctions.bitAnd, 'and')
+    ),
+    bitOr: withFixedArity(
+      'bitOr',
+      2,
+      withCompatBitwiseInfiniteBigNumberBinary(mathFunctions.bitOr, 'or')
+    ),
+    bitXor: withFixedArity(
+      'bitXor',
+      2,
+      withCompatBitwiseInfiniteBigNumberBinary(mathFunctions.bitXor, 'xor')
+    ),
     leftShift: withFixedArity('leftShift', 2, mathFunctions.leftShift),
     rightArithShift: withFixedArity('rightArithShift', 2, mathFunctions.rightArithShift),
     rightLogShift: withFixedArity('rightLogShift', 2, mathFunctions.rightLogShift),
-    bitNot: withFixedArity('bitNot', 1, withBitNotIntegerMessage(mathFunctions.bitNot)),
+    bitNot: withFixedArity(
+      'bitNot',
+      1,
+      withBitNotIntegerMessage(
+        withCompatBitNotInfiniteBigNumber(mathFunctions.bitNot as (...args: unknown[]) => unknown)
+      )
+    ),
     norm: withMathjsNormMatrixRules(mathFunctions.norm as (...args: unknown[]) => unknown),
     typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
     number: withFixedArity('number', 1, mathFunctions.number),
@@ -975,9 +995,6 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   ) as (keyof typeof compatDefaultOverrides)[];
   for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
-  // `instanceSymbols.random` replaces `mathFunctions.random`; plain wrapper so typed
-  // signatures do not bypass parity guards (#1773).
-  flat.random = createCompatRandomInstance(flat.random as (...args: unknown[]) => unknown);
   if (localUnits) flat.Unit = localUnits.Unit;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
@@ -1172,10 +1189,16 @@ export function create(
   // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
   instance.DimensionError = instanceSymbols.DimensionError;
 
-  // Parity wrappers on `flat.random` can be bypassed when the instance own-key
-  // loop materialises a typed-function reference; re-apply after wiring (#1773).
-  instance.random = flat.random;
-  expressionConstants.random = () => instance.random;
+  // Arity / BigNumber guards must wrap the config-scoped seeded `random`, not the
+  // module typed-function (re-apply after wiring — own-key materialisation bypasses `flat`) (#1773).
+  if (typeof instance.random === 'function') {
+    const guardedRandom = createCompatRandomInstance(
+      instance.random as (...args: unknown[]) => unknown
+    );
+    instance.random = guardedRandom;
+    flat.random = guardedRandom;
+    expressionConstants.random = () => instance.random;
+  }
 
   return instance as unknown as MathInstance;
 }

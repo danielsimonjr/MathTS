@@ -53,4 +53,7 @@ export const FUNCTION_ISSUE: Record<string, string> = {
   invmod: '1566',
   xgcd: '1566',
   mod: '1566',
+  /** #1773 error class / arity wrappers (compat-only); pool/doc name-level gaps stay here. */
+  bitNot: '1773',
+  number: '1773',
 };
