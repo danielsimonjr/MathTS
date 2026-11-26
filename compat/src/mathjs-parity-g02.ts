@@ -206,6 +206,20 @@ export function withFractionRejection(fn: UnaryLike): (...args: unknown[]) => un
 export function withCountBoolean(fn: UnaryLike): (...args: unknown[]) => unknown {
   return keepSurface(fn, (...args: unknown[]): unknown => {
     if (args.length > 1) {
+      // mathjs count takes one argument: its typed dispatch reports the
+      // one-argument signature's own error first (a type error for a bad
+      // value, the too-many error for a valid one), so evaluate args[0] with
+      // the boolean conversion the one-argument form applies.
+      const first = typeof args[0] === 'boolean' ? String(args[0]) : args[0];
+      let firstOk = false;
+      let firstError: unknown;
+      try {
+        apply(fn, [first]);
+        firstOk = true;
+      } catch (err) {
+        firstError = err;
+      }
+      if (!firstOk) throw firstError;
       throw tooManyArgumentsError('count', 1, args.length);
     }
     if (args.length === 1 && typeof args[0] === 'boolean') return apply(fn, [String(args[0])]);
