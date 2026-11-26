@@ -159,7 +159,7 @@ describe('D2 [P2 gap] compare(BigNumber, Fraction) must throw the mathjs mixed-t
 // D3 (P2, PRE-EXISTING) — `pinv` of a dense 1×2 matrix `[[0, 1]]` must throw
 // mathjs's `Cannot calculate inverse, determinant is zero`; compat returns a
 // matrix. #1767 documents only the SPARSE form of this gap
-// (`docs/api/compat.md` → `pinv(sparse([[0,1]]))`), but the DENSE form diverges
+// (documented sparse-only gap before the fix), but the DENSE form diverges
 // identically and is not documented.
 // ===========================================================================
 describe('D3 [P2 undocumented gap] dense pinv([[0,1]]) must throw as mathjs does', () => {
@@ -172,7 +172,7 @@ describe('D3 [P2 undocumented gap] dense pinv([[0,1]]) must throw as mathjs does
 // D4 (P2, claimed residual — but WRAPPABLE) — `bernoulli` on the NUMBER path
 // diverges from mathjs from index ~192 onward. mathjs's float recurrence
 // overflows to ±Infinity (then NaN), while native `functions.bernoulli`
-// returns a large finite value. `docs/api/compat.md` says "Small and moderate
+// returns a large finite value. Prior compat docs claimed "Small and moderate
 // indexes match", which is false: mathjs returns Infinity at n = 198 while
 // compat returns 3.6e212.
 //

@@ -224,6 +224,12 @@ function mathjsPinvMatrix(
   }
 }
 
+/**
+ * mathjs `pinv` scalar (`any`) path keeps BigNumber / Fraction / Complex types;
+ * number-only Array / Matrix inputs follow the mathjs factory rank-factorization
+ * path (singular `pinv([[0,1]])` throws like mathjs). Other matrix element types
+ * delegate to the native typed `pinv`.
+ */
 export function createCompatPinv(native: AnyFn, deps: CompatPinvDependencies): AnyFn {
   const { convert, divide, equal } = deps;
   return keepSurface(native, (...args: unknown[]): unknown => {
@@ -388,12 +394,6 @@ export function createCompatBernoulli(native: AnyFn, deps: CompatBernoulliDepend
 // #1554 — compare rejects Complex the way mathjs does
 // =============================================================================
 
-/**
- * mathjs `compare` throws `No ordering relation is defined for complex numbers`
- * for a Complex operand; the compat typed surface rejects the Complex with the
- * generic argument error instead. The wrapper converts the foreign scalars
- * first, then raises the mathjs error.
- */
 function hasBigNumberLike(x: unknown): boolean {
   return isOwnBigNumber(x) || isBigNumberLike(x);
 }
@@ -402,6 +402,11 @@ function mixedFractionBigNumber(a: unknown, b: unknown): boolean {
   return (hasBigNumberLike(a) && isFractionLike(b)) || (isFractionLike(a) && hasBigNumberLike(b));
 }
 
+/**
+ * mathjs `compare` throws `No ordering relation is defined for complex numbers`
+ * for a Complex operand and rejects mixed BigNumber / Fraction pairs with the
+ * implicit-conversion error. The wrapper converts foreign scalars first.
+ */
 export function createCompatCompare(native: AnyFn, convert: (v: unknown) => unknown): AnyFn {
   return keepSurface(native, (...args: unknown[]): unknown => {
     const converted = args.map(convert);
