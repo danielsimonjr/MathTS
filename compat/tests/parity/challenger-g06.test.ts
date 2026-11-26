@@ -251,6 +251,6 @@ describe('G06 regression guards (pass on builder head; keep green after fixes)',
     const compat = createCompat(compatAll, {}) as unknown as HarnessInstance;
     const foreign = invoke(oracle, 'bignumber', '2.5');
     const result = invoke(compat, 'pinv', foreign);
-    expect(show(compat as never, result)).toBe('BigNumber 0.4');
+    expect(show(compat, result)).toBe('BigNumber 0.4');
   });
 });

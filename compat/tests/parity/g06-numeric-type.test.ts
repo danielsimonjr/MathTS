@@ -175,7 +175,7 @@ function outcomeOf(
   run: (l: Lib) => unknown
 ): { value: string } | { error: string; message: string } {
   try {
-    return { value: show(L as never, run(L)) };
+    return { value: show(L, run(L)) };
   } catch (e) {
     const err = e as Error;
     return { error: err.name, message: firstClause(err.message) };
@@ -265,9 +265,7 @@ describe('G06 #1554 — src-instance pinv (scalar and matrix paths)', () => {
     const oracle = createOracle(oracleAll, {}) as unknown as Lib;
     const src = createCompat(srcAll, {}) as unknown as Lib;
     const foreign = call(oracle, 'matrix', [1, 2]);
-    expect(show(src as never, call(src, 'pinv', foreign))).toBe(
-      show(oracle as never, call(oracle, 'pinv', foreign))
-    );
+    expect(show(src, call(src, 'pinv', foreign))).toBe(show(oracle, call(oracle, 'pinv', foreign)));
   });
 
   it('a Complex matrix element delegates to the native pinv', () => {
@@ -359,8 +357,8 @@ describe('G06 #1554 — src-instance compare and unaryPlus', () => {
     const oracle = createOracle(oracleAll, {}) as unknown as Lib;
     const src = createCompat(srcAll, {}) as unknown as Lib;
     const foreign = call(oracle, 'bignumber', 0.5);
-    expect(show(src as never, call(src, 'compare', foreign, -0.5))).toBe(
-      show(oracle as never, call(oracle, 'compare', foreign, -0.5))
+    expect(show(src, call(src, 'compare', foreign, -0.5))).toBe(
+      show(oracle, call(oracle, 'compare', foreign, -0.5))
     );
   });
 
