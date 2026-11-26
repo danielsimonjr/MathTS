@@ -10,7 +10,7 @@ import {
   assertValidCreateFactories,
   isCompatFactory,
 } from '../../src/create-factory-validation.js';
-import { wrapFactoryMathjsErrors } from '../../src/factory-mathjs-errors.js';
+import { wrapFactoryMathjsErrors, type CompatFactory } from '../../src/factory-mathjs-errors.js';
 import { MathjsError } from '@danielsimonjr/mathts-core/internal';
 
 /**
@@ -232,15 +232,27 @@ describe('G20 adapter branches: create factory validation', () => {
   });
 });
 
+function brandedFactory(run: (scope: Record<string, unknown>) => unknown): CompatFactory {
+  return Object.assign(run, {
+    isFactory: true as const,
+    fn: 'g20factory',
+    dependencies: [] as string[],
+  });
+}
+
 describe('G20 adapter branches: factory error mapping', () => {
   it('a MathjsError from a factory becomes a plain Error like mathjs', () => {
-    const failing = wrapFactoryMathjsErrors((() => {
-      throw new MathjsError('dependency "x" is missing');
-    }) as never);
+    const failing = wrapFactoryMathjsErrors(
+      brandedFactory(() => {
+        throw new MathjsError('dependency "x" is missing');
+      })
+    );
     expect(errorOf(() => failing({}))).toBe('Error: dependency "x" is missing');
-    const plain = wrapFactoryMathjsErrors((() => {
-      throw new TypeError('plain');
-    }) as never);
+    const plain = wrapFactoryMathjsErrors(
+      brandedFactory(() => {
+        throw new TypeError('plain');
+      })
+    );
     expect(errorOf(() => plain({}))).toBe('TypeError: plain');
   });
 });
