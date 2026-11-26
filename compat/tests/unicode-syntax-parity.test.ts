@@ -50,5 +50,6 @@ it('uses the mathjs token classes for operators, identifiers and quoted strings'
     ).toEqual(parsed);
   }
   expect(compat.parse.isValidLatinOrGreek('×')).toBe(true);
+  expect(instance.parse.isValidLatinOrGreek('×')).toBe(true);
   expect(instance.parse.isValidMathSymbol('𝟙'[0], '𝟙'[1])).toBe(true);
 });

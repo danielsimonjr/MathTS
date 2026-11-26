@@ -27,6 +27,7 @@ import {
   reviveInstanceValue,
 } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
+import { patchParseForMathjsToTex } from './totex-parity.js';
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
 
 type MathNamespace = Parameters<typeof importFactory>[2];
@@ -213,6 +214,22 @@ export function wireMathjsInstanceApi(
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
+  function patchEvaluatorToTex(bound: InstanceEvaluator): void {
+    const unit = instance.Unit as { isValuelessUnit?: (name: string) => boolean } | undefined;
+    if (typeof unit?.isValuelessUnit !== 'function') return;
+    const originalParse = bound.parse;
+    const patched = patchParseForMathjsToTex(
+      originalParse.bind(bound),
+      instance as Record<string, unknown>,
+      unit as { isValuelessUnit: (name: string) => boolean }
+    );
+    // Copy `isValidLatinOrGreek` / other parse statics from the *scoped* parser
+    // (mathjsSyntax). Assigning `functionsParse` overwrote those with the typed
+    // namespace parser, so `compat.parse.isValidLatinOrGreek('×')` became false.
+    Object.assign(patched, originalParse);
+    bound.parse = patched as typeof bound.parse;
+  }
+
   function resolveHelpName(search: unknown): string {
     if (typeof search === 'string') return search;
     const mwt = expressionLayers.mathWithTransform;
@@ -251,6 +268,7 @@ export function wireMathjsInstanceApi(
       true,
       compatDecimalResult
     );
+    patchEvaluatorToTex(evaluator);
     const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
       entries?: unknown[]
     ) => unknown;
