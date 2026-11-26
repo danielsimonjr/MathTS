@@ -233,6 +233,8 @@ function mathjsZetaDeps(config: () => G18ParityConfig) {
   };
 }
 
+type RangeFn = ((...args: unknown[]) => unknown) & { signatures?: Record<string, unknown> };
+
 /** Instance overrides for #1585 (mathjs zeta / symbolicEqual / range adapters). */
 export function g18InstanceOverrides(config: () => G18ParityConfig): {
   zeta: ReturnType<typeof createMathjsZeta>;
@@ -243,8 +245,9 @@ export function g18InstanceOverrides(config: () => G18ParityConfig): {
     zeta: createMathjsZeta(mathjsZetaDeps(config)),
     symbolicEqual: createMathjsSymbolicEqual({ typed: g18Typed }),
     range: createMathjsRange({
-      nativeRange: mathFunctions.range as (...args: unknown[]) => unknown,
+      nativeRange: mathFunctions.range as RangeFn,
       config,
+      typed: g18Typed,
     }),
   };
 }
@@ -252,8 +255,9 @@ export function g18InstanceOverrides(config: () => G18ParityConfig): {
 const namedZeta = createMathjsZeta(mathjsZetaDeps(() => mathFunctions.config() as G18ParityConfig));
 const namedSymbolicEqual = createMathjsSymbolicEqual({ typed: g18Typed });
 const namedRange = createMathjsRange({
-  nativeRange: mathFunctions.range as (...args: unknown[]) => unknown,
+  nativeRange: mathFunctions.range as RangeFn,
   config: () => mathFunctions.config() as G18ParityConfig,
+  typed: g18Typed,
 });
 
 export {

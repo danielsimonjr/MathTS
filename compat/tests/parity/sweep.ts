@@ -284,7 +284,9 @@ export function sweepDocs(perName: Map<string, string[]>): {
   let total = 0;
   for (const config of DOC_CONFIGS) {
     const configTag = JSON.stringify(config);
-    for (const examples of perName.values()) {
+    for (const [fnName, examples] of perName) {
+      // Stateful doc examples (e.g. `config({number: "Fraction"})`) mutate the instance.
+      if (SKIP_FUNCTIONS.has(fnName)) continue;
       for (const example of examples) {
         total++;
         const { mathjs, compat } = pair(config);

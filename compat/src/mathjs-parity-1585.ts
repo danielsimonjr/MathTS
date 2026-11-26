@@ -200,8 +200,9 @@ export function createMathjsSymbolicEqual(deps: SymbolicEqualDeps): CompatTyped 
 }
 
 interface RangeDeps {
-  nativeRange: (...args: unknown[]) => unknown;
+  nativeRange: ((...args: unknown[]) => unknown) & { signatures?: Record<string, unknown> };
   config: () => ParityConfig;
+  typed: CompatTyped;
 }
 
 /**
@@ -209,27 +210,22 @@ interface RangeDeps {
  * (`_strRange` passes it to `_out`, not `_range`). Mirror that quirk only.
  */
 export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unknown {
-  const { nativeRange, config } = deps;
-  const range = function range(this: unknown, ...args: unknown[]): unknown {
+  const { nativeRange, config, typed } = deps;
+  const applyQuirk = function applyQuirk(this: unknown, ...args: unknown[]): unknown {
     if (config().number === 'BigNumber' && typeof args[0] === 'string') {
       if (args.length === 1) return nativeRange.call(this, args[0]);
       if (args.length === 2 && typeof args[1] === 'boolean') return nativeRange.call(this, args[0]);
     }
     return nativeRange.apply(this, args);
   };
-  // Colon / `diag(1:3)` go through the typed `range` signatures on the instance.
-  // A bare wrapper dropped them and every range doc example diverged.
-  const native = nativeRange as {
-    signatures?: unknown;
-    _typedFunctionData?: unknown;
-  };
-  const tagged = range as unknown as {
-    signatures?: unknown;
-    _typedFunctionData?: unknown;
-  };
-  if (native.signatures !== undefined) tagged.signatures = native.signatures;
-  if (native._typedFunctionData !== undefined) {
-    tagged._typedFunctionData = native._typedFunctionData;
+  const signatures = nativeRange.signatures ?? {};
+  const mapped: Record<string, (...args: unknown[]) => unknown> = {};
+  for (const name of Object.keys(signatures)) {
+    mapped[name] = function (this: unknown, ...args: unknown[]): unknown {
+      return applyQuirk.apply(this, args);
+    };
   }
-  return range;
+  return (
+    typed as unknown as (name: string, sigs: typeof mapped) => (...args: unknown[]) => unknown
+  )('range', mapped);
 }
