@@ -32,13 +32,36 @@ if (!existsSync(vitestBin)) {
   process.exit(1);
 }
 
+/**
+ * Root vitest.config.ts includes only `tests/{docs,integration,wasm}`.
+ * Package tests need that package's config, whose include is `tests/**`.
+ * @param {string} file repo-relative test path
+ */
+function vitestTarget(file) {
+  const testsAt = file.indexOf('/tests/');
+  if (testsAt === -1) {
+    return { cwd: repoRoot, args: [vitestBin, 'run', file] };
+  }
+  const pkg = file.slice(0, testsAt);
+  const config = join(repoRoot, pkg, 'vitest.config.ts');
+  if (!existsSync(config)) {
+    return { cwd: repoRoot, args: [vitestBin, 'run', file] };
+  }
+  return {
+    cwd: join(repoRoot, pkg),
+    args: [vitestBin, 'run', '--config', config, file.slice(testsAt + 1)],
+  };
+}
+
 for (const entry of manifest.vitest) {
   if (typeof entry === 'string') {
-    run(`vitest ${entry}`, [vitestBin, 'run', entry]);
+    const target = vitestTarget(entry);
+    run(`vitest ${entry}`, target.args, target.cwd);
     continue;
   }
-  const args = [vitestBin, 'run', entry.file, '-t', entry.testNamePattern];
-  run(`vitest ${entry.file} (${entry.testNamePattern})`, args);
+  const target = vitestTarget(entry.file);
+  target.args.push('-t', entry.testNamePattern);
+  run(`vitest ${entry.file} (${entry.testNamePattern})`, target.args, target.cwd);
 }
 
 for (const rel of manifest.nodeTest ?? []) {
