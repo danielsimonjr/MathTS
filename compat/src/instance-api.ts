@@ -242,7 +242,15 @@ export function wireMathjsInstanceApi(
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
   /** Compat shims that must win over the functions singleton in `evaluate` (#1589). */
-  const EVALUATE_SCOPE_OVERRIDES = ['zpk2tf', 'freqz'] as const;
+  const EVALUATE_SCOPE_OVERRIDES = [
+    'zpk2tf',
+    'freqz',
+    // G05 (#1553, #1584): the mathjs 15.3.0 schur/sylvester/lyap/solveODE adapters.
+    'schur',
+    'sylvester',
+    'lyap',
+    'solveODE',
+  ] as const;
 
   function syncEvaluateScopeOverrides(): void {
     for (const name of EVALUATE_SCOPE_OVERRIDES) {

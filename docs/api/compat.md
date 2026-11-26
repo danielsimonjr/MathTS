@@ -84,6 +84,42 @@ math.config({ precision: 128 });
 
 On `create(all)`, `eigs` is the mathjs 15.3.0 factory (precision options, non-unit eigenvector scale, magnitude-ordered values). The native `@danielsimonjr/mathts-functions` export keeps the corrected orthes/hqr2 solver with unit-normalized vectors and ignores a numeric-only `precision` knob. The factory port lives in `compat/src/mathjs-eigs/` (compat-only; not a critical-library change).
 
+### `schur`, `sylvester`, `lyap` and `solveODE` (#1553, #1584)
+
+On `create(all)` these four run the mathjs 15.3.0 algorithms through adapters in
+`compat/src/mathjs-parity-g05.ts` (compat-only; the critical libraries keep their
+own implementations):
+
+- `schur` is mathjs's unshifted QR iteration (`qr`, then `R·Q`, until the L2 norm
+  of the step drops to `1e-4`). That fixes the diagonal ordering (#1584: the
+  largest eigenvalue of the 2×2 test matrix sits at `T[0][0]`) and keeps the
+  subdiagonal residue the oracle leaves (`5.147e-118`, not an exact `0`). It also
+  accepts BigNumber matrices (#1553): every step runs on the entries, so a
+  BigNumber input returns BigNumber entries.
+- `sylvester` and `lyap` are the activated factories of
+  `@danielsimonjr/mathts-functions` (ports of the mathjs factories) wired to that
+  `schur`, so BigNumber matrices flow through and match the oracle (#1553).
+- `solveODE` is a port of the mathjs adaptive Runge-Kutta factory; its initial
+  step is `(tEnd - tStart) / 1` unless `firstStep` is given (#1584).
+
+Native MathTS differences (import the names from
+`@danielsimonjr/mathts-functions` / `@danielsimonjr/mathts-matrix` to keep them):
+
+- `schur` uses the Francis double-shift QR (`matrixSchur`), a different and more
+  accurate decomposition: eigenvalues agree, but the diagonal order differs
+  (smallest first for the 2×2 test matrix) and the subdiagonal is flushed to an
+  exact `0`. The reconstruction `A = U·T·Uᵀ` holds in both.
+- `solveODE` uses a scipy-style step control (BDF, Radau, RK23/RK45 with
+  normalized error control). Both solve the issue's problem within the default
+  tolerance; the step grids differ.
+- A BigNumber `schur` is the one place where compat can differ from the mathjs
+  oracle in the last digits: mathjs computes BigNumber QR with decimal.js at
+  precision 64, compat with the MathTS decimal. The iteration is chaotic at the
+  ulp level, so `T` can stop at a different iterate (mathjs's own BigNumber
+  result for `schur([[1,2],[3,4]])` is itself an unconverged iterate with a
+  `6.98e-8` subdiagonal). Eigenvalues and `A = U·T·Uᵀ` agree; pinned by
+  `compat/tests/parity/g05-schur-ode.test.ts`.
+
 ### Fraction formatting (#1579, #1586)
 
 On the compat instance, `format(fraction(2))` is `"2/1"` (the same `n/1` form inside arrays,
