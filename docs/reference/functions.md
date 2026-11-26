@@ -41,12 +41,14 @@ Function tables in hardware-accelerated categories carry an **Accel** column:
 
 - **`parallel`** — `ComputePool` may dispatch to worker threads when the typed
   path passes an **op name** and length meets that op's `DEFAULT_THRESHOLD_BY_OP`
-  entry (for example `matmul` at 4,096 via `poolOptions(..., 'matmul')`). When
+  entry (for example `matmul` at 7,077,888 multiply-adds via
+  `poolOptions(..., 'matmul')` — 192³, the smallest measured size where workers
+  took at most 0.90 of the sequential time). When
   the path calls `shouldParallelize(n)` **without** an op name, only the
   **50,000-element global fallback** applies — even if the map lists a different
   threshold for that symbol (`erfc`, `spectrogram`, … are never passed by name).
   Ops absent from the map also use the 50,000 fallback when called namelessly
-  (`cube`, `round`, `sec`, …).
+  (`parallelConv` → `computePool.fftBatch` is the one live example).
 - **`parallel†`** — the pool op is `'never'` in `DEFAULT_THRESHOLD_BY_OP`, so
   workers are not used when that **op name** is passed to `shouldParallelize`
   (inline JS). Some rows still show `parallel†` while a nameless
@@ -81,11 +83,15 @@ WebGPU device is unavailable.
 > `backendManager.multiply` — `wasm-pairing.md` (generated, not committed)
 > / [`backends.md`](../backends.md).
 
-> **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 219.** The
-> generated report `webgpu-pairing.md` (not committed; `bun run docs:deps` writes it) lists **9 standalone
-> functions** that route to the GPU (`fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`,
-> `elementwiseChainGpuDispatch`, `elementwiseChainReduceGpuDispatch`, `fftGpuDispatch`, and the
-> four `gpu*` matrix helpers) plus **2 typed-dispatch functions** — `parallelFFT` and
+> **WebGPU coverage at the typed-dispatch layer is deliberately SMALL — 2 of 215.** The
+> generated report `webgpu-pairing.md` (not committed; `bun run docs:deps` writes it) lists the
+> standalone functions that route to the GPU (`fuseUnaryChainAsync`, `fuseUnaryChainReduceAsync`,
+> `fftGpuDispatch`, and the four `gpu*` matrix helpers — 7 in the generated report; the two
+> internal dispatchers `elementwiseChainGpuDispatch` /
+> `elementwiseChainReduceGpuDispatch` behind the fused chain are missed by its scanner, so the
+> code-verified count is 9 — see
+> `docs/superpowers/optimization/README.md`, mismatch M6) plus **2 typed-dispatch functions** —
+> `parallelFFT` and
 > `parallelIFFT`, which reach the GPU through `fftGpuDispatch` when you have opted in.
 >
 > That 2 is the honest number, and it should stay small. A GPU dispatch costs an upload and a
@@ -171,41 +177,41 @@ The primitives are exported from `@danielsimonjr/mathts-core` (`pairwiseSum`, `n
 
 ## Arithmetic
 
-| Function         | Description                                                                                                                          | Types                                             | Accel                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------------ |
-| `add(a, b)`      | Addition                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-| `subtract(a, b)` | Subtraction                                                                                                                          | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-| `multiply(a, b)` | Multiplication / matrix product                                                                                                      | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-| `divide(a, b)`   | Division                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-| `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-| `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —                              |
-| `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | parallel†, WASM (≥1024)        |
-| `sign(x)`        | Sign of x: -1, 0, or 1 (nameless `shouldParallelize` at 50k; map `sign` is `'never'`)                                                | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
-| `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | —                              |
-| `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | parallel†                      |
-| `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel†                      |
-| `cube(x)`        | `x³`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
-| `cbrt(x)`        | Cube root                                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel                       |
-| `nthRoot(x, n)`  | nth root                                                                                                                             | number, Complex                                   | —                              |
-| `exp(x)`         | `e^x`                                                                                                                                | number, Complex, BigNumber, Float64Array          | parallel†                      |
-| `expm1(x)`       | `e^x - 1` (stable near 0)                                                                                                            | number, Complex, Float64Array                     | parallel                       |
-| `log(x[, base])` | Natural log (or log base)                                                                                                            | number, Complex, BigNumber, Float64Array          | parallel†, WASM (≥16384)       |
-| `log2(x)`        | Base-2 logarithm                                                                                                                     | number, Complex, BigNumber, Float64Array          | parallel                       |
-| `log10(x)`       | Base-10 logarithm                                                                                                                    | number, Complex, BigNumber, Float64Array          | parallel, WASM (≥1024)         |
-| `log1p(x)`       | `ln(1 + x)` (stable near 0)                                                                                                          | number, Complex, Float64Array                     | parallel, WASM ([1024, 16384)) |
-| `round(x[, n])`  | Round to n digits                                                                                                                    | number, bigint, Complex, Fraction, Float64Array   | parallel                       |
-| `floor(x)`       | Round down                                                                                                                           | number, Complex, Fraction, Float64Array           | parallel                       |
-| `ceil(x)`        | Round up                                                                                                                             | number, Complex, Fraction, Float64Array           | parallel                       |
-| `fix(x)`         | Round toward zero                                                                                                                    | number, Complex, Fraction, Float64Array           | parallel                       |
-| `mod(a, b)`      | Modulo `a % b` (sign of `b`; `b = 0` returns `a`); an Array or a matrix applies it to each element                                   | number, bigint, Fraction, BigNumber, Array        | —                              |
-| `gcd(a, b)`      | Greatest common divisor                                                                                                              | number, bigint                                    | —                              |
-| `lcm(a, b)`      | Least common multiple                                                                                                                | number, bigint                                    | —                              |
-| `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`                                                                                                          | number                                            | —                              |
-| `norm(x[, p])`   | p-norm                                                                                                                               | number, Float64Array, DenseMatrix                 | parallel†                      |
-| `dot(a, b)`      | Vector dot product                                                                                                                   | Float64Array, array                               | parallel†                      |
-| `outer(a, b)`    | Vector outer product                                                                                                                 | Float64Array, array                               | parallel†                      |
-| `matmul(A, B)`   | Matrix multiplication                                                                                                                | Float64Array, DenseMatrix                         | parallel                       |
-| `matvec(A, x)`   | Matrix–vector product                                                                                                                | Float64Array, DenseMatrix                         | parallel†                      |
+| Function         | Description                                                                                                                          | Types                                             | Accel                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------ |
+| `add(a, b)`      | Addition                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `subtract(a, b)` | Subtraction                                                                                                                          | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `multiply(a, b)` | Multiplication / matrix product                                                                                                      | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `divide(a, b)`   | Division                                                                                                                             | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `unaryMinus(x)`  | Negation `-x`                                                                                                                        | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `unaryPlus(x)`   | Identity `+x`                                                                                                                        | number, bigint, Complex, Fraction                 | —                        |
+| `abs(x)`         | Absolute value                                                                                                                       | number, bigint, Complex, Fraction, Float64Array   | WASM (≥1024)             |
+| `sign(x)`        | Sign of x: -1, 0, or 1                                                                                                               | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `pow(x, y)`      | Power `x^y`; square-matrix power `A^n` for non-negative integer `n` (native-accelerated) — use `matrixPower` for negative/fractional | number, bigint, Complex, Fraction, Array (matrix) | WASM (GEMM, matrix path) |
+| `sqrt(x)`        | Square root                                                                                                                          | number, Complex, BigNumber, Float64Array          | —                        |
+| `square(x)`      | `x²`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `cube(x)`        | `x³`                                                                                                                                 | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `cbrt(x)`        | Cube root                                                                                                                            | number, Complex, BigNumber, Float64Array          | —                        |
+| `nthRoot(x, n)`  | nth root                                                                                                                             | number, Complex                                   | —                        |
+| `exp(x)`         | `e^x`                                                                                                                                | number, Complex, BigNumber, Float64Array          | —                        |
+| `expm1(x)`       | `e^x - 1` (stable near 0)                                                                                                            | number, Complex, Float64Array                     | —                        |
+| `log(x[, base])` | Natural log (or log base)                                                                                                            | number, Complex, BigNumber, Float64Array          | WASM (≥16384)            |
+| `log2(x)`        | Base-2 logarithm                                                                                                                     | number, Complex, BigNumber, Float64Array          | —                        |
+| `log10(x)`       | Base-10 logarithm                                                                                                                    | number, Complex, BigNumber, Float64Array          | WASM (≥1024)             |
+| `log1p(x)`       | `ln(1 + x)` (stable near 0)                                                                                                          | number, Complex, Float64Array                     | WASM ([1024, 16384))     |
+| `round(x[, n])`  | Round to n digits                                                                                                                    | number, bigint, Complex, Fraction, Float64Array   | —                        |
+| `floor(x)`       | Round down                                                                                                                           | number, Complex, Fraction, Float64Array           | —                        |
+| `ceil(x)`        | Round up                                                                                                                             | number, Complex, Fraction, Float64Array           | —                        |
+| `fix(x)`         | Round toward zero                                                                                                                    | number, Complex, Fraction, Float64Array           | —                        |
+| `mod(a, b)`      | Modulo `a % b` (sign of `b`; `b = 0` returns `a`); an Array or a matrix applies it to each element                                   | number, bigint, Fraction, BigNumber, Array        | —                        |
+| `gcd(a, b)`      | Greatest common divisor                                                                                                              | number, bigint                                    | —                        |
+| `lcm(a, b)`      | Least common multiple                                                                                                                | number, bigint                                    | —                        |
+| `xgcd(a, b)`     | Extended GCD: `{gcd, x, y}`                                                                                                          | number                                            | —                        |
+| `norm(x[, p])`   | p-norm                                                                                                                               | number, Float64Array, DenseMatrix                 | —                        |
+| `dot(a, b)`      | Vector dot product                                                                                                                   | Float64Array, array                               | —                        |
+| `outer(a, b)`    | Vector outer product                                                                                                                 | Float64Array, array                               | —                        |
+| `matmul(A, B)`   | Matrix multiplication                                                                                                                | Float64Array, DenseMatrix                         | —                        |
+| `matvec(A, x)`   | Matrix–vector product                                                                                                                | Float64Array, DenseMatrix                         | —                        |
 
 The factory layer additionally provides scalar variants used internally and by
 the expression evaluator: `addScalar`, `subtractScalar`, `multiplyScalar`,
@@ -323,7 +329,7 @@ Functions support `number`, `Complex`, `BigNumber`, and parallel `Float64Array`.
 
 | Function                         | Description                                      | Accel                   |
 | -------------------------------- | ------------------------------------------------ | ----------------------- |
-| `sin(x)`                         | Sine                                             | WASM ([1024, 131072))   |
+| `sin(x)`                         | Sine                                             | WASM ([16384, 65536))   |
 | `cos(x)`                         | Cosine                                           | WASM (≥16384)           |
 | `tan(x)`                         | Tangent                                          | —                       |
 | `csc(x)` `cot(x)`                | Cosecant, cotangent                              | —                       |
@@ -2314,10 +2320,13 @@ leastSquares(
 ## Signal Processing
 
 `parallelFFT`, `parallelIFFT`, `parallelConv`, and related `parallel*` helpers may
-return a `Promise`, but FFT/conv op thresholds in `ComputePool` are `'never'`
-today — they run the sequential radix-2 / FFT convolution core inline unless a
-future threshold retune enables workers. Optional WebGPU FFT (`enableGpu()`, power-of-two
-n ≥ 262 144) is separate from the worker pool.
+return a `Promise`. The **named** FFT ops are `'never'` in `ComputePool`
+(`parallelFFT`, `parallelConv`, `fft2d`), so the radix-2 core runs inline — but
+`parallelConv` / `parallelXCorr` / `parallelAutoCorr` additionally gate a worker
+`fftBatch` through a **nameless** `shouldParallelize(2·nextPow2(len))` call, so
+those three DO engage workers once the padded length reaches the 50,000-element
+global fallback. Optional WebGPU FFT (`enableGpu()`, power-of-two
+n ≥ 262 144) is separate from the worker pool.
 
 | Function                                        | Description                                                                                                                                                                                            | Accel           |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
@@ -2325,9 +2334,9 @@ n ≥ 262 144) is separate from the worker pool.
 | `parallelIFFT(X)`                               | Inverse FFT → `{ real, imag }`                                                                                                                                                                         | parallel†, GPU‡ |
 | `parallelFFTMagnitude(x)`                       | FFT magnitude spectrum                                                                                                                                                                                 | parallel†       |
 | `parallelFFTPower(x)`                           | FFT power spectrum                                                                                                                                                                                     | parallel†       |
-| `parallelConv(a, b)`                            | Convolution → `Promise<Float64Array>`                                                                                                                                                                  | parallel†       |
-| `parallelXCorr(a, b)`                           | Cross-correlation → `Promise<Float64Array>`                                                                                                                                                            | parallel†       |
-| `parallelAutoCorr(a)`                           | Auto-correlation → `Promise<Float64Array>`                                                                                                                                                             | parallel†       |
+| `parallelConv(a, b)`                            | Convolution → `Promise<Float64Array>`                                                                                                                                                                  | parallel        |
+| `parallelXCorr(a, b)`                           | Cross-correlation → `Promise<Float64Array>`                                                                                                                                                            | parallel        |
+| `parallelAutoCorr(a)`                           | Auto-correlation → `Promise<Float64Array>`                                                                                                                                                             | parallel        |
 | `fft(x)` / `ifft(X)`                            | Discrete Fourier transform / inverse (factory layer)                                                                                                                                                   | —               |
 | `fft2d(matrix)`                                 | 2D FFT (synchronous; for worker threads use `computePool.fftBatch`)                                                                                                                                    | —               |
 | `fourier(f)` / `invFourier(F)`                  | Continuous Fourier transform                                                                                                                                                                           | —               |
@@ -2843,37 +2852,39 @@ minimumSpanningTree(adj); // MST edge list
 
 ## Hypothesis Tests
 
-All return structured result objects.
+All return structured result objects. Four tests — `chiSquareTest`, `kolmogorovSmirnovTest`,
+`mannWhitneyTest`, and `shapiroWilkTest` — dispatch to the worker pool for `n ≥ 4096` (named ops
+in `DEFAULT_THRESHOLD_BY_OP`; `functions/src/typed/hypothesis.ts`); below that they run inline.
 
-| Function                                               | Returns                              | Description                                                                                                                                                                                                    |
-| ------------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `studentTTest(sample1[, sample2])`                     | `TTestResult`                        | One/two-sample t-test                                                                                                                                                                                          |
-| `chiSquareTest(observed, expected)`                    | `ChiSquareResult`                    | Chi-square goodness-of-fit (1D) or plain independence test (2D); complementary to (not a duplicate of) `chi2Contingency`, which adds Yates correction, expected counts, and Cramer's V                         |
-| `anova(groups)`                                        | `AnovaResult`                        | One-way ANOVA                                                                                                                                                                                                  |
-| `kolmogorovSmirnovTest(sample[, sample2])`             | `KSTestResult`                       | K-S test                                                                                                                                                                                                       |
-| `mannWhitneyTest(sample1, sample2)`                    | `MannWhitneyResult`                  | Mann–Whitney U test                                                                                                                                                                                            |
-| `shapiroWilkTest(sample)`                              | `ShapiroWilkResult`                  | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8)                                                                                                        |
-| `principalComponentAnalysis(data[, k])`                | `PCAResult`                          | PCA                                                                                                                                                                                                            |
-| `fTest(x, y)`                                          | `FTestResult`                        | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                                                                         |
-| `jarqueBera(x)`                                        | `JarqueBeraResult`                   | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                                                                    |
-| `kruskalWallis(...groups)`                             | `KruskalResult`                      | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                                                                    |
-| `wilcoxon(x[, y])`                                     | `WilcoxonResult`                     | Wilcoxon signed-rank test (paired/one-sample); matches `scipy.stats.wilcoxon` defaults (SciPy 1.16)                                                                                                            |
-| `fisherExact(table)`                                   | `FisherExactResult`                  | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                                                                       |
-| `tukeyHSD(groups[, alpha])`                            | `TukeyComparison[]`                  | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                                                                   |
-| `chi2Contingency(table[, opts])`                       | `Chi2ContingencyResult`              | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                                               |
-| `multipleTest(pValues, method)`                        | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`; equivalent alias of `multipleComparison` (same algorithm) |
-| `multipleComparison(pValues[, method])`                | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`, default `'bh'`); equivalent alias of `multipleTest` (same algorithm, `statsmodels`-parity naming)                                         |
-| `kendallTauTest(x, y)`                                 | `KendallTauTestResult`               | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names                           |
-| `mcnemar(table[, opts])`                               | `McNemarResult`                      | McNemar's test on a 2×2 paired table; `chi2 = (\|b−c\| − correction)²/(b+c)` (continuity correction default on); matches `statsmodels` `mcnemar`                                                               |
-| `wilsonInterval(successes, n[, confidence])`           | `{ lower, upper }`                   | Wilson score interval for a binomial proportion; bounds exactly 0 and 1 at 0 and n successes; matches `statsmodels` `proportion_confint(method='wilson')`                                                      |
-| `newcombePairedInterval({ a, b, c, d }[, confidence])` | `{ diff, lower, upper }`             | Newcombe (1998) method 10 interval for the paired difference `(b − c)/n`, from two Wilson intervals and a continuity-corrected φ                                                                               |
-| `cohensKappa(matrix)`                                  | `number`                             | Cohen's κ for a square agreement matrix of counts; NaN when chance agreement is 1; matches `statsmodels` `cohens_kappa`                                                                                        |
-| `cochranQ(data)`                                       | `CochranQResult`                     | Cochran's Q test — McNemar generalized to `k > 2` matched binary treatments; `dof = k − 1`; matches `statsmodels` `cochrans_q`                                                                                 |
-| `signTest(x[, median])`                                | `{ statistic, pValue, nPos, nNeg }`  | Exact binomial sign test about `median` (default 0); values equal to the median are dropped                                                                                                                    |
-| `runsTest(x[, { cutoff }])`                            | `{ runs, z, pValue }`                | Wald–Wolfowitz runs test on booleans, or on numbers dichotomized at `cutoff` (default the median, ties dropped); normal approximation, if every value falls on one side the result is `z = NaN`, `p = 1`       |
-| `moodMedianTest(groups)`                               | `{ statistic, pValue, grandMedian }` | Mood's median test: chi-square on above / below-grand-median counts across groups                                                                                                                              |
-| `powerDivergence(observed[, expected, lambda])`        | `{ statistic, pValue }`              | Cressie–Read power-divergence statistic; `lambda = 1` (default) is Pearson chi-square, `0` the G-test; `−1` is singular and throws `RangeError`; zero observed counts contribute 0 at `lambda = 0`             |
-| `gTest(observed[, expected])`                          | `{ statistic, pValue }`              | Log-likelihood-ratio G-test (power divergence at `lambda = 0`); `expected` defaults to uniform                                                                                                                 |
+| Function                                               | Returns                              | Description                                                                                                                                                                                                    | Accel               |
+| ------------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `studentTTest(sample1[, sample2])`                     | `TTestResult`                        | One/two-sample t-test                                                                                                                                                                                          | —                   |
+| `chiSquareTest(observed, expected)`                    | `ChiSquareResult`                    | Chi-square goodness-of-fit (1D) or plain independence test (2D); complementary to (not a duplicate of) `chi2Contingency`, which adds Yates correction, expected counts, and Cramer's V                         | parallel (n ≥ 4096) |
+| `anova(groups)`                                        | `AnovaResult`                        | One-way ANOVA                                                                                                                                                                                                  | —                   |
+| `kolmogorovSmirnovTest(sample[, sample2])`             | `KSTestResult`                       | K-S test                                                                                                                                                                                                       | parallel (n ≥ 4096) |
+| `mannWhitneyTest(sample1, sample2)`                    | `MannWhitneyResult`                  | Mann–Whitney U test                                                                                                                                                                                            | parallel (n ≥ 4096) |
+| `shapiroWilkTest(sample)`                              | `ShapiroWilkResult`                  | Normality test — Royston (1995) AS R94 W statistic and p-value (matches `scipy.stats.shapiro` to ~1e-8)                                                                                                        | parallel (n ≥ 4096) |
+| `principalComponentAnalysis(data[, k])`                | `PCAResult`                          | PCA                                                                                                                                                                                                            | —                   |
+| `fTest(x, y)`                                          | `FTestResult`                        | Two-sample F-test for equality of variances (`F = s²₁/s²₂`, two-sided)                                                                                                                                         | —                   |
+| `jarqueBera(x)`                                        | `JarqueBeraResult`                   | Jarque–Bera normality test from sample skewness and excess kurtosis (χ²(2))                                                                                                                                    | —                   |
+| `kruskalWallis(...groups)`                             | `KruskalResult`                      | Kruskal–Wallis H-test (nonparametric one-way ANOVA on ranks), tie-corrected                                                                                                                                    | —                   |
+| `wilcoxon(x[, y])`                                     | `WilcoxonResult`                     | Wilcoxon signed-rank test (paired/one-sample); matches `scipy.stats.wilcoxon` defaults (SciPy 1.16)                                                                                                            | —                   |
+| `fisherExact(table)`                                   | `FisherExactResult`                  | Fisher's exact test on a 2×2 table; two-sided p-value matches `scipy.stats.fisher_exact`                                                                                                                       | —                   |
+| `tukeyHSD(groups[, alpha])`                            | `TukeyComparison[]`                  | Tukey's HSD post-hoc test (Tukey–Kramer, studentized range); mirrors `scipy.stats.tukey_hsd`                                                                                                                   | —                   |
+| `chi2Contingency(table[, opts])`                       | `Chi2ContingencyResult`              | Chi-square test of independence with auto-expected counts, Yates continuity correction (2x2, default on), and Cramer's V; matches `scipy.stats.chi2_contingency`                                               | —                   |
+| `multipleTest(pValues, method)`                        | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`), original order preserved; matches `statsmodels.stats.multitest.multipletests`; equivalent alias of `multipleComparison` (same algorithm) | —                   |
+| `multipleComparison(pValues[, method])`                | `number[]`                           | Multiple-testing p-value adjustment (`'bonferroni'`/`'holm'`/`'bh'`, default `'bh'`); equivalent alias of `multipleTest` (same algorithm, `statsmodels`-parity naming)                                         | —                   |
+| `kendallTauTest(x, y)`                                 | `KendallTauTestResult`               | Kendall's τ_b rank-correlation test: `{ tau, pValue }` via the normal approximation `z = τ/√(2(2n+5)/(9n(n−1)))`; same coefficient/p as `kendalltau`, `*Test`-convention field names                           | —                   |
+| `mcnemar(table[, opts])`                               | `McNemarResult`                      | McNemar's test on a 2×2 paired table; `chi2 = (\|b−c\| − correction)²/(b+c)` (continuity correction default on); matches `statsmodels` `mcnemar`                                                               | —                   |
+| `wilsonInterval(successes, n[, confidence])`           | `{ lower, upper }`                   | Wilson score interval for a binomial proportion; bounds exactly 0 and 1 at 0 and n successes; matches `statsmodels` `proportion_confint(method='wilson')`                                                      | —                   |
+| `newcombePairedInterval({ a, b, c, d }[, confidence])` | `{ diff, lower, upper }`             | Newcombe (1998) method 10 interval for the paired difference `(b − c)/n`, from two Wilson intervals and a continuity-corrected φ                                                                               | —                   |
+| `cohensKappa(matrix)`                                  | `number`                             | Cohen's κ for a square agreement matrix of counts; NaN when chance agreement is 1; matches `statsmodels` `cohens_kappa`                                                                                        | —                   |
+| `cochranQ(data)`                                       | `CochranQResult`                     | Cochran's Q test — McNemar generalized to `k > 2` matched binary treatments; `dof = k − 1`; matches `statsmodels` `cochrans_q`                                                                                 | —                   |
+| `signTest(x[, median])`                                | `{ statistic, pValue, nPos, nNeg }`  | Exact binomial sign test about `median` (default 0); values equal to the median are dropped                                                                                                                    | —                   |
+| `runsTest(x[, { cutoff }])`                            | `{ runs, z, pValue }`                | Wald–Wolfowitz runs test on booleans, or on numbers dichotomized at `cutoff` (default the median, ties dropped); normal approximation, if every value falls on one side the result is `z = NaN`, `p = 1`       | —                   |
+| `moodMedianTest(groups)`                               | `{ statistic, pValue, grandMedian }` | Mood's median test: chi-square on above / below-grand-median counts across groups                                                                                                                              | —                   |
+| `powerDivergence(observed[, expected, lambda])`        | `{ statistic, pValue }`              | Cressie–Read power-divergence statistic; `lambda = 1` (default) is Pearson chi-square, `0` the G-test; `−1` is singular and throws `RangeError`; zero observed counts contribute 0 at `lambda = 0`             | —                   |
+| `gTest(observed[, expected])`                          | `{ statistic, pValue }`              | Log-likelihood-ratio G-test (power divergence at `lambda = 0`); `expected` defaults to uniform                                                                                                                 | —                   |
 
 ### Details
 
