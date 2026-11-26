@@ -18,10 +18,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { after, describe, test } from 'node:test';
-import {
-  missingSurfaceFileMessage,
-  runtimeExportNames,
-} from '../generate-functions-reference.mjs';
+import { missingSurfaceFileMessage, runtimeExportNames } from '../generate-functions-reference.mjs';
 import { IMPORT_EXPORT_KEYS, packageDotEntry } from '../package-dot-entry.mjs';
 
 const REPO = resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -222,11 +219,11 @@ describe('runtimeExportNames', () => {
         'export const kept2 = 1;',
         'export interface I {}',
         'export default function def() {}',
-      ].join('\n'),
+      ].join('\n')
     );
     assert.deepEqual(
       [...names].sort(),
-      ['Cls', 'E', 'fn', 'freshName', 'kept', 'kept2', 'lw', 'ns'].sort(),
+      ['Cls', 'E', 'fn', 'freshName', 'kept', 'kept2', 'lw', 'ns'].sort()
     );
   });
 
@@ -239,7 +236,7 @@ describe('runtimeExportNames', () => {
         '  loadWasm as lw,',
         '};',
         'export { config } from "./x.js"; // trailing',
-      ].join('\n'),
+      ].join('\n')
     );
     assert.deepEqual([...names].sort(), ['config', 'kept', 'lw']);
   });
@@ -264,5 +261,36 @@ describe('generate-functions-reference surfaces file', () => {
   test('--check passes the file test when the surfaces file exists', () => {
     const dir = fixture('with-surfaces', { 'package-export-surfaces.json': '{"surfaces":{}}' });
     assert.equal(missingSurfaceFileMessage(join(dir, 'package-export-surfaces.json'), true), null);
+  });
+});
+
+describe('__PKG_VERSION__ for docs:functions (Bun source execution)', () => {
+  test('tsdown define does not emit globalThis."<version>" in core dist', () => {
+    const dist = readFileSync(join(REPO, 'core/dist/index.js'), 'utf8');
+    assert.doesNotMatch(dist, /globalThis\."/);
+    assert.match(dist, /__PKG/);
+    assert.match(dist, /VERSION__/);
+  });
+
+  test('core/src VERSION reads globalThis when the tsdown define is missing', () => {
+    const script = [
+      'globalThis.__PKG_VERSION__ = "from-global";',
+      'const m = await import("./core/src/index.ts");',
+      'if (m.VERSION !== "from-global") {',
+      '  console.error(m.VERSION);',
+      '  process.exit(1);',
+      '}',
+    ].join('');
+    const bun = spawnSync('bun', ['-e', script], { cwd: REPO, encoding: 'utf8' });
+    assert.equal(bun.status, 0, bun.stderr + bun.stdout);
+  });
+
+  test('docs:functions always injects __PKG_VERSION__ through run-docs-functions.mjs', () => {
+    const runner = readFileSync(join(REPO, 'tools/run-docs-functions.mjs'), 'utf8');
+    assert.match(runner, /--define/);
+    assert.match(runner, /__PKG_VERSION__/);
+    const pkg = JSON.parse(readFileSync(join(REPO, 'package.json'), 'utf8'));
+    assert.equal(pkg.scripts['docs:functions'], 'bun tools/run-docs-functions.mjs');
+    assert.equal(pkg.scripts['docs:functions:check'], 'bun tools/run-docs-functions.mjs --check');
   });
 });

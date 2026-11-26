@@ -33,6 +33,7 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
+import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { compatMathjsEigs } from './eigs-mathjs.js';
@@ -448,9 +449,10 @@ export function create(
   // Always give a full-bundle `create(all)` its own Unit class. Patching
   // `typeConverters` on `instanceSymbols.Unit` would mutate the shared native
   // constructor that functions/core use (#1551).
-  const localUnits = fullBundle
+  const rawLocalUnits = fullBundle
     ? mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig)
     : undefined;
+  const localUnits = rawLocalUnits ? wrapCompatUnitSources(rawLocalUnits) : undefined;
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
@@ -695,7 +697,7 @@ export function create(
   const constantReaders = compatConstantReaders(
     flat,
     currentConfig,
-    localUnits?.Unit ?? instanceSymbols.Unit,
+    (localUnits?.Unit ?? instanceSymbols.Unit) as typeof instanceSymbols.Unit,
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
@@ -740,6 +742,10 @@ export function create(
       expressionConstants[name] = () => instance[name];
   }
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
+  // `config` inside an expression is the instance's config function (#1562):
+  // `evaluate('config()')` reads the fields and
+  // `evaluate('config({number: "Fraction"})')` updates that instance.
+  expressionConstants.config = () => instance.config;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>

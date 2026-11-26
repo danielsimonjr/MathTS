@@ -284,10 +284,10 @@ export function sweepDocs(perName: Map<string, string[]>): {
   let total = 0;
   for (const config of DOC_CONFIGS) {
     const configTag = JSON.stringify(config);
-    const { mathjs, compat } = pair(config);
     for (const examples of perName.values()) {
       for (const example of examples) {
         total++;
+        const { mathjs, compat } = pair(config);
         const o = outcome(mathjs, () => mathjs.evaluate(example));
         const c = outcome(compat, () => compat.evaluate(example));
         if (JSON.stringify(o) !== JSON.stringify(c)) {

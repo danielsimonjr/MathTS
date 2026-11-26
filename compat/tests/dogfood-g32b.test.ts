@@ -54,7 +54,15 @@ describe('dogfood G32b formatting and units', () => {
   });
 
   it('#739 safe evaluate cannot reach createUnit', () => {
-    expect(() => mt.evaluate('createUnit("sneakyUnit", "1 m")')).toThrow();
+    // #1549: the default policy follows mathjs (createUnit is callable there);
+    // the `{ safe: true }` opt-in keeps it unreachable.
+    expect(() =>
+      (mt.evaluate as (e: string, s?: unknown, o?: { safe: boolean }) => unknown)(
+        'createUnit("sneakyUnit", "1 m")',
+        {},
+        { safe: true }
+      )
+    ).toThrow();
     expect(() => mt.unit(1, 'sneakyUnit')).toThrow();
   });
 
