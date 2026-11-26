@@ -120,6 +120,17 @@ describe('g18 adversarial: range and bookkeeping', () => {
     expect(arr(B.range('4:10', true))).toBe(arr(OB.range('4:10', true)));
   });
 
+  it('number string range still honors includeEnd (not the BigNumber _strRange quirk)', () => {
+    const N = createCompat(compatAll) as Instance;
+    const ON = create(all) as Instance;
+    expect(arr(N.range('4:10', true))).toBe(arr(ON.range('4:10', true)));
+    expect(arr(N.range('4:10', true))).toBe(JSON.stringify(['4', '5', '6', '7', '8', '9', '10']));
+    expect(arr(N.evaluate('range(3, 7)'))).toBe(arr(ON.evaluate('range(3, 7)')));
+    expect('signatures' in N.range).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(N.range, 'signatures')).toBe(true);
+    expect(Object.keys(N.range).includes('signatures')).toBe(true);
+  });
+
   it('F7: known-gaps drops #1585 zeta/symbolicEqual doc examples', () => {
     // Split per-issue JSON under known-gaps/; GAPS is the merged record.
     const gaps = GAPS;

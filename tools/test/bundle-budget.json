@@ -1,28 +1,28 @@
 {
   "note": "Per-entry byte ceilings of bun run build output, before build:prod: each exports[].import file plus the files it statically imports. A growth past a ceiling updates this file in the same PR; ordinary size wiggle changes no line (see ceilingFor).",
   "files": {
-    "packages/typed-function/dist/index.js": 4608,
+    "packages/typed-function/dist/index.js": 2816,
     "packages/typed-function/package.json": 2304,
-    "packages/workerpool/dist/index.js": 59392,
-    "packages/workerpool/dist/worker.js": 26624,
+    "packages/workerpool/dist/index.js": 32768,
+    "packages/workerpool/dist/worker.js": 12288,
     "packages/workerpool/package.json": 2816,
-    "core/dist/index.js": 274432,
-    "core/dist/internal.js": 274432,
+    "core/dist/index.js": 155648,
+    "core/dist/internal.js": 155648,
     "core/package.json": 2048,
-    "matrix/dist/index.js": 245760,
+    "matrix/dist/index.js": 143360,
     "matrix/package.json": 2816,
     "matrix/dist/wasm/mathts-as.wasm": 70656,
-    "tensor/dist/index.js": 90112,
+    "tensor/dist/index.js": 50176,
     "tensor/package.json": 2304,
-    "autograd/dist/index.js": 75776,
+    "autograd/dist/index.js": 41984,
     "autograd/package.json": 2304,
-    "functions/dist/index.js": 2424832,
-    "functions/dist/subpath-evaluate.js": 1605632,
+    "functions/dist/index.js": 1310720,
+    "functions/dist/subpath-evaluate.js": 868352,
     "functions/package.json": 3840,
     "functions/dist/wasm/mathts-as.wasm": 70656,
-    "expression/dist/index.js": 376832,
+    "expression/dist/index.js": 245760,
     "expression/package.json": 2304,
-    "parser/dist/index.js": 768,
+    "parser/dist/index.js": 512,
     "parser/package.json": 2560,
     "units/dist/index.js": 1024,
     "units/package.json": 2304,
@@ -42,21 +42,21 @@
     "statistics/package.json": 2560,
     "signal/dist/index.js": 768,
     "signal/package.json": 2304,
-    "parallel/dist/index.js": 52224,
+    "parallel/dist/index.js": 31744,
     "parallel/package.json": 2304,
-    "workbook/dist/index.js": 51200,
+    "workbook/dist/index.js": 30720,
     "workbook/package.json": 2304,
     "assembly/build/mathts.js": 98304,
     "assembly/build/mathts.wasm": 70656,
     "assembly/build/mathts-debug.wasm": 135168,
     "assembly/build/mathts-debug.js": 104448,
     "assembly/package.json": 3584,
-    "compat/dist/index.js": 425984,
+    "compat/dist/index.js": 266240,
     "compat/package.json": 2560,
-    "gpu/dist/index.js": 18432,
+    "gpu/dist/index.js": 11264,
     "gpu/package.json": 2304,
-    "plot/dist/index.js": 38912,
-    "plot/dist/render-file.js": 6656,
+    "plot/dist/index.js": 22016,
+    "plot/dist/render-file.js": 4352,
     "plot/package.json": 2560
   },
   "entries": {
@@ -180,31 +180,31 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "maxBytes": 1441792
+      "maxBytes": 1409024
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "maxBytes": 1441792
+      "maxBytes": 1409024
     },
     {
       "label": "functions barrel evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions';",
       "platform": "node",
-      "maxBytes": 1441792
+      "maxBytes": 1409024
     },
     {
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "maxBytes": 286720
+      "maxBytes": 282624
     },
     {
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "maxBytes": 2129920
+      "maxBytes": 2097152
     },
     {
       "label": "compat create(all) browser",
