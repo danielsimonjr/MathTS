@@ -177,6 +177,46 @@ import {
 import { Complex, Fraction, BigNumber } from '@danielsimonjr/mathts-core';
 ```
 
+### Typed packages and the mathjs instance
+
+What the typed packages export, and what stays on `create(all)` from
+`@danielsimonjr/mathts-compat` (#1567–#1571):
+
+- **Error and matrix classes (#1567).** `DimensionError` and `IndexError` come
+  from `@danielsimonjr/mathts-core` (one class identity for the whole monorepo
+  when those classes are thrown). Axis/index errors that use `DimensionError`
+  are `instanceof DimensionError` against the core export. Native typed `add`
+  of mismatched vectors still throws `RangeError`; `create(all).add` maps that
+  to mathjs 15.3.0's plain `Error` and `shape mismatch` text (#G12).
+  `ArgumentsError`, `FibonacciHeap`,
+  `ImmutableDenseMatrix` and `Spa` come from `@danielsimonjr/mathts-functions`;
+  `ResultSet`, the 16 Node classes (`Node`, `ConstantNode`, `SymbolNode`, …)
+  and `Parser` come from `@danielsimonjr/mathts-expression`, next to the
+  `create<X>` factories that build them with custom dependencies.
+- **Events are per instance (#1568).** The typed packages export functions, not
+  an event emitter; `on`, `off`, `once`, and `emit` exist only on
+  `create(all)` from `@danielsimonjr/mathts-compat`, where `config` and
+  `import` fire them.
+- **`docs`, `all` and `expression` (#1569).** `docs` (the embedded-docs map,
+  every mathjs key plus MathTS extras) is exported from
+  `@danielsimonjr/mathts-expression` (also as `embeddedDocs`). `all` and the
+  instance `expression` namespace stay compat-only: they are the instance
+  bundle, not a module export.
+- **Factories (#1570, decision b).** mathjs-style `create*` / `*Dependencies`
+  tree-shaking is a compat feature. The typed packages export the 63 factories
+  that exist under both names: `factory_abs` and `createAbs` are the same
+  function object from `@danielsimonjr/mathts-functions` (and likewise for the
+  other 62). The remaining mathjs `create*` factories and the `*Dependencies`
+  bundles are not generated on the typed packages; use compat for a fully
+  tree-shaken mathjs-style build.
+- **Renamed constants and classes (#1571).** `pi`, `e`, `tau`, `phi`, `i` are
+  exported from `@danielsimonjr/mathts-core` as the same values as
+  `PI`, `E`, `TAU`, `PHI`, `I`. The Node classes and `Parser` are listed above.
+  `factory` stays `createFactory`, and `import` stays `importFactory`
+  (factory-only). The ten JS literals (`Infinity`, `NaN`, `true`, `false`,
+  `null`, and the `_`-prefixed forms) are not exported; `version` is the
+  emulated mathjs version on the compat instance, not a typed-package constant.
+
 ### Scalar dispatch (synchronous)
 
 ```ts

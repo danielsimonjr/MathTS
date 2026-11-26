@@ -31,6 +31,7 @@ import {
   createMathjsExpressionBindings,
   type CompatExpressionApi,
 } from './mathjs-expression-bindings.js';
+import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
 import { wrapCompatUnitConstructor, type CompatUnitConstructorLike } from './mathjs-unit.js';
 
 /** Compat instance evaluate options: adds `{ safe: true }` mathjs opt-in (#1549). */
@@ -294,10 +295,17 @@ export function wireMathjsInstanceApi(
       compatDecimalResult,
       mathjsExpressionBindings
     );
+    const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
+      entries?: unknown[]
+    ) => unknown;
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: CompatEvaluateOptions) =>
         mapExpressions(expression, (text) =>
-          evaluator.evaluate(text, scope, policyOptions(options))
+          wrapBlockArrayAsResultSet(
+            evaluator.evaluate(text, scope, policyOptions(options)),
+            text,
+            ResultSetCtor
+          )
         )
     );
     instance.compile = runBound((expression: unknown, options?: CompatEvaluateOptions) =>

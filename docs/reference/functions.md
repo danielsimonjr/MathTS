@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1433** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1500** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -3338,7 +3338,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1433 exports).
+> `@danielsimonjr/mathts-functions` (1500 exports).
 
 ### Functions by category
 
@@ -4576,9 +4576,73 @@ await terminatePool();
 `terminateSignal`
 `terminateStatistics`
 
-**Other exports (uncategorized)** (96):
+**Other exports (uncategorized)** (160):
+`ArgumentsError`
 `compile`
+`createAbs`
+`createAcos`
+`createAcosh`
+`createAcot`
+`createAcsc`
+`createAsec`
+`createAsin`
+`createAsinh`
+`createAtan`
+`createAtan2`
+`createAtanh`
+`createCbrt`
+`createCeil`
+`createCompare`
+`createCos`
+`createCosh`
+`createCot`
+`createCreateUnit`
+`createCsc`
+`createCtranspose`
+`createCube`
+`createDivide`
+`createDot`
+`createEqual`
+`createExp`
+`createExpm1`
+`createFix`
+`createFloor`
+`createGcd`
+`createHypot`
 `createInstanceEvaluator`
+`createLarger`
+`createLargerEq`
+`createLcm`
+`createLog`
+`createLog10`
+`createLog1p`
+`createLog2`
+`createMax`
+`createMean`
+`createMin`
+`createMod`
+`createNorm`
+`createNthRoot`
+`createPow`
+`createRound`
+`createSec`
+`createSign`
+`createSin`
+`createSinh`
+`createSmaller`
+`createSmallerEq`
+`createSqrt`
+`createSquare`
+`createStd`
+`createSubtract`
+`createSum`
+`createTan`
+`createTanh`
+`createTranspose`
+`createUnaryMinus`
+`createUnaryPlus`
+`createVariance`
+`createXgcd`
 `den`
 `eigSym3`
 `frustumContainsPoint`
@@ -4750,11 +4814,14 @@ await terminatePool();
 `weakMixingAngle`
 `wienDisplacement`
 
-### Classes & types (3)
+### Classes & types (6)
 
 `Chain`
+`FibonacciHeap`
 `Help`
+`ImmutableDenseMatrix`
 `Interval`
+`Spa`
 
 ### Factory-shadowed (`factory_*`, 65)
 

@@ -343,6 +343,9 @@
       "DUAL_UNARY_RULES": {
         "kind": "object"
       },
+      "DimensionError": {
+        "kind": "function"
+      },
       "DimensionMismatchError": {
         "kind": "function"
       },
@@ -414,6 +417,9 @@
       },
       "IMatrix": {
         "kind": "type"
+      },
+      "IndexError": {
+        "kind": "function"
       },
       "IrrationalName": {
         "kind": "type"
@@ -631,6 +637,9 @@
       "createFactory": {
         "kind": "function"
       },
+      "createIndexError": {
+        "kind": "function"
+      },
       "createMathTSTyped": {
         "kind": "function"
       },
@@ -657,6 +666,9 @@
       },
       "divideScalar": {
         "kind": "function"
+      },
+      "e": {
+        "kind": "number"
       },
       "equal": {
         "kind": "function"
@@ -699,6 +711,9 @@
       },
       "getUnitRow": {
         "kind": "function"
+      },
+      "i": {
+        "kind": "object"
       },
       "initTypedWasm": {
         "kind": "function"
@@ -817,6 +832,12 @@
       "pairwiseSumChecked": {
         "kind": "function"
       },
+      "phi": {
+        "kind": "number"
+      },
+      "pi": {
+        "kind": "number"
+      },
       "pow": {
         "kind": "function"
       },
@@ -876,6 +897,9 @@
       },
       "sumSquaredDeviationsChecked": {
         "kind": "function"
+      },
+      "tau": {
+        "kind": "number"
       },
       "toSiDimensionVector": {
         "kind": "function"
@@ -2470,6 +2494,9 @@
       "AnovaResult": {
         "kind": "type"
       },
+      "ArgumentsError": {
+        "kind": "function"
+      },
       "AsecCallable": {
         "kind": "type"
       },
@@ -2734,6 +2761,9 @@
       "FTestResult": {
         "kind": "type"
       },
+      "FibonacciHeap": {
+        "kind": "function"
+      },
       "FindPeaksOptions": {
         "kind": "type"
       },
@@ -2904,6 +2934,9 @@
       },
       "HungarianResult": {
         "kind": "type"
+      },
+      "ImmutableDenseMatrix": {
+        "kind": "function"
       },
       "ImportOptions": {
         "kind": "type"
@@ -3477,6 +3510,9 @@
       },
       "SolveResult": {
         "kind": "type"
+      },
+      "Spa": {
+        "kind": "function"
       },
       "SpaceCoefficient": {
         "kind": "type"
@@ -4204,10 +4240,199 @@
       "cov": {
         "kind": "function"
       },
+      "createAbs": {
+        "kind": "function"
+      },
+      "createAcos": {
+        "kind": "function"
+      },
+      "createAcosh": {
+        "kind": "function"
+      },
+      "createAcot": {
+        "kind": "function"
+      },
+      "createAcsc": {
+        "kind": "function"
+      },
+      "createAsec": {
+        "kind": "function"
+      },
+      "createAsin": {
+        "kind": "function"
+      },
+      "createAsinh": {
+        "kind": "function"
+      },
+      "createAtan": {
+        "kind": "function"
+      },
+      "createAtan2": {
+        "kind": "function"
+      },
+      "createAtanh": {
+        "kind": "function"
+      },
+      "createCbrt": {
+        "kind": "function"
+      },
+      "createCeil": {
+        "kind": "function"
+      },
+      "createCompare": {
+        "kind": "function"
+      },
+      "createCos": {
+        "kind": "function"
+      },
+      "createCosh": {
+        "kind": "function"
+      },
+      "createCot": {
+        "kind": "function"
+      },
+      "createCreateUnit": {
+        "kind": "function"
+      },
+      "createCsc": {
+        "kind": "function"
+      },
+      "createCtranspose": {
+        "kind": "function"
+      },
+      "createCube": {
+        "kind": "function"
+      },
+      "createDivide": {
+        "kind": "function"
+      },
+      "createDot": {
+        "kind": "function"
+      },
+      "createEqual": {
+        "kind": "function"
+      },
+      "createExp": {
+        "kind": "function"
+      },
+      "createExpm1": {
+        "kind": "function"
+      },
+      "createFix": {
+        "kind": "function"
+      },
+      "createFloor": {
+        "kind": "function"
+      },
+      "createGcd": {
+        "kind": "function"
+      },
+      "createHypot": {
+        "kind": "function"
+      },
       "createInstanceEvaluator": {
         "kind": "function"
       },
+      "createLarger": {
+        "kind": "function"
+      },
+      "createLargerEq": {
+        "kind": "function"
+      },
+      "createLcm": {
+        "kind": "function"
+      },
+      "createLog": {
+        "kind": "function"
+      },
+      "createLog10": {
+        "kind": "function"
+      },
+      "createLog1p": {
+        "kind": "function"
+      },
+      "createLog2": {
+        "kind": "function"
+      },
+      "createMax": {
+        "kind": "function"
+      },
+      "createMean": {
+        "kind": "function"
+      },
+      "createMin": {
+        "kind": "function"
+      },
+      "createMod": {
+        "kind": "function"
+      },
+      "createNorm": {
+        "kind": "function"
+      },
+      "createNthRoot": {
+        "kind": "function"
+      },
+      "createPow": {
+        "kind": "function"
+      },
+      "createRound": {
+        "kind": "function"
+      },
+      "createSec": {
+        "kind": "function"
+      },
+      "createSign": {
+        "kind": "function"
+      },
+      "createSin": {
+        "kind": "function"
+      },
+      "createSinh": {
+        "kind": "function"
+      },
+      "createSmaller": {
+        "kind": "function"
+      },
+      "createSmallerEq": {
+        "kind": "function"
+      },
+      "createSqrt": {
+        "kind": "function"
+      },
+      "createSquare": {
+        "kind": "function"
+      },
+      "createStd": {
+        "kind": "function"
+      },
+      "createSubtract": {
+        "kind": "function"
+      },
+      "createSum": {
+        "kind": "function"
+      },
+      "createTan": {
+        "kind": "function"
+      },
+      "createTanh": {
+        "kind": "function"
+      },
+      "createTranspose": {
+        "kind": "function"
+      },
+      "createUnaryMinus": {
+        "kind": "function"
+      },
+      "createUnaryPlus": {
+        "kind": "function"
+      },
       "createUnit": {
+        "kind": "function"
+      },
+      "createVariance": {
+        "kind": "function"
+      },
+      "createXgcd": {
         "kind": "function"
       },
       "cross": {
@@ -7825,8 +8050,26 @@
   },
   "@danielsimonjr/mathts-expression": {
     ".": {
+      "AccessorNode": {
+        "kind": "function"
+      },
+      "ArrayNode": {
+        "kind": "function"
+      },
+      "AssignmentNode": {
+        "kind": "function"
+      },
+      "BlockNode": {
+        "kind": "function"
+      },
       "CompiledExpression": {
         "kind": "type"
+      },
+      "ConditionalNode": {
+        "kind": "function"
+      },
+      "ConstantNode": {
+        "kind": "function"
       },
       "EXPRESSION_SCOPE_OMIT": {
         "kind": "object"
@@ -7843,8 +8086,17 @@
       "EvaluatePolicy": {
         "kind": "type"
       },
+      "FunctionAssignmentNode": {
+        "kind": "function"
+      },
+      "FunctionNode": {
+        "kind": "function"
+      },
       "IndexLike": {
         "kind": "type"
+      },
+      "IndexNode": {
+        "kind": "function"
       },
       "LoweredScalarFn": {
         "kind": "type"
@@ -7852,10 +8104,37 @@
       "MathNode": {
         "kind": "type"
       },
+      "Node": {
+        "kind": "function"
+      },
+      "ObjectNode": {
+        "kind": "function"
+      },
       "OperatorGroup": {
         "kind": "type"
       },
+      "OperatorNode": {
+        "kind": "function"
+      },
       "OperatorProperty": {
+        "kind": "type"
+      },
+      "ParenthesisNode": {
+        "kind": "function"
+      },
+      "Parser": {
+        "kind": "function"
+      },
+      "RangeNode": {
+        "kind": "function"
+      },
+      "RelationalNode": {
+        "kind": "function"
+      },
+      "ResultSet": {
+        "kind": "function"
+      },
+      "ResultSetJSON": {
         "kind": "type"
       },
       "SCALAR_FUNCTIONS": {
@@ -7890,6 +8169,9 @@
       },
       "StringOptions": {
         "kind": "type"
+      },
+      "SymbolNode": {
+        "kind": "function"
       },
       "TypedFunction": {
         "kind": "type"
@@ -8048,6 +8330,9 @@
         "kind": "function"
       },
       "defaultMathScope": {
+        "kind": "object"
+      },
+      "docs": {
         "kind": "object"
       },
       "embeddedDocs": {
@@ -8135,7 +8420,25 @@
   },
   "@danielsimonjr/mathts-parser": {
     ".": {
+      "AccessorNode": {
+        "kind": "type"
+      },
+      "ArrayNode": {
+        "kind": "type"
+      },
+      "AssignmentNode": {
+        "kind": "type"
+      },
+      "BlockNode": {
+        "kind": "type"
+      },
       "CompiledExpression": {
+        "kind": "type"
+      },
+      "ConditionalNode": {
+        "kind": "type"
+      },
+      "ConstantNode": {
         "kind": "type"
       },
       "EXPRESSION_SCOPE_OMIT": {
@@ -8153,7 +8456,16 @@
       "EvaluatePolicy": {
         "kind": "type"
       },
+      "FunctionAssignmentNode": {
+        "kind": "type"
+      },
+      "FunctionNode": {
+        "kind": "type"
+      },
       "IndexLike": {
+        "kind": "type"
+      },
+      "IndexNode": {
         "kind": "type"
       },
       "LoweredScalarFn": {
@@ -8162,10 +8474,37 @@
       "MathNode": {
         "kind": "type"
       },
+      "Node": {
+        "kind": "type"
+      },
+      "ObjectNode": {
+        "kind": "type"
+      },
       "OperatorGroup": {
         "kind": "type"
       },
+      "OperatorNode": {
+        "kind": "type"
+      },
       "OperatorProperty": {
+        "kind": "type"
+      },
+      "ParenthesisNode": {
+        "kind": "type"
+      },
+      "Parser": {
+        "kind": "type"
+      },
+      "RangeNode": {
+        "kind": "type"
+      },
+      "RelationalNode": {
+        "kind": "type"
+      },
+      "ResultSet": {
+        "kind": "type"
+      },
+      "ResultSetJSON": {
         "kind": "type"
       },
       "SCALAR_FUNCTIONS": {
@@ -8199,6 +8538,9 @@
         "kind": "type"
       },
       "StringOptions": {
+        "kind": "type"
+      },
+      "SymbolNode": {
         "kind": "type"
       },
       "TypedFunction": {
@@ -8358,6 +8700,9 @@
         "kind": "type"
       },
       "defaultMathScope": {
+        "kind": "type"
+      },
+      "docs": {
         "kind": "type"
       },
       "embeddedDocs": {
@@ -8747,7 +9092,25 @@
   },
   "@danielsimonjr/mathts-ast": {
     ".": {
+      "AccessorNode": {
+        "kind": "type"
+      },
+      "ArrayNode": {
+        "kind": "type"
+      },
+      "AssignmentNode": {
+        "kind": "type"
+      },
+      "BlockNode": {
+        "kind": "type"
+      },
       "CompiledExpression": {
+        "kind": "type"
+      },
+      "ConditionalNode": {
+        "kind": "type"
+      },
+      "ConstantNode": {
         "kind": "type"
       },
       "EXPRESSION_SCOPE_OMIT": {
@@ -8765,7 +9128,16 @@
       "EvaluatePolicy": {
         "kind": "type"
       },
+      "FunctionAssignmentNode": {
+        "kind": "type"
+      },
+      "FunctionNode": {
+        "kind": "type"
+      },
       "IndexLike": {
+        "kind": "type"
+      },
+      "IndexNode": {
         "kind": "type"
       },
       "LoweredScalarFn": {
@@ -8774,10 +9146,37 @@
       "MathNode": {
         "kind": "type"
       },
+      "Node": {
+        "kind": "type"
+      },
+      "ObjectNode": {
+        "kind": "type"
+      },
       "OperatorGroup": {
         "kind": "type"
       },
+      "OperatorNode": {
+        "kind": "type"
+      },
       "OperatorProperty": {
+        "kind": "type"
+      },
+      "ParenthesisNode": {
+        "kind": "type"
+      },
+      "Parser": {
+        "kind": "type"
+      },
+      "RangeNode": {
+        "kind": "type"
+      },
+      "RelationalNode": {
+        "kind": "type"
+      },
+      "ResultSet": {
+        "kind": "type"
+      },
+      "ResultSetJSON": {
         "kind": "type"
       },
       "SCALAR_FUNCTIONS": {
@@ -8811,6 +9210,9 @@
         "kind": "type"
       },
       "StringOptions": {
+        "kind": "type"
+      },
+      "SymbolNode": {
         "kind": "type"
       },
       "TypedFunction": {
@@ -8970,6 +9372,9 @@
         "kind": "type"
       },
       "defaultMathScope": {
+        "kind": "type"
+      },
+      "docs": {
         "kind": "type"
       },
       "embeddedDocs": {
