@@ -61,11 +61,13 @@ import {
   createCompatMathjsStatistics,
   createForeignScalarConverter,
   isComplexLike as g02IsComplexLike,
+  tooManyArgumentsError,
   withComplexOrderingGuard,
   withConvertedScalars,
   withCountBoolean,
   withFixedArity,
   withIdentityValidation,
+  withMaxArity,
   withRoundDigitsGuard,
   withSingleNumericStringGuard,
   withFractionRejection,
@@ -956,9 +958,22 @@ export function create(
     ),
     norm: withMathjsNormMatrixRules(mathFunctions.norm as (...args: unknown[]) => unknown),
     typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
-    number: withFixedArity('number', 1, mathFunctions.number),
+    number: (...args: unknown[]) => {
+      if (args.length === 0) return 0;
+      if (args.length === 1) return mathFunctions.number(args[0]);
+      if (isUnit(args[0])) {
+        if (args.length > 2) throw tooManyArgumentsError('number', 2, args.length);
+        const unitArg = args[0] as { toNumeric(u?: unknown): unknown };
+        if (typeof args[1] === 'string' || isUnit(args[1])) {
+          return Number(unitArg.toNumeric(args[1]));
+        }
+        return (mathFunctions.number as (...a: unknown[]) => unknown)(...args);
+      }
+      throw tooManyArgumentsError('number', 1, args.length);
+    },
     numeric: createCompatNumeric(mathFunctions.numeric as (...args: unknown[]) => unknown),
-    boolean: withFixedArity('boolean', 1, (...args: unknown[]) => {
+    boolean: withMaxArity('boolean', 1, (...args: unknown[]) => {
+      if (args.length === 0) return false;
       if (args.length === 1 && isComplex(args[0])) {
         throw new TypeError(
           'Unexpected type of argument in function boolean ' +
@@ -973,7 +988,8 @@ export function create(
       }
       return mathFunctions.boolean(...args);
     }),
-    bigint: withFixedArity('bigint', 1, (...args: unknown[]) => {
+    bigint: withMaxArity('bigint', 1, (...args: unknown[]) => {
+      if (args.length === 0) return 0n;
       if (args.length === 1 && isComplex(args[0])) {
         throw new TypeError(
           'Unexpected type of argument in function bigint (expected: number or BigNumber or bigint or Fraction or string or Array or Matrix or boolean or null, actual: Complex, index: 0)'
@@ -1186,8 +1202,10 @@ export function create(
   instance.chain = chainApi.chain;
   if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
 
-  // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
+  // mathjs shares error constructors on the module and on each instance (#G12 F4, #1773).
   instance.DimensionError = instanceSymbols.DimensionError;
+  instance.ArgumentsError = instanceSymbols.ArgumentsError;
+  instance.IndexError = instanceSymbols.IndexError;
 
   // Arity / BigNumber guards must wrap the config-scoped seeded `random`, not the
   // module typed-function (re-apply after wiring — own-key materialisation bypasses `flat`) (#1773).

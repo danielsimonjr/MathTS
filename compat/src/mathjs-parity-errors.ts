@@ -120,13 +120,21 @@ export function withPublicFactoryScalar(
         const guard = MATHTS_SCALAR_GUARD.exec(err.message);
         if (guard) {
           const typeLabel = formatMathjsActual(guard[2] ?? '');
+          const expectedTypes =
+            factoryName === 'addScalar'
+              ? 'number or Complex or BigNumber or bigint or Fraction or Unit or string or boolean'
+              : 'any';
           throw new TypeError(
             `Unexpected type of argument in function ${factoryName} ` +
-              `(expected: any, actual: ${typeLabel}, index: ${guard[3]})`
+              `(expected: ${expectedTypes}, actual: ${typeLabel}, index: ${guard[3]})`
           );
         }
         if (err.message.includes(`function ${factoryName}`)) {
-          throw new TypeError(remapPublicScalarFnName(err.message, factoryName, publicName));
+          const remapped = remapPublicScalarFnName(err.message, factoryName, publicName).replace(
+            'actual: null,',
+            'actual: identifier | null,'
+          );
+          throw new TypeError(remapped);
         }
       }
       if (
@@ -136,8 +144,9 @@ export function withPublicFactoryScalar(
         args[1] !== undefined &&
         !isUnitLike(args[1])
       ) {
+        const actualType = args[1] === null ? 'identifier | null' : typeof args[1];
         throw new TypeError(
-          `Unexpected type of argument in function add (expected: Unit, actual: any, index: 1)`
+          `Unexpected type of argument in function ${factoryName} (expected: Unit, actual: ${actualType}, index: 1)`
         );
       }
       throw err;
@@ -302,8 +311,9 @@ export function createCompatRandomInstance(
   typedRandom: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
   function random(this: unknown, ...args: unknown[]): unknown {
-    if (args.length > 3) {
-      throw tooManyArgumentsError('random', 3, args.length);
+    const maxArgs = Array.isArray(args[0]) || isMatrixLikeValue(args[0]) ? 3 : 2;
+    if (args.length > maxArgs) {
+      throw tooManyArgumentsError('random', maxArgs, args.length);
     }
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];

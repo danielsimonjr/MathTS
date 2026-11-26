@@ -166,7 +166,7 @@ export function withFixedArity(
 ): (...args: unknown[]) => unknown {
   return keepSurface(fn, (...args: unknown[]): unknown => {
     if (args.length < expected) {
-      throw tooFewArgumentsError(name);
+      throw tooFewArgumentsError(name, args.length);
     }
     if (args.length > expected) {
       throw tooManyArgumentsError(name, expected, args.length);

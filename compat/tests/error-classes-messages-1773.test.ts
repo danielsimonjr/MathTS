@@ -131,3 +131,65 @@ describe('#1773 unary matrix / map hint and special cases', () => {
     expectSameThrow(cfn('boolean'), ofn('boolean'), cfn('unit')('5cm'));
   });
 });
+
+describe('#1773 PR review regressions', () => {
+  it('bigint(), number(), boolean() accept 0 args and reject excess args', () => {
+    expect(cfn('bigint')()).toBe(0n);
+    expectSameThrow(cfn('bigint'), ofn('bigint'), 1, 2);
+
+    expect(cfn('number')()).toBe(0);
+    expect(cfn('number')(cfn('unit')('52cm'), 'm')).toBe(0.52);
+    expect(cfn('number')(cfn('unit')('52cm'), cfn('unit')('m'))).toBe(0.52);
+    expectSameThrow(cfn('number'), ofn('number'), 1, 2);
+    expectSameThrow(cfn('number'), ofn('number'), cfn('unit')('52cm'), 'm', 3);
+
+    expect(cfn('boolean')()).toBe(false);
+    expectSameThrow(cfn('boolean'), ofn('boolean'), 1, 2);
+  });
+
+  it('IndexError without new throws SyntaxError and preserves instanceof', () => {
+    const bare = IndexError as unknown as (index: number) => unknown;
+    expect(() => bare(5)).toThrow(SyntaxError);
+    expect(() => bare(5)).toThrow('Constructor must be called with the new operator');
+    const err = new IndexError(5);
+    expect(err).toBeInstanceOf(IndexError);
+    expect(err).toBeInstanceOf(RangeError);
+  });
+
+  it('named and instance error constructors are identical', () => {
+    const inst = create(all);
+    expect(inst.ArgumentsError).toBe(ArgumentsError);
+    expect(inst.DimensionError).toBe(DimensionError);
+    expect(inst.IndexError).toBe(IndexError);
+  });
+
+  it('tooFewArgumentsError uses index 0 for 0-arg calls and index 1 for 1-arg binary calls', () => {
+    expectSameThrow(cfn('typeOf'), ofn('typeOf'));
+    expect(() => cfn('bitNot')()).toThrow(TypeError);
+    expect(() => cfn('bitNot')()).toThrow(/Too few arguments in function bitNot.*index: 0/);
+    expect(() => cfn('dotMultiply')(1)).toThrow(TypeError);
+    expect(() => cfn('dotMultiply')(1)).toThrow(
+      /Too few arguments in function dotMultiply.*index: 1/
+    );
+  });
+
+  it('random(1, 2, 3, 4) matches mathjs expected count of 2', () => {
+    expectSameThrow(cfn('random'), ofn('random'), 1, 2, 3, 4);
+    expectSameThrow(cfn('random'), ofn('random'), 1, 2, 3);
+  });
+
+  it('add(null, 1), add(null, 0), and add(unit, 2) match mathjs wording', () => {
+    expect(() => cfn('add')(null, 1)).toThrow(TypeError);
+    expect(() => cfn('add')(null, 1)).toThrow(
+      /Unexpected type of argument in function add.*actual: identifier \| null, index: 0/
+    );
+    expect(() => cfn('add')(null, 0)).toThrow(TypeError);
+    expect(() => cfn('add')(null, 0)).toThrow(
+      /Unexpected type of argument in function add.*actual: identifier \| null, index: 0/
+    );
+    expect(() => cfn('add')(cfn('unit')('5cm'), 2)).toThrow(TypeError);
+    expect(() => cfn('add')(cfn('unit')('5cm'), 2)).toThrow(
+      /Unexpected type of argument in function add.*\(expected: Unit, actual: number, index: 1\)/
+    );
+  });
+});
