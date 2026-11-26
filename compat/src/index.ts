@@ -800,7 +800,7 @@ export function create(
     unaryPlus: mathFunctions.factory_unaryPlus,
     nthRoot: mathFunctions.factory_nthRoot,
     // #1587: count of a boolean is the string length; size/inv take one argument.
-    count: withFixedArity('count', 1, withCountBoolean(mathFunctions.count)),
+    count: withCountBoolean(mathFunctions.count),
     size: withFixedArity('size', 1, mathFunctions.size),
     inv: withFixedArity('inv', 1, mathFunctions.inv),
     // #1583 / #1588: the mathjs-shaped mad and the Matrix-returning expm.

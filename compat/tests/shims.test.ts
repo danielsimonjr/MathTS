@@ -281,8 +281,11 @@ describe('variadic arithmetic (regression: silent arg-dropping)', () => {
     expect(multiply(2, 3, 4, 5)).toBe(120);
   });
 
-  it('subtract folds left-to-right over all arguments', () => {
-    expect(subtract(10, 2, 3)).toBe(5);
+  it('subtract accepts exactly two arguments (mathjs #1587)', () => {
+    expect(subtract(10, 2)).toBe(8);
+    expect(() => subtract(10, 2, 3)).toThrow(
+      'Too many arguments in function subtract (expected: 2, actual: 3)'
+    );
   });
 
   it('single argument throws the mathjs arity error (#1587)', () => {

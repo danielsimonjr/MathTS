@@ -205,6 +205,9 @@ export function withFractionRejection(fn: UnaryLike): (...args: unknown[]) => un
  */
 export function withCountBoolean(fn: UnaryLike): (...args: unknown[]) => unknown {
   return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length > 1) {
+      throw tooManyArgumentsError('count', 1, args.length);
+    }
     if (args.length === 1 && typeof args[0] === 'boolean') return apply(fn, [String(args[0])]);
     return apply(fn, args);
   });
@@ -238,6 +241,9 @@ export function withInvalidNumericStringGuard(fn: UnaryLike): (...args: unknown[
   return keepSurface(fn, (...args: unknown[]): unknown => {
     for (const arg of args) {
       if (typeof arg === 'string' && (arg.trim() === '' || Number.isNaN(Number(arg)))) {
+        if (args.length > 1) {
+          throw new Error(`Cannot convert "${arg}" to a number`);
+        }
         throw invalidNumericStringError(arg);
       }
     }
@@ -338,6 +344,7 @@ function reboxMatrixStatistics(
 
 type StatisticsNormalization = 'unbiased' | 'uncorrected' | 'biased';
 
+/** Instance arithmetic used to compute mathjs-shaped `variance`/`std` in compat only. */
 export interface CompatStatisticsDeps {
   add: UnaryLike;
   subtract: UnaryLike;
@@ -389,6 +396,18 @@ export function createCompatMathjsStatistics(
     x === 'unbiased' || x === 'uncorrected' || x === 'biased';
 
   return keepSurface(native, (...args: unknown[]): unknown => {
+    for (const arg of args) {
+      if (
+        typeof arg === 'string' &&
+        !isNorm(arg) &&
+        (arg.trim() === '' || Number.isNaN(Number(arg)))
+      ) {
+        if (args.length === 1 && !Array.isArray(arg)) {
+          throw invalidNumericStringError(arg);
+        }
+        throw new Error(`Cannot convert "${arg}" to a number`);
+      }
+    }
     if (args.length === 1 && Array.isArray(args[0]) && args[0].length === 0) {
       throw statisticsEmptyParametersError(name);
     }
@@ -597,7 +616,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
     if (typeof v === 'string') {
       const n = Number(v);
       if (v.trim() !== '' && !Number.isNaN(n)) return n;
-      throw invalidNumericStringError(v);
+      throw new Error(`Cannot convert "${v}" to a number`);
     }
     return convert(v);
   }
@@ -682,6 +701,13 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
 
   return (...args: unknown[]): unknown => {
     if (args.length === 0) throw tooFewArgumentsError('mad', 0);
+    if (
+      args.length === 1 &&
+      typeof args[0] === 'string' &&
+      (args[0].trim() === '' || Number.isNaN(Number(args[0])))
+    ) {
+      throw invalidNumericStringError(args[0]);
+    }
     const source = args.length === 1 ? args[0] : args;
     const flat: unknown[] = [];
     if (isMatrixLikeValue(source) && !Array.isArray(source)) {

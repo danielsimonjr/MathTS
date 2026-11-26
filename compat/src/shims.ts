@@ -492,10 +492,16 @@ function isProtoSparseMatrix(x: unknown): boolean {
 }
 
 const subtractPair = (a: unknown, b: unknown): unknown => {
-  if (isComplex(a) || isComplex(b)) return _compatSubtract(a, b);
   if (isProtoSparseMatrix(a) || isProtoSparseMatrix(b)) return _factorySubtract(a, b);
   if (typeof a === 'bigint' || typeof b === 'bigint') return _factorySubtract(a, b);
-  return _subtract(a, b);
+  return applyArithmetic(
+    _subtract as (a: unknown, b: unknown) => unknown,
+    _matSubtract as (a: unknown, b: unknown) => unknown,
+    a,
+    b,
+    true,
+    _compatSubtract
+  );
 };
 
 const addCore = makeArithmetic(
