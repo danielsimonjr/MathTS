@@ -24,8 +24,15 @@ describe('#924 createParse(create(all)) keeps the expression sandbox', () => {
 
   it.each([...(EXPRESSION_SCOPE_OMIT ?? [])])('%s("x") cannot be called', (fn) => {
     const math = create(all) as unknown as Record<string, unknown>;
-    const evaluate = math.evaluate as (expr: string) => unknown;
-    expect(() => evaluate(`${fn}("x")`)).toThrow();
+    const evaluate = math.evaluate as (
+      expr: string,
+      scope?: unknown,
+      options?: { safe: boolean }
+    ) => unknown;
+    // #1549: compat's default policy follows mathjs, where the expression-
+    // building names are instance functions. The denylist holds under the
+    // `{ safe: true }` opt-in, which is what this test pins.
+    expect(() => evaluate(`${fn}("x")`, {}, { safe: true })).toThrow();
     const node = createParse(math)(`${fn}("x")`);
     expect(() => node.compile().evaluate({})).toThrow(new RegExp(`Undefined function ${fn}`));
   });

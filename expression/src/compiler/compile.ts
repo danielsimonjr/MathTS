@@ -21,6 +21,8 @@ import {
   isSafeProperty,
   assertSandboxReceiver,
 } from '../utils/customs.js';
+import { accessFactory } from '../node/utils/access.js';
+import { assignFactory } from '../node/utils/assign.js';
 import { MAX_COMPILE_DEPTH } from '../limits.js';
 import type { MathNode } from '../node/Node.js';
 
@@ -507,20 +509,20 @@ function compileAssignmentNode(
   const asgNode = node as MathNode & {
     value: MathNode;
     name?: string;
-    index?: unknown;
-    object?: MathNode & {
+    object: MathNode & {
       isSymbolNode?: boolean;
-      name?: string;
       isAccessorNode?: boolean;
+      name?: string;
       object?: MathNode;
       index?: MathNode & ObjectPropertyIndex;
     };
+    index: (MathNode & ObjectPropertyIndex) | null;
   };
+
   const evalValue = compileNode(asgNode.value, math, argNames, depth);
 
-  if (asgNode.object && asgNode.object.isSymbolNode && !asgNode.index) {
-    // Simple variable assignment: x = 5
-    const name: string = asgNode.object.name as string;
+  if (asgNode.object?.isSymbolNode && !asgNode.index) {
+    const name = asgNode.object.name as string;
     return function evalAssignmentNode(
       scope: Scope,
       args: Record<string, unknown>,
@@ -532,11 +534,10 @@ function compileAssignmentNode(
     };
   }
 
-  if (asgNode.object && asgNode.object.isAccessorNode) {
-    // Property assignment: obj.prop = value
+  if (asgNode.object?.isAccessorNode && !asgNode.index) {
     const evalObject = compileNode(asgNode.object.object as MathNode, math, argNames, depth);
-    if (asgNode.object.index && asgNode.object.index.isObjectProperty!()) {
-      const prop = asgNode.object.index.getObjectProperty!();
+    if (asgNode.object.index?.isObjectProperty?.()) {
+      const prop = asgNode.object.index.getObjectProperty?.() ?? '';
       return function evalAssignmentNode(
         scope: Scope,
         args: Record<string, unknown>,
@@ -544,27 +545,121 @@ function compileAssignmentNode(
       ) {
         const obj = evalObject(scope, args, context);
         const value = evalValue(scope, args, context);
-        // Sandbox: refuse writes to constructor / __proto__ / etc.
         return setSafeProperty(obj, prop, value);
       };
     }
   }
 
-  // Fallback: treat as symbol assignment using the name property
-  const name = asgNode.name || (asgNode.object && asgNode.object.name);
-  if (name) {
+  const fallbackName = asgNode.name ?? asgNode.object?.name;
+  if (fallbackName && !asgNode.index) {
     return function evalAssignmentNode(
       scope: Scope,
       args: Record<string, unknown>,
       context: unknown
     ) {
       const value = evalValue(scope, args, context);
-      scope.set(name, value);
+      scope.set(fallbackName, value);
       return value;
     };
   }
 
-  throw new Error('Unsupported assignment target');
+  if (!asgNode.index) {
+    throw new Error('Unsupported assignment target');
+  }
+
+  const subsetFn = math.subset as ((...args: unknown[]) => unknown) | undefined;
+  if (typeof subsetFn !== 'function') {
+    throw new Error('subset is not in the math scope');
+  }
+  const matrixCtor = math.matrix as ((data: unknown[]) => unknown) | undefined;
+  const assign = assignFactory({
+    subset: subsetFn,
+    matrix: matrixCtor as
+      | ((data: unknown[]) => { subset(index: unknown, value: unknown): { valueOf(): unknown[] } })
+      | undefined,
+  });
+  const access = accessFactory({ subset: subsetFn });
+
+  const evalObject = compileNode(asgNode.object, math, argNames, depth);
+  const evalIndex = asgNode.index ? compileNode(asgNode.index, math, argNames, depth) : null;
+  const symbolName = (asgNode.object as { name?: string }).name;
+
+  if (asgNode.index?.isObjectProperty?.()) {
+    const prop = asgNode.index.getObjectProperty?.() ?? '';
+    return function evalAssignmentNode(
+      scope: Scope,
+      args: Record<string, unknown>,
+      context: unknown
+    ) {
+      const object = evalObject(scope, args, context);
+      const value = evalValue(scope, args, context);
+      setSafeProperty(object, prop, value);
+      return value;
+    };
+  }
+
+  if (asgNode.object.isSymbolNode) {
+    const name = symbolName as string;
+    return function evalAssignmentNode(
+      scope: Scope,
+      args: Record<string, unknown>,
+      context: unknown
+    ) {
+      const childObject = evalObject(scope, args, context);
+      const value = evalValue(scope, args, context);
+      const index = evalIndex!(scope, args, childObject);
+      scope.set(name, assign(childObject, index as Parameters<typeof assign>[1], value));
+      return value;
+    };
+  }
+
+  if (!asgNode.object.isAccessorNode || !asgNode.object.object || !asgNode.object.index) {
+    throw new Error('Unsupported assignment target');
+  }
+
+  const accessorObject = asgNode.object;
+  const parentObject = accessorObject.object as MathNode;
+  const parentIndexNode = accessorObject.index as MathNode & ObjectPropertyIndex;
+  const evalParentObject = compileNode(parentObject, math, argNames, depth);
+
+  if (parentIndexNode.isObjectProperty && parentIndexNode.isObjectProperty()) {
+    const parentProp = parentIndexNode.getObjectProperty?.() ?? '';
+    return function evalAssignmentNode(
+      scope: Scope,
+      args: Record<string, unknown>,
+      context: unknown
+    ) {
+      const parent = evalParentObject(scope, args, context);
+      const childObject = getSafeProperty(parent, parentProp);
+      const index = evalIndex!(scope, args, childObject);
+      const value = evalValue(scope, args, context);
+      setSafeProperty(
+        parent,
+        parentProp,
+        assign(childObject, index as Parameters<typeof assign>[1], value)
+      );
+      return value;
+    };
+  }
+
+  const evalParentIndex = compileNode(parentIndexNode, math, argNames, depth);
+  return function evalAssignmentNode(
+    scope: Scope,
+    args: Record<string, unknown>,
+    context: unknown
+  ) {
+    const parent = evalParentObject(scope, args, context);
+    const parentIndex = evalParentIndex(scope, args, parent);
+    const childObject = access(parent, parentIndex as Parameters<typeof access>[1]);
+    const index = evalIndex!(scope, args, childObject);
+    const value = evalValue(scope, args, context);
+    assign(
+      parent,
+      parentIndex as Parameters<typeof assign>[1],
+      assign(childObject, index as Parameters<typeof assign>[1], value)
+    );
+    return value;
+  };
 }
 
 function compileBlockNode(
@@ -579,6 +674,8 @@ function compileBlockNode(
     evaluate: compileNode(block.node, math, argNames, depth),
     visible: block.visible,
   }));
+  const useBlockResultSet = math.compatBlockResultSet === true;
+  const ResultSetClass = math.ResultSet as (new (entries: unknown[]) => unknown) | undefined;
 
   return function evalBlockNode(scope: Scope, args: Record<string, unknown>, context: unknown) {
     const results: unknown[] = [];
@@ -588,7 +685,9 @@ function compileBlockNode(
         results.push(result);
       }
     }
-    // Return ResultSet-like array if multiple visible results, otherwise last result
+    if (useBlockResultSet && typeof ResultSetClass === 'function') {
+      return new ResultSetClass(results);
+    }
     if (results.length === 1) return results[0];
     if (results.length > 1) return results;
     return undefined;
@@ -740,6 +839,9 @@ function compileFunctionAssignmentNode(
       return evalExpr(scope, childArgs, undefined);
     };
     (fn as unknown as { syntax: string }).syntax = name + '(' + params.join(', ') + ')';
+    // The declared name is the function's `.name` (#1580); the closure variable
+    // would otherwise infer the name `fn`.
+    Object.defineProperty(fn, 'name', { value: name, configurable: true });
     scope.set(name, fn);
     return fn;
   };
