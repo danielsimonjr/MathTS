@@ -16,12 +16,14 @@ import { fileURLToPath } from 'node:url';
 
 /**
  * Workspace order lists short packages before `functions`. The runner must still *start*
- * `functions` first, as one unsharded vitest with `--maxWorkers` equal to machine CPUs.
+ * `functions` first. Node 22 shards it 4 ways; Node 24+ runs one unsharded process with
+ * `--maxWorkers` equal to machine CPUs.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REAL_RUNNER = join(HERE, 'run-vitest-node.mjs');
 const REAL_WORKSPACES = join(HERE, 'workspaces.mjs');
+const nodeMajor = Number.parseInt(process.versions.node, 10);
 
 function makeFixture() {
   const root = mkdtempSync(join(tmpdir(), 'run-vitest-node-schedule-'));
@@ -78,7 +80,7 @@ function workerCapFrom(argv) {
   return undefined;
 }
 
-test('functions runs first, unsharded, with a worker cap of machine CPUs', async () => {
+test('functions starts first with the Node-major worker layout', async () => {
   const { root, argvLog, cleanup } = makeFixture();
   try {
     await runRunner(root);
@@ -86,14 +88,22 @@ test('functions runs first, unsharded, with a worker cap of machine CPUs', async
       .split('\n')
       .filter(Boolean)
       .map((line) => JSON.parse(line));
-    assert.equal(argvs.length, 3, 'functions + core + root');
-    const first = argvs[0];
-    assert.equal(
-      first.some((a) => String(a).startsWith('--shard=')),
-      false,
-      `functions must not be sharded; got ${JSON.stringify(first)}`
-    );
-    assert.equal(workerCapFrom(first), availableParallelism());
+    if (nodeMajor < 24) {
+      assert.ok(argvs.length >= 5, `expected 4 shards + core + root, got ${argvs.length}`);
+      assert.ok(
+        argvs.slice(0, 4).every((argv) => argv.some((a) => String(a).startsWith('--shard='))),
+        'Node 22 must spawn the four functions shards first'
+      );
+    } else {
+      assert.equal(argvs.length, 3, 'functions + core + root');
+      const first = argvs[0];
+      assert.equal(
+        first.some((a) => String(a).startsWith('--shard=')),
+        false,
+        `Node 24+ must not shard functions; got ${JSON.stringify(first)}`
+      );
+      assert.equal(workerCapFrom(first), availableParallelism());
+    }
   } finally {
     cleanup();
   }
