@@ -170,8 +170,11 @@ describe('compat parity — complex re/im/conj/arg vs functions', () => {
 // These are allowlisted as intentional independent bodies; this guard pins
 // each to an explicit oracle so a future edit can't silently break compat.
 // --------------------------------------------------------------------------
-type ShimMatrixResult = ReturnType<typeof cMatrix> | ReturnType<typeof cZeros>;
-const toArr = (m: ShimMatrixResult): unknown => ('toArray' in m ? m.toArray() : m.valueOf());
+type ShimMatrixResult = ReturnType<typeof cMatrix> | ReturnType<typeof cZeros> | unknown;
+const toArr = (m: ShimMatrixResult): unknown =>
+  m !== null && typeof m === 'object' && 'toArray' in m
+    ? (m as { toArray(): unknown }).toArray()
+    : (m as { valueOf(): unknown }).valueOf();
 
 describe('compat parity — matrix constructors vs oracle', () => {
   it('zeros(rows,cols) is a rows×cols zero matrix', () => {

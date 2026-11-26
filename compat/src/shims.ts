@@ -1,4 +1,5 @@
 import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
+import { tooFewArgumentsError, tooManyArgumentsError } from './mathjs-parity-g02.js';
 /**
  * mathjs Compatibility Shims
  *
@@ -78,6 +79,10 @@ import {
   round as _round,
   floor as _floor,
   ceil as _ceil,
+  factory_round as _factoryRound,
+  factory_floor as _factoryFloor,
+  factory_ceil as _factoryCeil,
+  identity as _identityFactory,
   matrix as _factoryMatrix,
   sparse as _factorySparse,
   zeros as _factoryZeros,
@@ -182,6 +187,13 @@ export function bignumber(
   value?: number | string | bigint | boolean | null | BigNumber | Fraction
 ): BigNumber;
 export function bignumber(value?: unknown): unknown {
+  // #1587: mathjs bignumber takes at most one argument. Its typed dispatch
+  // reports the argument-type error of the one-argument signature before the
+  // arity error, so evaluate the value first and only then reject the arity.
+  if (arguments.length > 1) {
+    compatBignumber(value);
+    throw tooManyArgumentsError('bignumber', 1, arguments.length);
+  }
   if (value === undefined) {
     return new CompatBigNumber(0);
   }
@@ -381,6 +393,7 @@ const applyArithmetic = (
 // internal callers like polynomialRoot's cubic branch. Fold over every arg.
 const makeArithmetic =
   (
+    name: string,
     scalarFn: (a: unknown, b: unknown) => unknown,
     matrixFn: (a: unknown, b: unknown) => unknown,
     elementwise: boolean,
@@ -391,8 +404,10 @@ const makeArithmetic =
     if (args.length === 0) {
       throw new TypeError('Too few arguments (expected at least 1)');
     }
+    // #1587: mathjs rejects a lone argument ("Too few arguments in function add
+    // (expected: any, index: 1)"); the compat fold used to return it as is.
     if (args.length === 1) {
-      return args[0];
+      throw tooFewArgumentsError(name);
     }
     if (
       args.length === 2 &&
@@ -477,13 +492,23 @@ function isProtoSparseMatrix(x: unknown): boolean {
 }
 
 const subtractPair = (a: unknown, b: unknown): unknown => {
-  if (isComplex(a) || isComplex(b)) return _compatSubtract(a, b);
   if (isProtoSparseMatrix(a) || isProtoSparseMatrix(b)) return _factorySubtract(a, b);
+  // A native-class DenseMatrix operand takes the matrix package (the scalar
+  // broadcast included), as the variadic fold routed it before (#1337).
+  if (isDenseMatrix(a) || isDenseMatrix(b)) return _matSubtract(a, b);
   if (typeof a === 'bigint' || typeof b === 'bigint') return _factorySubtract(a, b);
-  return _subtract(a, b);
+  return applyArithmetic(
+    _subtract as (a: unknown, b: unknown) => unknown,
+    _matSubtract as (a: unknown, b: unknown) => unknown,
+    a,
+    b,
+    true,
+    _compatSubtract
+  );
 };
 
 const addCore = makeArithmetic(
+  'add',
   withNumericText(_add as BinaryArithmetic, _addScalar),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
@@ -500,12 +525,13 @@ export const add = withTypedSurface(function (...args: unknown[]): unknown {
     throw err;
   }
 }, _add) as NumericStringArithmetic & PublicAdd & OneArg;
-export const subtract = makeArithmetic(
-  subtractPair,
-  _matSubtract as (a: unknown, b: unknown) => unknown,
-  true
-) as typeof _subtract;
+export const subtract = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
+  if (arguments.length < 2) throw tooFewArgumentsError('subtract');
+  if (arguments.length > 2) throw tooManyArgumentsError('subtract', 2, arguments.length);
+  return subtractPair(a, b);
+}, _subtract) as typeof _subtract;
 export const multiply = makeArithmetic(
+  'multiply',
   withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
@@ -671,8 +697,13 @@ export const variance = _variance as PublicVariance;
  */
 export const std = withTypedSurface(function (...args: unknown[]): unknown {
   const result = (_std as (...values: unknown[]) => unknown)(...args);
-  const source = args[0];
-  if (!Array.isArray(result) || !isCompatBridgeMatrix(source)) return result;
+  // A matrix operand makes the result a collection; re-box it with the storage
+  // of the operand. The varargs dispatch (#1550) may nest the argument list one
+  // level, so look through one level of arrays for the operand.
+  const source = args
+    .flat()
+    .find((a) => typeof a === 'object' && a !== null && isCompatBridgeMatrix(a));
+  if (!Array.isArray(result) || source === undefined) return result;
   const boxed = source as { storage?: () => string };
   const sparse = isSparseMatrix(source) || boxed.storage?.() === 'sparse';
   return _factoryMatrix(result, sparse ? 'sparse' : 'dense');
@@ -691,9 +722,11 @@ export const lcm: TypedFunction = _lcm;
 // Rounding Shims
 // =============================================================================
 
-export const round: TypedFunction = _round;
-export const floor: TypedFunction = _floor;
-export const ceil: TypedFunction = _ceil;
+// #1550: the mathjs-shaped factories, not the one-argument typed surface —
+// mathjs ceil/floor/fix/round take (x, digits?) and a Unit.
+export const round: TypedFunction = _factoryRound as unknown as TypedFunction;
+export const floor: TypedFunction = _factoryFloor as unknown as TypedFunction;
+export const ceil: TypedFunction = _factoryCeil as unknown as TypedFunction;
 
 // =============================================================================
 // Complex-specific Shims
@@ -733,6 +766,11 @@ export function transpose<T extends MatrixScalar>(m: T): T;
 export function transpose<T>(m: T[]): T[];
 export function transpose(m: CompatMatrixValue): CompatMatrixValue;
 export function transpose(m: unknown): unknown {
+  // #1587: mathjs transpose takes exactly one argument.
+  if (arguments.length < 1) throw tooFewArgumentsError('transpose');
+  if (arguments.length > 1) {
+    throw tooManyArgumentsError('transpose', 1, arguments.length);
+  }
   if (isDenseMatrix(m) || isSparseMatrix(m)) return m.transpose();
   return _transpose(m);
 }
@@ -742,6 +780,11 @@ export function det(m: DenseMatrix | number[][]): number;
 export function det<T extends MatrixScalar>(m: T): T;
 export function det(m: unknown): ReturnType<typeof _det>;
 export function det(m: unknown): unknown {
+  // #1587: mathjs det takes exactly one argument.
+  if (arguments.length < 1) throw tooFewArgumentsError('det');
+  if (arguments.length > 1) {
+    throw tooManyArgumentsError('det', 1, arguments.length);
+  }
   if (isSparseMatrix(m)) throw new TypeError('Expected DenseMatrix or 2D array');
   if (isDenseMatrix(m)) {
     if (m.rows !== m.cols) throw notSquareError('Determinant requires a square matrix');
@@ -751,50 +794,29 @@ export function det(m: unknown): unknown {
 }
 
 /**
- * Identity matrix (mathjs-compatible)
+ * Identity matrix (mathjs-compatible).
+ *
+ * #1550: the mathjs-shaped factory — `identity(m, n)` is m×n, `identity()` is an
+ * empty DenseMatrix and `identity([m, n])` an Array, as in mathjs.
  */
-export function identity(n: number): DenseMatrix {
-  return DenseMatrix.identity(n);
-}
+export const identity: TypedFunction = _identityFactory as unknown as TypedFunction;
 
 /**
  * Zeros (mathjs-compatible).
  *
- * Two forms keep the compat contract: `zeros(n)` is a length-`n` `number[]` (the size is
- * `[n]`, as `math.zeros(3).toArray()` is `[0,0,0]` in mathjs) and `zeros(r, c)` is a native
- * `r×c` DenseMatrix. Every other form goes to the functions `zeros`, which returns the mathjs
- * shape: an Array size (`zeros([2, 3, 2])`, an Array), three or more sizes
- * (`zeros(2, 3, 2)`, a matrix of size `[2, 3, 2]`) and a trailing format (`zeros(2, 2, 'sparse')`).
+ * #1550: the mathjs-shaped factory. `zeros(n)` is a DenseMatrix of size `[n]`
+ * (mathjs returns a Matrix under the default `matrix: 'Matrix'` config), and
+ * every other form — an Array size, three or more sizes, a trailing format —
+ * goes to the same factory, which returns the mathjs shape.
  */
-export function zeros(rows: number, cols?: number): DenseMatrix | number[];
-export function zeros(...args: unknown[]): CompatMatrixValue | unknown[];
-export function zeros(...args: unknown[]): unknown {
-  return filled(args, 0, _factoryZeros as (...a: unknown[]) => unknown);
-}
+export const zeros: TypedFunction = _factoryZeros as unknown as TypedFunction;
 
 /**
  * Ones (mathjs-compatible).
  *
- * The forms are those of {@link zeros}: `ones(n)` is a `number[]`, `ones(r, c)` a native
- * `r×c` DenseMatrix, and every other form goes to the functions `ones`.
+ * #1550: the mathjs-shaped factory, with the same forms as {@link zeros}.
  */
-export function ones(rows: number, cols?: number): DenseMatrix | number[];
-export function ones(...args: unknown[]): CompatMatrixValue | unknown[];
-export function ones(...args: unknown[]): unknown {
-  return filled(args, 1, _factoryOnes as (...a: unknown[]) => unknown);
-}
-
-/** The shared body of `zeros` and `ones`: the two compat forms, else the functions factory. */
-function filled(args: unknown[], value: 0 | 1, factory: (...a: unknown[]) => unknown): unknown {
-  const [rows, cols] = args;
-  if (typeof rows === 'number' && args.length <= 2) {
-    if (cols === undefined) return new Array<number>(rows).fill(value);
-    if (typeof cols === 'number') {
-      return value === 0 ? DenseMatrix.zeros(rows, cols) : DenseMatrix.ones(rows, cols);
-    }
-  }
-  return factory(...args);
-}
+export const ones: TypedFunction = _factoryOnes as unknown as TypedFunction;
 
 /** Return the dimensions of a scalar, string, array, or matrix. */
 export function size(value: unknown): number[] {
