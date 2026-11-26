@@ -19,8 +19,15 @@ export const UNARY_NUMBER_FAST_PATH = {
   sin: { fastNumber: Math.sin, inReal: ALL_REAL },
   cos: { fastNumber: Math.cos, inReal: ALL_REAL },
   tan: { fastNumber: Math.tan, inReal: ALL_REAL },
-  asin: { fastNumber: Math.asin, inReal: (x: number) => x >= -1 && x <= 1 },
-  acos: { fastNumber: Math.acos, inReal: (x: number) => x >= -1 && x <= 1 },
+  // mathjs `asin(±Infinity)` is a real NaN (`Math.asin`); `asin(NaN)` is Complex.
+  asin: {
+    fastNumber: Math.asin,
+    inReal: (x: number) => x === Infinity || x === -Infinity || (x >= -1 && x <= 1),
+  },
+  acos: {
+    fastNumber: Math.acos,
+    inReal: (x: number) => x === Infinity || x === -Infinity || (x >= -1 && x <= 1),
+  },
   atan: { fastNumber: Math.atan, inReal: ALL_REAL },
   sqrt: { fastNumber: Math.sqrt, inReal: (x: number) => x >= 0 },
   abs: { fastNumber: Math.abs, inReal: ALL_REAL },

@@ -772,8 +772,25 @@ export class Complex implements IComplex {
 
   /**
    * Arc sine: asin(z) = -i·ln(iz + √(1 - z²))
+   *
+   * Infinite arguments use the C99 Annex G / Python `cmath` principal values.
+   * The log form multiplies a real `∞` by the zero of `-i` and yields `NaN`.
    */
   asin(): Complex {
+    const a = this.re;
+    const b = this.im;
+    if (a === Infinity || a === -Infinity || b === Infinity || b === -Infinity) {
+      if (Number.isNaN(a) || Number.isNaN(b)) return new Complex(NaN, NaN);
+      if (a === Infinity || a === -Infinity) {
+        const re = (a > 0 ? 1 : -1) * (Math.PI / 2);
+        const imInf = b < 0 || Object.is(b, -0) ? -Infinity : Infinity;
+        if (b === Infinity || b === -Infinity) {
+          return new Complex((a > 0 ? 1 : -1) * (Math.PI / 4), imInf);
+        }
+        return new Complex(re, imInf);
+      }
+      return new Complex(0, b);
+    }
     const iz = new Complex(-this.im, this.re); // i * z
     const one = new Complex(1, 0);
     const sqrt = one.subtract(this.multiply(this)).sqrt();
@@ -812,7 +829,9 @@ export class Complex implements IComplex {
     return result;
   }
 
-  /** Arc secant. */
+  /** Arc secant: asec(z) = acos(1/z). At 0, complex.js 2.4.2 — the library of the
+   * mathjs 15.3.0 oracle — special-cases asec(0) to +i∞, which the compat instance
+   * method parity test pins. */
   asec(): Complex {
     if (this.isZero()) return new Complex(0, Infinity);
     return this.inverse().acos();
@@ -854,8 +873,20 @@ export class Complex implements IComplex {
 
   /**
    * Inverse hyperbolic tangent: atanh(z) = (1/2)·ln((1 + z)/(1 - z))
+   *
+   * Infinite arguments follow C99 / `cmath`: `atanh(±∞) = ±0 + iπ/2`.
+   * The unscaled divide overflows to `NaN` for a non-finite real input.
    */
   atanh(): Complex {
+    const a = this.re;
+    const b = this.im;
+    if (a === Infinity || a === -Infinity || b === Infinity || b === -Infinity) {
+      if (Number.isNaN(a) || Number.isNaN(b)) return new Complex(NaN, NaN);
+      if (b === Infinity || b === -Infinity) {
+        return new Complex(0, b > 0 ? Math.PI / 2 : -Math.PI / 2);
+      }
+      return new Complex(a === -Infinity ? -0 : 0, Math.PI / 2);
+    }
     const one = new Complex(1, 0);
     const half = new Complex(0.5, 0);
     return one.add(this).divide(one.subtract(this)).log().multiply(half);

@@ -1,0 +1,4 @@
+### Fixed
+
+- **Inverse trig at infinity and Complex `acsch` (#1558, #1560):** `Complex.asin(±∞)` multiplied a real `∞` by the zero of `-i` and returned `NaN`; it now uses the C99/`cmath` values (`±π/2 + i∞`). `acos` is `π/2 − asin`, so `asec(0) = acos(+∞) = −i∞`. `Complex.atanh(±∞)` overflowed the unscaled divide; it now returns `±0 + iπ/2`, so `acoth(0)` is `iπ/2` rather than `NaN`. `acsch(complex)` called missing `Complex.acsch` and now uses `inverse().asinh()`. mathjs `acsc(0)`/`asec(0)` = `∞i` stays in compat adapters. Tests: `core/tests/types/complex.test.ts`, `functions/tests/g08-inverse-special-zero.test.ts`.
+- **Inverse trig/hyperbolic mathjs parity on `create(all)` (#1558, #1559, #1560):** Compat matches mathjs 15.3.0 for branch cuts, large magnitudes, and signed zeros via `compat/src/complex-js-inverse-hyperbolic.ts` (complex.js 2.4.2 adapters). Tests: `compat/tests/parity/g08-inv-hyperbolic.test.ts`, `adversarial-g08.test.ts`.

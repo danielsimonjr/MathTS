@@ -57,7 +57,7 @@ export const createAcsc = /* #__PURE__ */ factory(
         if (x <= -1 || x >= 1 || config.predictable) {
           return acscNumber(x);
         }
-        // acsc(x) = asin(1/x). The core Complex type has no acsc method.
+        // acsc(x) = asin(1/x). At 0 this is casin(±∞) = ±π/2 + i∞ (C99), not mathjs `∞i`.
         return new Complex(1 / x, 0).asin();
       },
 
