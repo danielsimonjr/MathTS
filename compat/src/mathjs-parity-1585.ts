@@ -221,7 +221,7 @@ export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unkn
   // A bare wrapper dropped them and every range doc example diverged.
   const native = nativeRange as { signatures?: unknown; name?: string };
   if (native.signatures !== undefined) {
-    (range as { signatures: unknown }).signatures = native.signatures;
+    (range as unknown as { signatures: unknown }).signatures = native.signatures;
   }
   return range;
 }
