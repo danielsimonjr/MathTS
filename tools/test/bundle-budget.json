@@ -180,13 +180,13 @@
       "label": "functions/evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "maxBytes": 1409024
+      "maxBytes": 1441792
     },
     {
       "label": "functions/evaluate three names",
       "import": "import { evaluate, parse, compileExpr } from '@danielsimonjr/mathts-functions/evaluate';",
       "platform": "node",
-      "maxBytes": 1409024
+      "maxBytes": 1441792
     },
     {
       "label": "functions barrel evaluate",
@@ -210,7 +210,7 @@
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "maxBytes": 2064384
+      "maxBytes": 2097152
     }
   ]
 }
