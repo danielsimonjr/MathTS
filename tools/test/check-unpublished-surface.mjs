@@ -27,7 +27,21 @@ import { pathToFileURL } from 'node:url';
 import { repoRoot, workspaceDirs } from './workspaces.mjs';
 
 /**
- * Workspace package names mentioned in any pending changeset under `.changeset/*.md`.
+ * Extract YAML frontmatter between the opening and closing `---` at the top of a file.
+ * @param {string} text full file text
+ * @returns {string | null} frontmatter body, or null when absent or invalid
+ */
+export function extractChangesetFrontmatter(text) {
+  const lines = text.replace(/^\uFEFF/, '').split('\n');
+  if (lines[0]?.trim() !== '---') return null;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '---') return lines.slice(1, i).join('\n');
+  }
+  return null;
+}
+
+/**
+ * Workspace package names mentioned in pending changeset frontmatter under `.changeset/*.md`.
  * @param {string} root repository root
  * @returns {Set<string>} package names, e.g. `@danielsimonjr/mathts-core`
  */
@@ -37,11 +51,58 @@ export function changesetNames(root) {
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.md') || file === 'README.md') continue;
     const text = readFileSync(join(dir, file), 'utf8');
-    for (const match of text.matchAll(/@?[\w./-]*mathts-[a-z0-9-]+/g)) {
-      names.add(match[0].startsWith('@') ? match[0] : `@danielsimonjr/${match[0]}`);
+    const frontmatter = extractChangesetFrontmatter(text);
+    if (!frontmatter) continue;
+    for (const line of frontmatter.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const match = trimmed.match(/^(['"]?)(@?[^'":\s]+)\1\s*:/);
+      if (!match) continue;
+      const pkg = match[2];
+      names.add(pkg.startsWith('@') ? pkg : `@danielsimonjr/${pkg}`);
     }
   }
   return names;
+}
+
+/**
+ * Normalise `package.json` `exports` to a map of subpath → condition value.
+ * @param {unknown} exportsField manifest `exports`
+ * @param {string | undefined} main fallback main
+ * @param {string | undefined} module fallback module
+ * @returns {Record<string, string | object>}
+ */
+export function exportSubpathMap(exportsField, main, module) {
+  if (typeof exportsField === 'string') return { '.': exportsField };
+  if (exportsField && typeof exportsField === 'object') {
+    return { .../** @type {Record<string, string | object>} */ (exportsField) };
+  }
+  const fallback = module ?? main;
+  if (typeof fallback === 'string') return { '.': fallback };
+  return {};
+}
+
+/**
+ * Resolve the runtime ESM entry file for one export subpath.
+ * @param {string} pkgDir absolute package directory (holds `package.json`)
+ * @param {string} subpath export key, e.g. `.` or `./evaluate`
+ * @param {Record<string, string | object>} map from {@link exportSubpathMap}
+ * @returns {string | null} absolute entry file path, or null when not a JS entry
+ */
+export function entryPathForSubpath(pkgDir, subpath, map) {
+  const value = map[subpath];
+  if (value === undefined) return null;
+  const specifier =
+    typeof value === 'string'
+      ? value
+      : typeof value === 'object' && value !== null
+        ? /** @type {{ import?: string; default?: string; require?: string }} */ (value).import ??
+          /** @type {{ import?: string; default?: string; require?: string }} */ (value).default ??
+          /** @type {{ import?: string; default?: string; require?: string }} */ (value).require
+        : null;
+  if (typeof specifier !== 'string') return null;
+  if (specifier.endsWith('package.json')) return null;
+  return join(pkgDir, specifier);
 }
 
 /**
@@ -51,17 +112,8 @@ export function changesetNames(root) {
  */
 export function entryPathFor(pkgDir) {
   const manifest = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8'));
-  const dot =
-    typeof manifest.exports === 'object' && manifest.exports !== null
-      ? manifest.exports['.']
-      : manifest.exports;
-  const specifier =
-    typeof dot === 'string'
-      ? dot
-      : typeof dot === 'object' && dot !== null
-        ? (dot.import ?? dot.default ?? dot.require)
-        : (manifest.main ?? manifest.module);
-  return typeof specifier === 'string' ? join(pkgDir, specifier) : null;
+  const map = exportSubpathMap(manifest.exports, manifest.main, manifest.module);
+  return entryPathForSubpath(pkgDir, '.', map);
 }
 
 /**
@@ -109,7 +161,7 @@ export async function fetchPublishedTarball(name, version, scratchDir, offline) 
       execFileSync('tar', ['-xzf', tgz, '-C', join(scratchDir, 'tarball')]);
     } catch (error) {
       const message = String(error?.stderr ?? error);
-      if (/E404|not found/i.test(message)) return 'not-found';
+      if (/E404|ETARGET|not found|notarget|No matching version/i.test(message)) return 'not-found';
       throw new Error(`npm pack ${name}@${version} failed: ${message}`);
     } finally {
       rmSync(packDir, { recursive: true, force: true });
@@ -118,6 +170,95 @@ export async function fetchPublishedTarball(name, version, scratchDir, offline) 
   }
   execFileSync('tar', ['-xzf', tgz, '-C', tarballDir]);
   return { dir: tarballDir };
+}
+
+/**
+ * Compare built and published export subpaths and each comparable JS entry's export names.
+ * @param {string} builtPkgDir absolute built package tree (workspace package dir)
+ * @param {string} publishedPkgDir absolute extracted `package/` dir from the tarball
+ * @returns {Promise<string | null>} drift detail, or null when surfaces match
+ */
+export async function compareAllExportSubpaths(builtPkgDir, publishedPkgDir) {
+  const builtManifest = JSON.parse(readFileSync(join(builtPkgDir, 'package.json'), 'utf8'));
+  const publishedManifest = JSON.parse(
+    readFileSync(join(publishedPkgDir, 'package.json'), 'utf8')
+  );
+  const builtMap = exportSubpathMap(
+    builtManifest.exports,
+    builtManifest.main,
+    builtManifest.module
+  );
+  const publishedMap = exportSubpathMap(
+    publishedManifest.exports,
+    publishedManifest.main,
+    publishedManifest.module
+  );
+  const builtKeys = Object.keys(builtMap).sort();
+  const publishedKeys = Object.keys(publishedMap).sort();
+  const parts = [];
+
+  const keysOnlyOnBuilt = builtKeys.filter((key) => !publishedKeys.includes(key));
+  const keysOnlyOnPublished = publishedKeys.filter((key) => !builtKeys.includes(key));
+  if (keysOnlyOnBuilt.length) {
+    parts.push(`export subpaths on HEAD but not in the tarball: ${keysOnlyOnBuilt.join(', ')}`);
+  }
+  if (keysOnlyOnPublished.length) {
+    parts.push(
+      `export subpaths in the tarball but not on HEAD: ${keysOnlyOnPublished.join(', ')}`
+    );
+  }
+
+  for (const key of builtKeys) {
+    if (!publishedKeys.includes(key)) continue;
+    const builtEntry = entryPathForSubpath(builtPkgDir, key, builtMap);
+    const publishedEntry = entryPathForSubpath(publishedPkgDir, key, publishedMap);
+    if (!builtEntry && !publishedEntry) continue;
+    if (!builtEntry || !publishedEntry) {
+      parts.push(`${key}: export condition shape differs between HEAD and tarball`);
+      continue;
+    }
+    if (!existsSync(builtEntry)) {
+      parts.push(`${key}: built entry missing at ${builtEntry}`);
+      continue;
+    }
+    if (!existsSync(publishedEntry)) {
+      parts.push(`${key}: published entry missing at ${publishedEntry}`);
+      continue;
+    }
+    let built;
+    let published;
+    try {
+      built = await collectExports(builtEntry);
+    } catch (error) {
+      const builtMessage = error instanceof Error ? error.message : String(error);
+      try {
+        await collectExports(publishedEntry);
+        parts.push(`${key}: failed to import built entry (${builtMessage})`);
+      } catch {
+        // Both entries need a runtime this check does not provide (e.g. a worker entry).
+        continue;
+      }
+      continue;
+    }
+    try {
+      published = await collectExports(publishedEntry);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      parts.push(`${key}: failed to import published entry (${message})`);
+      continue;
+    }
+    const missing = built.filter((name) => !published.includes(name));
+    const extra = published.filter((name) => !built.includes(name));
+    if (!missing.length && !extra.length) continue;
+    if (missing.length) {
+      parts.push(`${key}: on HEAD but not in the tarball: ${missing.join(', ')}`);
+    }
+    if (extra.length) {
+      parts.push(`${key}: in the tarball but not on HEAD: ${extra.join(', ')}`);
+    }
+  }
+
+  return parts.length ? parts.join('; ') : null;
 }
 
 /**
@@ -134,24 +275,15 @@ export async function checkPackage(root, dir, scratchDir, offline) {
   if (manifest.private) return { verdict: 'skip', detail: 'private package' };
   const entry = entryPathFor(pkgDir);
   if (!entry || !existsSync(entry)) return { verdict: 'skip', detail: 'no built entry' };
-  const built = await collectExports(entry);
 
   const result = await fetchPublishedTarball(manifest.name, manifest.version, scratchDir, offline);
   if (result === 'not-found') return { verdict: 'skip', detail: 'version not on the registry' };
   if (result === 'unavailable') return { verdict: 'skip', detail: 'no local tarball (offline)' };
-  const publishedEntry = entryPathFor(join(result.dir, 'package'));
-  if (!publishedEntry || !existsSync(publishedEntry)) {
-    return { verdict: 'drift', detail: 'published tarball has no usable entry' };
-  }
-  const published = await collectExports(publishedEntry);
 
-  const missing = built.filter((name) => !published.includes(name));
-  const extra = published.filter((name) => !built.includes(name));
-  if (!missing.length && !extra.length) return { verdict: 'ok' };
-  const parts = [];
-  if (missing.length) parts.push(`on HEAD but not in the tarball: ${missing.join(', ')}`);
-  if (extra.length) parts.push(`in the tarball but not on HEAD: ${extra.join(', ')}`);
-  return { verdict: 'drift', detail: parts.join('; ') };
+  const publishedPkgDir = join(result.dir, 'package');
+  const drift = await compareAllExportSubpaths(pkgDir, publishedPkgDir);
+  if (!drift) return { verdict: 'ok' };
+  return { verdict: 'drift', detail: drift };
 }
 
 /**
@@ -159,34 +291,42 @@ export async function checkPackage(root, dir, scratchDir, offline) {
  * that no pending changeset names.
  * @param {string} [root] repository root; defaults to this checkout (tests pass a fixture)
  * @param {{ offline?: boolean }} [options]
- * @returns {Promise<{ failures: string[], skipped: string[] }>}
+ * @returns {Promise<{ failures: string[], skipped: string[], compared: number }>}
  */
 export async function run(root = repoRoot, options = {}) {
   const offline = options.offline ?? process.env.CHECK_SURFACE_OFFLINE === '1';
   const changesets = changesetNames(root);
   const failures = [];
   const skipped = [];
+  let compared = 0;
+  let registryUnavailableSkips = 0;
   const scratch = mkdtempSync(join(tmpdir(), 'check-surface-'));
   mkdirSync(join(scratch, 'tarball'));
-  // A published tarball's dist imports its dependencies by bare specifier. A symlink
-  // to the repo's node_modules lets the extracted entry resolve them the way the real
-  // package tree does, without installing anything into the temp dir.
   const repoModules = join(repoRoot, 'node_modules');
   if (existsSync(repoModules)) symlinkSync(repoModules, join(scratch, 'node_modules'), 'dir');
   try {
     let index = 0;
     for (const dir of workspaceDirs(root)) {
-      // A fresh subdir per package: importing `tarball/package/dist/index.js` from the
-      // same path twice would return Node's cached module of the first package.
       const pkgScratch = join(scratch, `pkg-${index++}`);
       mkdirSync(join(pkgScratch, 'tarball'), { recursive: true });
+      const manifest = JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8'));
+      const name = manifest.name;
       const verdict = await checkPackage(root, dir, pkgScratch, offline);
-      if (verdict.verdict === 'ok') continue;
-      if (verdict.verdict === 'skip') {
-        skipped.push(`${dir}: ${verdict.detail}`);
+      if (verdict.verdict === 'ok') {
+        compared++;
         continue;
       }
-      const name = JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8')).name;
+      if (verdict.verdict === 'skip') {
+        skipped.push(`${dir}: ${verdict.detail}`);
+        if (
+          verdict.detail === 'version not on the registry' ||
+          verdict.detail === 'no local tarball (offline)'
+        ) {
+          registryUnavailableSkips++;
+        }
+        continue;
+      }
+      compared++;
       if (changesets.has(name)) {
         skipped.push(`${dir}: drifted (${verdict.detail}), but a pending changeset names ${name}`);
         continue;
@@ -196,10 +336,17 @@ export async function run(root = repoRoot, options = {}) {
           'Add a changeset that names this package.'
       );
     }
+    if (compared === 0 && registryUnavailableSkips === 0) {
+      failures.push(
+        'No workspace package was compared against a published tarball at the same version ' +
+          '(every package was skipped or the workspace is empty). Re-run after `bun run build`, ' +
+          'or fix skip reasons above.'
+      );
+    }
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }
-  return { failures, skipped };
+  return { failures, skipped, compared };
 }
 
 async function main() {
