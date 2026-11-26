@@ -28,6 +28,7 @@ import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { chainTypedFromInstance, createChain } from './chain.js';
+import { normalizeCompatFormatOptions } from './fraction-format-parity.js';
 import { assertValidCreateFactories, isCompatFactory } from './create-factory-validation.js';
 import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
 import { compatConstantReaders, type CompatConstantName } from './instance-constants.js';
@@ -840,18 +841,7 @@ export function create(
     expm: compatExpm,
     bignumber: shims.bignumber,
     format: ((value: unknown, options?: Record<string, unknown> | number) => {
-      let merged: Record<string, unknown>;
-      if (options === undefined) {
-        merged =
-          currentConfig.precision !== undefined ? { precision: currentConfig.precision } : {};
-      } else if (typeof options === 'number') {
-        merged = { precision: options };
-      } else {
-        merged = { ...options };
-        if (merged.precision === undefined && currentConfig.precision !== undefined) {
-          merged.precision = currentConfig.precision;
-        }
-      }
+      const merged = normalizeCompatFormatOptions(options, currentConfig.precision);
       const formatImpl = namedFormat;
       return usesOverlay()
         ? (mathFunctions.runWithConfig(currentConfig, () => formatImpl(value, merged)) as string)
