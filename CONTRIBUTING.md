@@ -66,10 +66,24 @@ docs(readme): add WebGPU backend examples
 1. Fork the repository
 2. Create a feature branch from `main`
 3. Make your changes
-4. Ensure all tests pass: `bun run test`
-5. Ensure linting passes: `bun run lint`
-6. Ensure type checking passes: `bun run typecheck`
-7. Submit a pull request
+4. Run the pre-push gate: `bun run prepush` (see below)
+5. Ensure all tests pass: `bun run test`
+6. Ensure linting passes: `bun run lint`
+7. Ensure type checking passes: `bun run typecheck`
+8. Submit a pull request
+
+### Pre-push gate
+
+Run **`bun run prepush` before every push**. It runs the cheap CI checks locally so a push
+does not discover them in CI minutes later:
+
+1. `bun run lint` (oxlint, repo-wide zero warnings)
+2. `bun run format:check` (prettier)
+3. the code-docs check (`tools/test/check-code-docs.mjs`)
+4. the bundle-budget check (`tools/test/check-bundle-budget.mjs`) — reads the built `dist/`,
+   so run `bun run build` first after a fresh checkout or a dependency change
+
+The heavy gates (typecheck, tests, coverage) still run only in CI.
 
 ### PR Checklist
 

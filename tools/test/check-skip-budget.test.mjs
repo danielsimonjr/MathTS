@@ -98,3 +98,54 @@ test('ANSI colour escapes are stripped before matching', () => {
     '::group::@x/a:test\n\x1b[2m      Tests \x1b[22m \x1b[32m7 passed\x1b[39m | \x1b[33m2 skipped\x1b[39m (9)\n::endgroup::';
   assert.deepEqual(summarized(log), { '@x/a': 2 });
 });
+
+test('coverage tasks (`test:coverage`) are read like plain test tasks', () => {
+  // The Coverage job runs the suite once with coverage and feeds that log to the parser,
+  // so a `test:coverage` task must summarize its package exactly like a `test` task.
+  const log = [
+    '@x/a:test:coverage: $ bun test --isolate --coverage',
+    '@x/a:test:coverage:  933 pass',
+    '@x/a:test:coverage:  4 skip',
+    '@x/a:test:coverage:  1 todo',
+    '@x/a:test:coverage: Ran 938 tests across 52 files. [12.00s]',
+    '::group::@x/b:test:coverage',
+    '$ vitest run --coverage',
+    '      Tests  4950 passed | 53 skipped (5003)',
+    '::endgroup::',
+    ...ROOT_RUN,
+  ].join('\n');
+  assert.deepEqual(summarized(log), { '@x/a': 5, '@x/b': 53, [ROOT_SUITE]: 0 });
+});
+
+test('a plain `bun run test` log and its `test:coverage` twin parse identically', () => {
+  const plain = [
+    '::group::@x/a:test',
+    '$ bun test --isolate',
+    ' 933 pass',
+    ' 4 skip',
+    ' 1 todo',
+    'Ran 938 tests across 52 files. [12.00s]',
+    '::endgroup::',
+    '::group::@x/b:test',
+    '$ vitest run',
+    '      Tests  4950 passed | 53 skipped (5003)',
+    '::endgroup::',
+    ...ROOT_RUN,
+  ].join('\n');
+  const coverage = plain
+    .replaceAll('@x/a:test', '@x/a:test:coverage')
+    .replaceAll('@x/b:test', '@x/b:test:coverage')
+    .replace('$ bun test --isolate', '$ bun test --isolate --coverage')
+    .replace('$ vitest run', '$ vitest run --coverage');
+  assert.deepEqual(summarized(coverage), summarized(plain));
+});
+
+test('a build task named like coverage output is still ignored', () => {
+  const log = [
+    '::group::@x/a:build',
+    '      Tests  1 passed | 9 skipped (10)',
+    '::endgroup::',
+    ...ROOT_RUN,
+  ].join('\n');
+  assert.deepEqual(summarized(log), { [ROOT_SUITE]: 0 });
+});

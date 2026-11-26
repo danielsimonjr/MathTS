@@ -16,22 +16,24 @@ human-facing overview.
 
 ## Build / Test / Verify (run from repo root)
 
-| Task          | Command                                                  | Notes                                                                                           |
-| ------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development  |
-| Build all     | `bun run build`                                          | turbo, respects dep graph                                                                       |
-| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 47/47, 0 errors** (includes the builds it waits for)                  |
-| Test all      | `bun run test`                                           | turbo runs each package's own runner (`bun test`, or vitest in `functions`), then root vitest   |
-| Lint / format | `bun run lint` · `bun run format`                        | oxlint (`--deny-warnings`: a warning fails) + prettier                                          |
-| Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts                                       |
-| One package   | `bunx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                 |
-| One test file | `bunx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                 |
-| WASM (AS)     | `bun run build:wasm`                                     | AssemblyScript — the **sole** WASM backend; `bun run build` runs it first, and fails without it |
+| Task          | Command                                                  | Notes                                                                                                                                                |
+| ------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install       | `bun install`                                            | Bun is the package manager (`bun.lock`) and script runtime; Node is not needed for development                                                       |
+| Build all     | `bun run build`                                          | turbo, respects dep graph                                                                                                                            |
+| Typecheck all | `bun run typecheck`                                      | turbo; **green baseline = 47/47, 0 errors** (includes the builds it waits for)                                                                       |
+| Test all      | `bun run test`                                           | turbo runs each package's own runner (`bun test`, or vitest in `functions`), then root vitest                                                        |
+| Lint / format | `bun run lint` · `bun run format`                        | oxlint (`--deny-warnings`: a warning fails) + prettier                                                                                               |
+| Coverage      | `bun run test:coverage`                                  | measurement scoped to an include-list in vitest.config.ts; now also runs the root vitest suites (same suites as `bun run test`, once, with coverage) |
+| Pre-push gate | `bun run prepush`                                        | **required before every push**: lint + format:check + code-docs + bundle-budget (build first — it reads `dist/`)                                     |
+| One package   | `bunx turbo <task> --filter=@danielsimonjr/mathts-<pkg>` |                                                                                                                                                      |
+| One test file | `bunx vitest run <path>`                                 | e.g. `core/tests/utils.test.ts`                                                                                                                      |
+| WASM (AS)     | `bun run build:wasm`                                     | AssemblyScript — the **sole** WASM backend; `bun run build` runs it first, and fails without it                                                      |
 
 Bun migration status / next phases: `docs/roadmap/BUN_MIGRATION.md`.
 
 **Before claiming "done":** run `bun run typecheck` (must stay 0 errors) and the
 affected package's tests. Don't bypass the pre-commit hook (`--no-verify`).
+Run `bun run prepush` before every push (see the table above).
 
 ---
 
@@ -273,25 +275,6 @@ amortises the upload more slowly). A shared threshold is convenient and wrong.
   `compat/tests/parity/known-gaps/`, and changelog entries go into
   `changelog-fragments/`. Do not reintroduce hand-edited shared-list files —
   parallel PRs conflict on them (see `CLAUDE.md` → compat and Versioning).
-- **Carry work to RELEASED.** Versioning is via Changesets. Tagging, GitHub Releases, and npm
-  publish run only when the repository variable `RELEASES_ENABLED` is exactly `true` (unset is
-  off). The version PR still opens on each push; leave it unmerged; do not set
-  `RELEASES_ENABLED` as part of this work; do not tag or publish by hand. Set
-  `RELEASES_ENABLED=true` to re-enable;
-  do not delete the workflows. `publish.yml` gates the same variable on all three triggers.
-  The flow when releases are on: changeset → commit → push → the Release workflow opens a
-  "chore: release packages" PR → merge it. That merge bumps versions. The same workflow then
-  tags each bumped package (`name@version`), opens a GitHub Release, and calls the Publish
-  workflow in that run. Publish
-  (`.github/workflows/publish.yml`) runs `bun run build` and then `changeset publish`, which
-  skips versions already on npm and passes `--access public`. Auth is
-  the repository secret `NPM` (`NODE_AUTH_TOKEN`) — no `id-token: write`, and no provenance,
-  because provenance needs that OIDC token. The secret is not named `NPM_TOKEN`. Releases
-  created with `GITHUB_TOKEN` do not fire `release` for other workflows, which is why Publish
-  is called in-process rather than waiting on the event. A release a person creates does
-  trigger Publish, and so does **workflow_dispatch** on Publish. Versions already on `main`
-  (the push did not change a `version` field — the packages bumped by #334) are published
-  that way. Do not `npm publish` from a workstation.
 - **Carry work to RELEASED.** Versioning is via Changesets. Tagging, GitHub Releases, and npm
   publish run only when the repository variable `RELEASES_ENABLED` is exactly `true` (unset is
   off). The version PR still opens on each push; leave it unmerged; do not set
