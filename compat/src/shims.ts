@@ -1,4 +1,5 @@
 import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
+import { complexJsAsec } from './complex-js-inverse-hyperbolic.js';
 /**
  * mathjs Compatibility Shims
  *
@@ -119,6 +120,12 @@ import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts
  * Matrix converts, and an invalid part or a third argument throws a TypeError, as in mathjs.
  * The call shape `(value, index, collection)` converts the value, so `[1, 2].map(complex)` works.
  */
+class CompatComplex extends Complex {
+  override asec(): Complex {
+    return complexJsAsec(this);
+  }
+}
+
 export function complex(re?: number | string | Complex, im?: number, ...rest: unknown[]): Complex {
   if (re === undefined && im === undefined && rest.length === 0) {
     return COMPLEX_ZERO;
@@ -129,7 +136,11 @@ export function complex(re?: number | string | Complex, im?: number, ...rest: un
   }
   // Every other input uses the functions `complex`, which follows mathjs (#1220).
   const args = im === undefined && rest.length === 0 ? [re] : [re, im, ...rest];
-  return (_complex as (...a: unknown[]) => Complex)(...args);
+  const result = (_complex as (...a: unknown[]) => Complex)(...args);
+  if (isComplex(result)) {
+    return new CompatComplex(result.re, result.im);
+  }
+  return result;
 }
 
 /** The call forms of the compat {@link fraction}. */
