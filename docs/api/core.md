@@ -375,9 +375,9 @@ The main ones:
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-core` (165 exports).
+> `@danielsimonjr/mathts-core` (173 exports).
 
-### Functions (100)
+### Functions (103)
 
 `abs`
 `addExactScales`
@@ -389,12 +389,14 @@ The main ones:
 `clearExactScaleNumberCache`
 `create`
 `createFactory`
+`createIndexError`
 `createMathTSTyped`
 `createRangeClass`
 `createSeededRng`
 `createTypedFunction`
 `decimalExactScale`
 `dim`
+`DimensionError`
 `DimensionMismatchError`
 `divideByScale`
 `divideExactScales`
@@ -413,6 +415,7 @@ The main ones:
 `getUnitDef`
 `getUnitPrefix`
 `getUnitRow`
+`IndexError`
 `initTypedWasm`
 `irrationalPower`
 `isArray`
@@ -480,7 +483,7 @@ The main ones:
 `unitRowExactScale`
 `unitRowValue`
 
-### Constants & values (57)
+### Constants & values (62)
 
 `ALL_UNITS`
 `AMBIGUOUS_UNIT_SPELLINGS`
@@ -501,6 +504,7 @@ The main ones:
 `DERIVED_UNITS`
 `DIMENSIONLESS`
 `DUAL_UNARY_RULES`
+`e`
 `E`
 `FRACTION_HALF`
 `FRACTION_NEG_ONE`
@@ -508,6 +512,7 @@ The main ones:
 `FRACTION_QUARTER`
 `FRACTION_THIRD`
 `FRACTION_ZERO`
+`i`
 `I`
 `LN10`
 `LN2`
@@ -520,7 +525,9 @@ The main ones:
 `MAX_UNIT_STRING_LENGTH`
 `NAMED_IRRATIONALS`
 `NAMED_SCALES`
+`phi`
 `PHI`
+`pi`
 `PI`
 `PI_EXACT_SCALE`
 `REFUSED_UNIT_SPELLINGS`
@@ -531,6 +538,7 @@ The main ones:
 `SQRT1_2`
 `SQRT2`
 `SQUARES_SAFE_MIN`
+`tau`
 `TAU`
 `UNIT_ALIASES`
 `UNIT_DIMENSION_LENGTH`

@@ -3201,7 +3201,7 @@ const buildUnitClass =
      */
     const typeConverters: TypeConverters = {
       BigNumber: function (x: Numeric): Numeric {
-        const fx = x as FractionValue;
+        const fx = x as unknown as FractionValue;
         if (fx?.isFraction) {
           return new BigNumber(String(fx.numerator)).div(String(fx.denominator));
         }
@@ -3219,7 +3219,7 @@ const buildUnitClass =
       },
 
       number: function (x: Numeric): Numeric {
-        if ((x as FractionValue)?.isFraction) return number(x);
+        if ((x as unknown as FractionValue)?.isFraction) return number(x);
         return x;
       },
     };

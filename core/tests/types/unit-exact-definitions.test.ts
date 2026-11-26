@@ -520,9 +520,9 @@ describe('conversions multiply exact scales and round once', () => {
   });
 
   it('a Fraction value converts exactly; a BigNumber value at its precision', () => {
-    const f = new Unit(new Fraction(1n) as never, 'torr').toSI().value as unknown as Fraction;
+    const f = new Unit(new Fraction(1n), 'torr').toSI().value as unknown as Fraction;
     expect([f.numerator, f.denominator]).toEqual([20265n, 152n]);
-    const b = new Unit(BigNumber.fromNumber(1) as never, 'psi').toSI().value as unknown as {
+    const b = new Unit(BigNumber.fromNumber(1), 'psi').toSI().value as unknown as {
       toString(): string;
     };
     expect(b.toString().startsWith('6894.757293168361336722')).toBe(true);
