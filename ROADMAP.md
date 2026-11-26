@@ -47,6 +47,22 @@ That plan accounts for all **145** open issues at snapshot time:
 
 Native packages (`core`, `typed-function`, `matrix`, `functions`, `workerpool`, `gpu`, `parallel`) stay MathTS-native. Reference-system quirks that disagree with NumPy/SciPy stay in `compat/`.
 
+### WASM, workpool, and WebGPU optimization
+
+Acceleration work is sequenced separately from the parity issues, from the same
+inventory the code was checked against
+(`docs/superpowers/optimization/inventory.json`, README in that directory):
+
+[`docs/superpowers/plans/2026-11-26-wasm-workpool-webgpu-optimization-plan.md`](docs/superpowers/plans/2026-11-26-wasm-workpool-webgpu-optimization-plan.md).
+
+Wave 0 wires the public dense product and flat matmul through the thresholds
+already measured in code (WASM GEMM at 13_824 flops, pool matmul at 7_077_888
+multiply-adds). Later waves add import-free AssemblyScript only for ranked
+kernels, pool fan-out only where copy cost is paid back, and WebGPU only where
+`enableGpu()` and the per-kernel size cut amortize the transfer. It sits beside
+the compat full-suite plan and the future-features parity plan above; it does
+not reorder those issues.
+
 ### Scientific Workbook capabilities
 
 The `.mtsw` runtime is headless (CLI + JSON-RPC serve); the GUI will sit on top of it.
