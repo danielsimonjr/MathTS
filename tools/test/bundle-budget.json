@@ -44,7 +44,7 @@
     "signal/package.json": 2304,
     "parallel/dist/index.js": 52224,
     "parallel/package.json": 2304,
-    "workbook/dist/index.js": 50176,
+    "workbook/dist/index.js": 51200,
     "workbook/package.json": 2304,
     "assembly/build/mathts.js": 98304,
     "assembly/build/mathts.wasm": 70656,
