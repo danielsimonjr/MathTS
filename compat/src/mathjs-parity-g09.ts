@@ -23,6 +23,12 @@ type RuntimeIndex = Index & {
   size: () => number[];
 };
 
+/** The two Index methods `reshapeG09AssignmentRhsInPlace` actually reads. */
+export type G09AssignmentIndex = {
+  isScalar: () => boolean;
+  size: () => number[];
+};
+
 type BridgeMatrixMutable = {
   _data: unknown;
   _size: number[];
@@ -121,7 +127,10 @@ function replacementSize(replacement: unknown): number[] {
  * mathjs mutates the assignment RHS in place (unsqueeze/broadcast) before `_setSubset`.
  * The bridge keeps a private copy for arrays; we reshape the caller's matrix or array here.
  */
-export function reshapeG09AssignmentRhsInPlace(index: RuntimeIndex, replacement: unknown): void {
+export function reshapeG09AssignmentRhsInPlace(
+  index: G09AssignmentIndex,
+  replacement: unknown
+): void {
   if (index.isScalar()) return;
   const selection = index.size();
   if (replacement === null || replacement === undefined) return;

@@ -136,15 +136,7 @@ describe('G09 src surface (#1557)', () => {
       isScalar: () => boolean;
       size: () => number[];
     };
-    const m = math.matrix([5, 6]) as {
-      isMatrix: boolean;
-      subset: (...args: unknown[]) => unknown;
-      constructor: { name: string };
-      _size: number[];
-      _data: unknown;
-      toArray: () => unknown;
-      size: () => number[];
-    };
+    const m = math.matrix([5, 6]);
     reshapeG09AssignmentRhsInPlace(index, m);
     expect(m.size().length).toBeGreaterThanOrEqual(1);
   });
