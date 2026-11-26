@@ -210,11 +210,18 @@ interface RangeDeps {
  */
 export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unknown {
   const { nativeRange, config } = deps;
-  return (...args: unknown[]) => {
+  const range = function range(this: unknown, ...args: unknown[]): unknown {
     if (config().number === 'BigNumber' && typeof args[0] === 'string') {
-      if (args.length === 1) return nativeRange(args[0]);
-      if (args.length === 2 && typeof args[1] === 'boolean') return nativeRange(args[0]);
+      if (args.length === 1) return nativeRange.call(this, args[0]);
+      if (args.length === 2 && typeof args[1] === 'boolean') return nativeRange.call(this, args[0]);
     }
-    return nativeRange(...args);
+    return nativeRange.apply(this, args);
   };
+  // Colon / `diag(1:3)` go through the typed `range` signatures on the instance.
+  // A bare wrapper dropped them and every range doc example diverged.
+  const native = nativeRange as { signatures?: unknown; name?: string };
+  if (native.signatures !== undefined) {
+    (range as { signatures: unknown }).signatures = native.signatures;
+  }
+  return range;
 }
