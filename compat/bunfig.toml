@@ -4,7 +4,10 @@
 # v8 provider did. Without the ignore pattern, Bun also reports the sibling packages'
 # dist files that the tests load. lcov is the file that Codecov reads.
 coverageReporter = ["text", "lcov"]
-coveragePathIgnorePatterns = ["../**", "dist/**"]
+# mathjs-eigs is a verbatim mathjs 15.3.0 port (G10). Adapter tests compare
+# create(all).eigs to live mathjs; counting those kernels here would either
+# drop the package floor ~10pp or force coverage-stunt tests of mathjs code.
+coveragePathIgnorePatterns = ["../**", "dist/**", "src/mathjs-eigs/**"]
 
 [run]
 # Run this package's scripts on the Bun runtime (see the root bunfig.toml).
