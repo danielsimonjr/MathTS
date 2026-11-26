@@ -40,7 +40,10 @@ ROADMAP item  ──►  brainstorm → SPEC  ──►  writing-plans → PLAN 
 
 4. **Close the loop (bidirectional).** Execution feeds back:
    - **Done** → check the item off in `TODO.md` _and_ roll it into ROADMAP
-     "Recently Shipped"; add per-package `CHANGELOG` entries; publish.
+     "Recently Shipped"; add a `changelog-fragments/*.md` fragment (PRs do not
+     hand-edit the root `CHANGELOG.md`; the release version PR assembles the
+     fragments) plus a `.changeset/*.md` bump when a package version changes;
+     publish.
    - **Deferred / abandoned** → move to ROADMAP "Explicitly out of scope
      (non-decisions)" with the rationale.
    - **New gap found mid-work** → add a ROADMAP candidate; don't lose it.

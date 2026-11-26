@@ -361,14 +361,81 @@ lengths, and `histogram` requires a positive integer `bins`.
 
 ### Functions (62)
 
-`bitAnd`, `bitNot`, `bitOr`, `bitXor`, `calculateChunks`, `calculateOptimalChunks`, `chunkArray`, `chunkFloat64Array`, `dispatch`, `leftShift`, `matmulSequential`, `mergeArrayChunks`, `mergeFloat64Chunks`, `parallelAbs`, `parallelAdd`, `parallelCos`, `parallelCount`, `parallelDistance`, `parallelDivide`, `parallelDot`, `parallelElementwise`, `parallelEvery`, `parallelExp`, `parallelFilter`, `parallelFind`, `parallelForEach`, `parallelHistogram`, `parallelLog`, `parallelMap`, `parallelMatmul`, `parallelMatvec`, `parallelMax`, `parallelMean`, `parallelMin`, `parallelMinMax`, `parallelMultiply`, `parallelNegate`, `parallelNorm`, `parallelOuter`, `parallelReduce`, `parallelScale`, `parallelSin`, `parallelSome`, `parallelSort`, `parallelSqrt`, `parallelSquare`, `parallelStd`, `parallelSubtract`, `parallelSum`, `parallelTan`, `parallelTranspose`, `parallelUnary`, `parallelVariance`, `partition2D`, `partitionRange`, `resolveDefaultWorkerScript`, `resolveOpThreshold`, `rightArithShift`, `rightLogShift`, `shouldChunkParallelize`, `shouldParallelize`, `Transfer`
+`bitAnd`
+`bitNot`
+`bitOr`
+`bitXor`
+`calculateChunks`
+`calculateOptimalChunks`
+`chunkArray`
+`chunkFloat64Array`
+`dispatch`
+`leftShift`
+`matmulSequential`
+`mergeArrayChunks`
+`mergeFloat64Chunks`
+`parallelAbs`
+`parallelAdd`
+`parallelCos`
+`parallelCount`
+`parallelDistance`
+`parallelDivide`
+`parallelDot`
+`parallelElementwise`
+`parallelEvery`
+`parallelExp`
+`parallelFilter`
+`parallelFind`
+`parallelForEach`
+`parallelHistogram`
+`parallelLog`
+`parallelMap`
+`parallelMatmul`
+`parallelMatvec`
+`parallelMax`
+`parallelMean`
+`parallelMin`
+`parallelMinMax`
+`parallelMultiply`
+`parallelNegate`
+`parallelNorm`
+`parallelOuter`
+`parallelReduce`
+`parallelScale`
+`parallelSin`
+`parallelSome`
+`parallelSort`
+`parallelSqrt`
+`parallelSquare`
+`parallelStd`
+`parallelSubtract`
+`parallelSum`
+`parallelTan`
+`parallelTranspose`
+`parallelUnary`
+`parallelVariance`
+`partition2D`
+`partitionRange`
+`resolveDefaultWorkerScript`
+`resolveOpThreshold`
+`rightArithShift`
+`rightLogShift`
+`shouldChunkParallelize`
+`shouldParallelize`
+`Transfer`
 
 ### Constants & values (5)
 
-`computePool`, `DEFAULT_POOL_CONFIG`, `DEFAULT_THRESHOLD_BY_OP`, `DEFAULT_THRESHOLDS`, `thresholdDispatcher`
+`computePool`
+`DEFAULT_POOL_CONFIG`
+`DEFAULT_THRESHOLD_BY_OP`
+`DEFAULT_THRESHOLDS`
+`thresholdDispatcher`
 
 ### Classes & types (3)
 
-`ComputePool`, `ThresholdDispatcher`, `WorkerPool`
+`ComputePool`
+`ThresholdDispatcher`
+`WorkerPool`
 
 <!-- END GENERATED EXPORT INDEX -->

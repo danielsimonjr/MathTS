@@ -273,17 +273,177 @@ package exports only `.`, and `transpose` is taken.
 
 ### Functions by category
 
-**MatrixOperations** (30): `abs`, `add`, `column`, `diag`, `diagonal`, `divide`, `dotMultiply`, `exp`, `identity`, `log`, `matrix`, `max`, `mean`, `min`, `multiply`, `norm`, `ones`, `pow`, `random`, `row`, `size`, `sqrt`, `square`, `subset`, `subtract`, `sum`, `trace`, `transpose`, `unaryMinus`, `zeros`
+**MatrixOperations** (30):
+`abs`
+`add`
+`column`
+`diag`
+`diagonal`
+`divide`
+`dotMultiply`
+`exp`
+`identity`
+`log`
+`matrix`
+`max`
+`mean`
+`min`
+`multiply`
+`norm`
+`ones`
+`pow`
+`random`
+`row`
+`size`
+`sqrt`
+`square`
+`subset`
+`subtract`
+`sum`
+`trace`
+`transpose`
+`unaryMinus`
+`zeros`
 
-**Factory / uncategorized** (105): `assertDenseMatrixSize`, `balanceForEig`, `cholesky`, `clearFeatureCache`, `cond`, `condest`, `createBackendManager`, `createGPUMatrixBackend`, `createParallelBackend`, `createSyncManager`, `createWASMBackend`, `decompositionInputToDenseMatrix`, `decompositionInputToNestedArray`, `densifyForSolver`, `destroyGlobalGPU`, `destroyGlobalGPUBackend`, `detectGPUCapabilities`, `detectWasmFeatures`, `eig`, `eigvals`, `eigvalsWasm`, `eigWasm`, `getCachedFeatures`, `getGlobalGPUBackend`, `getGlobalGPUContext`, `getRecommendedWorkgroupSize`, `hasWebGPU`, `implicitNumber`, `initializeGlobalGPUBackend`, `initializeParallelMatrix`, `isAtomicsAvailable`, `isDenseMatrix`, `isMatrix`, `isNativeMatrix`, `isPackedMatrixDescriptor`, `isSharedMemoryAvailable`, `isSparseMatrix`, `isTypedScalar`, `isWasmAvailable`, `lowRankApprox`, `lq`, `lstsq`, `lu`, `luSolve`, `matMul`, `matrixExpm`, `matrixLogm`, `matrixPinv`, `matrixSchur`, `matrixSqrtm`, `nestedMatrixShape`, `norm2`, `normFro`, `parallelDiag`, `parallelDotMultiply`, `parallelIdentity`, `parallelMatrix`, `parallelMatrixAbs`, `parallelMatrixAdd`, `parallelMatrixColumn`, `parallelMatrixCos`, `parallelMatrixDiagonal`, `parallelMatrixDistance`, `parallelMatrixDivide`, `parallelMatrixDot`, `parallelMatrixExp`, `parallelMatrixHistogram`, `parallelMatrixLog`, `parallelMatrixMatvec`, `parallelMatrixMax`, `parallelMatrixMean`, `parallelMatrixMin`, `parallelMatrixMultiply`, `parallelMatrixNorm`, `parallelMatrixOuter`, `parallelMatrixRow`, `parallelMatrixSin`, `parallelMatrixSize`, `parallelMatrixSqrt`, `parallelMatrixSquare`, `parallelMatrixStd`, `parallelMatrixSubset`, `parallelMatrixSubtract`, `parallelMatrixSum`, `parallelMatrixTan`, `parallelMatrixTrace`, `parallelMatrixTranspose`, `parallelMatrixVariance`, `parallelOnes`, `parallelRandom`, `parallelUnaryMinus`, `parallelZeros`, `pinv`, `powerIteration`, `ql`, `qr`, `qrPivoted`, `readRightHandSide`, `rq`, `singularValues`, `spectralRadiusWasm`, `svd`, `svdWasm`, `terminateParallelMatrix`, `transposeNestedArray`
+**Factory / uncategorized** (105):
+`assertDenseMatrixSize`
+`balanceForEig`
+`cholesky`
+`clearFeatureCache`
+`cond`
+`condest`
+`createBackendManager`
+`createGPUMatrixBackend`
+`createParallelBackend`
+`createSyncManager`
+`createWASMBackend`
+`decompositionInputToDenseMatrix`
+`decompositionInputToNestedArray`
+`densifyForSolver`
+`destroyGlobalGPU`
+`destroyGlobalGPUBackend`
+`detectGPUCapabilities`
+`detectWasmFeatures`
+`eig`
+`eigvals`
+`eigvalsWasm`
+`eigWasm`
+`getCachedFeatures`
+`getGlobalGPUBackend`
+`getGlobalGPUContext`
+`getRecommendedWorkgroupSize`
+`hasWebGPU`
+`implicitNumber`
+`initializeGlobalGPUBackend`
+`initializeParallelMatrix`
+`isAtomicsAvailable`
+`isDenseMatrix`
+`isMatrix`
+`isNativeMatrix`
+`isPackedMatrixDescriptor`
+`isSharedMemoryAvailable`
+`isSparseMatrix`
+`isTypedScalar`
+`isWasmAvailable`
+`lowRankApprox`
+`lq`
+`lstsq`
+`lu`
+`luSolve`
+`matMul`
+`matrixExpm`
+`matrixLogm`
+`matrixPinv`
+`matrixSchur`
+`matrixSqrtm`
+`nestedMatrixShape`
+`norm2`
+`normFro`
+`parallelDiag`
+`parallelDotMultiply`
+`parallelIdentity`
+`parallelMatrix`
+`parallelMatrixAbs`
+`parallelMatrixAdd`
+`parallelMatrixColumn`
+`parallelMatrixCos`
+`parallelMatrixDiagonal`
+`parallelMatrixDistance`
+`parallelMatrixDivide`
+`parallelMatrixDot`
+`parallelMatrixExp`
+`parallelMatrixHistogram`
+`parallelMatrixLog`
+`parallelMatrixMatvec`
+`parallelMatrixMax`
+`parallelMatrixMean`
+`parallelMatrixMin`
+`parallelMatrixMultiply`
+`parallelMatrixNorm`
+`parallelMatrixOuter`
+`parallelMatrixRow`
+`parallelMatrixSin`
+`parallelMatrixSize`
+`parallelMatrixSqrt`
+`parallelMatrixSquare`
+`parallelMatrixStd`
+`parallelMatrixSubset`
+`parallelMatrixSubtract`
+`parallelMatrixSum`
+`parallelMatrixTan`
+`parallelMatrixTrace`
+`parallelMatrixTranspose`
+`parallelMatrixVariance`
+`parallelOnes`
+`parallelRandom`
+`parallelUnaryMinus`
+`parallelZeros`
+`pinv`
+`powerIteration`
+`ql`
+`qr`
+`qrPivoted`
+`readRightHandSide`
+`rq`
+`singularValues`
+`spectralRadiusWasm`
+`svd`
+`svdWasm`
+`terminateParallelMatrix`
+`transposeNestedArray`
 
 ### Constants & values (12)
 
-`backendManager`, `backendRegistry`, `BUILTIN_SHADERS`, `DEFAULT_BACKEND_HINTS`, `DEFAULT_EXTENDED_HINTS`, `DEFAULT_SOLVER_MAX_ELEMENTS`, `DENSE_MATRIX_MAX_ELEMENTS`, `gpuMatrixBackend`, `jsBackend`, `parallelBackend`, `parallelMatrixOperations`, `wasmBackend`
+`backendManager`
+`backendRegistry`
+`BUILTIN_SHADERS`
+`DEFAULT_BACKEND_HINTS`
+`DEFAULT_EXTENDED_HINTS`
+`DEFAULT_SOLVER_MAX_ELEMENTS`
+`DENSE_MATRIX_MAX_ELEMENTS`
+`gpuMatrixBackend`
+`jsBackend`
+`parallelBackend`
+`parallelMatrixOperations`
+`wasmBackend`
 
 ### Classes & types (15)
 
-`BackendManager`, `BackendRegistry`, `BatchExecutor`, `BufferPool`, `DenseMatrix`, `GPUBackend`, `GPUContext`, `GPUMatrixBackend`, `JSBackend`, `Matrix`, `ParallelBackend`, `ShaderManager`, `SparseMatrix`, `SyncManager`, `WASMBackend`
+`BackendManager`
+`BackendRegistry`
+`BatchExecutor`
+`BufferPool`
+`DenseMatrix`
+`GPUBackend`
+`GPUContext`
+`GPUMatrixBackend`
+`JSBackend`
+`Matrix`
+`ParallelBackend`
+`ShaderManager`
+`SparseMatrix`
+`SyncManager`
+`WASMBackend`
 
 ### Namespace aggregates (1)
 
