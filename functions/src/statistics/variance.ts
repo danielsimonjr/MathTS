@@ -1,5 +1,5 @@
 import { deepForEach } from '../utils/collection.js';
-import { isBigNumber } from '../utils/is.js';
+import { isBigNumber, isComplex } from '../utils/is.js';
 import { factory } from '../utils/factory.js';
 import { improveErrorMessage } from './utils/improveErrorMessage.js';
 import { sumSquaredDeviations } from '@danielsimonjr/mathts-core';
@@ -36,6 +36,8 @@ interface VarianceDependencies {
   divide: TypedFunction;
   mapSlices: TypedFunction;
   isNaN: TypedFunction;
+  conj: TypedFunction;
+  re: TypedFunction;
   parseNumberWithConfig: (value: string) => unknown;
 }
 
@@ -46,19 +48,19 @@ const DEFAULT_NORMALIZATION: NormalizationType = 'unbiased';
 /** The operations that the exact sum of squared deviations needs. */
 type DeviationOps = Pick<
   VarianceDependencies,
-  'add' | 'subtract' | 'multiply' | 'divide' | 'parseNumberWithConfig'
+  'add' | 'subtract' | 'multiply' | 'divide' | 'conj' | 're' | 'parseNumberWithConfig'
 >;
 
 /**
  * The sum of squared deviations from the mean of every value of `array`, at any depth, and the
  * number of values. A string value becomes a number of the configured type, as in `sum`. A
- * Complex deviation contributes its complex square `diff * diff` (#1550).
+ * Complex deviation contributes `diff * conj(diff)` (a real number).
  */
 function sumOfSquaredDeviations(
   array: unknown[] | MatrixType,
   ops: DeviationOps
 ): { sum: unknown; num: number } {
-  const { add, subtract, multiply, divide, parseNumberWithConfig } = ops;
+  const { add, subtract, multiply, divide, conj, re, parseNumberWithConfig } = ops;
   const toValue = (v: unknown): unknown => (typeof v === 'string' ? parseNumberWithConfig(v) : v);
   let sum: unknown;
   let num = 0;
@@ -76,11 +78,7 @@ function sumOfSquaredDeviations(
   sum = undefined;
   deepForEach(array, function (value: unknown) {
     const diff = subtract(toValue(value), mean);
-    // The squared deviation keeps the complex square (diff * diff, as mathjs
-    // computes it): a Complex input makes the variance Complex (#1550). The
-    // former `re(diff * conj(diff))` dropped the imaginary part and reduced
-    // complex data to a real magnitude.
-    const sq = multiply(diff, diff);
+    const sq = isComplex(diff) ? re(multiply(diff, conj(diff))) : multiply(diff, diff);
     sum = sum === undefined ? sq : add(sum, sq);
   });
   return { sum, num };
@@ -95,6 +93,8 @@ const dependencies = [
   'divide',
   'mapSlices',
   'isNaN',
+  'conj',
+  're',
   'parseNumberWithConfig',
 ];
 
@@ -109,9 +109,11 @@ export const createVariance = /* #__PURE__ */ factory(
     divide,
     mapSlices,
     isNaN: mathIsNaN,
+    conj,
+    re,
     parseNumberWithConfig,
   }: VarianceDependencies) => {
-    const ops: DeviationOps = { add, subtract, multiply, divide, parseNumberWithConfig };
+    const ops: DeviationOps = { add, subtract, multiply, divide, conj, re, parseNumberWithConfig };
 
     /**
      * Compute the variance of a matrix or a  list with values.
@@ -296,6 +298,8 @@ const ddofDependencies = [
   'multiply',
   'divide',
   'isNaN',
+  'conj',
+  're',
   'parseNumberWithConfig',
 ];
 

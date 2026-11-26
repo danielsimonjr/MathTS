@@ -25,24 +25,21 @@ describe('#1049 exact element types in the public reduction types', () => {
   it('variance and std', () => {
     const vf: Fraction = variance(F);
     const vb: BigNumber = variance(B);
-    // #1550: the rest signature keeps the value's exact scalar type (unknown at
-    // the source level); the bigint list computes to a number at runtime.
-    const vi = variance(I) as number;
+    const vi: number = variance(I);
     const sf: number = std(F);
     const sb: BigNumber = std([B, B]);
     const si: number = std(I);
-    // #1550: the squared deviation of a Complex is its complex square, so the
-    // variance and the std of Complex values are Complex (as in mathjs).
-    const vc: Complex = variance(C);
-    const sc: Complex = std(C);
-    expect([vf, vb, sb, vc, sc].map((x) => x.constructor)).toEqual([
-      Fraction,
-      BigNumber,
-      BigNumber,
-      Complex,
-      Complex,
+    // A Complex deviation counts as |d|^2, so the variance and std of Complex values are real.
+    const vc: number = variance(C);
+    const sc: number = std(C);
+    expect([vf, vb, sb].map((x) => x.constructor)).toEqual([Fraction, BigNumber, BigNumber]);
+    expect([typeof vi, typeof sf, typeof si, typeof vc, typeof sc]).toEqual([
+      'number',
+      'number',
+      'number',
+      'number',
+      'number',
     ]);
-    expect([typeof vi, typeof sf, typeof si]).toEqual(['number', 'number', 'number']);
   });
 
   it('median and mad', () => {

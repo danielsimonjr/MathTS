@@ -43,14 +43,17 @@ import {
   createCompatArg,
   createCompatErfExpression,
   createCompatExpm,
+  createCompatGammaBigNumberGuard,
   createCompatMad,
-  createCompatVarargsStatistics,
+  createCompatMathjsStatistics,
   createForeignScalarConverter,
   isComplexLike as g02IsComplexLike,
+  withComplexOrderingGuard,
   withConvertedScalars,
   withCountBoolean,
   withFixedArity,
   withIdentityValidation,
+  withInvalidNumericStringGuard,
   withRoundDigitsGuard,
   withFractionRejection,
   withRawSingleValue,
@@ -325,9 +328,13 @@ const convertForeignScalar = createForeignScalarConverter({
   sparseFrom: mathFunctions.sparse as (nested: unknown) => unknown,
   isOwnMatrix: isOwnBridgeMatrix,
 });
-const compatArg = createCompatArg(
+const withBigNumberPrecision = (precision: number, build: () => unknown): unknown =>
+  mathFunctions.runWithConfig({ precision }, build);
+const compatArgDefault = createCompatArg(
   mathFunctions.arg as (...args: unknown[]) => unknown,
-  CompatBigNumberCtor
+  CompatBigNumberCtor,
+  () => defaultConfig.precision ?? 64,
+  withBigNumberPrecision
 );
 const compatExpm = createCompatExpm(
   mathFunctions.expm as (...args: unknown[]) => unknown,
@@ -492,6 +499,35 @@ export function create(
   const createdWithCustomConfig = instanceConfigUsesOverlay(configBaseline, defaultsAtCreate);
   const currentConfig: MathJSConfig = { ...configBaseline };
 
+  const g02StatisticsDeps = {
+    add: mathFunctions.add as (...args: unknown[]) => unknown,
+    subtract: mathFunctions.subtract as (...args: unknown[]) => unknown,
+    multiply: mathFunctions.multiply as (...args: unknown[]) => unknown,
+    divide: mathFunctions.divide as (...args: unknown[]) => unknown,
+    sqrt: mathFunctions.sqrt as (...args: unknown[]) => unknown,
+    matrix: mathFunctions.matrix as (data: unknown, storage?: string) => unknown,
+  };
+  const compatArg = createCompatArg(
+    mathFunctions.arg as (...args: unknown[]) => unknown,
+    CompatBigNumberCtor,
+    () => currentConfig.precision ?? 64,
+    withBigNumberPrecision
+  );
+  const compatStd = createCompatMathjsStatistics(
+    'std',
+    shims.std as (...args: unknown[]) => unknown,
+    g02StatisticsDeps
+  );
+  const compatVariance = createCompatMathjsStatistics(
+    'variance',
+    shims.variance as (...args: unknown[]) => unknown,
+    g02StatisticsDeps
+  );
+  const compatErf = createCompatErfExpression(mathFunctions.erf as (...args: unknown[]) => unknown);
+  const compatGamma = createCompatGammaBigNumberGuard(
+    mathFunctions.gamma as (...args: unknown[]) => unknown
+  );
+
   // The overlay decision diffs every config key. Each wrapped call used to repeat that
   // diff (a Set per call, #889); it now recomputes only after config() changes the config.
   let configGeneration = 0;
@@ -613,7 +649,7 @@ export function create(
     isNegative: mathFunctions.isNegative,
     isInteger: mathFunctions.isInteger,
     fix: withConvertedScalars(convertForeignScalar, mathFunctions.factory_fix),
-    sqrt: shims.sqrt,
+    sqrt: withFractionRejection(shims.sqrt),
     abs: shims.abs,
     // #1587: a Fraction argument throws the mathjs conversion error.
     exp: withFractionRejection(shims.exp),
@@ -629,17 +665,23 @@ export function create(
     atan2: withFractionRejection(shims.atan2),
 
     // Statistics
-    sum: withRawSingleValue(shims.sum),
+    sum: withInvalidNumericStringGuard(withRawSingleValue(shims.sum)),
     mean: shims.mean,
-    std: createCompatVarargsStatistics(shims.std),
-    variance: createCompatVarargsStatistics(shims.variance),
-    min: withRawSingleValue(
-      wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
-      g02IsComplexLike
+    std: compatStd,
+    variance: compatVariance,
+    min: withComplexOrderingGuard(
+      'min',
+      withRawSingleValue(
+        wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
+        g02IsComplexLike
+      )
     ),
-    max: withRawSingleValue(
-      wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
-      g02IsComplexLike
+    max: withComplexOrderingGuard(
+      'max',
+      withRawSingleValue(
+        wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
+        g02IsComplexLike
+      )
     ),
     sign: wrapUnitExtrema(mathFunctions.sign as (...args: unknown[]) => unknown, factorySignUnits),
 
@@ -734,12 +776,14 @@ export function create(
     asech: withFractionRejection(g08Overrides.asech),
     asinh: withFractionRejection(g08Overrides.asinh),
     atanh: withFractionRejection(g08Overrides.atanh),
-    cbrt: mathFunctions.factory_cbrt,
+    cbrt: withFractionRejection(mathFunctions.factory_cbrt),
     cosh: withFractionRejection(mathFunctions.factory_cosh),
     cot: withFractionRejection(mathFunctions.factory_cot),
     csc: withFractionRejection(mathFunctions.factory_csc),
     cube: mathFunctions.factory_cube,
-    expm1: mathFunctions.factory_expm1,
+    expm1: withFractionRejection(mathFunctions.factory_expm1),
+    erf: compatErf,
+    gamma: withFractionRejection(compatGamma),
     sec: withFractionRejection(mathFunctions.factory_sec),
     sinh: withFractionRejection(mathFunctions.factory_sinh),
     square: mathFunctions.factory_square,
@@ -756,7 +800,7 @@ export function create(
     unaryPlus: mathFunctions.factory_unaryPlus,
     nthRoot: mathFunctions.factory_nthRoot,
     // #1587: count of a boolean is the string length; size/inv take one argument.
-    count: withCountBoolean(mathFunctions.count),
+    count: withFixedArity('count', 1, withCountBoolean(mathFunctions.count)),
     size: withFixedArity('size', 1, mathFunctions.size),
     inv: withFixedArity('inv', 1, mathFunctions.inv),
     // #1583 / #1588: the mathjs-shaped mad and the Matrix-returning expm.
@@ -1053,7 +1097,7 @@ export * from './function-reexports.js';
 
 // G02 (#1550, #1583, #1588): the named mathjs-shaped adapters shadow the native
 // re-exports above (an explicit export wins over a star export).
-export { compatExpm as expm, compatMad as mad, compatArg as arg };
+export { compatExpm as expm, compatMad as mad, compatArgDefault as arg };
 
 // These four names are also star-exported by ./shims.js (the G03 sign-predicate
 // wrappers). The explicit re-export keeps the functions implementation winning,

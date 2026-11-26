@@ -516,12 +516,11 @@ export const add = withTypedSurface(function (...args: unknown[]): unknown {
     throw err;
   }
 }, _add) as NumericStringArithmetic & PublicAdd & OneArg;
-export const subtract = makeArithmetic(
-  'subtract',
-  subtractPair as (a: unknown, b: unknown) => unknown,
-  _matSubtract as (a: unknown, b: unknown) => unknown,
-  true
-) as typeof _subtract;
+export const subtract = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
+  if (arguments.length < 2) throw tooFewArgumentsError('subtract');
+  if (arguments.length > 2) throw tooManyArgumentsError('subtract', 2, arguments.length);
+  return subtractPair(a, b);
+}, _subtract) as typeof _subtract;
 export const multiply = makeArithmetic(
   'multiply',
   withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
@@ -759,7 +758,8 @@ export function transpose<T>(m: T[]): T[];
 export function transpose(m: CompatMatrixValue): CompatMatrixValue;
 export function transpose(m: unknown): unknown {
   // #1587: mathjs transpose takes exactly one argument.
-  if (arguments.length !== 1) {
+  if (arguments.length < 1) throw tooFewArgumentsError('transpose');
+  if (arguments.length > 1) {
     throw tooManyArgumentsError('transpose', 1, arguments.length);
   }
   if (isDenseMatrix(m) || isSparseMatrix(m)) return m.transpose();
@@ -772,7 +772,8 @@ export function det<T extends MatrixScalar>(m: T): T;
 export function det(m: unknown): ReturnType<typeof _det>;
 export function det(m: unknown): unknown {
   // #1587: mathjs det takes exactly one argument.
-  if (arguments.length !== 1) {
+  if (arguments.length < 1) throw tooFewArgumentsError('det');
+  if (arguments.length > 1) {
     throw tooManyArgumentsError('det', 1, arguments.length);
   }
   if (isSparseMatrix(m)) throw new TypeError('Expected DenseMatrix or 2D array');
