@@ -60,7 +60,6 @@ export {
   dotDivide,
   dotMultiply,
   dotPow,
-  eigs,
   erf,
   expm,
   factory_expm1 as expm1,
