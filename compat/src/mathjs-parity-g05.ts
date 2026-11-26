@@ -681,6 +681,14 @@ const createMathjsSolveODE = /* #__PURE__ */ factory(
       ) => solveODE(f, tspan, y0, options),
       'function, Matrix, Matrix, Object': matrixSolveODE,
       'function, Array, Array': (f: unknown, T: unknown[], y0: unknown[]) => solveODE(f, T, y0, {}),
+      'function, Array, Matrix': (f: unknown, T: unknown[], y0: MatrixLike) =>
+        solveODE(f, T, y0.toArray?.() as unknown[], {}),
+      'function, Array, Matrix, Object': (
+        f: unknown,
+        T: unknown[],
+        y0: MatrixLike,
+        options: Record<string, unknown>
+      ) => solveODE(f, T, y0.toArray?.() as unknown[], options),
       'function, Matrix, Matrix': (f: unknown, T: MatrixLike, y0: MatrixLike) =>
         matrixSolveODE(f, T, y0, {}),
       'function, Array, number | BigNumber | Unit': (f: unknown, T: unknown[], y0: unknown) => {

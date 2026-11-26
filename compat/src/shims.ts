@@ -409,7 +409,7 @@ const makeArithmetic =
   ) =>
   (...args: unknown[]): unknown => {
     if (args.length === 0) {
-      throw new TypeError('Too few arguments (expected at least 1)');
+      throw tooFewArgumentsError(name, 0);
     }
     // #1587: mathjs rejects a lone argument ("Too few arguments in function add
     // (expected: any, index: 1)"); the compat fold used to return it as is.
@@ -533,7 +533,7 @@ export const add = withTypedSurface(function (...args: unknown[]): unknown {
   }
 }, _add) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
-  if (arguments.length < 2) throw tooFewArgumentsError('subtract');
+  if (arguments.length < 2) throw tooFewArgumentsError('subtract', arguments.length);
   if (arguments.length > 2) throw tooManyArgumentsError('subtract', 2, arguments.length);
   return subtractPair(a, b);
 }, _subtract) as typeof _subtract;
@@ -774,7 +774,7 @@ export function transpose<T>(m: T[]): T[];
 export function transpose(m: CompatMatrixValue): CompatMatrixValue;
 export function transpose(m: unknown): unknown {
   // #1587: mathjs transpose takes exactly one argument.
-  if (arguments.length < 1) throw tooFewArgumentsError('transpose');
+  if (arguments.length < 1) throw tooFewArgumentsError('transpose', arguments.length);
   if (arguments.length > 1) {
     throw tooManyArgumentsError('transpose', 1, arguments.length);
   }
@@ -788,7 +788,7 @@ export function det<T extends MatrixScalar>(m: T): T;
 export function det(m: unknown): ReturnType<typeof _det>;
 export function det(m: unknown): unknown {
   // #1587: mathjs det takes exactly one argument.
-  if (arguments.length < 1) throw tooFewArgumentsError('det');
+  if (arguments.length < 1) throw tooFewArgumentsError('det', arguments.length);
   if (arguments.length > 1) {
     throw tooManyArgumentsError('det', 1, arguments.length);
   }
