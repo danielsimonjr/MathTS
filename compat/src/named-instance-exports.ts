@@ -239,16 +239,10 @@ type RangeFn = ((...args: unknown[]) => unknown) & { signatures?: Record<string,
 export function g18InstanceOverrides(config: () => G18ParityConfig): {
   zeta: ReturnType<typeof createMathjsZeta>;
   symbolicEqual: ReturnType<typeof createMathjsSymbolicEqual>;
-  range: ReturnType<typeof createMathjsRange>;
 } {
   return {
     zeta: createMathjsZeta(mathjsZetaDeps(config)),
     symbolicEqual: createMathjsSymbolicEqual({ typed: g18Typed }),
-    range: createMathjsRange({
-      nativeRange: mathFunctions.range as RangeFn,
-      config,
-      typed: g18Typed,
-    }),
   };
 }
 
