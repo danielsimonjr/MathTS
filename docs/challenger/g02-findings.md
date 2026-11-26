@@ -173,3 +173,95 @@ Two compat tests pass and are kept as controls: `C6 arg(bignumber) at the defaul
 - Changelog: the PR uses `changelog-fragments/2026-11-26-g02-factory-binding.md` (no
   `CHANGELOG.md` edit) — correct format. It does not add a `.changeset/*.md` for the
   `compat`/`functions`/`core` bumps the fragment announces `BREAKING`.
+
+---
+
+# Round 2 — verification of the fix commits
+
+Fix commits `<code>a00903b7</code>` (revert native variance + compat adapters) and
+`a75a2f11` (bundle budget) were verified against this branch's tests and against the builder's own
+suites, in a clean worktree at `origin/cursor/g02-bind-factories-d797` after `bun run build`.
+
+## Resolved
+
+- **N1/N2/N3 (native).** `git diff origin/main..origin/cursor/g02-bind-factories-d797` is now
+  **empty** for `functions/src/statistics/variance.ts`, `functions/src/typed/arithmetic.ts`,
+  both `public-overloads` files, and both edited native tests. The critical-library diff versus
+  `main` is only the two `core/` rounding fixes, which this review classifies as genuine bug fixes
+  (a). Native variance of Complex data is again the NumPy value (`2.5`, `2`, `4`).
+- **Round-1 compat findings.** All 28 cases pass, including R1–R3 (`mad()` and `mad` of Complex),
+  C4–C5 (`sqrt`/`cbrt`/`expm1`/`gamma`/`erf` Fraction rejection), C6 (instance-level
+  `erf`/`gamma` BigNumber), C12 (`arg` precision), and C1/C2/C3 arity and empty-input texts.
+- My two test files are **byte-identical** to what landed on the builder branch (no test was
+  weakened to make them pass).
+
+## New failures introduced by the fix commits (builder suite is red)
+
+All five reproduce on the fixed head and pass on the pre-fix head `9318eb1b`, so they are
+regressions from `a00903b7`, not pre-existing gaps.
+
+### 1. `compat/tests/shims.test.ts` → `subtract folds left-to-right over all arguments`
+
+`subtract(10, 2, 3)` now throws `TypeError: Too many arguments in function subtract (expected: 2,
+actual: 3)`. That is what mathjs 15.3.0 does, but this is a **pre-existing compat test** that pins
+the compat fold, and the fix commit changed compat behavior without updating it. Either the test is
+updated with a citation (the round-1 finding C2 asked for exactly this behavior) or the guard is
+dropped. Leaving both is a red suite.
+
+### 2. `compat/tests/dogfood-1337-compat-empty-shape.test.ts` → `0 x 0 and 2 x 2 operands, as inv and sqrtm`
+
+`m.subtract(dense, dense)` no longer returns a native `DenseMatrix`; it returns the bridge
+`MathJSDenseMatrix`. Reproduced for a 2×2 as well:
+`subtract(A, A) instanceof DenseMatrix === false`, while `divide` is `true`. Cause: the new
+`subtract = withTypedSurface(function (a, b) { … return subtractPair(a, b) }, _subtract)` calls
+`subtractPair` directly and bypasses the `_matSubtract` matrix branch and the `withTypedSurface`
+result boxing that `makeArithmetic('subtract', …)` used to apply. This is an internal-consistency
+regression independent of mathjs.
+
+### 3. `compat/tests/std-variance.test.ts` → `honours the dimension argument`
+
+`expect(varianceOf(math.matrix(m), 0)).toEqual([2, 4.5])` receives a `MathJSDenseMatrix` and fails
+`toEqual` against a plain array. `reboxMatrixStatistics` now boxes the sliced result, which matches
+mathjs (`DenseMatrix [2, 2]`) — the round-1 finding C4 asked for it — but the existing compat test
+pins the array shape. Same category as (1): behavior change without a test update.
+
+### 4. `compat/tests/parity/full-surface.test.ts` → `every instance function matches the oracle over the argument pool` — **248 unrecorded labels**
+
+The harness fails with 248 pool divergences that are not in `known-gaps/`:
+
+| function   | labels | cause                                                                                                                                                                                                                                                                         |
+| ---------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `count`    | 184    | `withFixedArity('count', 1, withCountBoolean(...))` reports `Too many arguments` before the type check. mathjs reports `Unexpected type of argument in function count (… actual: number, index: 0)` for `count(0, 0)`, `count(1, 2)`, … All 184 two-number pairs now diverge. |
+| `sum`      | 16     | `withInvalidNumericStringGuard` throws `SyntaxError: String "abc" is not a valid number` for **every** string argument, but mathjs only does that for the unary form; `sum('abc', 0)` is `Error: Cannot convert "abc" to a number`.                                           |
+| `variance` | 16     | same guard, same wrong scope: `variance('abc', 0)`                                                                                                                                                                                                                            |
+| `std`      | 16     | same guard                                                                                                                                                                                                                                                                    |
+| `mad`      | 16     | same guard (`mad('abc', 0)`)                                                                                                                                                                                                                                                  |
+
+The guard should apply only when the string is the **sole** argument (the shape mathjs's unary
+signature rejects); with a second argument mathjs takes the variadic path and gives the conversion
+`Error`. And `count` should check the argument **type** before the arity.
+
+### 5. `compat/tests/parity/full-surface.test.ts` → `every embedded-docs example matches the oracle` — one **stale** gap
+
+`{"number":"BigNumber"} gamma(1/2)` is listed in `known-gaps/` but now matches the oracle, because
+`createCompatGammaBigNumberGuard` was added. A gap that no longer diverges fails the harness by
+design (`stale` assertion), so the label must be deleted in the same commit.
+
+## Net
+
+The round-1 findings are genuinely fixed, and the native critical libraries are clean. But the fix
+commits leave `compat` with **4 failing test files / 5 failing tests** and **249 harness labels**
+(248 unrecorded + 1 stale). The builder's "all green locally" claim did not hold in a clean worktree
+build of `a75a2f11`.
+
+Failing on `a75a2f11`:
+
+```
+compat/tests/shims.test.ts                                     > subtract folds left-to-right over all arguments
+compat/tests/std-variance.test.ts                              > honours the dimension argument (1.707825127659933 before)
+compat/tests/dogfood-1337-compat-empty-shape.test.ts           > 0 x 0 and 2 x 2 operands, as inv and sqrtm
+compat/tests/parity/full-surface.test.ts                       > every embedded-docs example matches the oracle or a recorded gap
+compat/tests/parity/full-surface.test.ts                       > every instance function matches the oracle over the argument pool or a recorded gap
+```
+
+`functions` (718 files / 14,076 tests) and the two challenger suites are green on `a75a2f11`.
