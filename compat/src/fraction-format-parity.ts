@@ -4,6 +4,7 @@
  * {@link @danielsimonjr/mathts-core} Fraction formatting is unchanged.
  */
 import {
+  isBigNumber,
   isFraction,
   isMatrix,
   isSparseMatrix,
@@ -173,9 +174,46 @@ function formatCompatValue(value: unknown, options: unknown, nativeFormat: Nativ
   return nativeFormat(value, options);
 }
 
+function formatOptionsToNumber(precision: unknown): unknown {
+  if (isBigNumber(precision)) {
+    return precision.toNumber();
+  }
+  return precision;
+}
+
+/** Coerce `format` options like mathjs: numeric second arg and BigNumber precision (#1575 G20). */
+export function normalizeCompatFormatOptions(
+  options: unknown,
+  defaultPrecision?: number
+): Record<string, unknown> {
+  if (options === undefined) {
+    return defaultPrecision !== undefined ? { precision: defaultPrecision } : {};
+  }
+  if (typeof options === 'number') {
+    return { precision: options };
+  }
+  if (isBigNumber(options)) {
+    return { precision: options.toNumber() };
+  }
+  if (options !== null && typeof options === 'object') {
+    const merged = { ...(options as Record<string, unknown>) };
+    if (merged.precision === undefined && defaultPrecision !== undefined) {
+      merged.precision = defaultPrecision;
+    }
+    if (merged.precision !== undefined) {
+      merged.precision = formatOptionsToNumber(merged.precision);
+    }
+    return merged;
+  }
+  return {};
+}
+
 /** Wrap the native `format` so Fraction ratios and units match mathjs 15.3.0 (#1579). */
 export function createCompatFormat(nativeFormat: NativeFormat): NativeFormat {
-  return (value: unknown, options?: unknown) => formatCompatValue(value, options, nativeFormat);
+  return (value: unknown, options?: unknown) => {
+    const normalized = normalizeCompatFormatOptions(options);
+    return formatCompatValue(value, normalized, nativeFormat);
+  };
 }
 
 type NativeString = (value: unknown) => unknown;

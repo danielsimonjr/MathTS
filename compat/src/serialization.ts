@@ -25,9 +25,20 @@ export function compatReplacer(this: unknown, key: string, value: unknown): unkn
   return nativeReplacer(key, value);
 }
 
+function assertReviverTagShape(value: object): void {
+  const tag = Reflect.get(value, 'mathjs');
+  if (tag === 'BigNumber' && !Object.hasOwn(value, 'value')) {
+    throw new Error('[DecimalError] Invalid argument: undefined');
+  }
+  if (tag === 'Complex' && (!Object.hasOwn(value, 're') || !Object.hasOwn(value, 'im'))) {
+    throw new SyntaxError('Invalid Param');
+  }
+}
+
 /** Revive tagged values using only the supplied classes. */
 export function reviveWithClasses(value: unknown, classes: Record<string, unknown>): unknown {
   if (typeof value !== 'object' || value === null || !Object.hasOwn(value, 'mathjs')) return value;
+  assertReviverTagShape(value);
   const tag = Reflect.get(value, 'mathjs');
   if (typeof tag !== 'string' || !Object.hasOwn(classes, tag)) return value;
   const constructor = classes[tag] as { fromJSON?: (input: unknown) => unknown } | undefined;
@@ -43,16 +54,20 @@ export function compatReviver(key: string, value: unknown): unknown {
 export function reviveInstanceValue(
   key: string,
   value: unknown,
-  Unit: typeof instanceSymbols.Unit
+  Unit: typeof instanceSymbols.Unit,
+  classes: Record<string, unknown> = instanceSymbols
 ): unknown {
+  if (value && typeof value === 'object' && Object.hasOwn(value, 'mathjs')) {
+    assertReviverTagShape(value);
+  }
   if (
     value &&
     typeof value === 'object' &&
     Object.hasOwn(value, 'mathjs') &&
     (Reflect.get(value, 'mathjs') === 'Unit' || Reflect.get(value, 'mathjs') === 'BigNumber')
   ) {
-    return reviveWithClasses(value, { Unit, BigNumber: instanceSymbols.BigNumber });
+    return reviveWithClasses(value, { ...classes, Unit, BigNumber: instanceSymbols.BigNumber });
   }
   const numeric = nativeReviver(key, value);
-  return numeric === value ? reviveWithClasses(value, instanceSymbols) : numeric;
+  return numeric === value ? reviveWithClasses(value, classes) : numeric;
 }

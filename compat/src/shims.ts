@@ -44,6 +44,7 @@ import type {
 } from '@danielsimonjr/mathts-functions';
 
 import { withMathjsComplexBinary } from './mathjs-complex.js';
+import { ensureMathjsFractionToJson } from './fraction-mathjs-json.js';
 import { compatComplexPow } from './mathjs-compat-pow.js';
 import {
   add as _add,
@@ -162,10 +163,16 @@ interface CompatFraction {
  * returned unchanged (#1033), and a BigNumber, a bigint, null, an object `{ n, d }`, a Unit, an
  * Array and a Matrix convert, as in mathjs.
  */
-export const fraction = mathTyped('fraction', factory_mathjsCompat.fraction as never, {
+const fractionCore = mathTyped('fraction', factory_mathjsCompat.fraction as never, {
   '': () => new Fraction(0, 1),
   undefined: () => new Fraction(0, 1),
 }) as unknown as CompatFraction;
+
+function fractionExport(this: unknown, ...args: unknown[]): unknown {
+  return ensureMathjsFractionToJson(Reflect.apply(fractionCore, this, args));
+}
+
+export const fraction = Object.assign(fractionExport, fractionCore) as CompatFraction;
 
 const compatBignumber = factory_mathjsCompat.compatFactoryExports().createBignumber({
   typed: factory_mathjsCompat.createCompatTyped(),
@@ -402,7 +409,7 @@ const makeArithmetic =
   ) =>
   (...args: unknown[]): unknown => {
     if (args.length === 0) {
-      throw new TypeError('Too few arguments (expected at least 1)');
+      throw tooFewArgumentsError(name, 0);
     }
     // #1587: mathjs rejects a lone argument ("Too few arguments in function add
     // (expected: any, index: 1)"); the compat fold used to return it as is.
@@ -526,7 +533,7 @@ export const add = withTypedSurface(function (...args: unknown[]): unknown {
   }
 }, _add) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
-  if (arguments.length < 2) throw tooFewArgumentsError('subtract');
+  if (arguments.length < 2) throw tooFewArgumentsError('subtract', arguments.length);
   if (arguments.length > 2) throw tooManyArgumentsError('subtract', 2, arguments.length);
   return subtractPair(a, b);
 }, _subtract) as typeof _subtract;
@@ -767,7 +774,7 @@ export function transpose<T>(m: T[]): T[];
 export function transpose(m: CompatMatrixValue): CompatMatrixValue;
 export function transpose(m: unknown): unknown {
   // #1587: mathjs transpose takes exactly one argument.
-  if (arguments.length < 1) throw tooFewArgumentsError('transpose');
+  if (arguments.length < 1) throw tooFewArgumentsError('transpose', arguments.length);
   if (arguments.length > 1) {
     throw tooManyArgumentsError('transpose', 1, arguments.length);
   }
@@ -781,7 +788,7 @@ export function det<T extends MatrixScalar>(m: T): T;
 export function det(m: unknown): ReturnType<typeof _det>;
 export function det(m: unknown): unknown {
   // #1587: mathjs det takes exactly one argument.
-  if (arguments.length < 1) throw tooFewArgumentsError('det');
+  if (arguments.length < 1) throw tooFewArgumentsError('det', arguments.length);
   if (arguments.length > 1) {
     throw tooManyArgumentsError('det', 1, arguments.length);
   }

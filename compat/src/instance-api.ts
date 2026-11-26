@@ -7,6 +7,7 @@ import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
 
 import type { mathTyped } from '@danielsimonjr/mathts-core';
 import { deepMap, isMatrix } from '@danielsimonjr/mathts-core/internal';
+import { isCompatFactory } from './create-factory-validation.js';
 import { createHelpClass } from '@danielsimonjr/mathts-expression';
 import {
   createInstanceEvaluator,
@@ -34,6 +35,8 @@ import {
 } from './mathjs-expression-bindings.js';
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
 import { wrapCompatUnitConstructor } from './mathjs-unit.js';
+import { instanceSymbols } from './instance-symbols.js';
+import { wrapFactoryCreator, type CompatFactory } from './factory-mathjs-errors.js';
 import { patchParseForMathjsToTex } from './totex-parity.js';
 import {
   buildExpressionTransforms,
@@ -120,6 +123,12 @@ const wiredInstances = new WeakSet<object>();
  */
 const INSTANCE_BRAND = Symbol.for('mathts.compat.instance');
 
+/** True when `value` is a compat instance built by `create` / `wireMathjsInstanceApi`. */
+export function isCompatMathInstance(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') return false;
+  return isInstance(value as object);
+}
+
 function isInstance(value: object): boolean {
   if (wiredInstances.has(value)) return true;
   const proto: unknown = Object.getPrototypeOf(value);
@@ -148,6 +157,36 @@ function scrubDenylist(scope: Record<string, unknown>): void {
   for (const key of EVALUATE_SCOPE_OMIT) {
     delete scope[key];
   }
+}
+
+/** mathjs defers evaluator rebuild until plain values are imported; lazy factories stay unread (#1575 G20 D5). */
+function importRequiresEvaluatorRebind(functions: unknown): boolean {
+  if (functions === null || typeof functions !== 'object') return false;
+  const queue: unknown[] = Array.isArray(functions) ? [...functions] : [functions];
+  while (queue.length > 0) {
+    const current = queue.pop();
+    if (current === null || typeof current !== 'object') {
+      if (!isCompatFactory(current)) return true;
+      continue;
+    }
+    if (Array.isArray(current)) {
+      queue.push(...current);
+      continue;
+    }
+    for (const key of Object.keys(current)) {
+      const desc = Object.getOwnPropertyDescriptor(current, key);
+      if (desc === undefined) continue;
+      if ('value' in desc) {
+        const value = desc.value;
+        if (value !== null && typeof value === 'object' && !isCompatFactory(value)) {
+          queue.push(value);
+        } else if (!isCompatFactory(value)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 /**
@@ -187,6 +226,11 @@ export function wireMathjsInstanceApi(
 
   const mathNs = instance as MathNamespace;
   mathNs.typed = instanceTyped;
+  if (typeof instance.factory === 'function') {
+    instance.factory = wrapFactoryCreator(
+      instance.factory as (...args: unknown[]) => CompatFactory
+    );
+  }
   mathNs.expression = expressionLayers;
   // G13 (#1572): the 26 expression-language transforms, built against the
   // instance, and `mathWithTransform` = the instance's function namespace with
@@ -259,7 +303,6 @@ export function wireMathjsInstanceApi(
   }
   const importedFactories: ImportableFactories = {};
   const noopLoad = (): unknown => undefined;
-
   const internalImport = importFactory(
     instanceTyped as never,
     noopLoad as never,
@@ -287,6 +330,7 @@ export function wireMathjsInstanceApi(
   const EVALUATE_SCOPE_OVERRIDES = [
     'zpk2tf',
     'freqz',
+    'format',
     // G05 (#1553, #1584): the mathjs 15.3.0 schur/sylvester/lyap/solveODE adapters.
     'schur',
     'sylvester',
@@ -454,7 +498,9 @@ export function wireMathjsInstanceApi(
     }
     internalImport(functions, options);
     scrubDenylist(expressionLayers.mathWithTransform);
-    rebindEvaluator();
+    if (importRequiresEvaluatorRebind(functions)) {
+      rebindEvaluator();
+    }
   }
 
   // The parser of the functions package evaluates in the module scope. The instance
@@ -479,8 +525,19 @@ export function wireMathjsInstanceApi(
 
   instance.import = mathImport;
   instance.typed = instanceTyped;
+  const reviveClasses: Record<string, unknown> = {
+    ...instanceSymbols,
+    Unit: instance.Unit,
+    Chain: instance.Chain,
+    BigNumber: instanceSymbols.BigNumber,
+  };
   instance.reviver = (key: string, value: unknown) =>
-    reviveInstanceValue(key, value, instance.Unit as typeof factory_mathjsCompat.constructors.Unit);
+    reviveInstanceValue(
+      key,
+      value,
+      instance.Unit as typeof factory_mathjsCompat.constructors.Unit,
+      reviveClasses
+    );
   instance.replacer = replacer;
 
   const initialEvaluator = rebindEvaluator();
