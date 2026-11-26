@@ -4,12 +4,15 @@
 import type { mathTyped } from '@danielsimonjr/mathts-core';
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 
+/** mathjs `Chain` instance type: fluent methods plus unwrap/json members (#1575 G20). */
 export type Chain = ChainMethods & ChainUnwrap;
 
+/** Method surface of a `Chain`: each call returns another `Chain`. */
 export interface ChainMethods {
   [method: string]: (...args: unknown[]) => Chain;
 }
 
+/** Unwrap, stringify, and JSON members of a mathjs `Chain`. */
 export interface ChainUnwrap {
   done(): unknown;
   valueOf(): unknown;
@@ -41,6 +44,7 @@ interface CompatChainInstance {
   toJSON(): { mathjs: 'Chain'; value: unknown };
 }
 
+/** Constructor for mathjs-compatible `Chain` (callable and `fromJSON`). */
 export interface CompatChainCtor {
   new (value?: unknown): CompatChainInstance & Chain;
   fromJSON(json: { value: unknown }): CompatChainInstance & Chain;
@@ -125,12 +129,14 @@ function attachImportProxies(
   });
 }
 
+/** Options for {@link createChain}: instance `format`, `typed`, and import listener. */
 export interface CreateChainOptions {
   format?: FormatFn;
   typed?: TypedLike;
   on?: (event: string, callback: (...args: unknown[]) => void) => void;
 }
 
+/** Read a mathjs `typed` instance from a compat `create(all)` object, if present. */
 export function chainTypedFromInstance(value: unknown): TypedLike | undefined {
   if (
     value !== null &&
@@ -143,6 +149,7 @@ export function chainTypedFromInstance(value: unknown): TypedLike | undefined {
   return undefined;
 }
 
+/** Build `chain` and `Chain` for a compat instance (#1575 G20 D1). */
 export function createChain(
   math: Record<string, unknown>,
   options?: CreateChainOptions

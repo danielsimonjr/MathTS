@@ -2,6 +2,7 @@ import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
 
 type FactoryFn = { isFactory?: boolean; fn?: string };
 
+/** True when `value` is a mathjs-style factory object accepted by `create`. */
 export function isCompatFactory(value: unknown): value is FactoryFn {
   return (
     typeof value === 'function' &&

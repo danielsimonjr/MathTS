@@ -123,6 +123,7 @@ const wiredInstances = new WeakSet<object>();
  */
 const INSTANCE_BRAND = Symbol.for('mathts.compat.instance');
 
+/** True when `value` is a compat instance built by `create` / `wireMathjsInstanceApi`. */
 export function isCompatMathInstance(value: unknown): boolean {
   if (value === null || typeof value !== 'object') return false;
   return isInstance(value as object);

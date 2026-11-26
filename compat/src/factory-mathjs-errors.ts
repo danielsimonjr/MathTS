@@ -1,5 +1,6 @@
 import { MathjsError } from '@danielsimonjr/mathts-core/internal';
 
+/** mathjs factory function plus `isFactory`, `fn`, and `dependencies` metadata. */
 export type CompatFactory = ((scope: Record<string, unknown>) => unknown) & {
   isFactory: true;
   fn: string;
