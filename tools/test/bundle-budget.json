@@ -1,6 +1,7 @@
 {
   "note": "Per-entry byte ceilings of bun run build output, before build:prod: each exports[].import file plus the files it statically imports. A growth past a ceiling updates this file in the same PR; ordinary size wiggle changes no line (see ceilingFor).",
   "files": {
+    "packages/typed-function/dist/index.js": 4608,
     "packages/typed-function/package.json": 2304,
     "packages/workerpool/dist/index.js": 59392,
     "packages/workerpool/dist/worker.js": 26624,
@@ -11,7 +12,9 @@
     "matrix/dist/index.js": 245760,
     "matrix/package.json": 2816,
     "matrix/dist/wasm/mathts-as.wasm": 70656,
+    "tensor/dist/index.js": 90112,
     "tensor/package.json": 2304,
+    "autograd/dist/index.js": 75776,
     "autograd/package.json": 2304,
     "functions/dist/index.js": 2424832,
     "functions/dist/subpath-evaluate.js": 1605632,
@@ -19,18 +22,29 @@
     "functions/dist/wasm/mathts-as.wasm": 70656,
     "expression/dist/index.js": 376832,
     "expression/package.json": 2304,
+    "parser/dist/index.js": 768,
     "parser/package.json": 2560,
+    "units/dist/index.js": 1024,
     "units/package.json": 2304,
+    "numbers/dist/index.js": 512,
     "numbers/package.json": 2304,
+    "ast/dist/index.js": 512,
     "ast/package.json": 2560,
+    "evaluator/dist/index.js": 256,
     "evaluator/package.json": 2304,
+    "linalg/dist/index.js": 512,
     "linalg/package.json": 2560,
+    "arithmetic/dist/index.js": 512,
     "arithmetic/package.json": 2304,
+    "trigonometry/dist/index.js": 256,
     "trigonometry/package.json": 2304,
+    "statistics/dist/index.js": 2560,
     "statistics/package.json": 2560,
+    "signal/dist/index.js": 768,
     "signal/package.json": 2304,
     "parallel/dist/index.js": 52224,
     "parallel/package.json": 2304,
+    "workbook/dist/index.js": 51200,
     "workbook/package.json": 2304,
     "assembly/build/mathts.js": 98304,
     "assembly/build/mathts.wasm": 70656,
@@ -41,9 +55,15 @@
     "compat/package.json": 2560,
     "gpu/dist/index.js": 18432,
     "gpu/package.json": 2304,
+    "plot/dist/index.js": 38912,
+    "plot/dist/render-file.js": 6656,
     "plot/package.json": 2560
   },
   "entries": {
+    "packages/typed-function/dist/index.js": {
+      "export": "NoMatchingSignatureError",
+      "treeShake": true
+    },
     "packages/workerpool/dist/index.js": {
       "export": "MathWorkerPool",
       "treeShake": false
@@ -62,6 +82,14 @@
       "export": "BackendManager",
       "treeShake": true
     },
+    "tensor/dist/index.js": {
+      "export": "Index",
+      "treeShake": true
+    },
+    "autograd/dist/index.js": {
+      "export": "DualTensor",
+      "treeShake": true
+    },
     "functions/dist/index.js": {
       "export": "ArgumentsError",
       "treeShake": true
@@ -74,8 +102,52 @@
       "export": "AccessorNode",
       "treeShake": true
     },
+    "parser/dist/index.js": {
+      "export": "createAccessorNode",
+      "treeShake": true
+    },
+    "units/dist/index.js": {
+      "export": "DimensionMismatchError",
+      "treeShake": true
+    },
+    "numbers/dist/index.js": {
+      "export": "BigNumber",
+      "treeShake": true
+    },
+    "ast/dist/index.js": {
+      "export": "createAccessorNode",
+      "treeShake": true
+    },
+    "evaluator/dist/index.js": {
+      "export": "compile",
+      "treeShake": true
+    },
+    "linalg/dist/index.js": {
+      "export": "DenseMatrix",
+      "treeShake": true
+    },
+    "arithmetic/dist/index.js": {
+      "export": "abs",
+      "treeShake": true
+    },
+    "trigonometry/dist/index.js": {
+      "export": "acos",
+      "treeShake": true
+    },
+    "statistics/dist/index.js": {
+      "export": "acf",
+      "treeShake": true
+    },
+    "signal/dist/index.js": {
+      "export": "autoCorrelation",
+      "treeShake": true
+    },
     "parallel/dist/index.js": {
       "export": "ComputePool",
+      "treeShake": true
+    },
+    "workbook/dist/index.js": {
+      "export": "Session",
       "treeShake": true
     },
     "assembly/build/mathts.js": {
@@ -92,6 +164,14 @@
     },
     "gpu/dist/index.js": {
       "export": "BufferPool",
+      "treeShake": true
+    },
+    "plot/dist/index.js": {
+      "export": "area",
+      "treeShake": true
+    },
+    "plot/dist/render-file.js": {
+      "export": "PlotRenderError",
       "treeShake": true
     }
   },
