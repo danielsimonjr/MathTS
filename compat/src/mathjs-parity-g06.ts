@@ -18,6 +18,7 @@ import {
   isOwnBigNumber,
   keepSurface,
 } from './mathjs-parity-g02.js';
+import { compatDecimalResult } from './bignumber.js';
 import type {
   BigNumber as CompatBigNumberType,
   Fraction as CompatFractionType,
@@ -247,7 +248,9 @@ export function createCompatPinv(native: AnyFn, deps: CompatPinvDependencies): A
     }
     if (isScalarObject(x)) {
       if (equal(x, 0) === true) return x;
-      return divide(1, x);
+      // A BigNumber scalar comes back from the typed divide as the native core
+      // decimal; re-box it so it deep-equals the compat `bignumber` values (#1774).
+      return compatDecimalResult(divide(1, x));
     }
     if (typeof x === 'boolean') {
       // equal(false, 0) is true in mathjs, so `pinv(false)` is `false` itself;

@@ -8,6 +8,7 @@ import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
 import type { mathTyped } from '@danielsimonjr/mathts-core';
 import { deepMap, isMatrix } from '@danielsimonjr/mathts-core/internal';
 import { isCompatFactory } from './create-factory-validation.js';
+import { newOperatorGuard } from './constructors-without-new.js';
 import { createHelpClass } from '@danielsimonjr/mathts-expression';
 import {
   createInstanceEvaluator,
@@ -516,7 +517,7 @@ export function wireMathjsInstanceApi(
       (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
     return Object.assign(this, made);
   }
-  const ParserClass = Parser as unknown as WiredCompatInstance['Parser'];
+  const ParserClass = newOperatorGuard(Parser) as unknown as WiredCompatInstance['Parser'];
   instance.Parser = ParserClass;
   if (bindParser) {
     const instanceParser: typeof functionsParser = (options) => new ParserClass(options);

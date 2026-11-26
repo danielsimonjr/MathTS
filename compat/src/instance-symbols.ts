@@ -1,5 +1,5 @@
 import { BigNumber } from './bignumber.js';
-import { Complex, Fraction, Range } from '@danielsimonjr/mathts-core';
+import { Complex, Fraction, Range, isNumber, isUnit } from '@danielsimonjr/mathts-core';
 import {
   DimensionError,
   IndexError,
@@ -7,7 +7,8 @@ import {
 } from '@danielsimonjr/mathts-core/internal';
 import { factory_mathjsCompat, Help, num, den } from '@danielsimonjr/mathts-functions';
 import { isDenseMatrix, isSparseMatrix, isMatrix } from '@danielsimonjr/mathts-matrix';
-import { complex } from './shims.js';
+import { callableWithoutNew, newOperatorGuard } from './constructors-without-new.js';
+import { mathjsComplexProxy, type MathjsComplexConstructor } from './mathjs-complex-class.js';
 import packageMetadata from '../package.json' with { type: 'json' };
 
 /**
@@ -32,21 +33,30 @@ class Matrix {
   }
 }
 
-type ComplexConstructor = typeof Complex & {
-  new (value?: unknown, imaginary?: number): Complex;
+/** mathjs callable classes: `Complex(...)` and `BigNumber(...)` build an instance (#1774). */
+const CompatBigNumber = callableWithoutNew(BigNumber) as unknown as BigNumberConstructor;
+
+type BigNumberConstructor = typeof BigNumber & {
+  (value?: number | string | bigint | boolean | null): BigNumber;
 };
 
-const CompatComplex = new Proxy(Complex, {
-  construct(target, args, newTarget) {
-    const value = (complex as (...args: unknown[]) => Complex)(...args);
-    return Reflect.construct(target, [value.re, value.im], newTarget);
-  },
-}) as ComplexConstructor;
+const CompatComplex = mathjsComplexProxy(Complex, { isNumber, isUnit });
+
+/**
+ * mathjs guard classes: a new-less call throws the mathjs SyntaxError, while
+ * `new X(...)` constructs normally (#1774). Index, Range, Spa and the error
+ * classes follow mathjs 15.3.0's `if (!(this instanceof X)) throw` convention.
+ */
+const CompatIndex = newOperatorGuard(constructors.Index);
+const CompatRange = newOperatorGuard(Range);
+const CompatSpa = newOperatorGuard(constructors.Spa);
+const CompatArgumentsError = newOperatorGuard(constructors.ArgumentsError);
+const CompatDimensionError = newOperatorGuard(DimensionError);
 
 type NativeCompatSymbols = {
   Help: typeof Help;
-  BigNumber: typeof BigNumber;
-  Complex: ComplexConstructor;
+  BigNumber: BigNumberConstructor;
+  Complex: MathjsComplexConstructor;
   Fraction: typeof Fraction;
   Range: typeof Range;
   Matrix: typeof Matrix;
@@ -116,13 +126,16 @@ export const instanceSymbols: typeof factory_mathjsCompat.constructors &
   CompatChecks = {
   ...constructors,
   Help,
+  Index: CompatIndex,
+  Spa: CompatSpa,
+  ArgumentsError: CompatArgumentsError,
   // Use the same constructors whose values are returned by the compatibility functions.
-  BigNumber,
+  BigNumber: CompatBigNumber,
   Complex: CompatComplex,
   Fraction,
-  Range,
+  Range: CompatRange,
   Matrix,
-  DimensionError,
+  DimensionError: CompatDimensionError,
   IndexError,
   factory,
   PI: Math.PI,
