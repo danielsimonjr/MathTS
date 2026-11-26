@@ -2666,7 +2666,6 @@
   "{\"matrix\":\"Array\"} randomInt(10, 20)",
   "{\"matrix\":\"Array\"} randomInt([2, 3], 10)",
   "{\"matrix\":\"Array\"} schur([[1, 0], [-4, 3]])",
-  "{\"matrix\":\"Array\"} zeta(-0.5)",
   "{\"number\":\"BigNumber\"} bernoulli(4)",
   "{\"number\":\"BigNumber\"} bernoulli(fraction(12))",
   "{\"number\":\"BigNumber\"} createUnit(\"foo\")",
