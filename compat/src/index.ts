@@ -17,7 +17,6 @@
  * @packageDocumentation
  */
 
-import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
@@ -26,7 +25,7 @@ import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
-import { createChain, type Chain } from './chain.js';
+import { createChain } from './chain.js';
 import { compatConstantReaders, type CompatConstantName } from './instance-constants.js';
 import type {
   BigNumber as ConfiguredBigNumber,
@@ -35,12 +34,34 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
-import {
-  createCompatFormat,
-  createCompatPrint,
-  createCompatString,
-} from './fraction-format-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import {
+  bindDefaultInstanceSource,
+  Chain,
+  chain,
+  compile,
+  config,
+  evaluate,
+  parse,
+  parser,
+  pickRandom,
+  random,
+  randomInt,
+  typed,
+  docs,
+  compareText as namedCompareText,
+  combinations as namedCombinations,
+  combinationsWithRep as namedCombinationsWithRep,
+  equalText as namedEqualText,
+  format as namedFormat,
+  lgamma as namedLgamma,
+  permutations as namedPermutations,
+  print as namedPrint,
+  setUnion as namedSetUnion,
+  toBest as namedToBest,
+  xgcd as namedXgcd,
+  string as namedCompatString,
+} from './named-instance-exports.js';
 import {
   applyUnitRelationalParity,
   factoryMaxUnits,
@@ -78,18 +99,6 @@ export interface MathJSConfig extends Partial<RuntimeConfig> {
   /** Predictable random seed */
   randomSeed?: string | null;
 }
-
-const moduleDefaults = {
-  relTol: 1e-12,
-  absTol: 1e-15,
-  matrix: 'Matrix',
-  number: 'number',
-  numberFallback: 'number',
-  precision: 64,
-  predictable: false,
-  randomSeed: null,
-  legacySubset: false,
-} as const satisfies MathJSConfig;
 
 /**
  * Default configuration
@@ -139,7 +148,7 @@ type CompatInstanceCreateInput = CompatFactoryInput | Partial<MathJSConfig>;
  */
 interface MathInstanceOverrides {
   /** Fluent chain: `math.chain(x).add(3).done()`. */
-  chain: (value?: unknown) => Chain;
+  chain: ReturnType<typeof createChain>['chain'];
   /** Chain constructor bound to this instance. */
   Chain: ReturnType<typeof createChain>['Chain'];
   create: (input?: CompatInstanceCreateInput, options?: Partial<MathJSConfig>) => MathInstance;
@@ -842,144 +851,24 @@ export function create(
  */
 export { all };
 
+// The default-instance wrappers of named-instance-exports.ts build their lazy
+// instance through `create` and `all`; bind them here so that module keeps no
+// import of this one (runtime or type-only). Architecture docs pin 2 runtime
+// cycles; the bind types live in compat-types.ts.
+bindDefaultInstanceSource(create, all);
+
 // =============================================================================
 // Re-exports for direct use
 // =============================================================================
+// The definitions live in named-instance-exports.ts: this file is where every
+// parallel PR used to add a wrapper or a re-export, so it stayed the conflict
+// hotspot. Add a new wrapper group as its own file and re-export it here, or
+// extend the matching group file.
 
-let defaultInstance: MathInstance | undefined;
+export { Chain, chain, compile, config, evaluate, parse, parser };
 
-function getDefaultInstance(): MathInstance {
-  return (defaultInstance ??= create(all, moduleDefaults));
-}
+export { pickRandom, random, randomInt };
 
-/** Evaluate an expression or a collection in the default compatibility instance. */
-const defaultEvaluate = ((...args: unknown[]) =>
-  (getDefaultInstance().evaluate as (...args: unknown[]) => unknown)(
-    ...args
-  )) as MathInstance['evaluate'];
-
-/** Compile an expression or a collection in the default compatibility instance. */
-const defaultCompile = ((...args: unknown[]) =>
-  (getDefaultInstance().compile as (...args: unknown[]) => unknown)(
-    ...args
-  )) as MathInstance['compile'];
-
-/** Parse an expression into a mathjs-compatible syntax tree. */
-const defaultParse: MathInstance['parse'] = /* #__PURE__ */ new Proxy(mathFunctions.parse, {
-  get: (target, key, receiver) =>
-    typeof key === 'string' && key.startsWith('is')
-      ? Reflect.get(getDefaultInstance().parse, key)
-      : Reflect.get(target, key, receiver),
-  apply: (_target, receiver, args) => Reflect.apply(getDefaultInstance().parse, receiver, args),
-});
-
-/** Stateful expression parser for the default compatibility instance. */
-export const Parser = function Parser(options?: Parameters<MathInstance['parser']>[0]): object {
-  if (new.target === undefined) throw new TypeError('Parser must be constructed with new');
-  return Reflect.construct(getDefaultInstance().Parser, [options], new.target);
-} as unknown as MathInstance['Parser'];
-
-/** Create a compatibility parser with its own retained scope. */
-const defaultParser: MathInstance['parser'] = (options) => new Parser(options);
-
-const defaultChainApi = /* #__PURE__ */ createChain(
-  /* #__PURE__ */ new Proxy<Record<string, unknown>>(
-    {},
-    {
-      get(_target, property) {
-        return Reflect.get(getDefaultInstance(), property);
-      },
-    }
-  )
-);
-
-/** Start a fluent chain using the default compatibility instance. */
-const defaultChain: MathInstance['chain'] = /* #__PURE__ */ (() => defaultChainApi.chain)();
-
-/** Chain constructor that uses the default compatibility instance. */
-const defaultChainConstructor: MathInstance['Chain'] = /* #__PURE__ */ (() =>
-  defaultChainApi.Chain)();
-
-export {
-  defaultChainConstructor as Chain,
-  defaultChain as chain,
-  defaultCompile as compile,
-  defaultEvaluate as evaluate,
-  defaultParse as parse,
-  defaultParser as parser,
-};
-
-/** Read the configuration for MathJS-compatible named imports. */
-const defaultConfigReader = /* #__PURE__ */ Object.assign(
-  (settings?: Partial<MathJSConfig>) => {
-    if (settings !== undefined) {
-      throw new Error('The global config is readonly. Create an instance to change its settings.');
-    }
-    return { ...moduleDefaults };
-  },
-  moduleDefaults,
-  {
-    MATRIX_OPTIONS: ['Matrix', 'Array'],
-    NUMBER_OPTIONS: ['number', 'BigNumber', 'bigint', 'Fraction'],
-  }
-);
-
-const namedRandomSources =
-  /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatRandomSources(
-    moduleDefaults,
-    undefined
-  );
-type NamedRandomSources = ReturnType<
-  typeof mathFunctions.factory_mathjsCompat.createCompatRandomSources
->;
-
-const defaultRandom: ReturnType<NamedRandomSources['random']> =
-  /* #__PURE__ */ namedRandomSources.random();
-const defaultRandomInt: ReturnType<NamedRandomSources['randomInt']> =
-  /* #__PURE__ */ namedRandomSources.randomInt();
-const defaultPickRandom: ReturnType<NamedRandomSources['pickRandom']> =
-  /* #__PURE__ */ namedRandomSources.pickRandom();
-
-export {
-  defaultConfigReader as config,
-  defaultPickRandom as pickRandom,
-  defaultRandom as random,
-  defaultRandomInt as randomInt,
-};
-
-/** Union of two multisets in MathJS result order. */
-const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
-const namedString = mathFunctions.factory_mathjsCompat.string as typeof mathFunctions.string;
-const namedCompatString = /* #__PURE__ */ createCompatString(namedString);
-const namedFormat = /* #__PURE__ */ createCompatFormat(mathFunctions.format);
-const namedPrint = /* #__PURE__ */ createCompatPrint(
-  mathFunctions.print as (template: string, values: unknown, options?: unknown) => string,
-  mathFunctions.format
-);
-const namedCompareText = mathFunctions.factory_mathjsCompat.compareText as {
-  (left: string, right: string): number;
-  (left: unknown, right: unknown): unknown;
-};
-const namedEqualText = mathFunctions.factory_mathjsCompat.equalText as {
-  (left: string, right: string): boolean;
-  (left: unknown, right: unknown): unknown;
-};
-const namedCombinationsWithRep = mathFunctions.factory_mathjsCompat
-  .combinationsWithRep as typeof mathFunctions.combinationsWithRep;
-const namedCombinations = mathFunctions.factory_mathjsCompat
-  .combinations as typeof mathFunctions.combinations;
-const namedXgcd = mathFunctions.factory_mathjsCompat.xgcd as unknown as (
-  a: unknown,
-  b: unknown
-) => unknown[] | mathFunctions.BridgeMatrix;
-const namedPermutations = mathFunctions.factory_mathjsCompat
-  .permutations as typeof mathFunctions.permutations;
-const namedLgamma = mathFunctions.factory_mathjsCompat.lgamma as (
-  ...args: unknown[]
-) => ReturnType<typeof mathFunctions.lgamma>;
-const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
-  ...args: unknown[]
-) => ReturnType<typeof mathFunctions.toBest>;
 export {
   namedFormat as format,
   namedPrint as print,
@@ -995,208 +884,7 @@ export {
   namedLgamma as lgamma,
 };
 
-/** Embedded documentation for names in the MathJS compatibility surface. */
-export const docs = /* #__PURE__ */ Object.fromEntries(
-  Object.entries(embeddedDocs).filter(([name]) => MATHJS_PARITY_NAMES.includes(name))
-);
-
-export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
-
-export * from './named-symbols.js';
-export * from './native-factory-exports.js';
-export * from './constant-factory-exports.js';
-export * from './named-physical-constants.generated.js';
-
-const defaultTyped: MathInstance['typed'] =
-  /* #__PURE__ */ mathFunctions.factory_mathjsCompat.createCompatTyped();
-export { defaultTyped as typed };
-
-/** G04 named exports — same unit-relational adapters as `create(all)` (#1552). */
-const namedUnitRelational = applyUnitRelationalParity({
-  equal: mathFunctions.equal as UnitRelationalOps['equal'],
-  unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
-  equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
-  deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
-  compare: mathFunctions.compare as UnitRelationalOps['compare'],
-  larger: mathFunctions.larger as UnitRelationalOps['larger'],
-  smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
-  largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
-  smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
-});
-
-// Mathematical functions shared with the functions package.
 export {
-  Help,
-  factory_acosh as acosh,
-  factory_acot as acot,
-  acoth,
-  factory_acsc as acsc,
-  acsch,
-  addScalar,
-  and,
-  apply,
-  factory_asec as asec,
-  asech,
-  factory_asinh as asinh,
-  factory_atanh as atanh,
-  bellNumbers,
-  bernoulli,
-  bigint,
-  bin,
-  bitAnd,
-  bitNot,
-  bitOr,
-  bitXor,
-  boolean,
-  catalan,
-  factory_cbrt as cbrt,
-  clone,
-  column,
-  compareNatural,
-  composition,
-  concat,
-  corr,
-  factory_cosh as cosh,
-  factory_cot as cot,
-  coth,
-  count,
-  cross,
-  factory_csc as csc,
-  csch,
-  ctranspose,
-  factory_cube as cube,
-  cumsum,
-  derivative,
-  diag,
-  diff,
-  distance,
-  divideScalar,
-  dot,
-  dotDivide,
-  dotMultiply,
-  dotPow,
-  eigs,
-  erf,
-  expm,
-  factory_expm1 as expm1,
-  factorial,
-  fft,
-  filter,
-  fix,
-  flatten,
-  forEach,
-  freqz,
-  gamma,
-  getMatrixDataType,
-  hasNumericValue,
-  help,
-  hex,
-  hypot,
-  ifft,
-  index,
-  intersect,
-  inv,
-  invmod,
-  isBounded,
-  isFinite,
-  isInteger,
-  isNaN,
-  isNegative,
-  isNumeric,
-  isPositive,
-  isPrime,
-  isZero,
-  kldivergence,
-  kron,
-  leafCount,
-  leftShift,
-  log10,
-  log1p,
-  log2,
-  lsolve,
-  lsolveAll,
-  lup,
-  lusolve,
-  lyap,
-  mad,
-  map,
-  mapSlices,
-  matrixFromColumns,
-  matrixFromFunction,
-  matrixFromRows,
-  median,
-  mod,
-  mode,
-  multinomial,
-  multiplyScalar,
-  norm,
-  not,
-  nthRoot,
-  nthRoots,
-  nullish,
-  number,
-  numeric,
-  oct,
-  or,
-  partitionSelect,
-  pinv,
-  polynomialRoot,
-  prod,
-  qr,
-  quantileSeq,
-  range,
-  rationalize,
-  reshape,
-  resize,
-  resolve,
-  rightArithShift,
-  rightLogShift,
-  rotate,
-  rotationMatrix,
-  row,
-  schur,
-  factory_sec as sec,
-  sech,
-  setCartesian,
-  setDifference,
-  setDistinct,
-  setIntersect,
-  setIsSubset,
-  setMultiplicity,
-  setPowerset,
-  setSize,
-  setSymDifference,
-  sign,
-  simplify,
-  simplifyConstant,
-  simplifyCore,
-  factory_sinh as sinh,
-  slu,
-  solveODE,
-  sort,
-  splitUnit,
-  sqrtm,
-  factory_square as square,
-  squeeze,
-  stirlingS2,
-  subset,
-  subtractScalar,
-  sylvester,
-  symbolicEqual,
-  factory_tanh as tanh,
-  to,
-  trace,
-  typeOf,
-  unaryMinus,
-  unaryPlus,
-  usolve,
-  usolveAll,
-  xor,
-  zeta,
-  zpk2tf,
-} from '@danielsimonjr/mathts-functions';
-
-export const {
   equal,
   unequal,
   equalScalar,
@@ -1206,7 +894,29 @@ export const {
   smaller,
   largerEq,
   smallerEq,
-} = namedUnitRelational;
+} from './named-instance-exports.js';
+
+export { docs };
+
+export { typed };
+
+export { Parser } from './named-instance-exports.js';
+
+export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+
+export * from './named-symbols.js';
+export * from './native-factory-exports.js';
+export * from './constant-factory-exports.js';
+export * from './named-physical-constants.generated.js';
+
+// Mathematical functions shared with the functions package: one name per line, in
+// sorted order, in function-reexports.ts so parallel additions don't conflict.
+export * from './function-reexports.js';
+
+// These four names are also star-exported by ./shims.js (the G03 sign-predicate
+// wrappers). The explicit re-export keeps the functions implementation winning,
+// exactly as the previous explicit block in this file did.
+export { fix, isInteger, isNegative, isPositive } from './function-reexports.js';
 
 type UnitMagnitude = number | ConfiguredBigNumber | Fraction;
 
