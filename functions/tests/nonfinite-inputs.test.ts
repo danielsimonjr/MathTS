@@ -135,11 +135,91 @@ function thrownClass(out: string): string | null {
   return out.startsWith('throws:') ? out.slice('throws:'.length) : null;
 }
 
+/**
+ * The mathjs-named `create*` aliases of the `factory_*` exports (#1570). Each
+ * alias is the SAME function object as its `factory_*` name, so every allowlist
+ * reason below applies to it verbatim; the lookups resolve through this map
+ * instead of duplicating the entries.
+ */
+const FACTORY_ALIASES: Record<string, string> = Object.fromEntries(
+  [
+    'abs',
+    'acos',
+    'acosh',
+    'acot',
+    'acsc',
+    'asec',
+    'asin',
+    'asinh',
+    'atan',
+    'atan2',
+    'atanh',
+    'cbrt',
+    'ceil',
+    'compare',
+    'cos',
+    'cosh',
+    'cot',
+    'createUnit',
+    'csc',
+    'ctranspose',
+    'cube',
+    'divide',
+    'dot',
+    'equal',
+    'exp',
+    'expm1',
+    'fix',
+    'floor',
+    'gcd',
+    'hypot',
+    'larger',
+    'largerEq',
+    'lcm',
+    'log',
+    'log10',
+    'log1p',
+    'log2',
+    'max',
+    'mean',
+    'min',
+    'mod',
+    'norm',
+    'nthRoot',
+    'pow',
+    'round',
+    'sec',
+    'sign',
+    'sin',
+    'sinh',
+    'smaller',
+    'smallerEq',
+    'sqrt',
+    'square',
+    'std',
+    'subtract',
+    'sum',
+    'tan',
+    'tanh',
+    'transpose',
+    'unaryMinus',
+    'unaryPlus',
+    'variance',
+    'xgcd',
+  ].map((n) => [`create${n[0].toUpperCase()}${n.slice(1)}`, `factory_${n}`])
+);
+
+/** The allowlist key for an export name: the alias resolves to its factory name. */
+function allowKey(name: string): string {
+  return FACTORY_ALIASES[name] ?? name;
+}
+
 /** True when the result is acceptable for a NaN argument to the named export. */
 function acceptsNaNResult(name: string, out: string): boolean {
+  const key = allowKey(name);
   const cls = thrownClass(out);
-  if (cls !== null) return THROWS_ON_NAN[name]?.includes(cls) ?? false;
-  return out.includes('NaN') || name in NOT_NAN_ALLOWLIST;
+  if (cls !== null) return THROWS_ON_NAN[key]?.includes(cls) ?? false;
+  return out.includes('NaN') || key in NOT_NAN_ALLOWLIST;
 }
 
 function allNumberJobs(values: string[]): Job[] {
@@ -467,10 +547,11 @@ describe('non-finite inputs: sweep of typed signatures and plain functions', () 
     expect(scalar.size).toBeGreaterThan(50);
     const bad = plain
       .filter((r) => scalar.has(r.job.name) && r.job.args.includes('NaN'))
-      .filter((r) => !(r.job.name in PLAIN_NOT_SCALAR))
+      .filter((r) => !(allowKey(r.job.name) in PLAIN_NOT_SCALAR))
       .filter((r) => {
         const cls = thrownClass(r.out);
-        if (cls !== null) return !(PLAIN_THROWS_ON_NAN[r.job.name]?.includes(cls) ?? false);
+        if (cls !== null)
+          return !(PLAIN_THROWS_ON_NAN[allowKey(r.job.name)]?.includes(cls) ?? false);
         return !r.out.includes('NaN');
       })
       .map((r) => `${r.job.name} ${JSON.stringify(r.job.args)} -> ${r.out}`);

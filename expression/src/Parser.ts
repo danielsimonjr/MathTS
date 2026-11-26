@@ -256,3 +256,7 @@ function isExpressionFunction(value: unknown): value is ExpressionFunction {
     typeof value === 'function' && typeof fn.syntax === 'string' && typeof fn.expr === 'string'
   );
 }
+
+/** The ready-made `Parser` class (#1571): `createParserClass` at the package's
+ *  default config, so `new Parser()` is what the `parser()` factory builds. */
+export const Parser = createParserClass();

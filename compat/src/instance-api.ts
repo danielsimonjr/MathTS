@@ -27,6 +27,7 @@ import {
   reviveInstanceValue,
 } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
+import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
 
 type MathNamespace = Parameters<typeof importFactory>[2];
 type ImportableFactories = Parameters<typeof importFactory>[3];
@@ -265,9 +266,14 @@ export function wireMathjsInstanceApi(
       true,
       compatDecimalResult
     );
+    const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
+      entries?: unknown[]
+    ) => unknown;
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: PhysicsEvaluateOptions) =>
-        mapExpressions(expression, (text) => evaluator.evaluate(text, scope, options))
+        mapExpressions(expression, (text) =>
+          wrapBlockArrayAsResultSet(evaluator.evaluate(text, scope, options), text, ResultSetCtor)
+        )
     );
     instance.compile = runBound((expression: unknown, options?: PhysicsEvaluateOptions) =>
       mapExpressions(expression, (text) => {

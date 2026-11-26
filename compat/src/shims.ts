@@ -106,6 +106,7 @@ import {
   multiply as _matMultiply,
 } from '@danielsimonjr/mathts-matrix';
 import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
+import { mapDivideBroadcastError, mapElementwiseBroadcastError } from './g12-mathjs-parity.js';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -467,13 +468,6 @@ const _compatAdd = withMathjsComplexBinary(_add as BinaryArithmetic, 'add');
 const _compatSubtract = withMathjsComplexBinary(_subtract as BinaryArithmetic, 'sub');
 const _compatMultiply = withMathjsComplexBinary(_multiply as BinaryArithmetic, 'mul');
 
-export const add = makeArithmetic(
-  withNumericText(_add as BinaryArithmetic, _addScalar),
-  _matAdd as (a: unknown, b: unknown) => unknown,
-  true,
-  (a, b) => a + b,
-  _compatAdd
-) as NumericStringArithmetic & PublicAdd & OneArg;
 function isProtoSparseMatrix(x: unknown): boolean {
   return (
     typeof x === 'object' &&
@@ -489,6 +483,23 @@ const subtractPair = (a: unknown, b: unknown): unknown => {
   return _subtract(a, b);
 };
 
+const addCore = makeArithmetic(
+  withNumericText(_add as BinaryArithmetic, _addScalar),
+  _matAdd as (a: unknown, b: unknown) => unknown,
+  true,
+  (a, b) => a + b,
+  _compatAdd
+);
+export const add = withTypedSurface(function (...args: unknown[]): unknown {
+  try {
+    return addCore(...args);
+  } catch (err) {
+    if (args.length >= 2) {
+      mapElementwiseBroadcastError(err, args[0], args[1]);
+    }
+    throw err;
+  }
+}, _add) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = makeArithmetic(
   subtractPair,
   _matSubtract as (a: unknown, b: unknown) => unknown,
@@ -518,16 +529,22 @@ const _compatDivideScalar = withMathjsComplexBinary(
   'div'
 );
 export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
-  if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
-    return _matMultiply(a, _inv(b) as DenseMatrix);
+  try {
+    if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
+      return _matMultiply(a, _inv(b) as DenseMatrix);
+    }
+    if (arguments.length === 2 && (isComplex(a) || isComplex(b))) {
+      return _compatDivideScalar(a, b);
+    }
+    // The mathjs-shaped factory carries the 15.3.0 sparse semantics (a sparse result only
+    // when the image of zero is zero, #1565); the typed surface keeps its older sparse path.
+    return (_factoryDivide as unknown as (...args: unknown[]) => unknown).apply(
+      undefined,
+      arguments as unknown as unknown[]
+    );
+  } catch (err) {
+    mapDivideBroadcastError(err, b);
   }
-  if (arguments.length === 2 && (isComplex(a) || isComplex(b))) {
-    return _compatDivideScalar(a, b);
-  }
-  return (_factoryDivide as unknown as (...args: unknown[]) => unknown).apply(
-    undefined,
-    arguments as unknown as unknown[]
-  );
 }, _divide) as TypedFunction;
 function powWithFractionOperands(base: unknown, exponent: unknown, predictable: boolean): unknown {
   const toFractionOperand = (v: unknown): Fraction | null => {

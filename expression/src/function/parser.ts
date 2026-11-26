@@ -1,6 +1,6 @@
 import { mathTyped } from '@danielsimonjr/mathts-core';
 import { factory } from '../utils/factory.js';
-import { createParserClass } from '../Parser.js';
+import { Parser as DefaultParser } from '../Parser.js';
 
 const name = 'parser';
 const dependencies = ['typed', 'Parser'];
@@ -69,7 +69,7 @@ export const createParser = /* #__PURE__ */ factory(
     // The shared typed instance and the package's own Parser class.
     const fill: Record<string, unknown> = {};
     if (missing.includes('typed')) fill.typed = mathTyped;
-    if (missing.includes('Parser')) fill.Parser = createParserClass();
+    if (missing.includes('Parser')) fill.Parser = DefaultParser;
     return fill;
   }
 );

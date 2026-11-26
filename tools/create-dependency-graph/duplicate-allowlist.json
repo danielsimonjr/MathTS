@@ -1,5 +1,5 @@
 {
-  "note": "Entries here are legitimately-independent own-definitions that detectDuplicateSymbols would otherwise flag as TRUE_DUPLICATE. Matched by (name, file) — `names` supports a trailing '*' wildcard or exact literal '*' for match-all; `filesGlob` supports a trailing '/**' prefix match or an exact repo-relative file path. A duplicate name is only fully explained away (tag ALLOWLISTED) when ALL of its non-alias-delegation, non-dispatch-variant definers match an entry here.",
+  "note": "Entries here are legitimately-independent own-definitions that detectDuplicateSymbols would otherwise flag as TRUE_DUPLICATE. Matched by (name, file) \u2014 `names` supports a trailing '*' wildcard or exact literal '*' for match-all; `filesGlob` supports a trailing '/**' prefix match or an exact repo-relative file path. A duplicate name is only fully explained away (tag ALLOWLISTED) when ALL of its non-alias-delegation, non-dispatch-variant definers match an entry here.",
   "entries": [
     {
       "names": ["TWIDDLE_CACHE_DEFAULT_MAX_BYTES", "setTwiddleCacheMaxBytes", "twiddleCacheState"],
@@ -41,7 +41,7 @@
         "functions/src/type/matrix/types.ts",
         "tensor/src/Tensor.ts"
       ],
-      "reason": "already consolidated in substance, not just name: both non-core copies are now generic-specialization aliases that delegate 100% of their body to core's canonical `NestedArray<T>` (functions/src/type/matrix/types.ts keeps its own default type param `T = MatrixValue`; tensor/src/Tensor.ts specializes `T = number`) — the static scanner still counts each `export type X = ...` as an own declaration since neither can use a bare `export type { NestedArray } from ...` re-export without losing the default/specialization. 2026-07 type-dedup pass."
+      "reason": "already consolidated in substance, not just name: both non-core copies are now generic-specialization aliases that delegate 100% of their body to core's canonical `NestedArray<T>` (functions/src/type/matrix/types.ts keeps its own default type param `T = MatrixValue`; tensor/src/Tensor.ts specializes `T = number`) \u2014 the static scanner still counts each `export type X = ...` as an own declaration since neither can use a bare `export type { NestedArray } from ...` re-export without losing the default/specialization. 2026-07 type-dedup pass."
     },
     {
       "names": ["*"],
@@ -56,7 +56,7 @@
     {
       "names": ["DEFAULT_CONFIG"],
       "filesGlob": ["core/src/config.ts", "core/src/factory/factory.ts", "matrix/src/config.ts"],
-      "reason": "package/module-specific default config — three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
+      "reason": "package/module-specific default config \u2014 three genuinely distinct shapes for distinct subsystems: core/src/config.ts's ConfigOptions (mathjs-style relTol/absTol/matrix/number/predictable tolerance config, internal-only), core/src/factory/factory.ts's MathTSConfig (the public factory-registry/backend-routing config: precision/preferredBackend/wasmThreshold/gpuThreshold/parallelEnabled), and matrix/src/config.ts's MatrixConfig (backend enable/preference/threshold + adaptive-tuning + profiling settings, matrix-only fields). functions/src/core/config.ts's former byte-identical copy of core's ConfigOptions/DEFAULT_CONFIG was consolidated to a re-export shim instead of allowlisted (see @danielsimonjr/mathts-core/internal)."
     },
     {
       "names": [
@@ -85,7 +85,7 @@
         "functions/src/matrix/utils/zerosAndOnes.ts",
         "functions/src/type/bignumber/BigNumber.ts"
       ],
-      "reason": "additional minimal per-consumer structural views of BigNumber beyond the is.ts guard pair — zerosAndOnes.ts needs only what its zeros/ones construction path reads; type/bignumber/BigNumber.ts is the local mathjs-mirror BigNumber type. 2026-07 type-dedup pass."
+      "reason": "additional minimal per-consumer structural views of BigNumber beyond the is.ts guard pair \u2014 zerosAndOnes.ts needs only what its zeros/ones construction path reads; type/bignumber/BigNumber.ts is the local mathjs-mirror BigNumber type. 2026-07 type-dedup pass."
     },
     {
       "names": ["Complex"],
@@ -95,7 +95,7 @@
     {
       "names": ["Matrix"],
       "filesGlob": ["functions/src/matrix/sqrtm.ts", "functions/src/matrix/utils/zerosAndOnes.ts"],
-      "reason": "additional minimal per-consumer structural views of Matrix beyond the is.ts guard pair — each file declares only the fields/methods it actually reads (sqrtm.ts's spectral helpers; zerosAndOnes.ts's construction path). 2026-07 type-dedup pass."
+      "reason": "additional minimal per-consumer structural views of Matrix beyond the is.ts guard pair \u2014 each file declares only the fields/methods it actually reads (sqrtm.ts's spectral helpers; zerosAndOnes.ts's construction path). 2026-07 type-dedup pass."
     },
     {
       "names": ["DenseMatrix"],
@@ -103,7 +103,7 @@
         "functions/src/algebra/solver/lsolveAll.ts",
         "functions/src/algebra/solver/usolveAll.ts"
       ],
-      "reason": "additional minimal per-consumer structural views of DenseMatrix beyond the is.ts guard pair — each triangular-solver file declares only the concrete _data/_size/_datatype/valueOf() shape it operates on. 2026-07 type-dedup pass."
+      "reason": "additional minimal per-consumer structural views of DenseMatrix beyond the is.ts guard pair \u2014 each triangular-solver file declares only the concrete _data/_size/_datatype/valueOf() shape it operates on. 2026-07 type-dedup pass."
     },
     {
       "names": ["IndexDimension"],
@@ -113,7 +113,7 @@
     {
       "names": ["Chain"],
       "filesGlob": ["compat/src/chain.ts"],
-      "reason": "compat's Chain is the real chain-wrapper object contract (done/valueOf/toString/method-chaining proxy), genuinely different from the is.ts guard-adjacent Chain (a minimal {constructor.prototype.isChain} duck type) — additional to the is.ts guard pair in the AST-node group below. 2026-07 type-dedup pass."
+      "reason": "compat's Chain is the real chain-wrapper object contract (done/valueOf/toString/method-chaining proxy), genuinely different from the is.ts guard-adjacent Chain (a minimal {constructor.prototype.isChain} duck type) \u2014 additional to the is.ts guard pair in the AST-node group below. 2026-07 type-dedup pass."
     },
     {
       "names": [
@@ -149,7 +149,7 @@
         "expression/src/utils/factory.ts",
         "functions/src/utils/factory.ts"
       ],
-      "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) — redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} — the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
+      "reason": "genuinely distinct generic constraints on TDeps (core/src/factory.ts: Record<string, unknown>; expression: object; functions: Record<string, any>) \u2014 redirecting to one shape breaks tsc at real call sites in the other packages (confirmed empirically; see each file's header comment). core/src/factory/factory.ts's FactoryFunction is a THIRD, completely unrelated shape ({name, dependencies, factory} \u2014 the newer MathTSConfig-based registry, vs. the mathjs-style callable-with-isFactory/fn/dependencies/meta shape in core/src/factory.ts): two intentionally distinct 'FactoryFunction' concepts coexist within core itself for two different subsystems, mirroring the already-allowlisted DEFAULT_CONFIG/ConfigOptions-vs-MathTSConfig split. FactoryMeta (core/src/factory.ts + expression + functions only) WAS byte-identical and has been consolidated onto core's copy instead (2026-07 type-dedup pass)."
     },
     {
       "names": ["SymbolicAnalysis"],
@@ -200,17 +200,17 @@
     {
       "names": ["CholeskyResult"],
       "filesGlob": ["functions/src/typed/matrix-ops.ts", "matrix/src/operations/cholesky.ts"],
-      "reason": "functions' L is a plain number[][]; matrix's L is a DenseMatrix instance — different representations for different consumers. 2026-07 type-dedup pass."
+      "reason": "functions' L is a plain number[][]; matrix's L is a DenseMatrix instance \u2014 different representations for different consumers. 2026-07 type-dedup pass."
     },
     {
       "names": ["CompiledExpression"],
       "filesGlob": ["expression/src/compiler/compile.ts", "expression/src/node/Node.ts"],
-      "reason": "near-miss, deliberately not merged: compile.ts's evaluate() accepts Record<string, unknown> | Scope, Node.ts's accepts only Record<string, unknown> — Node.ts is imported by compile.ts so redirecting the other way risks a circular import for a one-parameter-type difference. Flagged for a future follow-up rather than forced now. 2026-07 type-dedup pass."
+      "reason": "near-miss, deliberately not merged: compile.ts's evaluate() accepts Record<string, unknown> | Scope, Node.ts's accepts only Record<string, unknown> \u2014 Node.ts is imported by compile.ts so redirecting the other way risks a circular import for a one-parameter-type difference. Flagged for a future follow-up rather than forced now. 2026-07 type-dedup pass."
     },
     {
       "names": ["ConfigOptions"],
       "filesGlob": ["core/src/config.ts", "functions/src/core/function/config.ts"],
-      "reason": "functions' copy is Partial<MathJsConfig> & {epsilon}, a legacy-compat partial wrapper for the config() function's overload — not a copy of core's full ConfigOptions (which functions/src/core/config.ts already re-exports as-is from @danielsimonjr/mathts-core/internal). 2026-07 type-dedup pass."
+      "reason": "functions' copy is Partial<MathJsConfig> & {epsilon}, a legacy-compat partial wrapper for the config() function's overload \u2014 not a copy of core's full ConfigOptions (which functions/src/core/config.ts already re-exports as-is from @danielsimonjr/mathts-core/internal). 2026-07 type-dedup pass."
     },
     {
       "names": ["ExecutionMode"],
@@ -220,12 +220,12 @@
     {
       "names": ["WasmModule"],
       "filesGlob": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"],
-      "reason": "matrix cannot import from functions (functions depends on matrix; importing the other way would create a cycle), and each package's WasmModule binds a genuinely different subset of the AssemblyScript exports (functions declares the AS kernels its bridges dispatch — signal/special-function/polynomial/interpolation/sort/bitwise; matrix only needs matrix-relevant exports) — a real content difference, not just an artifact of the import-cycle constraint. `LoadingMetrics`/`WasmManifest` (same architectural constraint, but byte-identical shapes) have been consolidated onto `@danielsimonjr/mathts-core/internal` instead of allowlisted here (2026-07 type-dedup pass) — core/internal is reachable from both packages without creating the functions<->matrix cycle."
+      "reason": "matrix cannot import from functions (functions depends on matrix; importing the other way would create a cycle), and each package's WasmModule binds a genuinely different subset of the AssemblyScript exports (functions declares the AS kernels its bridges dispatch \u2014 signal/special-function/polynomial/interpolation/sort/bitwise; matrix only needs matrix-relevant exports) \u2014 a real content difference, not just an artifact of the import-cycle constraint. `LoadingMetrics`/`WasmManifest` (same architectural constraint, but byte-identical shapes) have been consolidated onto `@danielsimonjr/mathts-core/internal` instead of allowlisted here (2026-07 type-dedup pass) \u2014 core/internal is reachable from both packages without creating the functions<->matrix cycle."
     },
     {
       "names": ["MatrixConstructor"],
       "filesGlob": ["functions/src/matrix/utils/zerosAndOnes.ts", "functions/src/types.ts"],
-      "reason": "zerosAndOnes.ts's is a callable matrix-factory shape; types.ts's is a constructible-with-index-signature shape — different contracts. 2026-07 type-dedup pass."
+      "reason": "zerosAndOnes.ts's is a callable matrix-factory shape; types.ts's is a constructible-with-index-signature shape \u2014 different contracts. 2026-07 type-dedup pass."
     },
     {
       "names": ["MathNode"],
@@ -243,7 +243,7 @@
     {
       "names": ["TypeTest"],
       "filesGlob": ["functions/src/core/function/typed.ts", "packages/typed-function/src/index.ts"],
-      "reason": "functions' is a plain (value: unknown) => boolean; typed-function's is generic (x: unknown) => x is T (a type predicate) — different signatures. 2026-07 type-dedup pass."
+      "reason": "functions' is a plain (value: unknown) => boolean; typed-function's is generic (x: unknown) => x is T (a type predicate) \u2014 different signatures. 2026-07 type-dedup pass."
     },
     {
       "names": ["SparseMatrixData"],
@@ -261,12 +261,12 @@
     {
       "names": ["TypeDef", "ConversionDef"],
       "filesGlob": ["core/src/typed/mathts-typed.ts", "packages/typed-function/src/index.ts"],
-      "reason": "no valid import path exists: core depends on the external typed-function fork (npm alias of @danielsimonjr/typed-function), NOT on the workspace's @danielsimonjr/mathts-typed-function package — these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
+      "reason": "no valid import path exists: core depends on the external typed-function fork (npm alias of @danielsimonjr/typed-function), NOT on the workspace's @danielsimonjr/mathts-typed-function package \u2014 these are declarations for two independently-versioned type systems that coincide in shape today but could diverge; core has no dependency edge to add without introducing an unrelated coupling. 2026-07 type-dedup pass."
     },
     {
       "names": ["det", "conj", "re", "im", "arg", "acos", "asin", "atan", "atan2"],
       "filesGlob": ["compat/src/shims.ts"],
-      "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (self-contained 2×2/3×3/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) — a divergent compat impl is exactly how a past 10^6× variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X ≡ functions.X (all three agree to full double precision today). The std and variance twins are gone: compat delegates to the functions implementations (#1280), because a copy without the subnormal and overflow rescue is exactly how the std of data of order 1e-170 came back 0. 2026-07 dedup campaign, compat-parity slice."
+      "reason": "compat intentionally pins mathjs semantics independently of the functions/core twins (self-contained 2\u00d72/3\u00d73/LU det; Math.* trig wrappers; Complex-method conj/re/im/arg) \u2014 a divergent compat impl is exactly how a past 10^6\u00d7 variance bug hid, so this is NOT rubber-stamped: guarded by compat/tests/parity-oracle.test.ts, which anchors each to the numpy oracle AND cross-checks compat.X \u2261 functions.X (all three agree to full double precision today). The std and variance twins are gone: compat delegates to the functions implementations (#1280), because a copy without the subnormal and overflow rescue is exactly how the std of data of order 1e-170 came back 0. 2026-07 dedup campaign, compat-parity slice."
     },
     {
       "names": [
@@ -279,12 +279,12 @@
         "rightLogShift"
       ],
       "filesGlob": ["parallel/src/ops/bitwise.ts"],
-      "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model — the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
+      "reason": "dispatch-variant, not copy-paste: parallel/src/ops/bitwise.ts is the chunked worker-thread kernel over Int32Array buffers; functions/src/typed/bitwise.ts is the scalar/BigNumber typed-dispatch layer (mathTyped registrations). Different input types, different execution model \u2014 the finder can't auto-tag the parallel side DISPATCH_VARIANT because it isn't a mathTyped() call. bitXor's third definer (functions/src/utils/bignumber/bitwise.ts, the BigNumber bit op) is separately allowlisted, so all three definers are now resolved (entry ALLOWLISTED). 2026-07 dedup campaign."
     },
     {
       "names": ["fftshift", "ifftshift"],
       "filesGlob": ["functions/src/signal/fft-helpers.ts"],
-      "reason": "toolkit-vs-public-surface split: after the 2026-07 consolidation both fftshift/ifftshift route through ONE roll algorithm (rollBy<T> in functions/src/signal/fft.ts) — fft.ts keeps the generic <T> toolkit member used by the complex-FFT toolkit and its tests, fft-helpers.ts keeps the thin public number[] surface (exported from the package index) that delegates to it. The static scanner still counts each `export function fftshift` as an own declaration; allowlisting the public wrapper leaves fft.ts's generic as the single canonical algorithm. Guarded by functions/tests/signal/fftshift-parity.test.ts (asserts both surfaces produce identical rolls). 2026-07 dedup campaign."
+      "reason": "toolkit-vs-public-surface split: after the 2026-07 consolidation both fftshift/ifftshift route through ONE roll algorithm (rollBy<T> in functions/src/signal/fft.ts) \u2014 fft.ts keeps the generic <T> toolkit member used by the complex-FFT toolkit and its tests, fft-helpers.ts keeps the thin public number[] surface (exported from the package index) that delegates to it. The static scanner still counts each `export function fftshift` as an own declaration; allowlisting the public wrapper leaves fft.ts's generic as the single canonical algorithm. Guarded by functions/tests/signal/fftshift-parity.test.ts (asserts both surfaces produce identical rolls). 2026-07 dedup campaign."
     },
     {
       "names": [
@@ -302,12 +302,12 @@
         "sign"
       ],
       "filesGlob": ["core/src/number.ts"],
-      "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number→number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) — that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
+      "reason": "hot-path typed-dispatch: functions/src/typed/{arithmetic,trigonometry}.ts inline Math.* in the `number` case for V8 inlining (is.ts precedent, project-all-libraries-build-on-core); core/src/number.ts exports the scalar `number\u2192number` primitive for cold consumers. The functions definer is already auto-tagged DISPATCH_VARIANT (a mathTyped registration), so only the core PLAIN primitive needs allowlisting; the collision is by NAME not role. The rich-type (BigNumber/Complex/Fraction/Dual) cases delegate to the class methods and are guarded by functions/tests/gap-transcendental-richtype-oracle.test.ts (mpmath/NumPy oracle parity) \u2014 that audit found and fixed two real public-API bugs: BigNumber.divide precision for large-digit divisors (cbrt/sqrt/asinh) and the Complex.acosh branch cut. 2026-07 dedup campaign, transcendental temperature-split slice."
     },
     {
       "names": ["pinv", "lowRankApprox", "singularValues", "normFro", "cond"],
       "filesGlob": ["matrix/src/operations/svd.ts", "matrix/src/operations/pinv.ts"],
-      "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain — the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
+      "reason": "dispatch-variant: the functions typed wrapper (functions/src/typed/matrix-ops.ts) is a `mathTyped(...)` registration that routes to these matrix-package SVD/pinv primitives (matrixCond/matrixPinv/matrixSingularValues/matrixLowRankApprox/matrixNormFro), verified by reading the call chain \u2014 the matrix package owns the single canonical body, so there is no second implementation to drift (native-accel pattern, project-two-decomposition-layers-prefer-matrix). The functions definer is auto-tagged DISPATCH_VARIANT; only these matrix PLAIN primitives need allowlisting. `cond`'s former shadowed power-iteration body in functions/src/typed/numeric.ts was removed (dead/unreachable) in the same slice. 2026-07 dedup campaign, matrix-domain routing slice."
     },
     {
       "names": ["matrixExpm", "matrixLogm", "matrixSqrtm"],
@@ -321,12 +321,12 @@
     {
       "names": ["cholesky"],
       "filesGlob": ["matrix/src/operations/cholesky.ts", "functions/src/typed/matrix-ops.ts"],
-      "reason": "matrix/src/operations/cholesky.ts is the canonical, oracle-pinned DenseMatrix Cholesky primitive. functions/src/typed/matrix-ops.ts's `number[][]` cholesky was an independent body; it now ROUTES to the matrix primitive (native-accel, project-two-decomposition-layers-prefer-matrix), keeping only a symmetry pre-check (the matrix primitive reads the lower triangle only, so it would silently accept asymmetric input this surface must reject) and converting DenseMatrix→number[][] for its contract. Pre-routing NumPy audit (np.linalg.cholesky over an SPD corpus) confirmed BOTH bodies were already correct to full double precision — no bug. Guarded by functions/tests/gap-matrix-domain-dedup-parity.test.ts (NumPy oracle + functions≡matrix parity). 2026-07 dedup campaign, matrix-domain routing slice."
+      "reason": "matrix/src/operations/cholesky.ts is the canonical, oracle-pinned DenseMatrix Cholesky primitive. functions/src/typed/matrix-ops.ts's `number[][]` cholesky was an independent body; it now ROUTES to the matrix primitive (native-accel, project-two-decomposition-layers-prefer-matrix), keeping only a symmetry pre-check (the matrix primitive reads the lower triangle only, so it would silently accept asymmetric input this surface must reject) and converting DenseMatrix\u2192number[][] for its contract. Pre-routing NumPy audit (np.linalg.cholesky over an SPD corpus) confirmed BOTH bodies were already correct to full double precision \u2014 no bug. Guarded by functions/tests/gap-matrix-domain-dedup-parity.test.ts (NumPy oracle + functions\u2261matrix parity). 2026-07 dedup campaign, matrix-domain routing slice."
     },
     {
       "names": ["trace", "diag", "dotMultiply", "row", "column", "subset"],
       "filesGlob": ["functions/src/factories/index.ts", "matrix/src/types/dense/reduction.ts"],
-      "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions≡matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
+      "reason": "independent-by-design, not copy-paste: functions/ exposes the mathjs-derived factory body over the mathjs Matrix / number[][] contract (createTrace/createDiag/createDotMultiply/createRow/createColumn/createSubset in functions/src/factories/index.ts, wired into the factory scope); matrix/ dispatches the same mathematical op over its own DenseMatrix type (matrix/src/typed-operations.ts, already auto-tagged DISPATCH_VARIANT). Different type surfaces across two packages with genuinely different call contracts (e.g. subset: mathjs `index(i,j)` object vs matrix scalar `(row,col)`). The matrix typed-op definer is DISPATCH_VARIANT; the PLAIN definers allowlisted are the functions factory bodies (all six) plus matrix/src/types/dense/reduction.ts (the DenseMatrix.trace() primitive that trace() dispatches to). Pinned together by functions/tests/gap-matrix-domain-dedup-parity.test.ts (functions\u2261matrix on overlapping inputs + NumPy trace). 2026-07 dedup campaign, matrix-domain routing slice."
     },
     {
       "names": ["is*"],
@@ -355,7 +355,7 @@
     {
       "names": ["deepMap", "deepForEach"],
       "filesGlob": ["core/src/collection.ts"],
-      "reason": "matrix-aware wrapper, not a copy: core/src/collection.ts's deepMap/deepForEach dispatch over `T[] | Matrix<T>` and delegate the array case to core/src/array.ts's canonical primitive (imported as arrayDeepMap/arrayDeepForEach) — a different (superset) domain, not a duplicated body. Allowlisting the collection wrapper leaves core/src/array.ts as the single canonical array primitive. 2026-07 dedup campaign, closing tail slice."
+      "reason": "matrix-aware wrapper, not a copy: core/src/collection.ts's deepMap/deepForEach dispatch over `T[] | Matrix<T>` and delegate the array case to core/src/array.ts's canonical primitive (imported as arrayDeepMap/arrayDeepForEach) \u2014 a different (superset) domain, not a duplicated body. Allowlisting the collection wrapper leaves core/src/array.ts as the single canonical array primitive. 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["get"],
@@ -405,7 +405,7 @@
     {
       "names": ["round", "fix", "equal", "compareText"],
       "filesGlob": ["core/src/arithmetic/scalar.ts", "core/src/string.ts"],
-      "reason": "hot-path scalar `number` primitives (Bucket-C temperature split, same pattern as the transcendental slice): core owns the inline number→number body (round/fix/equal in core/src/arithmetic/scalar.ts; compareText in core/src/string.ts); functions/src/typed/{arithmetic,relational}.ts register the auto-tagged DISPATCH_VARIANT that handles rich types and delegates the number case. Kept local per project-all-libraries-build-on-core. 2026-07 dedup campaign, closing tail slice."
+      "reason": "hot-path scalar `number` primitives (Bucket-C temperature split, same pattern as the transcendental slice): core owns the inline number\u2192number body (round/fix/equal in core/src/arithmetic/scalar.ts; compareText in core/src/string.ts); functions/src/typed/{arithmetic,relational}.ts register the auto-tagged DISPATCH_VARIANT that handles rich types and delegates the number case. Kept local per project-all-libraries-build-on-core. 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["scatter"],
@@ -430,7 +430,7 @@
     {
       "names": ["derivative", "jacobian"],
       "filesGlob": ["autograd/src/grad.ts"],
-      "reason": "same name, different function: autograd/src/grad.ts's derivative/jacobian are numeric autodiff (fn, x0 → number / number[][]); functions' twins are the symbolic-CAS derivative (functions/src/factories/index.ts) and the numeric vector-field jacobian (functions/src/typed/cas.ts), left canonical. Distinct-by-domain (autodiff vs CAS). 2026-07 dedup campaign, closing tail slice."
+      "reason": "same name, different function: autograd/src/grad.ts's derivative/jacobian are numeric autodiff (fn, x0 \u2192 number / number[][]); functions' twins are the symbolic-CAS derivative (functions/src/factories/index.ts) and the numeric vector-field jacobian (functions/src/typed/cas.ts), left canonical. Distinct-by-domain (autodiff vs CAS). 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["topologicalSort"],
@@ -455,7 +455,7 @@
     {
       "names": ["factory"],
       "filesGlob": ["expression/src/utils/factory.ts", "functions/src/utils/factory.ts"],
-      "reason": "genuinely distinct generic constraints on TDeps (same reason as the already-allowlisted FactoryFunction/CreateFunction types: core Record<string,unknown> vs expression object vs functions Record<string,any>) — redirecting to one shape breaks tsc at real call sites in the other packages. core/src/factory.ts's factory stays canonical. 2026-07 dedup campaign, closing tail slice."
+      "reason": "genuinely distinct generic constraints on TDeps (same reason as the already-allowlisted FactoryFunction/CreateFunction types: core Record<string,unknown> vs expression object vs functions Record<string,any>) \u2014 redirecting to one shape breaks tsc at real call sites in the other packages. core/src/factory.ts's factory stays canonical. 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["create"],
@@ -470,7 +470,7 @@
     {
       "names": ["getOperator", "properties"],
       "filesGlob": ["functions/src/expression/operators.ts"],
-      "reason": "mathjs operator-precedence table + lookup, kept local to the functions expression-node helpers; expression/src/operators.ts (left canonical) is the parser's copy. Pinned identical by expression↔functions operator tables in their own suites; a divergence here is inert (each package reads its own). 2026-07 dedup campaign, closing tail slice."
+      "reason": "mathjs operator-precedence table + lookup, kept local to the functions expression-node helpers; expression/src/operators.ts (left canonical) is the parser's copy. Pinned identical by expression\u2194functions operator tables in their own suites; a divergence here is inert (each package reads its own). 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["printTemplate"],
@@ -496,12 +496,12 @@
         "squeeze"
       ],
       "filesGlob": ["functions/src/factories/index.ts"],
-      "reason": "mathjs factory-layer reimplementations (the `math.create({...})` plugin escape-hatch) of the core primitives in core/src/arithmetic/scalar.ts / core/src/array.ts. The scalar arith ops (add/subtract/multiply/divideScalar) + isNumeric are the SAME semantics as core and are guarded functions≡core≡oracle by functions/tests/gap-factory-core-parity.test.ts; the array ops (concat/filter/flatten/forEach/map/reshape/resize/squeeze) are the mathjs Matrix-aware factory contracts over core's pure-array primitives (oracle-pinned in the same test); `number` is distinct-by-contract (functions parses strings/units, core coerces a NumericScalar). core stays canonical. NOTE (surfaced): the deeper 'collapse the factory layer into typed' ADR is an open call — allowlist-with-parity is the interim divergence guard, not a resolution. 2026-07 dedup campaign, closing tail slice."
+      "reason": "mathjs factory-layer reimplementations (the `math.create({...})` plugin escape-hatch) of the core primitives in core/src/arithmetic/scalar.ts / core/src/array.ts. The scalar arith ops (add/subtract/multiply/divideScalar) + isNumeric are the SAME semantics as core and are guarded functions\u2261core\u2261oracle by functions/tests/gap-factory-core-parity.test.ts; the array ops (concat/filter/flatten/forEach/map/reshape/resize/squeeze) are the mathjs Matrix-aware factory contracts over core's pure-array primitives (oracle-pinned in the same test); `number` is distinct-by-contract (functions parses strings/units, core coerces a NumericScalar). core stays canonical. NOTE (surfaced): the deeper 'collapse the factory layer into typed' ADR is an open call \u2014 allowlist-with-parity is the interim divergence guard, not a resolution. 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["zeros", "ones", "size", "matrix", "identity", "bignumber", "fraction", "sparse"],
       "filesGlob": ["compat/src/shims.ts", "functions/src/factories/index.ts"],
-      "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) — self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r×c matrix (fixed 2026-07-18 floor-decisions slice — formerly an n×n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
+      "reason": "compat mathjs-API shim (compat/src/shims.ts) vs the functions mathjs factory (functions/src/factories/index.ts) \u2014 self-contained independent bodies with DIFFERENT return types (compat matrix constructors return DenseMatrix; functions return arrays / mathjs types; matrix/src/typed-operations.ts is the auto-tagged DISPATCH_VARIANT). compat's zeros/ones(n) return a length-n VECTOR matching mathjs (single-arg), and zeros/ones(r,c) an r\u00d7c matrix (fixed 2026-07-18 floor-decisions slice \u2014 formerly an n\u00d7n square, which diverged from mathjs). Guarded by compat/tests/parity-oracle.test.ts (each pinned to the mathjs/numpy oracle). 2026-07 dedup campaign."
     },
     {
       "names": ["fix", "isPositive", "isNegative", "isInteger"],
@@ -537,7 +537,7 @@
     {
       "names": ["e", "pi", "phi", "tau"],
       "filesGlob": ["compat/src/shims.ts"],
-      "reason": "trivial mathematical constants (Math.PI / Math.E / 2π / golden ratio): compat/src/shims.ts's public copies vs functions/src/plain/number/constants.ts's plain-number internal copies (left canonical; not re-exported from the functions index). Pinned to closed-form oracles in compat/tests/parity-oracle.test.ts. 2026-07 dedup campaign, closing tail slice."
+      "reason": "trivial mathematical constants (Math.PI / Math.E / 2\u03c0 / golden ratio): compat/src/shims.ts's public copies vs functions/src/plain/number/constants.ts's plain-number internal copies (left canonical; not re-exported from the functions index). Pinned to closed-form oracles in compat/tests/parity-oracle.test.ts. 2026-07 dedup campaign, closing tail slice."
     },
     {
       "names": ["fft", "ifft"],
@@ -557,12 +557,12 @@
     {
       "names": ["qr"],
       "filesGlob": ["functions/src/factories/index.ts", "matrix/src/operations/qr.ts"],
-      "reason": "distinct-contract dispatch-variant, KEEP both (routing would drop the mathjs Matrix contract): functions/src/algebra/decomposition/qr.ts (`createQr`, wired via functions/src/factories/index.ts) is the mathjs `Matrix`/`SparseMatrix` factory — Householder QR (full Q m×m, R m×n; its former legacy-WASM `qrDecomposition` branch was dead — the AS binary never exported that kernel — and was removed), Array input ⇒ {Q:number[][],R:number[][]}; matrix/src/operations/qr.ts is the DenseMatrix primitive (Gram-Schmidt w/ re-orthogonalisation, reduced|full mode). Different call contracts, different algorithms, both needed. Guarded by functions/tests/gap-qr-parity.test.ts, which pins functions ≡ matrix ≡ NumPy on |diag R| (sign-invariant) + A=Q·R reconstruction + Qᵀ·Q=I — no divergence found (full double precision). 2026-07 dedup campaign, floor-decisions slice (Daniel keep-vs-route ADR = keep)."
+      "reason": "distinct-contract dispatch-variant, KEEP both (routing would drop the mathjs Matrix contract): functions/src/algebra/decomposition/qr.ts (`createQr`, wired via functions/src/factories/index.ts) is the mathjs `Matrix`/`SparseMatrix` factory \u2014 Householder QR (full Q m\u00d7m, R m\u00d7n; its former legacy-WASM `qrDecomposition` branch was dead \u2014 the AS binary never exported that kernel \u2014 and was removed), Array input \u21d2 {Q:number[][],R:number[][]}; matrix/src/operations/qr.ts is the DenseMatrix primitive (Gram-Schmidt w/ re-orthogonalisation, reduced|full mode). Different call contracts, different algorithms, both needed. Guarded by functions/tests/gap-qr-parity.test.ts, which pins functions \u2261 matrix \u2261 NumPy on |diag R| (sign-invariant) + A=Q\u00b7R reconstruction + Q\u1d40\u00b7Q=I \u2014 no divergence found (full double precision). 2026-07 dedup campaign, floor-decisions slice (Daniel keep-vs-route ADR = keep)."
     },
     {
       "names": ["WasmLoader", "wasmLoader"],
       "filesGlob": ["functions/src/wasm/WasmLoader.ts", "matrix/src/backends/WasmLoader.ts"],
-      "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes have DIFFERENT allocation responsibilities — functions/src/wasm/WasmLoader.ts only loads/verifies/instantiates (its never-populated single-pointer allocation pool was removed together with the dead legacy-WASM call sites that were its only users; the functions bridges marshal through functions/src/wasm/bridges/common.ts), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) — and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
+      "reason": "genuinely different runtime, not copy-paste: the two WasmLoader classes have DIFFERENT allocation responsibilities \u2014 functions/src/wasm/WasmLoader.ts only loads/verifies/instantiates (its never-populated single-pointer allocation pool was removed together with the dead legacy-WASM call sites that were its only users; the functions bridges marshal through functions/src/wasm/bridges/common.ts), while matrix/src/backends/WasmLoader.ts implements the AssemblyScript managed-runtime model (a 12-byte header + separate data block, an `Allocation<T>` handle with ptr/dataPtr/array, plus `readReturnedFloat64Array`/`initWasm`) \u2014 and each binds its own package-scoped `WasmModule` ABI subset (already allowlisted as a distinct type). matrix can't import from functions (cycle). The SHARED, byte-identical parts (SHA-384 integrity `sha384OfBuffer`/`verifyWasmIntegrity`/`loadWasmManifest` + path resolution `resolvePackagedWasm`/`defaultWasmLocation`) WERE consolidated to @danielsimonjr/mathts-core/internal (core/src/wasm-loader.ts); both packages' integrity.ts/resolve.ts now re-export it and inject their own import.meta.url. Only the allocation-divergent class + its singleton remain per-package. SHA-384 verify-before-instantiate preserved byte-for-byte; guarded by functions+matrix tests/security/wasm-integrity.test.ts. 2026-07 dedup campaign, floor-decisions slice (Daniel security ADR = consolidate shared logic, keep divergent loaders)."
     },
     {
       "names": ["canUseWasm", "canUseSharedMemory"],
@@ -575,32 +575,46 @@
     {
       "names": ["initializePool", "terminatePool"],
       "filesGlob": ["functions/src/typed/arithmetic.ts", "packages/workerpool/src/index.ts"],
-      "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel — the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global — so delegating functions→workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
+      "reason": "same name, DIFFERENT pool target (distinct-by-target, NOT a reimplementation to consolidate): functions/src/typed/arithmetic.ts's initializePool/terminatePool are thin lifecycle wrappers over the `computePool` singleton (a ComputePool from @danielsimonjr/mathts-parallel \u2014 the pool that functions' own parallel matmul/transpose/matvec/outer actually use); packages/workerpool/src/index.ts's operate on the `mathWorkerPool` singleton (a MathWorkerPool). Verified (RFL R4): ComputePool wraps its OWN MathWorkerPool instance, distinct from workerpool's module-global \u2014 so delegating functions\u2192workerpool (the original dedup hypothesis) would initialize the WRONG pool and leave functions' ComputePool uninitialised, a real regression. Two thin wrappers over two different pool singletons that coincidentally share a name; distinct-by-domain like the other lifecycle homonyms. Independent of #27 (structure unchanged). 2026-07 dedup campaign, floor-decisions slice."
     },
     {
       "names": ["degree", "derivative", "evaluate", "isZero"],
       "filesGlob": ["functions/src/typed/factorization/integer-poly.ts"],
-      "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives — a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
+      "reason": "self-contained univariate factorization engine (bigint IntPoly = bigint[]) primitives, distinct-by-domain from their homonyms and surfaced as TRUE_DUPLICATE only once factor() wired the engine into the live graph (2026-07-20): degree(p: IntPoly) is the bigint dense-poly degree (vs algebra.ts's number[] degree, left canonical); derivative(p: IntPoly): IntPoly is the formal bigint-poly derivative (vs the autograd numeric-autodiff derivative [already allowlisted] and the functions/src/factories/index.ts symbolic-CAS derivative [left canonical]); evaluate(p: IntPoly, x: bigint): bigint is bigint Horner (vs functions/src/factories/evaluate.ts's expression evaluator, left canonical); isZero(p: IntPoly) is the zero-polynomial test (vs the factories numeric isZero, left canonical). The engine is bigint-only by design (float64 loses correctness once p^k > 2^53 during Hensel lift), so it cannot delegate to the number-typed primitives \u2014 a genuinely independent body, not a copy to consolidate. 2026-07 factorization Layer-1 slice."
     },
     {
       "names": ["isZero", "equals"],
       "filesGlob": ["functions/src/typed/factorization/multi-poly.ts"],
-      "reason": "self-contained multivariate factorization engine (sparse bigint MultiPoly) primitives, surfaced as TRUE_DUPLICATE only once factor() wired the Kronecker Layer-2 engine into the live graph (2026-07-20): isZero(p: MultiPoly) tests the empty term-map (vs functions/src/factories/index.ts's numeric isZero [left canonical] and the Layer-1 integer-poly.ts IntPoly isZero [separately allowlisted]); equals(a,b: MultiPoly) is structural term-map equality (vs functions/src/typed/factorization/integer-poly.ts's IntPoly equals [left canonical]). The engine is bigint-only and operates on a distinct type (MultiPoly), so it cannot delegate to the number/IntPoly-typed homonyms — a genuinely independent body, not a copy to consolidate. Engine correctness is sympy-oracle-pinned (functions/tests/factorization/*). 2026-07 factorization Layer-2 slice."
+      "reason": "self-contained multivariate factorization engine (sparse bigint MultiPoly) primitives, surfaced as TRUE_DUPLICATE only once factor() wired the Kronecker Layer-2 engine into the live graph (2026-07-20): isZero(p: MultiPoly) tests the empty term-map (vs functions/src/factories/index.ts's numeric isZero [left canonical] and the Layer-1 integer-poly.ts IntPoly isZero [separately allowlisted]); equals(a,b: MultiPoly) is structural term-map equality (vs functions/src/typed/factorization/integer-poly.ts's IntPoly equals [left canonical]). The engine is bigint-only and operates on a distinct type (MultiPoly), so it cannot delegate to the number/IntPoly-typed homonyms \u2014 a genuinely independent body, not a copy to consolidate. Engine correctness is sympy-oracle-pinned (functions/tests/factorization/*). 2026-07 factorization Layer-2 slice."
     },
     {
       "names": ["substitute"],
       "filesGlob": ["functions/src/typed/factorization/kronecker.ts"],
-      "reason": "same name, different function (distinct-by-domain): functions/src/typed/factorization/kronecker.ts's substitute(p: MultiPoly, bases): IntPoly performs Kronecker substitution xₖ↦x^{bₖ}, collapsing a multivariate bigint poly to its univariate image; functions/src/typed/algebra.ts's substitute (left canonical) is the CAS string/AST variable substitution. Surfaced as TRUE_DUPLICATE only once factor() wired the Layer-2 engine into the live graph (2026-07-20). 2026-07 factorization Layer-2 slice."
+      "reason": "same name, different function (distinct-by-domain): functions/src/typed/factorization/kronecker.ts's substitute(p: MultiPoly, bases): IntPoly performs Kronecker substitution x\u2096\u21a6x^{b\u2096}, collapsing a multivariate bigint poly to its univariate image; functions/src/typed/algebra.ts's substitute (left canonical) is the CAS string/AST variable substitution. Surfaced as TRUE_DUPLICATE only once factor() wired the Layer-2 engine into the live graph (2026-07-20). 2026-07 factorization Layer-2 slice."
     },
     {
       "names": ["parse", "evaluate"],
       "filesGlob": ["expression/src/default-instance.ts", "functions/src/factories/evaluate.ts"],
-      "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph — distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
+      "reason": "G20 dogfood: default thin-package wired instance (minimal arithmetic scope, lazy createParse) vs functions public evaluate with the full activated math graph \u2014 distinct entry points; expression/tests/dogfood-g20-parser-evaluator.test.ts pins evaluate('2+3')===5 on the default path."
     },
     {
       "names": ["Transfer", "ExecOptions", "PoolOptions", "PoolStats"],
       "filesGlob": ["packages/workerpool/src/workerpool-browser-shim.ts"],
       "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
+    },
+    {
+      "names": ["Parser"],
+      "filesGlob": ["compat/src/index.ts", "expression/src/Parser.ts"],
+      "reason": "#1571: compat's Parser is the callable instance-proxy constructor for create(all) (Reflect.construct of the wired instance's parser); expression's Parser is the ready-made class at the package's default config. Different surfaces by design; #1568 records events/instance members as compat-only."
+    },
+    {
+      "names": ["ResultSetJSON"],
+      "filesGlob": [
+        "compat/src/index.ts",
+        "expression/src/ResultSet.ts",
+        "functions/src/type/resultset/ResultSet.ts"
+      ],
+      "reason": "#1567: functions' createResultSet factory and expression's canonical ResultSet class are two independent implementations of the mathjs JSON shape; merging them is a consolidation-backlog item, not a G12 behavior change."
     }
   ]
 }

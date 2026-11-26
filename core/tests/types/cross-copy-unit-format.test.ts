@@ -22,7 +22,7 @@ describe('Unit format with a value of a second copy of core', () => {
   });
 
   it('prints a Fraction value as the ratio', () => {
-    const own = new Unit(new Fraction(1, 8) as never, 'S').toString();
+    const own = new Unit(new Fraction(1, 8), 'S').toString();
     const foreign = new Unit(new core2.Fraction(1, 8) as never, 'S').toString();
     expect(own).toBe('1/8 S');
     expect(foreign).toBe(own);
