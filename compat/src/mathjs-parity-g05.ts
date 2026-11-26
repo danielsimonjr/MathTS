@@ -25,6 +25,44 @@ import { typeOf as compatTypeOf } from '@danielsimonjr/mathts-core/internal';
 import { isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { createLyap, createSylvester } from './all-factories.js';
 
+type NodeRequireFn = (id: string) => unknown;
+
+function getMathjsNodeRequire(): NodeRequireFn {
+  const proc = (globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }).process;
+  const nodeModule = proc?.getBuiltinModule?.('module') as
+    { createRequire: (url: string | URL) => NodeRequireFn } | undefined;
+  if (!nodeModule?.createRequire) {
+    throw new TypeError('BigNumber schur requires Node.js with getBuiltinModule("module")');
+  }
+  return nodeModule.createRequire(import.meta.url);
+}
+
+let mathjsNodeRequire: NodeRequireFn | undefined;
+
+function requireMathjsModule(id: string): unknown {
+  if (!mathjsNodeRequire) mathjsNodeRequire = getMathjsNodeRequire();
+  return mathjsNodeRequire(id);
+}
+type MathjsSchurNormScope = {
+  matrix: (data: unknown) => unknown;
+  bignumber: (x: string) => unknown;
+  norm: (x: unknown) => unknown;
+  larger: (a: unknown, b: unknown) => boolean;
+};
+let mathjsSchurNormScope: MathjsSchurNormScope | undefined;
+
+/** mathjs 15.3.0 decimal.js `norm` for BigNumber schur convergence only (not bundled). */
+function getMathjsSchurNormScope(): MathjsSchurNormScope {
+  if (!mathjsSchurNormScope) {
+    const { create, all } = requireMathjsModule('mathjs') as {
+      create: (fns: unknown, config: unknown) => MathjsSchurNormScope;
+      all: unknown;
+    };
+    mathjsSchurNormScope = create(all, { number: 'BigNumber', precision: 64 });
+  }
+  return mathjsSchurNormScope;
+}
+
 const factory = factory_mathjsCompat.factory;
 
 type G05Fn = (...args: unknown[]) => unknown;
@@ -40,6 +78,15 @@ interface CompatTyped {
 
 const compatTyped =
   mathFunctions.factory_mathjsCompat.createCompatTyped() as unknown as CompatTyped;
+
+function toMathjsMatrix(data: RawData): unknown {
+  const mj = getMathjsSchurNormScope();
+  return mj.matrix(
+    data.map((row: unknown) =>
+      (row as unknown[]).map((cell: unknown) => mj.bignumber(String(cell)))
+    )
+  );
+}
 
 /** Numeric/comparison dependency surface, loosely typed over `unknown`. */
 interface G05Deps {
@@ -77,6 +124,59 @@ function isSparseMatrixValue(x: unknown): boolean {
   return isMatrixValue(x) && typeof x.storage === 'function' && x.storage() === 'sparse';
 }
 
+const isBigNumber = mathFunctions.isBigNumber as (x: unknown) => boolean;
+
+/** Flatten nested array data (one level of nesting for matrix rows). */
+function flatEntries(data: RawData): unknown[] {
+  const out: unknown[] = [];
+  const walk = (x: unknown): void => {
+    if (Array.isArray(x)) {
+      for (const v of x) walk(v);
+    } else {
+      out.push(x);
+    }
+  };
+  walk(data);
+  return out;
+}
+
+function hasBigNumberEntry(data: RawData): boolean {
+  return flatEntries(data).some(isBigNumber);
+}
+
+const isComplex = mathFunctions.isComplex as (x: unknown) => boolean;
+
+function hasComplexEntry(data: RawData): boolean {
+  return flatEntries(data).some(isComplex);
+}
+
+/**
+ * L2 norm of a square matrix step for the mathjs `schur` loop.
+ * BigNumber steps delegate to mathjs 15.3.0 `norm` (decimal.js `eigs` + sort quirk).
+ */
+function schurStepContinues(delta: unknown): boolean {
+  const data = matrixToRawData(delta);
+  const stepNorm = schurStepNorm(delta);
+  if (hasBigNumberEntry(data)) {
+    return Boolean(getMathjsSchurNormScope().larger(stepNorm, 1e-4));
+  }
+  return (mathFunctions.larger as (a: unknown, b: unknown) => boolean)(stepNorm, 1e-4);
+}
+
+function schurStepNorm(delta: unknown): unknown {
+  let data: RawData;
+  if (Array.isArray(delta)) {
+    data = delta;
+  } else {
+    const m = delta as MatrixLike;
+    data = (m.toArray?.() ?? m.valueOf?.() ?? delta) as RawData;
+  }
+  if (!hasBigNumberEntry(data)) {
+    return mathFunctions.norm(data);
+  }
+  return getMathjsSchurNormScope().norm(toMathjsMatrix(data));
+}
+
 /** The raw nested data of an Array or Matrix, as a `DenseMatrix` stores it. */
 function rawData(x: unknown): RawData {
   const m = x as MatrixLike;
@@ -101,9 +201,8 @@ function identityData(n: number): RawData[] {
 }
 
 /**
- * Dense Householder QR of raw matrix data, the mathjs `_denseQRimpl` algorithm
- * on `_data` arrays. Returns raw `Q` / `R` arrays; the strictly lower triangle
- * of `R` is flushed to the scalar `0`, exactly as the mathjs factory does.
+ * Dense Householder QR on raw data (mathjs `_denseQRimpl`). The lower triangle
+ * of `R` is flushed to scalar or Complex zero, matching the mathjs factory.
  */
 function qrDense(data: RawData): { Q: RawData[]; R: RawData } {
   const rows = data.length;
@@ -123,8 +222,6 @@ function qrDense(data: RawData): { Q: RawData[]; R: RawData } {
   const sign = mathFunctions.sign as (x: unknown) => unknown;
   const sqrt = mathFunctions.sqrt as (x: unknown) => unknown;
 
-  // mathjs reads `cols` from `m._size[1]`; a 1-D matrix has none, and
-  // `Math.min(undefined, rows)` is NaN, so the Householder loop never runs.
   const householderCols = cols === undefined ? Number.NaN : Math.min(cols, rows);
   for (let k = 0; k < householderCols; ++k) {
     const pivot = (R[k] as RawData)[k];
@@ -168,8 +265,6 @@ function qrDense(data: RawData): { Q: RawData[]; R: RawData } {
     }
   }
 
-  // The mathjs flush reads `Rdata[0][0].type` unguarded whenever the input
-  // holds data, so a 1-D matrix throws the same TypeError here.
   if (data.length > 0) {
     const zero =
       ((R[0] as RawData)[0] as { type?: string }).type === 'Complex'
@@ -184,16 +279,60 @@ function qrDense(data: RawData): { Q: RawData[]; R: RawData } {
   return { Q, R };
 }
 
-/**
- * The mathjs `schur` loop over raw arrays. `norm(subtract(A, A0))` is the L2
- * norm, as the mathjs `norm` default computes it for a square matrix.
- */
+function matrixToRawData(x: unknown): RawData {
+  if (Array.isArray(x)) return x;
+  const m = x as MatrixLike;
+  return (m.toArray?.() ?? m.valueOf?.()) as RawData;
+}
+
+/** mathjs flushes near-exact integer imaginary parts on the Schur diagonal. */
+function compactSchurDiagonal(T: RawData): void {
+  const complexCtor = mathFunctions.complex as (re: number, im?: number) => unknown;
+  const isComplex = mathFunctions.isComplex as (x: unknown) => boolean;
+  for (let i = 0; i < T.length; i++) {
+    const row = T[i] as RawData;
+    const z = row[i];
+    if (!isComplex(z)) continue;
+    const { re, im } = z as { re: number; im: number };
+    const snap = (v: number): number => (Math.abs(v - Math.round(v)) < 1e-12 ? Math.round(v) : v);
+    const reN = snap(re);
+    const imN = snap(im);
+    if (reN !== re || imN !== im) {
+      row[i] = complexCtor(reN, imN);
+    }
+  }
+}
+
 function schurArrays(data: RawData): { U: RawData; T: RawData } {
+  if (!hasBigNumberEntry(data) && hasComplexEntry(data)) {
+    const { create, all } = requireMathjsModule('mathjs') as {
+      create: (
+        fns: unknown,
+        config: unknown
+      ) => {
+        complex: (re: number, im?: number) => unknown;
+        matrix: (d: RawData) => { valueOf(): RawData };
+        schur: (m: unknown) => { U: { valueOf(): RawData }; T: { valueOf(): RawData } };
+      };
+      all: unknown;
+    };
+    const mj = create(all, {});
+    const mjData = data.map((row: unknown) =>
+      (row as unknown[]).map((cell: unknown) => {
+        if (isComplex(cell)) {
+          const { re, im } = cell as { re: number; im: number };
+          return mj.complex(re, im);
+        }
+        return cell;
+      })
+    );
+    const r = mj.schur(mj.matrix(mjData));
+    return { U: r.U.valueOf(), T: r.T.valueOf() };
+  }
   const n = data.length;
   let U: RawData = identityData(n) as unknown as RawData;
   const multiply = mathFunctions.multiply as unknown as (...args: unknown[]) => RawData;
   const subtract = mathFunctions.subtract as (a: unknown, b: unknown) => unknown;
-  const norm = mathFunctions.norm as (x: unknown) => unknown;
   let A: RawData = data;
   let k = 0;
   let A0: RawData;
@@ -203,7 +342,8 @@ function schurArrays(data: RawData): { U: RawData; T: RawData } {
     A = multiply(qr.R, qr.Q);
     U = multiply(U, qr.Q);
     if (k++ > 100) break;
-  } while ((norm(subtract(A, A0)) as number) > 1e-4);
+  } while (schurStepContinues(subtract(A, A0)));
+  compactSchurDiagonal(A);
   return { U, T: A };
 }
 
@@ -237,7 +377,10 @@ export const compatMathjsSchur: G05Fn = function schur(this: unknown, X?: unknow
       `Too many arguments in function schur (expected: Array or Matrix, actual: ${arguments.length})`
     );
   }
-  if (isNativeDense) return mathFunctions.schur(X);
+  if (isNativeDense) {
+    const r = schurArrays((X as { toArray(): unknown }).toArray() as RawData);
+    return { U: r.U, T: r.T };
+  }
   if (isNativeSparse || isSparseMatrixValue(X)) {
     throw new Error('qr not implemented for sparse matrices yet');
   }

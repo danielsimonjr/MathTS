@@ -80,13 +80,9 @@ describe('G05 schur ordering and subdiagonal (#1584)', () => {
     }
   });
 
-  it('a BigNumber schur keeps the Schur invariants (documented digit difference)', () => {
-    // mathjs 15.3.0 computes the BigNumber schur with decimal.js at precision
-    // 64; compat runs the same QR iteration on the MathTS decimal, whose
-    // last-place rounding differs. The iteration is chaotic at the ulp level,
-    // so T can stop at a different iterate: the diagonal order and the
-    // subdiagonal residue are NOT asserted digit-for-digit here (documented in
-    // docs/api/compat.md). The decomposition invariants still hold.
+  it('a BigNumber schur keeps the Schur invariants', () => {
+    // Differential parity (precision 14) is in challenger-g05.test.ts and
+    // g05-bignumber-matrix.test.ts. Here we only assert U·T·Uᵀ = A.
     const L = createCompat(compatAll, { number: 'BigNumber' });
     const bn = L.bignumber;
     const result = L.schur([

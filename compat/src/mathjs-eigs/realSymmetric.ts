@@ -36,6 +36,8 @@ interface Dependencies {
   bignumber: (x: number | string) => BigNumber;
   multiply: (...args: Scalar[]) => Scalar;
   add: (...args: Scalar[]) => Scalar;
+  /** mathjs 15.3.0 `eigs` selection sort uses raw `<` on `abs` values (lexicographic strings on BigNumber). */
+  lexicographicAbsSort?: boolean;
 }
 
 /**
@@ -55,6 +57,7 @@ export function createRealSymmetric({
   bignumber,
   multiply,
   add,
+  lexicographicAbsSort = false,
 }: Dependencies) {
   // BigNumber comparison helpers — JavaScript's >=/</<= operators don't work
   // with Decimal.js objects because valueOf() returns strings, causing
@@ -66,6 +69,19 @@ export function createRealSymmetric({
   function bigLte(a: Scalar, b: Scalar): boolean {
     if (typeof a === 'number' && typeof b === 'number') return a <= b;
     return (a as BigNumber).lte(b as BigNumber);
+  }
+
+  function absSortedLess(a: Scalar, b: Scalar): boolean {
+    const aj = abs(a) as Scalar;
+    const bj = abs(b) as Scalar;
+    if (lexicographicAbsSort) {
+      if (typeof aj === 'number' && typeof bj === 'number') return aj < bj;
+      return (
+        String((aj as { valueOf(): unknown }).valueOf()) <
+        String((bj as { valueOf(): unknown }).valueOf())
+      );
+    }
+    return bigLt(aj, bj);
   }
 
   /**
@@ -449,7 +465,7 @@ export function createRealSymmetric({
       let minID = 0;
       let minE = E[0];
       for (let j = 0; j < E.length; j++) {
-        if (bigLt(abs(E[j]), abs(minE))) {
+        if (absSortedLess(E[j], minE)) {
           minID = j;
           minE = E[minID];
         }

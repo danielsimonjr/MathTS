@@ -112,13 +112,14 @@ Native MathTS differences (import the names from
 - `solveODE` uses a scipy-style step control (BDF, Radau, RK23/RK45 with
   normalized error control). Both solve the issue's problem within the default
   tolerance; the step grids differ.
-- A BigNumber `schur` is the one place where compat can differ from the mathjs
-  oracle in the last digits: mathjs computes BigNumber QR with decimal.js at
-  precision 64, compat with the MathTS decimal. The iteration is chaotic at the
-  ulp level, so `T` can stop at a different iterate (mathjs's own BigNumber
-  result for `schur([[1,2],[3,4]])` is itself an unconverged iterate with a
-  `6.98e-8` subdiagonal). Eigenvalues and `A = U·T·Uᵀ` agree; pinned by
-  `compat/tests/parity/g05-schur-ode.test.ts`.
+- BigNumber `schur` convergence uses mathjs 15.3.0's `_matrixNormTwo` stopping
+  rule (decimal.js `eigs` with lexicographic `<` on `abs` when sorting
+  eigenvalues), not the corrected MathTS `norm`/`eigs` ordering. The compat
+  adapter calls that oracle `norm` for BigNumber steps only (`node:module`
+  `require('mathjs')` at runtime — present in dev/CI via the `mathjs` devDependency;
+  ship your own `mathjs` install if you rely on this path outside the monorepo).
+  A native `@danielsimonjr/mathts-matrix` `DenseMatrix` argument to `schur` runs
+  the same mathjs QR iteration as array input (not the native Francis path).
 
 ### Fraction formatting (#1579, #1586)
 
