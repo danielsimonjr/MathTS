@@ -108,17 +108,29 @@ function isSafeProperty(object: unknown, prop: unknown): boolean {
   // UNSAFE: inherited from Function prototype
   // e.g call, apply
   if ((prop as string) in Function.prototype) {
-    // mathjs names the one-based slice transform `apply` on mathWithTransform; it
-    // must resolve in parse().evaluate() while inherited Function#apply stays blocked.
-    if (prop === 'apply' && hasOwnProperty(object, 'apply')) {
-      return true;
-    }
     // 'in' is used instead of hasOwnProperty for nodejs v0.10
     // which is inconsistent on root prototypes. It is safe
     // here because Function.prototype is a root object
     return false;
   }
   return true;
+}
+
+/**
+ * Read a binding from the expression math namespace. The transform name `apply`
+ * is an own property on mathWithTransform; it must resolve in parsed ASTs while
+ * user objects still cannot read inherited Function#apply as a property.
+ */
+function getMathNamespaceBinding(object: unknown, prop: unknown): unknown {
+  const key = prop as string;
+  if (
+    key === 'apply' &&
+    isPlainObject(object) &&
+    Object.prototype.hasOwnProperty.call(object, key)
+  ) {
+    return (object as Record<string, unknown>)[key];
+  }
+  return getSafeProperty(object, prop);
 }
 
 /**
@@ -243,7 +255,7 @@ const safeNativeMethods = {
   toLocaleString: true,
 };
 
-export { getSafeProperty };
+export { getSafeProperty, getMathNamespaceBinding };
 export { setSafeProperty };
 export { isSafeProperty };
 export { getSafeMethod };

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  getMathNamespaceBinding,
   getSafeProperty,
   setSafeProperty,
   isSafeProperty,
@@ -61,10 +62,6 @@ describe('utils/customs - isSafeProperty', () => {
     expect(isSafeProperty({}, 'bind')).toBe(false);
   });
 
-  it('allows own apply on plain objects (expression transform name, #1572)', () => {
-    expect(isSafeProperty({ apply: () => 0 }, 'apply')).toBe(true);
-  });
-
   it('returns false for non-plain-object non-array values', () => {
     expect(isSafeProperty(new Date(), 'getTime')).toBe(false);
     class Foo {
@@ -74,12 +71,18 @@ describe('utils/customs - isSafeProperty', () => {
   });
 });
 
+describe('utils/customs - getMathNamespaceBinding', () => {
+  it('reads own apply on the math namespace (#1572)', () => {
+    const applyFn = () => 0;
+    expect(getMathNamespaceBinding({ apply: applyFn }, 'apply')).toBe(applyFn);
+    expect(() => getMathNamespaceBinding({}, 'apply')).toThrow(/No access to property/);
+  });
+});
+
 describe('utils/customs - getSafeProperty', () => {
   it('returns the value for a safe property', () => {
     expect(getSafeProperty({ x: 42 }, 'x')).toBe(42);
     expect(getSafeProperty([10, 20, 30], 'length')).toBe(3);
-    const applyFn = () => 0;
-    expect(getSafeProperty({ apply: applyFn }, 'apply')).toBe(applyFn);
   });
 
   it('throws "No access to property" for unsafe properties', () => {

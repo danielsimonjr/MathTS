@@ -7,7 +7,13 @@ import {
 } from '../utils/is.js';
 import { escape, format } from '../utils/string.js';
 import { hasOwnProperty } from '../utils/object.js';
-import { getSafeProperty, getSafeMethod, isSafeProperty, isSafeMethod } from '../utils/customs.js';
+import {
+  getMathNamespaceBinding,
+  getSafeMethod,
+  getSafeProperty,
+  isSafeMethod,
+  isSafeProperty,
+} from '../utils/customs.js';
 import { createSubScope } from '../utils/scope.js';
 import { factory } from '../utils/factory.js';
 import type { DefaultDependencies } from '../utils/factory.js';
@@ -247,7 +253,8 @@ export const createFunctionNode = /* #__PURE__ */ factory(
           if (!argNames[name]) {
             // we can statically determine whether the function
             // has the rawArgs property
-            const fn = name in math ? (getSafeProperty(math, name) as MathFunction) : undefined;
+            const fn =
+              name in math ? (getMathNamespaceBinding(math, name) as MathFunction) : undefined;
             const isRaw = typeof fn === 'function' && fn.rawArgs === true;
 
             const resolveFn = (scope: Map<string, unknown>): MathFunction | undefined => {
@@ -255,7 +262,7 @@ export const createFunctionNode = /* #__PURE__ */ factory(
               if (scope.has(name)) {
                 value = scope.get(name);
               } else if (name in math) {
-                value = getSafeProperty(math, name);
+                value = getMathNamespaceBinding(math, name);
               } else if (fromOptionalChaining) value = undefined;
               else return FunctionNode.onUndefinedFunction(name);
 
