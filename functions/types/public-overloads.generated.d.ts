@@ -196,9 +196,9 @@ export interface VarianceCallable {
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
+  (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): unknown;
   <T extends Fraction | BigNumber>(a: ExactData<T>): T;
-  (a: ExactData<Complex | bigint>): number;
+  (a: ExactData<Complex>): Complex;
   (a: readonly unknown[] | Matrix | MatrixValue, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;
@@ -227,9 +227,10 @@ export interface StdCallable {
   (a: Matrix, b: number | BigNumber): number | number[];
   (a: Matrix, b: number | BigNumber, c: string): number | number[];
   (a: Matrix, b: number | BigNumber, c: StatReduceOptions): number | number[];
-  (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): number;
+  (...rest: (number | bigint | Fraction | BigNumber | Complex | UnitInstance)[]): unknown;
   (a: ExactData<BigNumber>): BigNumber;
-  (a: ExactData<Fraction | Complex | bigint>): number;
+  (a: ExactData<Fraction | bigint>): number;
+  (a: ExactData<Complex>): Complex;
   (a: readonly unknown[] | Matrix | MatrixValue, b?: number | BigNumber | string | StatReduceOptions, c?: string | StatReduceOptions): unknown;
   readonly name: string;
   readonly signatures: Readonly<Record<string, (...args: readonly unknown[]) => unknown>>;

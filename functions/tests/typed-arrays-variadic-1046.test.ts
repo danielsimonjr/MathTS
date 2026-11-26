@@ -59,9 +59,12 @@ describe('#1046 sum, mean, variance and std take separate arguments', () => {
   it('the public types accept a typed array and separate numbers', () => {
     // No cast: the typecheck of this file fails when the public types reject these calls.
     const fromTyped: number = mean(new Int32Array([1, 3]));
-    const fromBytes: number = variance(new Uint8Array([1, 3]));
-    const fromValues: number = mean(1, 2, 3);
-    const fromStd: number = std(1, 2, 3);
+    // #1550: the rest signature keeps the value's exact scalar type (unknown at
+    // the source level); a Uint8Array has no dedicated signature and computes to
+    // a number at runtime.
+    const fromBytes = variance(new Uint8Array([1, 3])) as number;
+    const fromValues = mean(1, 2, 3) as number;
+    const fromStd = std(1, 2, 3) as number;
     expect([fromTyped, fromBytes, fromValues, fromStd]).toEqual([2, 2, 2, 1]);
   });
 });

@@ -3382,8 +3382,10 @@ export const variance = mathTyped('variance', {
   },
   // variance(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
   // computes the result, so an exact scalar type stays exact.
-  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): f64 =>
-    variance(values) as f64,
+  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): unknown =>
+    // A Complex value makes the variance Complex (#1550), so the rest form
+    // keeps the exact scalar type the values carry.
+    variance(values),
 }) as PublicVariance;
 
 /**
@@ -3622,8 +3624,10 @@ const stdSignatures = {
   },
   // std(a, b, c, ...): the values as separate arguments, as in mathjs. The array form
   // computes the result, so an exact scalar type stays exact.
-  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): f64 =>
-    std(values) as f64,
+  '...number | bigint | Fraction | BigNumber | Complex | Unit': (values: unknown[]): unknown =>
+    // A Complex value makes the std Complex (#1550), so the rest form keeps
+    // the exact scalar type the values carry.
+    std(values),
 };
 
 export const std = mathTyped('std', withScaledStd(stdSignatures)) as unknown as PublicStd;
