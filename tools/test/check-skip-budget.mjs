@@ -5,8 +5,10 @@
  * A skipped test passes silently. Nine WASM-tier suites once looked for their binary at a
  * deleted path and skipped themselves on every machine, CI included, for months: 57 tests
  * that never ran while every gate stayed green. This check turns that class of rot into a
- * failure. It reads the output of `bun run test` (each package's `bun test` or vitest
- * summary, then the root vitest run) and compares each suite's not-run count
+ * failure. It reads the output of a single suite run — `bun run test` (each package's `bun
+ * test` or vitest summary, then the root vitest run) or `bun run test:coverage` (the same
+ * suites with coverage instrumentation; the Coverage job's single run) — and compares each
+ * suite's not-run count
  * (skipped + todo) with tools/test/skip-baseline.json.
  *
  * Turbo labels a task's output in one of two ways. In a terminal it prefixes every line
@@ -23,7 +25,7 @@
  *   - printed a summary but is not in the baseline (register new suites).
  *
  * Usage:
- *   bun run test 2>&1 | tee test-output.log
+ *   bun run test 2>&1 | tee test-output.log          # or: bun run test:coverage 2>&1 | tee test-output.log
  *   node tools/test/check-skip-budget.mjs test-output.log
  *   node tools/test/check-skip-budget.mjs test-output.log --update   # rewrite the baseline
  */
@@ -67,9 +69,13 @@ export function parseSuites(log) {
       continue;
     }
 
-    const prefixed = raw.match(/^(@[^:\s]+):([^:\s]+): ?(.*)$/);
+    // A task name may itself contain colons (`test:coverage`, `build:prod`), so the name is
+    // colon-free segments joined by colons, and the separator before the message is `: `.
+    const prefixed = raw.match(/^(@[^:\s]+):([\w-]+(?::[\w-]+)*): ?(.*)$/);
     const task = prefixed ? { pkg: prefixed[1], task: prefixed[2] } : (groups[0] ?? null);
-    if (task && task.task !== 'test') continue; // a build's output holds no test summary
+    // `test` is the plain suite task; `test:coverage` is the same suite with coverage
+    // instrumentation. Any other task (a build, lint, …) holds no test summary.
+    if (task && task.task !== 'test' && task.task !== 'test:coverage') continue; // a build's output holds no test summary
     const name = task ? task.pkg : ROOT_SUITE;
     const text = prefixed ? prefixed[3] : raw;
 

@@ -23,8 +23,15 @@ export function ciStepProblem(command, text) {
   while (first > 0 && !/^ {6}- name:/.test(lines[first] ?? '')) first--;
   let last = at + 1;
   while (last < lines.length && !/^ {6}(?:- |#)|^ {2}[a-z]/.test(lines[last] ?? '')) last++;
-  if (/continue-on-error|^\s+if:/m.test(lines.slice(first, last).join('\n'))) {
+  const stepBlock = lines.slice(first, last).join('\n');
+  if (/continue-on-error/.test(stepBlock)) {
     return `the step that runs \`${command}\` cannot fail the job or may not run`;
+  }
+  if (/^\s+if:/m.test(stepBlock)) {
+  const docsOnlyGate = /needs\.changes\.outputs\.docs_only\s*!=\s*'true'/;
+    if (!docsOnlyGate.test(stepBlock)) {
+      return `the step that runs \`${command}\` cannot fail the job or may not run`;
+    }
   }
   return null;
 }

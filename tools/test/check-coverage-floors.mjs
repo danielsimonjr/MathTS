@@ -15,7 +15,7 @@ const FLOORS_PATH = join(repoRoot, 'tools/test/coverage-floors.json');
 const writeMode = process.argv.includes('--write');
 
 const NOTE =
-  'Line hits / line found from coverage/lcov.info after bun run test:coverage. Integer floor is the measured percent rounded down, minus 1. Bun and vitest numbers are not comparable across packages. assembly has no test:coverage script (AssemblyScript; covered by test:wasm and tests/wasm/, not this gate).';
+  'Line hits / line found from coverage/lcov.info after bun run test:coverage. Integer floor is the measured percent rounded down, minus 1. Bun and vitest numbers are not comparable across packages. A `script` runner (assembly) has a test:coverage script that runs the suite without a coverage reporter, so no lcov is measured: the gate only pins that the script exists and runs in the single Coverage job.';
 
 /**
  * Adds the LF and LH totals of an lcov report.
@@ -75,8 +75,13 @@ export function checkLcovAgainstFloor(lcovPath, floor) {
   return { ok: true, measured };
 }
 
-function runnerForScript(script) {
-  return script.includes('vitest') ? 'vitest' : 'bun';
+/** Classifies a `test:coverage` script by what it measures: `vitest`, `bun`, or `script`. */
+export function runnerForScript(script) {
+  // `--coverage` is what every measured runner passes (bun test --coverage, vitest run
+  // --coverage). A script without it runs the suite but measures nothing (assembly's node
+  // test scripts): class `script` — the gate pins its presence, not an lcov percentage.
+  if (script.includes('vitest')) return 'vitest';
+  return script.includes('--coverage') ? 'bun' : 'script';
 }
 
 /** Packages with a test:coverage script, keyed by workspace directory. */
@@ -115,13 +120,19 @@ export function measureFloors() {
   /** @type {Record<string, number>} */
   const measured = {};
   for (const [dir, meta] of Object.entries(packages)) {
+    const key = packageFloorKey(dir);
+    if (meta.runner === 'script') {
+      // No coverage reporter: nothing to measure. The entry exists so the floors file pins
+      // that the package still takes part in the single Coverage run.
+      entries[key] = { runner: meta.runner };
+      continue;
+    }
     const lcovPath = join(repoRoot, meta.lcovRel);
     const check = checkLcovAgainstFloor(lcovPath, 0);
     const pct = check.measured;
     if (pct === undefined) {
       throw new Error(check.message ?? `no measurement for ${dir}`);
     }
-    const key = packageFloorKey(dir);
     entries[key] = {
       runner: meta.runner,
       floor: floorFromMeasured(pct),
@@ -164,6 +175,11 @@ function main() {
       failed = true;
       continue;
     }
+    if (row.runner === 'script') {
+      // The script runs the suite without a coverage reporter: nothing to measure beyond
+      // its presence, which the `live` lookup above just proved.
+      continue;
+    }
     const lcovPath = join(repoRoot, live[dir].lcovRel);
     const result = checkLcovAgainstFloor(lcovPath, row.floor);
     if (!result.ok) {
@@ -173,7 +189,9 @@ function main() {
   }
 
   if (failed) {
-    console.error('Run bun run test:coverage, then node tools/test/check-coverage-floors.mjs --write');
+    console.error(
+      'Run bun run test:coverage, then node tools/test/check-coverage-floors.mjs --write'
+    );
     process.exit(1);
   }
   console.log('OK: per-package coverage meets committed floors.');

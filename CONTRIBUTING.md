@@ -66,10 +66,24 @@ docs(readme): add WebGPU backend examples
 1. Fork the repository
 2. Create a feature branch from `main`
 3. Make your changes
-4. Ensure all tests pass: `bun run test`
-5. Ensure linting passes: `bun run lint`
-6. Ensure type checking passes: `bun run typecheck`
-7. Submit a pull request
+4. Run the pre-push gate: `bun run prepush` (see below)
+5. Ensure all tests pass: `bun run test`
+6. Ensure linting passes: `bun run lint`
+7. Ensure type checking passes: `bun run typecheck`
+8. Submit a pull request
+
+### Pre-push gate
+
+Run **`bun run prepush` before every push**. It runs the cheap CI checks locally so a push
+does not discover them in CI minutes later:
+
+1. `bun run lint` (oxlint, repo-wide zero warnings)
+2. `bun run format:check` (prettier)
+3. the code-docs check (`tools/test/check-code-docs.mjs`)
+4. the bundle-budget check (`tools/test/check-bundle-budget.mjs`) — reads the built `dist/`,
+   so run `bun run build` first after a fresh checkout or a dependency change
+
+The heavy gates (typecheck, tests, coverage) still run only in CI.
 
 ### PR Checklist
 
@@ -78,6 +92,34 @@ docs(readme): add WebGPU backend examples
 - [ ] TypeScript types are correct
 - [ ] No console.log statements (except in CLI)
 - [ ] Follows existing code style
+
+### Changelog: add a fragment, do not edit `CHANGELOG.md`
+
+Every PR that changes release-relevant code records its changelog entry as one
+file in `changelog-fragments/` instead of editing `CHANGELOG.md` by hand. The
+top of the `[Unreleased]` section is a single line that every parallel PR used
+to insert into, so those hand-edits conflicted and forced re-merges and full CI
+reruns.
+
+1. Create `changelog-fragments/YYYY-MM-DD-<short-slug>.md` (the PR date).
+2. Write one `### Added|Changed|Fixed|…` heading and your bullets:
+
+   ```markdown
+   ### Fixed
+
+   - **What changed and why (#1234):** the observable behavior before and after.
+   ```
+
+3. Commit it with the PR. Do not edit `CHANGELOG.md`.
+
+The release version PR (`chore: release packages`) assembles the pending
+fragments into `CHANGELOG.md`, newest first, and deletes them. The CI gate
+(`tools/test/check-changelog-fragment.mjs`) fails a PR with no fragment unless
+every changed file is docs-only (markdown, `docs/`, `.changeset/`,
+`changelog-fragments/`, `.github/`, repo metadata dotfiles). A direct
+`CHANGELOG.md` edit is still accepted while in-flight PRs transition. Package
+`CHANGELOG.md` files stay changeset-owned: record the version bump with a
+`.changeset/*.md` file as before.
 
 ## Code Style
 

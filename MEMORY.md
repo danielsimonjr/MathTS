@@ -88,7 +88,7 @@ workspace via `npm:@danielsimonjr/typed-function@5.0.0-alpha.4` (root and `core/
 
 - **Charter/rules:** `CLAUDE.md` → `AGENTS.md` (repo); `~/Github/AGENTS.md` (workspace); `~/AGENTS.md` (machine).
 - **Build/test/structure:** `Mathts/CLAUDE.md` (the full monorepo reference).
-- **Live tasks + pending work:** `TODO.md`. **Change history:** `CHANGELOG.md` (running `[Unreleased]`).
+- **Live tasks + pending work:** `TODO.md`. **Change history:** `CHANGELOG.md` (assembled from `changelog-fragments/` by the release version PR; PRs add a fragment, not a `CHANGELOG.md` edit).
 - **Public API:** `docs/reference/functions.md` (1,090 exports at the last run; the generated export
   index is the source of truth, `bun run docs:functions`).
 - **Scalar structure (landed):** `expression/src/scalar-structure.ts`,
