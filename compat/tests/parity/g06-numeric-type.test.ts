@@ -235,6 +235,16 @@ describe('G06 #1554 — src-instance pinv (scalar and matrix paths)', () => {
     srcMatches('src pinv([[0,0]])', {}, (L) => call(L, 'pinv', [[0, 0]]));
   });
 
+  it('tall and wide 2-D matrix rows', () => {
+    srcMatches('src pinv([[1],[0]])', {}, (L) => call(L, 'pinv', [[1], [0]]));
+    srcMatches('src pinv(dense [[1,2]])', {}, (L) => call(L, 'pinv', call(L, 'matrix', [[1, 2]])));
+  });
+
+  it('multi-argument calls keep the native arity rejection', () => {
+    srcMatches('src pinv(1, 2)', {}, (L) => call(L, 'pinv', 1, 2));
+    srcMatches('src bernoulli(2, 3)', {}, (L) => call(L, 'bernoulli', 2, 3));
+  });
+
   it('higher-dimensional input throws the mathjs RangeError', () => {
     srcMatches('src pinv(3-D)', {}, (L) => call(L, 'pinv', [[[1], [2]]]));
   });
