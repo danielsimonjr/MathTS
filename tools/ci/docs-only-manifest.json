@@ -1,5 +1,5 @@
 {
-  "note": "Documentation-only CI runs this subset from the Test (22.x) job after bun run build, plus the nodeTest and commands entries. excludedConsumers are md-reading tests that run only on full CI (see reason).",
+  "note": "Documentation-only CI runs this subset from the Test (22.x) job after bun run build, plus the nodeTest and commands entries. docs:deps writes package-export-surfaces.json (not committed) before docs:functions:check, which fails closed when that file is missing. excludedConsumers are md-reading tests that run only on full CI (see reason).",
   "vitest": [
     "tests/docs/readme-fences.test.ts",
     "tests/docs/async-samples.test.ts",
@@ -27,6 +27,7 @@
   "nodeTest": ["tools/test/sync-readme-functions-stats.test.mjs"],
   "commands": [
     "node tools/sync-readme-functions-stats.mjs --check",
+    "bun run docs:deps",
     "bun run docs:functions:check"
   ],
   "excludedConsumers": [
