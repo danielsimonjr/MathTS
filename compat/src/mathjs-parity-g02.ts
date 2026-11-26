@@ -17,6 +17,9 @@ import type {
 
 type UnaryLike = (...args: never[]) => unknown;
 
+/** The compat BigNumber constructor. */
+type BigNumberCtor = new (v: number | string) => CompatBigNumberType;
+
 /**
  * Call a concretely-typed function through the `never[]` top type for its
  * parameters (the repo's typed-dispatch convention). One cast, here only.
@@ -223,57 +226,13 @@ export function withRawSingleValue(
  */
 export function createCompatArg(
   native: UnaryLike,
-  BigNumberClass: new (v: number | string) => CompatBigNumberType
+  BigNumberClass: BigNumberCtor
 ): (...args: unknown[]) => unknown {
   return (...args: unknown[]): unknown => {
     if (args.length === 1 && (isBigNumberLike(args[0]) || isOwnBigNumber(args[0]))) {
-      const x = args[0] as { s: number };
-      return x.s < 0 ? new BigNumberClass(BIGNUMBER_PI.toString()) : new BigNumberClass(0);
-    }
-    return apply(native, args);
-  };
-}
-
-// =============================================================================
-// #1550 — compare keeps the input type for Fractions and BigNumbers
-// =============================================================================
-
-/**
- * mathjs `compare` of two Fractions is a Fraction (the sign as n/1) and of two
- * BigNumbers a BigNumber. The compat typed compare converts both to numbers.
- * Mixed inputs keep the native behavior.
- */
-export function createCompatCompare(
-  native: UnaryLike,
-  FractionClass: new (n: bigint, d: bigint) => CompatFractionType,
-  BigNumberClass: new (v: number | string) => CompatBigNumberType
-): (...args: unknown[]) => unknown {
-  const signOf = (a: unknown, b: unknown): number => {
-    const fa = a as { s: number; n: number; d: number };
-    const fb = b as { s: number; n: number; d: number };
-    // cross-multiplied difference of the two fractions, signs included
-    const left = BigInt(fa.s) * BigInt(fa.n) * BigInt(fb.d);
-    const right = BigInt(fb.s) * BigInt(fb.n) * BigInt(fa.d);
-    return left < right ? -1 : left > right ? 1 : 0;
-  };
-  return (...args: unknown[]): unknown => {
-    if (args.length === 2) {
-      const [a, b] = args;
-      if (isFractionLike(a) && isFractionLike(b)) {
-        return new FractionClass(BigInt(signOf(a, b)), 1n);
-      }
-      if ((isBigNumberLike(a) || isOwnBigNumber(a)) && (isBigNumberLike(b) || isOwnBigNumber(b))) {
-        const compare = (
-          BigNumberClass as unknown as {
-            compare(x: string, y: string): number;
-          }
-        ).compare;
-        const cmp = compare(
-          (a as { toString(): string }).toString(),
-          (b as { toString(): string }).toString()
-        );
-        return new BigNumberClass(cmp);
-      }
+      const bn = new BigNumberClass(args[0] as string);
+      const negative = (bn as unknown as { isNegative(): boolean }).isNegative();
+      return negative ? new BigNumberClass(BIGNUMBER_PI.toString()) : new BigNumberClass(0);
     }
     return apply(native, args);
   };
@@ -346,7 +305,7 @@ export function createCompatExpm(
 /** The classes the converter builds compat instances with. */
 export interface ForeignScalarClasses {
   FractionClass: new (n: bigint, d: bigint) => CompatFractionType;
-  BigNumberClass: new (v: number | string) => CompatBigNumberType;
+  BigNumberClass: BigNumberCtor;
   ComplexClass: new (re: number, im: number) => unknown;
   /** Build a compat (bridge) DenseMatrix from nested data. */
   denseFrom: (nested: unknown) => unknown;
@@ -460,20 +419,18 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
   function normalizeNumbers(flat: unknown[]): unknown[] {
     const hasBigint = flat.some((v) => typeof v === 'bigint');
     if (!hasBigint) return flat;
+    // A matrix element is one "value" of the list (it stays whole below), so a
+    // bigint next to a matrix keeps its bigint type; every other non-bigint
+    // scalar (number, Unit, Complex, …) pulls the list into numbers, mathjs's
+    // lowest-index bigint conversion.
     const hasOther = flat.some(
       (v) =>
         typeof v !== 'bigint' &&
         v !== null &&
-        (typeof v !== 'object' || (!isMatrixLikeValue(v) && !isUnitVal(v)))
+        (typeof v !== 'object' || !isMatrixLikeValue(v))
     );
     if (!hasOther) return flat;
     return flat.map((v) => (typeof v === 'bigint' ? Number(v) : v));
-  }
-
-  function isUnitVal(x: unknown): boolean {
-    if (typeof x !== 'object' || x === null) return false;
-    const proto = Object.getPrototypeOf(x) as { isUnit?: boolean } | null;
-    return proto?.isUnit === true;
   }
 
   /**

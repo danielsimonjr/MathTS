@@ -129,7 +129,6 @@ export {
   prod,
   qr,
   quantileSeq,
-  range,
   rationalize,
   reshape,
   resize,
@@ -167,7 +166,6 @@ export {
   subset,
   subtractScalar,
   sylvester,
-  symbolicEqual,
   factory_tanh as tanh,
   to,
   trace,
@@ -177,6 +175,5 @@ export {
   usolve,
   usolveAll,
   xor,
-  zeta,
   zpk2tf,
 } from '@danielsimonjr/mathts-functions';

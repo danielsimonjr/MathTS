@@ -1,3 +1,4 @@
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import { factory } from '../utils/factory.js';
 import type { TypedFunction } from '../core/function/typed.js';
 import type { BigNumber as BigNumberType } from '../types.js';
@@ -206,6 +207,7 @@ export const createZeta = /* #__PURE__ */ factory(
 
     return typed(name, {
       number: zetaNumber,
+      bigint: (s: bigint): number => zetaNumber(bigintToNumber(s)),
       BigNumber: (s: BigNumberType): BigNumberType => {
         const x = s as unknown as ExactBigNumber;
         const createValue = (value: number): BigNumberType => new BigNumber!(value);

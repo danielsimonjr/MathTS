@@ -177,22 +177,36 @@ const SKIP_FUNCTIONS = new Set([
 /** G07 factory logical fns on compat reject mathjs-typed pool values; compare with compat types. */
 const FACTORY_TYPED_POOL_OPS = new Set(['nullish', 'not', 'and', 'or', 'xor']);
 
-export function sweepPool(): { labels: Set<string> } {
+export function sweepPool(options?: { only?: string[] }): {
+  labels: Set<string>;
+  arities: Map<string, Set<number>>;
+} {
   const labels = new Set<string>();
+  const arities = new Map<string, Set<number>>();
   const { mathjs, compat } = pair({});
   const oraclePool = buildPool(mathjs);
   const compatPool = buildPool(compat);
   const compatRecord = compat as unknown as Record<string, unknown>;
   const oracleRecord = mathjs as unknown as Record<string, unknown>;
   const names = Object.keys(compatRecord).filter(
-    (k) => typeof compatRecord[k] === 'function' && !SKIP_FUNCTIONS.has(k) && !CLASS_NAMES.has(k)
+    (k) =>
+      typeof compatRecord[k] === 'function' &&
+      !SKIP_FUNCTIONS.has(k) &&
+      !CLASS_NAMES.has(k) &&
+      (!options?.only || options.only.includes(k))
   );
   for (const name of names) {
     const fnO = oracleRecord[name] as (...args: unknown[]) => unknown;
     const fnC = compatRecord[name] as (...args: unknown[]) => unknown;
     if (typeof fnO !== 'function' || typeof fnC !== 'function') continue;
-    const arity = Math.max(fnO.length ?? 0, 1);
-    const maxWidth = Math.min(arity <= 1 ? 1 : 8, oraclePool.length);
+    const declared = fnO.length ?? 0;
+    const widths = new Set<number>([Math.max(declared, 1)]);
+    // Extra unary width only for a targeted `only` sweep (G18 F2: zeta.length is 2
+    // but mathjs still accepts one argument). The full-surface pool stays on the
+    // declared arity so Test stays inside the 20-minute job wall.
+    if (declared > 1 && options?.only) widths.add(1);
+    const seen = new Set<number>();
+    arities.set(name, seen);
     const useCompatPool = FACTORY_TYPED_POOL_OPS.has(name);
     for (let a = 0; a < oraclePool.length; a++) {
       const tryCall = (poolArgs: unknown[], compatArgs: unknown[]): void => {
@@ -202,6 +216,7 @@ export function sweepPool(): { labels: Set<string> } {
         ) {
           return;
         }
+        seen.add(poolArgs.length);
         const o = outcome(mathjs, () => fnO.apply(mathjs, poolArgs));
         // An arity rejection of the oracle is one divergence per function (#1587), not one
         // per argument combination.
@@ -214,20 +229,23 @@ export function sweepPool(): { labels: Set<string> } {
           labels.add(`${name}: (${poolArgs.map((x) => show(mathjs, x)).join(', ')})`);
         }
       };
-      if (arity <= 1) {
-        const compatArgs = useCompatPool ? [compatPool[a]] : [oraclePool[a]];
-        tryCall([oraclePool[a]], compatArgs);
-        continue;
-      }
-      for (let b = 0; b < maxWidth; b++) {
-        const compatArgs = useCompatPool
-          ? [compatPool[a], compatPool[b]]
-          : [oraclePool[a], oraclePool[b]];
-        tryCall([oraclePool[a], oraclePool[b]], compatArgs);
+      for (const width of widths) {
+        if (width <= 1) {
+          const compatArgs = useCompatPool ? [compatPool[a]] : [oraclePool[a]];
+          tryCall([oraclePool[a]], compatArgs);
+          continue;
+        }
+        const maxWidth = Math.min(8, oraclePool.length);
+        for (let b = 0; b < maxWidth; b++) {
+          const compatArgs = useCompatPool
+            ? [compatPool[a], compatPool[b]]
+            : [oraclePool[a], oraclePool[b]];
+          tryCall([oraclePool[a], oraclePool[b]], compatArgs);
+        }
       }
     }
   }
-  return { labels };
+  return { labels, arities };
 }
 
 export const DOC_CONFIGS: Record<string, unknown>[] = [

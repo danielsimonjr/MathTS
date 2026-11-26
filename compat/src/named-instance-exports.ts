@@ -29,6 +29,13 @@ import {
   createCompatPrint,
   createCompatString,
 } from './fraction-format-parity.js';
+import { instanceSymbols } from './instance-symbols.js';
+import {
+  createMathjsRange,
+  createMathjsRangeEvaluate,
+  createMathjsSymbolicEqual,
+  createMathjsZeta,
+} from './mathjs-parity-1585.js';
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
 
 let createInstance:
@@ -198,6 +205,65 @@ const namedLgamma = mathFunctions.factory_mathjsCompat.lgamma as (
 const namedToBest = mathFunctions.factory_mathjsCompat.toBest as (
   ...args: unknown[]
 ) => ReturnType<typeof mathFunctions.toBest>;
+
+const g18Typed = mathFunctions.factory_mathjsCompat.createCompatTyped();
+const parityIsBounded = Reflect.get(mathFunctions, 'isBounded') as (x: unknown) => boolean;
+const parityIsNegative = Reflect.get(mathFunctions, 'isNegative') as (x: unknown) => boolean;
+
+type G18ParityConfig = { relTol?: number; number?: string };
+
+function mathjsZetaDeps(config: () => G18ParityConfig) {
+  return {
+    typed: g18Typed,
+    config,
+    multiply: mathFunctions.multiply,
+    pow: mathFunctions.pow,
+    divide: mathFunctions.divide,
+    factorial: mathFunctions.factorial,
+    equal: mathFunctions.equal,
+    smallerEq: mathFunctions.smallerEq,
+    isBounded: parityIsBounded,
+    isNegative: parityIsNegative,
+    gamma: mathFunctions.gamma,
+    sin: mathFunctions.sin,
+    subtract: mathFunctions.subtract,
+    add: mathFunctions.add,
+    Complex: instanceSymbols.Complex,
+    BigNumber: instanceSymbols.BigNumber,
+    pi: instanceSymbols.PI,
+  };
+}
+
+type RangeFn = ((...args: unknown[]) => unknown) & { signatures?: Record<string, unknown> };
+
+/** Instance overrides for #1585 (mathjs zeta / symbolicEqual / range adapters). */
+export function g18InstanceOverrides(config: () => G18ParityConfig): {
+  zeta: ReturnType<typeof createMathjsZeta>;
+  symbolicEqual: ReturnType<typeof createMathjsSymbolicEqual>;
+  range: ReturnType<typeof createMathjsRange>;
+  rangeEvaluate: ReturnType<typeof createMathjsRangeEvaluate>;
+} {
+  const range = createMathjsRange({
+    nativeRange: mathFunctions.range as RangeFn,
+    config,
+    typed: g18Typed,
+  });
+  return {
+    zeta: createMathjsZeta(mathjsZetaDeps(config)),
+    symbolicEqual: createMathjsSymbolicEqual({ typed: g18Typed }),
+    range,
+    rangeEvaluate: createMathjsRangeEvaluate(range, g18Typed),
+  };
+}
+
+const namedZeta = createMathjsZeta(mathjsZetaDeps(() => mathFunctions.config() as G18ParityConfig));
+const namedSymbolicEqual = createMathjsSymbolicEqual({ typed: g18Typed });
+const namedRange = createMathjsRange({
+  nativeRange: mathFunctions.range as RangeFn,
+  config: () => mathFunctions.config() as G18ParityConfig,
+  typed: g18Typed,
+});
+
 export {
   namedFormat as format,
   namedPrint as print,
@@ -211,6 +277,9 @@ export {
   namedCombinationsWithRep as combinationsWithRep,
   namedXgcd as xgcd,
   namedLgamma as lgamma,
+  namedRange as range,
+  namedSymbolicEqual as symbolicEqual,
+  namedZeta as zeta,
 };
 
 /** Embedded documentation — byte-identical to mathjs 15.3.0 `create(all).docs` (#G12 F5). */

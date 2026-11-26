@@ -5,6 +5,7 @@
 // [1] Hare, "Computing the Principal Branch of log-Gamma", Journal of Algorithms, 1997.
 // [2] https://math.stackexchange.com/questions/1338753/how-do-i-calculate-values-for-gamma-function-with-complex-arguments
 
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import { lgammaNumber, lnSqrt2PI } from '../plain/number/index.js';
 import { factory } from '../utils/factory.js';
 import { logSinPiForReflection } from './log-sin-pi.js';
@@ -93,6 +94,7 @@ function lgammaFactory(compatibility = false) {
       ...(compatibility ? {} : { Array: (arr: number[]) => arr.map(evaluateReal) }),
 
       number: evaluateReal,
+      bigint: (n: bigint): number => evaluateReal(bigintToNumber(n)),
       Complex: lgammaComplex,
       BigNumber: function () {
         throw new Error(

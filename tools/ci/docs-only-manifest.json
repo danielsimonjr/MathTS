@@ -53,6 +53,14 @@
     {
       "file": "compat/tests/parity/adversarial-g01.test.ts",
       "reason": "G01 adversarial uses sweepDocs against mathjs embedded docs; full CI Test job only."
+    },
+    {
+      "file": "compat/tests/parity/adversarial-g18.test.ts",
+      "reason": "Full CI mathjs oracle probes; docs/api/compat.md assertions run with the G18 suite, not docs-only CI."
+    },
+    {
+      "file": "compat/tests/parity/g18-parity.test.ts",
+      "reason": "Full CI mathjs oracle probes; docs/api/compat.md assertions run with the G18 suite, not docs-only CI."
     }
   ]
 }

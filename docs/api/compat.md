@@ -373,6 +373,44 @@ Fraction formatting parity is #1579 (G15).
 
 See [Migration Guide](../migration/guide.md) for complete details.
 
+## Native MathTS differences (compat matches mathjs)
+
+`create(all)` on `@danielsimonjr/mathts-compat` matches mathjs 15.3.0 for
+`zeta`, `symbolicEqual`, and `range` (including mathjs quirks), via adapters in
+`compat/src/mathjs-parity-1585.ts`. Importing the same names from
+`@danielsimonjr/mathts-functions` keeps the more accurate MathTS behavior.
+Pinned by `compat/tests/parity/g18-parity.test.ts`. (#1585)
+
+### `zeta(-3)`
+
+Compat matches mathjs `0.0083333345772996`. Native MathTS returns
+`0.0083333333333335`, much closer to the exact value `1/120`.
+
+### `zeta(complex(1, 2))`
+
+Compat matches mathjs `NaN + NaNi` on the line `Re(s) = 1`. Native MathTS
+returns a finite value on the critical strip (for example `zeta(0.5 + 2i)` is
+finite in both libraries; only `zeta(1 + 2i)` is NaN in mathjs).
+
+### `zeta(bignumber(4))`
+
+Compat matches mathjs `1.0823232498396`. Native MathTS returns
+`1.0823232337111`, closer to π⁴/90.
+
+### `symbolicEqual`
+
+Compat uses mathjs’s simplify-only equality (no exact-polynomial shortcuts).
+Native MathTS also proves many polynomial identities that mathjs rejects (for
+example `(x+y)^2` versus `x^2+2*x*y+y^2` in default number mode). In BigNumber
+config, compat matches mathjs’s `false` for `symbolicEqual("x*y", "y*x")`.
+
+### `range`
+
+Under `number: 'BigNumber'`, compat matches mathjs: `range('4:10')` and
+`evaluate('range("4:10")')` return `[4,…,9]`, and the string form ignores
+`includeEnd` (mathjs passes it to `_out`, not `_range`). Native MathTS range
+honours `includeEnd` on those paths.
+
 ## Complete export index
 
 <!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->
