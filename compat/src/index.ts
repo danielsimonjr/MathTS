@@ -63,6 +63,7 @@ import {
   withFractionRejection,
   withRawSingleValue,
 } from './mathjs-parity-g02.js';
+import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
   bindDefaultInstanceSource,
@@ -533,6 +534,14 @@ export function create(
     mathFunctions.gamma as (...args: unknown[]) => unknown,
     convertForeignScalar
   );
+  installG09BridgeMatrixSubsetPatch(mathFunctions.matrix([]));
+  const compatSubset = createCompatSubsetG09(
+    mathFunctions.subset as (...args: never[]) => unknown,
+    {
+      add: mathFunctions.add as (...args: unknown[]) => unknown,
+      zeros: mathFunctions.zeros as (dims: number | number[]) => unknown,
+    }
+  );
 
   // G06 (#1554): pinv and bernoulli keep BigNumber / Fraction / Complex inputs;
   // compare rejects a Complex operand the mathjs way. All compat-only adapters.
@@ -859,6 +868,7 @@ export function create(
     xor: g07Logical.xor,
     diag: mathFunctions.diag,
     rotationMatrix: mathFunctions.rotationMatrix,
+    subset: compatSubset,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
