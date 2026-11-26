@@ -145,6 +145,17 @@ jobs:
         if: needs.changes.outputs.docs_only != 'true'
         run: bun run typecheck
 
+      # #1573: a package whose built exports differ from the npm tarball at the same
+      # version must have a pending changeset that names it, or the drift publishes
+      # silently. The script only reads the registry (`npm pack` is a download); it
+      # never publishes. The version PR itself is exempt: its push carries no pending
+      # changesets, and the tarballs for its bumped versions may not exist yet.
+      - name: Unpublished surface check
+        if: >-
+          needs.changes.outputs.docs_only != 'true' &&
+          github.head_ref != 'changeset-release/main'
+        run: node tools/test/check-unpublished-surface.mjs
+
       - name: Lint
         if: needs.changes.outputs.docs_only != 'true'
         run: bun run lint
