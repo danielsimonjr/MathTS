@@ -61,6 +61,7 @@ import {
   createCompatMathjsStatistics,
   createForeignScalarConverter,
   isComplexLike as g02IsComplexLike,
+  keepSurface,
   tooManyArgumentsError,
   withComplexOrderingGuard,
   withConvertedScalars,
@@ -958,7 +959,7 @@ export function create(
     ),
     norm: withMathjsNormMatrixRules(mathFunctions.norm as (...args: unknown[]) => unknown),
     typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
-    number: (...args: unknown[]) => {
+    number: keepSurface(mathFunctions.number, (...args: unknown[]) => {
       if (args.length === 0) return 0;
       if (args.length === 1) return mathFunctions.number(args[0]);
       if (isUnit(args[0])) {
@@ -970,7 +971,7 @@ export function create(
         return (mathFunctions.number as (...a: unknown[]) => unknown)(...args);
       }
       throw tooManyArgumentsError('number', 1, args.length);
-    },
+    }),
     numeric: createCompatNumeric(mathFunctions.numeric as (...args: unknown[]) => unknown),
     boolean: withMaxArity('boolean', 1, (...args: unknown[]) => {
       if (args.length === 0) return false;
