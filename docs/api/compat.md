@@ -369,6 +369,8 @@ Fraction formatting parity is #1579 (G15).
 | `m.size()`                     | `math.size(m)` returns `[rows, cols]`             |
 | `f.n`, `f.d`                   | `f.numerator`, `f.denominator` (bigint)           |
 
+**`Complex` non-finite arithmetic and `zpk2tf` (#1589):** on `create(all)` only, compat matches mathjs 15.3.0 complex.js rules (NaN parts count as infinite in `add`/`subtract`/`multiply`/`divide`/`dotMultiply`; compat `zpk2tf`/`freqz` use the same arithmetic). Native MathTS `Complex` elsewhere keeps IEEE semantics. The 2-D Matrix `zpk2tf` repro above matches the oracle; 1-D results unchanged. Compat `zpk2tf` gain: `number | bigint | string | boolean` only (not BigNumber or Fraction).
+
 See [Migration Guide](../migration/guide.md) for complete details.
 
 ## Complete export index

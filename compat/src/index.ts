@@ -20,6 +20,7 @@
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
+import { compatFreqz, compatZpk2tf } from './compat-signal-factories.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -543,10 +544,13 @@ export function create(
 
     // Arithmetic
     add: bindShim(shims.add),
-    subtract: mathFunctions.factory_subtract,
+    subtract: bindShim(shims.subtract),
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
+    dotMultiply: bindShim(shims.dotMultiply),
     pow: bindShim(createCompatPow(() => Boolean(currentConfig.predictable))),
+    zpk2tf: bindShim(compatZpk2tf),
+    freqz: bindShim(compatFreqz),
     isPositive: mathFunctions.isPositive,
     isNegative: mathFunctions.isNegative,
     isInteger: mathFunctions.isInteger,

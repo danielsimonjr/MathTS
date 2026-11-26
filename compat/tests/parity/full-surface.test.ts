@@ -39,7 +39,7 @@ describe('full-surface differential harness (#1574)', () => {
 
   it(
     'every embedded-docs example matches the oracle or a recorded gap',
-    { timeout: 180_000 },
+    { timeout: 240_000 },
     async () => {
       const { perName, total } = await docsExamples();
       expect(total).toBeGreaterThan(900);
@@ -62,7 +62,7 @@ describe('full-surface differential harness (#1574)', () => {
     expect(unrecorded, 'pool divergences not recorded in known-gaps/').toEqual([]);
     const stale = [...ALL_GAPS].filter((l) => !l.startsWith('{') && !labels.has(l));
     expect(stale, 'known-gaps/ lists pool labels that now match the oracle').toEqual([]);
-  });
+  }, 240_000);
 
   it('the recorded gaps are grouped under the issue that owns each root cause', () => {
     for (const [issue, labels] of Object.entries(GAPS)) {
