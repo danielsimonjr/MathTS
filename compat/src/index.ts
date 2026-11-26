@@ -58,6 +58,7 @@ import {
   withFractionRejection,
   withRawSingleValue,
 } from './mathjs-parity-g02.js';
+import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
   bindDefaultInstanceSource,
@@ -528,6 +529,16 @@ export function create(
     mathFunctions.gamma as (...args: unknown[]) => unknown,
     convertForeignScalar
   );
+  installG09BridgeMatrixSubsetPatch(
+    mathFunctions.matrix([]) as unknown as Parameters<typeof installG09BridgeMatrixSubsetPatch>[0]
+  );
+  const compatSubset = createCompatSubsetG09(
+    mathFunctions.subset as (...args: never[]) => unknown,
+    {
+      add: mathFunctions.add as (...args: unknown[]) => unknown,
+      zeros: mathFunctions.zeros as (dims: number | number[]) => unknown,
+    }
+  );
 
   // The overlay decision diffs every config key. Each wrapped call used to repeat that
   // diff (a Set per call, #889); it now recomputes only after config() changes the config.
@@ -831,6 +842,7 @@ export function create(
     xor: g07Logical.xor,
     diag: mathFunctions.diag,
     rotationMatrix: mathFunctions.rotationMatrix,
+    subset: compatSubset,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
