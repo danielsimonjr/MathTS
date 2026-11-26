@@ -20,7 +20,7 @@
     "functions/dist/subpath-evaluate.js": 1605632,
     "functions/package.json": 3840,
     "functions/dist/wasm/mathts-as.wasm": 70656,
-    "expression/dist/index.js": 376832,
+    "expression/dist/index.js": 385024,
     "expression/package.json": 2304,
     "parser/dist/index.js": 768,
     "parser/package.json": 2560,

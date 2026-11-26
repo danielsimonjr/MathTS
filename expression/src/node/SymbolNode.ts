@@ -1,7 +1,7 @@
 import { EXPRESSION_SCOPE_OMIT } from '../default-math-scope.js';
 import { nodeDefaults } from './default-node.js';
 import { escape } from '../utils/string.js';
-import { getSafeProperty } from '../utils/customs.js';
+import { getMathNamespaceBinding, getSafeProperty } from '../utils/customs.js';
 import { factory } from '../utils/factory.js';
 import { toSymbol } from '../utils/latex.js';
 import { toMathMLSymbol } from '../utils/mathml.js';
@@ -105,7 +105,7 @@ export const createSymbolNode = /* #__PURE__ */ factory(
             _args: Record<string, unknown>,
             _context: unknown
           ): unknown {
-            return scope.has(name) ? scope.get(name) : getSafeProperty(math, name);
+            return scope.has(name) ? scope.get(name) : getMathNamespaceBinding(math, name);
           };
         } else {
           const unitClass = EXPRESSION_SCOPE_OMIT.has(name)

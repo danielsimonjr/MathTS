@@ -27,6 +27,7 @@ import {
   reviveInstanceValue,
 } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
+const INTERNAL_NAMES: ReadonlySet<string> = new Set<string>(COMPAT_INTERNAL_NAMES);
 import {
   createMathjsExpressionBindings,
   type CompatExpressionApi,
@@ -34,6 +35,11 @@ import {
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
 import { wrapCompatUnitConstructor } from './mathjs-unit.js';
 import { patchParseForMathjsToTex } from './totex-parity.js';
+import {
+  buildExpressionTransforms,
+  mathWithTransformValue,
+  MATH_WITH_TRANSFORM_EXCLUDED,
+} from './g13-transforms.js';
 
 /** Compat instance evaluate options: adds `{ safe: true }` mathjs opt-in (#1549). */
 export type CompatEvaluateOptions = PhysicsEvaluateOptions & { safe?: boolean };
@@ -171,22 +177,22 @@ export function wireMathjsInstanceApi(
   });
   const expressionLayers: CompatExpressionLayers = {
     transform: {},
+    // mathjs 15.3.0: every block evaluates to a ResultSet (#1556) — compat only.
     mathWithTransform: {
-      num: instance.num,
-      den: instance.den,
-      // mathjs 15.3.0: every block evaluates to a ResultSet (#1556) — compat only.
       compatBlockResultSet: true,
-      ResultSet: (instance as { ResultSet?: unknown }).ResultSet,
     },
   };
 
   const instanceTyped = factory_mathjsCompat.createCompatTyped();
 
-  if (typeof instance.num !== 'function') delete expressionLayers.mathWithTransform.num;
-  if (typeof instance.den !== 'function') delete expressionLayers.mathWithTransform.den;
   const mathNs = instance as MathNamespace;
   mathNs.typed = instanceTyped;
   mathNs.expression = expressionLayers;
+  // G13 (#1572): the 26 expression-language transforms, built against the
+  // instance, and `mathWithTransform` = the instance's function namespace with
+  // those 26 replaced by their transforms (the mathjs layout).
+  const transforms = buildExpressionTransforms(mathNs as Record<string, unknown>);
+  expressionLayers.transform = transforms;
   const emitter = factory_mathjsCompat.attachEmitter({});
   mathNs.emit = emitter.emit;
   instance.on = emitter.on;
@@ -209,12 +215,48 @@ export function wireMathjsInstanceApi(
   }
 
   const UnitCtor = instance.Unit as Parameters<typeof wrapCompatUnitConstructor>[0] | undefined;
+  let wrappedUnit: unknown;
   if (typeof UnitCtor === 'function' && typeof UnitCtor.isValuelessUnit === 'function') {
     const mathjsUnit = wrapCompatUnitConstructor(UnitCtor);
     mathNs.Unit = mathjsUnit;
-    expressionLayers.mathWithTransform.Unit = mathjsUnit;
+    wrappedUnit = mathjsUnit;
   }
 
+  // G13 (#1572): `mathWithTransform` mirrors mathjs — every instance function and
+  // constant, with the 26 transform names holding their transform versions
+  // instead of the plain functions. The entries are live getters over the
+  // instance, so config-dependent constants (`pi`, the unit constants, …) and
+  // lazy compat wrappers stay live and are not materialised eagerly. The
+  // evaluator keeps its own scope (see `buildEvaluatorScope`): the module math
+  // scope of `createInstanceEvaluator` already resolves the built-in functions,
+  // and statically flattening every instance value into it would override the
+  // richer typed signatures the expression language relies on.
+  const mwt = expressionLayers.mathWithTransform;
+  mwt.compatBlockResultSet = true;
+  const wholesaleGetters = new Map<string, () => unknown>();
+  for (const key of Object.keys(instance)) {
+    if (MATH_WITH_TRANSFORM_EXCLUDED.has(key)) continue;
+    if (INTERNAL_NAMES.has(key)) continue;
+    const read =
+      transforms[key] !== undefined
+        ? () => mathWithTransformValue(transforms, key)
+        : () => instance[key];
+    wholesaleGetters.set(key, read);
+    Object.defineProperty(mwt, key, {
+      enumerable: true,
+      configurable: true,
+      get: read,
+      // `import` and the transform bookkeeping assign and delete these entries.
+      set(value: unknown) {
+        Object.defineProperty(mwt, key, {
+          value,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
+      },
+    });
+  }
   const importedFactories: ImportableFactories = {};
   const noopLoad = (): unknown => undefined;
 
@@ -315,11 +357,51 @@ export function wireMathjsInstanceApi(
     instance.help = (search: unknown) => new Help(nativeHelp(resolveHelpName(search)).doc);
   }
 
+  /**
+   * The scope `createInstanceEvaluator` sees. The public `mathWithTransform`
+   * carries the full instance surface as live getters (#1572), but the module
+   * math scope already resolves those built-ins with their full typed
+   * signatures. Only the compat markers, the wrapped `Unit`, and names that
+   * `import` added or overrode (data properties, not the wholesale getters)
+   * need to reach the evaluator.
+   */
+  function buildEvaluatorScope(): Record<string, unknown> {
+    const scope: Record<string, unknown> = {
+      // mathjs 15.3.0: every block evaluates to a ResultSet (#1556) — compat only.
+      compatBlockResultSet: true,
+    };
+    // Expression `apply` is the one-based transform (`expression.transform.apply`),
+    // not the programmatic alias `mapSlices` (`formerly: 'apply'`). The module math
+    // scope only overlays the other 25 transforms; mirror mathjs by wiring apply here.
+    const applyTransform = expressionLayers.transform.apply;
+    if (typeof applyTransform === 'function') {
+      scope.apply = applyTransform;
+    }
+    if (typeof instance.num === 'function') scope.num = instance.num;
+    if (typeof instance.den === 'function') scope.den = instance.den;
+    if (wrappedUnit !== undefined) scope.Unit = wrappedUnit;
+    if (instance.ResultSet !== undefined) scope.ResultSet = instance.ResultSet;
+    for (const key of Object.keys(mwt)) {
+      const desc = Object.getOwnPropertyDescriptor(mwt, key);
+      if (desc === undefined) continue;
+      if (desc.get !== undefined) {
+        // A wholesale getter is supplied by the module math scope; a getter that
+        // `import` installed later (a lazy factory import) resolves here, like
+        // the scope spread did before the G13 split.
+        if (wholesaleGetters.get(key) === desc.get) continue;
+        scope[key] = desc.get();
+      } else if ('value' in desc) {
+        scope[key] = desc.value;
+      }
+    }
+    return scope;
+  }
+
   function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
     syncEvaluateScopeOverrides();
     evaluator = createInstanceEvaluator(
-      expressionLayers.mathWithTransform,
+      buildEvaluatorScope(),
       COMPAT_INTERNAL_NAMES,
       true,
       constants,
