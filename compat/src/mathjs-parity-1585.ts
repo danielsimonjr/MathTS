@@ -216,6 +216,14 @@ export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unkn
       if (args.length === 1) return nativeRange.call(this, args[0]);
       if (args.length === 2 && typeof args[1] === 'boolean') return nativeRange.call(this, args[0]);
     }
+    // mathjs evaluate / colon RangeNodes pass two or three values without
+    // includeEnd and still include the end. Native `_range` defaults false.
+    if (args.length === 2 && typeof args[1] !== 'boolean') {
+      return nativeRange.call(this, args[0], args[1], true);
+    }
+    if (args.length === 3 && typeof args[2] !== 'boolean') {
+      return nativeRange.call(this, args[0], args[1], args[2], true);
+    }
     return nativeRange.apply(this, args);
   };
   const signatures = nativeRange.signatures ?? {};
