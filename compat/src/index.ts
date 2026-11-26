@@ -34,7 +34,10 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
+import { wrapCompatUnitSources } from './mathjs-unit.js';
+import { createG07LogicalParity } from './g07-logical-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
   bindDefaultInstanceSource,
   Chain,
@@ -443,9 +446,10 @@ export function create(
   // Always give a full-bundle `create(all)` its own Unit class. Patching
   // `typeConverters` on `instanceSymbols.Unit` would mutate the shared native
   // constructor that functions/core use (#1551).
-  const localUnits = fullBundle
+  const rawLocalUnits = fullBundle
     ? mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig)
     : undefined;
+  const localUnits = rawLocalUnits ? wrapCompatUnitSources(rawLocalUnits) : undefined;
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
@@ -616,6 +620,9 @@ export function create(
     Infinity: shims.Infinity,
     NaN: shims.NaN,
 
+    // #1561 — mathjs 15.3.0 eigs (precision, vector scale, value order); native solver stays in functions.
+    eigs: compatMathjsEigs,
+
     // Placeholder; rebound below once `instance` exists so chain methods can
     // resolve against the full surfaced namespace.
     chain: (() => {
@@ -640,6 +647,7 @@ export function create(
     factory_acsc: mathFunctions.factory_acsc,
     factory_asec: mathFunctions.factory_asec,
   });
+  const g07Logical = createG07LogicalParity();
   const compatDefaultOverrides = {
     acosh: g08Overrides.acosh,
     acot: mathFunctions.factory_acot,
@@ -676,6 +684,11 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    nullish: g07Logical.nullish,
+    not: g07Logical.not,
+    and: g07Logical.and,
+    or: g07Logical.or,
+    xor: g07Logical.xor,
     diag: mathFunctions.diag,
     rotationMatrix: mathFunctions.rotationMatrix,
   };
@@ -693,7 +706,7 @@ export function create(
   const constantReaders = compatConstantReaders(
     flat,
     currentConfig,
-    localUnits?.Unit ?? instanceSymbols.Unit,
+    (localUnits?.Unit ?? instanceSymbols.Unit) as typeof instanceSymbols.Unit,
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
@@ -738,6 +751,10 @@ export function create(
       expressionConstants[name] = () => instance[name];
   }
   if (Object.hasOwn(flat, 'version')) expressionConstants.version = () => instance.version;
+  // `config` inside an expression is the instance's config function (#1562):
+  // `evaluate('config()')` reads the fields and
+  // `evaluate('config({number: "Fraction"})')` updates that instance.
+  expressionConstants.config = () => instance.config;
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
@@ -850,6 +867,8 @@ export function create(
       )
     )
   );
+  // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
+  instance.DimensionError = instanceSymbols.DimensionError;
 
   return instance as unknown as MathInstance;
 }
@@ -913,6 +932,7 @@ export { typed };
 export { Parser } from './named-instance-exports.js';
 
 export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+export { compatMathjsEigs as eigs };
 
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';

@@ -2,8 +2,11 @@
  * #737: the instance type has no index signature; compat members keep their own types and the
  * rest of the functions namespace is typed from the functions package. `tsc -p tsconfig.test.json`
  * (the typecheck script) enforces this file.
+ *
+ * `expectTypeOf` is vitest-only and is not implemented by `bun test` (compat's runner).
+ * Compile-time checks use typed assignments; runtime checks use `typeof`.
  */
-import { describe, it, expect, expectTypeOf } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { UnitInstance } from '@danielsimonjr/mathts-core';
 import { create, all, sqrt, unit, unitDependencies, type MathInstance } from '../src/index.js';
 
@@ -26,16 +29,22 @@ describe('MathInstance type (#737)', () => {
   });
 
   it('has no string index signature', () => {
-    expectTypeOf<string extends keyof MathInstance ? true : false>().toEqualTypeOf<false>();
+    type HasStringIndex = string extends keyof MathInstance ? true : false;
+    const noIndex: HasStringIndex = false;
+    expect(noIndex).toBe(false);
   });
 
   it('keeps the explicit compat members', () => {
-    expectTypeOf<MathInstance['config']>().toBeFunction();
-    expectTypeOf<MathInstance['evaluate']>().toBeFunction();
+    const math = create(all);
+    const config: MathInstance['config'] = math.config;
+    const evaluate: MathInstance['evaluate'] = math.evaluate;
+    expect(typeof config).toBe('function');
+    expect(typeof evaluate).toBe('function');
   });
 
   it('types a functions-namespace member that compat does not override', () => {
     const math = create(all);
-    expectTypeOf(math.det).toBeFunction();
+    const det: MathInstance['det'] = math.det;
+    expect(typeof det).toBe('function');
   });
 });

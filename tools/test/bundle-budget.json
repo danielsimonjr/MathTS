@@ -51,7 +51,7 @@
     "assembly/build/mathts-debug.wasm": 135168,
     "assembly/build/mathts-debug.js": 104448,
     "assembly/package.json": 3584,
-    "compat/dist/index.js": 229376,
+    "compat/dist/index.js": 425984,
     "compat/package.json": 2560,
     "gpu/dist/index.js": 18432,
     "gpu/package.json": 2304,
@@ -91,7 +91,7 @@
       "treeShake": true
     },
     "functions/dist/index.js": {
-      "export": "Chain",
+      "export": "ArgumentsError",
       "treeShake": true
     },
     "functions/dist/subpath-evaluate.js": {
@@ -99,7 +99,7 @@
       "treeShake": false
     },
     "expression/dist/index.js": {
-      "export": "ScalarBuildError",
+      "export": "AccessorNode",
       "treeShake": true
     },
     "parser/dist/index.js": {
@@ -198,19 +198,19 @@
       "label": "expression evaluate",
       "import": "import { evaluate } from '@danielsimonjr/mathts-expression';",
       "platform": "node",
-      "maxBytes": 282624
+      "maxBytes": 286720
     },
     {
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "maxBytes": 2064384
+      "maxBytes": 2129920
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "maxBytes": 2097152
+      "maxBytes": 2129920
     }
   ]
 }

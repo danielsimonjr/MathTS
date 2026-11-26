@@ -670,7 +670,12 @@ export function createInstanceEvaluator(
   matrixLiterals = false,
   constants: Readonly<Record<string, () => unknown>> = {},
   mathjsSyntax = false,
-  decimalLiteral?: (value: unknown) => unknown
+  decimalLiteral?: (value: unknown) => unknown,
+  /**
+   * Optional expression-only names for the unsafe scope (compat `create(all)`).
+   * Ignored unless the caller passes them; native evaluate is unchanged.
+   */
+  expressionUnsafeBindings?: Record<string, unknown>
 ): {
   evaluate: typeof evaluate;
   compile: typeof compileExpr;
@@ -679,6 +684,13 @@ export function createInstanceEvaluator(
   const hidden: ReadonlySet<string> = new Set(hiddenNames);
   const safeScope = buildScopedMathNamespace(importedExpressionScope, hidden);
   const unsafeScope = buildUnsafeScopedMathNamespace(importedExpressionScope, hidden);
+  if (expressionUnsafeBindings) {
+    for (const [key, value] of Object.entries(expressionUnsafeBindings)) {
+      if (EVALUATE_SCOPE_OMIT.has(key) && !hidden.has(key)) {
+        unsafeScope[key] = value;
+      }
+    }
+  }
   // Node.compile uses the factory transforms (including one-based indexing).
   // Overlay the same instance bindings without replacing its other operators.
   const parseScope = omitEvaluateInternals({

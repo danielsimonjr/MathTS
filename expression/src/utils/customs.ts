@@ -68,6 +68,10 @@ function getSafeProperty(object: unknown, prop: unknown): unknown {
  */
 // TODO: merge this function into access.js?
 function setSafeProperty(object: unknown, prop: unknown, value: unknown): unknown {
+  // mathjs blocks assigning to `length` on arrays (sandbox parity).
+  if (Array.isArray(object) && prop === 'length') {
+    throw new Error('No access to property "length"');
+  }
   // only allow setting safe properties of a plain object
   if (isSafeProperty(object, prop)) {
     (object as Record<string, unknown>)[prop as string] = value;
@@ -127,6 +131,15 @@ function getSafeMethod(object: unknown, method: unknown): unknown {
   return (object as Record<string, unknown>)[method as string];
 }
 
+/** True when `object` is an expression-defined function (has an own `syntax` string). */
+function isExpressionDefinedFunction(object: unknown): boolean {
+  return (
+    typeof object === 'function' &&
+    typeof (object as { syntax?: unknown }).syntax === 'string' &&
+    Object.prototype.hasOwnProperty.call(object, 'syntax')
+  );
+}
+
 /**
  * Check whether a method is safe.
  * Throws an error when that's not the case (for example for `constructor`).
@@ -135,6 +148,25 @@ function getSafeMethod(object: unknown, method: unknown): unknown {
  * @return {boolean} Returns true when safe, false otherwise
  */
 function isSafeMethod(object: unknown, method: unknown): boolean {
+  // User-defined expression functions expose toString/valueOf like mathjs (#1580).
+  if (
+    isExpressionDefinedFunction(object) &&
+    method === 'toString' &&
+    typeof (object as { toString?: unknown }).toString === 'function'
+  ) {
+    return true;
+  }
+  // AST nodes expose their evaluate/compile/render methods to expressions that
+  // created them (mathjs parity, #1549); every other host object stays locked.
+  if (
+    object !== null &&
+    object !== undefined &&
+    (object as { isNode?: boolean }).isNode === true &&
+    NODE_METHODS.has(method as string) &&
+    typeof (object as Record<string, unknown>)[method as string] === 'function'
+  ) {
+    return true;
+  }
   if (!isSandboxReceiver(object)) return false;
   if (
     object === null ||
@@ -189,6 +221,16 @@ const safeNativeProperties = {
   length: true,
   name: true,
 };
+
+/** Methods an expression may call on an AST node it created (#1549). */
+const NODE_METHODS: ReadonlySet<string> = new Set([
+  'evaluate',
+  'compile',
+  'toString',
+  'toTex',
+  'toHTML',
+  'toMathML',
+]);
 
 const safeNativeMethods = {
   toString: true,

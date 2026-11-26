@@ -648,7 +648,7 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1433 exports).
+> `@danielsimonjr/mathts-functions` (1500 exports).
 
 ### Functions by category
 
@@ -1886,9 +1886,73 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 `terminateSignal`
 `terminateStatistics`
 
-**Other exports (uncategorized)** (96):
+**Other exports (uncategorized)** (160):
+`ArgumentsError`
 `compile`
+`createAbs`
+`createAcos`
+`createAcosh`
+`createAcot`
+`createAcsc`
+`createAsec`
+`createAsin`
+`createAsinh`
+`createAtan`
+`createAtan2`
+`createAtanh`
+`createCbrt`
+`createCeil`
+`createCompare`
+`createCos`
+`createCosh`
+`createCot`
+`createCreateUnit`
+`createCsc`
+`createCtranspose`
+`createCube`
+`createDivide`
+`createDot`
+`createEqual`
+`createExp`
+`createExpm1`
+`createFix`
+`createFloor`
+`createGcd`
+`createHypot`
 `createInstanceEvaluator`
+`createLarger`
+`createLargerEq`
+`createLcm`
+`createLog`
+`createLog10`
+`createLog1p`
+`createLog2`
+`createMax`
+`createMean`
+`createMin`
+`createMod`
+`createNorm`
+`createNthRoot`
+`createPow`
+`createRound`
+`createSec`
+`createSign`
+`createSin`
+`createSinh`
+`createSmaller`
+`createSmallerEq`
+`createSqrt`
+`createSquare`
+`createStd`
+`createSubtract`
+`createSum`
+`createTan`
+`createTanh`
+`createTranspose`
+`createUnaryMinus`
+`createUnaryPlus`
+`createVariance`
+`createXgcd`
 `den`
 `eigSym3`
 `frustumContainsPoint`
@@ -2060,11 +2124,14 @@ simplify('0.4 * x', {}, { exactFractions: false }).toString(); // '0.4 * x'
 `weakMixingAngle`
 `wienDisplacement`
 
-### Classes & types (3)
+### Classes & types (6)
 
 `Chain`
+`FibonacciHeap`
 `Help`
+`ImmutableDenseMatrix`
 `Interval`
+`Spa`
 
 ### Factory-shadowed (`factory_*`, 65)
 

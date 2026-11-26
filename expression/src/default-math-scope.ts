@@ -74,6 +74,13 @@ export const EXPRESSION_SCOPE_OMIT: ReadonlySet<string> = new Set([
 /** Names kept off the default math scope: the denylist plus the parser dependencies. */
 const SAFE_SCOPE_OMIT: readonly string[] = [...EXPRESSION_SCOPE_OMIT, 'config', 'numeric'];
 
+/**
+ * Canonical block ResultSet (#1567). Re-exported so existing default-scope
+ * imports keep working; G01 still only constructs it when `compatBlockResultSet`
+ * is set on the compiler math overlay.
+ */
+export { ResultSet } from './ResultSet.js';
+
 const expressionViews = new WeakMap<object, Record<string, unknown>>();
 
 /**

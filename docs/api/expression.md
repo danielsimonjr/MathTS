@@ -292,9 +292,9 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-expression` (81 exports).
+> `@danielsimonjr/mathts-expression` (101 exports).
 
-### Functions (74)
+### Functions (75)
 
 `compile`
 `compileExpression`
@@ -359,6 +359,7 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 `mathMLDocument`
 `mathMLError`
 `parse`
+`resolveMode`
 `ScalarBuildError`
 `scalarCanonical`
 `scalarCanonicalKey`
@@ -371,14 +372,36 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 `setStringSubset`
 `toMathMLSymbol`
 
-### Constants & values (7)
+### Constants & values (8)
 
 `defaultMathScope`
+`docs`
 `embeddedDocs`
 `EXPRESSION_SCOPE_OMIT`
 `keywords`
 `properties`
 `SCALAR_FUNCTION_LOWERING`
 `SCALAR_FUNCTIONS`
+
+### Classes & types (18)
+
+`AccessorNode`
+`ArrayNode`
+`AssignmentNode`
+`BlockNode`
+`ConditionalNode`
+`ConstantNode`
+`FunctionAssignmentNode`
+`FunctionNode`
+`IndexNode`
+`Node`
+`ObjectNode`
+`OperatorNode`
+`ParenthesisNode`
+`Parser`
+`RangeNode`
+`RelationalNode`
+`ResultSet`
+`SymbolNode`
 
 <!-- END GENERATED EXPORT INDEX -->
