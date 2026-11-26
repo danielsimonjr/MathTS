@@ -23,6 +23,11 @@ export * from './factories/index.js';
 export { config, runWithConfig } from './config-api.js'; // GC12: runtime config accessor
 export { importFactory, type ImportOptions } from './core/function/import.js';
 
+// Canonical `ArgumentsError` (#1567): the one class identity for the argument-count
+// errors the typed layer throws (`DimensionError`/`IndexError` are canonical on
+// `@danielsimonjr/mathts-core`, which this package imports).
+export { ArgumentsError } from './error/ArgumentsError.js';
+
 // Opt-in AssemblyScript tier. Nothing loads the WASM binary on its own; until
 // `await loadWasm()` resolves true, every function runs its JavaScript path.
 export { loadWasm, isWasmLoaded } from './wasm/WasmLoader.js';

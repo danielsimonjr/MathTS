@@ -843,6 +843,8 @@ export function create(
       )
     )
   );
+  // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
+  instance.DimensionError = instanceSymbols.DimensionError;
 
   return instance as unknown as MathInstance;
 }
