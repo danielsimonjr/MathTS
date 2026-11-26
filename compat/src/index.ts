@@ -529,9 +529,7 @@ export function create(
     mathFunctions.gamma as (...args: unknown[]) => unknown,
     convertForeignScalar
   );
-  installG09BridgeMatrixSubsetPatch(
-    mathFunctions.matrix([]) as unknown as Parameters<typeof installG09BridgeMatrixSubsetPatch>[0]
-  );
+  installG09BridgeMatrixSubsetPatch(mathFunctions.matrix([]));
   const compatSubset = createCompatSubsetG09(
     mathFunctions.subset as (...args: never[]) => unknown,
     {
