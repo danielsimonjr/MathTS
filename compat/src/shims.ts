@@ -42,12 +42,16 @@ import type {
   PublicVariance,
 } from '@danielsimonjr/mathts-functions';
 
+import { withMathjsComplexBinary } from './mathjs-complex.js';
+import { compatComplexPow } from './mathjs-compat-pow.js';
 import {
   add as _add,
   addScalar as _addScalar,
   subtract as _subtract,
+  factory_subtract as _factorySubtract,
   multiply as _multiply,
   multiplyScalar as _multiplyScalar,
+  dotMultiply as _dotMultiply,
   number as _number,
   divide as _divide,
   factory_divide as _factoryDivide,
@@ -345,14 +349,22 @@ const applyArithmetic = (
   matrixFn: (a: unknown, b: unknown) => unknown,
   a: unknown,
   b: unknown,
-  elementwise: boolean
+  elementwise: boolean,
+  complexFn?: (a: unknown, b: unknown) => unknown
 ): unknown => {
   // Boxed operands carry the storage format and may hold non-double scalar types.
   // Keep them in the typed path rather than coercing them to the numeric backend.
   if (isBoxedMatrix(a) || isBoxedMatrix(b)) {
     const boxedA = Array.isArray(a) ? _factoryMatrix(a) : a;
     const boxedB = Array.isArray(b) ? _factoryMatrix(b) : b;
+    if (complexFn && (isComplex(boxedA) || isComplex(boxedB))) {
+      return compatDecimalResult(complexFn(boxedA, boxedB));
+    }
     return scalarFn(boxedA, boxedB);
+  }
+  // Riemann-sphere only for Complex scalars; number/BigNumber/bigint stay native.
+  if (complexFn && (isComplex(a) || isComplex(b))) {
+    return compatDecimalResult(complexFn(a, b));
   }
   if (isMatrixLike(a) || isMatrixLike(b)) {
     if (!matrixPackageCanTake(a, b, elementwise)) return unwrap(scalarFn(a, b));
@@ -372,7 +384,8 @@ const makeArithmetic =
     scalarFn: (a: unknown, b: unknown) => unknown,
     matrixFn: (a: unknown, b: unknown) => unknown,
     elementwise: boolean,
-    fastNumberPair?: (a: number, b: number) => number
+    fastNumberPair?: (a: number, b: number) => number,
+    complexFn?: (a: unknown, b: unknown) => unknown
   ) =>
   (...args: unknown[]): unknown => {
     if (args.length === 0) {
@@ -389,7 +402,9 @@ const makeArithmetic =
     ) {
       return fastNumberPair(args[0], args[1]);
     }
-    return args.reduce((acc, next) => applyArithmetic(scalarFn, matrixFn, acc, next, elementwise));
+    return args.reduce((acc, next) =>
+      applyArithmetic(scalarFn, matrixFn, acc, next, elementwise, complexFn)
+    );
   };
 
 /**
@@ -449,11 +464,31 @@ function withNumericText(arithmetic: BinaryArithmetic, scalar: BinaryArithmetic)
   };
 }
 
+const _compatAdd = withMathjsComplexBinary(_add as BinaryArithmetic, 'add');
+const _compatSubtract = withMathjsComplexBinary(_subtract as BinaryArithmetic, 'sub');
+const _compatMultiply = withMathjsComplexBinary(_multiply as BinaryArithmetic, 'mul');
+
+function isProtoSparseMatrix(x: unknown): boolean {
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    (Object.getPrototypeOf(x) as { isSparseMatrix?: boolean } | null)?.isSparseMatrix === true
+  );
+}
+
+const subtractPair = (a: unknown, b: unknown): unknown => {
+  if (isComplex(a) || isComplex(b)) return _compatSubtract(a, b);
+  if (isProtoSparseMatrix(a) || isProtoSparseMatrix(b)) return _factorySubtract(a, b);
+  if (typeof a === 'bigint' || typeof b === 'bigint') return _factorySubtract(a, b);
+  return _subtract(a, b);
+};
+
 const addCore = makeArithmetic(
   withNumericText(_add as BinaryArithmetic, _addScalar),
   _matAdd as (a: unknown, b: unknown) => unknown,
   true,
-  (a, b) => a + b
+  (a, b) => a + b,
+  _compatAdd
 );
 export const add = withTypedSurface(function (...args: unknown[]): unknown {
   try {
@@ -466,7 +501,7 @@ export const add = withTypedSurface(function (...args: unknown[]): unknown {
   }
 }, _add) as NumericStringArithmetic & PublicAdd & OneArg;
 export const subtract = makeArithmetic(
-  _subtract as (a: unknown, b: unknown) => unknown,
+  subtractPair,
   _matSubtract as (a: unknown, b: unknown) => unknown,
   true
 ) as typeof _subtract;
@@ -474,18 +509,32 @@ export const multiply = makeArithmetic(
   withNumericText(_multiply as BinaryArithmetic, _multiplyScalar),
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
-  (a, b) => a * b
+  (a, b) => a * b,
+  _compatMultiply
 ) as NumericStringArithmetic & typeof _multiply;
+const _dotMultiplyComplex = withMathjsComplexBinary(_dotMultiply as BinaryArithmetic, 'mul');
+const compatDotMultiply = withTypedSurface(function (a: unknown, b: unknown): unknown {
+  if (isComplex(a) || isComplex(b)) return _dotMultiplyComplex(a, b);
+  return _dotMultiply(a, b);
+}, _dotMultiply) as typeof _dotMultiply;
 /**
  * `divide(a, b)` is `multiply(a, inv(b))` (mathjs). Two native `DenseMatrix` operands give a native
  * `DenseMatrix`, as `inv`, `sqrtm` and the matrix path of `add` and `multiply` do: the typed
  * function gives the boxed class for every matrix operand. Every other call goes to the typed
  * function.
  */
+const _compatDivideScalar = withMathjsComplexBinary(
+  ((a: unknown, b: unknown) =>
+    (_factoryDivide as (x: unknown, y: unknown) => unknown)(a, b)) as BinaryArithmetic,
+  'div'
+);
 export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
   try {
     if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
       return _matMultiply(a, _inv(b) as DenseMatrix);
+    }
+    if (arguments.length === 2 && (isComplex(a) || isComplex(b))) {
+      return _compatDivideScalar(a, b);
     }
     // The mathjs-shaped factory carries the 15.3.0 sparse semantics (a sparse result only
     // when the image of zero is zero, #1565); the typed surface keeps its older sparse path.
@@ -514,10 +563,25 @@ function powWithFractionOperands(base: unknown, exponent: unknown, predictable: 
 /**
  * Adapter over native `factory_pow`: mathjs principal Complex roots (and
  * `predictable` throws) for a negative Fraction with a non-integer exponent.
+ * Complex×Complex uses complex.js `pow` (#1589).
  */
 export function createCompatPow(predictable: () => boolean): TypedFunction {
   return withTypedSurface(
     function (base?: unknown, exponent?: unknown): unknown {
+      if (arguments.length === 2 && isComplex(base) && isComplex(exponent)) {
+        return compatComplexPow(base, exponent);
+      }
+      if (
+        arguments.length === 2 &&
+        (Array.isArray(base) || isCompatBridgeMatrix(base)) &&
+        (typeof exponent === 'number' ||
+          typeof exponent === 'bigint' ||
+          isBigNumber(exponent) ||
+          isFraction(exponent)) &&
+        Number(exponent) < 0
+      ) {
+        return _factoryPow(base, exponent);
+      }
       if (arguments.length === 2 && (isFraction(base) || isFraction(exponent))) {
         return powWithFractionOperands(base, exponent, Boolean(predictable()));
       }
@@ -904,4 +968,5 @@ const _shims = {
 export const shims: Omit<typeof _shims, 'add' | 'sin'> & {
   add: NumericStringArithmetic & PublicAdd;
   sin: PublicSin;
-} = _shims;
+  dotMultiply: typeof _dotMultiply;
+} = { ..._shims, dotMultiply: compatDotMultiply };
