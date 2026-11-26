@@ -292,15 +292,16 @@ const result = compiled.evaluate({ x: 2, y: 3 });
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-expression` (101 exports).
+> `@danielsimonjr/mathts-expression` (102 exports).
 
-### Functions (75)
+### Functions (76)
 
 `compile`
 `compileExpression`
 `compileExpressionWithDeps`
 `createAccessorNode`
 `createAndTransform`
+`createApplyTransform`
 `createArrayNode`
 `createAssignmentNode`
 `createBitAndTransform`
