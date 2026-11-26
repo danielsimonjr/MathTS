@@ -49,9 +49,9 @@ import type {
 } from './unit-types.js';
 
 /**
- * Core scalar values ARE the runtime `Numeric` values the Unit stores (number,
- * bigint, boolean, or a core Complex/Fraction/BigNumber instance). The unit-types
- * `Numeric` is a structural view of those, so the crossing is a safe cast.
+ * Core scalar ops take `NumericScalar` (`number | bigint | Complex | Fraction |
+ * BigNumber`). Unit `Numeric` is that set plus boolean; the adapters cast at
+ * the factory boundary.
  */
 const asBinary = (op: (a: never, b: never) => unknown): ScalarBinaryOp =>
   ((a: Numeric, b: Numeric) => op(a as never, b as never) as Numeric) as ScalarBinaryOp;

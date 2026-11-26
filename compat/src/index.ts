@@ -34,6 +34,7 @@ import type {
 } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
+import { createG07LogicalParity } from './g07-logical-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import {
   bindDefaultInstanceSource,
@@ -631,6 +632,7 @@ export function create(
   // Internal names of the functions namespace (#1216) are not surfaced: not own, not
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const g07Logical = createG07LogicalParity();
   const compatDefaultOverrides = {
     acosh: mathFunctions.factory_acosh,
     acot: mathFunctions.factory_acot,
@@ -664,6 +666,11 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    nullish: g07Logical.nullish,
+    not: g07Logical.not,
+    and: g07Logical.and,
+    or: g07Logical.or,
+    xor: g07Logical.xor,
     diag: mathFunctions.diag,
     rotationMatrix: mathFunctions.rotationMatrix,
   };
@@ -838,6 +845,8 @@ export function create(
       )
     )
   );
+  // mathjs shares one `DimensionError` constructor on the module and on each instance (#G12 F4).
+  instance.DimensionError = instanceSymbols.DimensionError;
 
   return instance as unknown as MathInstance;
 }

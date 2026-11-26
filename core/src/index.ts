@@ -49,6 +49,18 @@ export type { DualUnaryRule, DualUnaryRuleName } from './types/dual-rules.js';
 // Named mathematical constants (plain numbers): PI, E, TAU, PHI, SQRT2, …
 export { PI, E, TAU, PHI, SQRT2, SQRT1_2, LN2, LN10, LOG2E, LOG10E } from './constants.js';
 
+// mathjs-named lowercase aliases of the constants above (#1571): mathjs exports
+// `pi`, `e`, `tau`, `phi`, `i`; MathTS spells them `PI`, `E`, `TAU`, `PHI`, `I`.
+// Same values, no second constant — the aliases are the uppercase bindings.
+export { PI as pi, E as e, TAU as tau, PHI as phi } from './constants.js';
+export { I as i } from './types/complex.js';
+
+// Canonical error classes (#1567). One `DimensionError`/`IndexError` identity for
+// the whole monorepo: `functions` and `expression` import these, so a mismatch
+// thrown anywhere is `instanceof DimensionError` against this export.
+export { DimensionError } from './error/DimensionError.js';
+export { IndexError, createIndexError } from './error/IndexError.js';
+
 // Fractions (exact rationals)
 export {
   Fraction,

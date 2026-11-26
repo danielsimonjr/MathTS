@@ -174,10 +174,14 @@ const SKIP_FUNCTIONS = new Set([
   'pickRandom',
 ]);
 
+/** G07 factory logical fns on compat reject mathjs-typed pool values; compare with compat types. */
+const FACTORY_TYPED_POOL_OPS = new Set(['nullish', 'not', 'and', 'or', 'xor']);
+
 export function sweepPool(): { labels: Set<string> } {
   const labels = new Set<string>();
   const { mathjs, compat } = pair({});
   const oraclePool = buildPool(mathjs);
+  const compatPool = buildPool(compat);
   const compatRecord = compat as unknown as Record<string, unknown>;
   const oracleRecord = mathjs as unknown as Record<string, unknown>;
   const names = Object.keys(compatRecord).filter(
@@ -189,26 +193,37 @@ export function sweepPool(): { labels: Set<string> } {
     if (typeof fnO !== 'function' || typeof fnC !== 'function') continue;
     const arity = Math.max(fnO.length ?? 0, 1);
     const maxWidth = Math.min(arity <= 1 ? 1 : 8, oraclePool.length);
+    const useCompatPool = FACTORY_TYPED_POOL_OPS.has(name);
     for (let a = 0; a < oraclePool.length; a++) {
-      const calls: unknown[][] = arity <= 1 ? [[oraclePool[a]]] : [];
-      if (arity > 1) {
-        for (let b = 0; b < maxWidth; b++) calls.push([oraclePool[a], oraclePool[b]]);
-      }
-      for (const args of calls) {
-        if (ALLOCATING.has(name) && args.some((x) => typeof x === 'number' && Math.abs(x) > 1000)) {
-          continue;
+      const tryCall = (poolArgs: unknown[], compatArgs: unknown[]): void => {
+        if (
+          ALLOCATING.has(name) &&
+          poolArgs.some((x) => typeof x === 'number' && Math.abs(x) > 1000)
+        ) {
+          return;
         }
-        const o = outcome(mathjs, () => fnO.apply(mathjs, args));
+        const o = outcome(mathjs, () => fnO.apply(mathjs, poolArgs));
         // An arity rejection of the oracle is one divergence per function (#1587), not one
         // per argument combination.
         if ('error' in o && o.arity) {
-          labels.add(`${name}: mathjs rejects ${args.length} argument(s) on the pool`);
-          continue;
+          labels.add(`${name}: mathjs rejects ${poolArgs.length} argument(s) on the pool`);
+          return;
         }
-        const c = outcome(compat, () => fnC.apply(compat, args));
+        const c = outcome(compat, () => fnC.apply(compat, compatArgs));
         if (JSON.stringify(o) !== JSON.stringify(c)) {
-          labels.add(`${name}: (${args.map((x) => show(mathjs as never, x)).join(', ')})`);
+          labels.add(`${name}: (${poolArgs.map((x) => show(mathjs, x)).join(', ')})`);
         }
+      };
+      if (arity <= 1) {
+        const compatArgs = useCompatPool ? [compatPool[a]] : [oraclePool[a]];
+        tryCall([oraclePool[a]], compatArgs);
+        continue;
+      }
+      for (let b = 0; b < maxWidth; b++) {
+        const compatArgs = useCompatPool
+          ? [compatPool[a], compatPool[b]]
+          : [oraclePool[a], oraclePool[b]];
+        tryCall([oraclePool[a], oraclePool[b]], compatArgs);
       }
     }
   }

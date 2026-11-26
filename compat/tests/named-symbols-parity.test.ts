@@ -20,7 +20,9 @@ describe('named MathJS symbols', () => {
     expect(Object.keys(compat.docs).sort()).toEqual(Object.keys(upstreamDocs).sort());
     const math = compat.create(compat.all);
     for (const name of ['num', 'den'] as const) {
-      expect(compat.docs[name].name).toBe(upstreamDocs[name].name);
+      const doc = compat.docs[name] as { name: string };
+      const upstream = upstreamDocs[name] as { name: string };
+      expect(doc.name).toBe(upstream.name);
       expect(compat.help(name).toJSON().name).toBe(name);
       const call = `${name}(fraction(-2, 3))`;
       expect(math.evaluate(call)).toBe(oracle.evaluate(call));
