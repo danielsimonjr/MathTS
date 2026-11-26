@@ -21,6 +21,8 @@ import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
 import { BigNumber as CompatBigNumberCtor } from './bignumber.js';
+import { applyG08CompatOverrides } from './g08-inverse-hyperbolic-compat.js';
+import { compatFreqz, compatZpk2tf } from './compat-signal-factories.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -596,10 +598,13 @@ export function create(
 
     // Arithmetic
     add: bindShim(shims.add),
-    subtract: mathFunctions.factory_subtract,
+    subtract: bindShim(shims.subtract),
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
+    dotMultiply: bindShim(shims.dotMultiply),
     pow: bindShim(createCompatPow(() => Boolean(currentConfig.predictable))),
+    zpk2tf: bindShim(compatZpk2tf),
+    freqz: bindShim(compatFreqz),
     isPositive: mathFunctions.isPositive,
     isNegative: mathFunctions.isNegative,
     isInteger: mathFunctions.isInteger,
@@ -699,14 +704,29 @@ export function create(
   // Internal names of the functions namespace (#1216) are not surfaced: not own, not
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const g08Overrides = applyG08CompatOverrides({
+    factory_asinh: mathFunctions.factory_asinh,
+    factory_acosh: mathFunctions.factory_acosh,
+    factory_atanh: mathFunctions.factory_atanh,
+    acoth: mathFunctions.acoth,
+    acsch: mathFunctions.acsch,
+    asech: mathFunctions.asech,
+    factory_acsc: mathFunctions.factory_acsc,
+    factory_asec: mathFunctions.factory_asec,
+  });
   const g07Logical = createG07LogicalParity();
   const compatDefaultOverrides = {
-    acosh: withFractionRejection(mathFunctions.factory_acosh),
+    // #1587: a Fraction argument throws the mathjs conversion error, on top of
+    // the G08 complex.js adapters (inverse hyperbolics) and the factories.
+    acosh: withFractionRejection(g08Overrides.acosh),
     acot: withFractionRejection(mathFunctions.factory_acot),
-    acsc: withFractionRejection(mathFunctions.factory_acsc),
-    asec: withFractionRejection(mathFunctions.factory_asec),
-    asinh: withFractionRejection(mathFunctions.factory_asinh),
-    atanh: withFractionRejection(mathFunctions.factory_atanh),
+    acoth: withFractionRejection(g08Overrides.acoth),
+    acsc: withFractionRejection(g08Overrides.acsc),
+    acsch: withFractionRejection(g08Overrides.acsch),
+    asec: withFractionRejection(g08Overrides.asec),
+    asech: withFractionRejection(g08Overrides.asech),
+    asinh: withFractionRejection(g08Overrides.asinh),
+    atanh: withFractionRejection(g08Overrides.atanh),
     cbrt: mathFunctions.factory_cbrt,
     cosh: withFractionRejection(mathFunctions.factory_cosh),
     cot: withFractionRejection(mathFunctions.factory_cot),
@@ -717,10 +737,8 @@ export function create(
     sinh: withFractionRejection(mathFunctions.factory_sinh),
     square: mathFunctions.factory_square,
     tanh: withFractionRejection(mathFunctions.factory_tanh),
-    // #1587: the remaining trigonometry surface rejects a Fraction argument as mathjs does.
-    acoth: withFractionRejection(mathFunctions.acoth),
-    asech: withFractionRejection(mathFunctions.asech),
-    acsch: withFractionRejection(mathFunctions.acsch),
+    // #1587: the remaining trigonometry surface rejects a Fraction argument as
+    // mathjs does; acoth/asech/acsch keep their G08 adapters above.
     csch: withFractionRejection(mathFunctions.csch),
     coth: withFractionRejection(mathFunctions.coth),
     sech: withFractionRejection(mathFunctions.sech),

@@ -48,7 +48,7 @@ export const createAcsch = /* #__PURE__ */ factory(
       number: acschNumber,
 
       Complex: function (x: Complex) {
-        return x.acsch();
+        return x.inverse().asinh();
       },
 
       BigNumber: function (x: BigNumber): BigNumber {
