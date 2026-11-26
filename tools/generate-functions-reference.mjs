@@ -21,6 +21,14 @@ import { packageDotEntry } from './package-dot-entry.mjs';
 // The label of the catch-all group is defined once, in the module that reads the index back.
 import { UNCATEGORIZED as OTHER } from './reference-index.mjs';
 
+// Bun may still compile `core/src` (root tsconfig `paths`) even with
+// `--tsconfig-override`. `__PKG_VERSION__` is a tsdown define; the bun-test
+// preload sets the same name on globalThis. Seed it here before any package
+// import so `docs:functions` does not throw ReferenceError.
+if (typeof globalThis.__PKG_VERSION__ !== 'string') {
+  globalThis.__PKG_VERSION__ = '0.0.0-source';
+}
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..');
 const BEGIN = '<!-- BEGIN GENERATED EXPORT INDEX (tools/generate-functions-reference.mjs) -->';
