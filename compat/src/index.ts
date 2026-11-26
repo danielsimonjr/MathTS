@@ -36,6 +36,7 @@ import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
   bindDefaultInstanceSource,
   Chain,
@@ -618,6 +619,9 @@ export function create(
     Infinity: shims.Infinity,
     NaN: shims.NaN,
 
+    // #1561 — mathjs 15.3.0 eigs (precision, vector scale, value order); native solver stays in functions.
+    eigs: compatMathjsEigs,
+
     // Placeholder; rebound below once `instance` exists so chain methods can
     // resolve against the full surfaced namespace.
     chain: (() => {
@@ -910,6 +914,7 @@ export { typed };
 export { Parser } from './named-instance-exports.js';
 
 export { compatReplacer as replacer, compatReviver as reviver } from './serialization.js';
+export { compatMathjsEigs as eigs };
 
 export * from './named-symbols.js';
 export * from './native-factory-exports.js';

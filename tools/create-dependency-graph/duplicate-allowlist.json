@@ -603,6 +603,30 @@
       "reason": "The shim mirrors the third-party workerpool API at runtime for the browser test bundle (vitest.config.browser.ts alias). It must not import from the package source it stands in for. pool-types.ts holds the published declarations."
     },
     {
+      "names": [
+        "createComplexEigs",
+        "createEigs",
+        "createRealSymmetric",
+        "defineRemovedVectorsGetter",
+        "isDegenerate",
+        "isExactZero",
+        "isZeroEntry",
+        "realScale",
+        "rescaled",
+        "rootOfSquaresLostDigits",
+        "squaresLeaveRange",
+        "RealScale"
+      ],
+      "filesGlob": [
+        "compat/src/mathjs-eigs/**",
+        "functions/src/matrix/eigs.ts",
+        "functions/src/matrix/eigs/**",
+        "functions/src/utils/real-scale.ts",
+        "functions/src/utils/isExactZero.ts"
+      ],
+      "reason": "G10 (#1561): the mathjs 15.3.0 eigs factory port lives in compat/src/mathjs-eigs/ (quirks, precision, vector scale). Native functions/src/matrix/eigs.ts remains the mathjs-shaped factory used only as a fallback for non-numeric public eigs. The two bodies must stay independent: critical libraries are not changed to match mathjs, and compat cannot import functions internals. Guarded by compat/tests/parity/g10-eigs.test.ts vs live mathjs 15.3.0 and functions/tests/challenger-g10-native-contract.test.ts for the native contract."
+    },
+    {
       "names": ["Parser"],
       "filesGlob": ["compat/src/index.ts", "expression/src/Parser.ts"],
       "reason": "#1571: compat's Parser is the callable instance-proxy constructor for create(all) (Reflect.construct of the wired instance's parser); expression's Parser is the ready-made class at the package's default config. Different surfaces by design; #1568 records events/instance members as compat-only."
