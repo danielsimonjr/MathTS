@@ -223,6 +223,7 @@ export function withMathjsNormMatrixRules(
   };
 }
 
+/** Reject invalid numeric strings that would become NaN under mathjs `numeric()`. */
 export function createCompatNumeric(
   native: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
