@@ -27,6 +27,8 @@ export interface ChainUnwrap {
   value: unknown;
 }
 
+/** Renders a chain value to a string, as `Chain.toString` does — the compat
+ * instance's `format` by default, overridable through `createChain` options. */
 export type FormatFn = (value: unknown, options?: Record<string, unknown>) => string;
 
 /** The slice of the core typed dispatcher a chain needs: recognize typed functions
