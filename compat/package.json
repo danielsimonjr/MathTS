@@ -22,8 +22,8 @@
     "build": "tsdown src/index.ts --format esm && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs",
     "dev": "tsdown src/index.ts --format esm --watch --on-success \"tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs\"",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
-    "test": "bun test --isolate --timeout 300000",
-    "test:coverage": "bun test --isolate --timeout 300000 --coverage",
+    "test": "bun test --isolate --timeout 240000",
+    "test:coverage": "bun test --timeout 240000 --coverage",
     "build:prod": "tsdown src/index.ts --format esm --minify && tsc -p tsconfig.dts.json && node ../tools/ensure-js-sourcemaps.mjs"
   },
   "tsdown": {
