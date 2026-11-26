@@ -211,19 +211,22 @@ interface RangeDeps {
  */
 export function createMathjsRange(deps: RangeDeps): (...args: unknown[]) => unknown {
   const { nativeRange, typed } = deps;
-  const applyQuirk = function applyQuirk(this: unknown, ...args: unknown[]): unknown {
-    if (typeof args[0] === 'string') {
-      if (args.length === 1) return nativeRange.call(this, args[0]);
-      if (args.length === 2 && typeof args[1] === 'boolean') return nativeRange.call(this, args[0]);
-    }
-    return nativeRange.apply(this, args);
-  };
   const signatures = nativeRange.signatures ?? {};
   const mapped: Record<string, (...args: unknown[]) => unknown> = {};
   for (const name of Object.keys(signatures)) {
-    mapped[name] = function (this: unknown, ...args: unknown[]): unknown {
-      return applyQuirk.apply(this, args);
-    };
+    const orig = signatures[name];
+    if (name === 'string' || name === 'string,boolean') {
+      mapped[name] = function (this: unknown, str: unknown): unknown {
+        return nativeRange.call(this, str);
+      };
+      continue;
+    }
+    mapped[name] =
+      typeof orig === 'function'
+        ? (orig as (...args: unknown[]) => unknown)
+        : function (this: unknown, ...args: unknown[]): unknown {
+            return nativeRange.apply(this, args);
+          };
   }
   return (
     typed as unknown as (name: string, sigs: typeof mapped) => (...args: unknown[]) => unknown
