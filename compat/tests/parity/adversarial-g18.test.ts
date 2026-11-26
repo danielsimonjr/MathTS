@@ -4,6 +4,7 @@ import { create as createCompat, all as compatAll } from '@danielsimonjr/mathts-
 import { create, all, type MathJsInstance as OracleInstance } from 'mathjs';
 import { zeta as nativeZeta, bignumber as nativeBignumber } from '@danielsimonjr/mathts-functions';
 import { INTENTIONAL } from './intentional.js';
+import { GAPS } from './known-gaps/index.js';
 import { expectSame } from './differential.js';
 import { show } from './oracle.js';
 import { sweepPool } from './sweep.js';
@@ -120,9 +121,7 @@ describe('g18 adversarial: range and bookkeeping', () => {
   });
 
   it('F7: known-gaps drops #1585 zeta/symbolicEqual doc examples', () => {
-    const gaps = JSON.parse(
-      readFileSync(new URL('./known-gaps.json', import.meta.url), 'utf8')
-    ) as Record<string, string[]>;
+    const gaps = GAPS;
     const flat = new Set(Object.values(gaps).flat());
     const removed = [
       '{} zeta(4)',

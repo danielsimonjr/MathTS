@@ -45,6 +45,14 @@
     {
       "file": "tools/test/check-changelog-fragment.test.mjs",
       "reason": "Docs-only classifier test: the string docs/api/functions.md is a classification input, not a docs read."
+    },
+    {
+      "file": "compat/tests/parity/adversarial-g18.test.ts",
+      "reason": "Full CI mathjs oracle probes; docs/api/compat.md assertions run with the G18 suite, not docs-only CI."
+    },
+    {
+      "file": "compat/tests/parity/g18-parity.test.ts",
+      "reason": "Full CI mathjs oracle probes; docs/api/compat.md assertions run with the G18 suite, not docs-only CI."
     }
   ]
 }
