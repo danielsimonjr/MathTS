@@ -1,7 +1,7 @@
-import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { create, all } from 'mathjs';
 import { create as createCompat, all as compatAll } from '../../src/index.js';
+import { ALL_GAPS } from './known-gaps/index.js';
 import { sweepDocs } from './sweep.js';
 
 /**
@@ -241,10 +241,7 @@ describe('PARITY: the docs sweep must compare each example on a fresh instance',
     // (`isPositive(2)`, `isInteger(2)`, `50cm == 0.5m`, `rotationMatrix(...)`, …) match the
     // oracle when each example gets its own instance. A fixture entry that cannot be reproduced
     // is a false gap: it stops the sweep from looking for the real one underneath.
-    const gaps = JSON.parse(
-      readFileSync(new URL('./known-gaps.json', import.meta.url), 'utf8')
-    ) as Record<string, string[]>;
-    const all = new Set(Object.values(gaps).flat());
+    const all = ALL_GAPS;
     // Verified fresh-instance matches (see the PR description). Each is a `{config} expression`
     // label whose two sides agree when the instance is not shared.
     const FALSE_GAPS = [
