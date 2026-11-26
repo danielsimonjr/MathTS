@@ -2685,7 +2685,6 @@
   "{\"matrix\":\"Array\"} randomInt(10, 20)",
   "{\"matrix\":\"Array\"} randomInt([2, 3], 10)",
   "{\"matrix\":\"Array\"} schur([[1, 0], [-4, 3]])",
-  "{\"matrix\":\"Array\"} zeta(-0.5)",
   "{\"number\":\"BigNumber\"} +\"2\"",
   "{\"number\":\"BigNumber\"} +true",
   "{\"number\":\"BigNumber\"} bernoulli(4)",
@@ -2727,7 +2726,6 @@
   "{\"number\":\"BigNumber\"} random([2, 3])",
   "{\"number\":\"BigNumber\"} randomInt(10, 20)",
   "{\"number\":\"BigNumber\"} randomInt([2, 3], 10)",
-  "{\"number\":\"BigNumber\"} range(\"4:10\")",
   "{\"number\":\"BigNumber\"} rotate([1, 0, 0], unit(\"90deg\"), [0, 0, 1])",
   "{\"number\":\"BigNumber\"} rotate([1, 0], pi / 2)",
   "{\"number\":\"BigNumber\"} rotate(matrix([1, 0, 0]), unit(\"90deg\"), matrix([0, 0, 1]))",
@@ -2735,10 +2733,6 @@
   "{\"number\":\"BigNumber\"} schur([[1, 0], [-4, 3]])",
   "{\"number\":\"BigNumber\"} slu(sparse([4.5, 0, 3.2, 0; 3.1, 2.9, 0, 0.9; 0, 1.7, 3, 0; 3.5, 0.4, 0, 1]), 1, 0.001)",
   "{\"number\":\"BigNumber\"} sylvester([[-1, -2], [1, 1]], [[-2, 1], [-1, 2]], [[-3, 2], [3, 0]])",
-  "{\"number\":\"BigNumber\"} symbolicEqual(\"x*y\",\"y*x\")",
-  "{\"number\":\"BigNumber\"} zeta(-0.5)",
-  "{\"number\":\"BigNumber\"} zeta(0.2)",
-  "{\"number\":\"BigNumber\"} zeta(4)",
   "{} bernoulli(fraction(12))",
   "{} corr(matrix([[1, 2.2, 3, 4.8, 5], [1, 2, 3, 4, 5]]), matrix([[4, 5.3, 6.6, 7, 8], [1, 2, 3, 4, 5]]))",
   "{} createUnit(\"knot\", {definition: \"0.514444444 m/s\", aliases: [\"knots\", \"kt\", \"kts\"]})",
@@ -2755,6 +2749,5 @@
   "{} random([2, 3])",
   "{} randomInt(10, 20)",
   "{} randomInt([2, 3], 10)",
-  "{} schur([[1, 0], [-4, 3]])",
-  "{} zeta(-0.5)"
+  "{} schur([[1, 0], [-4, 3]])"
 ]

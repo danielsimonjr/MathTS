@@ -18,8 +18,8 @@ import { GAPS, ALL_GAPS } from './known-gaps/index.js';
  *
  * A case that is neither a match nor listed in `known-gaps/` fails the run, and a
  * listed label that meanwhile matches fails too, so the gap list cannot rot. Later groups
- * delete their keys in the same commit as the fix; G21 fails CI while any key remains
- * except the `1585` intentional-divergence entries (which live in `intentional.ts`).
+ * delete their keys in the same commit as the fix; G21 fails CI while any key remains.
+ * #1585 now matches mathjs in compat (`INTENTIONAL['1585']` is empty).
  */
 
 describe('full-surface differential harness (#1574)', () => {
@@ -81,7 +81,7 @@ describe('full-surface differential harness (#1574)', () => {
     expect(total).toBeGreaterThan(900);
   });
 
-  it('the intentional divergences hold (#1585)', () => {
-    for (const entry of INTENTIONAL['1585'] ?? []) entry.assert();
+  it('no #1585 entries remain in intentional.ts (compat matches mathjs)', () => {
+    expect(INTENTIONAL['1585'] ?? []).toHaveLength(0);
   });
 });

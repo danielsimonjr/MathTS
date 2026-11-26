@@ -19,6 +19,7 @@ import { logSinPiForReflection } from '../probability/log-sin-pi.js';
  */
 
 import { mathTyped, Complex } from '@danielsimonjr/mathts-core';
+import { bigintToNumber } from '@danielsimonjr/mathts-core/internal';
 import { gammaG, gammaP } from '../plain/number/index.js';
 import { elementwiseUnaryDispatch } from '../wasm/elementwise/wasm-bridge.js';
 import { f64Unary } from './f64-kernels.js';
@@ -682,6 +683,7 @@ function lgammaComplex(z: Complex): Complex {
 
 export const lgamma = mathTyped('lgamma', {
   number: _lgamma,
+  bigint: (n: bigint): number => _lgamma(bigintToNumber(n)),
   Complex: lgammaComplex,
   Float64Array: (x: Float64Array): Float64Array => {
     if (x.length >= WASM_SPECIAL_THRESHOLD) {

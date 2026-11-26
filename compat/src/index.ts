@@ -65,6 +65,10 @@ import {
   toBest as namedToBest,
   xgcd as namedXgcd,
   string as namedCompatString,
+  g18InstanceOverrides,
+  zeta as namedZeta,
+  symbolicEqual as namedSymbolicEqual,
+  range as namedRange,
 } from './named-instance-exports.js';
 import {
   applyUnitRelationalParity,
@@ -652,6 +656,9 @@ export function create(
     factory_asec: mathFunctions.factory_asec,
   });
   const g07Logical = createG07LogicalParity();
+  const { rangeEvaluate: g18RangeEvaluate, ...g18Surface } = g18InstanceOverrides(
+    () => currentConfig
+  );
   const compatDefaultOverrides = {
     acosh: g08Overrides.acosh,
     acot: mathFunctions.factory_acot,
@@ -688,6 +695,7 @@ export function create(
     mod: mathFunctions.factory_mod,
     permutations: namedPermutations,
     lgamma: namedLgamma,
+    ...g18Surface,
     nullish: g07Logical.nullish,
     not: g07Logical.not,
     and: g07Logical.and,
@@ -714,7 +722,13 @@ export function create(
     (name) => originalSurface[name] === functionsNamespace[name]
   );
   const expressionConstants: Record<string, () => unknown> = {};
-  for (const name of overriddenNames) expressionConstants[name] = () => instance[name];
+  for (const name of overriddenNames) {
+    if (name === 'range') {
+      expressionConstants.range = () => g18RangeEvaluate;
+      continue;
+    }
+    expressionConstants[name] = () => instance[name];
+  }
   if (originalSurface.add === mathFunctions.add) expressionConstants.add = () => instance.add;
   if (originalSurface.multiply === mathFunctions.multiply) {
     expressionConstants.multiply = () => instance.multiply;
@@ -915,6 +929,9 @@ export {
   namedCombinationsWithRep as combinationsWithRep,
   namedXgcd as xgcd,
   namedLgamma as lgamma,
+  namedRange as range,
+  namedSymbolicEqual as symbolicEqual,
+  namedZeta as zeta,
 };
 
 export {
