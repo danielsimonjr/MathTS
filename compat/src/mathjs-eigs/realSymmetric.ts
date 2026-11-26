@@ -177,8 +177,59 @@ export function createRealSymmetric({
     return sorting(clone(Ei), Sij, computeVectors);
   }
 
+  /** mathjs 15.3.0 `diagBig`: |prec/N| stop, no graded pairs, absolute θ test. */
+  function diagBigMathjs15(
+    x: BigNumber[][],
+    precision: BigNumber,
+    computeVectors: boolean
+  ): EigenResult {
+    const N = x.length;
+    const e0 = abs(
+      typeof precision === 'number'
+        ? bignumber(precision / N)
+        : multiplyScalar(precision, bignumber(1 / N))
+    ) as BigNumber;
+    let Vab = getAijBig(x);
+    let psi: BigNumber;
+    let Sij: BigNumber[][] | undefined;
+    if (computeVectors) {
+      Sij = new Array(N);
+      for (let i = 0; i < N; i++) {
+        Sij[i] = Array(N).fill(bignumber(0));
+        Sij[i][i] = bignumber(1);
+      }
+    }
+    while (!bigLt(abs(Vab[1]), e0)) {
+      const i = Vab[0][0];
+      const j = Vab[0][1];
+      psi = getThetaBigMathjs15(x[i][i], x[j][j], x[i][j]);
+      x = x1Big(x, psi, i, j);
+      if (computeVectors) Sij = Sij1Big(Sij!, psi, i, j);
+      Vab = getAijBig(x);
+    }
+    const Ei: BigNumber[] = Array(N).fill(bignumber(0));
+    for (let i = 0; i < N; i++) {
+      Ei[i] = x[i][i];
+    }
+    return sorting(clone(Ei) as Scalar[], Sij as Scalar[][] | undefined, computeVectors);
+  }
+
+  function getThetaBigMathjs15(aii: BigNumber, ajj: BigNumber, aij: BigNumber): BigNumber {
+    const denom = subtract(ajj, aii) as BigNumber;
+    if (bigLte(abs(denom), bignumber(config.relTol as number))) {
+      return (bignumber(-1) as BigNumber & { acos(): BigNumber })
+        .acos()
+        .div(4) as unknown as BigNumber;
+    }
+    return multiplyScalar(
+      bignumber(0.5),
+      atan(multiply(bignumber(2), aij, inv(denom)))
+    ) as BigNumber;
+  }
+
   // diagonalization implementation for bigNumber
   function diagBig(x: BigNumber[][], precision: BigNumber, computeVectors: boolean): EigenResult {
+    if (lexicographicAbsSort) return diagBigMathjs15(x, precision, computeVectors);
     const N = x.length;
     // both tolerances are relative to the matrix scale (largest entry) (#1243)
     let scale: BigNumber = bignumber(0);
@@ -399,8 +450,13 @@ export function createRealSymmetric({
     let maxIJ: [number, number] = [0, 1];
     for (let i = 0; i < N; i++) {
       for (let j = i + 1; j < N; j++) {
-        if (bigLt(abs(maxMij), abs(Mij[i][j]))) {
-          maxMij = abs(Mij[i][j]) as BigNumber;
+        const cand = abs(Mij[i][j]) as BigNumber;
+        const better = lexicographicAbsSort
+          ? String((abs(maxMij) as { valueOf(): unknown }).valueOf()) <
+            String((cand as { valueOf(): unknown }).valueOf())
+          : bigLt(abs(maxMij), cand);
+        if (better) {
+          maxMij = cand;
           maxIJ = [i, j];
         }
       }

@@ -113,13 +113,14 @@ Native MathTS differences (import the names from
   normalized error control). Both solve the issue's problem within the default
   tolerance; the step grids differ.
 - BigNumber `schur` convergence uses mathjs 15.3.0's `_matrixNormTwo` stopping
-  rule (decimal.js `eigs` with lexicographic `<` on `abs` when sorting
-  eigenvalues), not the corrected MathTS `norm`/`eigs` ordering. The compat
-  adapter calls that oracle `norm` for BigNumber steps only (`node:module`
-  `require('mathjs')` at runtime — present in dev/CI via the `mathjs` devDependency;
-  ship your own `mathjs` install if you rely on this path outside the monorepo).
-  A native `@danielsimonjr/mathts-matrix` `DenseMatrix` argument to `schur` runs
-  the same mathjs QR iteration as array input (not the native Francis path).
+  rule (Jacobi `eigs` with lexicographic `<` on `abs` when sorting eigenvalues),
+  not the corrected MathTS `norm`/`eigs` ordering. The adapter computes that
+  2-norm in-tree via `createRealSymmetric({ lexicographicAbsSort: true })` in
+  `compat/src/mathjs-eigs/realSymmetric.ts`. A native
+  `@danielsimonjr/mathts-matrix` `DenseMatrix` argument to `schur` runs the same
+  mathjs QR iteration as array input (not the native Francis path). Complex
+  matrices use the same in-tree Householder QR / Schur loop (no `mathjs`
+  runtime import).
 
 ### Fraction formatting (#1579, #1586)
 

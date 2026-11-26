@@ -24,46 +24,80 @@ import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import { typeOf as compatTypeOf } from '@danielsimonjr/mathts-core/internal';
 import { isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
 import { createLyap, createSylvester } from './all-factories.js';
-
-type NodeRequireFn = (id: string) => unknown;
-
-function getMathjsNodeRequire(): NodeRequireFn {
-  const proc = (globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }).process;
-  const nodeModule = proc?.getBuiltinModule?.('module') as
-    { createRequire: (url: string | URL) => NodeRequireFn } | undefined;
-  if (!nodeModule?.createRequire) {
-    throw new TypeError('BigNumber schur requires Node.js with getBuiltinModule("module")');
-  }
-  return nodeModule.createRequire(import.meta.url);
-}
-
-let mathjsNodeRequire: NodeRequireFn | undefined;
-
-function requireMathjsModule(id: string): unknown {
-  if (!mathjsNodeRequire) mathjsNodeRequire = getMathjsNodeRequire();
-  return mathjsNodeRequire(id);
-}
-type MathjsSchurNormScope = {
-  matrix: (data: unknown) => unknown;
-  bignumber: (x: string) => unknown;
-  norm: (x: unknown) => unknown;
-  larger: (a: unknown, b: unknown) => boolean;
-};
-let mathjsSchurNormScope: MathjsSchurNormScope | undefined;
-
-/** mathjs 15.3.0 decimal.js `norm` for BigNumber schur convergence only (not bundled). */
-function getMathjsSchurNormScope(): MathjsSchurNormScope {
-  if (!mathjsSchurNormScope) {
-    const { create, all } = requireMathjsModule('mathjs') as {
-      create: (fns: unknown, config: unknown) => MathjsSchurNormScope;
-      all: unknown;
-    };
-    mathjsSchurNormScope = create(all, { number: 'BigNumber', precision: 64 });
-  }
-  return mathjsSchurNormScope;
-}
+import { createRealSymmetric } from './mathjs-eigs/realSymmetric.js';
+import type BigNumber from 'bignumber.js';
 
 const factory = factory_mathjsCompat.factory;
+
+type BnScalar = number | BigNumber;
+type LexEigs = (
+  arr: BnScalar[][],
+  n: number,
+  prec: number | BigNumber,
+  type: 'number' | 'BigNumber',
+  computeVectors: boolean
+) => { values: BnScalar[] };
+
+let lexRealSymmetric: LexEigs | undefined;
+
+/**
+ * mathjs 15.3.0 BigNumber `eigs` for `_matrixNormTwo`: Jacobi on a real
+ * symmetric matrix, then selection-sort of `|λ|` with raw `<` (lexicographic
+ * `valueOf()` strings on BigNumber). Wired to the in-tree port; never loads
+ * `mathjs`.
+ */
+function getLexicographicRealSymmetric(): LexEigs {
+  if (!lexRealSymmetric) {
+    const cfg = mathFunctions.config() as { relTol: number };
+    lexRealSymmetric = createRealSymmetric({
+      config: { relTol: cfg.relTol },
+      addScalar: mathFunctions.addScalar as (a: BnScalar, b: BnScalar) => BnScalar,
+      subtract: mathFunctions.subtract as (a: BnScalar, b: BnScalar) => BnScalar,
+      abs: mathFunctions.abs as (x: BnScalar) => BnScalar,
+      atan: mathFunctions.atan as (x: BnScalar) => BnScalar,
+      cos: mathFunctions.cos as (x: BnScalar) => BnScalar,
+      sin: mathFunctions.sin as (x: BnScalar) => BnScalar,
+      multiplyScalar: mathFunctions.multiplyScalar as (a: BnScalar, b: BnScalar) => BnScalar,
+      inv: mathFunctions.inv as (x: BnScalar) => BnScalar,
+      bignumber: mathFunctions.bignumber as unknown as (x: number | string) => BigNumber,
+      multiply: mathFunctions.multiply as (...args: BnScalar[]) => BnScalar,
+      add: mathFunctions.add as (...args: BnScalar[]) => BnScalar,
+      lexicographicAbsSort: true,
+    });
+  }
+  return lexRealSymmetric;
+}
+
+/** Clone a dense 2-D array; Jacobi mutates its argument. */
+function cloneRows(rows: BnScalar[][]): BnScalar[][] {
+  return rows.map((row) => row.slice());
+}
+
+/**
+ * mathjs 15.3.0 `_matrixNormTwo` on a real BigNumber matrix: √(largest |λ|
+ * of AᵀA), where "largest" is the last value after the lexicographic `eigs`
+ * sort — not a numeric 2-norm.
+ */
+function mathjsBigNumberMatrixNormTwo(data: RawData): unknown {
+  const transpose = mathFunctions.transpose as (x: unknown) => unknown;
+  const multiply = mathFunctions.multiply as (...args: unknown[]) => unknown;
+  const abs = mathFunctions.abs as (x: unknown) => unknown;
+  const sqrt = mathFunctions.sqrt as (x: unknown) => unknown;
+  const ata = matrixToRawData(multiply(transpose(data), data));
+  const rows: BnScalar[][] = (ata as RawData[]).map((row) =>
+    (row as unknown[]).map((cell) =>
+      isBigNumber(cell)
+        ? (cell as unknown as BigNumber)
+        : (mathFunctions.bignumber(cell as string | number) as unknown as BigNumber)
+    )
+  );
+  const n = rows.length;
+  if (n === 0) return mathFunctions.bignumber(0);
+  const prec = (mathFunctions.config() as { relTol: number }).relTol;
+  const result = getLexicographicRealSymmetric()(cloneRows(rows), n, prec, 'BigNumber', false);
+  const rho = result.values[result.values.length - 1];
+  return abs(sqrt(rho));
+}
 
 type G05Fn = (...args: unknown[]) => unknown;
 type CreateG05 = (scope: Record<string, unknown>) => G05Fn;
@@ -78,15 +112,6 @@ interface CompatTyped {
 
 const compatTyped =
   mathFunctions.factory_mathjsCompat.createCompatTyped() as unknown as CompatTyped;
-
-function toMathjsMatrix(data: RawData): unknown {
-  const mj = getMathjsSchurNormScope();
-  return mj.matrix(
-    data.map((row: unknown) =>
-      (row as unknown[]).map((cell: unknown) => mj.bignumber(String(cell)))
-    )
-  );
-}
 
 /** Numeric/comparison dependency surface, loosely typed over `unknown`. */
 interface G05Deps {
@@ -144,22 +169,12 @@ function hasBigNumberEntry(data: RawData): boolean {
   return flatEntries(data).some(isBigNumber);
 }
 
-const isComplex = mathFunctions.isComplex as (x: unknown) => boolean;
-
-function hasComplexEntry(data: RawData): boolean {
-  return flatEntries(data).some(isComplex);
-}
-
 /**
  * L2 norm of a square matrix step for the mathjs `schur` loop.
- * BigNumber steps delegate to mathjs 15.3.0 `norm` (decimal.js `eigs` + sort quirk).
+ * BigNumber steps use the in-tree lexicographic `eigs` 2-norm (mathjs 15.3.0).
  */
 function schurStepContinues(delta: unknown): boolean {
-  const data = matrixToRawData(delta);
   const stepNorm = schurStepNorm(delta);
-  if (hasBigNumberEntry(data)) {
-    return Boolean(getMathjsSchurNormScope().larger(stepNorm, 1e-4));
-  }
   return (mathFunctions.larger as (a: unknown, b: unknown) => boolean)(stepNorm, 1e-4);
 }
 
@@ -174,7 +189,7 @@ function schurStepNorm(delta: unknown): unknown {
   if (!hasBigNumberEntry(data)) {
     return mathFunctions.norm(data);
   }
-  return getMathjsSchurNormScope().norm(toMathjsMatrix(data));
+  return mathjsBigNumberMatrixNormTwo(data);
 }
 
 /** The raw nested data of an Array or Matrix, as a `DenseMatrix` stores it. */
@@ -215,7 +230,29 @@ function qrDense(data: RawData): { Q: RawData[]; R: RawData } {
   const addScalar = mathFunctions.addScalar as (a: unknown, b: unknown) => unknown;
   const subtractScalar = mathFunctions.subtractScalar as (a: unknown, b: unknown) => unknown;
   const multiplyScalar = mathFunctions.multiplyScalar as (a: unknown, b: unknown) => unknown;
-  const divideScalar = mathFunctions.divideScalar as (a: unknown, b: unknown) => unknown;
+  const divideScalarMath = mathFunctions.divideScalar as (a: unknown, b: unknown) => unknown;
+  const isComplexValue = mathFunctions.isComplex as (x: unknown) => boolean;
+  const complexCtor = mathFunctions.complex as (re: number, im?: number) => unknown;
+  /** complex.js Smith's division — mathjs 15.3.0 QR uses this, not MathTS scaled divide. */
+  const divideScalar = (a: unknown, b: unknown): unknown => {
+    if (!isComplexValue(a) && !isComplexValue(b)) return divideScalarMath(a, b);
+    const za = isComplexValue(a) ? (a as { re: number; im: number }) : { re: Number(a), im: 0 };
+    const zb = isComplexValue(b) ? (b as { re: number; im: number }) : { re: Number(b), im: 0 };
+    const ar = za.re;
+    const ai = za.im;
+    const br = zb.re;
+    const bi = zb.im;
+    if (bi === 0) return complexCtor(ar / br, ai / br);
+    if (br === 0) return complexCtor(ai / bi, -ar / bi);
+    if (Math.abs(br) < Math.abs(bi)) {
+      const x = br / bi;
+      const t = br * x + bi;
+      return complexCtor((ar * x + ai) / t, (ai * x - ar) / t);
+    }
+    const x = bi / br;
+    const t = bi * x + br;
+    return complexCtor((ar + ai * x) / t, (ai - ar * x) / t);
+  };
   const conj = mathFunctions.conj as (x: unknown) => unknown;
   const unaryMinus = mathFunctions.unaryMinus as (x: unknown) => unknown;
   const isZero = mathFunctions.isZero as (x: unknown) => boolean;
@@ -304,31 +341,6 @@ function compactSchurDiagonal(T: RawData): void {
 }
 
 function schurArrays(data: RawData): { U: RawData; T: RawData } {
-  if (!hasBigNumberEntry(data) && hasComplexEntry(data)) {
-    const { create, all } = requireMathjsModule('mathjs') as {
-      create: (
-        fns: unknown,
-        config: unknown
-      ) => {
-        complex: (re: number, im?: number) => unknown;
-        matrix: (d: RawData) => { valueOf(): RawData };
-        schur: (m: unknown) => { U: { valueOf(): RawData }; T: { valueOf(): RawData } };
-      };
-      all: unknown;
-    };
-    const mj = create(all, {});
-    const mjData = data.map((row: unknown) =>
-      (row as unknown[]).map((cell: unknown) => {
-        if (isComplex(cell)) {
-          const { re, im } = cell as { re: number; im: number };
-          return mj.complex(re, im);
-        }
-        return cell;
-      })
-    );
-    const r = mj.schur(mj.matrix(mjData));
-    return { U: r.U.valueOf(), T: r.T.valueOf() };
-  }
   const n = data.length;
   let U: RawData = identityData(n) as unknown as RawData;
   const multiply = mathFunctions.multiply as unknown as (...args: unknown[]) => RawData;
