@@ -57,11 +57,15 @@ These import mathjs modules that are not on the public `mathjs` export surface (
 
 ## Rules for every batch
 
-- Patch `compat/` only, matching mathjs 15.3.0. No runtime `require('mathjs')` or `import('mathjs')`.
-- Do not change `typed-function`, `core`, `matrix`, `functions`, `workerpool`, `gpu`, or `parallel` to chase mathjs. A real native bug gets a root-cause fix and a regression test in the owning package.
+- Patch `compat/` (`@danielsimonjr/mathts-compat`) only, copying `mathjs@15.3.0` behavior exactly — quirks included — as a thin wrapper/adapter layer. Zero runtime `require('mathjs')` or `import('mathjs')` in `compat/src/`.
+- Never change critical libraries (`typed-function`, `core`, `matrix`, `functions`, `workerpool`, `gpu`, `parallel`) just to match mathjs. Only genuine native MathTS bugs (verified against NumPy/SciPy/SymPy) may touch them, with regression tests and a changelog fragment.
+- No new dependencies (never add `mathjs` or any other dependency to `package.json`). No weakened or skipped tests.
+- No `: any`, `as any`, `as never`, or `@ts-ignore`. No force-push, amend, rebase, or `--no-verify`.
 - One batch, one PR, `Fixes #N` for each issue in that batch.
-- Changelog fragment under `changelog-fragments/`, not a hand edit of `CHANGELOG.md`.
-- No `as any`, `as never`, or `@ts-ignore`. No force-push, amend, rebase, or `--no-verify`.
+- Honor main's conflict-free formats:
+  - Add a changelog fragment at `changelog-fragments/YYYY-MM-DD-<slug>.md` (never hand-edit `CHANGELOG.md`).
+  - Update per-area gap lists in `compat/tests/parity/known-gaps/*.json` as gaps close.
+  - Add a patch changeset in `.changeset/`.
 - Do not set `RELEASES_ENABLED`. Do not tag, publish, or merge.
 
 ## Batches
@@ -126,6 +130,59 @@ Fewest dependencies first. Issues in one batch touch different compat files and 
 | ----- | -------: | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | #1794 |        1 | `rationalize` test "processes a really complex expression" did not finish in 20s isolated or 300s for the file. The other 13 tests in that file passed. | rationalize adapter |
 
+## Reproducing & Running Tests
+
+Each Relay builder and challenger can run any `mathjs@15.3.0` public unit test file (or the full public suite) against `@danielsimonjr/mathts-compat` without adding `mathjs` to MathTS:
+
+1. **Fetch `mathjs@15.3.0` into `/tmp` and install its test runner (`mocha`):**
+
+```bash
+curl -sL https://github.com/josdejong/mathjs/archive/refs/tags/v15.3.0.tar.gz | tar -xz -C /tmp
+cd /tmp/mathjs-15.3.0 && npm ci --ignore-scripts
+```
+
+2. **Build `@danielsimonjr/mathts-compat` from the MathTS repo root:**
+
+```bash
+bun run build
+```
+
+3. **Create a temporary Node ESM loader hook (`/tmp/compat-loader.mjs` and `/tmp/compat-register.mjs`)** that resolves `src/defaultInstance.js` (and the public `src/core/create.js`, `src/utils/factory.js`, and `src/type/error/*.js` entry points) to `<MATHTS_ROOT>/compat/dist/index.js`:
+
+```js
+// /tmp/compat-loader.mjs
+import { pathToFileURL } from 'node:url';
+
+const COMPAT_URL = pathToFileURL(process.env.MATHTS_COMPAT_DIST).href;
+
+export async function resolve(specifier, context, nextResolve) {
+  const res = await nextResolve(specifier, context);
+  if (
+    res.url.endsWith('/src/defaultInstance.js') ||
+    res.url.endsWith('/src/core/create.js') ||
+    res.url.endsWith('/src/utils/factory.js')
+  ) {
+    return { url: COMPAT_URL, shortCircuit: true };
+  }
+  return res;
+}
+```
+
+```js
+// /tmp/compat-register.mjs
+import { register } from 'node:module';
+register('/tmp/compat-loader.mjs', import.meta.url);
+```
+
+4. **Run one or more unit test files against compat:**
+
+```bash
+MATHTS_COMPAT_DIST="$(pwd)/compat/dist/index.js" \
+  node --import /tmp/compat-register.mjs \
+  /tmp/mathjs-15.3.0/node_modules/.bin/mocha \
+  /tmp/mathjs-15.3.0/test/unit-tests/function/string/string.test.js
+```
+
 ## Check
 
-Re-run the same loader harness (mathjs `v15.3.0` `test/unit-tests`, public files only). Target: 6439 public tests, 0 failed, 19 still pending. Do not expect the 367 internals-only tests to pass on compat.
+Re-run the loader harness above across all 285 public files in `mathjs@15.3.0` `test/unit-tests` (excluding the 26 internals-only files listed above). Target: 6439 public tests, 0 failed, 19 still pending. Do not expect the 367 internals-only tests to pass on compat.
