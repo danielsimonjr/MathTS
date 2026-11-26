@@ -23,17 +23,13 @@ describe('G20 chain implementation branches (#1575)', () => {
 
   it('Chain constructor, fromJSON, and nested chain unwrap values', () => {
     const math = create(all);
-    const Chain = math.Chain as new (value?: unknown) => {
-      done(): unknown;
-      type: string;
-    } & { fromJSON: (json: { value: unknown }) => { done(): unknown } };
-    const c = new Chain(math.chain(2));
+    const ChainCtor = math.Chain;
+    const c = new ChainCtor(math.chain(2));
     expect(c.type).toBe('Chain');
     expect(c.done()).toBe(2);
-    const revived = Chain.fromJSON({ value: 7 });
+    const revived = ChainCtor.fromJSON({ value: 7 });
     expect(revived.done()).toBe(7);
-    expect(() => (Chain as unknown as (v: unknown) => unknown)(3)).toThrow(
-      /Constructor must be called with 'new'/
-    );
+    const bareCall = ChainCtor as unknown as (value?: unknown) => unknown;
+    expect(() => bareCall(3)).toThrow(/Constructor must be called with 'new'/);
   });
 });
