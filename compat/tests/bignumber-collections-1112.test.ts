@@ -10,7 +10,9 @@ import type { BigNumber } from '@danielsimonjr/mathts-core';
 import { bignumber, fraction, matrix } from '../src/shims.js';
 
 // Type fixtures: each line compiles only when a scalar call returns BigNumber.
-const xs: BigNumber[] = [1, 2].map(bignumber);
+// #1587: `bignumber` takes one argument, as in mathjs, so a `map(bignumber)`
+// callback shape (value, index, array) must wrap the value itself.
+const xs: BigNumber[] = [1, 2].map((x) => bignumber(x));
 type Ret = ReturnType<typeof bignumber>;
 const one: BigNumber = bignumber(1) as Ret;
 const single: BigNumber = bignumber(1);

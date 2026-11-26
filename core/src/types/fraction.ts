@@ -796,17 +796,50 @@ export class Fraction implements IFraction {
   }
 
   /**
-   * Floor: largest integer ≤ this
+   * Floor: largest integer ≤ this, or — with `places` — the largest fraction
+   * with `places` decimal digits that is ≤ this (fraction.js semantics, the
+   * mathjs `floor(Fraction, digits)` behavior). The zero-places result is the
+   * plain floor.
    */
-  floor(): Fraction {
-    return this.truncBound('floor');
+  floor(places: number | bigint = 0): Fraction {
+    const p = 10n ** BigInt(places);
+    if (p === 1n) {
+      return this.truncBound('floor');
+    }
+    return this.scaledBound('floor', p);
   }
 
   /**
-   * Ceiling: smallest integer ≥ this
+   * Ceiling: smallest integer ≥ this, or — with `places` — the smallest
+   * fraction with `places` decimal digits that is ≥ this (fraction.js
+   * semantics, the mathjs `ceil(Fraction, digits)` behavior).
    */
-  ceil(): Fraction {
-    return this.truncBound('ceil');
+  ceil(places: number | bigint = 0): Fraction {
+    const p = 10n ** BigInt(places);
+    if (p === 1n) {
+      return this.truncBound('ceil');
+    }
+    return this.scaledBound('ceil', p);
+  }
+
+  /**
+   * The fraction.js scaled floor/ceil: truncate `this * p` toward zero with a
+   * bigint division, then step one unit of `1/p` away from zero in the
+   * floor/ceil direction when the scaled value is not exact.
+   */
+  private scaledBound(toward: 'floor' | 'ceil', p: bigint): Fraction {
+    const scaled = this.numerator * p;
+    const quot = scaled / this.denominator;
+    const inexact = scaled % this.denominator !== 0n;
+    const bump =
+      toward === 'floor'
+        ? inexact && this.numerator < 0n
+          ? 1n
+          : 0n
+        : inexact && this.numerator > 0n
+          ? 1n
+          : 0n;
+    return new Fraction(toward === 'floor' ? quot - bump : quot + bump, p);
   }
 
   private truncBound(toward: 'floor' | 'ceil'): Fraction {

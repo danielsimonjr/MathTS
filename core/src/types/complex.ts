@@ -930,17 +930,32 @@ export class Complex implements IComplex {
   }
 
   /**
-   * Floor real and imaginary parts
+   * Floor real and imaginary parts, or — with `decimals` — floor to `decimals`
+   * decimal places (mathjs `floor(Complex, n)` scales by `10^n`, fractional
+   * digits included).
    */
-  floor(): Complex {
-    return new Complex(Math.floor(this.re), Math.floor(this.im));
+  floor(decimals: number = 0): Complex {
+    if (decimals === 0) {
+      return new Complex(Math.floor(this.re), Math.floor(this.im));
+    }
+    const factor = Math.pow(10, decimals);
+    return new Complex(
+      Math.floor(this.re * factor) / factor,
+      Math.floor(this.im * factor) / factor
+    );
   }
 
   /**
-   * Ceil real and imaginary parts
+   * Ceil real and imaginary parts, or — with `decimals` — ceil to `decimals`
+   * decimal places (mathjs `ceil(Complex, n)` scales by `10^n`, fractional
+   * digits included).
    */
-  ceil(): Complex {
-    return new Complex(Math.ceil(this.re), Math.ceil(this.im));
+  ceil(decimals: number = 0): Complex {
+    if (decimals === 0) {
+      return new Complex(Math.ceil(this.re), Math.ceil(this.im));
+    }
+    const factor = Math.pow(10, decimals);
+    return new Complex(Math.ceil(this.re * factor) / factor, Math.ceil(this.im * factor) / factor);
   }
 
   /**

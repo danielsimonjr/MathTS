@@ -20,6 +20,7 @@
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
+import { BigNumber as CompatBigNumberCtor } from './bignumber.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
@@ -29,13 +30,29 @@ import { compatConstantReaders, type CompatConstantName } from './instance-const
 import type {
   BigNumber as ConfiguredBigNumber,
   Complex,
-  Fraction,
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
+import { Fraction, Complex as CompatComplex } from '@danielsimonjr/mathts-core';
 import { wireMathjsInstanceApi, type WiredCompatInstance } from './instance-api.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import {
+  createCompatArg,
+  createCompatErfExpression,
+  createCompatExpm,
+  createCompatMad,
+  createCompatVarargsStatistics,
+  createForeignScalarConverter,
+  isComplexLike as g02IsComplexLike,
+  withConvertedScalars,
+  withCountBoolean,
+  withFixedArity,
+  withIdentityValidation,
+  withRoundDigitsGuard,
+  withFractionRejection,
+  withRawSingleValue,
+} from './mathjs-parity-g02.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
   bindDefaultInstanceSource,
@@ -285,6 +302,41 @@ export type MathInstance = Omit<
 /** The internal names of the functions namespace (#1216). */
 const INTERNAL_NAMES: ReadonlySet<string> = new Set(COMPAT_INTERNAL_NAMES);
 
+// G02 (#1550, #1583, #1588): the mathjs-shaped adapters, shared by the instance
+// surface and the named exports.
+const bridgeDenseProto = Object.getPrototypeOf(mathFunctions.matrix([[1]])) as object;
+const bridgeSparseProto = Object.getPrototypeOf(mathFunctions.sparse([[0, 1]])) as object;
+const isOwnBridgeMatrix = (x: unknown): boolean => {
+  if (Array.isArray(x) || typeof x !== 'object' || x === null) return false;
+  const proto = Object.getPrototypeOf(x);
+  return proto === bridgeDenseProto || proto === bridgeSparseProto;
+};
+const convertForeignScalar = createForeignScalarConverter({
+  FractionClass: Fraction,
+  BigNumberClass: CompatBigNumberCtor,
+  ComplexClass: CompatComplex,
+  denseFrom: mathFunctions.matrix as (nested: unknown) => unknown,
+  sparseFrom: mathFunctions.sparse as (nested: unknown) => unknown,
+  isOwnMatrix: isOwnBridgeMatrix,
+});
+const compatArg = createCompatArg(
+  mathFunctions.arg as (...args: unknown[]) => unknown,
+  CompatBigNumberCtor
+);
+const compatExpm = createCompatExpm(
+  mathFunctions.expm as (...args: unknown[]) => unknown,
+  mathFunctions.matrix as (...args: unknown[]) => unknown
+);
+const compatMad = createCompatMad({
+  subtract: mathFunctions.subtract as (...args: unknown[]) => unknown,
+  abs: mathFunctions.abs as (...args: unknown[]) => unknown,
+  add: mathFunctions.add as (...args: unknown[]) => unknown,
+  divide: mathFunctions.divide as (...args: unknown[]) => unknown,
+  compare: mathFunctions.compare as (...args: unknown[]) => unknown,
+  unaryPlus: mathFunctions.factory_unaryPlus as (...args: unknown[]) => unknown,
+  convert: convertForeignScalar,
+});
+
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
   const bound = ((...args: unknown[]) => fn(...args)) as T;
@@ -505,7 +557,8 @@ export function create(
     unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
     equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
     deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
-    compare: mathFunctions.compare as UnitRelationalOps['compare'],
+    // #1550: the activated compare factory keeps a Fraction/BigNumber result.
+    compare: mathFunctions.factory_compare as UnitRelationalOps['compare'],
     larger: mathFunctions.larger as UnitRelationalOps['larger'],
     smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
     largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
@@ -550,51 +603,61 @@ export function create(
     isPositive: mathFunctions.isPositive,
     isNegative: mathFunctions.isNegative,
     isInteger: mathFunctions.isInteger,
-    fix: mathFunctions.fix,
+    fix: withConvertedScalars(convertForeignScalar, mathFunctions.factory_fix),
     sqrt: shims.sqrt,
     abs: shims.abs,
-    exp: shims.exp,
-    log: shims.log,
+    // #1587: a Fraction argument throws the mathjs conversion error.
+    exp: withFractionRejection(shims.exp),
+    log: withFractionRejection(shims.log),
 
-    // Trigonometry
-    sin: shims.sin,
-    cos: shims.cos,
-    tan: shims.tan,
-    asin: shims.asin,
-    acos: shims.acos,
-    atan: shims.atan,
-    atan2: shims.atan2,
+    // Trigonometry — #1587: a Fraction argument throws the mathjs conversion error.
+    sin: withFractionRejection(shims.sin),
+    cos: withFractionRejection(shims.cos),
+    tan: withFractionRejection(shims.tan),
+    asin: withFractionRejection(shims.asin),
+    acos: withFractionRejection(shims.acos),
+    atan: withFractionRejection(shims.atan),
+    atan2: withFractionRejection(shims.atan2),
 
     // Statistics
-    sum: shims.sum,
+    sum: withRawSingleValue(shims.sum),
     mean: shims.mean,
-    std: shims.std,
-    variance: shims.variance,
-    min: wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
-    max: wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
+    std: createCompatVarargsStatistics(shims.std),
+    variance: createCompatVarargsStatistics(shims.variance),
+    min: withRawSingleValue(
+      wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
+      g02IsComplexLike
+    ),
+    max: withRawSingleValue(
+      wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
+      g02IsComplexLike
+    ),
     sign: wrapUnitExtrema(mathFunctions.sign as (...args: unknown[]) => unknown, factorySignUnits),
 
     // Number theory
     gcd: shims.gcd,
     lcm: shims.lcm,
 
-    // Rounding
-    round: shims.round,
-    floor: shims.floor,
-    ceil: shims.ceil,
+    // Rounding — #1550: mathjs-shaped factories; foreign oracle scalars convert first.
+    round: withRoundDigitsGuard(withConvertedScalars(convertForeignScalar, shims.round)),
+    floor: withConvertedScalars(convertForeignScalar, shims.floor),
+    ceil: withConvertedScalars(convertForeignScalar, shims.ceil),
 
     // Complex-specific
     conj: shims.conj,
     re: shims.re,
     im: shims.im,
-    arg: shims.arg,
+    // #1550: the native `arg` keeps a BigNumber operand a BigNumber.
+    arg: compatArg,
 
     // Matrix-specific
     transpose: shims.transpose,
     det: shims.det,
-    identity: shims.identity,
-    zeros: mathFunctions.zeros,
-    ones: shims.ones,
+    identity: withFractionRejection(
+      withConvertedScalars(convertForeignScalar, withIdentityValidation(shims.identity))
+    ),
+    zeros: withFractionRejection(withConvertedScalars(convertForeignScalar, mathFunctions.zeros)),
+    ones: withFractionRejection(withConvertedScalars(convertForeignScalar, shims.ones)),
     size: mathFunctions.size,
 
     // Type checking
@@ -638,22 +701,42 @@ export function create(
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
   const g07Logical = createG07LogicalParity();
   const compatDefaultOverrides = {
-    acosh: mathFunctions.factory_acosh,
-    acot: mathFunctions.factory_acot,
-    acsc: mathFunctions.factory_acsc,
-    asec: mathFunctions.factory_asec,
-    asinh: mathFunctions.factory_asinh,
-    atanh: mathFunctions.factory_atanh,
+    acosh: withFractionRejection(mathFunctions.factory_acosh),
+    acot: withFractionRejection(mathFunctions.factory_acot),
+    acsc: withFractionRejection(mathFunctions.factory_acsc),
+    asec: withFractionRejection(mathFunctions.factory_asec),
+    asinh: withFractionRejection(mathFunctions.factory_asinh),
+    atanh: withFractionRejection(mathFunctions.factory_atanh),
     cbrt: mathFunctions.factory_cbrt,
-    cosh: mathFunctions.factory_cosh,
-    cot: mathFunctions.factory_cot,
-    csc: mathFunctions.factory_csc,
+    cosh: withFractionRejection(mathFunctions.factory_cosh),
+    cot: withFractionRejection(mathFunctions.factory_cot),
+    csc: withFractionRejection(mathFunctions.factory_csc),
     cube: mathFunctions.factory_cube,
     expm1: mathFunctions.factory_expm1,
-    sec: mathFunctions.factory_sec,
-    sinh: mathFunctions.factory_sinh,
+    sec: withFractionRejection(mathFunctions.factory_sec),
+    sinh: withFractionRejection(mathFunctions.factory_sinh),
     square: mathFunctions.factory_square,
-    tanh: mathFunctions.factory_tanh,
+    tanh: withFractionRejection(mathFunctions.factory_tanh),
+    // #1587: the remaining trigonometry surface rejects a Fraction argument as mathjs does.
+    acoth: withFractionRejection(mathFunctions.acoth),
+    asech: withFractionRejection(mathFunctions.asech),
+    acsch: withFractionRejection(mathFunctions.acsch),
+    csch: withFractionRejection(mathFunctions.csch),
+    coth: withFractionRejection(mathFunctions.coth),
+    sech: withFractionRejection(mathFunctions.sech),
+    log10: withFractionRejection(mathFunctions.log10),
+    log2: withFractionRejection(mathFunctions.log2),
+    // #1550: the mathjs-shaped factories keep a Unit operand and broadcast nthRoot.
+    unaryMinus: mathFunctions.factory_unaryMinus,
+    unaryPlus: mathFunctions.factory_unaryPlus,
+    nthRoot: mathFunctions.factory_nthRoot,
+    // #1587: count of a boolean is the string length; size/inv take one argument.
+    count: withCountBoolean(mathFunctions.count),
+    size: withFixedArity('size', 1, mathFunctions.size),
+    inv: withFixedArity('inv', 1, mathFunctions.inv),
+    // #1583 / #1588: the mathjs-shaped mad and the Matrix-returning expm.
+    mad: compatMad,
+    expm: compatExpm,
     bignumber: shims.bignumber,
     format: namedFormat,
     print: namedPrint,
@@ -741,6 +824,10 @@ export function create(
   // `evaluate('config()')` reads the fields and
   // `evaluate('config({number: "Fraction"})')` updates that instance.
   expressionConstants.config = () => instance.config;
+  // #1587: the expression scope's erf rejects a BigNumber argument, as the
+  // mathjs scope does; the direct instance call keeps its BigNumber extension.
+  expressionConstants.erf = () =>
+    createCompatErfExpression(mathFunctions.erf as (...args: unknown[]) => unknown);
 
   /** The config-scoped wrapper of a surfaced function, built on first read. */
   const buildWrapper = (key: string, raw: (...args: unknown[]) => unknown): unknown =>
@@ -928,6 +1015,10 @@ export * from './named-physical-constants.generated.js';
 // Mathematical functions shared with the functions package: one name per line, in
 // sorted order, in function-reexports.ts so parallel additions don't conflict.
 export * from './function-reexports.js';
+
+// G02 (#1550, #1583, #1588): the named mathjs-shaped adapters shadow the native
+// re-exports above (an explicit export wins over a star export).
+export { compatExpm as expm, compatMad as mad, compatArg as arg };
 
 // These four names are also star-exported by ./shims.js (the G03 sign-predicate
 // wrappers). The explicit re-export keeps the functions implementation winning,

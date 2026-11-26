@@ -454,7 +454,8 @@ describe('native compatibility dependency bundles', () => {
     const selected = create({ replacerDependencies: compat.replacerDependencies });
     const inputs = [
       compat.fraction('-3/7'),
-      ...['1e+100', '1e-7', '1.25e-8', '0.000001', '-2.34e+21'].map(compat.bignumber),
+      // #1587: `bignumber` takes one argument, as in mathjs.
+      ...['1e+100', '1e-7', '1.25e-8', '0.000001', '-2.34e+21'].map((x) => compat.bignumber(x)),
     ];
     const expected = JSON.stringify(
       [

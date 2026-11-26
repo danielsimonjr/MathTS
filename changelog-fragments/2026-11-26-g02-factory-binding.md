@@ -1,0 +1,9 @@
+### Changed
+
+- **Compat binds the mathjs-shaped factories (#1550, #1583, #1587, #1588):** Bound `create(all)` and the compat named exports to the `functions` factories for `ceil`/`floor`/`round`, `identity`, `ones`/`zeros`, `unaryMinus`/`unaryPlus`, `nthRoot`, `compare`, `arg`, `std`, `variance`, `mad` and `expm`, and re-dispatched the untyped mathjs variadic statistics signatures. `ceil(x, n)` and `identity(m, n)` accept their second argument, `ones(n)`/`zeros(n)` return a Matrix, `expm(Array)` returns a DenseMatrix, `std`/`variance` of Complex values return a Complex, `mad` keeps the mathjs result unit, `count(true)` is `4`, `arg`/`compare` keep BigNumber and Fraction operand types, and lone `add`/`multiply`/`subtract` calls plus extra arguments and Fraction arguments on the trig/log/exp surface now throw the mathjs `TypeError`s. BREAKING: extra/missing arguments and trig on Fractions now throw matching mathjs errors; `ones(n)`/`zeros(n)` return a DenseMatrix instead of a `number[]`; `std`/`variance` of Complex data return a Complex instead of a real magnitude.
+
+### Fixed
+
+- **Complex variance dropped the imaginary part (#1550):** the variance of Complex data used `re(diff * conj(diff))`, reducing complex data to a real magnitude; it now keeps the complex square `diff * diff`, so `variance(complex(1,2), 2)` is `-1.5 - 2i` as in mathjs.
+- **Fraction `ceil`/`floor` ignored the digit count (#1550):** `Fraction.ceil(places)`/`Fraction.floor(places)` existed without using `places`, so `ceil(fraction(1,3), 2)` returned `1/1`; they now scale by `10^places` exactly like fraction.js, and a negative count throws the fraction.js `RangeError`.
+- **Complex `ceil`/`floor` ignored the decimals argument (#1550):** `Complex.ceil(decimals)`/`Complex.floor(decimals)` existed without using `decimals`; they now scale by `10^decimals` (fractional and negative counts included), so `ceil(complex(1,2), 0.5)` matches mathjs.
