@@ -42,6 +42,11 @@ import {
 } from './instance-api.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
+import {
+  createCompatBernoulli,
+  createCompatCompare,
+  createCompatPinv,
+} from './mathjs-parity-g06.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import {
   createCompatArg,
@@ -60,6 +65,7 @@ import {
   withRoundDigitsGuard,
   withSingleNumericStringGuard,
   withFractionRejection,
+  withInvalidNumericStringGuard,
   withRawSingleValue,
 } from './mathjs-parity-g02.js';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
@@ -550,6 +556,39 @@ export function create(
     }
   );
 
+  // G06 (#1554): pinv and bernoulli keep BigNumber / Fraction / Complex inputs;
+  // compare rejects a Complex operand the mathjs way. All compat-only adapters.
+  const compatPinv = createCompatPinv(mathFunctions.pinv as (...args: unknown[]) => unknown, {
+    convert: convertForeignScalar,
+    divide: shims.divide as (...args: unknown[]) => unknown,
+    equal: mathFunctions.equal as (...args: unknown[]) => unknown,
+    inv: mathFunctions.inv as (...args: unknown[]) => unknown,
+    deepEqual: mathFunctions.deepEqual as (...args: unknown[]) => unknown,
+    dotDivide: mathFunctions.dotDivide as (...args: unknown[]) => unknown,
+    dot: mathFunctions.dot as (...args: unknown[]) => unknown,
+    ctranspose: mathFunctions.ctranspose as (...args: unknown[]) => unknown,
+    multiply: shims.multiply as (...args: unknown[]) => unknown,
+    add: shims.add as (...args: unknown[]) => unknown,
+    matrix: shims.matrix as (data: unknown, storage?: 'dense' | 'sparse') => unknown,
+    complex: shims.complex as (re: number, im: number) => unknown,
+    isMatrix: shims.isMatrix as (x: unknown) => boolean,
+  });
+  const compatBernoulli = createCompatBernoulli(
+    mathFunctions.bernoulli as (...args: unknown[]) => unknown,
+    {
+      convert: convertForeignScalar,
+      BigNumberClass: CompatBigNumberCtor,
+      FractionClass: Fraction,
+      precision: () => currentConfig.precision ?? 64,
+    }
+  );
+  const compatUnaryPlus = withInvalidNumericStringGuard(
+    withConvertedScalars(
+      convertForeignScalar,
+      mathFunctions.factory_unaryPlus as (...args: unknown[]) => unknown
+    )
+  );
+
   // The overlay decision diffs every config key. Each wrapped call used to repeat that
   // diff (a Set per call, #889); it now recomputes only after config() changes the config.
   let configGeneration = 0;
@@ -641,7 +680,7 @@ export function create(
     unequal: unitRelational.unequal,
     equalScalar: unitRelational.equalScalar,
     deepEqual: unitRelational.deepEqual,
-    compare: unitRelational.compare,
+    compare: createCompatCompare(unitRelational.compare, convertForeignScalar),
     larger: unitRelational.larger,
     smaller: unitRelational.smaller,
     largerEq: unitRelational.largerEq,
@@ -809,6 +848,7 @@ export function create(
     cosh: withFractionRejection(mathFunctions.factory_cosh),
     cot: withFractionRejection(mathFunctions.factory_cot),
     csc: withFractionRejection(mathFunctions.factory_csc),
+    bernoulli: compatBernoulli,
     cube: mathFunctions.factory_cube,
     expm1: withFractionRejection(mathFunctions.factory_expm1),
     erf: compatErf,
@@ -826,7 +866,7 @@ export function create(
     log2: withFractionRejection(mathFunctions.log2),
     // #1550: the mathjs-shaped factories keep a Unit operand and broadcast nthRoot.
     unaryMinus: mathFunctions.factory_unaryMinus,
-    unaryPlus: mathFunctions.factory_unaryPlus,
+    unaryPlus: compatUnaryPlus,
     nthRoot: mathFunctions.factory_nthRoot,
     // #1587: count of a boolean is the string length; size/inv take one argument.
     count: withCountBoolean(mathFunctions.count),
@@ -835,6 +875,7 @@ export function create(
     // #1583 / #1588: the mathjs-shaped mad and the Matrix-returning expm.
     mad: compatMad,
     expm: compatExpm,
+    pinv: compatPinv,
     bignumber: shims.bignumber,
     format: namedFormat,
     print: namedPrint,
