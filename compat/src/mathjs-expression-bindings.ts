@@ -2,8 +2,25 @@
  * mathjs-policy expression names for compat `create(all)` only (#1549, #1562).
  * Lives in compat so `functions` does not import `help` from a cycle with `evaluate`.
  */
-import { createHelpClass, embeddedDocs } from '@danielsimonjr/mathts-expression';
+import { createHelpClass } from '@danielsimonjr/mathts-expression';
+import { isMatrix } from '@danielsimonjr/mathts-core';
 import type { PhysicsEvaluateOptions } from '@danielsimonjr/mathts-functions';
+import { compatHelpDocForSearch } from './compat-help.js';
+
+function stringExpressionBatch(input: unknown): string[] | undefined {
+  if (Array.isArray(input) && input.every((entry) => typeof entry === 'string')) {
+    return input;
+  }
+  if (isMatrix(input)) {
+    const raw =
+      (input as { toArray?: () => unknown[] }).toArray?.() ??
+      (input as { _data?: unknown[] })._data;
+    if (Array.isArray(raw) && raw.every((entry) => typeof entry === 'string')) {
+      return raw as string[];
+    }
+  }
+  return undefined;
+}
 
 type HelpResult = ReturnType<ReturnType<typeof createHelpClass>['fromJSON']>;
 type HelpCtor = new (doc: unknown) => HelpResult;
@@ -31,8 +48,18 @@ export type CompatExpressionApi = {
  * Bindings for {@link createInstanceEvaluator}'s optional `expressionUnsafeBindings`
  * (help, evaluate, compile, parser on the mathjs-policy unsafe scope).
  */
+/** Compat instance evaluator used for unsafe-scope expression calls (#1776). */
+export type CompatEvaluatorEvaluate = (
+  expr: string | string[],
+  scope?: Record<string, unknown>,
+  options?: PhysicsEvaluateOptions
+) => unknown;
+
 export function createMathjsExpressionBindings(
-  getApi: () => CompatExpressionApi
+  getApi: () => CompatExpressionApi,
+  mathWithTransform: () => Record<string, unknown>,
+  getEvaluatorEvaluate: () => CompatEvaluatorEvaluate,
+  getCreateUnit: () => (...args: unknown[]) => unknown
 ): Record<string, unknown> {
   let savedConfig: Record<string, unknown> = {};
 
@@ -52,28 +79,26 @@ export function createMathjsExpressionBindings(
   });
 
   function help(search: unknown): HelpResult {
-    const name =
-      typeof search === 'string'
-        ? search
-        : typeof search === 'function'
-          ? (search as { name?: string }).name
-          : undefined;
-
-    const doc =
-      typeof name === 'string' && Object.prototype.hasOwnProperty.call(embeddedDocs, name)
-        ? (embeddedDocs as Record<string, unknown>)[name]
-        : undefined;
-
-    if (!doc) {
-      throw new Error(`No documentation found on "${String(name ?? search)}"`);
-    }
+    const doc = compatHelpDocForSearch(search, mathWithTransform());
     return new Help(doc);
   }
 
   return {
+    createUnit: (...args: unknown[]) => getCreateUnit()(...args),
     help,
-    evaluate: (expr: string, scope?: Record<string, unknown>, options?: PhysicsEvaluateOptions) =>
-      getApi().evaluate(expr, scope, options),
+    evaluate: (
+      expr: string | string[],
+      scope?: Record<string, unknown>,
+      options?: PhysicsEvaluateOptions
+    ) => {
+      const opts = { ...options, unsafe: true as const };
+      const batch = stringExpressionBatch(expr);
+      if (batch !== undefined) {
+        const shared = scope === undefined ? {} : scope;
+        return getEvaluatorEvaluate()(batch, shared, opts);
+      }
+      return getEvaluatorEvaluate()(expr, scope, opts);
+    },
     compile: (expr: string, options?: PhysicsEvaluateOptions) => getApi().compile(expr, options),
     parser: (options?: PhysicsEvaluateOptions) => getApi().parser(options),
   };

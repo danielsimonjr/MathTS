@@ -1,4 +1,5 @@
-import { factory_mathjsCompat, help as nativeHelp } from '@danielsimonjr/mathts-functions';
+import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
+import { compatHelpDocForSearch } from './compat-help.js';
 import { instanceSymbols } from './instance-symbols.js';
 
 import { compatReplacer as replacer, reviveWithClasses } from './serialization.js';
@@ -3337,17 +3338,7 @@ const createHelp: ConstructorFactory<(search: unknown) => unknown> = /* #__PURE_
   ['typed', 'mathWithTransform', 'Help'],
   ({ typed, mathWithTransform, Help }: HelpFactoryDependencies) =>
     typed('help', {
-      any: (search) => {
-        const name =
-          typeof search === 'string'
-            ? search
-            : Object.keys(mathWithTransform).find((key) => mathWithTransform[key] === search);
-        if (name === undefined) {
-          const label = typeof search === 'function' ? search.name : String(search);
-          throw new Error(`No documentation found on "${label}"`);
-        }
-        return new Help(nativeHelp(name).doc);
-      },
+      any: (search) => new Help(compatHelpDocForSearch(search, mathWithTransform)),
     })
 );
 

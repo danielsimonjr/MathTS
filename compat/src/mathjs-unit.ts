@@ -142,6 +142,7 @@ function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>):
  */
 export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T {
   const registeredNames = new Set<string>();
+  const builtinUnitKeys = new Set(Object.keys(sources.Unit.UNITS));
   const Unit = wrapCompatUnitClass(sources.Unit, registeredNames);
   patchCompatUnitTypeConverters(
     Unit as unknown as {
@@ -171,10 +172,51 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
     }
     return unit(...args);
   };
+  const isProtectedUnitName = (name: string): boolean =>
+    MATHJS_UNIT_NAME_SET.has(name) || builtinUnitKeys.has(name);
+
+  /** Core ships these; mathjs 15.3.0 embedded `createUnit` examples define them (#1776). */
+  const coreUnitsDefinedByMathjsDocs = new Set(['knot', 'mph']);
+
   const wrappedCreateUnit = (...args: unknown[]) => {
-    const result = createUnit(...args);
-    rememberCreateUnitNames(args, registeredNames);
-    return result;
+    const head = args[0];
+    const overrideRequested =
+      args.length >= 3 &&
+      typeof args[2] === 'object' &&
+      args[2] !== null &&
+      (args[2] as { override?: boolean }).override === true;
+    if (
+      !overrideRequested &&
+      typeof head === 'string' &&
+      coreUnitsDefinedByMathjsDocs.has(head) &&
+      builtinUnitKeys.has(head)
+    ) {
+      rememberCreateUnitNames(args, registeredNames);
+      return undefined;
+    }
+    if (typeof head === 'string' && registeredNames.has(head)) {
+      return undefined;
+    }
+    if (head && typeof head === 'object' && !Array.isArray(head)) {
+      const names = Object.keys(head as Record<string, unknown>);
+      if (names.length > 0 && names.every((name) => registeredNames.has(name))) {
+        return undefined;
+      }
+    }
+    try {
+      const result = createUnit(...args);
+      rememberCreateUnitNames(args, registeredNames);
+      return result;
+    } catch (error) {
+      if (!overrideRequested && error instanceof Error && /already exists/.test(error.message)) {
+        if (typeof head === 'string' && isProtectedUnitName(head)) {
+          throw error;
+        }
+        rememberCreateUnitNames(args, registeredNames);
+        return undefined;
+      }
+      throw error;
+    }
   };
 
   return {

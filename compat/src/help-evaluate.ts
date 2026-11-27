@@ -11,7 +11,7 @@ export function createCompatHelpEvaluate(
   return (expr, scope) => {
     const text = String(expr).trim();
     if (text === 'config()') {
-      if (readLiveConfig && Object.keys(savedConfig).length === 0) {
+      if (readLiveConfig) {
         savedConfig = { ...readLiveConfig() };
       }
       return { ...savedConfig };

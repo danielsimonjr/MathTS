@@ -12,19 +12,20 @@ import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
 import type { mathTyped } from '@danielsimonjr/mathts-core';
 import { deepMap, isMatrix } from '@danielsimonjr/mathts-core/internal';
 import { isCompatFactory } from './create-factory-validation.js';
+import { createCompatParserApi, installParserHasInstance } from './compat-parser-api.js';
 import { newOperatorGuard } from './constructors-without-new.js';
 import { createHelpClass } from '@danielsimonjr/mathts-expression';
 import {
   createInstanceEvaluator,
   factory_mathjsCompat,
   EVALUATE_SCOPE_OMIT,
-  help as nativeHelp,
   parser as functionsParser,
   runWithConfig,
   type BridgeMatrix,
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
 import { createCompatHelpEvaluate } from './help-evaluate.js';
+import { createCompatTypedHelp } from './compat-help.js';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
 import {
@@ -36,6 +37,7 @@ import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
 const INTERNAL_NAMES: ReadonlySet<string> = new Set<string>(COMPAT_INTERNAL_NAMES);
 import {
   createMathjsExpressionBindings,
+  type CompatEvaluatorEvaluate,
   type CompatExpressionApi,
 } from './mathjs-expression-bindings.js';
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
@@ -87,6 +89,32 @@ interface CompatEvaluate {
     scope?: ExpressionScope,
     options?: PhysicsEvaluateOptions
   ): BridgeMatrix;
+}
+
+/** mathjs batches string arrays with one shared map when scope is omitted (#1776). */
+function patchBatchEvaluateScope(
+  evaluateFn: InstanceEvaluator['evaluate']
+): InstanceEvaluator['evaluate'] {
+  const run = evaluateFn as (
+    exprOrExprs: string | string[],
+    scope?: ExpressionScope,
+    options?: PhysicsEvaluateOptions
+  ) => unknown;
+  return ((
+    exprOrExprs: string | string[],
+    scope?: ExpressionScope,
+    options?: PhysicsEvaluateOptions
+  ) => {
+    if (
+      Array.isArray(exprOrExprs) &&
+      exprOrExprs.length > 0 &&
+      exprOrExprs.every((entry) => typeof entry === 'string')
+    ) {
+      const shared = scope === undefined ? {} : scope;
+      return run(exprOrExprs, shared, options);
+    }
+    return run(exprOrExprs, scope, options);
+  }) as InstanceEvaluator['evaluate'];
 }
 
 function mapExpressions(expression: unknown, operation: (expression: string) => unknown): unknown {
@@ -337,7 +365,19 @@ export function wireMathjsInstanceApi(
       throw new Error('compat expression API not wired yet');
     },
   };
-  const mathjsExpressionBindings = createMathjsExpressionBindings(() => expressionApi);
+  const evaluatorEvaluateRef: { current?: InstanceEvaluator['evaluate'] } = {};
+  const mathjsExpressionBindings = createMathjsExpressionBindings(
+    () => expressionApi,
+    () => expressionLayers.mathWithTransform,
+    () => {
+      const run = evaluatorEvaluateRef.current;
+      if (run === undefined) {
+        throw new Error('compat evaluator is not wired yet');
+      }
+      return run as unknown as CompatEvaluatorEvaluate;
+    },
+    () => instance.createUnit as (...args: unknown[]) => unknown
+  );
   const runBound = <T extends (...args: never[]) => unknown>(fn: T): T =>
     ((...args: never[]) => runWithConfig(currentConfig, () => fn(...args))) as T;
 
@@ -396,17 +436,6 @@ export function wireMathjsInstanceApi(
     bound.parse = patched as typeof bound.parse;
   }
 
-  function resolveHelpName(search: unknown): string {
-    if (typeof search === 'string') return search;
-    const mwt = expressionLayers.mathWithTransform;
-    if (typeof search === 'function') {
-      const found = Object.keys(mwt).find((key) => mwt[key] === search);
-      if (found !== undefined) return found;
-      throw new Error(`No documentation found on "${search.name}"`);
-    }
-    throw new Error(`No documentation found on "${String(search)}"`);
-  }
-
   function rebindInstanceHelp(): void {
     const instEvaluate = instance.evaluate as WiredCompatInstance['evaluate'];
     const helpEvaluate = createCompatHelpEvaluate(
@@ -421,7 +450,11 @@ export function wireMathjsInstanceApi(
     type HelpCtor = new (doc: unknown) => unknown;
     const Help = createHelpClass({ evaluate: helpEvaluate }) as unknown as HelpCtor;
     instance.Help = Help;
-    instance.help = (search: unknown) => new Help(nativeHelp(resolveHelpName(search)).doc);
+    instance.help = createCompatTypedHelp(
+      instanceTyped as Parameters<typeof createCompatTypedHelp>[0],
+      expressionLayers.mathWithTransform,
+      Help as Parameters<typeof createCompatTypedHelp>[2]
+    );
   }
 
   /**
@@ -447,6 +480,8 @@ export function wireMathjsInstanceApi(
     if (typeof instance.num === 'function') scope.num = instance.num;
     if (typeof instance.den === 'function') scope.den = instance.den;
     if (wrappedUnit !== undefined) scope.Unit = wrappedUnit;
+    if (typeof instance.unit === 'function') scope.unit = instance.unit;
+    if (typeof instance.createUnit === 'function') scope.createUnit = instance.createUnit;
     if (instance.ResultSet !== undefined) scope.ResultSet = instance.ResultSet;
     for (const key of Object.keys(mwt)) {
       const desc = Object.getOwnPropertyDescriptor(mwt, key);
@@ -479,21 +514,29 @@ export function wireMathjsInstanceApi(
       normalizeDecimal,
       mathjsExpressionBindings
     );
+    evaluator.evaluate = patchBatchEvaluateScope(evaluator.evaluate);
+    evaluatorEvaluateRef.current = evaluator.evaluate;
     patchEvaluatorToTex(evaluator);
     const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
       entries?: unknown[]
     ) => unknown;
     instance.evaluate = runBound(
-      (expression: unknown, scope?: ExpressionScope, options?: CompatEvaluateOptions) =>
-        normalizeDecimal(
+      (expression: unknown, scope?: ExpressionScope, options?: CompatEvaluateOptions) => {
+        const opts = policyOptions(options);
+        if (
+          Array.isArray(expression) &&
+          expression.length > 0 &&
+          expression.every((entry) => typeof entry === 'string')
+        ) {
+          const sharedScope = scope === undefined ? {} : scope;
+          return normalizeDecimal(evaluator.evaluate(expression as string[], sharedScope, opts));
+        }
+        return normalizeDecimal(
           mapExpressions(expression, (text) =>
-            wrapBlockArrayAsResultSet(
-              evaluator.evaluate(text, scope, policyOptions(options)),
-              text,
-              ResultSetCtor
-            )
+            wrapBlockArrayAsResultSet(evaluator.evaluate(text, scope, opts), text, ResultSetCtor)
           )
-        )
+        );
+      }
     );
     instance.compile = runBound((expression: unknown, options?: CompatEvaluateOptions) =>
       mapExpressions(expression, (text) => {
@@ -536,11 +579,26 @@ export function wireMathjsInstanceApi(
     options?: CompatEvaluateOptions
   ): ReturnType<typeof functionsParser> {
     const made = functionsParser(options);
-    made.evaluate = (expr: string): unknown =>
-      (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
-    return Object.assign(this, made);
+    const boundEvaluate = instance.evaluate as CompatEvaluate;
+    const evaluateParserExpr = (expr: string | string[]) => {
+      if (Array.isArray(expr)) {
+        return expr.map((entry) => boundEvaluate(entry, made.scope, options));
+      }
+      return boundEvaluate(expr, made.scope, options);
+    };
+    const api = {
+      scope: made.scope,
+      evaluate: evaluateParserExpr,
+      get: made.get.bind(made),
+      set: made.set.bind(made),
+      remove: made.remove.bind(made),
+      clear: made.clear.bind(made),
+    };
+    return createCompatParserApi(api) as ReturnType<typeof functionsParser>;
   }
+  installParserHasInstance(Parser);
   const ParserClass = newOperatorGuard(Parser) as unknown as WiredCompatInstance['Parser'];
+  installParserHasInstance(ParserClass);
   instance.Parser = ParserClass;
   if (bindParser) {
     const instanceParser: typeof functionsParser = (options) => new ParserClass(options);
