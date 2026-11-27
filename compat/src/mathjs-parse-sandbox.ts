@@ -34,6 +34,7 @@ const FORBIDDEN_ARRAY_MEMBER_ASSIGN = new Set([
 
 /** Block `array.map = …` assignments that must throw before compile (parity shim). */
 export function guardMathjsForbiddenArrayMemberAssignment(expr: string): void {
+  if (!expr.includes('=')) return;
   const re = /(?:^|[;\n])\s*([A-Za-z_]\w*)\s*\.\s*([A-Za-z_]\w*)\s*=/g;
   let match: RegExpExecArray | null;
   while ((match = re.exec(expr)) !== null) {
@@ -47,6 +48,7 @@ export function guardMathjsForbiddenArrayMemberAssignment(expr: string): void {
 /** Throw when expression source uses object-literal keys that parse would strip. */
 export function guardMathjsObjectLiteralKeys(expr: string): void {
   guardMathjsForbiddenArrayMemberAssignment(expr);
+  if (!expr.includes(':')) return;
   for (const re of [
     /['"]([^'"]+)['"]\s*:/g,
     /(?:\{|,)\s*([A-Za-z_\u0080-\uFFFF][\w\u0080-\uFFFF]*)\s*:/g,
@@ -58,25 +60,6 @@ export function guardMathjsObjectLiteralKeys(expr: string): void {
       const forbidden = forbiddenObjectLiteralKey(raw, expr);
       if (forbidden !== null) {
         throw new Error('No access to property "' + forbidden + '"');
-      }
-    }
-  }
-  let block: RegExpExecArray | null;
-  const objectRe = /\{[^{}]*\}/g;
-  while ((block = objectRe.exec(expr)) !== null) {
-    const segment = block[0];
-    for (const re of [
-      /['"]([^'"]+)['"]\s*:/g,
-      /(?:\{|,)\s*([A-Za-z_\u0080-\uFFFF][\w\u0080-\uFFFF]*)\s*:/g,
-    ]) {
-      re.lastIndex = 0;
-      let match: RegExpExecArray | null;
-      while ((match = re.exec(segment)) !== null) {
-        const raw = match[1] ?? '';
-        const forbidden = forbiddenObjectLiteralKey(raw, expr);
-        if (forbidden !== null) {
-          throw new Error('No access to property "' + forbidden + '"');
-        }
       }
     }
   }

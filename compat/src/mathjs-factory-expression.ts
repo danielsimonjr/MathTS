@@ -66,12 +66,16 @@ function resolveInheritedInstanceBinding(
   return undefined;
 }
 
+const compileScopeCache = new WeakMap<Record<string, unknown>, Record<string, unknown>>();
+
 /** Namespace passed to `node._compile` (mathjs binds the live instance, not parseScope). */
 export function compileScopeForFactoryCompile(
   mathWithTransform: Record<string, unknown>,
   unitCtor?: unknown,
   instance?: Record<string, unknown>
 ): Record<string, unknown> {
+  const cached = compileScopeCache.get(mathWithTransform);
+  if (cached !== undefined) return cached;
   const withUnit =
     unitCtor === undefined
       ? mathWithTransform
@@ -85,16 +89,21 @@ export function compileScopeForFactoryCompile(
             return Reflect.has(target, prop);
           },
         });
-  if (instance === undefined) return withUnit;
+  if (instance === undefined) {
+    compileScopeCache.set(mathWithTransform, withUnit);
+    return withUnit;
+  }
   const unitClass = unitCtor as UnitConstructor | undefined;
-  return new Proxy(withUnit, {
+  const wrapped = new Proxy(withUnit, {
     has(target, prop) {
+      if (prop === 'chain' || prop === 'import') return false;
       if (typeof prop !== 'string') return Reflect.has(target, prop);
       if (Reflect.has(target, prop)) return true;
       if (unitClass?.isValuelessUnit?.(prop)) return false;
       return resolveInheritedInstanceBinding(instance, prop) !== undefined;
     },
     get(target, prop, receiver) {
+      if (prop === 'chain' || prop === 'import') return undefined;
       if (Reflect.has(target, prop)) return Reflect.get(target, prop, receiver);
       if (typeof prop === 'string') {
         const inherited = resolveInheritedInstanceBinding(instance, prop);
@@ -103,6 +112,8 @@ export function compileScopeForFactoryCompile(
       return Reflect.get(target, prop, receiver);
     },
   });
+  compileScopeCache.set(mathWithTransform, wrapped);
+  return wrapped;
 }
 
 const scopeFnWrapperCache = new WeakMap<(...args: never[]) => unknown, unknown>();

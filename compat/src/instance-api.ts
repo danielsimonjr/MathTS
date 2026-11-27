@@ -450,14 +450,39 @@ export function wireMathjsInstanceApi(
       if (EVALUATE_SCOPE_OMIT.has(key)) continue;
       // Valueless units such as `chain` must compile as symbols, not the Chain constructor.
       if (key === 'chain') continue;
-      scope[key] = asMathjsExpressionScopeValue(get());
+      Object.defineProperty(scope, key, {
+        enumerable: true,
+        configurable: true,
+        get,
+        set(value: unknown) {
+          Object.defineProperty(scope, key, {
+            value,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+        },
+      });
     }
     if (evaluator !== undefined) {
+      const activeEval = evaluator;
       for (const name of ['mean', 'quantileSeq'] as const) {
-        const fn = evaluator.evaluate(name);
-        if (typeof fn === 'function') {
-          scope[name] = asMathjsExpressionScopeValue(fn);
-        }
+        Object.defineProperty(scope, name, {
+          enumerable: true,
+          configurable: true,
+          get: () => {
+            const fn = activeEval.evaluate(name);
+            return typeof fn === 'function' ? asMathjsExpressionScopeValue(fn) : undefined;
+          },
+          set(value: unknown) {
+            Object.defineProperty(scope, name, {
+              value,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        });
       }
     }
     for (const [key, val] of Object.entries(scrubbedImports)) {
@@ -485,7 +510,19 @@ export function wireMathjsInstanceApi(
       }
       const wholesale = wholesaleGetters.get(key);
       if (wholesale !== undefined) {
-        scope[key] = asMathjsExpressionScopeValue(wholesale());
+        Object.defineProperty(scope, key, {
+          enumerable: true,
+          configurable: true,
+          get: wholesale,
+          set(value: unknown) {
+            Object.defineProperty(scope, key, {
+              value,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        });
         continue;
       }
       const instFn = (instance as Record<string, unknown>)[key];
