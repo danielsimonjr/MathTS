@@ -223,11 +223,9 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
       [1e-20, 0],
       [0, 1],
     ]);
-    const normalized = normalizeCompatRotationMatrix(
-      sparse,
-      matrixFn,
-      promoteToCompatMatrix
-    ) as { get?: (i: number, j: number) => number };
+    const normalized = normalizeCompatRotationMatrix(sparse, matrixFn, promoteToCompatMatrix) as {
+      get?: (i: number, j: number) => number;
+    };
     expect(normalized.get?.(0, 0)).toBe(0);
   });
 
