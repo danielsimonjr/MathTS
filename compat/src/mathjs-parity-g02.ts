@@ -282,6 +282,28 @@ export function withInvalidNumericStringGuard(fn: UnaryLike): (...args: unknown[
   });
 }
 
+/**
+ * 1-D matrix reductions along dimension 0 return a scalar in mathjs 15.3.0 (#1785),
+ * not a length-1 matrix.
+ */
+export function withReductionDim0ScalarReturn(fn: UnaryLike): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    const result = apply(fn, args);
+    if (
+      args.length === 2 &&
+      args[1] === 0 &&
+      typeof args[0] === 'object' &&
+      args[0] !== null &&
+      !Array.isArray(args[0]) &&
+      isMatrixLikeValue(args[0])
+    ) {
+      const size = (args[0] as { size(): number[] }).size();
+      if (size.length === 1 && typeof result !== 'object') return result;
+    }
+    return result;
+  });
+}
+
 /** `min` / `max` on Complex values throw mathjs's ordering error, not "Unexpected type". */
 export function withComplexOrderingGuard(
   name: 'min' | 'max',

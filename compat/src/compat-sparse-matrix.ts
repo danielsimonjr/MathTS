@@ -7,6 +7,7 @@ import { DimensionError } from '@danielsimonjr/mathts-core';
 import { clone, validateIndex } from '@danielsimonjr/mathts-core/internal';
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import { compatDecimalResult } from './bignumber.js';
+import { COMPAT_MATRIX_WRAPPER } from './compat-matrix-model.js';
 import { NEW_OPERATOR_MESSAGE, newOperatorGuard } from './constructors-without-new.js';
 import { mathjsFractionClass } from './mathjs-fraction-class.js';
 import { sanitizeDenseSparseInput } from './sparse-structural-zero.js';
@@ -78,6 +79,11 @@ function decorateSparseInstance(inst: SparseInstance, wrapperProto: object): voi
 }
 
 function defineSparseTypeFlags(proto: Record<string, unknown>): void {
+  Object.defineProperty(proto, COMPAT_MATRIX_WRAPPER, {
+    value: 'sparse',
+    enumerable: false,
+    configurable: true,
+  });
   Object.defineProperty(proto, 'type', {
     value: 'SparseMatrix',
     enumerable: true,

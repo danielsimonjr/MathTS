@@ -29,6 +29,24 @@ describe('matrix model #1785', () => {
     expect(math.add(1, [[1, 2], [3] as unknown as number[]])).toEqual([[2, 3], [4]]);
   });
 
+  it('Index stores compat ImmutableDenseMatrix in dimensions', () => {
+    const dims = new math.Index([1, 2, 3])._dimensions;
+    expect(math.deepEqual(dims[0], new math.ImmutableDenseMatrix([1, 2, 3]))).toBe(true);
+  });
+
+  it('matrix() returns compat-wrapped DenseMatrix instances', () => {
+    const m = math.matrix([
+      [1, 2],
+      [3, 4],
+    ]) as { type?: string };
+    expect(m.type).toBe('DenseMatrix');
+    expect(math.isDenseMatrix(m)).toBe(true);
+  });
+
+  it('gcd accepts nested 1d array matrix form', () => {
+    expect(math.gcd([[12, 8]])).toBe(4);
+  });
+
   it('sparse Symbol.iterator yields stored entries in column order', () => {
     const m = new math.SparseMatrix([
       [1, 0],

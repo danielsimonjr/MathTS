@@ -28,7 +28,9 @@
         "sqrt",
         "std",
         "tan",
-        "variance"
+        "variance",
+        "gcd",
+        "lcm"
       ],
       "filesGlob": ["compat/src/shims.ts"],
       "reason": "mathjs-compat shims delegate to @danielsimonjr/mathts-functions and only attach generated Public* overload types"

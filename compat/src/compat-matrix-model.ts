@@ -60,6 +60,53 @@ type DenseHelpers = {
   typeOf(value: unknown): string;
 };
 
+/** Marker on compat-wrapped matrix prototypes (#1785). */
+export const COMPAT_MATRIX_WRAPPER = Symbol.for('compat.matrix.wrapper');
+
+export function isCompatWrappedMatrix(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const proto = Object.getPrototypeOf(value) as Record<symbol, unknown> | null;
+  return proto != null && proto[COMPAT_MATRIX_WRAPPER] != null;
+}
+
+export type CompatMatrixCtors = {
+  DenseMatrix: MatrixCtor;
+  SparseMatrix: MatrixCtor;
+  ImmutableDenseMatrix: MatrixCtor;
+};
+
+let compatMatrixCtors: CompatMatrixCtors | null = null;
+
+/** Wire compat matrix constructors for bridge→wrapper promotion (#1785). */
+export function bindCompatMatrixPromotion(ctors: CompatMatrixCtors): void {
+  compatMatrixCtors = ctors;
+}
+
+/** Re-wrap bridge matrix instances with compat prototypes (#1785). */
+export function promoteToCompatMatrix(value: unknown, ctors?: CompatMatrixCtors): unknown {
+  const resolved = ctors ?? compatMatrixCtors;
+  if (resolved == null) return value;
+  if (value == null || typeof value !== 'object') return value;
+  if (isCompatWrappedMatrix(value)) return value;
+  const m = value as MatrixLike & {
+    storage?: () => string;
+    type?: string;
+    isImmutableDenseMatrix?: boolean;
+    isSparseMatrix?: boolean;
+    toArray(): unknown;
+    _datatype?: string;
+    isMatrix?: boolean;
+  };
+  if (m.isMatrix !== true) return value;
+  if (m.isImmutableDenseMatrix === true || m.type === 'ImmutableDenseMatrix') {
+    return Reflect.construct(resolved.ImmutableDenseMatrix, [m.toArray(), m._datatype]);
+  }
+  if (m.isSparseMatrix === true || m.type === 'SparseMatrix' || m.storage?.() === 'sparse') {
+    return Reflect.construct(resolved.SparseMatrix, [m.toArray(), m._datatype]);
+  }
+  return Reflect.construct(resolved.DenseMatrix, [m.toArray(), m._datatype]);
+}
+
 const MATRIX_INTERFACE_METHODS = [
   'storage',
   'datatype',
@@ -122,6 +169,11 @@ function decorateDenseInstance(
 }
 
 function defineEnumerableMatrixFlags(proto: Record<string, unknown>): void {
+  Object.defineProperty(proto, COMPAT_MATRIX_WRAPPER, {
+    value: 'dense',
+    enumerable: false,
+    configurable: true,
+  });
   for (const [key, value] of [
     ['isMatrix', true],
     ['isDenseMatrix', true],
@@ -149,8 +201,10 @@ function mapCallbackTypeError(err: unknown, callback: unknown, args: unknown[]):
   if (args.length >= 2) parts.push(`index: ${describe(args[1])}`);
   if (args.length >= 3) parts.push(`array: ${describe(args[2])}`);
   void err;
+  const fnLabel =
+    typeof callback === 'function' && callback.name ? `Function ${callback.name}` : 'Function map';
   return new TypeError(
-    `Function map cannot apply callback arguments ${callbackName}(${parts.join(', ')}) at index ${JSON.stringify(args[1])}`
+    `${fnLabel} cannot apply callback arguments ${callbackName}(${parts.join(', ')}) at index ${JSON.stringify(args[1])}`
   );
 }
 
@@ -466,22 +520,40 @@ export function wrapCompatDenseMatrixClass(
     },
   }) as MatrixCtor;
 
+  const nativeCreate = (NativeDense.prototype as { create: unknown }).create as (
+    this: MatrixLike,
+    data: unknown,
+    datatype?: string
+  ) => MatrixLike;
   (wrapperProto as Record<string, unknown>).create = function createWrapped(
     this: MatrixLike,
     data: unknown,
     datatype?: string
   ): MatrixLike {
-    return new Wrapped(data, datatype) as MatrixLike;
+    const result = nativeCreate.call(this, data, datatype);
+    decorateDenseInstance(result as MatrixLike & Record<string, unknown>, wrapperProto);
+    return result;
   };
   if (
     typeof (NativeDense.prototype as { createDenseMatrix?: unknown }).createDenseMatrix ===
     'function'
   ) {
+    const nativeCreateDenseMatrix = (
+      NativeDense.prototype as {
+        createDenseMatrix: (opts: {
+          data: unknown;
+          size: number[];
+          datatype?: string;
+        }) => MatrixLike;
+      }
+    ).createDenseMatrix;
     (wrapperProto as Record<string, unknown>).createDenseMatrix = function createDenseMatrixWrapped(
       this: MatrixLike,
       opts: { data: unknown; size: number[]; datatype?: string }
     ): MatrixLike {
-      return new Wrapped({ data: opts.data, size: opts.size }, opts.datatype) as MatrixLike;
+      const result = nativeCreateDenseMatrix.call(this, opts);
+      decorateDenseInstance(result as MatrixLike & Record<string, unknown>, wrapperProto);
+      return result;
     };
   }
 
@@ -585,6 +657,11 @@ export function wrapCompatImmutableDenseMatrixClass(
 ): MatrixCtor {
   const Guarded = newOperatorGuard(NativeImmutable as unknown as CompatClass) as MatrixCtor;
   const immutableProto = patchCompatImmutableDensePrototype(NativeImmutable, denseWrapperProto);
+  Object.defineProperty(immutableProto, COMPAT_MATRIX_WRAPPER, {
+    value: 'immutable',
+    enumerable: false,
+    configurable: true,
+  });
   return new Proxy(Guarded, {
     construct(target, argArray: unknown[], newTarget) {
       const inst = Reflect.construct(
@@ -603,6 +680,93 @@ export function wrapCompatImmutableDenseMatrixClass(
       throw new SyntaxError(NEW_OPERATOR_MESSAGE);
     },
   }) as MatrixCtor;
+}
+
+export type CompatMatrixIndexLike = {
+  _dimensions: unknown[];
+  clone(): CompatMatrixIndexLike;
+};
+
+function isBareImmutableIndexDimension(d: unknown): boolean {
+  if (typeof d !== 'object' || d === null) return false;
+  if (isCompatWrappedMatrix(d)) return false;
+  const m = d as {
+    isMatrix?: boolean;
+    type?: string;
+    isImmutableDenseMatrix?: boolean;
+    _size?: number[];
+  };
+  if (m.isMatrix !== true) return false;
+  if (m.type === 'ImmutableDenseMatrix' || m.isImmutableDenseMatrix === true) return true;
+  return Array.isArray(m._size) && m._size.length === 1;
+}
+
+function rewrapIndexDimensions(index: CompatMatrixIndexLike, ImmutableCtor: MatrixCtor): void {
+  index._dimensions = index._dimensions.map((dim) => {
+    if (!isBareImmutableIndexDimension(dim)) return dim;
+    const src = dim as { toArray(): unknown[]; _datatype?: string };
+    return Reflect.construct(ImmutableCtor, [src.toArray(), src._datatype]);
+  });
+}
+
+/**
+ * Index stores {@link ImmutableDenseMatrix} dimensions from the factory closure;
+ * re-wrap them with the compat instance constructors (#1785).
+ */
+export function wrapCompatIndexClass(
+  NativeIndex: CompatClass & (new (...args: unknown[]) => CompatMatrixIndexLike),
+  ImmutableDenseMatrix: MatrixCtor
+): typeof NativeIndex {
+  const Guarded = newOperatorGuard(NativeIndex) as typeof NativeIndex;
+  const Wrapped = new Proxy(Guarded, {
+    construct(_target, argArray: unknown[], newTarget) {
+      const inst = Reflect.construct(NativeIndex, argArray, newTarget) as CompatMatrixIndexLike;
+      rewrapIndexDimensions(inst, ImmutableDenseMatrix);
+      return inst;
+    },
+    apply() {
+      throw new SyntaxError(NEW_OPERATOR_MESSAGE);
+    },
+  }) as typeof NativeIndex;
+
+  const nativeCreate = (
+    NativeIndex as unknown as { create?: (dims: unknown[]) => CompatMatrixIndexLike }
+  ).create;
+  if (typeof nativeCreate === 'function') {
+    (Wrapped as unknown as { create: (dims: unknown[]) => CompatMatrixIndexLike }).create = (
+      dims: unknown[]
+    ) => {
+      const inst = nativeCreate(dims);
+      rewrapIndexDimensions(inst, ImmutableDenseMatrix);
+      return inst;
+    };
+  }
+
+  const nativeFromJSON = (
+    NativeIndex as unknown as { fromJSON?: (json: unknown) => CompatMatrixIndexLike }
+  ).fromJSON;
+  if (typeof nativeFromJSON === 'function') {
+    (Wrapped as unknown as { fromJSON: (json: unknown) => CompatMatrixIndexLike }).fromJSON = (
+      json: unknown
+    ) => {
+      const inst = nativeFromJSON(json);
+      rewrapIndexDimensions(inst, ImmutableDenseMatrix);
+      return inst;
+    };
+  }
+
+  const nativeClone = NativeIndex.prototype.clone as (
+    this: CompatMatrixIndexLike
+  ) => CompatMatrixIndexLike;
+  Wrapped.prototype.clone = function cloneIndexWrapped(
+    this: CompatMatrixIndexLike
+  ): CompatMatrixIndexLike {
+    const copy = nativeClone.call(this);
+    rewrapIndexDimensions(copy, ImmutableDenseMatrix);
+    return copy;
+  };
+
+  return Wrapped;
 }
 
 export function buildCompatMatrixWrappers<T extends Record<string, MatrixCtor>>(

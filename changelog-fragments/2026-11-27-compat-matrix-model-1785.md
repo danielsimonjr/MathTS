@@ -1,3 +1,4 @@
 ### Fixed
 
 - **Compat matrix model matches mathjs 15.3.0 (#1785):** `DenseMatrix`, `ImmutableDenseMatrix`, and `SparseMatrix` on `create(all)` use compat-only prototype wrappers (constructors without `new`, deep `clone`, `transpose` datatype, sparse CSC growth/`get`/`set`/`toJSON`/`fromJSON`/`Symbol.iterator`, Fraction/BigNumber datatypes). Jagged nested-array operands for `add`/`subtract`/`gcd` stay on the factory path instead of coercing to rectangular `DenseMatrix`.
+- **Matrix factory promotion (#1785):** `matrix`/`sparse`/`transpose`/`clone` re-wrap bridge matrices with compat prototypes; `Index` dimensions use compat `ImmutableDenseMatrix`; `gcd` uses the mathjs-shaped factory; logical `or`/`xor` use bridge `DenseMatrix`/`SparseMatrix`; `max`/`min`/`sum` return scalars for 1-D matrices along dimension 0.

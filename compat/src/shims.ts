@@ -101,6 +101,7 @@ import {
   det as _det,
   size as _size,
   factory_mathjsCompat,
+  factory_gcd,
   complex as _complex,
   config,
   isPositive as _isPositive,
@@ -110,6 +111,8 @@ import {
   isZero as _isZero,
   factory_fix as _factoryFix,
 } from '@danielsimonjr/mathts-functions';
+import { instanceSymbols } from './instance-symbols.js';
+import { promoteToCompatMatrix } from './compat-matrix-model.js';
 import {
   wrapFixForMathjsFraction,
   wrapUnaryForMathjsFraction,
@@ -230,6 +233,10 @@ export function bignumber(value?: unknown): unknown {
 /** Matrix values returned from the compat `matrix` shim (native, or the bridge matrix of `functions`). */
 export type CompatMatrixValue = DenseMatrix | SparseMatrix | BridgeMatrix;
 
+function promoteIfMatrix<T>(value: T): T {
+  return promoteToCompatMatrix(value) as T;
+}
+
 /** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
 function isCompatBridgeMatrix(x: unknown): boolean {
   if (isDenseMatrix(x) || isSparseMatrix(x)) {
@@ -297,7 +304,7 @@ export function matrix(
   format?: string
 ): CompatMatrixValue {
   if (arguments.length === 0) {
-    return _factoryMatrix();
+    return promoteIfMatrix(_factoryMatrix());
   }
   if (isDenseMatrix(data) || isSparseMatrix(data)) {
     // A native matrix of the format that is asked for, or of no format, is returned as it is.
@@ -307,18 +314,20 @@ export function matrix(
     // The nested data of a matrix with a zero axis does not show its size, so the size of the
     // source goes with the data (#1337).
     if (format === 'sparse' && isDenseMatrix(data)) {
-      return _factorySparse({
-        data: data.toArray(),
-        size: matrixSize(data),
-      });
+      return promoteIfMatrix(
+        _factorySparse({
+          data: data.toArray(),
+          size: matrixSize(data),
+        })
+      );
     }
     if (format !== 'sparse' && isSparseMatrix(data)) {
-      return denseOfNested(data.toArray(), data);
+      return promoteIfMatrix(denseOfNested(data.toArray(), data));
     }
-    return data;
+    return promoteIfMatrix(data);
   }
   // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
-  return _factoryMatrix(data, format);
+  return promoteIfMatrix(_factoryMatrix(data, format));
 }
 
 /**
@@ -326,12 +335,12 @@ export function matrix(
  */
 export function sparse(data?: number[][]): BridgeMatrix {
   if (data === undefined) {
-    return _factorySparse();
+    return promoteIfMatrix(_factorySparse());
   }
   if (Array.isArray(data)) {
-    return _factorySparse(sanitizeSparseNestedInput(data as unknown[][]));
+    return promoteIfMatrix(_factorySparse(sanitizeSparseNestedInput(data as unknown[][])));
   }
-  return _factorySparse(data);
+  return promoteIfMatrix(_factorySparse(data));
 }
 
 // =============================================================================
@@ -969,7 +978,19 @@ export const max: TypedFunction = _max;
 // Number Theory Shims
 // =============================================================================
 
-export const gcd: TypedFunction = _gcd;
+const _compatGcd = withTypedSurface((...args: unknown[]): unknown => {
+  try {
+    return (factory_gcd as (...a: unknown[]) => unknown)(...args);
+  } catch (err) {
+    if (err instanceof Error && err.message === 'gcd() supports only 1d matrices!') {
+      const ArgsError = instanceSymbols.ArgumentsError as unknown as new (fn: string) => Error;
+      throw new ArgsError('gcd() supports only 1d matrices!');
+    }
+    throw err;
+  }
+}, factory_gcd);
+
+export const gcd: TypedFunction = _compatGcd as TypedFunction;
 export const lcm: TypedFunction = _lcm;
 
 // =============================================================================
@@ -1025,8 +1046,8 @@ export function transpose(m: unknown): unknown {
   if (arguments.length > 1) {
     throw tooManyArgumentsError('transpose', 1, arguments.length);
   }
-  if (isDenseMatrix(m) || isSparseMatrix(m)) return m.transpose();
-  return _transpose(m);
+  if (isDenseMatrix(m) || isSparseMatrix(m)) return promoteIfMatrix(m.transpose());
+  return promoteIfMatrix(_transpose(m));
 }
 
 /** Compute the determinant with typed scalar arithmetic, preserving fractional and complex values. */

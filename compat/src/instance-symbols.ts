@@ -8,8 +8,17 @@ import {
 } from '@danielsimonjr/mathts-core/internal';
 import { factory_mathjsCompat, Help, num, den } from '@danielsimonjr/mathts-functions';
 import { isDenseMatrix, isSparseMatrix, isMatrix } from '@danielsimonjr/mathts-matrix';
-import { callableWithoutNew, newOperatorGuard } from './constructors-without-new.js';
-import { buildCompatMatrixWrappers, type MatrixCtorForCompat } from './compat-matrix-model.js';
+import {
+  callableWithoutNew,
+  newOperatorGuard,
+  type CompatClass,
+} from './constructors-without-new.js';
+import {
+  buildCompatMatrixWrappers,
+  wrapCompatIndexClass,
+  type MatrixCtorForCompat,
+  type CompatMatrixIndexLike,
+} from './compat-matrix-model.js';
 import { mathjsComplexProxy, type MathjsComplexConstructor } from './mathjs-complex-class.js';
 import { CompatComplexBase } from './mathjs-complex-prototype.js';
 import packageMetadata from '../package.json' with { type: 'json' };
@@ -40,6 +49,12 @@ export const compatMatrixConstructors = buildCompatMatrixWrappers(
   (value) => new BigNumber(value as number | string)
 );
 
+const CompatIndex = wrapCompatIndexClass(
+  constructors.Index as unknown as CompatClass &
+    (new (...args: unknown[]) => CompatMatrixIndexLike),
+  compatMatrixConstructors.ImmutableDenseMatrix
+) as typeof constructors.Index;
+
 /** mathjs callable classes: `Complex(...)` and `BigNumber(...)` build an instance (#1774). */
 const CompatBigNumber = callableWithoutNew(BigNumber) as unknown as BigNumberConstructor;
 
@@ -54,7 +69,6 @@ const CompatComplex = mathjsComplexProxy(CompatComplexBase, { isNumber, isUnit }
  * `new X(...)` constructs normally (#1774). Index, Range, Spa and the error
  * classes follow mathjs 15.3.0's `if (!(this instanceof X)) throw` convention.
  */
-const CompatIndex = newOperatorGuard(constructors.Index);
 const CompatRange = newOperatorGuard(Range);
 const CompatSpa = newOperatorGuard(constructors.Spa);
 const CompatArgumentsError = newOperatorGuard(constructors.ArgumentsError);
