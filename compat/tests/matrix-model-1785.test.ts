@@ -120,4 +120,41 @@ describe('matrix model #1785', () => {
       { value: 2, index: [1, 1] },
     ]);
   });
+
+  it('dense Symbol.iterator walks 2-D storage in row-major order', () => {
+    const m = math.matrix([
+      [10, 20],
+      [30, 40],
+    ]) as Iterable<{ value: unknown; index: number[] }>;
+    expect([...m]).toEqual([
+      { value: 10, index: [0, 0] },
+      { value: 20, index: [0, 1] },
+      { value: 30, index: [1, 0] },
+      { value: 40, index: [1, 1] },
+    ]);
+  });
+
+  it('dense subset rejects non-index GET with TypeError', () => {
+    const m = math.matrix([1, 2, 3]);
+    expect(() =>
+      (m as { subset: (i: unknown) => unknown }).subset({ isIndex: false } as unknown),
+    ).toThrow(/Invalid index/);
+  });
+
+  it('Matrix interface cannot be constructed without new', () => {
+    const Matrix = math.Matrix as unknown as (...args: unknown[]) => unknown;
+    expect(() => Matrix()).toThrow(NEW_MSG);
+    expect(new (math.Matrix as new () => { type: string })().type).toBe('Matrix');
+  });
+
+  it('reshape keeps compat matrix type for abstract Matrix inputs', () => {
+    const flat = math.reshape(math.matrix([1, 2, 3, 4]), [2, 2]) as { type?: string };
+    expect(flat.type).toBe('DenseMatrix');
+    expect(math.size(flat).valueOf()).toEqual([2, 2]);
+  });
+
+  it('range preserves includeEnd under BigNumber config', () => {
+    const cfg = create(all, { number: 'BigNumber' });
+    expect(cfg.range('4:10', true)).toEqual(cfg.range('4:10', true));
+  });
 });
