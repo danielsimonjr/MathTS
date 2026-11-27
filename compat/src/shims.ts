@@ -119,6 +119,7 @@ import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts
 import { mapDivideBroadcastError, mapElementwiseBroadcastError } from './g12-mathjs-parity.js';
 import { withPublicFactoryScalar } from './mathjs-parity-errors.js';
 import { subtractScalar as _factorySubtractScalar } from '@danielsimonjr/mathts-functions';
+import { toCompatComplex } from './mathjs-complex-prototype.js';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -138,15 +139,15 @@ import { subtractScalar as _factorySubtractScalar } from '@danielsimonjr/mathts-
  */
 export function complex(re?: number | string | Complex, im?: number, ...rest: unknown[]): Complex {
   if (re === undefined && im === undefined && rest.length === 0) {
-    return COMPLEX_ZERO;
+    return toCompatComplex(COMPLEX_ZERO);
   }
   // The brand tests also return a value of a second copy of core unchanged (#1033).
   if (isComplex(re) && im === undefined && rest.length === 0) {
-    return re as Complex;
+    return re instanceof Complex ? toCompatComplex(re) : (re as Complex);
   }
   // Every other input uses the functions `complex`, which follows mathjs (#1220).
   const args = im === undefined && rest.length === 0 ? [re] : [re, im, ...rest];
-  return (_complex as (...a: unknown[]) => Complex)(...args);
+  return toCompatComplex((_complex as (...a: unknown[]) => Complex)(...args));
 }
 
 /** The call forms of the compat {@link fraction}. */
