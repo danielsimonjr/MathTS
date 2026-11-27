@@ -53,6 +53,9 @@ describe('#1776 help() embedded documentation', () => {
 
     local.createUnit({ auditBar: '3 m' }, { override: true });
     expect(String(local.evaluate('1 auditBar to m'))).toBe('3 m');
+
+    local.createUnit('auditBar', '4 m');
+    expect(String(local.evaluate('1 auditBar to m'))).toBe('3 m');
   });
 
   it('recognizes real parser instances via instanceof Parser and rejects duck-typed objects', () => {
