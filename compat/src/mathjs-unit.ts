@@ -180,11 +180,16 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
 
   const wrappedCreateUnit = (...args: unknown[]) => {
     const head = args[0];
+    const optionsArg =
+      head && typeof head === 'object' && !Array.isArray(head)
+        ? args[1]
+        : args.length >= 3
+          ? args[2]
+          : args[1];
     const overrideRequested =
-      args.length >= 3 &&
-      typeof args[2] === 'object' &&
-      args[2] !== null &&
-      (args[2] as { override?: boolean }).override === true;
+      typeof optionsArg === 'object' &&
+      optionsArg !== null &&
+      (optionsArg as { override?: boolean }).override === true;
     if (
       !overrideRequested &&
       typeof head === 'string' &&
@@ -194,10 +199,10 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
       rememberCreateUnitNames(args, registeredNames);
       return undefined;
     }
-    if (typeof head === 'string' && registeredNames.has(head)) {
+    if (!overrideRequested && typeof head === 'string' && registeredNames.has(head)) {
       return undefined;
     }
-    if (head && typeof head === 'object' && !Array.isArray(head)) {
+    if (!overrideRequested && head && typeof head === 'object' && !Array.isArray(head)) {
       const names = Object.keys(head as Record<string, unknown>);
       if (names.length > 0 && names.every((name) => registeredNames.has(name))) {
         return undefined;

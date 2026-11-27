@@ -42,4 +42,35 @@ describe('#1776 help() embedded documentation', () => {
       math.evaluate('evaluate(["width=2", "height=4","width*height"])', {})
     ).not.toThrow();
   });
+
+  it('allows createUnit with { override: true } to update an already-registered custom unit', () => {
+    const local = create(all);
+    local.createUnit('auditBar', '1 m');
+    expect(String(local.evaluate('1 auditBar to m'))).toBe('1 m');
+
+    local.createUnit('auditBar', '2 m', { override: true });
+    expect(String(local.evaluate('1 auditBar to m'))).toBe('2 m');
+
+    local.createUnit({ auditBar: '3 m' }, { override: true });
+    expect(String(local.evaluate('1 auditBar to m'))).toBe('3 m');
+  });
+
+  it('recognizes real parser instances via instanceof Parser and rejects duck-typed objects', () => {
+    const fromFactory = math.parser();
+    const fromCtor = new math.Parser();
+    const duckTyped = {
+      evaluate() {
+        return 0;
+      },
+      get() {
+        return undefined;
+      },
+      set() {},
+      scope: {},
+    };
+
+    expect(fromFactory instanceof math.Parser).toBe(true);
+    expect(fromCtor instanceof math.Parser).toBe(true);
+    expect(duckTyped instanceof math.Parser).toBe(false);
+  });
 });
