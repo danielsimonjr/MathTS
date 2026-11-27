@@ -47,6 +47,64 @@ describe('matrix model #1785', () => {
     expect(math.gcd([[12, 8]])).toBe(4);
   });
 
+  it('matrix identity clone preserves number datatype', () => {
+    const b = math.matrix(
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      'dense',
+      'number'
+    );
+    const c = math.matrix(b, 'dense');
+    expect(c.datatype()).toBe('number');
+    expect(c._datatype).toBe('number');
+  });
+
+  it('sparse pattern add unions CSC structure', () => {
+    const a = new math.SparseMatrix({
+      values: null,
+      index: [0, 1, 2, 0],
+      ptr: [0, 2, 3, 4],
+      size: [3, 3],
+    });
+    const b = new math.SparseMatrix({
+      values: null,
+      index: [0, 1, 2, 1],
+      ptr: [0, 3, 3, 4],
+      size: [3, 3],
+    });
+    const c = math.add(a, b) as { _values: unknown[] | null; _ptr: number[] };
+    expect(c._values).toBeNull();
+    expect(c._ptr).toEqual([0, 3, 4, 6]);
+  });
+
+  it('sparse map respects skipZeros third argument', () => {
+    const m = new math.SparseMatrix([
+      [1, 0],
+      [0, 0],
+    ]);
+    let counter = 0;
+    m.map(
+      () => {
+        counter++;
+        return 2;
+      },
+      m,
+      true
+    );
+    expect(counter).toBe(1);
+  });
+
+  it('gcd promotes core Fraction gcd results to mathjs-shaped Fraction', () => {
+    const four = math.gcd(12, math.fraction(8));
+    expect(four).toEqual(math.fraction(4));
+  });
+
+  it('map applies unary callbacks across jagged arrays with empty rows', () => {
+    expect(math.map([[2], []], math.square)).toEqual([[4], []]);
+  });
+
   it('sparse Symbol.iterator yields stored entries in column order', () => {
     const m = new math.SparseMatrix([
       [1, 0],

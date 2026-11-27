@@ -298,7 +298,70 @@ export function withReductionDim0ScalarReturn(fn: UnaryLike): (...args: unknown[
       isMatrixLikeValue(args[0])
     ) {
       const size = (args[0] as { size(): number[] }).size();
-      if (size.length === 1 && typeof result !== 'object') return result;
+      if (size.length === 1) {
+        if (typeof result !== 'object') return result;
+        if (isMatrixLikeValue(result)) {
+          const rSize = (result as { size(): number[] }).size();
+          if (rSize.length === 1 && rSize[0] === 1) {
+            const flat = (result as { toArray(): unknown }).toArray();
+            if (Array.isArray(flat) && flat.length === 1) return flat[0];
+          }
+        }
+      }
+    }
+    return result;
+  });
+}
+
+function isStatisticsCollectionOperand(x: unknown): boolean {
+  if (Array.isArray(x)) return true;
+  return isMatrixLikeValue(x);
+}
+
+/** mathjs rejects multiple bare collections without a dimension (#1785). */
+export function withStatisticsMultiCollectionGuard(fn: UnaryLike): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length >= 2 && args.every(isStatisticsCollectionOperand)) {
+      throw new Error('Scalar values expected');
+    }
+    return apply(fn, args);
+  });
+}
+
+/** mathjs throws on empty array reductions (#1785). */
+export function withStatisticsEmptyCollectionThrow(
+  name: 'max' | 'min' | 'sum',
+  fn: UnaryLike
+): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length === 1 && Array.isArray(args[0]) && (args[0] as unknown[]).length === 0) {
+      throw new Error(`Cannot calculate ${name} of an empty array`);
+    }
+    return apply(fn, args);
+  });
+}
+
+/**
+ * When `config.number === 'bigint'`, all-integer string args reduce to bigint (#1785).
+ */
+export function withBigIntStatisticsStrings(
+  fn: UnaryLike,
+  getNumberMode: () => string
+): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    const result = apply(fn, args);
+    if (getNumberMode() !== 'bigint') return result;
+    const allIntegerStrings =
+      args.length > 0 &&
+      args.every(
+        (a) =>
+          typeof a === 'string' &&
+          a.trim() !== '' &&
+          !Number.isNaN(Number(a)) &&
+          Number.isInteger(Number(a))
+      );
+    if (allIntegerStrings && typeof result === 'number' && Number.isInteger(result)) {
+      return BigInt(result);
     }
     return result;
   });

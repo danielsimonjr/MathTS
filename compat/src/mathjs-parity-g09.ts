@@ -263,6 +263,11 @@ export function createCompatSubsetG09(
       const value = args[0];
       const index = args[1];
       const replacement = args[2];
+      if (isRuntimeIndex(index) && shouldDeferEmptyIndexNoop(index, true)) {
+        if (Array.isArray(value) || isBridgeDenseMatrix(value)) {
+          return value;
+        }
+      }
       // Sparse matrices keep their own subset contract (do not mutate the caller
       // replacement). G09 reshape/throw applies to the dense bridge used by
       // indexed assignment, not to SparseMatrix.

@@ -5,3 +5,5 @@
 - **`DenseMatrix#create` scalars (#1785):** compat dense `create` returns a scalar unchanged (mathjs `reduce` parity) instead of wrapping numbers as matrices.
 - **Immutable / sparse subset guards (#1785):** `ImmutableDenseMatrix` inherits immutable `min`/`max` and mathjs-shaped get/subset errors; sparse pattern `subset` and scalar-replacement checks match mathjs messages.
 - **`matrix`/`sparse` factory routing (#1785):** compat overloads (`matrix('dense','number')`, identity clone) and arity rejections align with mathjs 15.3.0.
+- **`compatDecimalResult` + gcd (#1785):** core `Fraction` results from `factory_gcd` promote via `numerator`/`denominator`, fixing `gcd(12, fraction(8))`.
+- **Map / matrixFrom / range / statistics (#1785):** `mathjs-parity-1785-surfaces` adds jagged `map`, dense `matrixFromRows`/`matrixFromFunction`, range zero-step guard, mixed-type max/min scalar routing, empty `sum`, and reshape message/BigNumber fixes; sparse subset scalar `get` and instance `BigNumber` `valueOf`.

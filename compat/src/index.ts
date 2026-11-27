@@ -32,6 +32,17 @@ import {
   createInstanceBigNumberClass,
   normalizeCompatRangeResult,
 } from './compat-bignumber-instance.js';
+import {
+  createCompatEmptySum,
+  createCompatMap,
+  createCompatMatrixFromFunction,
+  createCompatMatrixFromRows,
+  createCompatReshape,
+  createCompatSum,
+  guardCompatRangeZeroStep,
+  normalizeCompatRotationMatrix,
+  withMixedTypeVariadicMaxMin,
+} from './mathjs-parity-1785-surfaces.js';
 import { configuredMathjsConstant } from './instance-constants.js';
 import { withCompatLog2BigNumberExact } from './compat-log2-bignumber.js';
 import {
@@ -62,7 +73,7 @@ import { createPrototypeLevels, definePrototypeAccessor } from './instance-layou
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { chainTypedFromInstance, createChain } from './chain-create.js';
 import { normalizeInstanceFormatOptions } from './fraction-format-parity.js';
-import { toCompatComplex } from './mathjs-complex-prototype.js';
+import { CompatComplexBase, toCompatComplex } from './mathjs-complex-prototype.js';
 import { assertValidCreateFactories, isCompatFactory } from './create-factory-validation.js';
 import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
 import { compatConstantReaders, type CompatConstantName } from './instance-constants.js';
@@ -125,8 +136,15 @@ import {
   withInvalidNumericStringGuard,
   withRawSingleValue,
   withReductionDim0ScalarReturn,
+  withStatisticsEmptyCollectionThrow,
+  withStatisticsMultiCollectionGuard,
+  withBigIntStatisticsStrings,
 } from './mathjs-parity-g02.js';
-import { bindCompatMatrixPromotion, promoteToCompatMatrix } from './compat-matrix-model.js';
+import {
+  bindCompatMatrixPromotion,
+  inheritMatrixDatatype,
+  promoteToCompatMatrix,
+} from './compat-matrix-model.js';
 import {
   createCompatNumeric,
   createCompatRandomInstance,
@@ -1034,47 +1052,82 @@ export function create(
     }),
 
     // Statistics
-    sum: withReductionDim0ScalarReturn(withSingleNumericStringGuard(withRawSingleValue(shims.sum))),
+    sum: createCompatSum(
+      createCompatEmptySum(
+        withReductionDim0ScalarReturn(
+          withStatisticsMultiCollectionGuard(
+            withBigIntStatisticsStrings(
+              withSingleNumericStringGuard(withRawSingleValue(shims.sum)),
+              () => currentConfig.number ?? 'number'
+            )
+          )
+        ),
+        () => currentConfig.number ?? 'number',
+        instanceBigNumberClass
+      )
+    ),
     mean: shims.mean,
     std: compatStd,
     variance: compatVariance,
-    min: withReductionDim0ScalarReturn(
-      withComplexOrderingGuard(
-        'min',
-        withRawSingleValue((...args: unknown[]) => {
-          const mapped =
-            currentConfig.number === 'BigNumber'
-              ? args.map((arg) =>
-                  typeof arg === 'string' && arg.trim() !== '' && !Number.isNaN(Number(arg))
-                    ? new instanceBigNumberClass(arg)
-                    : arg
-                )
-              : args;
-          return wrapUnitExtrema(
-            shims.min as (...a: unknown[]) => unknown,
-            factoryMinUnits
-          )(...mapped);
-        }, g02IsComplexLike)
-      )
+    min: withMixedTypeVariadicMaxMin(
+      withReductionDim0ScalarReturn(
+        withStatisticsMultiCollectionGuard(
+          withStatisticsEmptyCollectionThrow(
+            'min',
+            withBigIntStatisticsStrings(
+              withComplexOrderingGuard(
+                'min',
+                withRawSingleValue((...args: unknown[]) => {
+                  const mapped =
+                    currentConfig.number === 'BigNumber'
+                      ? args.map((arg) =>
+                          typeof arg === 'string' && arg.trim() !== '' && !Number.isNaN(Number(arg))
+                            ? new instanceBigNumberClass(arg)
+                            : arg
+                        )
+                      : args;
+                  return wrapUnitExtrema(
+                    shims.min as (...a: unknown[]) => unknown,
+                    factoryMinUnits
+                  )(...mapped);
+                }, g02IsComplexLike)
+              ),
+              () => currentConfig.number ?? 'number'
+            )
+          )
+        )
+      ),
+      mathFunctions.min as (...args: unknown[]) => unknown
     ),
-    max: withReductionDim0ScalarReturn(
-      withComplexOrderingGuard(
-        'max',
-        withRawSingleValue((...args: unknown[]) => {
-          const mapped =
-            currentConfig.number === 'BigNumber'
-              ? args.map((arg) =>
-                  typeof arg === 'string' && arg.trim() !== '' && !Number.isNaN(Number(arg))
-                    ? new instanceBigNumberClass(arg)
-                    : arg
-                )
-              : args;
-          return wrapUnitExtrema(
-            shims.max as (...a: unknown[]) => unknown,
-            factoryMaxUnits
-          )(...mapped);
-        }, g02IsComplexLike)
-      )
+    max: withMixedTypeVariadicMaxMin(
+      withReductionDim0ScalarReturn(
+        withStatisticsMultiCollectionGuard(
+          withStatisticsEmptyCollectionThrow(
+            'max',
+            withBigIntStatisticsStrings(
+              withComplexOrderingGuard(
+                'max',
+                withRawSingleValue((...args: unknown[]) => {
+                  const mapped =
+                    currentConfig.number === 'BigNumber'
+                      ? args.map((arg) =>
+                          typeof arg === 'string' && arg.trim() !== '' && !Number.isNaN(Number(arg))
+                            ? new instanceBigNumberClass(arg)
+                            : arg
+                        )
+                      : args;
+                  return wrapUnitExtrema(
+                    shims.max as (...a: unknown[]) => unknown,
+                    factoryMaxUnits
+                  )(...mapped);
+                }, g02IsComplexLike)
+              ),
+              () => currentConfig.number ?? 'number'
+            )
+          )
+        )
+      ),
+      mathFunctions.max as (...args: unknown[]) => unknown
     ),
     sign: (...args: unknown[]) => {
       if (
@@ -1198,7 +1251,11 @@ export function create(
     ...g18Surface
   } = g18InstanceOverrides(() => currentConfig);
   const g18Range = (...args: unknown[]) =>
-    normalizeCompatRangeResult(args, g18RangeNative(...args), instanceBigNumberClass);
+    normalizeCompatRangeResult(
+      args,
+      guardCompatRangeZeroStep(g18RangeNative)(...args),
+      instanceBigNumberClass
+    );
   copyFunctionSurface(g18RangeNative as (...args: unknown[]) => unknown, g18Range);
   const compatDefaultOverrides = {
     // #1587: a Fraction argument throws the mathjs conversion error, on top of
@@ -1456,8 +1513,17 @@ export function create(
     },
     rotationMatrix: (...args: unknown[]) => {
       const fn = mathFunctions.rotationMatrix as (...a: unknown[]) => unknown;
+      const promote = (value: unknown): unknown =>
+        promoteToCompatMatrix(value, {
+          DenseMatrix: compatMatrixConstructors.DenseMatrix,
+          SparseMatrix: compatMatrixConstructors.SparseMatrix,
+          ImmutableDenseMatrix: compatMatrixConstructors.ImmutableDenseMatrix,
+        });
+      const matrixFactory = shims.matrix as (...args: unknown[]) => unknown;
       if (!args.some((a) => isBigNumber(a))) {
-        return fn(...args);
+        return normalizeCompatRotationMatrix(fn(...args), matrixFactory, (v) =>
+          promote(inheritMatrixDatatype(v, args))
+        );
       }
       const outPrec = currentConfig.precision ?? 64;
       const prev = NativeBigNumber.config();
@@ -1491,10 +1557,39 @@ export function create(
           }
           return v;
         };
-        return roundBn(raw);
+        return normalizeCompatRotationMatrix(roundBn(raw), matrixFactory, (v) =>
+          promote(inheritMatrixDatatype(v, args))
+        );
       } finally {
         NativeBigNumber.config(prev);
       }
+    },
+    map: createCompatMap(mathFunctions.map as (...args: unknown[]) => unknown),
+    matrixFromRows: createCompatMatrixFromRows(
+      mathFunctions.matrixFromRows as (...args: unknown[]) => unknown,
+      shims.matrix as (...args: unknown[]) => unknown,
+      compatMatrixConstructors
+    ),
+    matrixFromColumns: createCompatMatrixFromRows(
+      mathFunctions.matrixFromColumns as (...args: unknown[]) => unknown,
+      shims.matrix as (...args: unknown[]) => unknown,
+      compatMatrixConstructors
+    ),
+    matrixFromFunction: createCompatMatrixFromFunction(
+      mathFunctions.matrixFromFunction as (...args: unknown[]) => unknown,
+      compatMatrixConstructors
+    ),
+    reshape: createCompatReshape(
+      mathFunctions.reshape as (...args: unknown[]) => unknown,
+      instanceBigNumberClass
+    ),
+    ctranspose: (...args: unknown[]) => {
+      const raw = (mathFunctions.ctranspose as (...a: unknown[]) => unknown)(...args);
+      return promoteToCompatMatrix(inheritMatrixDatatype(raw, [args[0]]), {
+        DenseMatrix: compatMatrixConstructors.DenseMatrix,
+        SparseMatrix: compatMatrixConstructors.SparseMatrix,
+        ImmutableDenseMatrix: compatMatrixConstructors.ImmutableDenseMatrix,
+      });
     },
     subset: compatSubset,
     clone: withFixedArity('clone', 1, (...args: unknown[]) => {
@@ -1505,6 +1600,26 @@ export function create(
         ImmutableDenseMatrix: compatMatrixConstructors.ImmutableDenseMatrix,
       });
     }),
+    resize: (...args: unknown[]) => {
+      const result = (mathFunctions.resize as (...a: unknown[]) => unknown)(...args);
+      const promoted = promoteToCompatMatrix(inheritMatrixDatatype(result, [args[0]]), {
+        DenseMatrix: compatMatrixConstructors.DenseMatrix,
+        SparseMatrix: compatMatrixConstructors.SparseMatrix,
+        ImmutableDenseMatrix: compatMatrixConstructors.ImmutableDenseMatrix,
+      });
+      if (
+        typeof promoted === 'object' &&
+        promoted !== null &&
+        (promoted as { isMatrix?: boolean; map?: (cb: (v: unknown) => unknown) => unknown })
+          .isMatrix === true &&
+        typeof (promoted as { map?: unknown }).map === 'function'
+      ) {
+        return (promoted as { map: (cb: (v: unknown) => unknown) => unknown }).map((v) =>
+          isComplex(v) ? toCompatComplex(new CompatComplexBase(v.re, v.im)) : v
+        );
+      }
+      return promoted;
+    },
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]

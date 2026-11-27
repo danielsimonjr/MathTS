@@ -69,6 +69,38 @@ export function isCompatWrappedMatrix(value: unknown): boolean {
   return proto != null && proto[COMPAT_MATRIX_WRAPPER] != null;
 }
 
+/** Read mathjs-style `_datatype` / `datatype()` from a matrix instance (#1785). */
+export function readMatrixDatatype(value: unknown): string | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const m = value as { _datatype?: string; datatype?: () => string };
+  if (typeof m._datatype === 'string') return m._datatype;
+  if (typeof m.datatype === 'function') {
+    const dt = m.datatype();
+    if (typeof dt === 'string') return dt;
+  }
+  return undefined;
+}
+
+/** Set `_datatype` on a compat or bridge matrix (#1785). */
+export function stampMatrixDatatype(value: unknown, datatype: string | undefined): void {
+  if (datatype === undefined || typeof value !== 'object' || value === null) return;
+  (value as { _datatype?: string })._datatype = datatype;
+}
+
+/** Copy `_datatype` from operands onto a matrix result when present (#1785). */
+export function inheritMatrixDatatype(result: unknown, sources: readonly unknown[]): unknown {
+  if (typeof result !== 'object' || result === null) return result;
+  if ((result as { isMatrix?: boolean }).isMatrix !== true) return result;
+  for (const source of sources) {
+    const dt = readMatrixDatatype(source);
+    if (dt !== undefined) {
+      stampMatrixDatatype(result, dt);
+      return result;
+    }
+  }
+  return result;
+}
+
 export type CompatMatrixCtors = {
   DenseMatrix: MatrixCtor;
   SparseMatrix: MatrixCtor;
@@ -98,13 +130,14 @@ export function promoteToCompatMatrix(value: unknown, ctors?: CompatMatrixCtors)
     isMatrix?: boolean;
   };
   if (m.isMatrix !== true) return value;
+  const datatype = readMatrixDatatype(m);
   if (m.isImmutableDenseMatrix === true || m.type === 'ImmutableDenseMatrix') {
-    return Reflect.construct(resolved.ImmutableDenseMatrix, [m.toArray(), m._datatype]);
+    return Reflect.construct(resolved.ImmutableDenseMatrix, [m.toArray(), datatype]);
   }
   if (m.isSparseMatrix === true || m.type === 'SparseMatrix' || m.storage?.() === 'sparse') {
-    return Reflect.construct(resolved.SparseMatrix, [m.toArray(), m._datatype]);
+    return Reflect.construct(resolved.SparseMatrix, [m.toArray(), datatype]);
   }
-  return Reflect.construct(resolved.DenseMatrix, [m.toArray(), m._datatype]);
+  return Reflect.construct(resolved.DenseMatrix, [m.toArray(), datatype]);
 }
 
 const MATRIX_INTERFACE_METHODS = [
@@ -407,7 +440,14 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
     target._size = dims.slice();
     const base = copy ? clone(target._data as never) : (target._data as never);
     target._data = resizeArray(base, dims, null as never) as typeof target._data;
+    if (copy) {
+      target._data = clone(target._data as never);
+    }
     return target;
+  };
+
+  wrapperProto.datatype = function datatypeWrapped(this: MatrixLike): string | undefined {
+    return this._datatype;
   };
 
   const originalToJSON = nativeProto.toJSON as () => Record<string, unknown>;
@@ -421,6 +461,7 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
   wrapperProto.clone = function cloneWrapped(this: MatrixLike): MatrixLike {
     const c = originalClone.call(this) as MatrixLike & { _data: unknown; _size: number[] };
     c._data = clone(c._data as never);
+    c._datatype = this._datatype;
     decorateDenseInstance(c, wrapperProto);
     return c;
   };
@@ -471,7 +512,9 @@ function buildDenseConstructorArgs(argArray: unknown[], helpers: DenseHelpers): 
   ) {
     const block = data as { data: unknown[]; size: number[]; datatype?: string };
     validate(block.data as never, block.size);
-    return [{ data: block.data, size: block.size }];
+    return block.datatype !== undefined
+      ? [{ data: block.data, size: block.size, datatype: block.datatype }]
+      : [{ data: block.data, size: block.size }];
   }
   if (isArray(data)) {
     const processed = preprocessMatrixData(data, helpers.checks);

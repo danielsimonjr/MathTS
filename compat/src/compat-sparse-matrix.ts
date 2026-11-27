@@ -104,15 +104,19 @@ function defineSparseTypeFlags(proto: Record<string, unknown>): void {
   });
 }
 
-function patchSparseValueOf(sparse: SparseInstance): void {
+function patchSparseValueOf(sparse: SparseInstance, helpers: SparseHelpers): void {
   const native = sparse.valueOf.bind(sparse);
   sparse.valueOf = function () {
     const arr = native();
     const zero = sparse.zero;
+    const dt = sparse._datatype;
     return arr.map((row) =>
       row.map((cell) => {
         if (cell === 0 || (typeof cell === 'number' && Object.is(cell, -0))) {
-          return compatDecimalResult(zero);
+          return dt === 'BigNumber' ? helpers.bignumber(zero) : compatDecimalResult(zero);
+        }
+        if (dt === 'BigNumber') {
+          return helpers.bignumber(cell);
         }
         return compatDecimalResult(cell);
       })
@@ -121,13 +125,18 @@ function patchSparseValueOf(sparse: SparseInstance): void {
 }
 
 function applySparseDatatype(inst: SparseInstance, datatype: string, helpers: SparseHelpers): void {
-  void helpers;
   inst._datatype = datatype;
+  const convert = (value: unknown): unknown =>
+    datatype === 'BigNumber'
+      ? helpers.bignumber(value)
+      : datatype === 'Fraction'
+        ? helpers.fraction(value)
+        : convertSparseValue(value, datatype);
   if (inst._values) {
-    inst._values = inst._values.map((entry) => convertSparseValue(entry, datatype));
+    inst._values = inst._values.map((entry) => convert(entry));
   }
-  inst.zero = convertSparseValue(0, datatype) as typeof inst.zero;
-  if (datatype === 'BigNumber') patchSparseValueOf(inst);
+  inst.zero = convert(0) as typeof inst.zero;
+  if (datatype === 'BigNumber') patchSparseValueOf(inst, helpers);
 }
 
 function sparseResizeForSet(
@@ -263,20 +272,42 @@ function patchCompatSparseMatrixPrototype(
     return json;
   };
 
-  const nativeMap = nativeProto.map as (callback: unknown) => unknown;
-  wrapperProto.map = function mapWrapped(this: SparseInstance, callback: unknown): unknown {
+  wrapperProto.datatype = function datatypeSparse(this: SparseInstance): string | undefined {
+    return this._datatype;
+  };
+
+  const nativeMap = nativeProto.map as (callback: unknown, skipZeros?: unknown) => unknown;
+  wrapperProto.map = function mapWrapped(
+    this: SparseInstance,
+    callback: unknown,
+    skipZeros?: unknown
+  ): unknown {
     if (!this._values) {
       throw new Error('Cannot invoke map on a Pattern only matrix');
     }
-    return nativeMap.call(this, callback);
+    return nativeMap.call(this, callback, skipZeros);
   };
 
-  const nativeForEach = nativeProto.forEach as (callback: unknown) => void;
-  wrapperProto.forEach = function forEachWrapped(this: SparseInstance, callback: unknown): void {
+  const nativeForEach = nativeProto.forEach as (callback: unknown, skipZeros?: unknown) => void;
+  wrapperProto.forEach = function forEachWrapped(
+    this: SparseInstance,
+    callback: unknown,
+    skipZeros?: unknown
+  ): void {
     if (!this._values) {
       throw new Error('Cannot invoke forEach on a Pattern only matrix');
     }
-    nativeForEach.call(this, callback);
+    nativeForEach.call(this, callback, skipZeros);
+  };
+
+  const nativeToArray = nativeProto.toArray as () => unknown[][];
+  wrapperProto.toArray = function toArrayWrapped(this: SparseInstance): unknown[][] {
+    const arr = nativeToArray.call(this);
+    if (this._datatype === undefined) return arr;
+    const z = this.zero;
+    const isImplicitZero = (cell: unknown): boolean =>
+      cell === 0 || (typeof cell === 'number' && Object.is(cell, -0)) || (z !== 0 && cell === z);
+    return arr.map((row) => row.map((cell) => (isImplicitZero(cell) ? z : cell)));
   };
 
   const nativeClone = nativeProto.clone as () => SparseInstance;
@@ -327,6 +358,12 @@ function patchCompatSparseMatrixPrototype(
       }
       if (repSize.length !== 0) {
         throw new TypeError('Scalar expected');
+      }
+    }
+    if (arguments.length === 1 && isIndex(index)) {
+      const runtime = index as unknown as { isScalar?: () => boolean; min?: () => number[] };
+      if (runtime.isScalar?.() === true && typeof runtime.min === 'function') {
+        return (this as { get: (i: number[]) => unknown }).get(runtime.min());
       }
     }
     return nativeSubset.call(this, index, replacement, defaultValue);
@@ -384,11 +421,18 @@ export function wrapCompatSparseMatrixClass(
       if (datatype !== undefined && typeof datatype !== 'string') {
         throw new Error(`Invalid datatype: ${String(datatype)}`);
       }
-      const inst = Reflect.construct(
-        target,
-        typeof datatype === 'string' ? [data] : argArray,
-        newTarget
-      ) as SparseInstance;
+      let dataArg = data;
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'index' in data &&
+        'ptr' in data &&
+        (data as { values?: unknown }).values === undefined
+      ) {
+        dataArg = { ...(data as Record<string, unknown>), values: null };
+      }
+      const nativeArgs = dataArg !== data ? [dataArg, ...argArray.slice(1)] : argArray;
+      const inst = Reflect.construct(target, nativeArgs, newTarget) as SparseInstance;
       if (typeof datatype === 'string') {
         applySparseDatatype(inst, datatype, helpers);
       } else if (isMatrixInput(data)) {

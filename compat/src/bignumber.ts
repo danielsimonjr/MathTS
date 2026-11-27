@@ -3,8 +3,11 @@ import {
   Complex,
   isBigNumber,
   isComplex,
+  isFraction,
   isUnit,
 } from '@danielsimonjr/mathts-core';
+import { toCompatComplex } from './mathjs-complex-prototype.js';
+import { isMathjsFraction, mathjsFractionClass } from './mathjs-fraction-class.js';
 
 /** decimal.js (and mathjs) use exponent `0`, never `-0`, in deep equality tests. */
 function fixNegativeZeroExponent(bn: CompatBigNumber): CompatBigNumber {
@@ -125,6 +128,9 @@ export function compatDecimalResult(
     return changed ? mapped : value;
   }
   if (isBridgeMatrix(value)) {
+    if ((value as { _values?: unknown[] | null })._values === null) {
+      return value;
+    }
     let changed = false;
     const mapped = value.map((entry) => {
       const next = compatDecimalResult(entry, instanceCtor);
@@ -141,12 +147,14 @@ export function compatDecimalResult(
     const re = compatDecimalResult(value.re, instanceCtor);
     const im = compatDecimalResult(value.im, instanceCtor);
     if (re === value.re && im === value.im) {
-      return value;
+      return toCompatComplex(value);
     }
     if (typeof re === 'number' && typeof im === 'number') {
-      return new Complex(re, im);
+      return toCompatComplex(new Complex(re, im));
     }
-    return Object.assign(Object.create(Object.getPrototypeOf(value) as object), value, { re, im });
+    return toCompatComplex(
+      Object.assign(Object.create(Object.getPrototypeOf(value) as object), value, { re, im })
+    );
   }
   if (isUnit(value)) {
     const unit = value as { value: unknown; clone(): { value: unknown } };
@@ -160,6 +168,26 @@ export function compatDecimalResult(
   }
   if (isBigNumber(value)) {
     return value;
+  }
+  if (isFraction(value) && !isMathjsFraction(value)) {
+    const f = value as unknown as {
+      numerator?: bigint;
+      denominator?: bigint;
+      valueOf(): unknown;
+    };
+    if (f.numerator !== undefined && f.denominator !== undefined) {
+      return new mathjsFractionClass(f.numerator, f.denominator);
+    }
+    const raw = f.valueOf();
+    if (typeof raw === 'object' && raw !== null && 'n' in raw && 'd' in raw) {
+      const parts = raw as { n: bigint; d: bigint };
+      return new mathjsFractionClass(parts.n, parts.d);
+    }
+    if (typeof raw === 'number' && Number.isInteger(raw)) {
+      return new mathjsFractionClass(BigInt(raw), 1n);
+    }
+    const asFrac = value as { toString(): string };
+    return new mathjsFractionClass(asFrac.toString());
   }
   return value;
 }

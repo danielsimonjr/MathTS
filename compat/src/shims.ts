@@ -112,7 +112,12 @@ import {
   factory_fix as _factoryFix,
 } from '@danielsimonjr/mathts-functions';
 import { instanceSymbols } from './instance-symbols.js';
-import { promoteToCompatMatrix } from './compat-matrix-model.js';
+import { inheritMatrixDatatype, promoteToCompatMatrix } from './compat-matrix-model.js';
+import {
+  shouldUnionSparsePatterns,
+  unionSparseForAdd,
+  type CscLike,
+} from './compat-sparse-pattern.js';
 import { createCompatMatrixFactory, createCompatSparseFactory } from './compat-matrix-factory.js';
 import { compatMatrixConstructors } from './instance-symbols.js';
 import {
@@ -237,6 +242,24 @@ export type CompatMatrixValue = DenseMatrix | SparseMatrix | BridgeMatrix;
 
 function promoteIfMatrix<T>(value: T): T {
   return promoteToCompatMatrix(value) as T;
+}
+
+function finishMatrixArithmetic(result: unknown, sources: readonly unknown[]): unknown {
+  if (
+    result !== null &&
+    typeof result === 'object' &&
+    (result as { isMatrix?: boolean }).isMatrix === true
+  ) {
+    inheritMatrixDatatype(result, sources);
+    return promoteIfMatrix(result);
+  }
+  return result;
+}
+
+function isSparseStorageMatrix(x: unknown): boolean {
+  if (!isCompatBridgeMatrix(x)) return false;
+  if (isSparseMatrix(x)) return true;
+  return (x as { storage?: () => string }).storage?.() === 'sparse';
 }
 
 /** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
@@ -421,6 +444,21 @@ const applyArithmetic = (
   elementwise: boolean,
   complexFn?: (a: unknown, b: unknown) => unknown
 ): unknown => {
+  if (
+    elementwise &&
+    isSparseStorageMatrix(a) &&
+    isSparseStorageMatrix(b) &&
+    shouldUnionSparsePatterns(a, b)
+  ) {
+    return finishMatrixArithmetic(
+      unionSparseForAdd(
+        compatMatrixConstructors.SparseMatrix as new (data: unknown) => CscLike,
+        a as CscLike,
+        b as CscLike
+      ),
+      [a, b]
+    );
+  }
   // Boxed operands carry the storage format and may hold non-double scalar types.
   // Keep them in the typed path rather than coercing them to the numeric backend.
   if (isBoxedMatrix(a) || isBoxedMatrix(b)) {
@@ -429,7 +467,7 @@ const applyArithmetic = (
     if (complexFn && (isComplex(boxedA) || isComplex(boxedB))) {
       return compatDecimalResult(complexFn(boxedA, boxedB));
     }
-    return compatDecimalResult(scalarFn(boxedA, boxedB));
+    return compatDecimalResult(finishMatrixArithmetic(scalarFn(boxedA, boxedB), [boxedA, boxedB]));
   }
   // Riemann-sphere only for Complex scalars; number/BigNumber/bigint stay native.
   if (complexFn && (isComplex(a) || isComplex(b))) {
@@ -457,7 +495,7 @@ const applyArithmetic = (
     }
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
-    return compatDecimalResult(unwrap(matrixFn(aa, bb)));
+    return compatDecimalResult(finishMatrixArithmetic(unwrap(matrixFn(aa, bb)), [a, b]));
   }
   if ((Array.isArray(a) || Array.isArray(b)) && complexFn) {
     return compatDecimalResult(unwrap(callWithNumericStringOperands(complexFn, a, b)));
@@ -966,7 +1004,7 @@ export const max: TypedFunction = _max;
 
 const _compatGcd = withTypedSurface((...args: unknown[]): unknown => {
   try {
-    return (factory_gcd as (...a: unknown[]) => unknown)(...args);
+    return compatDecimalResult((factory_gcd as (...a: unknown[]) => unknown)(...args));
   } catch (err) {
     if (err instanceof Error && err.message === 'gcd() supports only 1d matrices!') {
       const ArgsError = instanceSymbols.ArgumentsError as unknown as new (fn: string) => Error;
@@ -1032,8 +1070,11 @@ export function transpose(m: unknown): unknown {
   if (arguments.length > 1) {
     throw tooManyArgumentsError('transpose', 1, arguments.length);
   }
-  if (isDenseMatrix(m) || isSparseMatrix(m)) return promoteIfMatrix(m.transpose());
-  return promoteIfMatrix(_transpose(m));
+  if (isDenseMatrix(m) || isSparseMatrix(m)) {
+    return promoteIfMatrix(inheritMatrixDatatype(m.transpose(), [m]));
+  }
+  const t = _transpose(m);
+  return promoteIfMatrix(inheritMatrixDatatype(t, [m]));
 }
 
 /** Compute the determinant with typed scalar arithmetic, preserving fractional and complex values. */

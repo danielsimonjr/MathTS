@@ -5,7 +5,19 @@
 import { isUnit } from '@danielsimonjr/mathts-core';
 import { clone } from '@danielsimonjr/mathts-core/internal';
 import { tooManyArgumentsError } from './mathjs-parity-g02.js';
-import { promoteToCompatMatrix, type CompatMatrixCtors } from './compat-matrix-model.js';
+import {
+  promoteToCompatMatrix,
+  readMatrixDatatype,
+  stampMatrixDatatype,
+  type CompatMatrixCtors,
+} from './compat-matrix-model.js';
+
+function promoteMatrix(value: unknown, ctors: CompatMatrixCtors, datatype?: string): unknown {
+  const out = promoteToCompatMatrix(value, ctors);
+  const dt = datatype ?? readMatrixDatatype(value);
+  if (dt !== undefined) stampMatrixDatatype(out, dt);
+  return out;
+}
 
 type MatrixFn = (...args: unknown[]) => unknown;
 type SparseFn = (...args: unknown[]) => unknown;
@@ -37,12 +49,12 @@ export function createCompatMatrixFactory(
   const wrapped: MatrixFn = function compatMatrix(...args: unknown[]): unknown {
     const data = args[0];
     const format = args[1];
-    const datatype = args[2];
+    const datatype = typeof args[2] === 'string' ? args[2] : undefined;
     if (args.length > 3) {
       throw tooManyArgumentsError('matrix', 3, args.length);
     }
     if (args.length === 0) {
-      return promoteToCompatMatrix(new DenseMatrix([]), ctors);
+      return promoteMatrix(new DenseMatrix([]), ctors);
     }
     if (
       args.length === 1 &&
@@ -50,10 +62,7 @@ export function createCompatMatrixFactory(
       (data === 'dense' || data === 'sparse' || data === 'default')
     ) {
       const fmt = data === 'sparse' ? 'sparse' : 'dense';
-      return promoteToCompatMatrix(
-        fmt === 'sparse' ? new SparseMatrix([]) : new DenseMatrix([]),
-        ctors
-      );
+      return promoteMatrix(fmt === 'sparse' ? new SparseMatrix([]) : new DenseMatrix([]), ctors);
     }
     if (
       args.length === 2 &&
@@ -62,9 +71,10 @@ export function createCompatMatrixFactory(
       (data === 'dense' || data === 'sparse' || data === 'default')
     ) {
       const fmt = data === 'sparse' ? 'sparse' : 'dense';
-      return promoteToCompatMatrix(
+      return promoteMatrix(
         fmt === 'sparse' ? new SparseMatrix([], format) : new DenseMatrix([], format),
-        ctors
+        ctors,
+        format
       );
     }
     if (args.length === 1) {
@@ -83,15 +93,15 @@ export function createCompatMatrixFactory(
       const size = clone((data as { size(): number[] }).size());
       if (format === 'sparse' || (format === undefined && storage === 'sparse')) {
         const copied = new SparseMatrix({ data: arr, size }, dt);
-        return promoteToCompatMatrix(copied, ctors);
+        return promoteMatrix(copied, ctors, dt);
       }
       const copied = new DenseMatrix({ data: arr, size }, dt);
-      return promoteToCompatMatrix(copied, ctors);
+      return promoteMatrix(copied, ctors, dt);
     }
     if (datatype !== undefined) {
-      return promoteToCompatMatrix(factoryMatrix(data, format, datatype), ctors);
+      return promoteMatrix(factoryMatrix(data, format, datatype), ctors, datatype);
     }
-    return promoteToCompatMatrix(factoryMatrix(data, format), ctors);
+    return promoteMatrix(factoryMatrix(data, format), ctors);
   };
   return wrapped;
 }
@@ -106,15 +116,15 @@ export function createCompatSparseFactory(
   const { SparseMatrix } = ctors;
   const wrapped: SparseFn = function compatSparse(...args: unknown[]): unknown {
     const data = args[0];
-    const datatype = args[1];
+    const datatype = typeof args[1] === 'string' ? args[1] : undefined;
     if (args.length > 2) {
       throw tooManyArgumentsError('sparse', 2, args.length);
     }
     if (args.length === 0) {
-      return promoteToCompatMatrix(new SparseMatrix([]), ctors);
+      return promoteMatrix(new SparseMatrix([]), ctors);
     }
     if (args.length === 1 && typeof data === 'string') {
-      return promoteToCompatMatrix(new SparseMatrix([], data), ctors);
+      return promoteMatrix(new SparseMatrix([], data), ctors, data);
     }
     if (args.length === 1) {
       rejectInvalidMatrixArg('sparse', data);
@@ -123,12 +133,12 @@ export function createCompatSparseFactory(
       const srcDatatype = (data as { _datatype?: string })._datatype;
       const dt = datatype ?? srcDatatype;
       const clone = new SparseMatrix((data as { toArray(): unknown }).toArray(), dt);
-      return promoteToCompatMatrix(clone, ctors);
+      return promoteMatrix(clone, ctors, dt);
     }
     if (datatype !== undefined) {
-      return promoteToCompatMatrix(factorySparse(data, datatype), ctors);
+      return promoteMatrix(factorySparse(data, datatype), ctors, datatype);
     }
-    return promoteToCompatMatrix(factorySparse(data), ctors);
+    return promoteMatrix(factorySparse(data), ctors);
   };
   return wrapped;
 }
