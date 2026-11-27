@@ -51,7 +51,8 @@ type G09SubsetDeps = {
 const SHAPE_MISMATCH_ZERO_INDEX =
   'shape mismatch: mismatch is found in arg with shape (1) not possible to broadcast dimension 1 with size 1 to size 0';
 
-const G09_MATRIX_SUBSET_PATCHED = Symbol('g09MatrixSubsetPatched');
+/** Marker on a dense matrix prototype once `installG09BridgeMatrixSubsetPatch` ran (#1557 / #1785). */
+export const G09_MATRIX_SUBSET_PATCHED = Symbol('g09MatrixSubsetPatched');
 
 const MATHJS_DENSE_MATRIX_NAME = 'MathJSDenseMatrix';
 
@@ -259,13 +260,18 @@ type SubsetPatchedCtor = {
   [G09_MATRIX_SUBSET_PATCHED]?: boolean;
 };
 
+type SubsetPatchedProto = BridgeMatrixMutable & {
+  subset(index: unknown, replacement?: unknown, defaultValue?: unknown): unknown;
+  [G09_MATRIX_SUBSET_PATCHED]?: boolean;
+};
+
 /** Patch bridge `DenseMatrix#subset` once so RHS values reshape like mathjs before `_setSubset`. */
 export function installG09BridgeMatrixSubsetPatch(sampleMatrix: unknown): void {
   if (!isBridgeDenseMatrix(sampleMatrix)) return;
   const ctor = sampleMatrix.constructor as SubsetPatchedCtor;
   if (ctor.name !== MATHJS_DENSE_MATRIX_NAME) return;
-  if (ctor[G09_MATRIX_SUBSET_PATCHED]) return;
-  const proto = ctor.prototype;
+  const proto = Object.getPrototypeOf(sampleMatrix) as SubsetPatchedProto;
+  if (proto[G09_MATRIX_SUBSET_PATCHED]) return;
   const original = proto.subset;
   proto.subset = function (
     this: BridgeMatrixMutable,
@@ -279,7 +285,7 @@ export function installG09BridgeMatrixSubsetPatch(sampleMatrix: unknown): void {
     }
     return original.call(this, index, replacement, defaultValue);
   };
-  Object.defineProperty(ctor, G09_MATRIX_SUBSET_PATCHED, { value: true, configurable: true });
+  Object.defineProperty(proto, G09_MATRIX_SUBSET_PATCHED, { value: true, configurable: true });
 }
 
 /** Wrap `subset` so zero-length selections throw and empty-index no-ops match mathjs 15.3.0. */

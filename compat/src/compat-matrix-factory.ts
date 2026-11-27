@@ -4,8 +4,16 @@
 
 import { isUnit } from '@danielsimonjr/mathts-core';
 import { clone } from '@danielsimonjr/mathts-core/internal';
+import {
+  SparseMatrix as NativeSparseMatrix,
+  isDenseMatrix,
+  isSparseMatrix,
+  type DenseMatrix as NativeDenseInstance,
+  type SparseMatrix as NativeSparseInstance,
+} from '@danielsimonjr/mathts-matrix';
 import { tooManyArgumentsError } from './mathjs-parity-g02.js';
 import {
+  isCompatWrappedMatrix,
   promoteToCompatMatrix,
   readMatrixDatatype,
   stampMatrixDatatype,
@@ -22,12 +30,54 @@ function promoteMatrix(value: unknown, ctors: CompatMatrixCtors, datatype?: stri
 type MatrixFn = (...args: unknown[]) => unknown;
 type SparseFn = (...args: unknown[]) => unknown;
 
+function typeName(value: unknown): string {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  if (Array.isArray(value)) return 'Array';
+  return (value as { constructor?: { name?: string } }).constructor?.name ?? typeof value;
+}
+
 function isCompatMatrixValue(value: unknown): boolean {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    (value as { isMatrix?: boolean }).isMatrix === true
-  );
+  if (typeof value !== 'object' || value === null) return false;
+  if ((value as { isMatrix?: boolean }).isMatrix === true) return true;
+  return isDenseMatrix(value) || isSparseMatrix(value);
+}
+
+function isNativeMathtsMatrix(value: unknown): boolean {
+  return (isDenseMatrix(value) || isSparseMatrix(value)) && !isCompatWrappedMatrix(value);
+}
+
+function convertNativeMatrixFormat(
+  data: unknown,
+  parsed: 'sparse' | 'dense' | undefined,
+  ctors: CompatMatrixCtors
+): unknown {
+  if (isSparseMatrix(data)) {
+    if (parsed === undefined || parsed === 'sparse') return data;
+    return (data as NativeSparseInstance).toDense();
+  }
+  if (isDenseMatrix(data)) {
+    if (parsed === undefined || parsed === 'dense') return data;
+    if (parsed === 'sparse') {
+      return promoteMatrix(NativeSparseMatrix.fromDense(data as NativeDenseInstance), ctors);
+    }
+  }
+  return data;
+}
+
+function matrixFormat(format: unknown): 'sparse' | 'dense' | undefined {
+  if (format === undefined) return undefined;
+  if (typeof format !== 'string' && typeof format !== 'boolean') {
+    throw new TypeError(
+      'Unexpected type of argument in function matrix (expected: string or boolean, actual: ' +
+        typeName(format) +
+        ', index: 1)'
+    );
+  }
+  const name = String(format);
+  if (name === 'sparse') return 'sparse';
+  if (name === 'dense' || name === 'default') return 'dense';
+  throw new TypeError('Unknown matrix type ' + JSON.stringify(name) + '.');
 }
 
 function rejectInvalidMatrixArg(fn: 'matrix' | 'sparse', value: unknown): void {
@@ -77,10 +127,22 @@ export function createCompatMatrixFactory(
         format
       );
     }
+    if (args.length === 1 && isCompatMatrixValue(data)) {
+      if (isCompatWrappedMatrix(data) || isNativeMathtsMatrix(data)) {
+        return data;
+      }
+    }
     if (args.length === 1) {
       rejectInvalidMatrixArg('matrix', data);
     }
-    if (isCompatMatrixValue(data) && typeof format === 'string') {
+    if (isCompatMatrixValue(data) && args.length === 2) {
+      if (format === undefined && (isCompatWrappedMatrix(data) || isNativeMathtsMatrix(data))) {
+        return data;
+      }
+      const parsed = matrixFormat(format);
+      if (isNativeMathtsMatrix(data)) {
+        return convertNativeMatrixFormat(data, parsed, ctors);
+      }
       const storage = (data as { storage?: () => string }).storage?.();
       const srcDatatype = (data as { _datatype?: string; datatype?: () => string })._datatype;
       const dt =
@@ -91,7 +153,7 @@ export function createCompatMatrixFactory(
           : undefined);
       const arr = clone((data as { toArray(): unknown }).toArray() as never);
       const size = clone((data as { size(): number[] }).size());
-      if (format === 'sparse' || (format === undefined && storage === 'sparse')) {
+      if (parsed === 'sparse' || (parsed === undefined && storage === 'sparse')) {
         const copied = new SparseMatrix({ data: arr, size }, dt);
         return promoteMatrix(copied, ctors, dt);
       }
@@ -125,6 +187,11 @@ export function createCompatSparseFactory(
     }
     if (args.length === 1 && typeof data === 'string') {
       return promoteMatrix(new SparseMatrix([], data), ctors, data);
+    }
+    if (args.length === 1 && isCompatMatrixValue(data)) {
+      if (isCompatWrappedMatrix(data) || isNativeMathtsMatrix(data)) {
+        return data;
+      }
     }
     if (args.length === 1) {
       rejectInvalidMatrixArg('sparse', data);

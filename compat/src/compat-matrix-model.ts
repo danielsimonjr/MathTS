@@ -17,7 +17,10 @@ import {
   newOperatorGuard,
   type CompatClass,
 } from './constructors-without-new.js';
-import { installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
+import {
+  G09_MATRIX_SUBSET_PATCHED,
+  installG09BridgeMatrixSubsetPatch,
+} from './mathjs-parity-g09.js';
 import {
   applyCompatLegacySubsetGet,
   forwardSubsetArgs,
@@ -403,7 +406,10 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
   };
 
   const originalGet = nativeProto.get as (index: unknown, col?: unknown) => unknown;
-  wrapperProto.get = function getWrapped(this: MatrixLike, index: unknown): unknown {
+  wrapperProto.get = function getWrapped(this: MatrixLike, index: unknown, col?: unknown): unknown {
+    if (arguments.length === 2 && typeof index === 'number' && typeof col === 'number') {
+      return originalGet.call(this, index, col);
+    }
     if (arguments.length === 2) {
       throw new TypeError('Array expected');
     }
@@ -635,9 +641,11 @@ export function wrapCompatDenseMatrixClass(
     };
   }
 
-  if (!Reflect.get(Wrapped, Symbol.for('compat.dense.patched'))) {
-    Object.defineProperty(Wrapped, Symbol.for('compat.dense.patched'), { value: true });
-    installG09BridgeMatrixSubsetPatch(new Wrapped());
+  if (!Reflect.get(wrapperProto, G09_MATRIX_SUBSET_PATCHED)) {
+    const g09Sample = Reflect.construct(NativeDense, [[]]) as MatrixLike & Record<string, unknown>;
+    decorateDenseInstance(g09Sample, wrapperProto);
+    installG09BridgeMatrixSubsetPatch(g09Sample);
+    Object.defineProperty(wrapperProto, G09_MATRIX_SUBSET_PATCHED, { value: true });
   }
 
   (Wrapped as { fromJSON?: unknown }).fromJSON = function fromJSON(json: {
