@@ -23,8 +23,18 @@ import { shims, createCompatPow } from './shims.js';
 import {
   BigNumber as CompatBigNumberCtor,
   compatDecimalResult,
+  setCompatDecimalBigNumberCtor,
+  createCompatBignumberShim,
   promoteBooleanScalarsForBigNumber,
 } from './bignumber.js';
+import {
+  createCompatDiag,
+  createInstanceBigNumberClass,
+  normalizeCompatRangeResult,
+} from './compat-bignumber-instance.js';
+import { wrapCompatSparseMatrixClass } from './compat-sparse-matrix.js';
+import { configuredMathjsConstant } from './instance-constants.js';
+import { withCompatLog2BigNumberExact } from './compat-log2-bignumber.js';
 import { applyG08CompatOverrides } from './g08-inverse-hyperbolic-compat.js';
 import { compatFreqz, compatZpk2tf } from './compat-signal-factories.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
@@ -44,6 +54,7 @@ import type {
 } from '@danielsimonjr/mathts-core';
 import {
   Complex as CompatComplex,
+  isBigNumber,
   isFraction as isCoreFraction,
   type TypedFunction,
 } from '@danielsimonjr/mathts-core';
@@ -191,6 +202,9 @@ const defaultConfig: MathJSConfig = {
   epsilon: 1e-12,
   randomSeed: null,
 };
+
+/** BigNumber ctor used for promotion in instance-scoped wrappers (#1780). */
+let instancePromoteBigNumber: typeof CompatBigNumberCtor = CompatBigNumberCtor;
 
 /** When false, wrapped calls skip `runWithConfig` (instance config unchanged since create). */
 function instanceConfigUsesOverlay(current: MathJSConfig, baseline: MathJSConfig): boolean {
@@ -392,7 +406,8 @@ const compatArgDefault = createCompatArg(
   mathFunctions.arg as (...args: unknown[]) => unknown,
   CompatBigNumberCtor,
   () => defaultConfig.precision ?? 64,
-  withBigNumberPrecision
+  withBigNumberPrecision,
+  () => Math.PI
 );
 const compatExpm = createCompatExpm(
   mathFunctions.expm as (...args: unknown[]) => unknown,
@@ -425,13 +440,15 @@ const compatMad = createCompatMad({
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
   const bound = ((...args: unknown[]) =>
-    compatDecimalResult(fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor)))) as T;
+    compatDecimalResult(fn(...promoteBooleanScalarsForBigNumber(args, instancePromoteBigNumber)))) as T;
   copyFunctionSurface(fn, bound);
   return bound;
 }
 
 /** Hot scalar ops skip lazy config wrappers (#735); still per-instance refs. */
 const HOT_SCALAR_SHIM_KEYS = new Set(['add', 'subtract', 'multiply']);
+/** Already applies `runWithConfig` / parity logic — skip the generic wrapper (#1780). */
+const SELF_SCOPED_FUNCTION_KEYS = new Set(['bignumber']);
 
 /**
  * Front for a unary scalar shim (#889): a lone number in the real domain takes the Math
@@ -500,10 +517,22 @@ function coerceBigNumberResultForNumberMode(
   result: unknown
 ): unknown {
   if (config.number === 'BigNumber') return result;
-  if (args.length === 1 && typeof args[0] === 'bigint' && result instanceof CompatBigNumberCtor) {
+  if (args.length === 1 && typeof args[0] === 'bigint' && isBigNumber(result)) {
     return (result as InstanceType<typeof CompatBigNumberCtor>).toNumber();
   }
   return result;
+}
+
+function withCompatInstanceSurface<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  currentConfig: MathJSConfig,
+  usesOverlay: () => boolean
+): T {
+  return wrapWithInstanceConfig(
+    ((...args: unknown[]) => compatDecimalResult(fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor)))) as T,
+    currentConfig,
+    usesOverlay
+  );
 }
 
 function withCoercedNumberConfigScalar<T extends (...args: unknown[]) => unknown>(
@@ -523,7 +552,7 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
 ): T {
   const wrapped = function (this: unknown, ...args: unknown[]) {
     const construct = new.target;
-    const callArgs = promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor);
+    const callArgs = promoteBooleanScalarsForBigNumber(args, instancePromoteBigNumber);
     const invoke = (): unknown => {
       if (construct) {
         return Reflect.construct(fn, callArgs, construct === wrapped ? fn : construct);
@@ -611,12 +640,6 @@ export function create(
     sqrt: mathFunctions.sqrt as (...args: unknown[]) => unknown,
     matrix: mathFunctions.matrix as (data: unknown, storage?: string) => unknown,
   };
-  const compatArg = createCompatArg(
-    mathFunctions.arg as (...args: unknown[]) => unknown,
-    CompatBigNumberCtor,
-    () => currentConfig.precision ?? 64,
-    withBigNumberPrecision
-  );
   const compatStd = createCompatMathjsStatistics(
     'std',
     shims.std as (...args: unknown[]) => unknown,
@@ -715,6 +738,44 @@ export function create(
     return overlayNeeded;
   };
 
+  const instanceBigNumberClass = createInstanceBigNumberClass(() => currentConfig, usesOverlay);
+  instancePromoteBigNumber = instanceBigNumberClass;
+  setCompatDecimalBigNumberCtor(instanceBigNumberClass);
+  const compatBignumberBackend = (value: unknown): unknown =>
+    (
+      mathFunctions.factory_mathjsCompat.compatFactoryExports().createBignumber({
+        typed: mathFunctions.factory_mathjsCompat.createCompatTyped(),
+        BigNumber: instanceBigNumberClass,
+      }) as (v: unknown) => unknown
+    )(value);
+  const scopedBignumber = createCompatBignumberShim(
+    instanceBigNumberClass,
+    (value) => {
+      const run = () => compatDecimalResult(compatBignumberBackend(value));
+      return usesOverlay() ? mathFunctions.runWithConfig(currentConfig, run) : run();
+    },
+    tooManyArgumentsError
+  );
+  const readInstancePi = (): unknown => {
+    const build = (): unknown => {
+      const pi = configuredMathjsConstant('pi', Math.PI, {
+        ...currentConfig,
+        number: 'BigNumber',
+      });
+      return new instanceBigNumberClass(
+        (pi as InstanceType<typeof CompatBigNumberCtor>).toString()
+      );
+    };
+    return usesOverlay() ? mathFunctions.runWithConfig(currentConfig, build) : build();
+  };
+  const compatArg = createCompatArg(
+    mathFunctions.arg as (...args: unknown[]) => unknown,
+    instanceBigNumberClass,
+    () => currentConfig.precision ?? 64,
+    withBigNumberPrecision,
+    readInstancePi
+  );
+
   function createSibling(
     input?: CompatInstanceCreateInput,
     options?: Partial<MathJSConfig>
@@ -791,7 +852,7 @@ export function create(
       shims.isFraction(value)
         ? 'Fraction'
         : (mathFunctions.typeOf as (v: unknown) => string)(value)) as typeof mathFunctions.typeOf,
-    bignumber: shims.bignumber,
+    bignumber: scopedBignumber,
     matrix: shims.matrix,
     sparse: shims.sparse,
 
@@ -819,7 +880,10 @@ export function create(
     exp: withMatrixMapHintOnUnary('exp', withFractionRejection(shims.exp)),
     log: withFractionRejection(shims.log),
     log10: withCoercedNumberConfigScalar(withFractionRejection(mathFunctions.log10), currentConfig),
-    log2: withCoercedNumberConfigScalar(withFractionRejection(mathFunctions.log2), currentConfig),
+    log2: withCoercedNumberConfigScalar(
+      withCompatLog2BigNumberExact(withFractionRejection(mathFunctions.log2)),
+      currentConfig
+    ),
 
     // Trigonometry — #1587: a Fraction argument throws the mathjs conversion error.
     sin: withFractionRejection(shims.sin),
@@ -940,9 +1004,13 @@ export function create(
     factory_asec: mathFunctions.factory_asec,
   });
   const g07Logical = createG07LogicalParity();
-  const { rangeEvaluate: g18RangeEvaluate, ...g18Surface } = g18InstanceOverrides(
-    () => currentConfig
-  );
+  const {
+    rangeEvaluate: g18RangeEvaluate,
+    range: g18RangeNative,
+    ...g18Surface
+  } = g18InstanceOverrides(() => currentConfig);
+  const g18Range = (...args: unknown[]) =>
+    normalizeCompatRangeResult(args, g18RangeNative(...args), instanceBigNumberClass);
   const compatDefaultOverrides = {
     // #1587: a Fraction argument throws the mathjs conversion error, on top of
     // the G08 complex.js adapters (inverse hyperbolics) and the factories.
@@ -988,7 +1056,6 @@ export function create(
     mad: compatMad,
     expm: compatExpm,
     pinv: compatPinv,
-    bignumber: shims.bignumber,
     format: ((value: unknown, options?: Record<string, unknown> | number) => {
       const merged = normalizeCompatFormatOptions(options, currentConfig.precision);
       const formatImpl = namedFormat;
@@ -1091,19 +1158,37 @@ export function create(
       return (mathFunctions.bigint as (...a: unknown[]) => unknown)(...args);
     }),
     ...g18Surface,
+    range: g18Range,
     nullish: g07Logical.nullish,
     not: g07Logical.not,
     and: g07Logical.and,
     or: g07Logical.or,
     xor: g07Logical.xor,
-    diag: mathFunctions.diag,
+    diag: createCompatDiag(
+      mathFunctions.diag as (...args: unknown[]) => unknown,
+      instanceBigNumberClass
+    ),
     rotationMatrix: mathFunctions.rotationMatrix,
     subset: compatSubset,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
   ) as (keyof typeof compatDefaultOverrides)[];
-  for (const name of overriddenNames) flat[name] = compatDefaultOverrides[name];
+  for (const name of overriddenNames) {
+    const raw = compatDefaultOverrides[name];
+    flat[name] =
+      typeof raw === 'function'
+        ? withCompatInstanceSurface(raw as (...args: unknown[]) => unknown, currentConfig, usesOverlay)
+        : raw;
+  }
+  flat.diag = withCompatInstanceSurface(
+    createCompatDiag(
+      mathFunctions.diag as (...args: unknown[]) => unknown,
+      instanceBigNumberClass
+    ),
+    currentConfig,
+    usesOverlay
+  );
   if (localUnits) flat.Unit = localUnits.Unit;
   const flatKeys = Object.keys(flat).filter(
     (key) => !(INTERNAL_NAMES.has(key) && Object.is(flat[key], functionsNamespace[key]))
@@ -1197,7 +1282,12 @@ export function create(
     definePrototypeAccessor(
       level,
       key,
-      isLazy(key, value) ? () => buildWrapper(key, value) : () => value,
+      isLazy(key, value)
+        ? () =>
+            SELF_SCOPED_FUNCTION_KEYS.has(key)
+              ? value
+              : buildWrapper(key, value as (...args: unknown[]) => unknown)
+        : () => value,
       instance
     );
   });
@@ -1217,8 +1307,12 @@ export function create(
     }
     const value = flat[key];
     if (!isLazy(key, value)) {
+      const assigned =
+        typeof value === 'function' && key !== 'bignumber'
+          ? buildWrapper(key, value as (...args: unknown[]) => unknown)
+          : value;
       Object.defineProperty(instance, key, {
-        value,
+        value: assigned,
         writable: true,
         enumerable: true,
         configurable: true,
@@ -1250,7 +1344,13 @@ export function create(
       enumerable: true,
       configurable: true,
       get() {
-        if (cached === undefined) replaceWith(buildWrapper(key, raw));
+        if (cached === undefined) {
+          replaceWith(
+            SELF_SCOPED_FUNCTION_KEYS.has(key)
+              ? raw
+              : buildWrapper(key, raw as (...args: unknown[]) => unknown)
+          );
+        }
         return cached;
       },
       set(v: unknown) {
@@ -1279,6 +1379,21 @@ export function create(
     });
   }
 
+  instance.BigNumber = instanceBigNumberClass;
+  instance.SparseMatrix = wrapCompatSparseMatrixClass(
+    mathFunctions.factory_mathjsCompat.constructors.SparseMatrix as abstract new (
+      ...args: unknown[]
+    ) => {
+      _datatype?: string;
+      _values: unknown[] | null;
+      _index: number[];
+      _ptr: number[];
+      _size: number[];
+      zero: unknown;
+      valueOf(): unknown[][];
+    },
+    (value) => new instanceBigNumberClass(value as number | string)
+  );
   wireMathjsInstanceApi(
     instance as Record<string, unknown>,
     currentConfig,

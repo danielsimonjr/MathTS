@@ -4,6 +4,7 @@
  */
 
 import { Complex, isBigNumber, isComplex } from '@danielsimonjr/mathts-core';
+import { compatDecimalResult } from './bignumber.js';
 
 function logHypotComplexJs(a: number, b: number): number {
   const absA = Math.abs(a);
@@ -210,21 +211,21 @@ export function wrapG08InverseHyperbolic(
   const recompute = options.recompute ?? (() => true);
   const wrapped = function (this: unknown, ...args: unknown[]) {
     const x = args[0];
-    if (isComplex(x)) return mathjs(x);
+    if (isComplex(x)) return compatDecimalResult(mathjs(x));
     if (typeof x === 'number' && Object.is(x, 0)) {
       if (zeroCase === 'acoth') return new Complex(0, Math.PI / 2);
       if (zeroCase === 'acsc' || zeroCase === 'asec') return new Complex(0, Infinity);
     }
     const result = base.apply(this, args);
-    if (!isComplex(result)) return result;
+    if (!isComplex(result)) return compatDecimalResult(result);
     if (typeof x === 'number' && recompute(x)) {
-      return mathjs(new Complex(x, 0));
+      return compatDecimalResult(mathjs(new Complex(x, 0)));
     }
     if (isBigNumber(x)) {
       const n = (x as { toNumber(): number }).toNumber();
-      if (recompute(n)) return mathjs(new Complex(n, 0));
+      if (recompute(n)) return compatDecimalResult(mathjs(new Complex(n, 0)));
     }
-    return result;
+    return compatDecimalResult(result);
   };
   copyFunctionSurface(base, wrapped);
   return wrapped;

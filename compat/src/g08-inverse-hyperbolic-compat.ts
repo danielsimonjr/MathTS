@@ -1,5 +1,11 @@
 /** G08 compat instance overrides — re-export bundle for `create(all)`. */
 
+import { isBigNumber } from '@danielsimonjr/mathts-core';
+import {
+  BigNumber as CompatBigNumber,
+  compatDecimalResult,
+  getCompatDecimalBigNumberCtor,
+} from './bignumber.js';
 import {
   complexJsAcosh,
   complexJsAcoth,
@@ -14,6 +20,16 @@ import {
 } from './complex-js-inverse-hyperbolic.js';
 
 type Fn = (...args: unknown[]) => unknown;
+
+function withBigNumberAcoshAtOne(fn: Fn): Fn {
+  return (...args: unknown[]): unknown => {
+    const x = args[0];
+    if (isBigNumber(x) && (x as { eq(n: unknown): boolean }).eq(1)) {
+      return compatDecimalResult(new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(0));
+    }
+    return fn(...args);
+  };
+}
 
 /** Typed-function entry points overridden for G08 on `create(all)`. */
 export type G08FactoryBundle = {
@@ -42,9 +58,11 @@ export function applyG08CompatOverrides(factories: G08FactoryBundle): {
     asinh: wrapG08InverseHyperbolic(factories.factory_asinh, complexJsAsinh, {
       recompute: () => true,
     }),
-    acosh: wrapG08InverseHyperbolic(factories.factory_acosh, complexJsAcosh, {
-      recompute: (x) => x > -1 && x < 1,
-    }),
+    acosh: withBigNumberAcoshAtOne(
+      wrapG08InverseHyperbolic(factories.factory_acosh, complexJsAcosh, {
+        recompute: (x) => x > -1 && x < 1,
+      })
+    ),
     atanh: wrapG08InverseHyperbolic(factories.factory_atanh, complexJsAtanh, {
       recompute: (x) => x < -1 || x > 1,
     }),

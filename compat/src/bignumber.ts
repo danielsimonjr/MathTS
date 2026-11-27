@@ -10,7 +10,7 @@ import {
 function fixNegativeZeroExponent(bn: CompatBigNumber): CompatBigNumber {
   const exponent = (bn as unknown as { _exponent: number })._exponent;
   if (Object.is(exponent, -0)) {
-    return new CompatBigNumber(bn.toString());
+    return new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(bn.toString());
   }
   return bn;
 }
@@ -56,7 +56,10 @@ export function promoteBooleanScalarsForBigNumber(
   BigNumberCtor: typeof CompatBigNumber
 ): unknown[] {
   const hasBigNumber = args.some(
-    (a) => a instanceof CompatBigNumber || (a instanceof NativeBigNumber && isBigNumber(a))
+    (a) =>
+      a instanceof BigNumberCtor ||
+      a instanceof CompatBigNumber ||
+      (a instanceof NativeBigNumber && isBigNumber(a))
   );
   if (!hasBigNumber) return [...args];
   return args.map((a) => (typeof a === 'boolean' ? new BigNumberCtor(a ? 1 : 0) : a));
@@ -75,10 +78,11 @@ function patchNodeEvaluate(node: { evaluate: (...args: unknown[]) => unknown }):
 /** Give a native decimal result the compatibility display convention (deep). */
 export function compatDecimalResult(value: unknown): unknown {
   if (value instanceof NativeBigNumber) {
-    if (!(value instanceof CompatBigNumber)) {
-      return fixNegativeZeroExponent(new CompatBigNumber(value));
+    const Ctor = getCompatDecimalBigNumberCtor();
+    if (!(value instanceof Ctor)) {
+      return fixNegativeZeroExponent(new Ctor(value.toString()));
     }
-    return fixNegativeZeroExponent(value);
+    return fixNegativeZeroExponent(value as CompatBigNumber);
   }
   if (Array.isArray(value)) {
     let changed = false;
@@ -174,5 +178,65 @@ Object.defineProperty(CompatBigNumber, 'config', {
 
 export { CompatBigNumber as BigNumber };
 
+export type CompatDecimalBigNumberCtor = new (
+  ...args: ConstructorParameters<typeof CompatBigNumber>
+) => CompatBigNumber;
+
+/** Ctor used when normalizing native decimals to compat instances (per-instance on `create`). */
+let compatDecimalBigNumberCtorState: CompatDecimalBigNumberCtor = CompatBigNumber;
+
+export function getCompatDecimalBigNumberCtor(): CompatDecimalBigNumberCtor {
+  return compatDecimalBigNumberCtorState;
+}
+
+/** @internal Per-instance ctor wiring from `create()` — not for app callers. */
+export function setCompatDecimalBigNumberCtor(ctor: CompatDecimalBigNumberCtor): void {
+  compatDecimalBigNumberCtorState = ctor;
+}
+
 /** Instance type for compat decimals (mathjs `BigNumber` / `math.bignumber()`). */
 export type CompatBigNumberInstance = CompatBigNumber;
+
+type CompatBignumberInvoke = (value: unknown) => unknown;
+
+/** Per-instance `bignumber()` using the instance BigNumber class (#1780). */
+export function createCompatBignumberShim(
+  BigNumberCtor: typeof CompatBigNumber,
+  invokeNative: CompatBignumberInvoke,
+  tooMany: (name: string, max: number, actual: number) => Error
+): (...args: unknown[]) => unknown {
+  const promote = (value: unknown): unknown => {
+    if (value instanceof BigNumberCtor) return value;
+    if (isBigNumber(value)) {
+      return new BigNumberCtor((value as CompatBigNumber).toString());
+    }
+    return compatDecimalResult(value);
+  };
+  return (...callArgs: unknown[]): unknown => {
+    if (callArgs.length > 1) {
+      invokeNative(callArgs[0]);
+      throw tooMany('bignumber', 1, callArgs.length);
+    }
+    const value = callArgs[0];
+    if (value === undefined) {
+      return new BigNumberCtor(0);
+    }
+    if (value instanceof BigNumberCtor) {
+      return value;
+    }
+    if (typeof value === 'bigint') {
+      return new BigNumberCtor(value.toString());
+    }
+    const raw = invokeNative(value);
+    if (Array.isArray(raw)) {
+      return raw.map((entry) => promote(entry));
+    }
+    if (typeof raw === 'object' && raw !== null) {
+      const matrix = raw as { isMatrix?: boolean; map?: (cb: (x: unknown) => unknown) => unknown };
+      if (matrix.isMatrix === true && typeof matrix.map === 'function') {
+        return matrix.map((entry) => promote(entry));
+      }
+    }
+    return promote(raw);
+  };
+}

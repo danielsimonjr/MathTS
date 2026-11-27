@@ -224,11 +224,13 @@ export function wireMathjsInstanceApi(
   };
 
   const instanceTyped = factory_mathjsCompat.createCompatTyped();
+  const instanceBigNumber =
+    (instance.BigNumber as typeof CompatBigNumber | undefined) ?? CompatBigNumber;
   instanceTyped.addConversion(
     {
       from: 'bigint',
       to: 'BigNumber',
-      convert: (x: unknown) => new CompatBigNumber((x as bigint).toString()),
+      convert: (x: unknown) => new instanceBigNumber((x as bigint).toString()),
     },
     { override: true }
   );
@@ -476,11 +478,13 @@ export function wireMathjsInstanceApi(
     ) => unknown;
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: CompatEvaluateOptions) =>
-        mapExpressions(expression, (text) =>
-          wrapBlockArrayAsResultSet(
-            evaluator.evaluate(text, scope, policyOptions(options)),
-            text,
-            ResultSetCtor
+        compatDecimalResult(
+          mapExpressions(expression, (text) =>
+            wrapBlockArrayAsResultSet(
+              evaluator.evaluate(text, scope, policyOptions(options)),
+              text,
+              ResultSetCtor
+            )
           )
         )
     );

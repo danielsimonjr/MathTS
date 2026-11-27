@@ -316,7 +316,8 @@ export function createCompatArg(
   native: UnaryLike,
   BigNumberClass: BigNumberCtor,
   getPrecision: () => number = () => 64,
-  withPrecision: ArgPrecisionScope = (_p, build) => build()
+  withPrecision: ArgPrecisionScope = (_p, build) => build(),
+  getPi: () => unknown = () => Math.PI
 ): (...args: unknown[]) => unknown {
   return (...args: unknown[]): unknown => {
     if (args.length === 1 && (isBigNumberLike(args[0]) || isOwnBigNumber(args[0]))) {
@@ -325,7 +326,15 @@ export function createCompatArg(
       const precision = getPrecision();
       return withPrecision(precision, () => {
         if (!negative) return new BigNumberClass(0);
-        const pi = new BigNumberClass(String(Math.PI));
+        const piSource = getPi();
+        const piText =
+          typeof piSource === 'object' &&
+          piSource !== null &&
+          'toString' in (piSource as object) &&
+          typeof (piSource as { toString(): string }).toString === 'function'
+            ? (piSource as { toString(): string }).toString()
+            : String(piSource);
+        const pi = new BigNumberClass(piText);
         const rounded = (pi as unknown as { toPrecision(n: number): string }).toPrecision(
           precision
         );
