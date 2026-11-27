@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
-import { chainTypedFromInstance } from '../src/chain-create.js';
+import { chainTypedFromInstance, createChain } from '../src/chain-create.js';
 
 describe('G20 chain implementation branches (#1575)', () => {
   it('chainTypedFromInstance rejects non-typed values', () => {
@@ -19,6 +19,16 @@ describe('G20 chain implementation branches (#1575)', () => {
     expect(calls).toContain('customChain');
     expect(typeof math.chain(1).customChain).toBe('function');
     expect(math.chain(5).customChain().done()).toBe(5);
+  });
+
+  it('createChain builds a working fluent chain', () => {
+    const math = create(all);
+    const { chain, Chain } = createChain(math as Record<string, unknown>, {
+      on: math.on.bind(math),
+    });
+    expect(chain(2).add(3).done()).toBe(5);
+    expect(new Chain(4).multiply(2).done()).toBe(8);
+    expect(String(chain(math.complex(1, 2)))).toMatch(/Chain|1|2/);
   });
 
   it('Chain constructor, fromJSON, and nested chain unwrap values', () => {
