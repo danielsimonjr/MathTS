@@ -4,6 +4,7 @@ type ExpressionFunction = ((...args: unknown[]) => unknown) & {
   expr?: string;
 };
 
+/** True when `value` is a parser-defined function with mathjs `syntax` / `expr` metadata. */
 export function isExpressionFunction(value: unknown): value is ExpressionFunction {
   const fn = value as Partial<ExpressionFunction>;
   return (
@@ -30,12 +31,14 @@ export function patchParserFunctionExpr(
   }
 }
 
+/** Tagged JSON payload for a mathjs {@link Parser} scope (#1782). */
 export type ParserJsonShape = {
   mathjs: 'Parser';
   variables: Record<string, unknown>;
   functions: Record<string, string>;
 };
 
+/** Serialize a parser scope to mathjs 15.3.0 JSON (`mathjs: 'Parser'`). */
 export function parserToJSON(scope: Record<string, unknown>): ParserJsonShape {
   const json: ParserJsonShape = {
     mathjs: 'Parser',
@@ -62,6 +65,7 @@ type ParserLike = {
   evaluate(expr: string): unknown;
 };
 
+/** Install `toJSON` / `fromJSON` on a compat `Parser` constructor (#1782). */
 export function attachParserJsonMethods<Options>(
   ParserClass: new (options?: Options) => ParserLike,
   createParser: (options?: Options) => ParserLike
