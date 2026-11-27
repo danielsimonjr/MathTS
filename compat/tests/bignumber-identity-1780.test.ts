@@ -216,4 +216,58 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     const r = bigmath.range(Big(1), 4) as { toArray(): unknown[] };
     expect(r.toArray()[0]).toBeInstanceOf(bigmath.BigNumber);
   });
+
+  it('SparseMatrix, diag/range matrix, log2 non-powers, and BigNumber helpers coverage (#1780)', () => {
+    const bigmath = create(all, { number: 'BigNumber', precision: 20 });
+    const Big = bigmath.bignumber;
+    const B = bigmath.BigNumber;
+    const inf = Big(Infinity);
+    const ninf = Big(-Infinity);
+
+    // SparseMatrix BigNumber operations
+    const sp = bigmath.sparse([
+      [Big(1), Big(0)],
+      [Big(0), Big(2)],
+    ]) as {
+      toArray(): unknown[][];
+      map(fn: (v: unknown) => unknown): { toArray(): unknown[][] };
+      clone(): { toArray(): unknown[][] };
+      get(idx: number[]): unknown;
+      set(idx: number[], val: unknown): unknown;
+    };
+    expect(sp.toArray()[0][0]).toBeInstanceOf(B);
+    expect(sp.clone().toArray()[1][1]).toBeInstanceOf(B);
+    expect(sp.map((v) => v).toArray()[0][0]).toBeInstanceOf(B);
+    expect(sp.get([0, 0])).toBeInstanceOf(B);
+    sp.set([0, 1], Big(3));
+    expect(sp.get([0, 1])).toBeInstanceOf(B);
+
+    // diag with Matrix input + range with plain numbers
+    const dm = bigmath.diag(bigmath.matrix([Big(1), Big(2)])) as { toArray(): unknown[][] };
+    expect(dm.toArray()[0][1]).toBeInstanceOf(B);
+    const rNum = bigmath.range(1, 3) as { toArray(): unknown[] };
+    expect(rNum.toArray()).toEqual([1, 2]);
+
+    // log2 non-power-of-2 and large power-of-2
+    expect(String(bigmath.log2(Big(3)))).toMatch(/^1\.5849625/);
+    expect(String(bigmath.log2(Big(0.5)))).toBe('-1');
+
+    // Additional bitwise shift edge cases
+    expect(String(bigmath.leftShift(Big(2), Big(-1)))).toBe('NaN');
+    expect(String(bigmath.leftShift(inf, Big(2)))).toBe('Infinity');
+    expect(String(bigmath.leftShift(inf, Infinity))).toBe('NaN');
+    expect(String(bigmath.leftShift(ninf, Big(-1)))).toBe('NaN');
+    expect(String(bigmath.rightArithShift(inf, Big(2)))).toBe('Infinity');
+    expect(String(bigmath.rightArithShift(ninf, inf))).toBe('-1');
+    expect(String(bigmath.bitNot(Big(5)))).toBe('-6');
+    expect(bigmath.bitAnd(5, 3)).toBe(1);
+    expect(bigmath.bitOr(5, 2)).toBe(7);
+    expect(bigmath.bitXor(5, 3)).toBe(6);
+
+    // BigNumber fromJSON, toNumber, Symbol.toPrimitive
+    const parsed = B.fromJSON({ value: '12.5' });
+    expect(parsed.toString()).toBe('12.5');
+    expect(Number(parsed)).toBe(12.5);
+    expect(`${parsed}`).toBe('12.5');
+  });
 });
