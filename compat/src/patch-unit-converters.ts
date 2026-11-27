@@ -16,6 +16,7 @@ type UnitConvertersHost = {
 function fractionMagnitudeToBigNumber(x: {
   isFraction?: boolean;
   numerator?: bigint;
+  denominator?: bigint;
   n?: bigint;
   d?: bigint;
   s?: bigint;
@@ -29,7 +30,9 @@ function fractionMagnitudeToBigNumber(x: {
   if (numerator === undefined) {
     throw new TypeError('Invalid Fraction magnitude');
   }
-  return new CompatBigNumber(String(numerator)).div(String(x.d ?? 1n)) as CompatBigNumber;
+  return new CompatBigNumber(String(numerator)).div(
+    String(x.denominator ?? x.d ?? 1n)
+  ) as CompatBigNumber;
 }
 
 /** Patch converters on one compat instance `Unit` constructor. */
@@ -39,6 +42,10 @@ export function patchCompatUnitTypeConverters(Unit: UnitConvertersHost): void {
 
   Unit.typeConverters.Fraction = (x: unknown) => {
     if (isMathjsFraction(x)) return x;
+    const core = x as { numerator?: unknown; denominator?: unknown };
+    if (typeof core.numerator === 'bigint' && typeof core.denominator === 'bigint') {
+      return new mathjsFractionClass(core.numerator, core.denominator);
+    }
     return new mathjsFractionClass(x as ConstructorParameters<typeof mathjsFractionClass>[0]);
   };
 
@@ -48,6 +55,15 @@ export function patchCompatUnitTypeConverters(Unit: UnitConvertersHost): void {
       return fractionMagnitudeToBigNumber(tagged);
     }
     return nativeBigNumber(x);
+  };
+
+  // A complex magnitude meets the unit scale, which can be an exact fraction: reduce it to a number.
+  Unit.typeConverters.Complex = (x: unknown) => {
+    const fraction = x as { numerator?: unknown; denominator?: unknown };
+    if (typeof fraction?.numerator === 'bigint' && typeof fraction.denominator === 'bigint') {
+      return Number(fraction.numerator) / Number(fraction.denominator);
+    }
+    return x;
   };
 
   Unit.typeConverters.number = (x: unknown) => {

@@ -92,6 +92,7 @@ import {
 } from './instance-api.js';
 import { bindInstanceSerialization } from './serialization.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
+import { withMathjsComplexBinary } from './mathjs-complex.js';
 import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
 import { wrapEqualForMathjsFraction } from './mathjs-fraction-relational.js';
 import { wrapMultiplyScalarForMathjsFraction } from './mathjs-fraction-unary-predicates.js';
@@ -766,6 +767,13 @@ export function create(
 
   // G06 (#1554): pinv and bernoulli keep BigNumber / Fraction / Complex inputs;
   // compare rejects a Complex operand the mathjs way. All compat-only adapters.
+  // mathjs 15.3.0 `to` broadcasts over Array and Matrix; the functions `to` is scalar-only.
+  const compatTo = mathFunctions.factory_mathjsCompat.compatFactoryExports().createTo({
+    typed: mathFunctions.factory_mathjsCompat.createCompatTyped(),
+    matrix: shims.matrix as Parameters<
+      ReturnType<typeof mathFunctions.factory_mathjsCompat.compatFactoryExports>['createTo']
+    >[0]['matrix'],
+  }) as (...args: unknown[]) => unknown;
   const compatPinv = createCompatPinv(mathFunctions.pinv as (...args: unknown[]) => unknown, {
     convert: convertForeignScalar,
     divide: shims.divide as (...args: unknown[]) => unknown,
@@ -814,7 +822,9 @@ export function create(
   const rawLocalUnits = fullBundle
     ? mathFunctions.factory_mathjsCompat.createCompatUnitSources(currentConfig)
     : undefined;
-  const localUnits = rawLocalUnits ? wrapCompatUnitSources(rawLocalUnits) : undefined;
+  const localUnits = rawLocalUnits
+    ? wrapCompatUnitSources(rawLocalUnits, () => currentConfig.number)
+    : undefined;
   const instanceConfig = mathFunctions.factory_mathjsCompat.configFactory(
     currentConfig as RuntimeConfig,
     (event, current, previous, changes) => {
@@ -1296,6 +1306,7 @@ export function create(
     compareText: namedCompareText,
     equalText: namedEqualText,
     toBest: namedToBest,
+    to: compatTo,
     unit: localUnits?.unit ?? namedUnit,
     createUnit: localUnits?.createUnit ?? namedCreateUnit,
     combinations: namedCombinations,
@@ -1710,8 +1721,13 @@ export function create(
   // Only the parser of the functions namespace is bound to the instance: a parser that
   // the caller supplies stays as given (#1250).
   if (localUnits) {
+    // complex.js division keeps a complex magnitude to the last digit (#1784).
+    const unitDivideScalar = withMathjsComplexBinary(
+      (a, b) => (instance.divideScalar as (x: unknown, y: unknown) => unknown)(a, b),
+      'div'
+    );
     patchCompatUnitDenormalize(localUnits.Unit, {
-      divideScalar: (a, b) => (instance.divideScalar as (x: unknown, y: unknown) => unknown)(a, b),
+      divideScalar: unitDivideScalar,
       multiplyScalar: (a, b) =>
         (instance.multiplyScalar as (x: unknown, y: unknown) => unknown)(a, b),
       pow: (base, exponent) =>

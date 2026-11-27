@@ -312,7 +312,10 @@ export function wireMathjsInstanceApi(
   const UnitCtor = instance.Unit as Parameters<typeof wrapCompatUnitConstructor>[0] | undefined;
   let wrappedUnit: unknown;
   if (typeof UnitCtor === 'function' && typeof UnitCtor.isValuelessUnit === 'function') {
-    const mathjsUnit = wrapCompatUnitConstructor(UnitCtor);
+    // mathjs 15.3.0: `Unit(2, 'inch')` without `new` throws a SyntaxError (#1784).
+    const mathjsUnit = newOperatorGuard(
+      wrapCompatUnitConstructor(UnitCtor) as unknown as abstract new (...args: never[]) => object
+    ) as unknown as typeof UnitCtor;
     mathNs.Unit = mathjsUnit;
     wrappedUnit = mathjsUnit;
   }
