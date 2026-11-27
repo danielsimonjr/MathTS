@@ -2,14 +2,20 @@
  * Remap MathTS typed / factory errors to mathjs 15.3.0 message and class shapes (#1773).
  */
 
-import {
-  BigNumber as CompatBigNumber,
-  compatDecimalResult,
-  getCompatDecimalBigNumberCtor,
-} from './bignumber.js';
+import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
 
-function compatDecimalNaN(): CompatBigNumber {
-  return new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(NaN);
+function ctorOf(a: unknown, b?: unknown): typeof CompatBigNumber {
+  if (a instanceof CompatBigNumber && typeof a.constructor === 'function') {
+    return a.constructor as typeof CompatBigNumber;
+  }
+  if (b instanceof CompatBigNumber && typeof b.constructor === 'function') {
+    return b.constructor as typeof CompatBigNumber;
+  }
+  return CompatBigNumber;
+}
+
+function compatDecimalNaN(Ctor: typeof CompatBigNumber = CompatBigNumber): CompatBigNumber {
+  return new Ctor(NaN);
 }
 import {
   FRACTION_TO_BIGNUMBER_ERROR,
@@ -215,7 +221,8 @@ export function withCompatBitwiseInfiniteBigNumberBinary(
   return (a: unknown, b: unknown): unknown => {
     const aa = asBigNumber(a);
     const bb = asBigNumber(b);
-    const wrap = (out: unknown) => compatDecimalResult(out);
+    const Ctor = ctorOf(a, b);
+    const wrap = (out: unknown) => compatDecimalResult(out, Ctor);
     if (!aa || !bb) return wrap(fn(a, b));
     const aInf = !aa.isFinite();
     const bInf = !bb.isFinite();
@@ -246,7 +253,7 @@ export function withCompatBitNotInfiniteBigNumber(
         return bn.neg();
       }
     }
-    return compatDecimalResult(fn(x));
+    return compatDecimalResult(fn(x), ctorOf(x));
   };
 }
 
@@ -271,13 +278,13 @@ export function withCompatBitShiftBigNumberParity(
   fn: (a: unknown, b: unknown) => unknown
 ): (a: unknown, b: unknown) => unknown {
   return (a: unknown, b: unknown): unknown => {
-    if (negativeShiftNaN(b)) {
-      return compatDecimalResult(compatDecimalNaN());
-    }
     const base = asCompatBigNumber(a);
     const shift = asCompatBigNumber(b);
     const shiftIsNumber = typeof b === 'number';
-    const Ctor = getCompatDecimalBigNumberCtor() as typeof CompatBigNumber;
+    const Ctor = ctorOf(a, b);
+    if ((base || shift) && negativeShiftNaN(b)) {
+      return compatDecimalResult(compatDecimalNaN(Ctor), Ctor);
+    }
     const shiftPositiveInfinity =
       b === Infinity ||
       (shiftIsNumber && b === Number.POSITIVE_INFINITY) ||
@@ -291,48 +298,44 @@ export function withCompatBitShiftBigNumberParity(
       a === Number.NEGATIVE_INFINITY ||
       Boolean(base && base.isNegative() && !base.isFinite());
     if (basePositiveInfinity && shiftPositiveInfinity) {
-      return compatDecimalResult(compatDecimalNaN());
+      return compatDecimalResult(compatDecimalNaN(Ctor), Ctor);
     }
     if (baseNegativeInfinity && shiftPositiveInfinity) {
-      return compatDecimalResult(new Ctor(-1));
+      return compatDecimalResult(new Ctor(-1), Ctor);
     }
     if (base) {
       if (shift) {
         if (!base.isFinite()) {
           if (!shift.isFinite()) {
             if (base.isNegative() && shift.isPositive()) {
-              return compatDecimalResult(
-                new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(-1)
-              );
+              return compatDecimalResult(new Ctor(-1), Ctor);
             }
-            return compatDecimalResult(compatDecimalNaN());
+            return compatDecimalResult(compatDecimalNaN(Ctor), Ctor);
           }
-          return compatDecimalResult(base);
+          return compatDecimalResult(base, Ctor);
         }
       } else if (shiftIsNumber && !Number.isFinite(b)) {
         if (!base.isFinite()) {
           if (base.isNegative() && (b as number) > 0) {
-            return compatDecimalResult(
-              new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(-1)
-            );
+            return compatDecimalResult(new Ctor(-1), Ctor);
           }
-          return compatDecimalResult(compatDecimalNaN());
+          return compatDecimalResult(compatDecimalNaN(Ctor), Ctor);
         }
-        return compatDecimalResult(base);
+        return compatDecimalResult(base, Ctor);
       }
     }
     try {
-      return compatDecimalResult(fn(a, b));
+      return compatDecimalResult(fn(a, b), Ctor);
     } catch (err) {
       if (
         base &&
         !base.isFinite() &&
         (shift?.isFinite() || (shiftIsNumber && Number.isFinite(b)))
       ) {
-        return compatDecimalResult(base);
+        return compatDecimalResult(base, Ctor);
       }
       if (base && negativeShiftNaN(b)) {
-        return compatDecimalResult(compatDecimalNaN());
+        return compatDecimalResult(compatDecimalNaN(Ctor), Ctor);
       }
       throw err;
     }
@@ -398,7 +401,7 @@ export function createCompatNumeric(
     ) {
       throw invalidNumericStringError(args[0]);
     }
-    return compatDecimalResult(out);
+    return compatDecimalResult(out, ctorOf(args[0]));
   };
 }
 

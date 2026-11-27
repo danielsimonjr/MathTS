@@ -1,5 +1,12 @@
 import { isBigNumber } from '@danielsimonjr/mathts-core';
-import { compatDecimalResult, getCompatDecimalBigNumberCtor } from './bignumber.js';
+import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
+
+function ctorOf(operand: unknown): typeof CompatBigNumber {
+  if (operand instanceof CompatBigNumber && typeof operand.constructor === 'function') {
+    return operand.constructor as typeof CompatBigNumber;
+  }
+  return CompatBigNumber;
+}
 
 function asCompatBigNumber(x: unknown): unknown {
   if (isBigNumber(x)) return x;
@@ -35,14 +42,14 @@ function exactLog2ForSmallIntegerPower(operand: unknown): unknown | null {
     big >>= 1n;
     exp += 1n;
   }
-  return new (getCompatDecimalBigNumberCtor())(exp.toString());
+  return new (ctorOf(operand))(exp.toString());
 }
 
 function roundLog2WhenExactPower(operand: unknown, out: unknown): unknown {
   const operandBn = asCompatBigNumber(operand) as DecimalLike | null;
   const outBn = asCompatBigNumber(out) as DecimalLike | null;
   if (!operandBn || !outBn) return out;
-  const Ctor = getCompatDecimalBigNumberCtor();
+  const Ctor = ctorOf(operand);
   const rounded = outBn.toDecimalPlaces(0);
   const two = new Ctor(2) as DecimalLike;
   try {
@@ -60,12 +67,12 @@ export function withCompatLog2BigNumberExact(fn: (x: unknown) => unknown): (x: u
   return (x: unknown): unknown => {
     const exactSmall = exactLog2ForSmallIntegerPower(x);
     if (exactSmall !== null) {
-      return compatDecimalResult(exactSmall);
+      return compatDecimalResult(exactSmall, ctorOf(x));
     }
     const out = fn(x);
     if ((asCompatBigNumber(x) as DecimalLike | null)?.eq?.(1)) {
-      return compatDecimalResult(new (getCompatDecimalBigNumberCtor())(0));
+      return compatDecimalResult(new (ctorOf(x))(0), ctorOf(x));
     }
-    return compatDecimalResult(roundLog2WhenExactPower(x, out));
+    return compatDecimalResult(roundLog2WhenExactPower(x, out), ctorOf(x));
   };
 }

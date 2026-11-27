@@ -122,8 +122,8 @@ describe('#1164 integer functions of BigNumbers through the expression language'
       expect(run('composition(5, 3)')).toBe(6);
       expect(str(run('composition(bignumber(5), bignumber(3))'))).toBe('6');
       expect(run('stirlingS2(5, 3)')).toBe(25);
-      expect(str(run('stirlingS2(bignumber(50), bignumber(3))'))).toBe('119649664052358811373730');
-      expect(str(run('bellNumbers(bignumber(30))'))).toBe('846749014511809332450147');
+      expect(big(run('stirlingS2(bignumber(50), bignumber(3))'))).toBe('119649664052358811373730');
+      expect(big(run('bellNumbers(bignumber(30))'))).toBe('846749014511809332450147');
     }
   });
 });

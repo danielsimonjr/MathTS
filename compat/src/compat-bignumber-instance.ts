@@ -17,12 +17,20 @@ export type InstanceBigNumberCtor = typeof CompatBigNumber & {
 /** Build a BigNumber class scoped to one compat instance config overlay. */
 type RunWithConfigOverlay = Parameters<typeof runWithConfig>[0];
 
+/** Symbol storing the owning compat instance's precision getter on its BigNumber class. */
+export const INSTANCE_PRECISION_GETTER = Symbol('compatInstancePrecisionGetter');
+
 /** Create a BigNumber class bound to one compat instance config. */
 export function createInstanceBigNumberClass(
   getConfig: () => RunWithConfigOverlay,
   usesOverlay: () => boolean
 ): InstanceBigNumberCtor {
   class InstanceBigNumber extends CompatBigNumber {}
+  Object.defineProperty(InstanceBigNumber, INSTANCE_PRECISION_GETTER, {
+    value: () => getConfig().precision ?? 64,
+    enumerable: false,
+    configurable: true,
+  });
 
   const installScopedMethod = (name: string, method: (...args: unknown[]) => unknown) => {
     Object.defineProperty(InstanceBigNumber.prototype, name, {

@@ -53,25 +53,42 @@ const nodeEvaluateWrapped = Symbol('compatNodeEvaluateWrapped');
 
 /** When one operand is a BigNumber, mathjs promotes booleans to 0/1 BigNumbers. */
 export function promoteBooleanScalarsForBigNumber(
-  args: readonly unknown[],
+  args: unknown[],
   BigNumberCtor: typeof CompatBigNumber
 ): unknown[] {
-  const hasBigNumber = args.some(
-    (a) =>
+  let hasBigNumber = false;
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (
       a instanceof BigNumberCtor ||
       a instanceof CompatBigNumber ||
       (a instanceof NativeBigNumber && isBigNumber(a))
-  );
-  if (!hasBigNumber) return [...args];
+    ) {
+      hasBigNumber = true;
+      break;
+    }
+  }
+  if (!hasBigNumber) return args;
+  let hasBoolean = false;
+  for (let i = 0; i < args.length; i++) {
+    if (typeof args[i] === 'boolean') {
+      hasBoolean = true;
+      break;
+    }
+  }
+  if (!hasBoolean) return args;
   return args.map((a) => (typeof a === 'boolean' ? new BigNumberCtor(a ? 1 : 0) : a));
 }
 
-function patchNodeEvaluate(node: { evaluate: (...args: unknown[]) => unknown }): void {
+function patchNodeEvaluate(
+  node: { evaluate: (...args: unknown[]) => unknown },
+  instanceCtor: CompatDecimalBigNumberCtor
+): void {
   const marker = node as { [nodeEvaluateWrapped]?: boolean };
   if (marker[nodeEvaluateWrapped]) return;
   const original = node.evaluate;
   node.evaluate = function (this: unknown, ...args: unknown[]) {
-    return compatDecimalResult(original.apply(this, args));
+    return compatDecimalResult(original.apply(this, args), instanceCtor);
   };
   marker[nodeEvaluateWrapped] = true;
 }
@@ -79,9 +96,12 @@ function patchNodeEvaluate(node: { evaluate: (...args: unknown[]) => unknown }):
 /** Give a native decimal result the compatibility display convention (deep). */
 export function compatDecimalResult(
   value: unknown,
-  instanceCtor: CompatDecimalBigNumberCtor = getCompatDecimalBigNumberCtor()
+  instanceCtor: CompatDecimalBigNumberCtor = CompatBigNumber
 ): unknown {
-  // Keep each compat instance's BigNumber class (#1780 — do not re-wrap with the last `create()` ctor).
+  if (typeof value !== 'object' || value === null) {
+    return value;
+  }
+  // Keep each compat instance's BigNumber class (#1780 — do not re-wrap with another instance's ctor).
   if (value instanceof CompatBigNumber) {
     return fixNegativeZeroExponent(value);
   }
@@ -94,31 +114,28 @@ export function compatDecimalResult(
   if (Array.isArray(value)) {
     let changed = false;
     const mapped = value.map((entry) => {
-      const next = compatDecimalResult(entry);
+      const next = compatDecimalResult(entry, instanceCtor);
       if (next !== entry) changed = true;
       return next;
     });
     return changed ? mapped : value;
   }
-  if (typeof value !== 'object' || value === null) {
-    return value;
-  }
   if (isBridgeMatrix(value)) {
     let changed = false;
     const mapped = value.map((entry) => {
-      const next = compatDecimalResult(entry);
+      const next = compatDecimalResult(entry, instanceCtor);
       if (next !== entry) changed = true;
       return next;
     });
     return changed ? mapped : value;
   }
   if (isExpressionNode(value)) {
-    patchNodeEvaluate(value);
+    patchNodeEvaluate(value, instanceCtor);
     return value;
   }
   if (isComplex(value)) {
-    const re = compatDecimalResult(value.re);
-    const im = compatDecimalResult(value.im);
+    const re = compatDecimalResult(value.re, instanceCtor);
+    const im = compatDecimalResult(value.im, instanceCtor);
     if (re === value.re && im === value.im) {
       return value;
     }
@@ -129,7 +146,7 @@ export function compatDecimalResult(
   }
   if (isUnit(value)) {
     const unit = value as { value: unknown; clone(): { value: unknown } };
-    const wrapped = compatDecimalResult(unit.value);
+    const wrapped = compatDecimalResult(unit.value, instanceCtor);
     if (wrapped !== unit.value) {
       const copy = unit.clone();
       copy.value = wrapped;
@@ -153,7 +170,11 @@ for (const name of Object.getOwnPropertyNames(NativeBigNumber.prototype)) {
   Object.defineProperty(CompatBigNumber.prototype, name, {
     ...descriptor,
     value(this: CompatBigNumber, ...args: unknown[]) {
-      return compatDecimalResult(Reflect.apply(method, this, args));
+      const ctor =
+        typeof this.constructor === 'function'
+          ? (this.constructor as CompatDecimalBigNumberCtor)
+          : CompatBigNumber;
+      return compatDecimalResult(Reflect.apply(method, this, args), ctor);
     },
   });
 }
@@ -190,22 +211,6 @@ export type CompatDecimalBigNumberCtor = new (
   ...args: ConstructorParameters<typeof CompatBigNumber>
 ) => CompatBigNumber;
 
-/** Ctor used when normalizing native decimals to compat instances (per-instance on `create`). */
-let compatDecimalBigNumberCtorState: CompatDecimalBigNumberCtor = CompatBigNumber;
-
-/** Active compat decimal ctor (per-instance after `create()`). */
-export function getCompatDecimalBigNumberCtor(): CompatDecimalBigNumberCtor {
-  return compatDecimalBigNumberCtorState;
-}
-
-/**
- * Register the decimal ctor used by `compatDecimalResult` for one instance.
- * @internal Per-instance ctor wiring from `create()` — not for app callers.
- */
-export function setCompatDecimalBigNumberCtor(ctor: CompatDecimalBigNumberCtor): void {
-  compatDecimalBigNumberCtorState = ctor;
-}
-
 /** Instance type for compat decimals (mathjs `BigNumber` / `math.bignumber()`). */
 export type CompatBigNumberInstance = CompatBigNumber;
 
@@ -222,7 +227,7 @@ export function createCompatBignumberShim(
     if (isBigNumber(value)) {
       return new BigNumberCtor((value as CompatBigNumber).toString());
     }
-    return compatDecimalResult(value);
+    return compatDecimalResult(value, BigNumberCtor);
   };
   return (...callArgs: unknown[]): unknown => {
     if (callArgs.length > 1) {

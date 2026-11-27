@@ -1,11 +1,7 @@
 /** G08 compat instance overrides — re-export bundle for `create(all)`. */
 
 import { isBigNumber } from '@danielsimonjr/mathts-core';
-import {
-  BigNumber as CompatBigNumber,
-  compatDecimalResult,
-  getCompatDecimalBigNumberCtor,
-} from './bignumber.js';
+import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
 import {
   complexJsAcosh,
   complexJsAcoth,
@@ -25,9 +21,11 @@ function withBigNumberAcoshAtOne(fn: Fn): Fn {
   return (...args: unknown[]): unknown => {
     const x = args[0];
     if (isBigNumber(x) && (x as { eq(n: unknown): boolean }).eq(1)) {
-      return compatDecimalResult(
-        new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(0)
-      );
+      const Ctor =
+        x instanceof CompatBigNumber && typeof x.constructor === 'function'
+          ? (x.constructor as typeof CompatBigNumber)
+          : CompatBigNumber;
+      return compatDecimalResult(new Ctor(0), Ctor);
     }
     return fn(...args);
   };

@@ -1,15 +1,30 @@
 /**
- * BigNumber unary trig via decimal.js (#1780), matching mathjs 15.3.0 / decimal.js paths
- * without relying on core's transcendental BigNumber kernels.
+ * BigNumber unary trig using core's NativeBigNumber (#1780), matching mathjs 15.3.0
+ * per-instance BigNumber precision and constructor identity without external decimal.js.
  */
 
-import { Decimal } from 'decimal.js';
-import { isBigNumber } from '@danielsimonjr/mathts-core';
+import { BigNumber as NativeBigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 import { runWithConfig } from '@danielsimonjr/mathts-functions';
 import { BigNumber as CompatBigNumber, type CompatDecimalBigNumberCtor } from './bignumber.js';
+import { INSTANCE_PRECISION_GETTER } from './compat-bignumber-instance.js';
 
 type ConfigSlice = Parameters<typeof runWithConfig>[0];
 type UnaryFn = (...args: unknown[]) => unknown;
+type BigNumberCtor = typeof NativeBigNumber;
+
+type TrigContext = {
+  x: NativeBigNumber;
+  D: BigNumberCtor;
+  operandPrec: number;
+  instancePrec: number;
+  atOperandPrec: (fn: (d: NativeBigNumber) => NativeBigNumber) => NativeBigNumber;
+  atInstancePrec: (fn: (D: BigNumberCtor) => NativeBigNumber) => NativeBigNumber;
+};
+
+type TrigCompute = {
+  run: (ctx: TrigContext) => NativeBigNumber;
+  resultOwner: 'operand' | 'instance';
+};
 
 function isCompatBigNumberArgument(x: unknown): boolean {
   if (isBigNumber(x)) return true;
@@ -18,63 +33,19 @@ function isCompatBigNumberArgument(x: unknown): boolean {
   );
 }
 
-function finiteOperandString(operand: { toString(): string }): string {
-  const s = operand.toString();
-  if (s === 'Infinity' || s === '-Infinity' || s === 'NaN') return s;
-  return s;
+function precisionOfOperand(operand: unknown, fallback: number): number {
+  if (operand instanceof CompatBigNumber) {
+    const ctor = (Object.getPrototypeOf(operand) as { constructor: Record<symbol, unknown> })
+      .constructor;
+    const getter = ctor?.[INSTANCE_PRECISION_GETTER];
+    if (typeof getter === 'function') {
+      return (getter as () => number)();
+    }
+  }
+  return fallback;
 }
 
-function operandPrecisionAnalysis(
-  operand: { toString(): string },
-  configPrecision: number
-): { workPrec: number; sd: number } {
-  const finite = finiteOperandString(operand);
-  if (finite === 'Infinity' || finite === '-Infinity' || finite === 'NaN') {
-    return { workPrec: configPrecision, sd: configPrecision };
-  }
-  const prev = {
-    precision: Decimal.precision,
-    rounding: Decimal.rounding,
-    toExpNeg: Decimal.toExpNeg,
-    toExpPos: Decimal.toExpPos,
-    minE: Decimal.minE,
-    maxE: Decimal.maxE,
-  };
-  const parseCap = Math.max(configPrecision, 256);
-  try {
-    Decimal.set({ ...prev, precision: parseCap });
-    const d = new Decimal(operand.toString());
-    const sdRaw = d.sd();
-    const sd = sdRaw === null || sdRaw === undefined ? configPrecision : sdRaw;
-    let workPrec = Math.max(configPrecision, sd);
-    // Near |sin(x)|≈1, decimal.js asin needs one extra digit beyond the operand (#1780).
-    if (sd > configPrecision && d.abs().gte(0.9)) workPrec = Math.max(workPrec, sd + 1);
-    if (sd > configPrecision && d.abs().gt(1)) workPrec = Math.max(workPrec, sd + 8);
-    // acosh(asinh) inverses near cosh(x)≈1 need extra guard digits (#1780).
-    if (sd > configPrecision && d.gt(1) && d.lte(1.05)) workPrec = Math.max(workPrec, sd + 6);
-    return { workPrec, sd };
-  } finally {
-    Decimal.set(prev);
-  }
-}
-
-function resultOutputPrecision(
-  configPrecision: number,
-  sd: number,
-  instanceCtor: CompatDecimalBigNumberCtor,
-  operandCtor: CompatDecimalBigNumberCtor
-): number {
-  if (
-    operandCtor !== CompatBigNumber &&
-    !Object.is(operandCtor, instanceCtor) &&
-    sd > configPrecision + 1
-  ) {
-    return Math.max(configPrecision, sd);
-  }
-  return configPrecision;
-}
-
-function resultBigNumberCtor(
+function ctorOfOperand(
   operand: unknown,
   instanceCtor: CompatDecimalBigNumberCtor
 ): CompatDecimalBigNumberCtor {
@@ -84,31 +55,6 @@ function resultBigNumberCtor(
   const operandCtor = (Object.getPrototypeOf(bn) as { constructor: CompatDecimalBigNumberCtor })
     .constructor;
   return operandCtor !== CompatBigNumber ? operandCtor : instanceCtor;
-}
-
-function decimalRoundingMode(name: string | undefined): Decimal.Rounding {
-  switch (name) {
-    case 'up':
-      return Decimal.ROUND_UP;
-    case 'down':
-      return Decimal.ROUND_DOWN;
-    case 'ceil':
-      return Decimal.ROUND_CEIL;
-    case 'floor':
-      return Decimal.ROUND_FLOOR;
-    case 'halfUp':
-      return Decimal.ROUND_HALF_UP;
-    case 'halfDown':
-      return Decimal.ROUND_HALF_DOWN;
-    case 'halfEven':
-      return Decimal.ROUND_HALF_EVEN;
-    case 'halfCeil':
-      return Decimal.ROUND_HALF_CEIL;
-    case 'halfFloor':
-      return Decimal.ROUND_HALF_FLOOR;
-    default:
-      return Decimal.ROUND_HALF_UP;
-  }
 }
 
 function copyFunctionSurface(from: UnaryFn, to: UnaryFn): void {
@@ -144,86 +90,63 @@ function copyFunctionSurface(from: UnaryFn, to: UnaryFn): void {
   }
 }
 
-/** Apply one decimal.js unary op when the sole argument is a BigNumber (#1780). */
+/** Apply one NativeBigNumber unary trig op when the sole argument is a BigNumber (#1780). */
 export function createCompatBigNumberTrigWrap(
   getConfig: () => ConfigSlice,
   getBigNumberCtor: () => CompatDecimalBigNumberCtor
 ) {
-  const applyDecimalUnary = (
-    operand: { toString(): string },
-    compute: (
-      d: InstanceType<typeof Decimal>,
-      DecimalCtor: typeof Decimal
-    ) => InstanceType<typeof Decimal>,
-    decimalOptions: { extendedPrecision: boolean }
-  ): unknown => {
+  const applyBigNumberUnary = (operand: { toString(): string }, compute: TrigCompute): unknown => {
     const configSlice = getConfig();
-    const configPrecision = configSlice.precision ?? 64;
-    const rounding =
-      'rounding' in configSlice ? (configSlice as { rounding?: string }).rounding : undefined;
+    const instancePrec = configSlice.precision ?? 64;
+    const operandPrec = precisionOfOperand(operand, instancePrec);
     const instanceCtor = getBigNumberCtor();
-    const crossInstanceOperand =
-      operand instanceof CompatBigNumber &&
-      operand.constructor !== CompatBigNumber &&
-      !(operand instanceof instanceCtor);
-    const useExtendedWork = decimalOptions.extendedPrecision || crossInstanceOperand;
-    const analysis = operandPrecisionAnalysis(operand, configPrecision);
-    let workPrec = analysis.workPrec;
-    if (useExtendedWork && decimalOptions.extendedPrecision && crossInstanceOperand) {
-      workPrec = Math.max(workPrec, configPrecision + 12);
-    }
-    const precision = useExtendedWork ? workPrec : configPrecision;
-    const resultCtor = resultBigNumberCtor(operand, instanceCtor);
-    const outputPrec = useExtendedWork
-      ? resultOutputPrecision(configPrecision, analysis.sd, instanceCtor, resultCtor)
-      : configPrecision;
-    const prev = {
-      precision: Decimal.precision,
-      rounding: Decimal.rounding,
-      toExpNeg: Decimal.toExpNeg,
-      toExpPos: Decimal.toExpPos,
-      minE: Decimal.minE,
-      maxE: Decimal.maxE,
-    };
+    const resultCtor =
+      compute.resultOwner === 'operand' ? ctorOfOperand(operand, instanceCtor) : instanceCtor;
+    const outputPrec = compute.resultOwner === 'operand' ? operandPrec : instancePrec;
+
+    const prev = NativeBigNumber.config();
     try {
-      Decimal.set({
-        ...prev,
-        precision,
-        rounding: decimalRoundingMode(rounding),
-      });
-      const d = new Decimal(operand.toString());
-      const out = compute(d, Decimal);
-      const config = getConfig();
-      const outputRounding = decimalRoundingMode(rounding);
-      Decimal.set({
-        ...prev,
-        precision: Math.max(precision, outputPrec),
-        rounding: outputRounding,
-      });
-      const rounded = out.toDecimalPlaces(outputPrec, outputRounding);
+      NativeBigNumber.config({ precision: Math.max(operandPrec, instancePrec) + 24 });
+      const x = new NativeBigNumber(operand.toString());
+      const ctx: TrigContext = {
+        x,
+        D: NativeBigNumber,
+        operandPrec,
+        instancePrec,
+        atOperandPrec(fn) {
+          NativeBigNumber.config({ precision: operandPrec + 24 });
+          const res = fn(x);
+          NativeBigNumber.config({ precision: operandPrec });
+          return res.isFinite() ? res.toSignificantDigits(operandPrec) : res;
+        },
+        atInstancePrec(fn) {
+          NativeBigNumber.config({ precision: instancePrec + 24 });
+          const res = fn(NativeBigNumber);
+          NativeBigNumber.config({ precision: instancePrec });
+          return res.isFinite() ? res.toSignificantDigits(instancePrec) : res;
+        },
+      };
+      const out = compute.run(ctx);
+      NativeBigNumber.config({ precision: outputPrec });
+      const rounded = out.isFinite() ? out.toSignificantDigits(outputPrec) : out;
       return runWithConfig(
-        { ...config, precision: outputPrec },
+        { ...configSlice, precision: outputPrec },
         () => new resultCtor(rounded.toString())
       );
     } finally {
-      Decimal.set(prev);
+      NativeBigNumber.config(prev);
     }
   };
 
   return function wrapCompatBigNumberUnaryTrig(
     base: UnaryFn,
-    compute: (
-      d: InstanceType<typeof Decimal>,
-      DecimalCtor: typeof Decimal
-    ) => InstanceType<typeof Decimal>,
-    decimalOptions: { extendedPrecision?: boolean } = {}
+    compute: TrigCompute,
+    _options?: { extendedPrecision?: boolean }
   ): UnaryFn {
-    const opts = { extendedPrecision: decimalOptions.extendedPrecision === true };
     const wrapped: UnaryFn = (...args: unknown[]) => {
       const x = args[0];
       if (isCompatBigNumberArgument(x)) {
-        const decimalOut = applyDecimalUnary(x as { toString(): string }, compute, opts);
-        return decimalOut;
+        return applyBigNumberUnary(x as { toString(): string }, compute);
       }
       return base(...args);
     };
@@ -232,25 +155,87 @@ export function createCompatBigNumberTrigWrap(
   };
 }
 
-export const compatDecimalTrigAsin = (d: InstanceType<typeof Decimal>) => d.asin();
-export const compatDecimalTrigAsinh = (d: InstanceType<typeof Decimal>) => d.asinh();
-export const compatDecimalTrigAcosh = (d: InstanceType<typeof Decimal>) => d.acosh();
-export const compatDecimalTrigAcot = (d: InstanceType<typeof Decimal>, D: typeof Decimal) =>
-  new D(1).div(d).atan();
-export const compatDecimalTrigAcoth = (d: InstanceType<typeof Decimal>, D: typeof Decimal) =>
-  new D(1).div(d).atanh();
-export const compatDecimalTrigAcsc = (d: InstanceType<typeof Decimal>, D: typeof Decimal) =>
-  new D(1).div(d).asin();
-export const compatDecimalTrigCsc = (d: InstanceType<typeof Decimal>, D: typeof Decimal) =>
-  new D(1).div(d.sin());
-export const compatDecimalTrigSec = (d: InstanceType<typeof Decimal>, D: typeof Decimal) =>
-  new D(1).div(d.cos());
-export const compatDecimalTrigSech = (d: InstanceType<typeof Decimal>, D: typeof Decimal) =>
-  new D(1).div(d.cosh());
-export const compatDecimalTrigSin = (d: InstanceType<typeof Decimal>) => d.sin();
-export const compatDecimalTrigCos = (d: InstanceType<typeof Decimal>) => d.cos();
-export const compatDecimalTrigCosh = (d: InstanceType<typeof Decimal>) => d.cosh();
-export const compatDecimalTrigSinh = (d: InstanceType<typeof Decimal>) => d.sinh();
-export const compatDecimalTrigCot = (d: InstanceType<typeof Decimal>, D: typeof Decimal) =>
-  new D(1).div(d.tan());
-export const compatDecimalTrigCoth = (d: InstanceType<typeof Decimal>) => d.cosh().div(d.sinh());
+export const compatDecimalTrigAsin: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandPrec((d) => d.asin()),
+};
+export const compatDecimalTrigAsinh: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandPrec((d) => d.asinh()),
+};
+export const compatDecimalTrigAcosh: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandPrec((d) => d.acosh()),
+};
+export const compatDecimalTrigSin: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandPrec((d) => d.sin()),
+};
+export const compatDecimalTrigCos: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandPrec((d) => d.cos()),
+};
+export const compatDecimalTrigCosh: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandPrec((d) => d.cosh()),
+};
+export const compatDecimalTrigSinh: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandPrec((d) => d.sinh()),
+};
+export const compatDecimalTrigCoth: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const t = ctx.atOperandPrec((d) => d.tanh());
+    return ctx.atInstancePrec((D) => new D(1).div(t));
+  },
+};
+export const compatDecimalTrigAcot: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const inv = ctx.atInstancePrec((D) => new D(1).div(ctx.x));
+    return ctx.atInstancePrec(() => inv.atan());
+  },
+};
+export const compatDecimalTrigAcoth: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const inv = ctx.atInstancePrec((D) => new D(1).div(ctx.x));
+    return ctx.atInstancePrec(() => inv.atanh());
+  },
+};
+export const compatDecimalTrigAcsc: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const inv = ctx.atInstancePrec((D) => new D(1).div(ctx.x));
+    return ctx.atInstancePrec(() => inv.asin());
+  },
+};
+export const compatDecimalTrigCsc: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const s = ctx.atOperandPrec((d) => d.sin());
+    return ctx.atInstancePrec((D) => new D(1).div(s));
+  },
+};
+export const compatDecimalTrigSec: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const c = ctx.atOperandPrec((d) => d.cos());
+    return ctx.atInstancePrec((D) => new D(1).div(c));
+  },
+};
+export const compatDecimalTrigSech: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const c = ctx.atOperandPrec((d) => d.cosh());
+    return ctx.atInstancePrec((D) => new D(1).div(c));
+  },
+};
+export const compatDecimalTrigCot: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const t = ctx.atOperandPrec((d) => d.tan());
+    return ctx.atInstancePrec((D) => new D(1).div(t));
+  },
+};
