@@ -168,4 +168,52 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     assert.strictEqual(bigmath.csc(pi.div(8)).toString(), '2.6131259297527530557');
     assert.deepStrictEqual(bigmath.csc(pi), bigmath.bignumber('-26769019461318409709'));
   });
+
+  it('BigNumber unary trig wrappers match mathjs 15.3.0 across precision instances', () => {
+    const bigmath = create(all, { number: 'BigNumber', precision: 20 });
+    const biggermath = bigmath.create({ number: 'BigNumber', precision: 22 });
+    const Big = bigmath.bignumber;
+
+    assert.deepStrictEqual(bigmath.acosh(biggermath.cosh(Big(0.1))), Big('0.10000000000000000012'));
+    assert.deepStrictEqual(
+      bigmath.asinh(biggermath.sinh(Big(0.1))),
+      Big('0.099999999999999999996')
+    );
+    assert.deepStrictEqual(bigmath.acoth(bigmath.coth(Big(-2))), Big('-1.9999999999999999998'));
+    assert.deepStrictEqual(bigmath.acot(bigmath.cot(Big(0.5))), Big(0.5));
+    assert.deepStrictEqual(bigmath.acsc(bigmath.csc(Big(0.5))), Big(0.5));
+    assert.deepStrictEqual(bigmath.sech(biggermath.pi), Big('0.086266738334054414696'));
+    assert.deepStrictEqual(bigmath.sec(Big(0)), Big(1));
+    assert.deepStrictEqual(bigmath.cos(Big(0)), Big(1));
+    assert.deepStrictEqual(bigmath.sin(Big(0)), Big(0));
+    assert.deepStrictEqual(bigmath.sinh(Big(0)), Big(0));
+    assert.deepStrictEqual(bigmath.cosh(Big(0)), Big(1));
+    assert.deepStrictEqual(bigmath.cot(Big(1)).toString(), '0.64209261593433070301');
+  });
+
+  it('BigNumber bitwise infinite and negative shifts, log2(1), diag, and range', () => {
+    const bigmath = create(all, { number: 'BigNumber', precision: 20 });
+    const Big = bigmath.bignumber;
+    const inf = Big(Infinity);
+    const ninf = Big(-Infinity);
+
+    expect(bigmath.bitAnd(inf, Big(5))).toEqual(Big(5));
+    expect(bigmath.bitOr(inf, Big(5))).toEqual(inf);
+    expect(bigmath.bitXor(inf, Big(-1))).toEqual(ninf);
+    expect(bigmath.bitXor(inf, Big(1))).toEqual(inf);
+    expect(bigmath.bitNot(inf)).toEqual(ninf);
+    expect(String(bigmath.leftShift(Big(2), -3))).toBe('NaN');
+    expect(String(bigmath.leftShift(inf, inf))).toBe('NaN');
+    expect(String(bigmath.leftShift(ninf, inf))).toBe('-1');
+    expect(String(bigmath.leftShift(ninf, Infinity))).toBe('-1');
+    expect(String(bigmath.leftShift(inf, 2))).toBe('Infinity');
+    expect(String(bigmath.rightArithShift(Big(2), -1))).toBe('NaN');
+    expect(bigmath.log2(Big(1))).toEqual(Big(0));
+    expect(bigmath.log2(Big(8))).toEqual(Big(3));
+
+    const d = bigmath.diag([Big(1), Big(2)]) as unknown[][];
+    expect(d[0][1]).toBeInstanceOf(bigmath.BigNumber);
+    const r = bigmath.range(Big(1), 4) as { toArray(): unknown[] };
+    expect(r.toArray()[0]).toBeInstanceOf(bigmath.BigNumber);
+  });
 });
