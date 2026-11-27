@@ -225,7 +225,7 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     const ninf = Big(-Infinity);
 
     // SparseMatrix BigNumber operations
-    const sp = bigmath.sparse([
+    const sp = (bigmath.sparse as (data: unknown) => unknown)([
       [Big(1), Big(0)],
       [Big(0), Big(2)],
     ]) as {
