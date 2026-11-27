@@ -4,7 +4,7 @@
  */
 
 import { DimensionError } from '@danielsimonjr/mathts-core';
-import { clone, validateIndex } from '@danielsimonjr/mathts-core/internal';
+import { arraySize, clone, isIndex, validateIndex } from '@danielsimonjr/mathts-core/internal';
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import { compatDecimalResult } from './bignumber.js';
 import { COMPAT_MATRIX_WRAPPER } from './compat-matrix-model.js';
@@ -298,8 +298,36 @@ function patchCompatSparseMatrixPrototype(
     replacement?: unknown,
     defaultValue?: unknown
   ): unknown {
-    if (!this._values && arguments.length >= 2) {
-      throw new Error('Cannot invoke set subset on a Pattern only matrix');
+    if (!this._values) {
+      throw new Error('Cannot invoke subset on a Pattern only matrix');
+    }
+    switch (arguments.length) {
+      case 1:
+      case 2:
+      case 3:
+        break;
+      default:
+        throw new SyntaxError('Wrong number of arguments');
+    }
+    if (
+      arguments.length >= 2 &&
+      replacement !== undefined &&
+      isIndex(index) &&
+      (index as unknown as { isScalar: () => boolean }).isScalar() === true
+    ) {
+      let repSize: number[];
+      if (
+        typeof replacement === 'object' &&
+        replacement !== null &&
+        (replacement as { isMatrix?: boolean }).isMatrix === true
+      ) {
+        repSize = (replacement as { size(): number[] }).size();
+      } else {
+        repSize = arraySize(replacement as never);
+      }
+      if (repSize.length !== 0) {
+        throw new TypeError('Scalar expected');
+      }
     }
     return nativeSubset.call(this, index, replacement, defaultValue);
   };

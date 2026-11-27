@@ -201,10 +201,8 @@ function mapCallbackTypeError(err: unknown, callback: unknown, args: unknown[]):
   if (args.length >= 2) parts.push(`index: ${describe(args[1])}`);
   if (args.length >= 3) parts.push(`array: ${describe(args[2])}`);
   void err;
-  const fnLabel =
-    typeof callback === 'function' && callback.name ? `Function ${callback.name}` : 'Function map';
   return new TypeError(
-    `${fnLabel} cannot apply callback arguments ${callbackName}(${parts.join(', ')}) at index ${JSON.stringify(args[1])}`
+    `Function map cannot apply callback arguments ${callbackName}(${parts.join(', ')}) at index ${JSON.stringify(args[1])}`
   );
 }
 
@@ -529,8 +527,21 @@ export function wrapCompatDenseMatrixClass(
     this: MatrixLike,
     data: unknown,
     datatype?: string
-  ): MatrixLike {
-    const result = nativeCreate.call(this, data, datatype);
+  ): unknown {
+    // mathjs `reduce` skips `create` when the reduced value is a scalar (#1785).
+    if (data !== null && data !== undefined && !Array.isArray(data) && typeof data !== 'object') {
+      return data;
+    }
+    const result =
+      data === undefined
+        ? (new Wrapped(undefined, datatype) as MatrixLike)
+        : isCompatMatrix(data, helpers.checks) ||
+            (typeof data === 'object' &&
+              data !== null &&
+              isArray((data as { data?: unknown }).data) &&
+              isArray((data as { size?: unknown }).size))
+          ? (new Wrapped(data, datatype) as MatrixLike)
+          : (nativeCreate.call(this, data, datatype) as MatrixLike);
     decorateDenseInstance(result as MatrixLike & Record<string, unknown>, wrapperProto);
     return result;
   };
@@ -590,10 +601,15 @@ const IMMUTABLE_METHODS_ON_DENSE = [
 
 function patchCompatImmutableDensePrototype(
   NativeImmutable: MatrixCtor,
-  denseWrapperProto: object
+  denseWrapperProto: object,
+  ImmutableCtor: MatrixCtor
 ): object {
   const nativeProto = NativeImmutable.prototype as Record<string, unknown>;
-  const immutableProto = Object.create(denseWrapperProto) as Record<string, unknown>;
+  const denseProto = denseWrapperProto as Record<string, unknown>;
+  const immutableProto = Object.create(nativeProto) as Record<string, unknown>;
+  if (typeof denseProto.get === 'function') {
+    immutableProto.get = denseProto.get;
+  }
   for (const key of IMMUTABLE_METHODS_ON_DENSE) {
     if (key === 'subset') continue;
     const method = nativeProto[key];
@@ -601,7 +617,7 @@ function patchCompatImmutableDensePrototype(
       immutableProto[key] = method;
     }
   }
-  const nativeSubset = nativeProto.subset as (
+  const denseSubset = denseProto.subset as (
     index: unknown,
     replacement?: unknown,
     defaultValue?: unknown
@@ -612,9 +628,25 @@ function patchCompatImmutableDensePrototype(
     replacement?: unknown,
     defaultValue?: unknown
   ): unknown {
-    const result = nativeSubset.call(this, index, replacement, defaultValue);
+    switch (arguments.length) {
+      case 1:
+        break;
+      case 2:
+      case 3:
+        if (arguments.length >= 2 && replacement !== undefined) {
+          throw new Error('Cannot invoke set subset on an Immutable Matrix instance');
+        }
+        break;
+      default:
+        throw new SyntaxError('Wrong number of arguments');
+    }
+    const result = denseSubset.call(this, index, replacement, defaultValue);
     if (result && typeof result === 'object' && (result as { isMatrix?: boolean }).isMatrix) {
-      decorateDenseInstance(result as MatrixLike & Record<string, unknown>, immutableProto);
+      const m = result as MatrixLike;
+      const imm = Reflect.construct(ImmutableCtor, [m.toArray(), m._datatype]) as MatrixLike &
+        Record<string, unknown>;
+      decorateDenseInstance(imm, immutableProto);
+      return imm;
     }
     return result;
   };
@@ -656,7 +688,11 @@ export function wrapCompatImmutableDenseMatrixClass(
   denseWrapperProto: object
 ): MatrixCtor {
   const Guarded = newOperatorGuard(NativeImmutable as unknown as CompatClass) as MatrixCtor;
-  const immutableProto = patchCompatImmutableDensePrototype(NativeImmutable, denseWrapperProto);
+  const immutableProto = patchCompatImmutableDensePrototype(
+    NativeImmutable,
+    denseWrapperProto,
+    Guarded
+  );
   Object.defineProperty(immutableProto, COMPAT_MATRIX_WRAPPER, {
     value: 'immutable',
     enumerable: false,

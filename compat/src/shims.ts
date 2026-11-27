@@ -113,6 +113,8 @@ import {
 } from '@danielsimonjr/mathts-functions';
 import { instanceSymbols } from './instance-symbols.js';
 import { promoteToCompatMatrix } from './compat-matrix-model.js';
+import { createCompatMatrixFactory, createCompatSparseFactory } from './compat-matrix-factory.js';
+import { compatMatrixConstructors } from './instance-symbols.js';
 import {
   wrapFixForMathjsFraction,
   wrapUnaryForMathjsFraction,
@@ -294,54 +296,38 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
  * matrix([[1,2],[3,4]], 'sparse')
  * matrix(sparseMatrix, 'dense')
  */
-export function matrix(data?: readonly unknown[], format?: string): BridgeMatrix;
-export function matrix(
-  data?: readonly unknown[] | DenseMatrix | SparseMatrix,
-  format?: string
-): CompatMatrixValue;
-export function matrix(
-  data?: readonly unknown[] | DenseMatrix | SparseMatrix,
-  format?: string
-): CompatMatrixValue {
-  if (arguments.length === 0) {
-    return promoteIfMatrix(_factoryMatrix());
+const _compatMatrixImpl = createCompatMatrixFactory((...args: unknown[]) => {
+  if (args.length === 1 && Array.isArray(args[0])) {
+    return _factoryMatrix(sanitizeSparseNestedInput(args[0] as unknown[][]));
   }
-  if (isDenseMatrix(data) || isSparseMatrix(data)) {
-    // A native matrix of the format that is asked for, or of no format, is returned as it is.
-    if (format === undefined) return data;
-    // The factory checks the format, so an unknown one throws the mathjs TypeError here too.
-    _factoryMatrix([], format);
-    // The nested data of a matrix with a zero axis does not show its size, so the size of the
-    // source goes with the data (#1337).
-    if (format === 'sparse' && isDenseMatrix(data)) {
-      return promoteIfMatrix(
-        _factorySparse({
-          data: data.toArray(),
-          size: matrixSize(data),
-        })
-      );
-    }
-    if (format !== 'sparse' && isSparseMatrix(data)) {
-      return promoteIfMatrix(denseOfNested(data.toArray(), data));
-    }
-    return promoteIfMatrix(data);
+  return (_factoryMatrix as (...a: unknown[]) => unknown)(...args);
+}, compatMatrixConstructors);
+
+const _compatSparseImpl = createCompatSparseFactory((...args: unknown[]) => {
+  if (args.length >= 1 && Array.isArray(args[0])) {
+    return _factorySparse(sanitizeSparseNestedInput(args[0] as unknown[][]));
   }
-  // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
-  return promoteIfMatrix(_factoryMatrix(data, format));
+  return (_factorySparse as (...a: unknown[]) => unknown)(...args);
+}, compatMatrixConstructors);
+
+function matrixImpl(...args: unknown[]): CompatMatrixValue {
+  return _compatMatrixImpl(...args) as CompatMatrixValue;
 }
+export const matrix: typeof _factoryMatrix = withTypedSurface(
+  matrixImpl as unknown as typeof _factoryMatrix,
+  _factoryMatrix as object
+) as typeof _factoryMatrix;
 
 /**
  * Create a sparse matrix (mathjs-compatible)
  */
-export function sparse(data?: number[][]): BridgeMatrix {
-  if (data === undefined) {
-    return promoteIfMatrix(_factorySparse());
-  }
-  if (Array.isArray(data)) {
-    return promoteIfMatrix(_factorySparse(sanitizeSparseNestedInput(data as unknown[][])));
-  }
-  return promoteIfMatrix(_factorySparse(data));
+function sparseImpl(...args: unknown[]): BridgeMatrix {
+  return _compatSparseImpl(...args) as BridgeMatrix;
 }
+export const sparse: typeof _factorySparse = withTypedSurface(
+  sparseImpl as unknown as typeof _factorySparse,
+  _factorySparse as object
+) as typeof _factorySparse;
 
 // =============================================================================
 // Arithmetic Function Shims
