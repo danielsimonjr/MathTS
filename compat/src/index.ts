@@ -62,7 +62,7 @@ import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { chainTypedFromInstance, createChain } from './chain-create.js';
-import { normalizeCompatFormatOptions } from './fraction-format-parity.js';
+import { normalizeInstanceFormatOptions } from './fraction-format-parity.js';
 import { toCompatComplex } from './mathjs-complex-prototype.js';
 import { assertValidCreateFactories, isCompatFactory } from './create-factory-validation.js';
 import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
@@ -90,6 +90,7 @@ import {
   type CompatExpressionLayers,
   type WiredCompatInstance,
 } from './instance-api.js';
+import { bindInstanceSerialization } from './serialization.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
 import { wrapEqualForMathjsFraction } from './mathjs-fraction-relational.js';
@@ -162,6 +163,9 @@ import {
   combinations as namedCombinations,
   combinationsWithRep as namedCombinationsWithRep,
   equalText as namedEqualText,
+  bin as namedBin,
+  oct as namedOct,
+  hex as namedHex,
   format as namedFormat,
   lgamma as namedLgamma,
   permutations as namedPermutations,
@@ -1264,13 +1268,25 @@ export function create(
     mad: compatMad,
     expm: compatExpm,
     pinv: compatPinv,
-    format: ((value: unknown, options?: Record<string, unknown> | number) => {
-      const merged = normalizeCompatFormatOptions(options, currentConfig.precision);
-      const formatImpl = namedFormat;
-      return usesOverlay()
-        ? (mathFunctions.runWithConfig(currentConfig, () => formatImpl(value, merged)) as string)
-        : (formatImpl(value, merged) as string);
-    }) as typeof namedFormat,
+    format: (() => {
+      const formatImpl = namedFormat as (...args: unknown[]) => string;
+      const formatFn = (...args: unknown[]): string => {
+        if (args.length === 0 || args.length > 2) {
+          return formatImpl(...args);
+        }
+        const [value, options] = args;
+        const merged = normalizeInstanceFormatOptions(value, options, currentConfig.precision);
+        const call = (): string =>
+          merged === undefined ? formatImpl(value) : formatImpl(value, merged);
+        return usesOverlay()
+          ? (mathFunctions.runWithConfig(currentConfig, call) as string)
+          : call();
+      };
+      return Object.assign(formatFn, namedFormat);
+    })() as typeof namedFormat,
+    bin: namedBin,
+    oct: namedOct,
+    hex: namedHex,
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,
@@ -1741,6 +1757,8 @@ export function create(
   instance.chain = chainApi.chain;
   if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
 
+  bindInstanceSerialization(instance as Parameters<typeof bindInstanceSerialization>[0]);
+
   // mathjs shares error constructors on the module and on each instance (#G12 F4, #1773).
   instance.DimensionError = instanceSymbols.DimensionError;
   instance.ArgumentsError = instanceSymbols.ArgumentsError;
@@ -1786,6 +1804,9 @@ export { Chain, chain, compile, config, evaluate, parse, parser };
 export { pickRandom, random, randomInt };
 
 export {
+  namedBin as bin,
+  namedOct as oct,
+  namedHex as hex,
   namedFormat as format,
   namedPrint as print,
   namedCompatString as string,

@@ -1,14 +1,6 @@
 import { hasOwnProperty } from './object.js';
 import { isExactStorageArray } from './plain-numeric-buffer.js';
-import {
-  isBigNumber,
-  isComplex,
-  isFraction,
-  isIndex,
-  isMatrix,
-  isResultSet,
-  isUnit,
-} from './is.js';
+import { isBigNumber, isComplex, isFraction, isMatrix, isResultSet, isUnit } from './is.js';
 
 /**
  * Values the expression sandbox may read or call methods on.
@@ -192,17 +184,6 @@ function isSafeMethod(object: unknown, method: unknown): boolean {
   ) {
     return true;
   }
-  if (isIndex(object) && method === 'dimension') {
-    return typeof (object as { dimension?: unknown }).dimension === 'function';
-  }
-  if (
-    object !== null &&
-    object !== undefined &&
-    (object as { isParser?: boolean }).isParser === true &&
-    typeof (object as Record<string, unknown>)[method as string] === 'function'
-  ) {
-    return (method as string) !== 'constructor' && !((method as string) in Function.prototype);
-  }
   if (!isSandboxReceiver(object)) return false;
   if (
     object === null ||
@@ -266,22 +247,6 @@ const NODE_METHODS: ReadonlySet<string> = new Set([
   'toTex',
   'toHTML',
   'toMathML',
-  // mathjs 15.3.0 expression security tests call these on nodes (#1777).
-  'map',
-  'transform',
-  'forEach',
-  'filter',
-  'traverse',
-  'clone',
-  'toJSON',
-  'name',
-  'index',
-  'type',
-  'get',
-  'set',
-  'apply',
-  'createProxy',
-  '_compile',
 ]);
 
 const safeNativeMethods = {

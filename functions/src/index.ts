@@ -91,7 +91,6 @@ export {
   compileExpr,
   compileExpr as compile,
   createInstanceEvaluator,
-  compatFactoryReducerScope,
   EVALUATE_SCOPE_OMIT,
   parse,
   parser,

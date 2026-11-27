@@ -84,6 +84,10 @@ export class CompatComplexBase extends CoreComplex {
   static [Symbol.hasInstance](value: unknown): boolean {
     return value instanceof CoreComplex;
   }
+
+  static override fromJSON(json: { re: number; im: number }): CompatComplexBase {
+    return new CompatComplexBase(json.re, json.im);
+  }
 }
 
 Object.defineProperty(CompatComplexBase, 'name', {

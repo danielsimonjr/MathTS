@@ -126,7 +126,7 @@ export function createChain(
               rest
             );
         }
-        return undefined;
+        return Reflect.get(target, prop, receiver);
       },
     }) as Chain;
   }

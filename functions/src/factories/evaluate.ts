@@ -238,27 +238,6 @@ bindNumericConstants(factoryScope.mathWithTransform as Record<string, unknown>);
 const _evaluate = createEvaluate(parse, mathScope, configFingerprint);
 const _evaluateUnsafe = createEvaluate(parse, unsafeMathScope, configFingerprint);
 
-/** Reducers the compat factory `_compile` path must take from module scope, not the instance copy (#1777). */
-const COMPAT_FACTORY_REDUCERS = [
-  'mean',
-  'max',
-  'min',
-  'median',
-  'sum',
-  'std',
-  'variance',
-  'quantileSeq',
-] as const;
-
-/** @internal compat factory compile — module `mean`/`quantileSeq`/… match tree unsafe evaluate. */
-export function compatFactoryReducerScope(): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const name of COMPAT_FACTORY_REDUCERS) {
-    if (Object.hasOwn(unsafeMathScope, name)) out[name] = unsafeMathScope[name];
-  }
-  return out;
-}
-
 type EvaluateRunner = ReturnType<typeof createEvaluate>;
 type ExpressionScope = Parameters<typeof _compileExpression>[1];
 

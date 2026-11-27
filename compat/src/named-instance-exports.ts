@@ -23,8 +23,10 @@ import {
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
 import { createChain } from './chain-create.js';
+import { installParserHasInstance } from './compat-parser-api.js';
 import type { BoundInstanceConfig, CompatCreate, CompatFactoryInput } from './compat-types.js';
 import {
+  createCompatBaseFormat,
   createCompatFormat,
   createCompatPrint,
   createCompatString,
@@ -107,6 +109,7 @@ export const Parser = function Parser(options?: PhysicsEvaluateOptions): CompatP
   }
   return Reflect.construct(getDefaultInstance().Parser as typeof Parser, [options], new.target);
 } as unknown as { new (options?: PhysicsEvaluateOptions): CompatParser };
+installParserHasInstance(Parser);
 
 /** Create a compatibility parser with its own retained scope. */
 const defaultParser = (options?: PhysicsEvaluateOptions) => new Parser(options);
@@ -179,6 +182,15 @@ export {
 const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
 const namedString = mathFunctions.factory_mathjsCompat.string as typeof mathFunctions.string;
 const namedCompatString = /* #__PURE__ */ createCompatString(namedString);
+const namedBin = /* #__PURE__ */ createCompatBaseFormat(
+  mathFunctions.bin as (...args: unknown[]) => string
+) as typeof mathFunctions.bin;
+const namedOct = /* #__PURE__ */ createCompatBaseFormat(
+  mathFunctions.oct as (...args: unknown[]) => string
+) as typeof mathFunctions.oct;
+const namedHex = /* #__PURE__ */ createCompatBaseFormat(
+  mathFunctions.hex as (...args: unknown[]) => string
+) as typeof mathFunctions.hex;
 const namedFormat = /* #__PURE__ */ createCompatFormat(mathFunctions.format);
 const namedPrint = /* #__PURE__ */ createCompatPrint(
   mathFunctions.print as (template: string, values: unknown, options?: unknown) => string,
@@ -268,6 +280,9 @@ const namedRange = createMathjsRange({
 });
 
 export {
+  namedBin as bin,
+  namedOct as oct,
+  namedHex as hex,
   namedFormat as format,
   namedPrint as print,
   namedCompatString as string,

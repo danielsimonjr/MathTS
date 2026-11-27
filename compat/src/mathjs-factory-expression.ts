@@ -105,30 +105,61 @@ export function compileScopeForFactoryCompile(
   });
 }
 
+const scopeFnWrapperCache = new WeakMap<(...args: never[]) => unknown, unknown>();
+const scopeFnUnwrapMap = new WeakMap<object, unknown>();
+
+/** Unwrap a proxy created by {@link asMathjsExpressionScopeValue} back to its original function. */
+export function unwrapMathjsExpressionScopeValue(value: unknown): unknown {
+  if (value !== null && (typeof value === 'function' || typeof value === 'object')) {
+    return scopeFnUnwrapMap.get(value) ?? value;
+  }
+  return value;
+}
+
 /**
  * mathjs security tests require every `mathWithTransform` function to satisfy
- * `fn.prototype.constructor === fn` without replacing the typed-function object.
+ * `fn.prototype.constructor === fn` without mutating the shared function object.
  */
 export function asMathjsExpressionScopeValue(value: unknown): unknown {
   if (typeof value !== 'function') return value;
-  const fn = value as {
+  const fn = value as ((...args: never[]) => unknown) & {
     prototype?: { constructor?: unknown };
-    apply?: (thisArg: unknown, args: unknown[]) => unknown;
   };
-  if (fn.prototype?.constructor === fn) return fn;
-  if (fn.prototype === undefined) {
-    Object.defineProperty(value, 'prototype', {
-      value: {},
-      writable: true,
-      configurable: true,
-    });
+  let ownProto: { constructor?: unknown } | undefined;
+  try {
+    ownProto = fn.prototype;
+  } catch {
+    return fn;
   }
-  Object.defineProperty((value as { prototype: object }).prototype, 'constructor', {
-    value,
-    writable: true,
-    configurable: true,
+  if (ownProto?.constructor === fn) return fn;
+  const cached = scopeFnWrapperCache.get(fn);
+  if (cached !== undefined) return cached;
+  function scopeFn(this: unknown, ...args: never[]): unknown {
+    return fn.apply(this, args);
+  }
+  const proxy = new Proxy(scopeFn, {
+    get(target, prop) {
+      if (prop === 'prototype') return target.prototype;
+      return Reflect.get(fn, prop, fn);
+    },
+    has(_target, prop) {
+      return Reflect.has(fn, prop);
+    },
+    apply(_target, thisArg, argArray) {
+      return Reflect.apply(fn, thisArg, argArray);
+    },
+    construct(_target, argArray, newTarget) {
+      return Reflect.construct(
+        fn as unknown as new (...args: unknown[]) => object,
+        argArray,
+        newTarget
+      );
+    },
   });
-  return value;
+  scopeFn.prototype.constructor = proxy;
+  scopeFnWrapperCache.set(fn, proxy);
+  scopeFnUnwrapMap.set(proxy, fn);
+  return proxy;
 }
 
 function validateScope(scope: Map<string, unknown>): void {
@@ -142,17 +173,53 @@ function validateScope(scope: Map<string, unknown>): void {
 /** Route `node.compile()` through mathjs factory `_compile` (#1777). */
 export function wrapMathjsFactoryCompiledNode<T extends MathNode>(
   node: T,
-  ctx: CompatFactoryCompileContext
+  ctx: CompatFactoryCompileContext,
+  sandboxMethods = false
 ): T {
   return new Proxy(node, {
     get(target, prop, receiver) {
+      if (sandboxMethods && prop === 'isTensor') return true;
       if (prop === 'compile') {
         return () => compileParsedFactoryNode(target, ctx);
       }
       const value = Reflect.get(target, prop, receiver);
-      return typeof value === 'function' ? value.bind(target) : value;
+      if (typeof value !== 'function' || prop === 'constructor') return value;
+      if (sandboxMethods && (prop === 'map' || prop === 'transform' || prop === 'clone')) {
+        return (...args: unknown[]) => {
+          const result = (value as (...a: unknown[]) => unknown).apply(target, args);
+          if (
+            result !== null &&
+            typeof result === 'object' &&
+            (result as { isNode?: boolean }).isNode === true
+          ) {
+            return wrapMathjsFactoryCompiledNode(result as MathNode, ctx, true);
+          }
+          return result;
+        };
+      }
+      return value.bind(target);
     },
   }) as T;
+}
+
+/**
+ * Wrap an `index(...)` factory for compat expression evaluation so `a.dimension(...)`
+ * passes `isSafeMethod` without widening the global `expression/` sandbox (#1777).
+ */
+export function wrapCompatSandboxIndex(
+  indexFn: (...args: unknown[]) => unknown
+): (...args: unknown[]) => unknown {
+  return function compatSandboxIndex(...args: unknown[]): unknown {
+    const result = indexFn(...args);
+    if (result === null || typeof result !== 'object') return result;
+    return new Proxy(result, {
+      get(target, prop, receiver) {
+        if (prop === 'isTensor') return true;
+        const value = Reflect.get(target, prop, receiver);
+        return typeof value === 'function' && prop !== 'constructor' ? value.bind(target) : value;
+      },
+    });
+  };
 }
 
 /** Compile a parsed AST with mathjs factory `_compile` (#1777). */
