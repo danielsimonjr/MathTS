@@ -19,9 +19,7 @@ describe('matrix #1785 integration wiring', () => {
     const cols = math.matrixFromColumns([[1], [2]]) as unknown;
     expect(Array.isArray(cols) || math.isMatrix(cols)).toBe(true);
     const legacy = create(all, { legacySubset: true });
-    const scalarGet = legacy
-      .matrix([[5]])
-      .subset(legacy.index(0, 0)) as unknown;
+    const scalarGet = legacy.matrix([[5]]).subset(legacy.index(0, 0)) as unknown;
     expect(typeof scalarGet === 'number' || legacy.isBigNumber(scalarGet)).toBe(true);
     const shaped = math.reshape(math.matrix([1, 2, 3, 4]), [2, 2]) as { type?: string };
     expect(shaped.type).toBe('DenseMatrix');
@@ -41,6 +39,32 @@ describe('matrix #1785 integration wiring', () => {
       [Math.sin(0.1), Math.cos(0.1)],
     ]);
     math.round(rot, 2);
-    expect(math.ctranspose(rot).type).toBe('DenseMatrix');
+    const tr = math.ctranspose(rot) as { type?: string };
+    expect(tr.type).toBe('DenseMatrix');
+  });
+
+  it('exercises modern vs legacy subset GET and sparse mutations', () => {
+    const modern = create(all, { legacySubset: false });
+    const vec = modern.matrix([9, 8, 7]);
+    expect(modern.isMatrix(vec.subset(modern.index([0, 1])))).toBe(true);
+    expect(vec.subset(modern.index(1))).toBe(8);
+    const legacy = create(all, { legacySubset: true });
+    const cell = legacy.matrix([[6]]);
+    expect(legacy.subset(cell, legacy.index(0, 0))).toBe(6);
+    const sparse = modern.sparse([
+      [1, 0, 0],
+      [0, 2, 0],
+      [0, 0, 3],
+    ]);
+    sparse.subset(modern.index(1, 1));
+    sparse.subset(modern.index(2, 2), 9);
+    sparse.subset(modern.index([0, 2]), [4, 5]);
+    expect(sparse.subset(modern.index(2, 2))).toBe(9);
+    const dense = modern.matrix([
+      [1, 2],
+      [3, 4],
+    ]);
+    dense.subset(modern.index(0, 1), 0);
+    expect(dense.get([0, 1])).toBe(0);
   });
 });
