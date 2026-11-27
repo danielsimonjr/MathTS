@@ -157,4 +157,20 @@ describe('matrix model #1785', () => {
     const cfg = create(all, { number: 'BigNumber' });
     expect(cfg.range('4:10', true)).toEqual(cfg.range('4:10', true));
   });
+
+  it('cloning ImmutableDenseMatrix keeps immutable type', () => {
+    const imm = new math.ImmutableDenseMatrix([2, 4, 6]);
+    const copy = math.matrix(imm) as { isImmutableDenseMatrix?: boolean };
+    expect(copy.isImmutableDenseMatrix).toBe(true);
+  });
+
+  it('resize stays on compat matrix instances', () => {
+    const m = math.matrix([
+      [1, 2],
+      [3, 4],
+    ]) as unknown as {
+      resize: (size: number[], value?: number) => { size(): { valueOf(): number[] } };
+    };
+    expect(m.resize([3, 2], 0).size().valueOf()).toEqual([3, 2]);
+  });
 });

@@ -29,14 +29,17 @@ import {
   promoteToCompatMatrix,
   readMatrixDatatype,
   stampMatrixDatatype,
+  type CompatMatrixCtors,
 } from '../src/compat-matrix-model.js';
 
 const math = create(all);
-bindCompatMatrixPromotion({
+const matrixCtors = {
   DenseMatrix: math.DenseMatrix,
   SparseMatrix: math.SparseMatrix,
   ImmutableDenseMatrix: math.ImmutableDenseMatrix,
-});
+} as unknown as CompatMatrixCtors;
+bindCompatMatrixPromotion(matrixCtors);
+const matrixFn = (...args: unknown[]) => math.matrix(...(args as Parameters<typeof math.matrix>));
 type BnCtor = new (value: string | number) => unknown;
 
 describe('mathjs-parity-1785-surfaces unit coverage', () => {
@@ -47,6 +50,8 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
     expect(max(1, '9', 3)).toBe('9');
     const min = createCompatMixedTypeReducer((a, b) => compareMixedTypes(a, b) < 0, false);
     expect(min('2', 5)).toBe('2');
+    expect(min()).toBe(Infinity);
+    expect(max()).toBe(-Infinity);
   });
 
   it('forwardSubsetArgs forwards one through four arguments', () => {
@@ -119,23 +124,18 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
   });
 
   it('matrix factory wrappers promote compat DenseMatrix shells', () => {
-    const ctors = {
-      DenseMatrix: math.DenseMatrix,
-      SparseMatrix: math.SparseMatrix,
-      ImmutableDenseMatrix: math.ImmutableDenseMatrix,
-    };
     const fromRows = createCompatMatrixFromRows(
       () =>
         math.sparse([
           [1, 0],
           [0, 2],
         ]),
-      math.matrix.bind(math),
-      ctors
+      matrixFn,
+      matrixCtors
     );
     const densified = fromRows() as { type?: string };
     expect(densified.type).toBe('DenseMatrix');
-    const fromFn = createCompatMatrixFromFunction(() => math.matrix([1, 2, 3]), ctors);
+    const fromFn = createCompatMatrixFromFunction(() => math.matrix([1, 2, 3]), matrixCtors);
     expect(isCompatWrappedMatrix(fromFn())).toBe(true);
   });
 
@@ -164,8 +164,8 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
         smallerEq: (a, b) => frac.smallerEq(a, b),
         larger: (a, b) => frac.larger(a, b),
         largerEq: (a, b) => frac.largerEq(a, b),
-        isPositive: (x) => frac.isPositive(x),
-        isZero: (x) => frac.isZero(x),
+        isPositive: (x) => Boolean(frac.isPositive(x)),
+        isZero: (x) => Boolean(frac.isZero(x)),
         matrixOut: (values) => frac.matrix(values),
       }
     );
@@ -198,6 +198,10 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
       math.bignumber as unknown as BnCtor
     );
     expect(math.isFraction(fracEmpty([]))).toBe(true);
+    const bnCfg = create(all, { number: 'BigNumber' });
+    const BnClass = Object.getPrototypeOf(bnCfg.bignumber(1)).constructor as BnCtor;
+    const bnEmpty = createCompatEmptySum(bnCfg.sum.bind(bnCfg), () => 'BigNumber', BnClass);
+    expect(bnCfg.isBigNumber(bnEmpty([]))).toBe(true);
     const sumWrap = createCompatSum(() => {
       throw new TypeError('Unexpected type of argument in function sum (x)');
     });
@@ -221,14 +225,15 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
     ]);
     const normalized = normalizeCompatRotationMatrix(
       sparse,
-      math.matrix.bind(math),
+      matrixFn,
       promoteToCompatMatrix
     ) as { get?: (i: number, j: number) => number };
     expect(normalized.get?.(0, 0)).toBe(0);
   });
 
   it('inheritMatrixDatatype copies datatype from operand matrices', () => {
-    const src = math.matrix([1], 'dense', 'number');
+    const src = math.matrix([1]);
+    stampMatrixDatatype(src, 'number');
     const out = inheritMatrixDatatype(math.matrix([2]), [src]);
     expect(readMatrixDatatype(out)).toBe('number');
   });
