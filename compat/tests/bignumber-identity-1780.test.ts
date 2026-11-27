@@ -269,5 +269,39 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     expect(parsed.toString()).toBe('12.5');
     expect(Number(parsed)).toBe(12.5);
     expect(`${parsed}`).toBe('12.5');
+    expect(B.config().precision).toBeGreaterThan(0);
+
+    // Additional SparseMatrix + BigNumber + error-parity branches
+    const sp2 = new bigmath.SparseMatrix([
+      [Big(1), Big(0)],
+      [Big(0), Big(2)],
+    ] as unknown as number[][]) as {
+      toArray(): unknown[][];
+      valueOf(): unknown[][];
+      forEach(cb: (v: unknown) => void): void;
+      resize(size: number[], defaultValue?: unknown): { toArray(): unknown[][] };
+      subset(index: unknown): unknown;
+    };
+    const seen: unknown[] = [];
+    sp2.forEach((v) => seen.push(v));
+    expect(seen.length).toBeGreaterThan(0);
+    expect(sp2.valueOf()[0][0]).toBeInstanceOf(B);
+    expect(sp2.resize([2, 2]).toArray()[0][0]).toBeInstanceOf(B);
+    expect(sp2.subset(bigmath.index(0, 0))).toBeInstanceOf(B);
+
+    // Unit and Complex with BigNumber normalization
+    const u = bigmath.unit(Big(5), 'cm') as { value: unknown };
+    expect(u.value).toBeInstanceOf(B);
+    expect((bigmath.abs as (x: unknown) => unknown)(u)).toBeDefined();
+    expect(() => (bigmath.bitNot as (x: unknown) => unknown)(1.5)).toThrow(
+      'Integer expected in function bitNot'
+    );
+    expect(() => (bigmath.bignumber as (...a: unknown[]) => unknown)(1, 2)).toThrow(TypeError);
+    expect(bigmath.bignumber()).toEqual(Big(0));
+    expect(bigmath.bignumber(123n)).toEqual(Big(123));
+    expect(bigmath.bignumber([1, 2])).toEqual([Big(1), Big(2)]);
+    expect(
+      (bigmath.bignumber(bigmath.matrix([1, 2])) as { toArray(): unknown[] }).toArray()
+    ).toEqual([Big(1), Big(2)]);
   });
 });

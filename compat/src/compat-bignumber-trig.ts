@@ -60,33 +60,11 @@ function ctorOfOperand(
 function copyFunctionSurface(from: UnaryFn, to: UnaryFn): void {
   Object.defineProperty(to, 'name', { value: from.name, configurable: true });
   Object.defineProperty(to, 'length', { value: from.length, configurable: true });
-  try {
-    Object.setPrototypeOf(to, Object.getPrototypeOf(from));
-  } catch {
-    // exotic functions may refuse a prototype swap
-  }
-  const proto = Object.getOwnPropertyDescriptor(from, 'prototype');
-  if (proto) {
-    try {
-      Object.defineProperty(to, 'prototype', proto);
-    } catch {
-      try {
-        (to as { prototype: unknown }).prototype = (from as { prototype: unknown }).prototype;
-      } catch {
-        // class `.prototype` can be non-writable
-      }
-    }
-  }
   for (const key of Reflect.ownKeys(from)) {
     if (key === 'length' || key === 'name' || key === 'prototype') continue;
     if (Object.prototype.hasOwnProperty.call(to, key)) continue;
     const desc = Object.getOwnPropertyDescriptor(from, key);
-    if (!desc) continue;
-    try {
-      Object.defineProperty(to, key, desc);
-    } catch {
-      // skip non-configurable exotic keys
-    }
+    if (desc) Object.defineProperty(to, key, desc);
   }
 }
 
