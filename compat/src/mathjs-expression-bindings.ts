@@ -55,6 +55,7 @@ export type CompatEvaluatorEvaluate = (
   options?: PhysicsEvaluateOptions
 ) => unknown;
 
+/** Build `help` / `evaluate` / `compile` / `parser` bindings for the mathjs unsafe expression scope. */
 export function createMathjsExpressionBindings(
   getApi: () => CompatExpressionApi,
   mathWithTransform: () => Record<string, unknown>,

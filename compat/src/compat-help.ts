@@ -5,6 +5,7 @@
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { hasOwnProperty } from '@danielsimonjr/mathts-core/internal';
 
+/** Shape of one mathjs 15.3.0 embedded documentation entry used by compat `help()`. */
 export interface CompatHelpDoc {
   name: string;
   category?: string;
@@ -76,6 +77,7 @@ export function resolveCompatHelpSearchName(
   return searchName;
 }
 
+/** Return the embedded doc for a help search value, or throw when none exists. */
 export function compatHelpDocForSearch(
   search: unknown,
   mathWithTransform: Record<string, unknown>
