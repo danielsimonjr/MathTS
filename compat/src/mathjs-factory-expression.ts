@@ -135,6 +135,13 @@ export function asMathjsExpressionScopeValue(value: unknown): unknown {
   const cached = scopeFnWrapperCache.get(fn);
   if (cached !== undefined) return cached;
   function scopeFn(this: unknown, a?: unknown, b?: unknown): unknown {
+    if (new.target !== undefined) {
+      return Reflect.construct(
+        fn as unknown as new (...args: unknown[]) => object,
+        Array.prototype.slice.call(arguments),
+        new.target === scopeFn ? (fn as unknown as new (...args: unknown[]) => object) : new.target
+      );
+    }
     const argc = arguments.length;
     if (argc === 2) return (fn as (x: unknown, y: unknown) => unknown).call(this, a, b);
     if (argc === 1) return (fn as (x: unknown) => unknown).call(this, a);
@@ -143,8 +150,6 @@ export function asMathjsExpressionScopeValue(value: unknown): unknown {
   }
   const descriptors = Object.getOwnPropertyDescriptors(fn);
   delete descriptors.prototype;
-  delete descriptors.length;
-  delete descriptors.name;
   Object.defineProperties(scopeFn, descriptors);
   scopeFnWrapperCache.set(fn, scopeFn);
   scopeFnUnwrapMap.set(scopeFn, fn);
