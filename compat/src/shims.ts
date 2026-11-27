@@ -752,6 +752,7 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
     mapDivideBroadcastError(err, b);
   }
 }, _divide) as TypedFunction;
+/** Bridges a mathjs fraction.js value into a MathTS core `Fraction` for matrix internals. */
 export function mathjsToCoreFraction(v: MathjsFraction): Fraction {
   const s = typeof v.s === 'bigint' ? v.s : BigInt(v.s);
   const n = typeof v.n === 'bigint' ? v.n : BigInt(v.n);
@@ -759,6 +760,7 @@ export function mathjsToCoreFraction(v: MathjsFraction): Fraction {
   return new Fraction(s < 0n ? -n : n, d);
 }
 
+/** Bridges a MathTS core `Fraction` into the bundled mathjs fraction.js class. */
 export function coreFractionToMathjs(v: Fraction): MathjsFraction {
   return new mathjsFractionClass(v.numerator, v.denominator) as MathjsFraction;
 }

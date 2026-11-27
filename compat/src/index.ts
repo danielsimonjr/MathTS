@@ -1390,7 +1390,9 @@ export {
   BIGNUMBER_E,
 } from '@danielsimonjr/mathts-core';
 
+/** mathjs 15.3.0 fraction.js constructor with metadata (#1779). */
 export { mathjsFractionClass as Fraction, isMathjsFraction, type MathjsFraction };
+/** True for mathjs-tagged fraction.js values or MathTS core `Fraction` instances. */
 export function isFraction(value: unknown): value is MathjsFraction {
   return isMathjsFraction(value) || isCoreFraction(value);
 }

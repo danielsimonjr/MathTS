@@ -498,6 +498,7 @@ function compareWithMathjsFractions(a: unknown, b: unknown): MathjsFraction {
   return new mathjsFractionClass(-1, 1) as MathjsFraction;
 }
 
+/** `compare` with mathjs fraction.js sign results and foreign-scalar conversion. */
 export function createCompatCompare(native: AnyFn, convert: (v: unknown) => unknown): AnyFn {
   return keepSurface(native, (...args: unknown[]): unknown => {
     const converted = args.map(convert);

@@ -8,6 +8,7 @@
  */
 import FractionJS from 'fraction.js';
 
+/** fraction.js instance with mathjs 15.3.0 prototype fields (`type`, `toJSON`, bigint accessors). */
 export type MathjsFraction = InstanceType<typeof FractionJS> & {
   readonly type: 'Fraction';
   readonly isFraction: true;
@@ -16,6 +17,7 @@ export type MathjsFraction = InstanceType<typeof FractionJS> & {
   toJSON(): { mathjs: 'Fraction'; n: string; d: string };
 };
 
+/** Constructor for mathjs-shaped fraction.js values (`fromJSON`, installed prototype). */
 export type MathjsFractionConstructor = typeof FractionJS & {
   new (...args: ConstructorParameters<typeof FractionJS>): MathjsFraction;
   fromJSON(json: { n: string | number | bigint; d: string | number | bigint }): MathjsFraction;
