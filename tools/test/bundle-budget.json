@@ -4,9 +4,9 @@
     "packages/typed-function/dist/index.js": 4608,
     "packages/typed-function/package.json": 2304,
     "packages/workerpool/dist/index.js": 59392,
-    "packages/workerpool/dist/worker.js": 26624,
+    "packages/workerpool/dist/worker.js": 26112,
     "packages/workerpool/package.json": 2816,
-    "core/dist/index.js": 278528,
+    "core/dist/index.js": 274432,
     "core/dist/internal.js": 274432,
     "core/package.json": 2048,
     "matrix/dist/index.js": 245760,
@@ -16,11 +16,11 @@
     "tensor/package.json": 2304,
     "autograd/dist/index.js": 75776,
     "autograd/package.json": 2304,
-    "functions/dist/index.js": 2424832,
+    "functions/dist/index.js": 2359296,
     "functions/dist/subpath-evaluate.js": 1605632,
     "functions/package.json": 3840,
     "functions/dist/wasm/mathts-as.wasm": 70656,
-    "expression/dist/index.js": 385024,
+    "expression/dist/index.js": 376832,
     "expression/package.json": 2304,
     "parser/dist/index.js": 768,
     "parser/package.json": 2560,
@@ -44,14 +44,14 @@
     "signal/package.json": 2304,
     "parallel/dist/index.js": 52224,
     "parallel/package.json": 2304,
-    "workbook/dist/index.js": 51200,
+    "workbook/dist/index.js": 50176,
     "workbook/package.json": 2304,
     "assembly/build/mathts.js": 98304,
     "assembly/build/mathts.wasm": 70656,
     "assembly/build/mathts-debug.wasm": 135168,
     "assembly/build/mathts-debug.js": 104448,
     "assembly/package.json": 3584,
-    "compat/dist/index.js": 606208,
+    "compat/dist/index.js": 655360,
     "compat/package.json": 2560,
     "gpu/dist/index.js": 18432,
     "gpu/package.json": 2304,
@@ -204,13 +204,13 @@
       "label": "compat create(all)",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "node",
-      "maxBytes": 2228224
+      "maxBytes": 2260992
     },
     {
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "maxBytes": 2228224
+      "maxBytes": 2260992
     }
   ]
 }
