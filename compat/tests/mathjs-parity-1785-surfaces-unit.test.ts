@@ -48,9 +48,9 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
     expect(readMatrixDatatype(wrapped)).toBe('number');
   });
 
-  it('matrixFromFunction builds a dense compat matrix', () => {
-    const m = math.matrixFromFunction([2, 2], () => 1) as { type?: string };
-    expect(m.type).toBe('DenseMatrix');
-    expect(math.size(m).valueOf()).toEqual([2, 2]);
+  it('legacy subset off keeps a scalar matrix GET as a matrix', () => {
+    const m = math.matrix([1, 2, 3]);
+    const col = (m as { subset: (i: unknown) => unknown }).subset(math.index(1));
+    expect(math.isMatrix(col)).toBe(true);
   });
 });

@@ -137,7 +137,7 @@ describe('matrix model #1785', () => {
   it('dense subset rejects non-index GET with TypeError', () => {
     const m = math.matrix([1, 2, 3]);
     expect(() =>
-      (m as { subset: (i: unknown) => unknown }).subset({ isIndex: false } as unknown),
+      (m as { subset: (i: unknown) => unknown }).subset({ isIndex: false } as unknown)
     ).toThrow(/Invalid index/);
   });
 
