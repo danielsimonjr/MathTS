@@ -28,7 +28,11 @@ import { createCompatHelpEvaluate } from './help-evaluate.js';
 import { createCompatTypedHelp } from './compat-help.js';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
-import { attachParserJsonMethods, patchParserFunctionExpr } from './compat-parser-json.js';
+import {
+  attachParserJsonMethods,
+  parserToJSON,
+  patchParserFunctionExpr,
+} from './compat-parser-json.js';
 import { compatReplacer, compatReviver } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
 const INTERNAL_NAMES: ReadonlySet<string> = new Set<string>(COMPAT_INTERNAL_NAMES);
@@ -596,6 +600,7 @@ export function wireMathjsInstanceApi(
       set: made.set.bind(made),
       remove: made.remove.bind(made),
       clear: made.clear.bind(made),
+      toJSON: () => parserToJSON(made.scope),
     };
     return createCompatParserApi(api) as ReturnType<typeof functionsParser>;
   }
