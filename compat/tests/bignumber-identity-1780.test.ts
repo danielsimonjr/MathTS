@@ -358,7 +358,7 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     assert.deepStrictEqual(big.atan2(1, Big(1)), Big('0.78539816339744830962'));
     assert.deepStrictEqual(big.atan2(Big(1), true), Big('0.78539816339744830962'));
     assert.deepStrictEqual(big.csch(Big(1)), Big('0.85091812823932154512'));
-    assert.deepStrictEqual(big.acsch(Big(0)).toString(), 'Infinity');
+    assert.deepStrictEqual(String(big.acsch(Big(0))), 'Infinity');
     assert.deepStrictEqual(big.acsch(big.csch(Big(2))), Big(2));
 
     // rotate, rotationMatrix, and sign on Unit with Fraction/Complex
