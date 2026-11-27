@@ -1,5 +1,6 @@
 import { BigNumber } from './bignumber.js';
-import { Fraction, Range, isNumber, isUnit } from '@danielsimonjr/mathts-core';
+import { Range, isNumber, isUnit } from '@danielsimonjr/mathts-core';
+import { mathjsFractionClass, type MathjsFractionConstructor } from './mathjs-fraction-class.js';
 import {
   DimensionError,
   IndexError,
@@ -59,7 +60,7 @@ type NativeCompatSymbols = {
   Help: typeof Help;
   BigNumber: BigNumberConstructor;
   Complex: MathjsComplexConstructor;
-  Fraction: typeof Fraction;
+  Fraction: MathjsFractionConstructor;
   Range: typeof Range;
   Matrix: typeof Matrix;
   DimensionError: typeof DimensionError;
@@ -134,7 +135,7 @@ export const instanceSymbols: typeof factory_mathjsCompat.constructors &
   // Use the same constructors whose values are returned by the compatibility functions.
   BigNumber: CompatBigNumber,
   Complex: CompatComplex,
-  Fraction,
+  Fraction: mathjsFractionClass,
   Range: CompatRange,
   Matrix,
   DimensionError: CompatDimensionError,

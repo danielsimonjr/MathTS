@@ -20,12 +20,13 @@ import {
   DenseMatrix,
   SparseMatrix,
   isMatrix,
+  type MathjsFraction,
 } from '../src/index.js';
 
 describe('factory pass-through (mathjs returns the same instance)', () => {
   it('fraction() returns the same Fraction instance unchanged', () => {
-    const original = new Fraction(3, 7);
-    const f = fraction(original);
+    const original = new Fraction(3, 7) as MathjsFraction;
+    const f = fraction(original) as MathjsFraction;
     expect(f).toBe(original);
     expect(f.numerator).toBe(3n);
     expect(f.denominator).toBe(7n);

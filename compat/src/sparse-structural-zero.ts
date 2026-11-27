@@ -6,6 +6,7 @@
  */
 
 import { BigNumber, Fraction, Complex } from '@danielsimonjr/mathts-core';
+import { isMathjsFraction } from './mathjs-fraction-class.js';
 import { DEFAULT_CONFIG, nearlyEqualBigNumber } from '@danielsimonjr/mathts-core/internal';
 
 const VALUELESS_UNIT_ERROR = 'Signature not found (signature: isZero(null))';
@@ -55,6 +56,10 @@ export function isCompatZeroScalar(value: unknown): boolean {
       return nearlyEqual(value.re, 0, relTol, absTol) && nearlyEqual(value.im, 0, relTol, absTol);
     }
     if (value instanceof Fraction) return value.isZero();
+    if (isMathjsFraction(value)) {
+      const n = typeof value.n === 'bigint' ? value.n : BigInt(value.n as number);
+      return n === 0n;
+    }
     if (isUnitLike(value)) {
       const unit = value as { value: unknown };
       if (unit.value === null) throw new TypeError(VALUELESS_UNIT_ERROR);
@@ -78,6 +83,10 @@ export function isSparseStructuralZero(value: unknown): boolean {
   if (typeof value === 'bigint') return value === 0n;
   if (value instanceof Complex) return value.isZero();
   if (value instanceof Fraction) return value.isZero();
+  if (isMathjsFraction(value)) {
+    const n = typeof value.n === 'bigint' ? value.n : BigInt(value.n as number);
+    return n === 0n;
+  }
   if (isBigNumberLike(value)) return value.isZero();
   if (isUnitLike(value)) {
     const unit = value as { value: unknown };

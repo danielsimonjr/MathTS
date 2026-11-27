@@ -9,6 +9,13 @@
  * relational / unary surface instead of being brand-rejected.
  */
 
+import { Fraction } from '@danielsimonjr/mathts-core';
+import {
+  isMathjsFraction,
+  mathjsFractionClass,
+  type MathjsFraction,
+} from './mathjs-fraction-class.js';
+import { coreFractionToMathjs, mathjsToCoreFraction } from './shims.js';
 import {
   FRACTION_TO_BIGNUMBER_ERROR,
   isBigNumberLike,
@@ -52,6 +59,42 @@ function isNumberNestedMatrix(x: unknown): boolean {
     return false;
   };
   return visit(x);
+}
+
+function isMathjsFractionNestedMatrix(x: unknown): boolean {
+  if (!Array.isArray(x)) return false;
+  const visit = (entry: unknown): boolean => {
+    if (isMathjsFraction(entry)) return true;
+    if (Array.isArray(entry)) return entry.every(visit);
+    return false;
+  };
+  return visit(x);
+}
+
+function mathjsFractionIsZero(s: Scalar): boolean {
+  if (!isMathjsFraction(s)) return false;
+  const n = typeof s.n === 'bigint' ? s.n : BigInt(s.n as number);
+  return n === 0n;
+}
+
+function mapNestedMatrixEntries(data: Scalar[][], map: (cell: Scalar) => Scalar): Scalar[][] {
+  return data.map((row) => row.map(map));
+}
+
+function reboxFractionMatrixPinvResult(raw: unknown): unknown {
+  if (Array.isArray(raw)) {
+    const mapCell = (cell: unknown): unknown =>
+      cell instanceof Fraction ? coreFractionToMathjs(cell) : cell;
+    const visit = (entry: unknown): unknown =>
+      Array.isArray(entry) ? entry.map((inner) => visit(inner)) : mapCell(entry);
+    return visit(raw);
+  }
+  if (isMatrixLikeValue(raw) && !Array.isArray(raw)) {
+    const data = (raw as { valueOf: () => unknown }).valueOf();
+    const mapped = reboxFractionMatrixPinvResult(data);
+    return Array.isArray(mapped) ? mapped : raw;
+  }
+  return raw;
 }
 
 function matrixData(x: unknown, isMatrix: (v: unknown) => boolean): Scalar[][] | null {
@@ -126,10 +169,27 @@ function mathjsPinvMatrix(
   const size = isMatrix(x)
     ? (x as { size: () => number[] }).size()
     : nestedArraySize(x as ScalarMatrix);
-  const isZero = (s: Scalar): boolean =>
-    equal(add(s, Complex(1, 1)), add(0, Complex(1, 1))) === true;
-  const isZeros = (arr: unknown): boolean =>
-    deepEqual(add(arr, Complex(1, 1)), add(multiply(arr, 0), Complex(1, 1))) === true;
+  const rawData = matrixData(x, isMatrix);
+  const fractionMatrix = rawData !== null && isMathjsFractionNestedMatrix(rawData);
+  const isZero = (s: Scalar): boolean => {
+    if (fractionMatrix) {
+      if (isMathjsFraction(s)) return mathjsFractionIsZero(s);
+      return equal(s, 0) === true;
+    }
+    if (isMathjsFraction(s)) return mathjsFractionIsZero(s);
+    return equal(add(s, Complex(1, 1)), add(0, Complex(1, 1))) === true;
+  };
+  const isZeros = (arr: unknown): boolean => {
+    if (fractionMatrix) {
+      const visit = (entry: unknown): boolean => {
+        if (isMathjsFraction(entry)) return mathjsFractionIsZero(entry);
+        if (Array.isArray(entry)) return entry.every(visit);
+        return equal(entry, 0) === true;
+      };
+      return visit(arr);
+    }
+    return deepEqual(add(arr, Complex(1, 1)), add(multiply(arr, 0), Complex(1, 1))) === true;
+  };
 
   const _pinv = (mat: Scalar[][], rows: number, cols: number): Scalar[][] => {
     const { C, F } = _rankFact(mat, rows, cols);
@@ -244,7 +304,18 @@ export function createCompatPinv(native: AnyFn, deps: CompatPinvDependencies): A
       if (data !== null && isNumberNestedMatrix(data)) {
         return mathjsPinvMatrix(x, deps);
       }
+      if (data !== null && isMathjsFractionNestedMatrix(data)) {
+        const core = mapNestedMatrixEntries(data, (cell) =>
+          isMathjsFraction(cell) ? mathjsToCoreFraction(cell) : cell
+        );
+        return reboxFractionMatrixPinvResult(native(core));
+      }
       return native(x);
+    }
+    if (isMathjsFraction(x)) {
+      const n = typeof x.n === 'bigint' ? x.n : BigInt(x.n as number);
+      if (n === 0n) return x;
+      return divide(1, x);
     }
     if (isScalarObject(x)) {
       if (equal(x, 0) === true) return x;
@@ -410,6 +481,24 @@ function mixedFractionBigNumber(a: unknown, b: unknown): boolean {
  * for a Complex operand and rejects mixed BigNumber / Fraction pairs with the
  * implicit-conversion error. The wrapper converts foreign scalars first.
  */
+export function compareMathjsFractionSign(a: unknown, b: unknown): number {
+  return compareWithMathjsFractions(a, b).valueOf();
+}
+
+function compareWithMathjsFractions(a: unknown, b: unknown): MathjsFraction {
+  const left = isMathjsFraction(a)
+    ? a
+    : (new mathjsFractionClass(a as number | string) as MathjsFraction);
+  const right = isMathjsFraction(b)
+    ? b
+    : (new mathjsFractionClass(b as number | string) as MathjsFraction);
+  const cmp = left.compare(right);
+  if (cmp === 0) return new mathjsFractionClass(0, 1) as MathjsFraction;
+  if (cmp > 0) return new mathjsFractionClass(1, 1) as MathjsFraction;
+  return new mathjsFractionClass(-1, 1) as MathjsFraction;
+}
+
+/** `compare` with mathjs fraction.js sign results and foreign-scalar conversion. */
 export function createCompatCompare(native: AnyFn, convert: (v: unknown) => unknown): AnyFn {
   return keepSurface(native, (...args: unknown[]): unknown => {
     const converted = args.map(convert);
@@ -418,6 +507,12 @@ export function createCompatCompare(native: AnyFn, convert: (v: unknown) => unkn
     }
     if (converted.length >= 2 && mixedFractionBigNumber(converted[0], converted[1])) {
       throw new TypeError(FRACTION_TO_BIGNUMBER_ERROR);
+    }
+    if (
+      converted.length === 2 &&
+      (isMathjsFraction(converted[0]) || isMathjsFraction(converted[1]))
+    ) {
+      return compareWithMathjsFractions(converted[0], converted[1]);
     }
     return native(...converted);
   });

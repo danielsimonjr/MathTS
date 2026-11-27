@@ -21,9 +21,9 @@ import {
   COMPLEX_ZERO,
   isComplex,
   isFraction,
-  mathTyped,
   isBigNumber,
   isNumber,
+  mathTyped,
   LN2 as CORE_LN2,
   LN10 as CORE_LN10,
   LOG2E as CORE_LOG2E,
@@ -48,7 +48,12 @@ import type {
 } from '@danielsimonjr/mathts-functions';
 
 import { withMathjsComplexBinary } from './mathjs-complex.js';
-import { ensureMathjsFractionToJson } from './fraction-mathjs-json.js';
+import { compatFractionFnExport, type CompatFractionFn } from './mathjs-compat-fraction.js';
+import {
+  isMathjsFraction,
+  mathjsFractionClass,
+  type MathjsFraction,
+} from './mathjs-fraction-class.js';
 import { compatComplexPow } from './mathjs-compat-pow.js';
 import {
   add as _add,
@@ -101,9 +106,22 @@ import {
   isPositive as _isPositive,
   isNegative as _isNegative,
   isInteger as _isInteger,
-  fix as _fix,
+  isPrime as _isPrime,
+  isZero as _isZero,
+  factory_fix as _factoryFix,
 } from '@danielsimonjr/mathts-functions';
+import {
+  wrapFixForMathjsFraction,
+  wrapUnaryForMathjsFraction,
+  wrapMultiplyScalarForMathjsFraction,
+  compatFractionIsInteger,
+  compatFractionIsNegative,
+  compatFractionIsPositive,
+  compatFractionIsPrime,
+  compatFractionIsZero,
+} from './mathjs-fraction-unary-predicates.js';
 import { mathjsPowFractionPair } from './mathjs-fraction-pow.js';
+import { createDotMultiply } from './all-factories.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { sanitizeSparseNestedInput } from './compat-sparse-matrix.js';
 import {
@@ -151,9 +169,7 @@ export function complex(re?: number | string | Complex, im?: number, ...rest: un
 }
 
 /** The call forms of the compat {@link fraction}. */
-interface CompatFraction {
-  (numerator?: number | string | Fraction, denominator?: number): Fraction;
-}
+type CompatFraction = CompatFractionFn;
 
 /**
  * Create a fraction (mathjs-compatible)
@@ -170,16 +186,7 @@ interface CompatFraction {
  * returned unchanged (#1033), and a BigNumber, a bigint, null, an object `{ n, d }`, a Unit, an
  * Array and a Matrix convert, as in mathjs.
  */
-const fractionCore = mathTyped('fraction', factory_mathjsCompat.fraction as never, {
-  '': () => new Fraction(0, 1),
-  undefined: () => new Fraction(0, 1),
-}) as unknown as CompatFraction;
-
-function fractionExport(this: unknown, ...args: unknown[]): unknown {
-  return ensureMathjsFractionToJson(Reflect.apply(fractionCore, this, args));
-}
-
-export const fraction = Object.assign(fractionExport, fractionCore) as CompatFraction;
+export const fraction = compatFractionFnExport as CompatFraction;
 
 const compatBignumber = factory_mathjsCompat.compatFactoryExports().createBignumber({
   typed: factory_mathjsCompat.createCompatTyped(),
@@ -544,6 +551,44 @@ const publicMultiplyScalar = withPublicFactoryScalar(
     guardFractionBigNumber: true,
   }
 );
+const compatMultiplyScalar = wrapMultiplyScalarForMathjsFraction(
+  publicMultiplyScalar as unknown as TypedFunction
+);
+
+/** Factory `dotMultiply` closes over `multiplyScalar`; rebuild when sparse Fraction × scalar needs fraction.js. */
+let fractionAwareDotMultiply: typeof _dotMultiply | null = null;
+function operandCarriesMathjsFraction(value: unknown): boolean {
+  if (isMathjsFraction(value)) return true;
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      if (operandCarriesMathjsFraction(entry)) return true;
+    }
+    return false;
+  }
+  if (typeof value === 'object' && value !== null) {
+    const values = (value as { _values?: unknown[] })._values;
+    if (Array.isArray(values) && values.some((v) => isMathjsFraction(v))) return true;
+    const data = (value as { valueOf?: () => unknown }).valueOf?.();
+    if (data !== value && operandCarriesMathjsFraction(data)) return true;
+  }
+  return false;
+}
+function dotMultiplyWithCompatScalar(a: unknown, b: unknown): unknown {
+  if (!operandCarriesMathjsFraction(a) && !operandCarriesMathjsFraction(b)) {
+    return _dotMultiply(a, b);
+  }
+  if (fractionAwareDotMultiply === null) {
+    fractionAwareDotMultiply = withTypedSurface(
+      createDotMultiply({
+        typed: mathTyped,
+        matrix: _factoryMatrix,
+        multiplyScalar: compatMultiplyScalar,
+      }) as typeof _dotMultiply,
+      _dotMultiply
+    );
+  }
+  return fractionAwareDotMultiply(a, b);
+}
 const publicSubtractScalar = withPublicFactoryScalar(
   'subtract',
   'subtractScalar',
@@ -554,19 +599,47 @@ const publicSubtractScalar = withPublicFactoryScalar(
 const useTypedArithmeticForPair = (a: unknown, b: unknown): boolean =>
   isCompatBridgeMatrix(a) || isCompatBridgeMatrix(b) || isBoxedMatrix(a) || isBoxedMatrix(b);
 
-const addPairScalars = (a: unknown, b: unknown): unknown =>
-  useTypedArithmeticForPair(a, b) ? _add(a, b) : publicAddScalar(a, b);
+function mathjsFractionAdd(a: unknown, b: unknown): unknown | null {
+  if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {
+    return a.add(b as number | MathjsFraction);
+  }
+  if (isMathjsFraction(b) && (isMathjsFraction(a) || typeof a === 'number')) {
+    const left = isMathjsFraction(a) ? a : (new mathjsFractionClass(a as number) as MathjsFraction);
+    return left.add(b as number | MathjsFraction);
+  }
+  return null;
+}
+
+const addPairScalars = (a: unknown, b: unknown): unknown => {
+  const frac = mathjsFractionAdd(a, b);
+  if (frac !== null) return frac;
+  return useTypedArithmeticForPair(a, b) ? _add(a, b) : publicAddScalar(a, b);
+};
 
 const multiplyPairScalars = (a: unknown, b: unknown): unknown => {
   if (useTypedArithmeticForPair(a, b)) return _multiply(a, b);
   if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
     return _multiply(a, b);
   }
-  return publicMultiplyScalar(a, b);
+  return compatMultiplyScalar(a, b);
 };
 
-const subtractPairScalars = (a: unknown, b: unknown): unknown =>
-  useTypedArithmeticForPair(a, b) ? _subtract(a, b) : publicSubtractScalar(a, b);
+function mathjsFractionSub(a: unknown, b: unknown): unknown | null {
+  if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {
+    return a.sub(b as number | MathjsFraction);
+  }
+  if (isMathjsFraction(b) && (isMathjsFraction(a) || typeof a === 'number')) {
+    const left = isMathjsFraction(a) ? a : (new mathjsFractionClass(a as number) as MathjsFraction);
+    return left.sub(b as number | MathjsFraction);
+  }
+  return null;
+}
+
+const subtractPairScalars = (a: unknown, b: unknown): unknown => {
+  const frac = mathjsFractionSub(a, b);
+  if (frac !== null) return frac;
+  return useTypedArithmeticForPair(a, b) ? _subtract(a, b) : publicSubtractScalar(a, b);
+};
 
 function isProtoSparseMatrix(x: unknown): boolean {
   return (
@@ -626,8 +699,15 @@ export const multiply = makeArithmetic(
 const _dotMultiplyComplex = withMathjsComplexBinary(_dotMultiply as BinaryArithmetic, 'mul');
 const compatDotMultiply = withTypedSurface(
   withFixedArity('dotMultiply', 2, function dotMultiplyCompat(a: unknown, b: unknown): unknown {
+    if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {
+      return a.mul(b as number | MathjsFraction);
+    }
+    if (isMathjsFraction(b) && (isMathjsFraction(a) || typeof a === 'number')) {
+      const left = isMathjsFraction(a) ? a : (new mathjsFractionClass(a) as MathjsFraction);
+      return left.mul(b);
+    }
     if (isComplex(a) || isComplex(b)) return _dotMultiplyComplex(a, b);
-    return _dotMultiply(a, b);
+    return dotMultiplyWithCompatScalar(a, b);
   }),
   _dotMultiply
 ) as typeof _dotMultiply;
@@ -642,6 +722,17 @@ const _compatDivideScalar = withMathjsComplexBinary(
     (_factoryDivide as (x: unknown, y: unknown) => unknown)(a, b)) as BinaryArithmetic,
   'div'
 );
+function mathjsFractionDivide(a: unknown, b: unknown): unknown | null {
+  if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {
+    return a.div(b as number | MathjsFraction);
+  }
+  if (isMathjsFraction(b) && (isMathjsFraction(a) || typeof a === 'number')) {
+    const left = isMathjsFraction(a) ? a : (new mathjsFractionClass(a as number) as MathjsFraction);
+    return left.div(b as number | MathjsFraction);
+  }
+  return null;
+}
+
 export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unknown {
   try {
     if (arguments.length === 2 && isDenseMatrix(a) && isDenseMatrix(b)) {
@@ -649,6 +740,10 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
     }
     if (arguments.length === 2 && (isComplex(a) || isComplex(b))) {
       return _compatDivideScalar(a, b);
+    }
+    if (arguments.length === 2) {
+      const frac = mathjsFractionDivide(a, b);
+      if (frac !== null) return frac;
     }
     // The mathjs-shaped factory carries the 15.3.0 sparse semantics (a sparse result only
     // when the image of zero is zero, #1565); the typed surface keeps its older sparse path.
@@ -660,16 +755,46 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
     mapDivideBroadcastError(err, b);
   }
 }, _divide) as TypedFunction;
+/** Bridges a mathjs fraction.js value into a MathTS core `Fraction` for matrix internals. */
+export function mathjsToCoreFraction(v: MathjsFraction): Fraction {
+  const s = typeof v.s === 'bigint' ? v.s : BigInt(v.s);
+  const n = typeof v.n === 'bigint' ? v.n : BigInt(v.n);
+  const d = typeof v.d === 'bigint' ? v.d : BigInt(v.d);
+  return new Fraction(s < 0n ? -n : n, d);
+}
+
+/** Bridges a MathTS core `Fraction` into the bundled mathjs fraction.js class. */
+export function coreFractionToMathjs(v: Fraction): MathjsFraction {
+  return new mathjsFractionClass(v.numerator, v.denominator) as MathjsFraction;
+}
+
+const NON_RATIONAL_POW = 'Result of pow is non-rational and cannot be expressed as a fraction';
+
 function powWithFractionOperands(base: unknown, exponent: unknown, predictable: boolean): unknown {
+  if (isMathjsFraction(base) || isMathjsFraction(exponent)) {
+    const x = isMathjsFraction(base) ? base : new mathjsFractionClass(base as number | string);
+    const y = isMathjsFraction(exponent)
+      ? exponent
+      : new mathjsFractionClass(exponent as number | string);
+    const result = x.pow(y);
+    if (result != null) return result;
+    if (predictable) throw new Error(NON_RATIONAL_POW);
+    return _factoryPow(x.valueOf(), y.valueOf());
+  }
   const toFractionOperand = (v: unknown): Fraction | null => {
+    if (isMathjsFraction(v)) return mathjsToCoreFraction(v);
     if (isFraction(v)) return v;
-    if (typeof v === 'number' && Number.isFinite(v)) return fraction(v);
+    if (typeof v === 'number' && Number.isFinite(v)) return mathjsToCoreFraction(fraction(v));
     return null;
   };
   const b = toFractionOperand(base);
   const e = toFractionOperand(exponent);
   if (b != null && e != null) {
-    return mathjsPowFractionPair(b, e, predictable, (n) => fraction(n));
+    const result = mathjsPowFractionPair(b, e, predictable, (n) =>
+      mathjsToCoreFraction(fraction(n))
+    );
+    if (result instanceof Fraction) return coreFractionToMathjs(result);
+    return result;
   }
   return _factoryPow(base, exponent);
 }
@@ -708,11 +833,28 @@ export function createCompatPow(predictable: () => boolean): TypedFunction {
 /** Default `pow` shim (singleton config); instances should use `createCompatPow`. */
 export const pow = createCompatPow(() => Boolean(config().predictable));
 
-/** Native Fraction predicates (sign/integrality from `numerator` / `denominator`). */
-export const isPositive = _isPositive as unknown as TypedFunction;
-export const isNegative = _isNegative as unknown as TypedFunction;
-export const isInteger = _isInteger as unknown as TypedFunction;
-export const fix = _fix as unknown as TypedFunction;
+/** mathjs 15.3.0 fraction.js predicate parity (s/n/d fields, #1779 / G03). */
+export const isPositive = wrapUnaryForMathjsFraction(
+  _isPositive as unknown as TypedFunction,
+  compatFractionIsPositive
+);
+export const isNegative = wrapUnaryForMathjsFraction(
+  _isNegative as unknown as TypedFunction,
+  compatFractionIsNegative
+);
+export const isInteger = wrapUnaryForMathjsFraction(
+  _isInteger as unknown as TypedFunction,
+  compatFractionIsInteger
+);
+export const isPrime = wrapUnaryForMathjsFraction(
+  _isPrime as unknown as TypedFunction,
+  compatFractionIsPrime
+);
+export const isZero = wrapUnaryForMathjsFraction(
+  _isZero as unknown as TypedFunction,
+  compatFractionIsZero
+);
+export const fix = wrapFixForMathjsFraction(_factoryFix as unknown as TypedFunction);
 
 // sqrt and log leave the real domain for x < 0 (they return Complex there).
 export const sqrt = makeUnaryFastPath(
@@ -931,8 +1073,8 @@ export function isComplex_(x: unknown): x is Complex {
  * @param x - The value to check.
  * @returns `true` if `x` is a Fraction.
  */
-export function isFraction_(x: unknown): x is Fraction {
-  return isFraction(x);
+export function isFraction_(x: unknown): x is Fraction | MathjsFraction {
+  return isFraction(x) || isMathjsFraction(x);
 }
 
 /**
@@ -1006,6 +1148,8 @@ const _shims = {
   isPositive,
   isNegative,
   isInteger,
+  isPrime,
+  isZero,
   fix,
   sqrt,
   abs,

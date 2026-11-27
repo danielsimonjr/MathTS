@@ -1,0 +1,56 @@
+/**
+ * mathjs 15.3.0 relational kernels use fraction.js `equals` / `compare`, not core `Fraction`.
+ */
+import type { TypedFunction } from '@danielsimonjr/mathts-core';
+import {
+  isMathjsFraction,
+  mathjsFractionClass,
+  type MathjsFraction,
+} from './mathjs-fraction-class.js';
+
+function copyTypedSurface(shim: object, typedFn: object): void {
+  for (const key of Reflect.ownKeys(typedFn)) {
+    if (key === 'prototype') continue;
+    const desc = Object.getOwnPropertyDescriptor(typedFn, key);
+    if (desc) Object.defineProperty(shim, key, desc);
+  }
+}
+
+function coerceMathjsFraction(value: unknown): MathjsFraction | null {
+  if (isMathjsFraction(value)) return value;
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return new mathjsFractionClass(value) as MathjsFraction;
+  }
+  return null;
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function tryMathjsFractionEquals(a: unknown, b: unknown): boolean | null {
+  const left = coerceMathjsFraction(a);
+  const right = coerceMathjsFraction(b);
+  if (left === null && right === null) return null;
+  if (left !== null && right !== null) return left.equals(right);
+  if (left !== null && isFiniteNumber(b)) {
+    return left.equals(new mathjsFractionClass(b));
+  }
+  if (right !== null && isFiniteNumber(a)) {
+    return right.equals(new mathjsFractionClass(a));
+  }
+  return null;
+}
+
+/** Route scalar equality through fraction.js when either operand is a mathjs Fraction. */
+export function wrapEqualForMathjsFraction(fn: TypedFunction): TypedFunction {
+  const shim = function (this: unknown, ...args: unknown[]): unknown {
+    if (args.length === 2) {
+      const fractionResult = tryMathjsFractionEquals(args[0], args[1]);
+      if (fractionResult !== null) return fractionResult;
+    }
+    return fn.apply(this, args);
+  };
+  copyTypedSurface(shim, fn);
+  return shim as TypedFunction;
+}

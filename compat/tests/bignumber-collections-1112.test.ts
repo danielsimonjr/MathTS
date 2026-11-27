@@ -47,7 +47,8 @@ describe('compat bignumber (#1112)', () => {
     expect(str(bignumber(null))).toBe('0');
     expect(str(bignumber(true))).toBe('1');
     expect(str(bignumber(5n))).toBe('5');
-    expect(str(bignumber(fraction(1, 3)))).toBe(
+    const fromFraction = fraction(1, 3) as import('../src/index.js').MathjsFraction;
+    expect(str(bignumber(fromFraction as unknown as Parameters<typeof bignumber>[0]))).toBe(
       '0.3333333333333333333333333333333333333333333333333333333333333333'
     );
   });
