@@ -154,6 +154,21 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
       rejectMathjsIncompatibleUnitToken(args[1]);
       args = [args[0], rewriteMathjsUnitString(args[1]), ...args.slice(2)];
     }
+    const value = args[0];
+    const unitName = args[1];
+    const valueIsNaN =
+      typeof value === 'number'
+        ? Number.isNaN(value)
+        : typeof value === 'object' &&
+          value !== null &&
+          typeof (value as { isNaN?: () => boolean }).isNaN === 'function' &&
+          (value as { isNaN(): boolean }).isNaN();
+    if (args.length >= 2 && typeof unitName === 'string' && valueIsNaN) {
+      const template = unit(0, unitName) as { clone(): { value: unknown } };
+      const copy = template.clone();
+      copy.value = typeof value === 'number' ? value : NaN;
+      return copy;
+    }
     return unit(...args);
   };
   const wrappedCreateUnit = (...args: unknown[]) => {

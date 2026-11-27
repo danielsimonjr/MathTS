@@ -32,11 +32,18 @@ describe('factory pass-through (mathjs returns the same instance)', () => {
     expect(f.denominator).toBe(7n);
   });
 
-  it('bignumber() returns the same BigNumber instance unchanged', () => {
-    const original = BigNumber.fromNumber(123);
+  it('bignumber() returns the same CompatBigNumber instance unchanged', () => {
+    const original = bignumber(123);
     const bn = bignumber(original);
     expect(bn).toBe(original);
-    expect(bn.valueOf()).toBe(123);
+    expect(bn.valueOf()).toBe('123');
+  });
+
+  it('bignumber() wraps a native BigNumber as CompatBigNumber', () => {
+    const native = BigNumber.fromNumber(123);
+    const bn = bignumber(native);
+    expect(bn).not.toBe(native);
+    expect(bn.valueOf()).toBe('123');
   });
 
   it('matrix() passes a DenseMatrix instance through unchanged', () => {

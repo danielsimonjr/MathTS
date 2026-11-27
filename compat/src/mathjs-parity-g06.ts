@@ -26,10 +26,8 @@ import {
   keepSurface,
 } from './mathjs-parity-g02.js';
 import { compatDecimalResult } from './bignumber.js';
-import type {
-  BigNumber as CompatBigNumberType,
-  Fraction as CompatFractionType,
-} from '@danielsimonjr/mathts-core';
+import type { Fraction as CompatFractionType } from '@danielsimonjr/mathts-core';
+import type { CompatBigNumberInstance as CompatBigNumberType } from './bignumber.js';
 
 type AnyFn = (...args: unknown[]) => unknown;
 

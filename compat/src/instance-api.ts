@@ -1,4 +1,8 @@
-import { compatDecimalResult } from './bignumber.js';
+import {
+  BigNumber as CompatBigNumber,
+  compatDecimalResult,
+  type CompatDecimalBigNumberCtor,
+} from './bignumber.js';
 import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
 /**
  * mathjs instance methods on `create(all)`: import, typed, compile, and
@@ -224,6 +228,16 @@ export function wireMathjsInstanceApi(
   };
 
   const instanceTyped = factory_mathjsCompat.createCompatTyped();
+  const instanceBigNumber =
+    (instance.BigNumber as typeof CompatBigNumber | undefined) ?? CompatBigNumber;
+  instanceTyped.addConversion(
+    {
+      from: 'bigint',
+      to: 'BigNumber',
+      convert: (x: unknown) => new instanceBigNumber((x as bigint).toString()),
+    },
+    { override: true }
+  );
 
   const mathNs = instance as MathNamespace;
   mathNs.typed = instanceTyped;
@@ -453,13 +467,16 @@ export function wireMathjsInstanceApi(
   function rebindEvaluator(): InstanceEvaluator {
     scrubDenylist(expressionLayers.mathWithTransform);
     syncEvaluateScopeOverrides();
+    const instanceBigNumberCtor = instance.BigNumber as CompatDecimalBigNumberCtor;
+    const normalizeDecimal = (value: unknown): unknown =>
+      compatDecimalResult(value, instanceBigNumberCtor);
     evaluator = createInstanceEvaluator(
       buildEvaluatorScope(),
       COMPAT_INTERNAL_NAMES,
       true,
       constants,
       true,
-      compatDecimalResult,
+      normalizeDecimal,
       mathjsExpressionBindings
     );
     patchEvaluatorToTex(evaluator);
@@ -468,18 +485,24 @@ export function wireMathjsInstanceApi(
     ) => unknown;
     instance.evaluate = runBound(
       (expression: unknown, scope?: ExpressionScope, options?: CompatEvaluateOptions) =>
-        mapExpressions(expression, (text) =>
-          wrapBlockArrayAsResultSet(
-            evaluator.evaluate(text, scope, policyOptions(options)),
-            text,
-            ResultSetCtor
+        normalizeDecimal(
+          mapExpressions(expression, (text) =>
+            wrapBlockArrayAsResultSet(
+              evaluator.evaluate(text, scope, policyOptions(options)),
+              text,
+              ResultSetCtor
+            )
           )
         )
     );
     instance.compile = runBound((expression: unknown, options?: CompatEvaluateOptions) =>
       mapExpressions(expression, (text) => {
         const compiled = evaluator.compile(text, policyOptions(options));
-        return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
+        return {
+          evaluate: runBound((...ea: unknown[]) =>
+            normalizeDecimal((compiled.evaluate as (...a: unknown[]) => unknown)(...ea))
+          ),
+        };
       })
     );
     instance.compileExpr = instance.compile;

@@ -1,0 +1,4 @@
+### Fixed
+
+- **Unified compat BigNumber class (#1780):** Per-instance `InstanceBigNumber` from `create()` wires `setCompatDecimalBigNumberCtor` so `compatDecimalResult`, bitwise NaN shifts, and `evaluate()` emit the same constructor as `math.bignumber()`. Lazy `bignumber` skips the generic config wrapper. `diag`/`range` promote structural zeros and mixed bounds; nested vector/matrix args detect BigNumber datatypes. `arg` uses configured full-precision `pi`; `log2` exacts small powers of two; bitwise shifts handle `±Infinity` pairs; `bignumber(bigint)` keeps full integer precision.
+- **BigNumber decimal.js trig (#1780):** `compat-bignumber-trig.ts` routes unary trig for BigNumber operands through `decimal.js`, preserving each instance's constructor (including mixed-precision `create()` children). `compatDecimalResult` no longer re-wraps compat decimals with the last `create()` ctor.

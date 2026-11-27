@@ -168,13 +168,13 @@ describe('@danielsimonjr/mathts-compat', () => {
     it('should create BigNumber from number', () => {
       const bn = bignumber(42);
 
-      expect(bn.valueOf()).toBe(42);
+      expect(bn.valueOf()).toBe('42');
     });
 
     it('should return zero BigNumber for undefined', () => {
       const bn = bignumber();
 
-      expect(bn.valueOf()).toBe(0);
+      expect(bn.valueOf()).toBe('0');
     });
   });
 

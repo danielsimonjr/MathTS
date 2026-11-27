@@ -1,5 +1,5 @@
 import { isBigNumber } from '@danielsimonjr/mathts-core';
-import { BigNumber } from './bignumber.js';
+import { BigNumber, compatDecimalResult } from './bignumber.js';
 import { evaluate, factory_mathjsCompat, runWithConfig } from '@danielsimonjr/mathts-functions';
 import { MATHJS_UNIT_CONSTANTS } from './parity-names.generated.js';
 
@@ -36,22 +36,26 @@ const Unit = factory_mathjsCompat.constructors.Unit;
 export function configuredMathjsConstant(
   name: keyof typeof mathConstants | 'Infinity' | 'NaN',
   value: number,
-  config: Parameters<typeof runWithConfig>[0]
-): number | import('@danielsimonjr/mathts-core').BigNumber {
+  config: Parameters<typeof runWithConfig>[0],
+  BigNumberCtor: typeof BigNumber = BigNumber
+): number | BigNumber {
   if (config.number !== 'BigNumber') return value;
-  if (name === 'Infinity' || name === 'NaN') return new BigNumber(value);
+  if (name === 'Infinity' || name === 'NaN') return new BigNumberCtor(value);
   const canonical = mathConstants[name];
-  return runWithConfig(config, () => {
-    // MathJS rounds each operation in (sqrt(5) + 1) / 2 at the configured precision.
-    if (canonical === 'phi') return new BigNumber(5).sqrt().add(1).divide(2);
-    const result: unknown = evaluate(canonical === 'tau' ? 'pi' : canonical);
-    if (!isBigNumber(result)) {
-      throw new TypeError(`Expected a BigNumber constant for ${canonical}`);
-    }
-    // MathJS derives tau by doubling the already rounded pi.
-    const decimal = new BigNumber(result);
-    return canonical === 'tau' ? decimal.multiply(2) : decimal;
-  });
+  return compatDecimalResult(
+    runWithConfig(config, () => {
+      // MathJS rounds each operation in (sqrt(5) + 1) / 2 at the configured precision.
+      if (canonical === 'phi') return new BigNumberCtor(5).sqrt().add(1).divide(2);
+      const result: unknown = evaluate(canonical === 'tau' ? 'pi' : canonical);
+      if (!isBigNumber(result)) {
+        throw new TypeError(`Expected a BigNumber constant for ${canonical}`);
+      }
+      // MathJS derives tau by doubling the already rounded pi.
+      const decimal = new BigNumberCtor(result);
+      return canonical === 'tau' ? decimal.multiply(2) : decimal;
+    }),
+    BigNumberCtor
+  ) as BigNumber;
 }
 
 /** Prepare live reads before the instance defines its property layout. */
@@ -59,7 +63,8 @@ export function compatConstantReaders(
   surface: Record<string, unknown>,
   config: Parameters<typeof runWithConfig>[0],
   UnitClass: typeof Unit,
-  isDefault: (name: string) => boolean
+  isDefault: (name: string) => boolean,
+  BigNumberCtor: typeof BigNumber = BigNumber
 ): Record<string, () => unknown> {
   const reads: Record<string, () => unknown> = {};
   const bind = (name: string, read: () => unknown): void => {
@@ -72,7 +77,7 @@ export function compatConstantReaders(
     bind(name, () => {
       if (config.number !== 'BigNumber') return number;
       if (precise === undefined || precision !== config.precision) {
-        precise = configuredMathjsConstant(name, number, config);
+        precise = configuredMathjsConstant(name, number, config, BigNumberCtor);
         precision = config.precision;
       }
       return precise;
@@ -81,7 +86,7 @@ export function compatConstantReaders(
   for (const [name, number] of Object.entries(scalarConstants)) {
     if (!isDefault(name)) continue;
     bind(name as keyof typeof scalarConstants, () =>
-      config.number === 'BigNumber' ? new BigNumber(number) : number
+      config.number === 'BigNumber' ? new BigNumberCtor(number) : number
     );
   }
   for (const [name, value, units, decimalValue] of MATHJS_UNIT_CONSTANTS) {
