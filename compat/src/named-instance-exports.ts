@@ -23,6 +23,7 @@ import {
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
 import { createChain } from './chain-create.js';
+import { installParserHasInstance } from './compat-parser-api.js';
 import type { BoundInstanceConfig, CompatCreate, CompatFactoryInput } from './compat-types.js';
 import {
   createCompatBaseFormat,
@@ -108,6 +109,7 @@ export const Parser = function Parser(options?: PhysicsEvaluateOptions): CompatP
   }
   return Reflect.construct(getDefaultInstance().Parser as typeof Parser, [options], new.target);
 } as unknown as { new (options?: PhysicsEvaluateOptions): CompatParser };
+installParserHasInstance(Parser);
 
 /** Create a compatibility parser with its own retained scope. */
 const defaultParser = (options?: PhysicsEvaluateOptions) => new Parser(options);
