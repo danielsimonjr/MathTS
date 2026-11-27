@@ -9,6 +9,7 @@ import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.j
 
 type CompatBigNumberClass = InstanceType<typeof CompatBigNumber>;
 import { callableWithoutNew } from './constructors-without-new.js';
+/** Callable per-instance BigNumber class (#1780). */
 export type InstanceBigNumberCtor = typeof CompatBigNumber & {
   (value?: number | string | bigint | boolean | null): CompatBigNumberClass;
 };
@@ -16,6 +17,7 @@ export type InstanceBigNumberCtor = typeof CompatBigNumber & {
 /** Build a BigNumber class scoped to one compat instance config overlay. */
 type RunWithConfigOverlay = Parameters<typeof runWithConfig>[0];
 
+/** Create a BigNumber class bound to one compat instance config. */
 export function createInstanceBigNumberClass(
   getConfig: () => RunWithConfigOverlay,
   usesOverlay: () => boolean

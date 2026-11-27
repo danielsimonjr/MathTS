@@ -440,7 +440,9 @@ const compatMad = createCompatMad({
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
   const bound = ((...args: unknown[]) =>
-    compatDecimalResult(fn(...promoteBooleanScalarsForBigNumber(args, instancePromoteBigNumber)))) as T;
+    compatDecimalResult(
+      fn(...promoteBooleanScalarsForBigNumber(args, instancePromoteBigNumber))
+    )) as T;
   copyFunctionSurface(fn, bound);
   return bound;
 }
@@ -529,7 +531,10 @@ function withCompatInstanceSurface<T extends (...args: unknown[]) => unknown>(
   usesOverlay: () => boolean
 ): T {
   return wrapWithInstanceConfig(
-    ((...args: unknown[]) => compatDecimalResult(fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor)))) as T,
+    ((...args: unknown[]) =>
+      compatDecimalResult(
+        fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor))
+      )) as T,
     currentConfig,
     usesOverlay
   );
@@ -1178,14 +1183,15 @@ export function create(
     const raw = compatDefaultOverrides[name];
     flat[name] =
       typeof raw === 'function'
-        ? withCompatInstanceSurface(raw as (...args: unknown[]) => unknown, currentConfig, usesOverlay)
+        ? withCompatInstanceSurface(
+            raw as (...args: unknown[]) => unknown,
+            currentConfig,
+            usesOverlay
+          )
         : raw;
   }
   flat.diag = withCompatInstanceSurface(
-    createCompatDiag(
-      mathFunctions.diag as (...args: unknown[]) => unknown,
-      instanceBigNumberClass
-    ),
+    createCompatDiag(mathFunctions.diag as (...args: unknown[]) => unknown, instanceBigNumberClass),
     currentConfig,
     usesOverlay
   );

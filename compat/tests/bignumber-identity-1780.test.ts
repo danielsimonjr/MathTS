@@ -9,9 +9,7 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
   const bn = (x: number | string) => math.bignumber(x);
   const isInstanceDecimal = (x: unknown): boolean =>
     math.isBigNumber(x) &&
-    ((x as { constructor?: { name?: string } }).constructor?.name ?? '').includes(
-      'BigNumber'
-    );
+    ((x as { constructor?: { name?: string } }).constructor?.name ?? '').includes('BigNumber');
 
   it('bignumber(), new BigNumber(), and floor share one constructor', () => {
     const a = bn('2.13');
@@ -129,19 +127,14 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
   });
 
   it('bignumber(bigint) keeps full integer precision', () => {
-    assert.deepStrictEqual(
-      math.bignumber(12345678901234567890n),
-      new B('12345678901234567890')
-    );
+    assert.deepStrictEqual(math.bignumber(12345678901234567890n), new B('12345678901234567890'));
   });
 
   it('arg of a negative BigNumber uses full-precision pi', () => {
     const neg = bn(-2);
     const a = math.arg(neg) as InstanceType<typeof B>;
     expect(isInstanceDecimal(a)).toBe(true);
-    expect(a.toString()).toBe(
-      '3.141592653589793238462643383279502884197169399375105820974944592'
-    );
+    expect(a.toString()).toBe('3.141592653589793238462643383279502884197169399375105820974944592');
   });
 
   it('log2 of exact powers of two returns exact integer BigNumbers', () => {
@@ -149,10 +142,7 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     const B100 = big.BigNumber;
     assert.deepStrictEqual(big.log2(big.bignumber(1)), new B100(0));
     assert.deepStrictEqual(big.log2(big.bignumber(8)), new B100(3));
-    assert.deepStrictEqual(
-      big.log2(big.bignumber(2).pow(500)),
-      new B100(500)
-    );
+    assert.deepStrictEqual(big.log2(big.bignumber(2).pow(500)), new B100(500));
   });
 
   it('evaluate(distance) returns instance BigNumber', () => {

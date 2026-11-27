@@ -258,9 +258,6 @@ function asCompatBigNumber(x: unknown): BigNumber | null {
   return null;
 }
 
-/**
- * mathjs bitwise shifts on BigNumbers: negative shift → NaN; infinite patterns (#1780).
- */
 function negativeShiftNaN(shift: unknown): boolean {
   if (typeof shift === 'number') {
     return Number.isFinite(shift) && shift < 0;
@@ -269,6 +266,7 @@ function negativeShiftNaN(shift: unknown): boolean {
   return Boolean(shiftBn && shiftBn.isFinite() && shiftBn.lt(0));
 }
 
+/** mathjs bitwise shifts on BigNumbers: negative shift → NaN; infinite patterns (#1780). */
 export function withCompatBitShiftBigNumberParity(
   fn: (a: unknown, b: unknown) => unknown
 ): (a: unknown, b: unknown) => unknown {
@@ -303,7 +301,9 @@ export function withCompatBitShiftBigNumberParity(
         if (!base.isFinite()) {
           if (!shift.isFinite()) {
             if (base.isNegative() && shift.isPositive()) {
-              return compatDecimalResult(new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(-1));
+              return compatDecimalResult(
+                new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(-1)
+              );
             }
             return compatDecimalResult(compatDecimalNaN());
           }
@@ -312,7 +312,9 @@ export function withCompatBitShiftBigNumberParity(
       } else if (shiftIsNumber && !Number.isFinite(b)) {
         if (!base.isFinite()) {
           if (base.isNegative() && (b as number) > 0) {
-            return compatDecimalResult(new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(-1));
+            return compatDecimalResult(
+              new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(-1)
+            );
           }
           return compatDecimalResult(compatDecimalNaN());
         }
@@ -322,7 +324,11 @@ export function withCompatBitShiftBigNumberParity(
     try {
       return compatDecimalResult(fn(a, b));
     } catch (err) {
-      if (base && !base.isFinite() && (shift?.isFinite() || (shiftIsNumber && Number.isFinite(b)))) {
+      if (
+        base &&
+        !base.isFinite() &&
+        (shift?.isFinite() || (shiftIsNumber && Number.isFinite(b)))
+      ) {
         return compatDecimalResult(base);
       }
       if (base && negativeShiftNaN(b)) {

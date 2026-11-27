@@ -178,6 +178,7 @@ Object.defineProperty(CompatBigNumber, 'config', {
 
 export { CompatBigNumber as BigNumber };
 
+/** Constructor type for compat decimal normalization (#1780). */
 export type CompatDecimalBigNumberCtor = new (
   ...args: ConstructorParameters<typeof CompatBigNumber>
 ) => CompatBigNumber;
@@ -185,11 +186,15 @@ export type CompatDecimalBigNumberCtor = new (
 /** Ctor used when normalizing native decimals to compat instances (per-instance on `create`). */
 let compatDecimalBigNumberCtorState: CompatDecimalBigNumberCtor = CompatBigNumber;
 
+/** Active compat decimal ctor (per-instance after `create()`). */
 export function getCompatDecimalBigNumberCtor(): CompatDecimalBigNumberCtor {
   return compatDecimalBigNumberCtorState;
 }
 
-/** @internal Per-instance ctor wiring from `create()` — not for app callers. */
+/**
+ * Register the decimal ctor used by `compatDecimalResult` for one instance.
+ * @internal Per-instance ctor wiring from `create()` — not for app callers.
+ */
 export function setCompatDecimalBigNumberCtor(ctor: CompatDecimalBigNumberCtor): void {
   compatDecimalBigNumberCtorState = ctor;
 }

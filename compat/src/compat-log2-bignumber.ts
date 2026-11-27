@@ -3,7 +3,11 @@ import { compatDecimalResult, getCompatDecimalBigNumberCtor } from './bignumber.
 
 function asCompatBigNumber(x: unknown): unknown {
   if (isBigNumber(x)) return x;
-  if (typeof x === 'object' && x !== null && (x as { isBigNumber?: boolean }).isBigNumber === true) {
+  if (
+    typeof x === 'object' &&
+    x !== null &&
+    (x as { isBigNumber?: boolean }).isBigNumber === true
+  ) {
     return x;
   }
   return null;
@@ -52,16 +56,14 @@ function roundLog2WhenExactPower(operand: unknown, out: unknown): unknown {
 }
 
 /** mathjs returns exact integer logs for exact powers of two (#1780). */
-export function withCompatLog2BigNumberExact(
-  fn: (x: unknown) => unknown
-): (x: unknown) => unknown {
+export function withCompatLog2BigNumberExact(fn: (x: unknown) => unknown): (x: unknown) => unknown {
   return (x: unknown): unknown => {
     const exactSmall = exactLog2ForSmallIntegerPower(x);
     if (exactSmall !== null) {
       return compatDecimalResult(exactSmall);
     }
     const out = fn(x);
-  if ((asCompatBigNumber(x) as DecimalLike | null)?.eq?.(1)) {
+    if ((asCompatBigNumber(x) as DecimalLike | null)?.eq?.(1)) {
       return compatDecimalResult(new (getCompatDecimalBigNumberCtor())(0));
     }
     return compatDecimalResult(roundLog2WhenExactPower(x, out));

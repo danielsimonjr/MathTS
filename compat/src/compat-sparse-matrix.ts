@@ -28,7 +28,9 @@ type SparseInstance = {
 };
 
 function isMatrixInput(data: unknown): data is { isMatrix?: boolean } {
-  return typeof data === 'object' && data !== null && (data as { isMatrix?: boolean }).isMatrix === true;
+  return (
+    typeof data === 'object' && data !== null && (data as { isMatrix?: boolean }).isMatrix === true
+  );
 }
 
 function patchSparseValueOf(sparse: SparseInstance): void {

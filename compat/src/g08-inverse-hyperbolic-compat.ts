@@ -25,7 +25,9 @@ function withBigNumberAcoshAtOne(fn: Fn): Fn {
   return (...args: unknown[]): unknown => {
     const x = args[0];
     if (isBigNumber(x) && (x as { eq(n: unknown): boolean }).eq(1)) {
-      return compatDecimalResult(new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(0));
+      return compatDecimalResult(
+        new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(0)
+      );
     }
     return fn(...args);
   };
