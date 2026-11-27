@@ -217,3 +217,19 @@ export const compatDecimalTrigCot: TrigCompute = {
     return ctx.atInstancePrec((D) => new D(1).div(t));
   },
 };
+export const compatDecimalTrigCsch: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) => {
+    const s = ctx.atOperandPrec((d) => d.sinh());
+    return ctx.atInstancePrec((D) => new D(1).div(s));
+  },
+};
+export const compatDecimalTrigAcsch: TrigCompute = {
+  resultOwner: 'instance',
+  run: (ctx) =>
+    ctx.atInstancePrec((D) => {
+      const d = ctx.atOperandPrec((v) => v);
+      if (d.isZero()) return new D(Infinity);
+      return new D(1).div(d).asinh();
+    }),
+};

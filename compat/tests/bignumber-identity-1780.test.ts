@@ -327,4 +327,52 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     expect(m.zeta(-20) as number).toBeCloseTo(0, 10);
     expect(Number(String(big.zeta(big.bignumber(2))))).toBeCloseTo((Math.PI * Math.PI) / 6, 6);
   });
+
+  it('matches math.BigNumber identity across instance functions and { number: "BigNumber" }', () => {
+    const big = create(all, { number: 'BigNumber', precision: 20 });
+    const B = big.BigNumber;
+    const Big = big.bignumber;
+
+    // Exact constructor identity: math.bignumber(1).constructor === math.BigNumber
+    assert.strictEqual(Big(1).constructor, B);
+    assert.strictEqual(new B(1).constructor, B);
+    expect(Big(1)).toBeInstanceOf(B);
+
+    // InstanceBigNumber returned by hypot, numeric, identity, ones
+    assert.deepStrictEqual(big.hypot(Big(3), Big(4)), Big(5));
+    assert.deepStrictEqual(big.numeric('12.5', 'BigNumber'), Big('12.5'));
+    assert.deepStrictEqual(
+      big.identity(Big(2)),
+      big.matrix([
+        [Big(1), Big(0)],
+        [Big(0), Big(1)],
+      ])
+    );
+    assert.deepStrictEqual(big.ones(Big(2)), big.matrix([Big(1), Big(1)]));
+
+    // max/min with { number: 'BigNumber' } on numeric strings
+    assert.deepStrictEqual(big.max('10', '2'), Big(10));
+    assert.deepStrictEqual(big.min('10', '2'), Big(2));
+
+    // atan2 mixed number/boolean + BigNumber, csch, acsch, cos
+    assert.deepStrictEqual(big.atan2(1, Big(1)), Big('0.78539816339744830962'));
+    assert.deepStrictEqual(big.atan2(Big(1), true), Big('0.78539816339744830962'));
+    assert.deepStrictEqual(big.csch(Big(1)), Big('0.85091812823932154512'));
+    assert.deepStrictEqual(big.acsch(Big(0)).toString(), 'Infinity');
+    assert.deepStrictEqual(big.acsch(big.csch(Big(2))), Big(2));
+
+    // rotate, rotationMatrix, and sign on Unit with Fraction/Complex
+    const rot = big.rotate([Big(1), Big(0)], Big(0)) as unknown[];
+    expect(rot[0]).toBeInstanceOf(B);
+    const rm = big.rotationMatrix(Big(0)) as { toArray(): unknown[][] };
+    expect(rm.toArray()[0][0]).toBeInstanceOf(B);
+    assert.deepStrictEqual(big.sign(big.unit(big.fraction(5), 'cm')), big.fraction(1));
+    assert.deepStrictEqual(big.sign(big.unit(big.complex(3, 4), 'mi')), big.complex(0.6, 0.8));
+
+    // Sibling instance isolation
+    const a = create(all, { number: 'BigNumber', precision: 20 });
+    const b = create(all, { number: 'BigNumber', precision: 7 });
+    expect(String(b.bignumber(1).div(3))).toBe('0.3333333');
+    expect(String(a.bignumber(1).div(3)).length).toBeGreaterThan(15);
+  });
 });

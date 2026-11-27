@@ -40,12 +40,15 @@ import {
   compatDecimalTrigAcot,
   compatDecimalTrigAcoth,
   compatDecimalTrigAcsc,
+  compatDecimalTrigAcsch,
   compatDecimalTrigAsin,
   compatDecimalTrigAsinh,
   compatDecimalTrigCsc,
+  compatDecimalTrigCsch,
   compatDecimalTrigSec,
   compatDecimalTrigSech,
   compatDecimalTrigSin,
+  compatDecimalTrigCos,
   compatDecimalTrigCosh,
   compatDecimalTrigSinh,
   compatDecimalTrigCot,
@@ -70,6 +73,7 @@ import type {
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
 import {
+  BigNumber as NativeBigNumber,
   Complex as CompatComplex,
   isBigNumber,
   isFraction as isCoreFraction,
@@ -983,7 +987,37 @@ export function create(
     asin: withFractionRejection(shims.asin),
     acos: withFractionRejection(shims.acos),
     atan: withFractionRejection(shims.atan),
-    atan2: withFractionRejection(shims.atan2),
+    atan2: withFractionRejection((...args: unknown[]) => {
+      if (args.length === 2) {
+        const [a, b] = args;
+        const aBn = isBigNumber(a);
+        const bBn = isBigNumber(b);
+        if (
+          (aBn || bBn) &&
+          (aBn || typeof a === 'number' || typeof a === 'boolean') &&
+          (bBn || typeof b === 'number' || typeof b === 'boolean')
+        ) {
+          const outPrec = currentConfig.precision ?? 64;
+          const prev = NativeBigNumber.config();
+          try {
+            NativeBigNumber.config({ precision: outPrec + 8 });
+            const yVal = new NativeBigNumber(
+              aBn ? (a as { toString(): string }).toString() : Number(a)
+            );
+            const xVal = new NativeBigNumber(
+              bBn ? (b as { toString(): string }).toString() : Number(b)
+            );
+            const raw = NativeBigNumber.atan2(yVal, xVal);
+            NativeBigNumber.config({ precision: outPrec });
+            const rounded = raw.toSignificantDigits(outPrec);
+            return new instanceBigNumberClass(rounded.toString());
+          } finally {
+            NativeBigNumber.config(prev);
+          }
+        }
+      }
+      return (shims.atan2 as (...a: unknown[]) => unknown)(...args);
+    }),
 
     // Statistics
     sum: withSingleNumericStringGuard(withRawSingleValue(shims.sum)),
@@ -992,26 +1026,66 @@ export function create(
     variance: compatVariance,
     min: withComplexOrderingGuard(
       'min',
-      withRawSingleValue(
-        wrapUnitExtrema(shims.min as (...args: unknown[]) => unknown, factoryMinUnits),
-        g02IsComplexLike
-      )
+      withRawSingleValue((...args: unknown[]) => {
+        const mapped =
+          currentConfig.number === 'BigNumber'
+            ? args.map((arg) =>
+                typeof arg === 'string' && arg.trim() !== '' && !Number.isNaN(Number(arg))
+                  ? new instanceBigNumberClass(arg)
+                  : arg
+              )
+            : args;
+        return wrapUnitExtrema(
+          shims.min as (...a: unknown[]) => unknown,
+          factoryMinUnits
+        )(...mapped);
+      }, g02IsComplexLike)
     ),
     max: withComplexOrderingGuard(
       'max',
-      withRawSingleValue(
-        wrapUnitExtrema(shims.max as (...args: unknown[]) => unknown, factoryMaxUnits),
-        g02IsComplexLike
-      )
+      withRawSingleValue((...args: unknown[]) => {
+        const mapped =
+          currentConfig.number === 'BigNumber'
+            ? args.map((arg) =>
+                typeof arg === 'string' && arg.trim() !== '' && !Number.isNaN(Number(arg))
+                  ? new instanceBigNumberClass(arg)
+                  : arg
+              )
+            : args;
+        return wrapUnitExtrema(
+          shims.max as (...a: unknown[]) => unknown,
+          factoryMaxUnits
+        )(...mapped);
+      }, g02IsComplexLike)
     ),
-    sign: (...args: unknown[]) =>
-      compatDecimalResult(
+    sign: (...args: unknown[]) => {
+      if (
+        args.length === 1 &&
+        typeof args[0] === 'object' &&
+        args[0] !== null &&
+        (args[0] as { isUnit?: boolean }).isUnit === true
+      ) {
+        const unit = args[0] as { value: unknown; units?: { unit?: { offset?: number } }[] };
+        if (
+          unit.value !== null &&
+          unit.value !== undefined &&
+          typeof unit.value === 'object' &&
+          (unit.value as { isComplex?: boolean }).isComplex === true
+        ) {
+          return toCompatComplex((mathFunctions.sign as (x: unknown) => unknown)(unit.value));
+        }
+        if (isMathjsFraction(unit.value)) {
+          return new mathjsFractionClass(unit.value.n === 0n ? 0 : Number(unit.value.s));
+        }
+      }
+      return compatDecimalResult(
         wrapUnitExtrema(
           mathFunctions.sign as (...args: unknown[]) => unknown,
           factorySignUnits
         )(...args),
         instanceBigNumberClass
-      ),
+      );
+    },
 
     // Number theory
     gcd: shims.gcd,
@@ -1128,7 +1202,9 @@ export function create(
         extendedPrecision: true,
       })
     ),
-    acsch: withFractionRejection(g08Overrides.acsch),
+    acsch: withFractionRejection(
+      wrapBnTrig(g08Overrides.acsch, compatDecimalTrigAcsch, { extendedPrecision: true })
+    ),
     asec: withFractionRejection(g08Overrides.asec),
     asech: withFractionRejection(g08Overrides.asech),
     asinh: withFractionRejection(
@@ -1159,6 +1235,11 @@ export function create(
         extendedPrecision: true,
       })
     ),
+    cos: withFractionRejection(
+      wrapBnTrig(mathFunctions.factory_cos, compatDecimalTrigCos, {
+        extendedPrecision: true,
+      })
+    ),
     sinh: withFractionRejection(
       wrapBnTrig(mathFunctions.factory_sinh, compatDecimalTrigSinh, { extendedPrecision: true })
     ),
@@ -1166,7 +1247,7 @@ export function create(
     tanh: withFractionRejection(mathFunctions.factory_tanh),
     // #1587: the remaining trigonometry surface rejects a Fraction argument as
     // mathjs does; acoth/asech/acsch keep their G08 adapters above.
-    csch: withFractionRejection(mathFunctions.csch),
+    csch: withFractionRejection(wrapBnTrig(mathFunctions.csch, compatDecimalTrigCsch)),
     sech: withFractionRejection(wrapBnTrig(mathFunctions.sech, compatDecimalTrigSech)),
     // #1550: the mathjs-shaped factories keep a Unit operand and broadcast nthRoot.
     unaryMinus: mathFunctions.factory_unaryMinus,
@@ -1298,7 +1379,93 @@ export function create(
       mathFunctions.diag as (...args: unknown[]) => unknown,
       instanceBigNumberClass
     ),
-    rotationMatrix: mathFunctions.rotationMatrix,
+    rotate: (...args: unknown[]) => {
+      const fn = mathFunctions.rotate as (...a: unknown[]) => unknown;
+      if (
+        !args.some((a) => isBigNumber(a) || (Array.isArray(a) && a.some((e) => isBigNumber(e))))
+      ) {
+        return fn(...args);
+      }
+      const outPrec = currentConfig.precision ?? 64;
+      const prev = NativeBigNumber.config();
+      try {
+        NativeBigNumber.config({ precision: outPrec + 8 });
+        const toNative = (v: unknown): unknown =>
+          isBigNumber(v)
+            ? new NativeBigNumber((v as { toString(): string }).toString())
+            : Array.isArray(v)
+              ? v.map(toNative)
+              : v;
+        const raw = mathFunctions.runWithConfig({ ...currentConfig, precision: outPrec + 8 }, () =>
+          fn(...args.map(toNative))
+        );
+        NativeBigNumber.config({ precision: outPrec });
+        const roundBn = (v: unknown): unknown => {
+          if (isBigNumber(v)) {
+            return new instanceBigNumberClass(
+              (v as { toSignificantDigits(p: number): { toString(): string } })
+                .toSignificantDigits(outPrec)
+                .toString()
+            );
+          }
+          if (Array.isArray(v)) return v.map(roundBn);
+          if (
+            typeof v === 'object' &&
+            v !== null &&
+            (v as { isMatrix?: boolean; map?: (cb: (x: unknown) => unknown) => unknown })
+              .isMatrix === true
+          ) {
+            return (v as { map: (cb: (x: unknown) => unknown) => unknown }).map(roundBn);
+          }
+          return v;
+        };
+        return roundBn(raw);
+      } finally {
+        NativeBigNumber.config(prev);
+      }
+    },
+    rotationMatrix: (...args: unknown[]) => {
+      const fn = mathFunctions.rotationMatrix as (...a: unknown[]) => unknown;
+      if (!args.some((a) => isBigNumber(a))) {
+        return fn(...args);
+      }
+      const outPrec = currentConfig.precision ?? 64;
+      const prev = NativeBigNumber.config();
+      try {
+        NativeBigNumber.config({ precision: outPrec + 8 });
+        const toNative = (v: unknown): unknown =>
+          isBigNumber(v)
+            ? new NativeBigNumber((v as { toString(): string }).toString())
+            : Array.isArray(v)
+              ? v.map(toNative)
+              : v;
+        const raw = mathFunctions.runWithConfig({ ...currentConfig, precision: outPrec + 8 }, () =>
+          fn(...args.map(toNative))
+        );
+        NativeBigNumber.config({ precision: outPrec });
+        const roundBn = (v: unknown): unknown => {
+          if (isBigNumber(v)) {
+            return new instanceBigNumberClass(
+              (v as { toSignificantDigits(p: number): { toString(): string } })
+                .toSignificantDigits(outPrec)
+                .toString()
+            );
+          }
+          if (
+            typeof v === 'object' &&
+            v !== null &&
+            (v as { isMatrix?: boolean; map?: (cb: (x: unknown) => unknown) => unknown })
+              .isMatrix === true
+          ) {
+            return (v as { map: (cb: (x: unknown) => unknown) => unknown }).map(roundBn);
+          }
+          return v;
+        };
+        return roundBn(raw);
+      } finally {
+        NativeBigNumber.config(prev);
+      }
+    },
     subset: compatSubset,
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(

@@ -101,8 +101,12 @@ export function compatDecimalResult(
   if (typeof value !== 'object' || value === null) {
     return value;
   }
-  // Keep each compat instance's BigNumber class (#1780 — do not re-wrap with another instance's ctor).
+  // Keep each compat instance's BigNumber class (#1780 — do not re-wrap with another instance's ctor),
+  // but upgrade plain module-level CompatBigNumber instances to the owning instance's BigNumber class.
   if (value instanceof CompatBigNumber) {
+    if (value.constructor === CompatBigNumber && instanceCtor !== CompatBigNumber) {
+      return fixNegativeZeroExponent(new instanceCtor(value.toString()));
+    }
     return fixNegativeZeroExponent(value);
   }
   if (value instanceof NativeBigNumber) {

@@ -52,7 +52,13 @@ export function createInstanceBigNumberClass(
     installScopedMethod(name, original as (...args: unknown[]) => unknown);
   }
 
-  return callableWithoutNew(InstanceBigNumber) as unknown as InstanceBigNumberCtor;
+  const Callable = callableWithoutNew(InstanceBigNumber) as unknown as InstanceBigNumberCtor;
+  Object.defineProperty(InstanceBigNumber.prototype, 'constructor', {
+    value: Callable,
+    writable: true,
+    configurable: true,
+  });
+  return Callable;
 }
 
 function valueUsesBigNumber(value: unknown): boolean {
