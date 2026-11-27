@@ -17,7 +17,7 @@
  * @packageDocumentation
  */
 
-import { instanceSymbols } from './instance-symbols.js';
+import { compatMatrixConstructors, instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
 import {
@@ -32,7 +32,6 @@ import {
   createInstanceBigNumberClass,
   normalizeCompatRangeResult,
 } from './compat-bignumber-instance.js';
-import { wrapCompatSparseMatrixClass } from './compat-sparse-matrix.js';
 import { configuredMathjsConstant } from './instance-constants.js';
 import { withCompatLog2BigNumberExact } from './compat-log2-bignumber.js';
 import {
@@ -1720,20 +1719,11 @@ export function create(
   }
 
   instance.BigNumber = instanceBigNumberClass;
-  instance.SparseMatrix = wrapCompatSparseMatrixClass(
-    mathFunctions.factory_mathjsCompat.constructors.SparseMatrix as abstract new (
-      ...args: unknown[]
-    ) => {
-      _datatype?: string;
-      _values: unknown[] | null;
-      _index: number[];
-      _ptr: number[];
-      _size: number[];
-      zero: unknown;
-      valueOf(): unknown[][];
-    },
-    (value) => new instanceBigNumberClass(value as number | string)
-  );
+  instance.Matrix = compatMatrixConstructors.Matrix;
+  instance.DenseMatrix = compatMatrixConstructors.DenseMatrix;
+  instance.SparseMatrix = compatMatrixConstructors.SparseMatrix;
+  instance.ImmutableDenseMatrix = compatMatrixConstructors.ImmutableDenseMatrix;
+  instance.FibonacciHeap = compatMatrixConstructors.FibonacciHeap;
   wireMathjsInstanceApi(
     instance as Record<string, unknown>,
     currentConfig,

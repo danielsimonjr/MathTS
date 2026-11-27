@@ -17,7 +17,8 @@
  */
 
 /** A callable constructor symbol: a plain factory function or a class. */
-type CompatClass = ((...args: never[]) => unknown) | (abstract new (...args: never[]) => object);
+export type CompatClass =
+  ((...args: never[]) => unknown) | (abstract new (...args: never[]) => object);
 
 /** The message the mathjs 15.3.0 guard classes throw on a new-less call. */
 export const NEW_OPERATOR_MESSAGE = 'Constructor must be called with the new operator';
