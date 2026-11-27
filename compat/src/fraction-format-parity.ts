@@ -202,12 +202,9 @@ function formatOptionsToNumber(precision: unknown): unknown {
 }
 
 /** Coerce `format` options like mathjs: numeric second arg and BigNumber precision (#1575 G20). */
-export function normalizeCompatFormatOptions(
-  options: unknown,
-  defaultPrecision?: number
-): Record<string, unknown> {
+export function normalizeCompatFormatOptions(options: unknown): Record<string, unknown> {
   if (options === undefined) {
-    return defaultPrecision !== undefined ? { precision: defaultPrecision } : {};
+    return {};
   }
   if (typeof options === 'number') {
     return { precision: options };
@@ -217,9 +214,6 @@ export function normalizeCompatFormatOptions(
   }
   if (options !== null && typeof options === 'object') {
     const merged = { ...(options as Record<string, unknown>) };
-    if (merged.precision === undefined && defaultPrecision !== undefined) {
-      merged.precision = defaultPrecision;
-    }
     if (merged.precision !== undefined) {
       merged.precision = formatOptionsToNumber(merged.precision);
     }
@@ -228,12 +222,78 @@ export function normalizeCompatFormatOptions(
   return {};
 }
 
+/**
+ * Instance `format(value, options?)` option merge (#1778): mathjs applies
+ * `config.precision` only for `format(bignumber)` with no second argument — not
+ * when an options object omits `precision` (engineering notation, fixed complex, …).
+ */
+const FORMAT_MODE_OPTION_KEYS = [
+  'notation',
+  'wordSize',
+  'lowerExp',
+  'upperExp',
+  'fraction',
+  'truncate',
+] as const;
+
+function shouldInjectConfigFormatPrecision(
+  value: unknown,
+  opts: Record<string, unknown>,
+  configPrecision?: number
+): boolean {
+  if (configPrecision === undefined || !isBigNumber(value) || opts.precision !== undefined) {
+    return false;
+  }
+  for (const key of FORMAT_MODE_OPTION_KEYS) {
+    if (opts[key] !== undefined) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function normalizeInstanceFormatOptions(
+  value: unknown,
+  options: unknown,
+  configPrecision?: number
+): Record<string, unknown> | undefined {
+  if (options !== undefined) {
+    if (typeof options === 'function') {
+      return options as unknown as Record<string, unknown>;
+    }
+    const normalized = normalizeCompatFormatOptions(options);
+    const opts =
+      Object.keys(normalized).length > 0 ? normalized : (options as Record<string, unknown>);
+    if (shouldInjectConfigFormatPrecision(value, opts, configPrecision)) {
+      return { ...opts, precision: configPrecision };
+    }
+    return opts;
+  }
+  if (configPrecision !== undefined && isBigNumber(value)) {
+    return { precision: configPrecision };
+  }
+  return undefined;
+}
+
 /** Wrap the native `format` so Fraction ratios and units match mathjs 15.3.0 (#1579). */
 export function createCompatFormat(nativeFormat: NativeFormat): NativeFormat {
-  return (value: unknown, options?: unknown) => {
+  const wrapped = (...args: unknown[]): string => {
+    if (args.length === 0) {
+      return (nativeFormat as (...a: unknown[]) => string)();
+    }
+    if (args.length > 2) {
+      return (nativeFormat as (...a: unknown[]) => string)(...args);
+    }
+    const [value, options] = args;
+    if (typeof options === 'function') {
+      return formatCompatValue(value, options, nativeFormat);
+    }
     const normalized = normalizeCompatFormatOptions(options);
-    return formatCompatValue(value, normalized, nativeFormat);
+    const formatOptions =
+      options === undefined ? undefined : Object.keys(normalized).length > 0 ? normalized : options;
+    return formatCompatValue(value, formatOptions, nativeFormat);
   };
+  return Object.assign(wrapped, nativeFormat) as NativeFormat;
 }
 
 type NativeString = (value: unknown) => unknown;
@@ -290,6 +350,13 @@ type PrintFn = (template: string, values: unknown, options?: unknown) => string;
 
 const PRINT_TEMPLATE = /\$([\w.]+)/g;
 
+function resolvePrintValuesContainer(values: unknown): Record<string, unknown> | unknown[] {
+  if (isMatrix(values)) {
+    return (values as { toArray: () => unknown }).toArray() as unknown[];
+  }
+  return values as Record<string, unknown> | unknown[];
+}
+
 function interpolatePrint(
   template: string,
   values: Record<string, unknown> | unknown[],
@@ -323,16 +390,14 @@ export function createCompatPrint(nativePrint: PrintFn, nativeFormat: NativeForm
     (nativePrint as (...a: unknown[]) => string)(...args);
   const wrapped = Object.assign((...args: unknown[]) => {
     try {
+      if (args.length < 2 || args.length > 3) {
+        return invoke(...args);
+      }
       const template = args[0];
       const values = args[1];
       const options = args[2];
       if (typeof template === 'string' && values != null && typeof values === 'object') {
-        return interpolatePrint(
-          template,
-          values as Record<string, unknown> | unknown[],
-          options,
-          format
-        );
+        return interpolatePrint(template, resolvePrintValuesContainer(values), options, format);
       }
       return invoke(...args);
     } catch (error) {

@@ -62,7 +62,7 @@ import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names
 import { createPrototypeLevels, definePrototypeAccessor } from './instance-layout.js';
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { chainTypedFromInstance, createChain } from './chain-create.js';
-import { normalizeCompatFormatOptions } from './fraction-format-parity.js';
+import { normalizeInstanceFormatOptions } from './fraction-format-parity.js';
 import { toCompatComplex } from './mathjs-complex-prototype.js';
 import { assertValidCreateFactories, isCompatFactory } from './create-factory-validation.js';
 import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
@@ -1264,13 +1264,22 @@ export function create(
     mad: compatMad,
     expm: compatExpm,
     pinv: compatPinv,
-    format: ((value: unknown, options?: Record<string, unknown> | number) => {
-      const merged = normalizeCompatFormatOptions(options, currentConfig.precision);
-      const formatImpl = namedFormat;
-      return usesOverlay()
-        ? (mathFunctions.runWithConfig(currentConfig, () => formatImpl(value, merged)) as string)
-        : (formatImpl(value, merged) as string);
-    }) as typeof namedFormat,
+    format: (() => {
+      const formatImpl = namedFormat as (...args: unknown[]) => string;
+      const formatFn = (...args: unknown[]): string => {
+        if (args.length === 0 || args.length > 2) {
+          return formatImpl(...args);
+        }
+        const [value, options] = args;
+        const merged = normalizeInstanceFormatOptions(value, options, currentConfig.precision);
+        const call = (): string =>
+          merged === undefined ? formatImpl(value) : formatImpl(value, merged);
+        return usesOverlay()
+          ? (mathFunctions.runWithConfig(currentConfig, call) as string)
+          : call();
+      };
+      return Object.assign(formatFn, namedFormat);
+    })() as typeof namedFormat,
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,

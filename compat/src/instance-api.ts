@@ -444,6 +444,11 @@ export function wireMathjsInstanceApi(
     if (typeof applyTransform === 'function') {
       scope.apply = applyTransform;
     }
+    // #1778: one-based `print` for evaluate/compile (module mathScope transform is stale).
+    const printTransform = expressionLayers.transform.print;
+    if (typeof printTransform === 'function') {
+      scope.print = printTransform;
+    }
     if (typeof instance.num === 'function') scope.num = instance.num;
     if (typeof instance.den === 'function') scope.den = instance.den;
     if (wrappedUnit !== undefined) scope.Unit = wrappedUnit;
