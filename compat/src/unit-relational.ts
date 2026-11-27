@@ -7,6 +7,7 @@
  * already implement mathjs `compareUnits`, plus explicit guards for known native gaps.
  */
 import { isUnit } from '@danielsimonjr/mathts-core';
+import { wrapEqualForMathjsFraction } from './mathjs-fraction-relational.js';
 import {
   factory_compare,
   factory_equal,
@@ -153,11 +154,19 @@ function copyName(from: UnitFactoryOp, to: UnitFactoryOp): void {
  * factories (mathjs-shaped) while leaving every other signature on the native function.
  */
 export function applyUnitRelationalParity(ops: UnitRelationalOps): UnitRelationalOps {
-  const factoryEqual = factory_equal as UnitFactoryOp;
+  const factoryEqual = wrapEqualForMathjsFraction(
+    factory_equal as unknown as import('@danielsimonjr/mathts-core').TypedFunction
+  ) as UnitFactoryOp;
 
   const equal = withUnits(ops.equal, factoryEqual, true);
   const unequal = wrapUnequal(ops.unequal, factoryEqual);
-  const equalScalar = withUnits(ops.equalScalar, factoryEqual, true);
+  const equalScalar = withUnits(
+    wrapEqualForMathjsFraction(
+      ops.equalScalar as import('@danielsimonjr/mathts-core').TypedFunction
+    ) as UnitFactoryOp,
+    factoryEqual,
+    true
+  );
   const compare = withUnits(ops.compare, factory_compare as UnitFactoryOp, false);
   const larger = withUnits(ops.larger, factory_larger as UnitFactoryOp, false);
   const smaller = withUnits(ops.smaller, factory_smaller as UnitFactoryOp, false);

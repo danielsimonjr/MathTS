@@ -472,14 +472,14 @@ honours `includeEnd` on those paths.
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-compat` (1157 exports).
+> `@danielsimonjr/mathts-compat` (1161 exports).
 
 ### Functions by category
 
 **Dependencies** (1):
 `createTyped`
 
-**Factory / uncategorized** (671):
+**Factory / uncategorized** (674):
 `abs`
 `acos`
 `acosh`
@@ -527,6 +527,7 @@ honours `includeEnd` on those paths.
 `concat`
 `config`
 `conj`
+`coreFractionToMathjs`
 `corr`
 `cos`
 `cosh`
@@ -990,6 +991,7 @@ honours `includeEnd` on those paths.
 `isIndexNode`
 `isInteger`
 `isMap`
+`isMathjsFraction`
 `isMatrix`
 `isNaN`
 `isNegative`
@@ -1037,6 +1039,7 @@ honours `includeEnd` on those paths.
 `mad`
 `map`
 `mapSlices`
+`mathjsToCoreFraction`
 `matrix`
 `Matrix`
 `matrixFromColumns`
@@ -1152,7 +1155,7 @@ honours `includeEnd` on those paths.
 `zeta`
 `zpk2tf`
 
-### Constants & values (454)
+### Constants & values (455)
 
 `_false`
 `_Infinity`
@@ -1259,6 +1262,7 @@ honours `includeEnd` on those paths.
 `cumsumDependencies`
 `cumsumTransformDependencies`
 `deepEqualDependencies`
+`default`
 `denDependencies`
 `DenseMatrixDependencies`
 `derivativeDependencies`

@@ -16,6 +16,7 @@ import {
   MATHJS_UNIT_NAMES,
   MATHJS_UNIT_PREFIX_GROUP,
 } from './mathjs-unit-names.generated.js';
+import { patchCompatUnitTypeConverters } from './patch-unit-converters.js';
 
 const MATHJS_UNIT_NAME_SET = new Set(MATHJS_UNIT_NAMES);
 const MATHJS_PREFIX_GROUP_SETS = new Map(
@@ -142,6 +143,11 @@ function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>):
 export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T {
   const registeredNames = new Set<string>();
   const Unit = wrapCompatUnitClass(sources.Unit, registeredNames);
+  patchCompatUnitTypeConverters(
+    Unit as unknown as {
+      typeConverters: Record<string, (x: unknown) => unknown>;
+    }
+  );
   const { unit, createUnit, update } = sources;
   const wrappedUnit = (...args: unknown[]) => {
     if (args.length >= 2 && typeof args[1] === 'string') {

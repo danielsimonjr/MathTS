@@ -234,6 +234,10 @@ export function mathjsComplexProxy(
       }
       return Reflect.get(t, prop, receiver);
     },
+    ownKeys(t) {
+      const keys = Reflect.ownKeys(t);
+      return keys.includes('fromPolar') ? keys : [...keys, 'fromPolar'];
+    },
     getOwnPropertyDescriptor(t, prop) {
       // Consumers copy own properties off the class (function-surface copies),
       // which bypasses the `get` trap; keep `fromPolar` the compat one there too.

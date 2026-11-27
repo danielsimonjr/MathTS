@@ -1,4 +1,5 @@
 import { isBigNumber, isFraction } from '@danielsimonjr/mathts-core';
+import { isMathjsFraction } from './mathjs-fraction-class.js';
 import {
   factory_mathjsCompat,
   replacer as nativeReplacer,
@@ -12,6 +13,9 @@ export function compatReplacer(this: unknown, key: string, value: unknown): unkn
     this !== null && typeof this === 'object'
       ? Object.getOwnPropertyDescriptor(this, key)?.value
       : undefined;
+  if (isMathjsFraction(original)) {
+    return original.toJSON();
+  }
   if (isFraction(original)) {
     return {
       mathjs: 'Fraction',
@@ -64,9 +68,16 @@ export function reviveInstanceValue(
     value &&
     typeof value === 'object' &&
     Object.hasOwn(value, 'mathjs') &&
-    (Reflect.get(value, 'mathjs') === 'Unit' || Reflect.get(value, 'mathjs') === 'BigNumber')
+    (Reflect.get(value, 'mathjs') === 'Unit' ||
+      Reflect.get(value, 'mathjs') === 'BigNumber' ||
+      Reflect.get(value, 'mathjs') === 'Fraction')
   ) {
-    return reviveWithClasses(value, { ...classes, Unit, BigNumber: instanceSymbols.BigNumber });
+    return reviveWithClasses(value, {
+      ...classes,
+      Unit,
+      BigNumber: instanceSymbols.BigNumber,
+      Fraction: instanceSymbols.Fraction,
+    });
   }
   const numeric = nativeReviver(key, value);
   return numeric === value ? reviveWithClasses(value, classes) : numeric;
