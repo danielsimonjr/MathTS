@@ -150,4 +150,22 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     const five = big.evaluate('distance([1, 2], [4, 6])');
     assert.deepStrictEqual(five, big.bignumber(5));
   });
+
+  it('asin from a parent instance preserves child instance BigNumber identity', () => {
+    const bigmath = create(all, { number: 'BigNumber', precision: 20 });
+    const bigmath61 = bigmath.create({ number: 'BigNumber', precision: 61 });
+    const asinBig = bigmath.asin;
+    const expected = bigmath61.bignumber(
+      '-1.141592653589793238462643383279502884197169399375105820974945'
+    );
+    assert.deepStrictEqual(asinBig(bigmath61.sin(bigmath61.bignumber(-2))), expected);
+    assert.deepStrictEqual(asinBig(bigmath.sin(bigmath.bignumber(0))), bigmath.bignumber(0));
+  });
+
+  it('csc on pi/8 matches mathjs 15.3.0 rounded output', () => {
+    const bigmath = create(all, { number: 'BigNumber', precision: 20 });
+    const pi = bigmath.pi as InstanceType<typeof bigmath.BigNumber>;
+    assert.strictEqual(bigmath.csc(pi.div(8)).toString(), '2.6131259297527530557');
+    assert.deepStrictEqual(bigmath.csc(pi), bigmath.bignumber('-26769019461318409709'));
+  });
 });

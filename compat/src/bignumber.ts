@@ -10,7 +10,8 @@ import {
 function fixNegativeZeroExponent(bn: CompatBigNumber): CompatBigNumber {
   const exponent = (bn as unknown as { _exponent: number })._exponent;
   if (Object.is(exponent, -0)) {
-    return new (getCompatDecimalBigNumberCtor() as typeof CompatBigNumber)(bn.toString());
+    const Ctor = bn.constructor as typeof CompatBigNumber;
+    return new Ctor(bn.toString());
   }
   return bn;
 }
@@ -76,13 +77,19 @@ function patchNodeEvaluate(node: { evaluate: (...args: unknown[]) => unknown }):
 }
 
 /** Give a native decimal result the compatibility display convention (deep). */
-export function compatDecimalResult(value: unknown): unknown {
+export function compatDecimalResult(
+  value: unknown,
+  instanceCtor: CompatDecimalBigNumberCtor = getCompatDecimalBigNumberCtor()
+): unknown {
+  // Keep each compat instance's BigNumber class (#1780 — do not re-wrap with the last `create()` ctor).
+  if (value instanceof CompatBigNumber) {
+    return fixNegativeZeroExponent(value);
+  }
   if (value instanceof NativeBigNumber) {
-    const Ctor = getCompatDecimalBigNumberCtor();
-    if (!(value instanceof Ctor)) {
-      return fixNegativeZeroExponent(new Ctor(value.toString()));
+    if (value instanceof instanceCtor) {
+      return fixNegativeZeroExponent(value as CompatBigNumber);
     }
-    return fixNegativeZeroExponent(value as CompatBigNumber);
+    return fixNegativeZeroExponent(new instanceCtor(value.toString()));
   }
   if (Array.isArray(value)) {
     let changed = false;
@@ -131,7 +138,7 @@ export function compatDecimalResult(value: unknown): unknown {
     return value;
   }
   if (isBigNumber(value)) {
-    return value instanceof CompatBigNumber ? fixNegativeZeroExponent(value) : value;
+    return value;
   }
   return value;
 }

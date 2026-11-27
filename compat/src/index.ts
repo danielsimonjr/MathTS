@@ -35,6 +35,23 @@ import {
 import { wrapCompatSparseMatrixClass } from './compat-sparse-matrix.js';
 import { configuredMathjsConstant } from './instance-constants.js';
 import { withCompatLog2BigNumberExact } from './compat-log2-bignumber.js';
+import {
+  compatDecimalTrigAcosh,
+  compatDecimalTrigAcot,
+  compatDecimalTrigAcoth,
+  compatDecimalTrigAcsc,
+  compatDecimalTrigAsin,
+  compatDecimalTrigAsinh,
+  compatDecimalTrigCsc,
+  compatDecimalTrigSec,
+  compatDecimalTrigSech,
+  compatDecimalTrigSin,
+  compatDecimalTrigCosh,
+  compatDecimalTrigSinh,
+  compatDecimalTrigCot,
+  compatDecimalTrigCoth,
+  createCompatBigNumberTrigWrap,
+} from './compat-bignumber-trig.js';
 import { applyG08CompatOverrides } from './g08-inverse-hyperbolic-compat.js';
 import { compatFreqz, compatZpk2tf } from './compat-signal-factories.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
@@ -530,14 +547,14 @@ function withCompatInstanceSurface<T extends (...args: unknown[]) => unknown>(
   currentConfig: MathJSConfig,
   usesOverlay: () => boolean
 ): T {
-  return wrapWithInstanceConfig(
+  const wrapped = wrapWithInstanceConfig(
     ((...args: unknown[]) =>
-      compatDecimalResult(
-        fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor))
-      )) as T,
+      fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor))) as T,
     currentConfig,
     usesOverlay
   );
+  copyFunctionSurface(fn, wrapped);
+  return wrapped;
 }
 
 function withCoercedNumberConfigScalar<T extends (...args: unknown[]) => unknown>(
@@ -565,7 +582,10 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
       return fn.apply(this, callArgs);
     };
     const finish = (raw: unknown): unknown =>
-      compatDecimalResult(coerceBigNumberResultForNumberMode(currentConfig, callArgs, raw));
+      compatDecimalResult(
+        coerceBigNumberResultForNumberMode(currentConfig, callArgs, raw),
+        instancePromoteBigNumber
+      );
     if (!usesOverlay()) {
       return finish(invoke());
     }
@@ -998,6 +1018,10 @@ export function create(
   // Internal names of the functions namespace (#1216) are not surfaced: not own, not
   // inherited. A value that the caller supplies under such a name stays (#1250).
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
+  const wrapBnTrig = createCompatBigNumberTrigWrap(
+    () => currentConfig,
+    () => instanceBigNumberClass
+  );
   const g08Overrides = applyG08CompatOverrides({
     factory_asinh: mathFunctions.factory_asinh,
     factory_acosh: mathFunctions.factory_acosh,
@@ -1019,33 +1043,63 @@ export function create(
   const compatDefaultOverrides = {
     // #1587: a Fraction argument throws the mathjs conversion error, on top of
     // the G08 complex.js adapters (inverse hyperbolics) and the factories.
-    acosh: withFractionRejection(g08Overrides.acosh),
-    acot: withFractionRejection(mathFunctions.factory_acot),
-    acoth: withFractionRejection(g08Overrides.acoth),
-    acsc: withFractionRejection(g08Overrides.acsc),
+    acosh: withFractionRejection(
+      wrapBnTrig(g08Overrides.acosh, compatDecimalTrigAcosh, { extendedPrecision: true })
+    ),
+    acot: withFractionRejection(
+      wrapBnTrig(mathFunctions.factory_acot, compatDecimalTrigAcot, { extendedPrecision: true })
+    ),
+    acoth: withFractionRejection(
+      wrapBnTrig(g08Overrides.acoth, compatDecimalTrigAcoth, { extendedPrecision: true })
+    ),
+    acsc: withFractionRejection(
+      wrapBnTrig(g08Overrides.acsc, compatDecimalTrigAcsc, { extendedPrecision: true })
+    ),
+    asin: withFractionRejection(
+      wrapBnTrig(shims.asin as (...args: unknown[]) => unknown, compatDecimalTrigAsin, {
+        extendedPrecision: true,
+      })
+    ),
     acsch: withFractionRejection(g08Overrides.acsch),
     asec: withFractionRejection(g08Overrides.asec),
     asech: withFractionRejection(g08Overrides.asech),
-    asinh: withFractionRejection(g08Overrides.asinh),
+    asinh: withFractionRejection(
+      wrapBnTrig(g08Overrides.asinh, compatDecimalTrigAsinh, { extendedPrecision: true })
+    ),
     atanh: withFractionRejection(g08Overrides.atanh),
     cbrt: withFractionRejection(mathFunctions.factory_cbrt),
-    cosh: withFractionRejection(mathFunctions.factory_cosh),
-    cot: withFractionRejection(mathFunctions.factory_cot),
-    csc: withFractionRejection(mathFunctions.factory_csc),
+    cosh: withFractionRejection(
+      wrapBnTrig(mathFunctions.factory_cosh, compatDecimalTrigCosh, { extendedPrecision: true })
+    ),
+    cot: withFractionRejection(
+      wrapBnTrig(mathFunctions.factory_cot, compatDecimalTrigCot, { extendedPrecision: true })
+    ),
+    coth: withFractionRejection(
+      wrapBnTrig(mathFunctions.coth as (...args: unknown[]) => unknown, compatDecimalTrigCoth, {
+        extendedPrecision: true,
+      })
+    ),
+    csc: withFractionRejection(wrapBnTrig(mathFunctions.factory_csc, compatDecimalTrigCsc)),
     bernoulli: compatBernoulli,
     cube: mathFunctions.factory_cube,
     expm1: withMatrixMapHintOnUnary('expm1', withFractionRejection(mathFunctions.factory_expm1)),
     erf: compatErf,
     gamma: withMatrixMapHintOnUnary('gamma', withFractionRejection(compatGamma)),
-    sec: withFractionRejection(mathFunctions.factory_sec),
-    sinh: withFractionRejection(mathFunctions.factory_sinh),
+    sec: withFractionRejection(wrapBnTrig(mathFunctions.factory_sec, compatDecimalTrigSec)),
+    sin: withFractionRejection(
+      wrapBnTrig(mathFunctions.factory_sin, compatDecimalTrigSin, {
+        extendedPrecision: true,
+      })
+    ),
+    sinh: withFractionRejection(
+      wrapBnTrig(mathFunctions.factory_sinh, compatDecimalTrigSinh, { extendedPrecision: true })
+    ),
     square: mathFunctions.factory_square,
     tanh: withFractionRejection(mathFunctions.factory_tanh),
     // #1587: the remaining trigonometry surface rejects a Fraction argument as
     // mathjs does; acoth/asech/acsch keep their G08 adapters above.
     csch: withFractionRejection(mathFunctions.csch),
-    coth: withFractionRejection(mathFunctions.coth),
-    sech: withFractionRejection(mathFunctions.sech),
+    sech: withFractionRejection(wrapBnTrig(mathFunctions.sech, compatDecimalTrigSech)),
     // #1550: the mathjs-shaped factories keep a Unit operand and broadcast nthRoot.
     unaryMinus: mathFunctions.factory_unaryMinus,
     unaryPlus: compatUnaryPlus,
@@ -1189,6 +1243,30 @@ export function create(
             usesOverlay
           )
         : raw;
+  }
+  const bigNumberDecimalTrigKeys = [
+    'asin',
+    'sin',
+    'cosh',
+    'cot',
+    'coth',
+    'csc',
+    'sec',
+    'sech',
+    'acosh',
+    'acot',
+    'acoth',
+    'acsc',
+    'asinh',
+  ] as const;
+  for (const key of bigNumberDecimalTrigKeys) {
+    const raw = compatDefaultOverrides[key];
+    if (typeof raw !== 'function') continue;
+    flat[key] = withCompatInstanceSurface(
+      raw as (...args: unknown[]) => unknown,
+      currentConfig,
+      usesOverlay
+    );
   }
   flat.diag = withCompatInstanceSurface(
     createCompatDiag(mathFunctions.diag as (...args: unknown[]) => unknown, instanceBigNumberClass),
