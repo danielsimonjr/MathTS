@@ -222,11 +222,6 @@ export function normalizeCompatFormatOptions(options: unknown): Record<string, u
   return {};
 }
 
-/**
- * Instance `format(value, options?)` option merge (#1778): mathjs applies
- * `config.precision` only for `format(bignumber)` with no second argument — not
- * when an options object omits `precision` (engineering notation, fixed complex, …).
- */
 const FORMAT_MODE_OPTION_KEYS = [
   'notation',
   'wordSize',
@@ -252,6 +247,11 @@ function shouldInjectConfigFormatPrecision(
   return true;
 }
 
+/**
+ * Instance `format(value, options?)` option merge (#1778): mathjs applies
+ * `config.precision` only for `format(bignumber)` with no second argument — not
+ * when an options object omits `precision` (engineering notation, fixed complex, …).
+ */
 export function normalizeInstanceFormatOptions(
   value: unknown,
   options: unknown,
