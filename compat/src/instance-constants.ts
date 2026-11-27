@@ -1,5 +1,5 @@
 import { isBigNumber } from '@danielsimonjr/mathts-core';
-import { BigNumber } from './bignumber.js';
+import { BigNumber, compatDecimalResult } from './bignumber.js';
 import { evaluate, factory_mathjsCompat, runWithConfig } from '@danielsimonjr/mathts-functions';
 import { MATHJS_UNIT_CONSTANTS } from './parity-names.generated.js';
 
@@ -37,21 +37,23 @@ export function configuredMathjsConstant(
   name: keyof typeof mathConstants | 'Infinity' | 'NaN',
   value: number,
   config: Parameters<typeof runWithConfig>[0]
-): number | import('@danielsimonjr/mathts-core').BigNumber {
+): number | BigNumber {
   if (config.number !== 'BigNumber') return value;
   if (name === 'Infinity' || name === 'NaN') return new BigNumber(value);
   const canonical = mathConstants[name];
-  return runWithConfig(config, () => {
-    // MathJS rounds each operation in (sqrt(5) + 1) / 2 at the configured precision.
-    if (canonical === 'phi') return new BigNumber(5).sqrt().add(1).divide(2);
-    const result: unknown = evaluate(canonical === 'tau' ? 'pi' : canonical);
-    if (!isBigNumber(result)) {
-      throw new TypeError(`Expected a BigNumber constant for ${canonical}`);
-    }
-    // MathJS derives tau by doubling the already rounded pi.
-    const decimal = new BigNumber(result);
-    return canonical === 'tau' ? decimal.multiply(2) : decimal;
-  });
+  return compatDecimalResult(
+    runWithConfig(config, () => {
+      // MathJS rounds each operation in (sqrt(5) + 1) / 2 at the configured precision.
+      if (canonical === 'phi') return new BigNumber(5).sqrt().add(1).divide(2);
+      const result: unknown = evaluate(canonical === 'tau' ? 'pi' : canonical);
+      if (!isBigNumber(result)) {
+        throw new TypeError(`Expected a BigNumber constant for ${canonical}`);
+      }
+      // MathJS derives tau by doubling the already rounded pi.
+      const decimal = new BigNumber(result);
+      return canonical === 'tau' ? decimal.multiply(2) : decimal;
+    })
+  ) as BigNumber;
 }
 
 /** Prepare live reads before the instance defines its property layout. */

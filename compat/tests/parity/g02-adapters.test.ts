@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { create, all } from 'mathjs';
 import { create as createCompat, all as compatAll } from '../../src/index.js';
 import { Fraction, Complex, BigNumber } from '@danielsimonjr/mathts-core';
+import { BigNumber as CompatBigNumber } from '../../src/bignumber.js';
 import {
   createCompatArg,
   createCompatErfExpression,
@@ -71,7 +72,7 @@ describe('G02 duck-typed predicates', () => {
 describe('G02 foreign-scalar converter', () => {
   const convert = createForeignScalarConverter({
     FractionClass: Fraction,
-    BigNumberClass: BigNumber,
+    BigNumberClass: CompatBigNumber,
     ComplexClass: Complex,
     denseFrom: (nested) => (instance.matrix as (n: unknown) => unknown)(nested),
     sparseFrom: (nested) => (instance.matrix as (n: unknown) => unknown)(nested),
@@ -166,7 +167,7 @@ describe('G02 wrapper primitives', () => {
     const lib = create(all, {});
     const conv = createForeignScalarConverter({
       FractionClass: Fraction,
-      BigNumberClass: BigNumber,
+      BigNumberClass: CompatBigNumber,
       ComplexClass: Complex,
       denseFrom: (n) => n,
       sparseFrom: (n) => n,
@@ -231,7 +232,7 @@ describe('G02 wrapper primitives', () => {
   });
 
   it('createCompatArg returns 0 or pi for a real BigNumber', () => {
-    const arg = createCompatArg(join, BigNumber);
+    const arg = createCompatArg(join, CompatBigNumber);
     expect((arg(new BigNumber(2)) as BigNumber).toString()).toBe('0');
     expect((arg(new BigNumber(-2)) as BigNumber).toNumber()).toBeCloseTo(Math.PI, 9);
     expect(arg(1, 2)).toBe('1|2');

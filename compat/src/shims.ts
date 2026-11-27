@@ -210,7 +210,10 @@ export function bignumber(value?: unknown): unknown {
   if (value === undefined) {
     return new CompatBigNumber(0);
   }
-  return compatBignumber(value);
+  if (value instanceof CompatBigNumber) {
+    return value;
+  }
+  return compatDecimalResult(compatBignumber(value));
 }
 
 /** Matrix values returned from the compat `matrix` shim (native, or the bridge matrix of `functions`). */
@@ -402,7 +405,7 @@ const applyArithmetic = (
     if (complexFn && (isComplex(boxedA) || isComplex(boxedB))) {
       return compatDecimalResult(complexFn(boxedA, boxedB));
     }
-    return scalarFn(boxedA, boxedB);
+    return compatDecimalResult(scalarFn(boxedA, boxedB));
   }
   // Riemann-sphere only for Complex scalars; number/BigNumber/bigint stay native.
   if (complexFn && (isComplex(a) || isComplex(b))) {
@@ -412,7 +415,7 @@ const applyArithmetic = (
     // A nested array with a BigNumber / Fraction / Complex leaf leaves the
     // numeric backend; the typed function keeps the scalar type (#1774).
     if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
-      return unwrap(scalarFn(a, b));
+      return compatDecimalResult(unwrap(scalarFn(a, b)));
     }
     if (!matrixPackageCanTake(a, b, elementwise)) {
       if (
@@ -424,16 +427,16 @@ const applyArithmetic = (
           isCompatBridgeMatrix(a) ||
           isCompatBridgeMatrix(b))
       ) {
-        return unwrap(callWithNumericStringOperands(complexFn, a, b));
+        return compatDecimalResult(unwrap(callWithNumericStringOperands(complexFn, a, b)));
       }
-      return unwrap(scalarFn(a, b));
+      return compatDecimalResult(unwrap(scalarFn(a, b)));
     }
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
-    return unwrap(matrixFn(aa, bb));
+    return compatDecimalResult(unwrap(matrixFn(aa, bb)));
   }
   if ((Array.isArray(a) || Array.isArray(b)) && complexFn) {
-    return unwrap(callWithNumericStringOperands(complexFn, a, b));
+    return compatDecimalResult(unwrap(callWithNumericStringOperands(complexFn, a, b)));
   }
   return compatDecimalResult(scalarFn(a, b));
 };
