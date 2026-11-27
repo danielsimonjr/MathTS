@@ -86,6 +86,11 @@ export class CompatComplexBase extends CoreComplex {
   }
 }
 
+Object.defineProperty(CompatComplexBase, 'name', {
+  value: 'Complex',
+  configurable: true,
+});
+
 Object.defineProperty(CompatComplexBase.prototype, 'format', {
   value: mathjsComplexFormat,
   writable: true,
