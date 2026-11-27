@@ -21,7 +21,6 @@ import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
 import { BigNumber as CompatBigNumberCtor, compatDecimalResult } from './bignumber.js';
-import { BigNumber as NativeBigNumberConfig } from '@danielsimonjr/mathts-core';
 import { applyG08CompatOverrides } from './g08-inverse-hyperbolic-compat.js';
 import { compatFreqz, compatZpk2tf } from './compat-signal-factories.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
@@ -389,7 +388,7 @@ const compatMad = createCompatMad({
 
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
-  const bound = ((...args: unknown[]) => compatDecimalResult(fn(...args))) as T;
+  const bound = ((...args: unknown[]) => fn(...args)) as T;
   copyFunctionSurface(fn, bound);
   return bound;
 }
@@ -471,13 +470,10 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
       }
       return fn.apply(this, args);
     };
-    const run = (): unknown => {
-      if (!usesOverlay()) {
-        return invoke();
-      }
-      return mathFunctions.runWithConfig(currentConfig, invoke);
-    };
-    return compatDecimalResult(run());
+    if (!usesOverlay()) {
+      return invoke();
+    }
+    return mathFunctions.runWithConfig(currentConfig, invoke);
   };
   copyFunctionSurface(fn, wrapped);
   return wrapped as T;
@@ -544,9 +540,6 @@ export function create(
   };
   const createdWithCustomConfig = instanceConfigUsesOverlay(configBaseline, defaultsAtCreate);
   const currentConfig: MathJSConfig = { ...configBaseline };
-  if (currentConfig.precision !== undefined) {
-    NativeBigNumberConfig.config({ precision: currentConfig.precision });
-  }
 
   const g02StatisticsDeps = {
     add: mathFunctions.add as (...args: unknown[]) => unknown,
@@ -640,9 +633,6 @@ export function create(
       configGeneration += 1;
       localUnits?.update(current, previous);
       if (current.number !== previous.number || current.precision !== previous.precision) {
-        if (current.precision !== previous.precision && current.precision !== undefined) {
-          NativeBigNumberConfig.config({ precision: current.precision });
-        }
         for (const [key, read] of Object.entries(constantReaders)) {
           if (!Object.isFrozen(instance)) instance[key] = read();
         }
@@ -787,7 +777,13 @@ export function create(
         g02IsComplexLike
       )
     ),
-    sign: wrapUnitExtrema(mathFunctions.sign as (...args: unknown[]) => unknown, factorySignUnits),
+    sign: (...args: unknown[]) =>
+      compatDecimalResult(
+        wrapUnitExtrema(
+          mathFunctions.sign as (...args: unknown[]) => unknown,
+          factorySignUnits
+        )(...args)
+      ),
 
     // Number theory
     gcd: shims.gcd,
@@ -938,7 +934,8 @@ export function create(
     combinations: namedCombinations,
     combinationsWithRep: namedCombinationsWithRep,
     xgcd: namedXgcd,
-    mod: mathFunctions.factory_mod,
+    mod: (...args: unknown[]) =>
+      compatDecimalResult((mathFunctions.factory_mod as (...a: unknown[]) => unknown)(...args)),
     permutations: namedPermutations,
     lgamma: namedLgamma,
     hypot: mathFunctions.factory_hypot,

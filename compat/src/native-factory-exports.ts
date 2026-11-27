@@ -1,4 +1,3 @@
-import { BigNumber as NativeBigNumberConfig } from '@danielsimonjr/mathts-core';
 import { factory_mathjsCompat, help as nativeHelp } from '@danielsimonjr/mathts-functions';
 import { instanceSymbols } from './instance-symbols.js';
 
@@ -93,32 +92,9 @@ const mathjsCreateTyped: CompatFactoryExports['createTyped'] = factories.createT
 
 /** Factory for the BigNumber constructor in a selected dependency bundle. */
 const createBigNumberClass: ConstructorFactory<(typeof instanceSymbols)['BigNumber']> =
-  /* #__PURE__ */ factory(
-    'BigNumber',
-    ['?on', 'config'],
-    ({
-      on,
-      config,
-    }: {
-      on?: (event: string, handler: (curr: { precision?: number }, prev: unknown) => void) => void;
-      config: { precision?: number };
-    }) => {
-      const BN = instanceSymbols.BigNumber;
-      if (config.precision !== undefined) {
-        NativeBigNumberConfig.config({ precision: config.precision });
-      }
-      if (on) {
-        on('config', (curr, prev) => {
-          const previous = prev as { precision?: number };
-          if (curr.precision !== previous.precision && curr.precision !== undefined) {
-            NativeBigNumberConfig.config({ precision: curr.precision });
-          }
-        });
-      }
-      return BN;
-    },
-    { isClass: true }
-  );
+  /* #__PURE__ */ factory('BigNumber', ['?on', 'config'], () => instanceSymbols.BigNumber, {
+    isClass: true,
+  });
 
 /** Factory for the Complex constructor in a selected dependency bundle. */
 const createComplexClass: ConstructorFactory<(typeof instanceSymbols)['Complex']> =

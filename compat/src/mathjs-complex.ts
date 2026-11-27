@@ -4,18 +4,38 @@
  */
 import { Complex, isComplex, isBigNumber, isFraction } from '@danielsimonjr/mathts-core';
 
-function riemannNonFinite(re: number, im: number): boolean {
-  return !Number.isFinite(re) || !Number.isFinite(im);
+function riemannNonFinite(re: unknown, im: unknown): boolean {
+  const a = complexComponentNumber(re);
+  const b = complexComponentNumber(im);
+  return !Number.isFinite(a) || !Number.isFinite(b);
 }
 
-function riemannZero(re: number, im: number): boolean {
-  return re === 0 && im === 0;
+function riemannZero(re: unknown, im: unknown): boolean {
+  return complexComponentNumber(re) === 0 && complexComponentNumber(im) === 0;
+}
+
+function bigNumberToNumber(value: { toNumber?: () => number; valueOf(): unknown }): number {
+  if (typeof value.toNumber === 'function') {
+    return value.toNumber();
+  }
+  const primitive = value.valueOf();
+  return typeof primitive === 'number' ? primitive : Number(primitive);
+}
+
+function complexComponentNumber(re: number | unknown): number {
+  return isBigNumber(re)
+    ? bigNumberToNumber(re as { toNumber?: () => number; valueOf(): unknown })
+    : (re as number);
 }
 
 function asComplex(value: unknown): Complex | null {
   if (isComplex(value)) return value;
   if (typeof value === 'number' && Number.isFinite(value)) return new Complex(value, 0);
-  if (isBigNumber(value)) return new Complex((value as { valueOf(): number }).valueOf(), 0);
+  if (isBigNumber(value))
+    return new Complex(
+      bigNumberToNumber(value as { toNumber?: () => number; valueOf(): unknown }),
+      0
+    );
   return null;
 }
 
@@ -27,7 +47,10 @@ function complexJsAdd(a: Complex, b: Complex): Complex {
     if (tInf && zInf) return new Complex(NaN, NaN);
     return new Complex(Infinity, Infinity);
   }
-  return new Complex(a.re + b.re, a.im + b.im);
+  return new Complex(
+    complexComponentNumber(a.re) + complexComponentNumber(b.re),
+    complexComponentNumber(a.im) + complexComponentNumber(b.im)
+  );
 }
 
 /** complex.js `sub` for two Complex operands. */
@@ -38,7 +61,10 @@ function complexJsSubtract(a: Complex, b: Complex): Complex {
     if (tInf && zInf) return new Complex(NaN, NaN);
     return new Complex(Infinity, Infinity);
   }
-  return new Complex(a.re - b.re, a.im - b.im);
+  return new Complex(
+    complexComponentNumber(a.re) - complexComponentNumber(b.re),
+    complexComponentNumber(a.im) - complexComponentNumber(b.im)
+  );
 }
 
 /** complex.js `mul` for two Complex operands. */
@@ -49,8 +75,12 @@ function complexJsMultiply(a: Complex, b: Complex): Complex {
   const zZero = riemannZero(b.re, b.im);
   if ((tInf && zZero) || (zInf && tZero)) return new Complex(NaN, NaN);
   if (tInf || zInf) return new Complex(Infinity, Infinity);
-  if (a.im === 0 && b.im === 0) return new Complex(a.re * b.re, 0);
-  return new Complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+  const ar = complexComponentNumber(a.re);
+  const ai = complexComponentNumber(a.im);
+  const br = complexComponentNumber(b.re);
+  const bi = complexComponentNumber(b.im);
+  if (ai === 0 && bi === 0) return new Complex(ar * br, 0);
+  return new Complex(ar * br - ai * bi, ar * bi + ai * br);
 }
 
 /** complex.js `div` for two Complex operands. */

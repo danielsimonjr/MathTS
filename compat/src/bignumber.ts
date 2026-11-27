@@ -31,27 +31,6 @@ function isBridgeMatrix(value: object): value is {
   return candidate.isMatrix === true && typeof candidate.map === 'function';
 }
 
-function matrixContainsForeignBigNumber(matrix: {
-  forEach?: (callback: (entry: unknown) => void) => void;
-  toArray?: () => unknown;
-}): boolean {
-  let found = false;
-  if (typeof matrix.forEach === 'function') {
-    matrix.forEach((entry) => {
-      if (entry instanceof NativeBigNumber && !(entry instanceof CompatBigNumber)) {
-        found = true;
-      }
-    });
-    return found;
-  }
-  const visit = (node: unknown): boolean => {
-    if (node instanceof NativeBigNumber && !(node instanceof CompatBigNumber)) return true;
-    if (Array.isArray(node)) return node.some(visit);
-    return false;
-  };
-  return matrix.toArray ? visit(matrix.toArray()) : false;
-}
-
 /** Give a native decimal result the compatibility display convention (deep). */
 export function compatDecimalResult(value: unknown): unknown {
   if (value instanceof NativeBigNumber && !(value instanceof CompatBigNumber)) {
@@ -70,10 +49,7 @@ export function compatDecimalResult(value: unknown): unknown {
     return value;
   }
   if (isBridgeMatrix(value)) {
-    if (!matrixContainsForeignBigNumber(value)) {
-      return value;
-    }
-    return value.map((entry) => compatDecimalResult(entry));
+    return value;
   }
   if (isComplex(value)) {
     const re = compatDecimalResult(value.re);
@@ -143,6 +119,4 @@ Object.defineProperty(CompatBigNumber, 'config', {
 });
 
 export { CompatBigNumber as BigNumber };
-
-/** Instance type for compat decimals (mathjs `BigNumber` / `math.bignumber()`). */
 export type CompatBigNumberInstance = CompatBigNumber;

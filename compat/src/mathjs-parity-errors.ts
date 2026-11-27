@@ -2,6 +2,7 @@
  * Remap MathTS typed / factory errors to mathjs 15.3.0 message and class shapes (#1773).
  */
 
+import { compatDecimalResult } from './bignumber.js';
 import {
   FRACTION_TO_BIGNUMBER_ERROR,
   invalidNumericStringError,
@@ -206,19 +207,20 @@ export function withCompatBitwiseInfiniteBigNumberBinary(
   return (a: unknown, b: unknown): unknown => {
     const aa = asBigNumber(a);
     const bb = asBigNumber(b);
-    if (!aa || !bb) return fn(a, b);
+    const wrap = (out: unknown) => compatDecimalResult(out);
+    if (!aa || !bb) return wrap(fn(a, b));
     const aInf = !aa.isFinite();
     const bInf = !bb.isFinite();
-    if (!aInf && !bInf) return fn(a, b);
+    if (!aInf && !bInf) return wrap(fn(a, b));
     const finite = aInf ? bb : aa;
     const infinite = aInf ? aa : bb;
-    if (op === 'and') return finite;
-    if (op === 'or') return infinite;
+    if (op === 'and') return wrap(finite);
+    if (op === 'or') return wrap(infinite);
     if (op === 'xor') {
-      if (finite.eq(-1)) return infinite.neg();
-      return infinite;
+      if (finite.eq(-1)) return wrap(infinite.neg());
+      return wrap(infinite);
     }
-    return fn(a, b);
+    return wrap(fn(a, b));
   };
 }
 
@@ -299,7 +301,7 @@ export function createCompatNumeric(
     ) {
       throw invalidNumericStringError(args[0]);
     }
-    return out;
+    return compatDecimalResult(out);
   };
 }
 
