@@ -48,15 +48,18 @@ describe('matrix model #1785', () => {
   });
 
   it('matrix identity clone preserves number datatype', () => {
-    const b = math.matrix(
+    const b = (math.matrix as (data: unknown, format?: string, datatype?: string) => unknown)(
       [
         [1, 2],
         [3, 4],
       ],
       'dense',
       'number'
-    );
-    const c = math.matrix(b, 'dense');
+    ) as { datatype(): string; _datatype?: string };
+    const c = math.matrix(b, 'dense') as unknown as {
+      datatype(): string;
+      _datatype?: string;
+    };
     expect(c.datatype()).toBe('number');
     expect(c._datatype).toBe('number');
   });
@@ -85,7 +88,7 @@ describe('matrix model #1785', () => {
       [0, 0],
     ]);
     let counter = 0;
-    m.map(
+    (m.map as (cb: () => number, context?: unknown, skipZeros?: boolean) => unknown)(
       () => {
         counter++;
         return 2;
