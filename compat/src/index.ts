@@ -162,6 +162,9 @@ import {
   combinations as namedCombinations,
   combinationsWithRep as namedCombinationsWithRep,
   equalText as namedEqualText,
+  bin as namedBin,
+  oct as namedOct,
+  hex as namedHex,
   format as namedFormat,
   lgamma as namedLgamma,
   permutations as namedPermutations,
@@ -1280,6 +1283,9 @@ export function create(
       };
       return Object.assign(formatFn, namedFormat);
     })() as typeof namedFormat,
+    bin: namedBin,
+    oct: namedOct,
+    hex: namedHex,
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,
@@ -1795,6 +1801,9 @@ export { Chain, chain, compile, config, evaluate, parse, parser };
 export { pickRandom, random, randomInt };
 
 export {
+  namedBin as bin,
+  namedOct as oct,
+  namedHex as hex,
   namedFormat as format,
   namedPrint as print,
   namedCompatString as string,

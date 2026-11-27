@@ -27,6 +27,28 @@ describe('#1778 format precision and notation', () => {
     expect(() => math.format()).toThrow(/Too few arguments/);
     expect(() => math.format(1, 2, 3)).toThrow(/Too many arguments/);
   });
+
+  it('supports BigNumber wordSize in bin, oct, and hex', () => {
+    expect(math.bin(math.bignumber(-128), math.bignumber(8))).toBe('0b10000000i8');
+    expect(math.oct(math.bignumber(-128), math.bignumber(8))).toBe('0o200i8');
+    expect(math.hex(math.bignumber(-128), math.bignumber(8))).toBe('0x80i8');
+    expect(math.bin(2, math.bignumber(8))).toBe('0b10i8');
+    expect(math.oct(-128)).toBe('-0o200');
+    expect(math.hex(-128, 8)).toBe('0x80i8');
+  });
+
+  it('rejects null options for BigNumber without raw null-dereference TypeError', () => {
+    expect(() => math.format(math.bignumber(1), null as unknown as number)).toThrow(
+      /Unsupported type of options/
+    );
+  });
+
+  it('supports custom formatter callback and empty options object', () => {
+    const inst = create(all, { number: 'BigNumber', precision: 5 });
+    expect(inst.format(inst.bignumber('1.23456789'), {})).toBe('1.2346');
+    expect(math.format(42, (v: unknown) => `v=${String(v)}`)).toBe('v=42');
+    expect(math.format(math.bignumber(42), (v: unknown) => `bn=${String(v)}`)).toBe('bn=42');
+  });
 });
 
 describe('#1778 print templates', () => {
@@ -41,6 +63,12 @@ describe('#1778 print templates', () => {
         ])
       )
     ).toBe('Values: [1, 2], [3, 4]');
+  });
+
+  it('handles nested matrix values, unresolved placeholders, and invalid value containers', () => {
+    expect(math.print('a=$a.0', { a: math.matrix([7, 8]) })).toBe('a=7');
+    expect(math.print('missing=$nope', { a: 1 })).toBe('missing=$nope');
+    expect(() => math.print('x=$x', 123 as unknown as Record<string, unknown>)).toThrow(TypeError);
   });
 
   it('rejects wrong arity like mathjs', () => {

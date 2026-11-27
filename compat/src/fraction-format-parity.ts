@@ -233,14 +233,23 @@ const FORMAT_MODE_OPTION_KEYS = [
 
 function shouldInjectConfigFormatPrecision(
   value: unknown,
-  opts: Record<string, unknown>,
+  opts: unknown,
   configPrecision?: number
 ): boolean {
-  if (configPrecision === undefined || !isBigNumber(value) || opts.precision !== undefined) {
+  if (
+    configPrecision === undefined ||
+    !isBigNumber(value) ||
+    opts === null ||
+    typeof opts !== 'object'
+  ) {
+    return false;
+  }
+  const record = opts as Record<string, unknown>;
+  if (record.precision !== undefined) {
     return false;
   }
   for (const key of FORMAT_MODE_OPTION_KEYS) {
-    if (opts[key] !== undefined) {
+    if (record[key] !== undefined) {
       return false;
     }
   }
@@ -256,16 +265,15 @@ export function normalizeInstanceFormatOptions(
   value: unknown,
   options: unknown,
   configPrecision?: number
-): Record<string, unknown> | undefined {
+): unknown {
   if (options !== undefined) {
     if (typeof options === 'function') {
-      return options as unknown as Record<string, unknown>;
+      return options;
     }
     const normalized = normalizeCompatFormatOptions(options);
-    const opts =
-      Object.keys(normalized).length > 0 ? normalized : (options as Record<string, unknown>);
+    const opts = Object.keys(normalized).length > 0 ? normalized : options;
     if (shouldInjectConfigFormatPrecision(value, opts, configPrecision)) {
-      return { ...opts, precision: configPrecision };
+      return { ...(opts as Record<string, unknown>), precision: configPrecision };
     }
     return opts;
   }
@@ -273,6 +281,22 @@ export function normalizeInstanceFormatOptions(
     return { precision: configPrecision };
   }
   return undefined;
+}
+
+type BaseFormatFn = (...args: unknown[]) => string;
+
+/**
+ * Wrap `bin` / `oct` / `hex` so a `BigNumber` `wordSize` argument is unwrapped
+ * to a plain number matching mathjs 15.3.0 (#1778).
+ */
+export function createCompatBaseFormat<T extends BaseFormatFn>(nativeFn: T): T {
+  const wrapped = (...args: unknown[]): string => {
+    if (args.length === 2 && isBigNumber(args[1])) {
+      return nativeFn(args[0], args[1].toNumber());
+    }
+    return nativeFn(...args);
+  };
+  return Object.assign(wrapped, nativeFn) as T;
 }
 
 /** Wrap the native `format` so Fraction ratios and units match mathjs 15.3.0 (#1579). */
