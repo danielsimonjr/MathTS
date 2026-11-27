@@ -90,6 +90,7 @@ import {
   type CompatExpressionLayers,
   type WiredCompatInstance,
 } from './instance-api.js';
+import { bindInstanceSerialization } from './serialization.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
 import { wrapEqualForMathjsFraction } from './mathjs-fraction-relational.js';
@@ -1740,6 +1741,8 @@ export function create(
   });
   instance.chain = chainApi.chain;
   if (flat.Chain === functionsNamespace.Chain) instance.Chain = chainApi.Chain;
+
+  bindInstanceSerialization(instance as Parameters<typeof bindInstanceSerialization>[0]);
 
   // mathjs shares error constructors on the module and on each instance (#G12 F4, #1773).
   instance.DimensionError = instanceSymbols.DimensionError;
