@@ -29,6 +29,7 @@ import { createPrototypeLevels, definePrototypeAccessor } from './instance-layou
 import { UNARY_NUMBER_FAST_PATH, type UnaryNumberFastPath } from './unary-fast-path.js';
 import { chainTypedFromInstance, createChain } from './chain-create.js';
 import { normalizeCompatFormatOptions } from './fraction-format-parity.js';
+import { toCompatComplex } from './mathjs-complex-prototype.js';
 import { assertValidCreateFactories, isCompatFactory } from './create-factory-validation.js';
 import { deepFlatten } from '@danielsimonjr/mathts-core/internal';
 import { compatConstantReaders, type CompatConstantName } from './instance-constants.js';
@@ -938,6 +939,9 @@ export function create(
     unaryMinus: mathFunctions.factory_unaryMinus,
     unaryPlus: compatUnaryPlus,
     nthRoot: mathFunctions.factory_nthRoot,
+    nthRoots: keepSurface(mathFunctions.nthRoots, (...args: unknown[]) =>
+      toCompatComplex((mathFunctions.nthRoots as (...a: unknown[]) => unknown)(...args))
+    ),
     // #1587: count of a boolean is the string length; size/inv take one argument.
     count: withCountBoolean(mathFunctions.count),
     size: withFixedArity('size', 1, mathFunctions.size),
@@ -1375,7 +1379,6 @@ export { BigNumber } from './bignumber.js';
 
 // Re-export core types
 export {
-  Complex,
   isBigNumber,
   isComplex,
   isNumber,
