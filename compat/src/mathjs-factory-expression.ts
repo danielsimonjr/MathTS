@@ -36,11 +36,13 @@ type UnitConstructor = {
   isValuelessUnit?: (name: string) => boolean;
 };
 
+/** Parse/compile entry points wired from {@link wireMathjsInstanceApi}. */
 export interface CompatExpressionCompileApi {
   parse: ScopedParse;
   compileTree: TreeCompile;
 }
 
+/** mathjs `mathWithTransform` namespace for factory `node._compile` (#1777). */
 export interface CompatFactoryCompileContext {
   mathWithTransform: Record<string, unknown>;
   /** `Unit` is excluded from `mathWithTransform` keys but required for valueless units (`chain`, …). */
@@ -151,6 +153,7 @@ export function wrapMathjsFactoryCompiledNode<T extends MathNode>(
   }) as T;
 }
 
+/** Compile a parsed AST with mathjs factory `_compile` (#1777). */
 export function compileParsedFactoryNode(
   node: MathNode,
   ctx: CompatFactoryCompileContext
@@ -187,6 +190,7 @@ export function compileParsedFactoryNode(
   };
 }
 
+/** Evaluate one expression under the mathjs compile path (#1777). */
 export function evaluateWithMathjsFactoryCompile(
   api: CompatExpressionCompileApi,
   expr: string,
@@ -207,6 +211,7 @@ export function evaluateWithMathjsFactoryCompile(
   }
 }
 
+/** Compile one expression under the mathjs compile path (#1777). */
 export function compileWithMathjsFactory(
   api: CompatExpressionCompileApi,
   expr: string,
