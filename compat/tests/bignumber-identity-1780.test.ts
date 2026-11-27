@@ -304,4 +304,27 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
       (bigmath.bignumber(bigmath.matrix([1, 2])) as { toArray(): unknown[] }).toArray()
     ).toEqual([Big(1), Big(2)]);
   });
+
+  it('covers mixed-bound range, log2 edge cases, and zeta across numeric types', () => {
+    const m = create(all, { precision: 20 });
+    const big = create(all, { number: 'BigNumber', precision: 20 });
+    const B = big.BigNumber;
+
+    // Mixed BigNumber + number bounds in range
+    const r = (big.range as (a: unknown, b: unknown) => { toArray(): unknown[] })(
+      big.bignumber(1),
+      4
+    );
+    expect(r.toArray()).toEqual([new B(1), new B(2), new B(3)]);
+
+    // log2 edge cases on BigNumber
+    expect(big.log2(big.bignumber(1))).toEqual(new B(0));
+    expect(big.log2(big.bignumber(3))).toBeInstanceOf(B);
+    expect(big.log2(big.bignumber(8))).toEqual(new B(3));
+
+    // zeta on number, negative number (reflection formula), and BigNumber
+    expect(m.zeta(2) as number).toBeCloseTo((Math.PI * Math.PI) / 6, 10);
+    expect(m.zeta(-20) as number).toBeCloseTo(0, 10);
+    expect(Number(String(big.zeta(big.bignumber(2))))).toBeCloseTo((Math.PI * Math.PI) / 6, 6);
+  });
 });
