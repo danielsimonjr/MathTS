@@ -4,6 +4,9 @@ import {
   type CompatDecimalBigNumberCtor,
 } from './bignumber.js';
 import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
+import { isMathjsFraction } from './mathjs-fraction-class.js';
+import { mathjsToCoreFraction } from './shims.js';
+import { Fraction as CoreFraction, isFraction as isCoreFraction } from '@danielsimonjr/mathts-core';
 /**
  * mathjs instance methods on `create(all)`: import, typed, compile, and
  * expression scope wired for per-instance evaluate.
@@ -312,7 +315,10 @@ export function wireMathjsInstanceApi(
   const UnitCtor = instance.Unit as Parameters<typeof wrapCompatUnitConstructor>[0] | undefined;
   let wrappedUnit: unknown;
   if (typeof UnitCtor === 'function' && typeof UnitCtor.isValuelessUnit === 'function') {
-    const mathjsUnit = wrapCompatUnitConstructor(UnitCtor);
+    // mathjs 15.3.0: `Unit(2, 'inch')` without `new` throws a SyntaxError (#1784).
+    const mathjsUnit = newOperatorGuard(
+      wrapCompatUnitConstructor(UnitCtor) as unknown as abstract new (...args: never[]) => object
+    ) as unknown as typeof UnitCtor;
     mathNs.Unit = mathjsUnit;
     wrappedUnit = mathjsUnit;
   }
@@ -768,8 +774,46 @@ export function wireMathjsInstanceApi(
     scrubDenylist(expressionLayers.mathWithTransform);
     syncEvaluateScopeOverrides();
     const instanceBigNumberCtor = instance.BigNumber as CompatDecimalBigNumberCtor;
+    const coerceFractionConfig = (value: unknown): unknown => {
+      if (instance.config().number !== 'Fraction') return value;
+      if (isMathjsFraction(value)) return mathjsToCoreFraction(value);
+      if (isCoreFraction(value)) return value;
+      if (Array.isArray(value)) {
+        let changed = false;
+        const mapped = value.map((entry) => {
+          const next = coerceFractionConfig(entry);
+          if (next !== entry) changed = true;
+          return next;
+        });
+        return changed ? mapped : value;
+      }
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        (value as { isMatrix?: boolean }).isMatrix === true &&
+        typeof (value as { map?: (fn: (x: unknown) => unknown) => unknown }).map === 'function'
+      ) {
+        return (value as { map: (fn: (x: unknown) => unknown) => unknown }).map((entry) =>
+          coerceFractionConfig(entry)
+        );
+      }
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        value.constructor === Object &&
+        'n' in value &&
+        'd' in value
+      ) {
+        const parts = value as { s?: number | bigint; n: number | bigint; d: number | bigint };
+        const s = typeof parts.s === 'bigint' ? parts.s : BigInt(parts.s ?? 1);
+        const n = typeof parts.n === 'bigint' ? parts.n : BigInt(parts.n);
+        const d = typeof parts.d === 'bigint' ? parts.d : BigInt(parts.d);
+        return new CoreFraction(s < 0n ? -n : n, d);
+      }
+      return value;
+    };
     const normalizeDecimal = (value: unknown): unknown =>
-      compatDecimalResult(value, instanceBigNumberCtor);
+      coerceFractionConfig(compatDecimalResult(value, instanceBigNumberCtor));
     evaluator = createInstanceEvaluator(
       buildEvaluatorScope(),
       COMPAT_INTERNAL_NAMES,

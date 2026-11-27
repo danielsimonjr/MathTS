@@ -150,9 +150,25 @@ export function promoteToCompatMatrix(value: unknown, ctors?: CompatMatrixCtors)
     m.type === 'SparseMatrix' ||
     m.storage?.() === 'sparse'
   ) {
-    return Reflect.construct(resolved.SparseMatrix, [m.toArray(), datatype]);
+    const sparseSize = m.size();
+    const sparseData = m.toArray();
+    const sparseArg =
+      sparseSize.length >= 2 &&
+      (sparseSize.some((d) => d === 0) ||
+        (Array.isArray(sparseData) && sparseData.length === 0 && sparseSize.length > 1))
+        ? { data: sparseData, size: sparseSize }
+        : sparseData;
+    return Reflect.construct(resolved.SparseMatrix, [sparseArg, datatype]);
   }
-  return Reflect.construct(resolved.DenseMatrix, [m.toArray(), datatype]);
+  const size = m.size();
+  const data = m.toArray();
+  const denseArg =
+    size.length >= 2 &&
+    (size.some((d) => d === 0) ||
+      (Array.isArray(data) && data.length === 0 && size.length > 1))
+      ? { data, size }
+      : data;
+  return Reflect.construct(resolved.DenseMatrix, [denseArg, datatype]);
 }
 
 const MATRIX_INTERFACE_METHODS = [

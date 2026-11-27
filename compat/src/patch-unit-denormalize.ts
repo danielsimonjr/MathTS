@@ -79,8 +79,11 @@ function formatMathjsFractionRatio(frac: { s: bigint; n: bigint; d: bigint }): s
   return `${sign}${frac.n}/${frac.d}`;
 }
 
-function patchedFormat(this: UnitLike & { value?: unknown }, options?: unknown): string {
+function patchedFormat(this: UnitLike & { value?: unknown }, rawOptions?: unknown): string {
   const nativeFormat = patchedFormat.__native as (opts?: unknown) => string;
+  // mathjs reads a number as the precision; the native Complex formatter reads only
+  // `options.precision`, so `unit.format(12)` kept every digit of a complex magnitude (#1784).
+  const options = typeof rawOptions === 'number' ? { precision: rawOptions } : rawOptions;
   const useDecimal =
     typeof options === 'object' &&
     options !== null &&

@@ -11,12 +11,14 @@
  * Never assign onto `factory_mathjsCompat.constructors.Unit`.
  */
 
+import { Complex } from '@danielsimonjr/mathts-core';
 import {
   MATHJS_PREFIX_GROUPS,
   MATHJS_UNIT_NAMES,
   MATHJS_UNIT_PREFIX_GROUP,
 } from './mathjs-unit-names.generated.js';
 import { patchCompatUnitTypeConverters } from './patch-unit-converters.js';
+import { patchCompatUnitParity, type CompatUnitParityClass } from './patch-unit-parity.js';
 
 const MATHJS_UNIT_NAME_SET = new Set(MATHJS_UNIT_NAMES);
 const MATHJS_PREFIX_GROUP_SETS = new Map(
@@ -42,9 +44,32 @@ export type CompatUnitConstructorLike = {
   UNITS: Record<string, unknown>;
 };
 
+/**
+ * mathjs 15.3.0 units that native `core` lacks but that have a real definition in
+ * mathjs: the stub copies the named core unit and may override its scale.
+ * `Ah` is an electric charge of 3600 C (`new Unit(1.4, 'Ah').value === 5040`).
+ */
+const MATHJS_UNIT_CLONES: Readonly<Record<string, { from: string; value?: number }>> = {
+  Ah: { from: 'C', value: 3600 },
+  ton: { from: 'shortton' },
+  tons: { from: 'shortton' },
+};
+
 function mathjsMissingStubs(units: Record<string, unknown>): void {
   for (const name of MATHJS_UNIT_NAMES) {
     if (Object.hasOwn(units, name)) continue;
+    const clone = Object.hasOwn(MATHJS_UNIT_CLONES, name) ? MATHJS_UNIT_CLONES[name] : undefined;
+    const source = clone === undefined ? undefined : units[clone.from];
+    if (clone !== undefined && typeof source === 'object' && source !== null) {
+      const copy: Record<string, unknown> = { ...(source as Record<string, unknown>), name };
+      if (clone.value !== undefined) {
+        copy.value = clone.value;
+        delete copy.exact;
+        delete copy.exactOffset;
+      }
+      units[name] = Object.freeze(copy);
+      continue;
+    }
     units[name] = Object.freeze({
       name,
       value: 1,
@@ -52,6 +77,17 @@ function mathjsMissingStubs(units: Record<string, unknown>): void {
       prefixes: Object.freeze({ '': Object.freeze({ name: '', value: 1, scientific: true }) }),
       offset: 0,
     });
+  }
+}
+
+/**
+ * `VAR` is `i` volt-amperes. The function layer builds the class without a `Complex.I`,
+ * which leaves `UNITS.VAR.value` undefined and breaks `evaluate('4000 VAR')` (#1784).
+ */
+function restoreReactivePowerScale(units: Record<string, unknown>): void {
+  const reactive = units.VAR as { value?: unknown } | undefined;
+  if (reactive !== undefined && reactive.value === undefined) {
+    reactive.value = new Complex(0, 1);
   }
 }
 
@@ -68,6 +104,7 @@ export function wrapCompatUnitClass<T extends CompatUnitConstructorLike>(
   const units = Base.UNITS;
   const originalKeys = new Set(Object.keys(units));
   mathjsMissingStubs(units);
+  restoreReactivePowerScale(units);
 
   const isVisibleKey = (prop: string): boolean =>
     MATHJS_UNIT_NAME_SET.has(prop) || !originalKeys.has(prop) || registeredNames.has(prop);
@@ -128,6 +165,49 @@ type LocalUnitSources = {
   update: (current: unknown, previous: unknown) => void;
 };
 
+/** Parse failures that native `core` raises as its own classes; mathjs 15.3.0 throws `SyntaxError`. */
+const NATIVE_PARSE_ERROR_NAMES = new Set(['UnitParseError', 'AmbiguousUnitError']);
+
+function toMathjsSyntaxError(error: unknown): unknown {
+  if (error instanceof Error && NATIVE_PARSE_ERROR_NAMES.has(error.name)) {
+    return new SyntaxError(error.message);
+  }
+  return error;
+}
+
+/** The part of an instance unit class that builds a unit with a non-finite magnitude. */
+type NonFiniteUnitClass = new (
+  value: null,
+  valuelessUnit?: unknown
+) => {
+  value: unknown;
+  _normalize(value: unknown): unknown;
+};
+
+function isValuelessUnitLike(candidate: unknown): boolean {
+  return (
+    typeof candidate === 'object' &&
+    candidate !== null &&
+    (candidate as { isUnit?: boolean }).isUnit === true &&
+    (candidate as { value?: unknown }).value === null
+  );
+}
+
+/**
+ * Build a unit whose magnitude is NaN or +/-Infinity. Native `core` refuses these in its
+ * constructor; mathjs 15.3.0 stores them (`isNaN`, `isFinite` and `isBounded` read them).
+ */
+function constructNonFiniteUnit<U extends { value: unknown; _normalize(value: unknown): unknown }>(
+  Ctor: new (value: null, valuelessUnit?: unknown) => U,
+  value: number,
+  valuelessUnit: unknown,
+  newTarget: abstract new (...args: never[]) => unknown = Ctor
+): U {
+  const built = Reflect.construct(Ctor, [null, valuelessUnit], newTarget) as U;
+  built.value = built._normalize(value);
+  return built;
+}
+
 /** Record names `createUnit` just registered so `isValuelessUnit` can see overrides. */
 function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>): void {
   const head = args[0];
@@ -140,10 +220,27 @@ function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>):
  * Wrap one compatibility instance's unit constructor, `unit()`, and `createUnit()`.
  * Pins `UNITS` keys and `isValuelessUnit` to mathjs 15.3.0 without changing native core.
  */
-export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T {
+export function wrapCompatUnitSources<T extends LocalUnitSources>(
+  sources: T,
+  numberMode: () => string | undefined = () => undefined
+): T {
   const registeredNames = new Set<string>();
   const builtinUnitKeys = new Set(Object.keys(sources.Unit.UNITS));
   const Unit = wrapCompatUnitClass(sources.Unit, registeredNames);
+  // `createUnit` keeps protecting every native name (#739); only a direct
+  // `Unit.createUnitSingle` may redefine a name that mathjs 15.3.0 does not have.
+  let insideCreateUnit = false;
+  patchCompatUnitParity(Unit as unknown as CompatUnitParityClass, {
+    numberMode,
+    isCoreOnlyUnit: (name) =>
+      !insideCreateUnit &&
+      builtinUnitKeys.has(name) &&
+      !MATHJS_UNIT_NAME_SET.has(name) &&
+      !registeredNames.has(name),
+    onUnitsCreated: (names) => {
+      for (const name of names) registeredNames.add(name);
+    },
+  });
   patchCompatUnitTypeConverters(
     Unit as unknown as {
       typeConverters: Record<string, (x: unknown) => unknown>;
@@ -151,26 +248,33 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
   );
   const { unit, createUnit, update } = sources;
   const wrappedUnit = (...args: unknown[]) => {
-    if (args.length >= 2 && typeof args[1] === 'string') {
-      rejectMathjsIncompatibleUnitToken(args[1]);
-      args = [args[0], rewriteMathjsUnitString(args[1]), ...args.slice(2)];
+    try {
+      if (args.length >= 2 && typeof args[1] === 'string') {
+        rejectMathjsIncompatibleUnitToken(args[1]);
+        args = [args[0], rewriteMathjsUnitString(args[1]), ...args.slice(2)];
+      }
+      const value = args[0];
+      const unitArg = args[1];
+      if (
+        args.length <= 2 &&
+        typeof value === 'number' &&
+        !Number.isFinite(value) &&
+        (args.length === 1 || typeof unitArg === 'string' || isValuelessUnitLike(unitArg))
+      ) {
+        return constructNonFiniteUnit(Unit as unknown as NonFiniteUnitClass, value, unitArg);
+      }
+      const valueIsNaN =
+        typeof value === 'object' &&
+        value !== null &&
+        typeof (value as { isNaN?: () => boolean }).isNaN === 'function' &&
+        (value as { isNaN(): boolean }).isNaN();
+      if (args.length >= 2 && typeof unitArg === 'string' && valueIsNaN) {
+        return constructNonFiniteUnit(Unit as unknown as NonFiniteUnitClass, NaN, unitArg);
+      }
+      return unit(...args);
+    } catch (error) {
+      throw toMathjsSyntaxError(error);
     }
-    const value = args[0];
-    const unitName = args[1];
-    const valueIsNaN =
-      typeof value === 'number'
-        ? Number.isNaN(value)
-        : typeof value === 'object' &&
-          value !== null &&
-          typeof (value as { isNaN?: () => boolean }).isNaN === 'function' &&
-          (value as { isNaN(): boolean }).isNaN();
-    if (args.length >= 2 && typeof unitName === 'string' && valueIsNaN) {
-      const template = unit(0, unitName) as { clone(): { value: unknown } };
-      const copy = template.clone();
-      copy.value = typeof value === 'number' ? value : NaN;
-      return copy;
-    }
-    return unit(...args);
   };
   const isProtectedUnitName = (name: string): boolean =>
     MATHJS_UNIT_NAME_SET.has(name) || builtinUnitKeys.has(name);
@@ -209,6 +313,7 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
       }
     }
     try {
+      insideCreateUnit = true;
       const result = createUnit(...args);
       rememberCreateUnitNames(args, registeredNames);
       return result;
@@ -221,6 +326,8 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(sources: T): T
         return undefined;
       }
       throw error;
+    } finally {
+      insideCreateUnit = false;
     }
   };
 
@@ -247,7 +354,17 @@ export function wrapCompatUnitConstructor<T extends CompatUnitConstructable>(Bas
   const baseIsValuelessUnit = Base.isValuelessUnit.bind(Base);
 
   function CompatUnit(this: unknown, ...args: unknown[]): unknown {
-    return Reflect.construct(Base, args, new.target ?? CompatUnit);
+    const newTarget = new.target ?? CompatUnit;
+    const value = args[0];
+    if (args.length <= 2 && typeof value === 'number' && !Number.isFinite(value)) {
+      return constructNonFiniteUnit(
+        Base as unknown as NonFiniteUnitClass,
+        value,
+        args[1],
+        newTarget as unknown as abstract new (...a: never[]) => unknown
+      );
+    }
+    return Reflect.construct(Base, args, newTarget);
   }
 
   Object.setPrototypeOf(CompatUnit, Base);

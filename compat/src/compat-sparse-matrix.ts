@@ -226,6 +226,14 @@ function patchCompatSparseMatrixPrototype(
 
   const nativeGet = nativeProto.get as (index: unknown) => unknown;
   wrapperProto.get = function getWrapped(this: SparseInstance, index: unknown): unknown {
+    if (arguments.length === 2 && typeof index === 'number') {
+      const col = arguments[1];
+      if (typeof col === 'number') {
+        validateIndex(index, this._size[0]);
+        validateIndex(col, this._size[1]);
+        return nativeGet.call(this, [index, col]);
+      }
+    }
     if (!isArray(index)) {
       throw new TypeError('Array expected');
     }

@@ -6,6 +6,10 @@
 
 import { DimensionError } from '@danielsimonjr/mathts-core';
 import {
+  COMPAT_MATRIX_WRAPPER,
+  isCompatWrappedMatrix,
+} from './compat-matrix-model.js';
+import {
   applyCompatLegacySubsetGet,
   forwardSubsetArgs,
   applySubsetGetMatrixShape,
@@ -46,6 +50,7 @@ type G09SubsetDeps = {
   add: (...args: unknown[]) => unknown;
   zeros: (dims: number | number[]) => unknown;
   matrix: (...args: unknown[]) => unknown;
+  sparse?: (...args: unknown[]) => unknown;
 };
 
 const SHAPE_MISMATCH_ZERO_INDEX =
@@ -82,6 +87,10 @@ function keepSurface<T extends (...args: unknown[]) => unknown>(from: UnaryLike,
 
 function isBridgeDenseMatrix(value: unknown): value is BridgeMatrixMutable {
   if (typeof value !== 'object' || value === null) return false;
+  if (isCompatWrappedMatrix(value)) {
+    const proto = Object.getPrototypeOf(value) as Record<symbol, unknown> | null;
+    return proto?.[COMPAT_MATRIX_WRAPPER] === 'dense';
+  }
   const obj = value as BridgeMatrixMutable & {
     constructor?: { name?: string };
     isMatrix?: boolean;
@@ -142,6 +151,13 @@ function sizesEqual(a: number[], b: number[]): boolean {
 
 function replacementSize(replacement: unknown): number[] {
   if (isBridgeDenseMatrix(replacement)) return replacement.size();
+  if (
+    typeof replacement === 'object' &&
+    replacement !== null &&
+    typeof (replacement as { size?: unknown }).size === 'function'
+  ) {
+    return (replacement as { size: () => number[] }).size();
+  }
   if (Array.isArray(replacement)) return arraySize(replacement);
   if (
     typeof replacement === 'object' &&
@@ -149,6 +165,9 @@ function replacementSize(replacement: unknown): number[] {
     typeof (replacement as { toArray?: unknown }).toArray === 'function'
   ) {
     return arraySize((replacement as { toArray: () => NestedArray<unknown> }).toArray());
+  }
+  if (isMatrixValue(replacement)) {
+    throw new DimensionError([1, 1], [0, 0], '>');
   }
   return arraySize(replacement as NestedArray<unknown>);
 }
@@ -268,8 +287,6 @@ type SubsetPatchedProto = BridgeMatrixMutable & {
 /** Patch bridge `DenseMatrix#subset` once so RHS values reshape like mathjs before `_setSubset`. */
 export function installG09BridgeMatrixSubsetPatch(sampleMatrix: unknown): void {
   if (!isBridgeDenseMatrix(sampleMatrix)) return;
-  const ctor = sampleMatrix.constructor as SubsetPatchedCtor;
-  if (ctor.name !== MATHJS_DENSE_MATRIX_NAME) return;
   const proto = Object.getPrototypeOf(sampleMatrix) as SubsetPatchedProto;
   if (proto[G09_MATRIX_SUBSET_PATCHED]) return;
   const original = proto.subset;
@@ -304,7 +321,11 @@ export function createCompatSubsetG09(
       const value = args[0];
       const index = args[1];
       const replacement = args[2];
-      if (isRuntimeIndex(index) && shouldDeferEmptyIndexNoop(index, true)) {
+      if (
+        isRuntimeIndex(index) &&
+        shouldDeferEmptyIndexNoop(index, true) &&
+        args[2] === undefined
+      ) {
         if (Array.isArray(value) || isBridgeDenseMatrix(value)) {
           return value;
         }
@@ -341,7 +362,20 @@ export function createCompatSubsetG09(
       }
       const legacy = getLegacySubset();
       const adjusted = applyCompatLegacySubsetGet(result, args[1], legacy, matrixFromScalar);
-      return applySubsetGetMatrixShape(adjusted, args[1], legacy, (data) => deps.matrix(data));
+      const matrixOut = (data: unknown): unknown => {
+        const src = args[0];
+        if (
+          typeof src === 'object' &&
+          src !== null &&
+          typeof (src as { storage?: () => string }).storage === 'function' &&
+          (src as { storage: () => string }).storage() === 'sparse'
+        ) {
+          const sparse = deps.sparse ?? deps.matrix;
+          return sparse(data);
+        }
+        return deps.matrix(data);
+      };
+      return applySubsetGetMatrixShape(adjusted, args[1], legacy, matrixOut);
     }
     return result;
   });
