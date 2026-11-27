@@ -23,7 +23,7 @@ Where a name exists in both layers (`add`, `multiply`, `sin`, …) the typed
 implementation is the public export. A subset of factory shadows are also exported
 under a `factory_` prefix (for example `factory_sin`); there is no `factory_add`.
 
-**Coverage**: the [export index](#complete-export-index) below lists **1500** exports
+**Coverage**: the [export index](#complete-export-index) below lists **1501** exports
 (incl. 53 CODATA names — see [Physical Constants](#physical-constants) — and 8
 type-conversion helpers in the generated index). The
 complete, always-current export list is the [export index](#complete-export-index)
@@ -3338,7 +3338,7 @@ await terminatePool();
 
 > **Generated** — do not edit by hand. Run `npm run docs:functions` after
 > adding or removing a public export. Complete index of every public name in
-> `@danielsimonjr/mathts-functions` (1500 exports).
+> `@danielsimonjr/mathts-functions` (1501 exports).
 
 ### Functions by category
 
@@ -4576,8 +4576,9 @@ await terminatePool();
 `terminateSignal`
 `terminateStatistics`
 
-**Other exports (uncategorized)** (160):
+**Other exports (uncategorized)** (161):
 `ArgumentsError`
+`compatFactoryReducerScope`
 `compile`
 `createAbs`
 `createAcos`

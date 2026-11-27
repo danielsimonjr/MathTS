@@ -86,10 +86,12 @@ export function compileScopeForFactoryCompile(
           },
         });
   if (instance === undefined) return withUnit;
+  const unitClass = unitCtor as UnitConstructor | undefined;
   return new Proxy(withUnit, {
     has(target, prop) {
       if (typeof prop !== 'string') return Reflect.has(target, prop);
       if (Reflect.has(target, prop)) return true;
+      if (unitClass?.isValuelessUnit?.(prop)) return false;
       return resolveInheritedInstanceBinding(instance, prop) !== undefined;
     },
     get(target, prop, receiver) {
@@ -175,6 +177,8 @@ export function compileParsedFactoryNode(
       if (
         symbolName !== undefined &&
         !s.has(symbolName) &&
+        !(symbolName in math) &&
+        !Object.hasOwn(ctx.mathWithTransform, symbolName) &&
         unitCtor !== undefined &&
         typeof unitCtor.isValuelessUnit === 'function' &&
         unitCtor.isValuelessUnit(symbolName)

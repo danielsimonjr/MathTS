@@ -16,6 +16,7 @@ import { newOperatorGuard } from './constructors-without-new.js';
 import { createHelpClass } from '@danielsimonjr/mathts-expression';
 import {
   createInstanceEvaluator,
+  compatFactoryReducerScope,
   factory_mathjsCompat,
   EVALUATE_SCOPE_OMIT,
   help as nativeHelp,
@@ -393,9 +394,55 @@ export function wireMathjsInstanceApi(
     }
     for (const [key, get] of wholesaleGetters) {
       if (EVALUATE_SCOPE_OMIT.has(key)) continue;
+      // Valueless units such as `chain` must compile as symbols, not the Chain constructor.
+      if (key === 'chain') continue;
       scope[key] = asMathjsExpressionScopeValue(get());
     }
-    Object.assign(scope, scrubbedImports);
+    for (const [name, fn] of Object.entries(compatFactoryReducerScope())) {
+      scope[name] = asMathjsExpressionScopeValue(fn);
+    }
+    for (const [key, val] of Object.entries(scrubbedImports)) {
+      // Instance wholesale getters (config-aware) must win over stale `mathWithTransform` copies.
+      if (wholesaleGetters.has(key)) continue;
+      scope[key] = val;
+    }
+    delete scope.chain;
+    delete scope.import;
+    /** mathjs keeps `import` off the compile namespace (security tests expect `Undefined function import`). */
+    const FACTORY_OMIT_NO_RESTORE = new Set([
+      'import',
+      'chain',
+      'typed',
+      'importFactory',
+      'compileExpr',
+    ]);
+    for (const key of EVALUATE_SCOPE_OMIT) {
+      if (
+        FACTORY_OMIT_NO_RESTORE.has(key) ||
+        INTERNAL_NAMES.has(key) ||
+        Object.hasOwn(scope, key)
+      ) {
+        continue;
+      }
+      const wholesale = wholesaleGetters.get(key);
+      if (wholesale !== undefined) {
+        scope[key] = asMathjsExpressionScopeValue(wholesale());
+        continue;
+      }
+      const instFn = (instance as Record<string, unknown>)[key];
+      if (typeof instFn === 'function') {
+        scope[key] = asMathjsExpressionScopeValue(instFn);
+      }
+    }
+    for (const [key, binding] of Object.entries(mathjsExpressionBindings)) {
+      if (!Object.hasOwn(scope, key)) scope[key] = binding;
+    }
+    const matrixLiteralsKey = Symbol.for('mathts.expression.matrixLiterals');
+    Object.defineProperty(scope, matrixLiteralsKey, {
+      value: () => currentConfig.matrix === 'Matrix',
+      enumerable: false,
+      configurable: true,
+    });
     for (const name of EVALUATE_SCOPE_OVERRIDES) {
       const fn = instance[name];
       if (typeof fn === 'function') {
@@ -688,8 +735,6 @@ export function wireMathjsInstanceApi(
     syncEvaluateScopeOverrides();
     if (importRequiresEvaluatorRebind(functions)) {
       rebindEvaluator();
-    } else {
-      rebuildFactoryCompileMath();
     }
   }
 
