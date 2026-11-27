@@ -6,6 +6,7 @@ import { Fraction as CoreFraction } from '@danielsimonjr/mathts-core';
 import { create, all, replacer, reviver, type MathjsFraction } from '../src/index.js';
 import { isMathjsFraction } from '../src/mathjs-fraction-class.js';
 import { mathjsPowFractionPair } from '../src/mathjs-fraction-pow.js';
+import { isCompatZeroScalar, isSparseStructuralZero } from '../src/sparse-structural-zero.js';
 import FractionJS from 'fraction.js';
 
 const math = create(all);
@@ -267,5 +268,44 @@ describe('#1779 fraction helpers and edge cases', () => {
     expect(
       mathjsPowFractionPair(new CoreFraction(2, 1), new CoreFraction(1, 2), false, toCore)
     ).toBeCloseTo(Math.SQRT2);
+  });
+
+  it('covers isCompatZeroScalar and isSparseStructuralZero across scalar types', () => {
+    expect(isCompatZeroScalar(0)).toBe(true);
+    expect(isCompatZeroScalar(1e-20)).toBe(true);
+    expect(isCompatZeroScalar(1)).toBe(false);
+    expect(isCompatZeroScalar(false)).toBe(true);
+    expect(isCompatZeroScalar(true)).toBe(false);
+    expect(isCompatZeroScalar(0n)).toBe(true);
+    expect(isCompatZeroScalar(1n)).toBe(false);
+    expect(isCompatZeroScalar('0')).toBe(true);
+    expect(isCompatZeroScalar('5')).toBe(false);
+    expect(isCompatZeroScalar(math.bignumber(0))).toBe(true);
+    expect(isCompatZeroScalar(math.bignumber(2))).toBe(false);
+    expect(isCompatZeroScalar(math.complex(0, 0))).toBe(true);
+    expect(isCompatZeroScalar(math.complex(1, 0))).toBe(false);
+    expect(isCompatZeroScalar(new CoreFraction(0, 1))).toBe(true);
+    expect(isCompatZeroScalar(new CoreFraction(1, 2))).toBe(false);
+    expect(isCompatZeroScalar(math.fraction(0, 1))).toBe(true);
+    expect(isCompatZeroScalar(math.fraction(1, 2))).toBe(false);
+    expect(isCompatZeroScalar(math.unit(0, 'm'))).toBe(true);
+    expect(isCompatZeroScalar(math.unit(2, 'm'))).toBe(false);
+    expect(() => isCompatZeroScalar(math.unit('m'))).toThrow(/Signature not found/);
+    expect(isCompatZeroScalar({ isZero: () => true })).toBe(true);
+    expect(isCompatZeroScalar({ n: 0 })).toBe(true);
+    expect(isCompatZeroScalar({})).toBe(false);
+
+    expect(isSparseStructuralZero(null)).toBe(true);
+    expect(isSparseStructuralZero(0)).toBe(true);
+    expect(isSparseStructuralZero(1e-100)).toBe(false);
+    expect(isSparseStructuralZero(false)).toBe(true);
+    expect(isSparseStructuralZero(0n)).toBe(true);
+    expect(isSparseStructuralZero(new CoreFraction(0, 1))).toBe(true);
+    expect(isSparseStructuralZero(math.fraction(0, 1))).toBe(true);
+    expect(isSparseStructuralZero(math.bignumber(0))).toBe(true);
+    expect(isSparseStructuralZero(math.unit(0, 'm'))).toBe(true);
+    expect(isSparseStructuralZero(math.unit('m'))).toBe(false);
+    expect(isSparseStructuralZero({ isZero: () => true })).toBe(true);
+    expect(isSparseStructuralZero({})).toBe(false);
   });
 });
