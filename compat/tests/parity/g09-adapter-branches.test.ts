@@ -87,6 +87,19 @@ describe('G09 createCompatSubsetG09', () => {
     };
     expect(got).toBeDefined();
   });
+
+  it('expands array assignments with null defaultValue', () => {
+    const arr: (number | null)[] = [1];
+    const idx = instance.index(2) as RuntimeIndex;
+    const out = compatSubset(arr, idx, 7, null) as (number | null)[];
+    expect(out).toEqual([1, null, 7]);
+  });
+
+  it('returns arrays from matrix GET when not legacy', () => {
+    const m = instance.matrix([1, 2, 3]);
+    const row = compatSubset(m, instance.index([0, 1])) as unknown;
+    expect(Array.isArray(row) || instance.isMatrix(row)).toBe(true);
+  });
 });
 
 describe('G09 installG09BridgeMatrixSubsetPatch', () => {

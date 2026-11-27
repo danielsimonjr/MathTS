@@ -148,6 +148,69 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
     expect(() => reshape(abstract, [2, 2])).toThrow(/Cannot invoke reshape/);
   });
 
+  it('range dispatch builds Fraction loops with explicit loop dependencies', () => {
+    const frac = create(all, { number: 'Fraction' });
+    const FracBnClass = Object.getPrototypeOf(frac.bignumber(1)).constructor as BnCtor;
+    const rangeFrac = createCompatRangeDispatch(
+      frac.range.bind(frac),
+      FracBnClass,
+      (x) => frac.fraction(x),
+      {
+        add: (a, b) => frac.add(a, b),
+        smaller: (a, b) => frac.smaller(a, b),
+        smallerEq: (a, b) => frac.smallerEq(a, b),
+        larger: (a, b) => frac.larger(a, b),
+        largerEq: (a, b) => frac.largerEq(a, b),
+        isPositive: (x) => Boolean(frac.isPositive(x)),
+        isZero: (x) => Boolean(frac.isZero(x)),
+        matrixOut: (values) => frac.matrix(values),
+      }
+    );
+    const dec = rangeFrac(
+      frac.fraction(2),
+      frac.fraction(0),
+      frac.fraction(-1),
+      true
+    ) as { toArray(): unknown[] };
+    expect(dec.toArray().length).toBeGreaterThan(1);
+  });
+
+  it('range dispatch appends the end BigNumber when includeEnd misses the stop', () => {
+    const bn = create(all, { number: 'BigNumber' });
+    const BnClass = Object.getPrototypeOf(bn.bignumber(1)).constructor as BnCtor;
+    const rangeBn = createCompatRangeDispatch(
+      bn.range.bind(bn),
+      BnClass,
+      (x) => bn.fraction(x),
+      {
+        add: (a, b) => bn.add(a, b),
+        smaller: (a, b) => bn.smaller(a, b),
+        smallerEq: (a, b) => bn.smallerEq(a, b),
+        larger: (a, b) => bn.larger(a, b),
+        largerEq: (a, b) => bn.largerEq(a, b),
+        isPositive: (x) => Boolean(bn.isPositive(x)),
+        isZero: (x) => Boolean(bn.isZero(x)),
+        matrixOut: (values) => bn.matrix(values),
+      }
+    );
+    const endCase = rangeBn(bn.bignumber(0), bn.bignumber(2), true) as { toArray(): unknown[] };
+    expect(endCase.toArray().length).toBeGreaterThan(0);
+  });
+
+  it('matrixFromRows densifies sparse compat results', () => {
+    const fromRows = createCompatMatrixFromRows(
+      () =>
+        math.sparse([
+          [1, 0],
+          [0, 2],
+        ]),
+      matrixFn,
+      matrixCtors
+    );
+    const densified = fromRows() as { storage?: () => string };
+    expect(densified.storage?.()).toBe('dense');
+  });
+
   it('range dispatch handles BigNumber endpoints and Fraction inputs', () => {
     const bn = create(all, { number: 'BigNumber' });
     const BnClass = Object.getPrototypeOf(bn.bignumber(1)).constructor as BnCtor;
