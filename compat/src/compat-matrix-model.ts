@@ -12,6 +12,7 @@ import {
   validate,
 } from '@danielsimonjr/mathts-core/internal';
 import { config as mathtsConfig } from '@danielsimonjr/mathts-functions';
+import { isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
 import {
   NEW_OPERATOR_MESSAGE,
   newOperatorGuard,
@@ -138,12 +139,17 @@ export function promoteToCompatMatrix(value: unknown, ctors?: CompatMatrixCtors)
     _datatype?: string;
     isMatrix?: boolean;
   };
-  if (m.isMatrix !== true) return value;
+  if (m.isMatrix !== true && !isDenseMatrix(value) && !isSparseMatrix(value)) return value;
   const datatype = readMatrixDatatype(m);
   if (m.isImmutableDenseMatrix === true || m.type === 'ImmutableDenseMatrix') {
     return Reflect.construct(resolved.ImmutableDenseMatrix, [m.toArray(), datatype]);
   }
-  if (m.isSparseMatrix === true || m.type === 'SparseMatrix' || m.storage?.() === 'sparse') {
+  if (
+    isSparseMatrix(value) ||
+    m.isSparseMatrix === true ||
+    m.type === 'SparseMatrix' ||
+    m.storage?.() === 'sparse'
+  ) {
     return Reflect.construct(resolved.SparseMatrix, [m.toArray(), datatype]);
   }
   return Reflect.construct(resolved.DenseMatrix, [m.toArray(), datatype]);
