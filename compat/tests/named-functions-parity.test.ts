@@ -1,6 +1,8 @@
 import { string as compatString, stringDependencies } from '../src/index.js';
 import { describe, expect, it } from 'vitest';
-import * as oracle from 'mathjs';
+import { create as createOracle, all as oracleAll } from 'mathjs';
+
+const oracle = createOracle(oracleAll, {});
 import {
   add,
   all,

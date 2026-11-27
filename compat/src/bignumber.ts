@@ -57,7 +57,8 @@ const nodeEvaluateWrapped = Symbol('compatNodeEvaluateWrapped');
 /** When one operand is a BigNumber, mathjs promotes booleans to 0/1 BigNumbers. */
 export function promoteBooleanScalarsForBigNumber(
   args: unknown[],
-  BigNumberCtor: typeof CompatBigNumber
+  BigNumberCtor: typeof CompatBigNumber,
+  options?: { promoteTrailingBoolean?: boolean }
 ): unknown[] {
   let hasBigNumber = false;
   for (let i = 0; i < args.length; i++) {
@@ -83,7 +84,9 @@ export function promoteBooleanScalarsForBigNumber(
   const trailingIncludeEnd = typeof args[args.length - 1] === 'boolean';
   return args.map((a, i) => {
     if (typeof a !== 'boolean') return a;
-    if (trailingIncludeEnd && i === args.length - 1) return a;
+    if (!options?.promoteTrailingBoolean && trailingIncludeEnd && i === args.length - 1) {
+      return a;
+    }
     return new BigNumberCtor(a ? 1 : 0);
   });
 }

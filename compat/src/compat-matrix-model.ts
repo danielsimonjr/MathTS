@@ -124,6 +124,22 @@ export function bindCompatMatrixPromotion(ctors: CompatMatrixCtors): void {
   compatMatrixCtors = ctors;
 }
 
+function readPromoteMatrixSize(m: {
+  size?: (() => number[]) | { rows: number; cols: number };
+  _size?: number[];
+  rows?: number;
+  cols?: number;
+}): number[] | undefined {
+  if (typeof m.size === 'function') return m.size();
+  if (Array.isArray(m._size)) return m._size;
+  if (typeof m.size === 'object' && m.size !== null && 'rows' in m.size && 'cols' in m.size) {
+    const block = m.size as { rows: number; cols: number };
+    return [block.rows, block.cols];
+  }
+  if (typeof m.rows === 'number' && typeof m.cols === 'number') return [m.rows, m.cols];
+  return undefined;
+}
+
 /** Re-wrap bridge matrix instances with compat prototypes (#1785). */
 export function promoteToCompatMatrix(value: unknown, ctors?: CompatMatrixCtors): unknown {
   const resolved = ctors ?? compatMatrixCtors;
@@ -150,8 +166,11 @@ export function promoteToCompatMatrix(value: unknown, ctors?: CompatMatrixCtors)
     m.type === 'SparseMatrix' ||
     m.storage?.() === 'sparse'
   ) {
-    const sparseSize = m.size();
+    const sparseSize = readPromoteMatrixSize(m);
     const sparseData = m.toArray();
+    if (sparseSize === undefined) {
+      return Reflect.construct(resolved.SparseMatrix, [sparseData, datatype]);
+    }
     const sparseArg =
       sparseSize.length >= 2 &&
       (sparseSize.some((d) => d === 0) ||
@@ -160,12 +179,14 @@ export function promoteToCompatMatrix(value: unknown, ctors?: CompatMatrixCtors)
         : sparseData;
     return Reflect.construct(resolved.SparseMatrix, [sparseArg, datatype]);
   }
-  const size = m.size();
+  const size = readPromoteMatrixSize(m);
   const data = m.toArray();
+  if (size === undefined) {
+    return Reflect.construct(resolved.DenseMatrix, [data, datatype]);
+  }
   const denseArg =
     size.length >= 2 &&
-    (size.some((d) => d === 0) ||
-      (Array.isArray(data) && data.length === 0 && size.length > 1))
+    (size.some((d) => d === 0) || (Array.isArray(data) && data.length === 0 && size.length > 1))
       ? { data, size }
       : data;
   return Reflect.construct(resolved.DenseMatrix, [denseArg, datatype]);

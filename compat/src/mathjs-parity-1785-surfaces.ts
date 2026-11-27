@@ -15,6 +15,7 @@ type MatrixLike = {
   isMatrix?: boolean;
   storage?: () => string;
   toArray: () => unknown;
+  size?: () => number[];
 };
 
 function isMatrixValue(value: unknown): value is MatrixLike {
@@ -419,6 +420,20 @@ export function applySubsetGetMatrixShape(
 ): unknown {
   if (!isIndex(index)) return result;
   const sizes = (index as unknown as LegacySubsetIndex).size();
+  if (
+    typeof result === 'object' &&
+    result !== null &&
+    (result as MatrixLike).isMatrix === true &&
+    typeof (result as MatrixLike).size === 'function'
+  ) {
+    const resultSize = ((result as MatrixLike).size as () => number[]).call(result);
+    if (
+      resultSize.length === sizes.length &&
+      resultSize.every((dim: number, i: number) => dim === sizes[i])
+    ) {
+      return result;
+    }
+  }
   const dims = (index as { _dimensions?: unknown[] })._dimensions;
   const raw =
     typeof result === 'object' && result !== null && (result as MatrixLike).isMatrix

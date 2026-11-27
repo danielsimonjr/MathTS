@@ -522,7 +522,8 @@ function bindBinaryNumericShim<T extends (...args: unknown[]) => unknown>(
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  BigNumberCtor: typeof CompatBigNumberCtor = CompatBigNumberCtor
+  BigNumberCtor: typeof CompatBigNumberCtor = CompatBigNumberCtor,
+  options?: { promoteTrailingBoolean?: boolean }
 ): T {
   const bound = function (this: unknown, a: unknown, b: unknown) {
     if (arguments.length === 2 && typeof a === 'number' && typeof b === 'number') {
@@ -538,7 +539,7 @@ function bindShim<T extends (...args: unknown[]) => unknown>(
     const args: unknown[] = new Array(arguments.length);
     for (let i = 0; i < arguments.length; i++) args[i] = arguments[i];
     return compatDecimalResult(
-      fn(...promoteBooleanScalarsForBigNumber(args, BigNumberCtor)),
+      fn(...promoteBooleanScalarsForBigNumber(args, BigNumberCtor, options)),
       BigNumberCtor
     );
   } as unknown as T;
@@ -1003,7 +1004,7 @@ export function create(
     add: bindBinaryNumericShim(shims.add, 0, instanceBigNumberClass),
     subtract: bindBinaryNumericShim(shims.subtract, 1, instanceBigNumberClass),
     multiply: bindBinaryNumericShim(shims.multiply, 2, instanceBigNumberClass),
-    divide: bindShim(shims.divide, instanceBigNumberClass),
+    divide: bindShim(shims.divide, instanceBigNumberClass, { promoteTrailingBoolean: true }),
     dotMultiply: bindShim(shims.dotMultiply, instanceBigNumberClass),
     multiplyScalar: bindShim(
       wrapMultiplyScalarForMathjsFraction(mathFunctions.multiplyScalar as unknown as TypedFunction),

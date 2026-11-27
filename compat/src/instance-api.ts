@@ -775,7 +775,7 @@ export function wireMathjsInstanceApi(
     syncEvaluateScopeOverrides();
     const instanceBigNumberCtor = instance.BigNumber as CompatDecimalBigNumberCtor;
     const coerceFractionConfig = (value: unknown): unknown => {
-      if (instance.config().number !== 'Fraction') return value;
+      if (currentConfig.number !== 'Fraction') return value;
       if (isMathjsFraction(value)) return mathjsToCoreFraction(value);
       if (isCoreFraction(value)) return value;
       if (Array.isArray(value)) {

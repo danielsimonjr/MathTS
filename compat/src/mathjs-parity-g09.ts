@@ -5,10 +5,7 @@
  */
 
 import { DimensionError } from '@danielsimonjr/mathts-core';
-import {
-  COMPAT_MATRIX_WRAPPER,
-  isCompatWrappedMatrix,
-} from './compat-matrix-model.js';
+import { COMPAT_MATRIX_WRAPPER, isCompatWrappedMatrix } from './compat-matrix-model.js';
 import {
   applyCompatLegacySubsetGet,
   forwardSubsetArgs,
@@ -272,12 +269,6 @@ function shouldDeferEmptyIndexNoop(index: RuntimeIndex, isSet: boolean): boolean
   const size = index.size();
   return size.length > 0 && size.some((d: number) => d === 0);
 }
-
-type SubsetPatchedCtor = {
-  name?: string;
-  prototype: BridgeMatrixMutable;
-  [G09_MATRIX_SUBSET_PATCHED]?: boolean;
-};
 
 type SubsetPatchedProto = BridgeMatrixMutable & {
   subset(index: unknown, replacement?: unknown, defaultValue?: unknown): unknown;
