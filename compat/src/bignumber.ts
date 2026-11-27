@@ -119,4 +119,6 @@ Object.defineProperty(CompatBigNumber, 'config', {
 });
 
 export { CompatBigNumber as BigNumber };
+
+/** Instance type for compat decimals (mathjs `BigNumber` / `math.bignumber()`). */
 export type CompatBigNumberInstance = CompatBigNumber;
