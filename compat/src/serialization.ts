@@ -54,7 +54,9 @@ export function compatReviver(key: string, value: unknown): unknown {
   return reviveInstanceValue(key, value, instanceSymbols.Unit);
 }
 
-/** Restore tagged units with the registry belonging to the receiving instance. */
+const INSTANCE_WRAPPED_TAGS = new Set(['Unit', 'BigNumber', 'Fraction', 'Complex']);
+
+/** Restore tagged units and instance-wrapped classes with the receiving instance's classes. */
 export function reviveInstanceValue(
   key: string,
   value: unknown,
@@ -63,23 +65,16 @@ export function reviveInstanceValue(
 ): unknown {
   if (value && typeof value === 'object' && Object.hasOwn(value, 'mathjs')) {
     assertReviverTagShape(value);
-  }
-  if (
-    value &&
-    typeof value === 'object' &&
-    Object.hasOwn(value, 'mathjs') &&
-    (Reflect.get(value, 'mathjs') === 'Unit' ||
-      Reflect.get(value, 'mathjs') === 'BigNumber' ||
-      Reflect.get(value, 'mathjs') === 'Fraction')
-  ) {
-    const BigNumber = (classes.BigNumber ??
-      instanceSymbols.BigNumber) as typeof instanceSymbols.BigNumber;
-    return reviveWithClasses(value, {
-      ...classes,
-      Unit,
-      BigNumber,
-      Fraction: instanceSymbols.Fraction,
-    });
+    const tag = Reflect.get(value, 'mathjs');
+    if (typeof tag === 'string' && INSTANCE_WRAPPED_TAGS.has(tag)) {
+      return reviveWithClasses(value, {
+        ...classes,
+        Unit,
+        BigNumber: classes.BigNumber ?? instanceSymbols.BigNumber,
+        Fraction: classes.Fraction ?? instanceSymbols.Fraction,
+        Complex: classes.Complex ?? instanceSymbols.Complex,
+      });
+    }
   }
   const numeric = nativeReviver(key, value);
   return numeric === value ? reviveWithClasses(value, classes) : numeric;
@@ -88,6 +83,8 @@ export function reviveInstanceValue(
 type SerializationHost = Record<string, unknown> & {
   Unit: typeof instanceSymbols.Unit;
   BigNumber?: typeof instanceSymbols.BigNumber;
+  Complex?: typeof instanceSymbols.Complex;
+  Fraction?: typeof instanceSymbols.Fraction;
   Chain?: { fromJSON?: (input: unknown) => unknown };
   Help?: { fromJSON?: (input: unknown) => unknown };
   Parser?: { fromJSON?: (input: unknown) => unknown };
@@ -95,11 +92,12 @@ type SerializationHost = Record<string, unknown> & {
 
 /** Class map for `reviveWithClasses` after the instance surface is fully wired. */
 export function buildInstanceReviveClasses(instance: SerializationHost): Record<string, unknown> {
-  const BigNumber = instance.BigNumber ?? instanceSymbols.BigNumber;
   return {
     ...instanceSymbols,
     Unit: instance.Unit,
-    BigNumber,
+    BigNumber: instance.BigNumber ?? instanceSymbols.BigNumber,
+    Complex: instance.Complex ?? instanceSymbols.Complex,
+    Fraction: instance.Fraction ?? instanceSymbols.Fraction,
     Chain: instance.Chain,
     Help: instance.Help,
     Parser: instance.Parser,
@@ -109,8 +107,11 @@ export function buildInstanceReviveClasses(instance: SerializationHost): Record<
 
 /** Bind `replacer` / `reviver` once Chain, Help, and Parser exist on the instance (#1782). */
 export function bindInstanceSerialization(instance: SerializationHost): void {
-  const classes = buildInstanceReviveClasses(instance);
   instance.replacer = compatReplacer;
-  instance.reviver = (key: string, value: unknown) =>
-    reviveInstanceValue(key, value, instance.Unit, classes);
+  instance.reviver = (key: string, value: unknown) => {
+    if (value && typeof value === 'object' && Object.hasOwn(value, 'mathjs')) {
+      return reviveInstanceValue(key, value, instance.Unit, buildInstanceReviveClasses(instance));
+    }
+    return nativeReviver(key, value);
+  };
 }

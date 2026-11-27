@@ -2,7 +2,9 @@
  * #1782 — JSON replacer/reviver round-trip for Parser, Chain, and Help.
  */
 import { describe, it, expect } from 'vitest';
+import { Fraction as CoreFraction } from '@danielsimonjr/mathts-core';
 import { create, all } from '../src/index.js';
+import { compatReplacer, reviveInstanceValue } from '../src/serialization.js';
 
 describe('#1782 JSON serialization', () => {
   const math = create(all);
@@ -61,5 +63,43 @@ describe('#1782 JSON serialization', () => {
     expect(parser.get('c')).toEqual(math.bignumber('6'));
     expect(parser.get('w')).toEqual(math.bignumber('2'));
     expect(parser.evaluate('f(4)')).toEqual(math.bignumber('8'));
+  });
+
+  it('rejects unsafe variable names and non-object inputs in Parser.fromJSON', () => {
+    const ParserCtor = math.Parser as unknown as { fromJSON: (input: unknown) => unknown };
+    for (const bad of [null, undefined, 42, 'str', true, []]) {
+      expect(() => ParserCtor.fromJSON(bad)).toThrow(TypeError);
+    }
+
+    for (const key of ['__proto__', 'constructor', 'prototype']) {
+      const payload = JSON.parse(`{"mathjs":"Parser","variables":{"${key}":{"polluted":true}}}`);
+      expect(() => ParserCtor.fromJSON(payload)).toThrow(/Unsafe variable name/);
+    }
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it('revives Complex with the compat Complex prototype', () => {
+    const revived = JSON.parse('{"mathjs":"Complex","re":2,"im":3}', math.reviver);
+    expect(revived).toBeInstanceOf(math.Complex);
+    expect(Object.getPrototypeOf(revived)).toBe(Object.getPrototypeOf(math.complex(2, 3)));
+    expect(revived).toEqual(math.complex(2, 3));
+  });
+
+  it('keeps Help revival in sync after instance.import(...)', () => {
+    const m = create(all);
+    m.import({ customHelper1782: (x: number) => x + 1 });
+    const revived = JSON.parse('{"mathjs":"Help","name":"foo","description":"bar"}', m.reviver);
+    expect(revived).toBeInstanceOf(m.Help);
+  });
+
+  it('handles core Fraction, null receiver in replacer, and fallback classes in reviver', () => {
+    expect(compatReplacer.call(null, 'k', 42)).toBe(42);
+    const coreFracJson = JSON.stringify({ f: new CoreFraction(1, 3) }, math.replacer);
+    expect(JSON.parse(coreFracJson)).toEqual({
+      f: { mathjs: 'Fraction', n: '1', d: '3' },
+    });
+
+    const revivedBn = reviveInstanceValue('', { mathjs: 'BigNumber', value: '1.5' }, math.Unit, {});
+    expect(revivedBn).toEqual(math.bignumber('1.5'));
   });
 });

@@ -82,9 +82,20 @@ export function attachParserJsonMethods<Options>(
     fromJSON?: (json: ParserJsonShape) => ReturnType<typeof createParser>;
   };
   ctor.fromJSON = function fromJSON(json: ParserJsonShape) {
+    if (typeof json !== 'object' || json === null || Array.isArray(json)) {
+      throw new TypeError('Expected a JSON object for Parser.fromJSON');
+    }
     const parser = createParser();
     Object.entries(json.variables ?? {}).forEach(([name, value]) => {
-      parser.scope[name] = value;
+      if (name === '__proto__' || name === 'constructor' || name === 'prototype') {
+        throw new Error(`Unsafe variable name: ${name}`);
+      }
+      Object.defineProperty(parser.scope, name, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
     });
     Object.values(json.functions ?? {}).forEach((fn) => {
       parser.evaluate(fn);
