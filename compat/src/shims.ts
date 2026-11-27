@@ -361,6 +361,22 @@ const unwrap = (r: unknown): unknown => {
   return (r as { toArray(): unknown }).toArray();
 };
 
+/** True when a nested array is a full 2-D rectangle (every row is an array of equal width, no deeper nesting). */
+const isRectangularNestedArray = (x: unknown): boolean => {
+  if (!Array.isArray(x)) return false;
+  if (x.length === 0) return true;
+  const head = x[0];
+  if (!Array.isArray(head)) return false;
+  const width = head.length;
+  for (const row of x) {
+    if (!Array.isArray(row) || row.length !== width) return false;
+    for (const cell of row) {
+      if (Array.isArray(cell)) return false;
+    }
+  }
+  return true;
+};
+
 /** The axis lengths of an Array or a matrix operand, read along the first elements; null for a scalar. */
 const axesOf = (x: unknown): number[] | null => {
   if (isCompatBridgeMatrix(x)) return matrixSize(x) ?? null;
@@ -380,6 +396,8 @@ const matrixPackageCanTake = (a: unknown, b: unknown, elementwise: boolean): boo
   const sb = axesOf(b);
   if (sa !== null && sa.length !== 2) return false;
   if (sb !== null && sb.length !== 2) return false;
+  if (Array.isArray(a) && !isRectangularNestedArray(a)) return false;
+  if (Array.isArray(b) && !isRectangularNestedArray(b)) return false;
   return !(elementwise && sa !== null && sb !== null && (sa[0] !== sb[0] || sa[1] !== sb[1]));
 };
 

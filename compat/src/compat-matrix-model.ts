@@ -367,10 +367,21 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
 
   const originalClone = nativeProto.clone as () => DenseInstance;
   wrapperProto.clone = function cloneWrapped(this: MatrixLike): MatrixLike {
-    const c = originalClone.call(this);
+    const c = originalClone.call(this) as MatrixLike & { _data: unknown; _size: number[] };
+    c._data = clone(c._data as never);
     decorateDenseInstance(c, wrapperProto);
     return c;
   };
+
+  const originalTranspose = nativeProto.transpose as (() => MatrixLike) | undefined;
+  if (typeof originalTranspose === 'function') {
+    wrapperProto.transpose = function transposeWrapped(this: MatrixLike): MatrixLike {
+      const t = originalTranspose.call(this) as MatrixLike & { _datatype?: string };
+      t._datatype = this._datatype;
+      decorateDenseInstance(t, wrapperProto);
+      return t;
+    };
+  }
 
   return wrapperProto;
 }
@@ -421,12 +432,11 @@ function buildDenseConstructorArgs(argArray: unknown[], helpers: DenseHelpers): 
 
 export function wrapCompatDenseMatrixClass(
   NativeDense: MatrixCtor,
-  helpers: DenseHelpers
+  helpers: DenseHelpers,
+  wrapperProto = patchCompatDenseMatrixPrototype(NativeDense)
 ): MatrixCtor {
   const Guarded = newOperatorGuard(NativeDense as unknown as CompatClass) as MatrixCtor;
   let Wrapped!: MatrixCtor;
-
-  const wrapperProto = patchCompatDenseMatrixPrototype(NativeDense);
 
   Wrapped = new Proxy(Guarded, {
     construct(_target, argArray: unknown[], newTarget) {
@@ -495,23 +505,98 @@ export function wrapCompatFibonacciHeapClass(NativeFibonacci: MatrixCtor): Matri
   return newOperatorGuard(NativeFibonacci as unknown as CompatClass) as MatrixCtor;
 }
 
+const IMMUTABLE_METHODS_ON_DENSE = [
+  'subset',
+  'toJSON',
+  'resize',
+  'reshape',
+  'set',
+  'swapRows',
+  'min',
+  'max',
+] as const;
+
+function patchCompatImmutableDensePrototype(
+  NativeImmutable: MatrixCtor,
+  denseWrapperProto: object
+): object {
+  const nativeProto = NativeImmutable.prototype as Record<string, unknown>;
+  const immutableProto = Object.create(denseWrapperProto) as Record<string, unknown>;
+  for (const key of IMMUTABLE_METHODS_ON_DENSE) {
+    if (key === 'subset') continue;
+    const method = nativeProto[key];
+    if (typeof method === 'function') {
+      immutableProto[key] = method;
+    }
+  }
+  const nativeSubset = nativeProto.subset as (
+    index: unknown,
+    replacement?: unknown,
+    defaultValue?: unknown
+  ) => unknown;
+  immutableProto.subset = function subsetImmutableWrapped(
+    this: MatrixLike,
+    index: unknown,
+    replacement?: unknown,
+    defaultValue?: unknown
+  ): unknown {
+    const result = nativeSubset.call(this, index, replacement, defaultValue);
+    if (result && typeof result === 'object' && (result as { isMatrix?: boolean }).isMatrix) {
+      decorateDenseInstance(result as MatrixLike & Record<string, unknown>, immutableProto);
+    }
+    return result;
+  };
+  Object.defineProperty(immutableProto, 'type', {
+    value: 'ImmutableDenseMatrix',
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+  Object.defineProperty(immutableProto, 'isImmutableDenseMatrix', {
+    value: true,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+  return immutableProto;
+}
+
+function immutableConstructorArgs(argArray: unknown[]): unknown[] {
+  const [data, datatype] = argArray;
+  if (
+    data &&
+    typeof data === 'object' &&
+    (data as { isMatrix?: boolean }).isMatrix === true &&
+    !Array.isArray(data) &&
+    !('data' in (data as object) && 'size' in (data as object))
+  ) {
+    const source = data as MatrixLike & { toArray(): unknown; size(): number[] };
+    const next: unknown[] = [source.toArray()];
+    if (datatype !== undefined) next.push(datatype);
+    else if (source._datatype !== undefined) next.push(source._datatype);
+    return next;
+  }
+  return argArray;
+}
+
 export function wrapCompatImmutableDenseMatrixClass(
   NativeImmutable: MatrixCtor,
-  WrappedDense: MatrixCtor
+  denseWrapperProto: object
 ): MatrixCtor {
   const Guarded = newOperatorGuard(NativeImmutable as unknown as CompatClass) as MatrixCtor;
-  void WrappedDense;
+  const immutableProto = patchCompatImmutableDensePrototype(NativeImmutable, denseWrapperProto);
   return new Proxy(Guarded, {
     construct(target, argArray: unknown[], newTarget) {
-      const inst = Reflect.construct(target, argArray, newTarget) as MatrixLike &
-        Record<string, unknown> & { isImmutableDenseMatrix?: boolean };
-      if (inst.isImmutableDenseMatrix !== true) {
-        inst.isImmutableDenseMatrix = true;
+      const inst = Reflect.construct(
+        target,
+        immutableConstructorArgs(argArray),
+        newTarget
+      ) as MatrixLike & Record<string, unknown>;
+      const [, rawDatatype] = argArray;
+      if (typeof rawDatatype === 'string') {
+        inst._datatype = rawDatatype;
       }
-      if (inst.type !== 'ImmutableDenseMatrix') {
-        inst.type = 'ImmutableDenseMatrix';
-      }
-      inst.isMatrix = true;
+      decorateDenseInstance(inst, immutableProto);
       return inst;
     },
     apply() {
@@ -536,14 +621,19 @@ export function buildCompatMatrixWrappers<T extends Record<string, MatrixCtor>>(
     checks,
     typeOf: typeName,
   };
-  const DenseMatrix = wrapCompatDenseMatrixClass(constructors.DenseMatrix as MatrixCtor, helpers);
+  const denseWrapperProto = patchCompatDenseMatrixPrototype(constructors.DenseMatrix as MatrixCtor);
+  const DenseMatrix = wrapCompatDenseMatrixClass(
+    constructors.DenseMatrix as MatrixCtor,
+    helpers,
+    denseWrapperProto
+  );
   const SparseMatrix = wrapCompatSparseMatrixClass(
     constructors.SparseMatrix as Parameters<typeof wrapCompatSparseMatrixClass>[0],
     bignumber
   ) as unknown as MatrixCtor;
   const ImmutableDenseMatrix = wrapCompatImmutableDenseMatrixClass(
     constructors.ImmutableDenseMatrix as MatrixCtor,
-    DenseMatrix
+    denseWrapperProto
   );
   const FibonacciHeap = wrapCompatFibonacciHeapClass(constructors.FibonacciHeap as MatrixCtor);
   return {
