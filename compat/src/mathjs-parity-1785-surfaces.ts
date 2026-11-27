@@ -244,6 +244,7 @@ function coerceRangeEndpoint(
   return value;
 }
 
+/** Typed-function dispatch for `range` with BigNumber endpoints and `includeEnd` (#1785). */
 export function createCompatRangeDispatch(
   native: (...args: unknown[]) => unknown,
   BigNumberClass: InstanceBigNumberCtor,
@@ -353,6 +354,7 @@ export function forwardSubsetArgs(
 
 type LegacySubsetIndex = { isScalar(): boolean; size(): number[] };
 
+/** Adjusts subset GET results for legacy vs modern matrix scalar promotion (#1785). */
 export function applyCompatLegacySubsetGet(
   result: unknown,
   index: unknown,
@@ -590,6 +592,7 @@ export function createCompatBigintStatisticsReducer(
   };
 }
 
+/** mathjs-ordered compare for heterogeneous numeric-ish arguments (#1785). */
 export function compareMixedTypes(a: unknown, b: unknown): number {
   const asNum = (x: unknown): number | null => {
     if (typeof x === 'number') return x;
@@ -612,6 +615,7 @@ export function compareMixedTypes(a: unknown, b: unknown): number {
   throw new Error('Invalid argument');
 }
 
+/** Builds variadic `max`/`min`-style reducers over mixed numeric types (#1785). */
 export function createCompatMixedTypeReducer(
   order: (a: unknown, b: unknown) => boolean,
   preferMax: boolean

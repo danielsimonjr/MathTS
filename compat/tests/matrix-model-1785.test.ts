@@ -125,7 +125,7 @@ describe('matrix model #1785', () => {
     const m = math.matrix([
       [10, 20],
       [30, 40],
-    ]) as Iterable<{ value: unknown; index: number[] }>;
+    ]) as unknown as Iterable<{ value: unknown; index: number[] }>;
     expect([...m]).toEqual([
       { value: 10, index: [0, 0] },
       { value: 20, index: [0, 1] },

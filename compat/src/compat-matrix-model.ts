@@ -48,6 +48,7 @@ type MatrixLike = {
   valueOf(): unknown;
 };
 
+/** Constructor shape for a native matrix class wired through compat (#1785). */
 export type MatrixCtorForCompat = new (...args: unknown[]) => unknown;
 type MatrixCtor = MatrixCtorForCompat;
 
@@ -73,6 +74,7 @@ type DenseHelpers = {
 /** Marker on compat-wrapped matrix prototypes (#1785). */
 export const COMPAT_MATRIX_WRAPPER = Symbol.for('compat.matrix.wrapper');
 
+/** Reports whether `value` was built by a compat matrix wrapper prototype (#1785). */
 export function isCompatWrappedMatrix(value: unknown): boolean {
   if (typeof value !== 'object' || value === null) return false;
   const proto = Object.getPrototypeOf(value) as Record<symbol, unknown> | null;
@@ -111,6 +113,7 @@ export function inheritMatrixDatatype(result: unknown, sources: readonly unknown
   return result;
 }
 
+/** Compat-wrapped matrix constructors surfaced on `create(all)` (#1785). */
 export type CompatMatrixCtors = {
   DenseMatrix: MatrixCtor;
   SparseMatrix: MatrixCtor;
@@ -392,6 +395,7 @@ export function createCompatMatrixClass(checks: MatrixChecks): new () => {
   return Wrapped;
 }
 
+/** Patches a native dense matrix prototype with mathjs 15.3.0 compat behavior (#1785). */
 export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
   const wrapperProto = Object.create(Native.prototype) as Record<string, unknown>;
   defineEnumerableMatrixFlags(wrapperProto);
@@ -598,6 +602,7 @@ function buildDenseConstructorArgs(argArray: unknown[], helpers: DenseHelpers): 
   throw new TypeError(`Unsupported type of data (${helpers.typeOf(data)})`);
 }
 
+/** Wraps the factory dense matrix constructor with compat guards and promotion (#1785). */
 export function wrapCompatDenseMatrixClass(
   NativeDense: MatrixCtor,
   helpers: DenseHelpers,
@@ -702,6 +707,7 @@ export function wrapCompatDenseMatrixClass(
   return Wrapped;
 }
 
+/** Wraps the mathjs FibonacciHeap constructor for compat type/layout parity (#1785). */
 export function wrapCompatFibonacciHeapClass(NativeFibonacci: MatrixCtor): MatrixCtor {
   return newOperatorGuard(NativeFibonacci as unknown as CompatClass) as MatrixCtor;
 }
@@ -801,6 +807,7 @@ function immutableConstructorArgs(argArray: unknown[]): unknown[] {
   return argArray;
 }
 
+/** Wraps immutable dense matrices with compat subset and iterator rules (#1785). */
 export function wrapCompatImmutableDenseMatrixClass(
   NativeImmutable: MatrixCtor,
   denseWrapperProto: object
@@ -836,6 +843,7 @@ export function wrapCompatImmutableDenseMatrixClass(
   }) as MatrixCtor;
 }
 
+/** Index object accepted by compat matrix subset/resize helpers (#1785). */
 export type CompatMatrixIndexLike = {
   _dimensions: unknown[];
   clone(): CompatMatrixIndexLike;
@@ -923,6 +931,7 @@ export function wrapCompatIndexClass(
   return Wrapped;
 }
 
+/** Builds wrapped matrix constructors for `create(all)` export wiring (#1785). */
 export function buildCompatMatrixWrappers<T extends Record<string, MatrixCtor>>(
   checks: MatrixChecks,
   constructors: T,
