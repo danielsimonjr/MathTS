@@ -106,6 +106,7 @@ import {
   isPositive as _isPositive,
   isNegative as _isNegative,
   isInteger as _isInteger,
+  isPrime as _isPrime,
   isZero as _isZero,
   factory_fix as _factoryFix,
 } from '@danielsimonjr/mathts-functions';
@@ -116,6 +117,7 @@ import {
   compatFractionIsInteger,
   compatFractionIsNegative,
   compatFractionIsPositive,
+  compatFractionIsPrime,
   compatFractionIsZero,
 } from './mathjs-fraction-unary-predicates.js';
 import { mathjsPowFractionPair } from './mathjs-fraction-pow.js';
@@ -844,6 +846,10 @@ export const isInteger = wrapUnaryForMathjsFraction(
   _isInteger as unknown as TypedFunction,
   compatFractionIsInteger
 );
+export const isPrime = wrapUnaryForMathjsFraction(
+  _isPrime as unknown as TypedFunction,
+  compatFractionIsPrime
+);
 export const isZero = wrapUnaryForMathjsFraction(
   _isZero as unknown as TypedFunction,
   compatFractionIsZero
@@ -1142,6 +1148,7 @@ const _shims = {
   isPositive,
   isNegative,
   isInteger,
+  isPrime,
   isZero,
   fix,
   sqrt,

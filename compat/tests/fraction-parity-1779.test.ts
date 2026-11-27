@@ -2,7 +2,10 @@
  * #1779 — fraction.js surface: `toString`, `valueOf`, `toJSON`, `fraction()`, and replacer.
  */
 import { describe, expect, it } from 'vitest';
-import { create, all, replacer, type MathjsFraction } from '../src/index.js';
+import { Fraction as CoreFraction } from '@danielsimonjr/mathts-core';
+import { create, all, replacer, reviver, type MathjsFraction } from '../src/index.js';
+import { isMathjsFraction } from '../src/mathjs-fraction-class.js';
+import { mathjsPowFractionPair } from '../src/mathjs-fraction-pow.js';
 import FractionJS from 'fraction.js';
 
 const math = create(all);
@@ -110,5 +113,159 @@ describe('#1779 replacer', () => {
     const json = '{"mathjs":"Fraction","n":"3","d":"8"}';
     expect(JSON.stringify(b)).toBe(json);
     expect(JSON.stringify(b, replacer)).toBe(json);
+  });
+});
+
+describe('#1779 reviver', () => {
+  it('revives v5 string and v4 number Fraction JSON to compat MathjsFraction', () => {
+    const v5 = JSON.parse('{"mathjs":"Fraction","n":"3","d":"8"}', math.reviver) as MathjsFraction;
+    expect(v5).toBeInstanceOf(math.Fraction);
+    expect(isMathjsFraction(v5)).toBe(true);
+    equalFraction(v5, new FractionJS(3, 8));
+
+    const v4 = JSON.parse('{"mathjs":"Fraction","n":3,"d":8}', math.reviver) as MathjsFraction;
+    expect(v4).toBeInstanceOf(math.Fraction);
+    equalFraction(v4, new FractionJS(3, 8));
+
+    const neg = JSON.parse('{"mathjs":"Fraction","n":"-3","d":"8"}', reviver) as MathjsFraction;
+    expect(neg).toBeInstanceOf(math.Fraction);
+    equalFraction(neg, new FractionJS(-3, 8));
+  });
+});
+
+describe('#1779 core Fraction prototype isolation', () => {
+  it('does not mutate native core Fraction instances or crash on compat predicates', () => {
+    const coreFrac = new CoreFraction(1, 3);
+    expect(isMathjsFraction(coreFrac)).toBe(false);
+    expect(isMathjsFraction(null)).toBe(false);
+    expect(isMathjsFraction(42)).toBe(false);
+    expect(coreFrac.toString()).toBe('0.(3)');
+    expect(CoreFraction.prototype.toJSON.name).toBe('toJSON');
+    expect(math.isPositive(coreFrac)).toBe(true);
+    expect(math.isNegative(new CoreFraction(-1, 3))).toBe(true);
+    expect(math.isZero(new CoreFraction(0, 1))).toBe(true);
+    expect(math.isInteger(new CoreFraction(2, 1))).toBe(true);
+  });
+});
+
+describe('#1779 isPrime on Fraction', () => {
+  it('throws TypeError matching mathjs 15.3.0 on Fraction input', () => {
+    expect(() => math.isPrime(math.fraction(7, 1))).toThrow(
+      /Cannot implicitly convert a Fraction to BigNumber/
+    );
+    expect(math.isPrime(7)).toBe(true);
+    expect(math.isPrime(4)).toBe(false);
+  });
+});
+
+describe('#1779 unit with Fraction formatting', () => {
+  it('formats unit magnitudes as ratios matching mathjs 15.3.0', () => {
+    const u1 = math.fraction(math.unit('2 m')) as {
+      toString(): string;
+      valueOf(): string;
+      format(opts?: unknown): string;
+    };
+    expect(u1.toString()).toBe('2/1 m');
+    expect(u1.valueOf()).toBe('2/1 m');
+    expect(u1.format({ fraction: 'decimal' })).toBe('2 m');
+
+    expect((math.fraction(math.unit(0.5, 'cm')) as { toString(): string }).toString()).toBe(
+      '1/2 cm'
+    );
+    expect((math.fraction(math.unit(-1.5, 'm')) as { toString(): string }).toString()).toBe(
+      '-3/2 m'
+    );
+  });
+});
+
+describe('#1779 fraction helpers and edge cases', () => {
+  it('covers fraction() empty, undefined, non-finite, passthrough, and sparse matrix', () => {
+    equalFraction(math.fraction() as MathjsFraction, new FractionJS(0));
+    equalFraction(math.fraction(undefined) as MathjsFraction, new FractionJS(0));
+    expect(() => math.fraction(NaN)).toThrow(/cannot be represented as a fraction/);
+    expect(() => math.fraction(Infinity)).toThrow(/cannot be represented as a fraction/);
+
+    const existing = math.fraction(2, 5);
+    expect(math.fraction(existing)).toBe(existing);
+
+    const sparse = math.sparse([
+      [0.5, 0],
+      [0, 0.25],
+    ]);
+    const mapped = math.fraction(sparse) as ReturnType<typeof math.sparse>;
+    expect(mapped.size()).toEqual([2, 2]);
+  });
+
+  it('covers MathjsFraction numerator, denominator, equals, and multiply', () => {
+    const f = math.fraction(-3, 4);
+    expect(f.numerator).toBe(-3n);
+    expect(f.denominator).toBe(4n);
+    const fCompat = f as MathjsFraction & {
+      equals(y: unknown): boolean;
+      multiply(y: unknown): MathjsFraction;
+    };
+    expect(fCompat.equals(new CoreFraction(-3, 4))).toBe(true);
+    expect(fCompat.equals(new CoreFraction(1, 4))).toBe(false);
+    expect(fCompat.equals({ invalid: true })).toBe(false);
+    equalFraction(fCompat.multiply(math.fraction(2, 3)), new FractionJS(-1, 2));
+  });
+
+  it('covers equal, unary predicates, fix, and multiplyScalar on fractions', () => {
+    expect(math.equal(math.fraction(1, 2), 0.5)).toBe(true);
+    expect(math.equal(0.5, math.fraction(1, 2))).toBe(true);
+    expect(math.equal(math.fraction(1, 2), math.fraction(2, 4))).toBe(true);
+
+    expect(math.isPositive([math.fraction(1, 2), math.fraction(-1, 2)])).toEqual([true, false]);
+    expect(math.isNegative([math.fraction(1, 2), math.fraction(-1, 2)])).toEqual([false, true]);
+    expect(math.isInteger([math.fraction(2, 1), math.fraction(1, 2)])).toEqual([true, false]);
+    expect(math.isZero([math.fraction(0, 1), math.fraction(1, 2)])).toEqual([true, false]);
+
+    equalFraction(math.fix(math.fraction(3, 2)) as MathjsFraction, new FractionJS(1));
+    equalFraction(math.fix(math.fraction(-3, 2)) as MathjsFraction, new FractionJS(-1));
+    equalFraction(math.fix(math.fraction(1, 3), 2) as MathjsFraction, new FractionJS(33, 100));
+    equalFraction(math.fix(math.fraction(1, 3), 2n) as MathjsFraction, new FractionJS(33, 100));
+    expect(() => math.fix(math.fraction(1, 3), 1.5)).toThrow(/not an integer/);
+    const fixedArr = math.fix([math.fraction(3, 2), math.fraction(-3, 2)]) as MathjsFraction[];
+    equalFraction(fixedArr[0] as MathjsFraction, new FractionJS(1));
+    equalFraction(fixedArr[1] as MathjsFraction, new FractionJS(-1));
+    expect(math.fix([1.5, -1.5], 0)).toEqual([1, -1]);
+
+    equalFraction(math.multiplyScalar(math.fraction(2, 3), 3) as MathjsFraction, new FractionJS(2));
+    equalFraction(math.multiplyScalar(3, math.fraction(2, 3)) as MathjsFraction, new FractionJS(2));
+    equalFraction(
+      math.multiplyScalar(math.fraction(2, 3), math.fraction(3, 4)) as MathjsFraction,
+      new FractionJS(1, 2)
+    );
+
+    equalFraction(math.pow(math.fraction(2, 3), 2) as MathjsFraction, new FractionJS(4, 9));
+    equalFraction(math.pow(math.fraction(2, 3), -2) as MathjsFraction, new FractionJS(9, 4));
+    equalFraction(math.pow(math.fraction(2, 3), 0) as MathjsFraction, new FractionJS(1, 1));
+    equalFraction(
+      math.pow(math.fraction(4, 9), math.fraction(1, 2)) as MathjsFraction,
+      new FractionJS(2, 3)
+    );
+    equalFraction(
+      math.pow(math.fraction(2, 3), math.fraction(2, 1)) as MathjsFraction,
+      new FractionJS(4, 9)
+    );
+
+    expect(math.equal(math.fraction(1, 2), '0.5')).toBe(true);
+    expect(math.equal('0.5', math.fraction(1, 2))).toBe(true);
+    expect(() => math.equal(math.fraction(1, 2), Infinity)).toThrow();
+    expect(() => math.equal(Infinity, math.fraction(1, 2))).toThrow();
+
+    const toCore = (n: number) => new CoreFraction(n);
+    expect(
+      mathjsPowFractionPair(new CoreFraction(4, 9), new CoreFraction(1, 2), false, toCore)
+    ).toEqual(new CoreFraction(2, 3));
+    expect(() =>
+      mathjsPowFractionPair(new CoreFraction(-8, 1), new CoreFraction(1, 3), true, toCore)
+    ).toThrow(/non-rational/);
+    expect(
+      mathjsPowFractionPair(new CoreFraction(-1, 1), new CoreFraction(1, 2), false, toCore)
+    ).toBeDefined();
+    expect(
+      mathjsPowFractionPair(new CoreFraction(2, 1), new CoreFraction(1, 2), false, toCore)
+    ).toBeCloseTo(Math.SQRT2);
   });
 });

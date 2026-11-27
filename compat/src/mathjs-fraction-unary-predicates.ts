@@ -38,6 +38,13 @@ function mathjsFractionIsZero(x: MathjsFraction): boolean {
   return bigintField(x.n) === 0n;
 }
 
+const FRACTION_TO_BIGNUMBER_ERROR =
+  'Cannot implicitly convert a Fraction to BigNumber or vice versa. Use function bignumber(x) to convert to BigNumber or fraction(x) to convert to Fraction.';
+
+function mathjsFractionIsPrime(_x: MathjsFraction): never {
+  throw new TypeError(FRACTION_TO_BIGNUMBER_ERROR);
+}
+
 function mathjsFractionFix(x: MathjsFraction): MathjsFraction {
   return (bigintField(x.s) < 0n ? x.ceil() : x.floor()) as MathjsFraction;
 }
@@ -108,6 +115,7 @@ export const compatFractionIsPositive = mathjsFractionIsPositive;
 export const compatFractionIsNegative = mathjsFractionIsNegative;
 export const compatFractionIsInteger = mathjsFractionIsInteger;
 export const compatFractionIsZero = mathjsFractionIsZero;
+export const compatFractionIsPrime = mathjsFractionIsPrime;
 
 function mathjsFractionMul(a: unknown, b: unknown): unknown | null {
   if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {

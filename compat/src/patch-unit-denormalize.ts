@@ -66,17 +66,60 @@ function patchedDenormalize(this: UnitLike, value: unknown, _prefixValue?: unkno
     );
   }
 
+  if (isMathjsFraction(res)) {
+    lastDenormalizedFraction = res;
+  }
   return res;
+}
+
+let lastDenormalizedFraction: { s: bigint; n: bigint; d: bigint; toString(): string } | null = null;
+
+function formatMathjsFractionRatio(frac: { s: bigint; n: bigint; d: bigint }): string {
+  const sign = frac.s < 0n ? '-' : '';
+  return `${sign}${frac.n}/${frac.d}`;
+}
+
+function patchedFormat(this: UnitLike & { value?: unknown }, options?: unknown): string {
+  const nativeFormat = patchedFormat.__native as (opts?: unknown) => string;
+  const useDecimal =
+    typeof options === 'object' &&
+    options !== null &&
+    (options as { fraction?: string }).fraction === 'decimal';
+  if (!isMathjsFraction(this.value) || useDecimal) {
+    return nativeFormat.call(this, options);
+  }
+  lastDenormalizedFraction = null;
+  const rendered = nativeFormat.call(this, options);
+  const frac = lastDenormalizedFraction ?? this.value;
+  lastDenormalizedFraction = null;
+  const decimal = frac.toString();
+  const ratio = formatMathjsFractionRatio(frac);
+  if (rendered === decimal) {
+    return ratio;
+  }
+  if (rendered.startsWith(`${decimal} `)) {
+    return `${ratio}${rendered.slice(decimal.length)}`;
+  }
+  return rendered;
 }
 
 patchedDenormalize.__native = null as unknown as (v: unknown, p?: unknown) => unknown;
 patchedDenormalize.__scalars = null as unknown as ScalarOps;
+patchedFormat.__native = null as unknown as (opts?: unknown) => string;
 
-/** Patch one compat instance's Unit class to denormalize with instance scalar shims. */
+/** Patch one compat instance's Unit class to denormalize and format with instance scalar shims. */
 export function patchCompatUnitDenormalize(Unit: { prototype: object }, scalars: ScalarOps): void {
-  const proto = Unit.prototype as { _denormalize: (v: unknown, p?: unknown) => unknown };
+  const proto = Unit.prototype as {
+    _denormalize: (v: unknown, p?: unknown) => unknown;
+    format: (opts?: unknown) => string;
+  };
   const native = proto._denormalize;
   patchedDenormalize.__native = native.bind(Unit.prototype);
   patchedDenormalize.__scalars = scalars;
   proto._denormalize = patchedDenormalize;
+
+  if (proto.format !== patchedFormat) {
+    patchedFormat.__native = proto.format;
+    proto.format = patchedFormat;
+  }
 }

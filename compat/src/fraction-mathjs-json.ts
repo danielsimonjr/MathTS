@@ -31,22 +31,10 @@ export function ensureMathjsFractionToJson<T>(value: T): T {
   return value;
 }
 
-/** Ensure core `Fraction` instances JSON the mathjs way when they are not typed wrappers. */
+/** Ensure mathjs fraction.js metadata is installed without mutating core `Fraction.prototype`. */
 export function installMathjsFractionJson(): void {
-  const proto = Fraction.prototype as Fraction & {
-    toJSON?: () => { mathjs: 'Fraction'; n: string; d: string };
-  };
-  if (Object.getOwnPropertyDescriptor(proto, 'toJSON')?.value === coreFractionToJson) {
-    return;
-  }
-  Object.defineProperty(proto, 'toJSON', {
-    configurable: true,
-    enumerable: false,
-    value: coreFractionToJson,
-  });
+  installMathjsFractionClass();
 }
-
-installMathjsFractionJson();
 
 export const withMathjsFractionJson = ensureMathjsFractionToJson;
 

@@ -779,6 +779,7 @@ export function create(
     isPositive: bindShim(shims.isPositive),
     isNegative: bindShim(shims.isNegative),
     isInteger: bindShim(shims.isInteger),
+    isPrime: bindShim(shims.isPrime),
     isZero: bindShim(shims.isZero),
     fix: withConvertedScalars(convertForeignScalar, shims.fix as (...args: unknown[]) => unknown),
     sqrt: withFractionRejection(shims.sqrt),
@@ -1359,7 +1360,7 @@ export { compatExpm as expm, compatMad as mad, compatArgDefault as arg };
 // These four names are also star-exported by ./shims.js (the G03 sign-predicate
 // wrappers). The explicit re-export keeps the functions implementation winning,
 // exactly as the previous explicit block in this file did.
-export { fix, isInteger, isNegative, isPositive, isZero } from './shims.js';
+export { fix, isInteger, isNegative, isPositive, isPrime, isZero } from './shims.js';
 
 type UnitMagnitude = number | ConfiguredBigNumber | MathjsFraction;
 

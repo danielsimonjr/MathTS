@@ -492,7 +492,7 @@ function compareWithMathjsFractions(a: unknown, b: unknown): MathjsFraction {
   const right = isMathjsFraction(b)
     ? b
     : (new mathjsFractionClass(b as number | string) as MathjsFraction);
-  const cmp = left.compare(right as never);
+  const cmp = left.compare(right);
   if (cmp === 0) return new mathjsFractionClass(0, 1) as MathjsFraction;
   if (cmp > 0) return new mathjsFractionClass(1, 1) as MathjsFraction;
   return new mathjsFractionClass(-1, 1) as MathjsFraction;

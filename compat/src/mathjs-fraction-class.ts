@@ -74,13 +74,11 @@ export function installMathjsFractionClass(): MathjsFractionConstructor {
     configurable: true,
     value: function (this: MathjsFraction, y: unknown): boolean {
       try {
-        return this.compare(y as never) === 0;
+        return this.compare(y as ConstructorParameters<typeof FractionJS>[0]) === 0;
       } catch {
         const core = y as { numerator?: bigint; denominator?: bigint };
         if (core.numerator !== undefined && core.denominator !== undefined) {
-          return (
-            this.compare(new mathjsFractionClass(core.numerator, core.denominator) as never) === 0
-          );
+          return this.compare(new mathjsFractionClass(core.numerator, core.denominator)) === 0;
         }
         return false;
       }
@@ -111,9 +109,17 @@ export const mathjsFractionClass = installMathjsFractionClass();
 
 /** True for mathjs-tagged fraction.js instances from this bundle. */
 export function isMathjsFraction(value: unknown): value is MathjsFraction {
+  if (value instanceof mathjsFractionClass) {
+    return true;
+  }
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const candidate = value as { isFraction?: boolean; s?: unknown; n?: unknown; d?: unknown };
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    (value as { isFraction?: boolean }).isFraction === true
+    candidate.isFraction === true &&
+    typeof candidate.s === 'bigint' &&
+    typeof candidate.n === 'bigint' &&
+    typeof candidate.d === 'bigint'
   );
 }
