@@ -498,7 +498,11 @@ export function wireMathjsInstanceApi(
     instance.compile = runBound((expression: unknown, options?: CompatEvaluateOptions) =>
       mapExpressions(expression, (text) => {
         const compiled = evaluator.compile(text, policyOptions(options));
-        return { evaluate: runBound(compiled.evaluate.bind(compiled)) };
+        return {
+          evaluate: runBound((...ea: unknown[]) =>
+            normalizeDecimal((compiled.evaluate as (...a: unknown[]) => unknown)(...ea))
+          ),
+        };
       })
     );
     instance.compileExpr = instance.compile;

@@ -547,14 +547,12 @@ function withCompatInstanceSurface<T extends (...args: unknown[]) => unknown>(
   currentConfig: MathJSConfig,
   usesOverlay: () => boolean
 ): T {
-  const wrapped = wrapWithInstanceConfig(
+  return wrapWithInstanceConfig(
     ((...args: unknown[]) =>
       fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor))) as T,
     currentConfig,
     usesOverlay
   );
-  copyFunctionSurface(fn, wrapped);
-  return wrapped;
 }
 
 function withCoercedNumberConfigScalar<T extends (...args: unknown[]) => unknown>(
@@ -1262,11 +1260,13 @@ export function create(
   for (const key of bigNumberDecimalTrigKeys) {
     const raw = compatDefaultOverrides[key];
     if (typeof raw !== 'function') continue;
-    flat[key] = withCompatInstanceSurface(
+    const surfaced = withCompatInstanceSurface(
       raw as (...args: unknown[]) => unknown,
       currentConfig,
       usesOverlay
     );
+    copyFunctionSurface(raw as (...args: unknown[]) => unknown, surfaced);
+    flat[key] = surfaced;
   }
   flat.diag = withCompatInstanceSurface(
     createCompatDiag(mathFunctions.diag as (...args: unknown[]) => unknown, instanceBigNumberClass),
