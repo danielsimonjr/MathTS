@@ -7,3 +7,4 @@
 - **`matrix`/`sparse` factory routing (#1785):** compat overloads (`matrix('dense','number')`, identity clone) and arity rejections align with mathjs 15.3.0.
 - **`compatDecimalResult` + gcd (#1785):** core `Fraction` results from `factory_gcd` promote via `numerator`/`denominator`, fixing `gcd(12, fraction(8))`.
 - **Map / matrixFrom / range / statistics (#1785):** `mathjs-parity-1785-surfaces` adds jagged `map`, dense `matrixFromRows`/`matrixFromFunction`, range zero-step guard, mixed-type max/min scalar routing, empty `sum`, and reshape message/BigNumber fixes; sparse subset scalar `get` and instance `BigNumber` `valueOf`.
+- **Range includeEnd / Fraction ranges / subset shapes (#1785):** preserve trailing `range` booleans under BigNumber promotion; compat fraction `range` loop; legacy vs modern `subset` GET matrix shapes; `null` default array assignment; `concat` BigNumber dimensions.

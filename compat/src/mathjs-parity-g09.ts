@@ -6,6 +6,11 @@
 
 import { DimensionError } from '@danielsimonjr/mathts-core';
 import {
+  applyCompatLegacySubsetGet,
+  forwardSubsetArgs,
+  applySubsetGetMatrixShape,
+} from './mathjs-parity-1785-surfaces.js';
+import {
   arraySize,
   broadcastTo,
   isEmptyIndex,
@@ -40,6 +45,7 @@ type BridgeMatrixMutable = {
 type G09SubsetDeps = {
   add: (...args: unknown[]) => unknown;
   zeros: (dims: number | number[]) => unknown;
+  matrix: (...args: unknown[]) => unknown;
 };
 
 const SHAPE_MISMATCH_ZERO_INDEX =
@@ -97,6 +103,29 @@ function isRuntimeIndex(value: unknown): value is RuntimeIndex {
   if (!isIndex(value)) return false;
   const obj = value as Index & { isScalar?: unknown; size?: unknown };
   return typeof obj.isScalar === 'function' && typeof obj.size === 'function';
+}
+
+type ScalarIndexDims = { _dimensions?: number[] };
+
+function tryArraySubsetWithNullDefault(args: readonly unknown[]): unknown | undefined {
+  if (args.length !== 4 || args[3] !== null || !Array.isArray(args[0])) {
+    return undefined;
+  }
+  const index = args[1];
+  if (!isRuntimeIndex(index) || !index.isScalar()) {
+    return undefined;
+  }
+  const dims = (index as unknown as ScalarIndexDims)._dimensions;
+  if (!Array.isArray(dims) || dims.length !== 1 || typeof dims[0] !== 'number') {
+    return undefined;
+  }
+  const position = dims[0];
+  const out: unknown[] = (args[0] as unknown[]).slice();
+  while (out.length < position) {
+    out.push(null);
+  }
+  out[position] = args[2];
+  return out;
 }
 
 function isScalarReplacement(replacement: unknown): boolean {
@@ -256,9 +285,15 @@ export function installG09BridgeMatrixSubsetPatch(sampleMatrix: unknown): void {
 /** Wrap `subset` so zero-length selections throw and empty-index no-ops match mathjs 15.3.0. */
 export function createCompatSubsetG09(
   subset: UnaryLike,
-  _deps: G09SubsetDeps
+  deps: G09SubsetDeps,
+  getLegacySubset: () => boolean = () => false
 ): (...args: unknown[]) => unknown {
+  const matrixFromScalar = (value: unknown): unknown => deps.matrix([value]);
   return keepSurface(subset, (...args: unknown[]): unknown => {
+    const arrayNull = tryArraySubsetWithNullDefault(args);
+    if (arrayNull !== undefined) {
+      return arrayNull;
+    }
     if (args.length >= 3) {
       const value = args[0];
       const index = args[1];
@@ -284,6 +319,24 @@ export function createCompatSubsetG09(
         return apply(subset, args);
       }
     }
-    return apply(subset, args);
+    const result = forwardSubsetArgs(subset as (...a: unknown[]) => unknown, ...args);
+    if (args.length === 2) {
+      if (Array.isArray(args[0])) {
+        if (
+          typeof result === 'object' &&
+          result !== null &&
+          (result as { isMatrix?: boolean }).isMatrix === true &&
+          typeof (result as { valueOf?: () => unknown }).valueOf === 'function'
+        ) {
+          const flat = (result as { valueOf: () => unknown }).valueOf();
+          return flat;
+        }
+        return result;
+      }
+      const legacy = getLegacySubset();
+      const adjusted = applyCompatLegacySubsetGet(result, args[1], legacy, matrixFromScalar);
+      return applySubsetGetMatrixShape(adjusted, args[1], legacy, (data) => deps.matrix(data));
+    }
+    return result;
   });
 }

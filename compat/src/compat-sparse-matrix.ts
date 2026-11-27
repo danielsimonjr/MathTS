@@ -22,6 +22,18 @@ export function sanitizeSparseNestedInput(data: unknown[][]): unknown[][] {
   return sanitizeDenseSparseInput(data);
 }
 
+let compatSparseBignumber: ((value: unknown) => unknown) | null = null;
+
+/** Use the compat instance `BigNumber` constructor for sparse valueOf/zero (#1785). */
+export function setCompatSparseBignumberFactory(fn: (value: unknown) => unknown): void {
+  compatSparseBignumber = fn;
+}
+
+function coerceSparseBigNumber(value: unknown, helpers: SparseHelpers): unknown {
+  if (compatSparseBignumber) return compatSparseBignumber(value);
+  return helpers.bignumber(value);
+}
+
 type SparseInstance = {
   _datatype?: string;
   _values: unknown[] | null;
@@ -110,15 +122,13 @@ function patchSparseValueOf(sparse: SparseInstance, helpers: SparseHelpers): voi
     const arr = native();
     const zero = sparse.zero;
     const dt = sparse._datatype;
+    const toBn = (cell: unknown): unknown => coerceSparseBigNumber(cell, helpers);
     return arr.map((row) =>
       row.map((cell) => {
         if (cell === 0 || (typeof cell === 'number' && Object.is(cell, -0))) {
-          return dt === 'BigNumber' ? helpers.bignumber(zero) : compatDecimalResult(zero);
+          return dt === 'BigNumber' ? toBn(zero) : compatDecimalResult(zero);
         }
-        if (dt === 'BigNumber') {
-          return helpers.bignumber(cell);
-        }
-        return compatDecimalResult(cell);
+        return dt === 'BigNumber' ? toBn(cell) : compatDecimalResult(cell);
       })
     );
   };
@@ -128,7 +138,7 @@ function applySparseDatatype(inst: SparseInstance, datatype: string, helpers: Sp
   inst._datatype = datatype;
   const convert = (value: unknown): unknown =>
     datatype === 'BigNumber'
-      ? helpers.bignumber(value)
+      ? coerceSparseBigNumber(value, helpers)
       : datatype === 'Fraction'
         ? helpers.fraction(value)
         : convertSparseValue(value, datatype);
@@ -366,7 +376,14 @@ function patchCompatSparseMatrixPrototype(
         return (this as { get: (i: number[]) => unknown }).get(runtime.min());
       }
     }
-    return nativeSubset.call(this, index, replacement, defaultValue);
+    switch (arguments.length) {
+      case 1:
+        return nativeSubset.call(this, index);
+      case 2:
+        return nativeSubset.call(this, index, replacement);
+      default:
+        return nativeSubset.call(this, index, replacement, defaultValue);
+    }
   };
 
   Object.defineProperty(wrapperProto, Symbol.iterator, {

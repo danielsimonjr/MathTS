@@ -346,9 +346,18 @@ export function withStatisticsEmptyCollectionThrow(
  */
 export function withBigIntStatisticsStrings(
   fn: UnaryLike,
-  getNumberMode: () => string
+  getNumberMode: () => string,
+  bigintStringReducer?: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
   return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (
+      getNumberMode() === 'bigint' &&
+      args.length > 0 &&
+      args.every((a) => typeof a === 'string') &&
+      typeof bigintStringReducer === 'function'
+    ) {
+      return bigintStringReducer(...args);
+    }
     const result = apply(fn, args);
     if (getNumberMode() !== 'bigint') return result;
     const allIntegerStrings =

@@ -11,12 +11,18 @@ import {
   resize as resizeArray,
   validate,
 } from '@danielsimonjr/mathts-core/internal';
+import { config as mathtsConfig } from '@danielsimonjr/mathts-functions';
 import {
   NEW_OPERATOR_MESSAGE,
   newOperatorGuard,
   type CompatClass,
 } from './constructors-without-new.js';
 import { installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
+import {
+  applyCompatLegacySubsetGet,
+  forwardSubsetArgs,
+  applySubsetGetMatrixShape,
+} from './mathjs-parity-1785-surfaces.js';
 import { wrapCompatSparseMatrixClass } from './compat-sparse-matrix.js';
 
 type SparseBignumberFn = (value: unknown) => unknown;
@@ -375,7 +381,25 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
       default:
         throw new SyntaxError('Wrong number of arguments');
     }
-    return originalSubset.call(this, index, replacement, defaultValue);
+    const legacy = () => (mathtsConfig() as { legacySubset?: boolean }).legacySubset === true;
+    const matrixFromScalar = (value: unknown): unknown =>
+      Reflect.construct(Native, [[value]]) as MatrixLike;
+    const invoke = (i: unknown, r?: unknown, d?: unknown) => originalSubset.call(this, i, r, d);
+    if (arguments.length === 1) {
+      const result = forwardSubsetArgs(invoke, index);
+      const legacyOn = legacy();
+      const adjusted = applyCompatLegacySubsetGet(result, index, legacyOn, matrixFromScalar);
+      return applySubsetGetMatrixShape(
+        adjusted,
+        index,
+        legacyOn,
+        (data) => Reflect.construct(Native, [data]) as MatrixLike
+      );
+    }
+    if (arguments.length === 2) {
+      return forwardSubsetArgs(invoke, index, replacement);
+    }
+    return forwardSubsetArgs(invoke, index, replacement, defaultValue);
   };
 
   const originalGet = nativeProto.get as (index: unknown, col?: unknown) => unknown;

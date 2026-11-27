@@ -80,7 +80,12 @@ export function promoteBooleanScalarsForBigNumber(
     }
   }
   if (!hasBoolean) return args;
-  return args.map((a) => (typeof a === 'boolean' ? new BigNumberCtor(a ? 1 : 0) : a));
+  const trailingIncludeEnd = typeof args[args.length - 1] === 'boolean';
+  return args.map((a, i) => {
+    if (typeof a !== 'boolean') return a;
+    if (trailingIncludeEnd && i === args.length - 1) return a;
+    return new BigNumberCtor(a ? 1 : 0);
+  });
 }
 
 function patchNodeEvaluate(

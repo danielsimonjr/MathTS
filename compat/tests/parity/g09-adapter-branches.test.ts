@@ -17,6 +17,7 @@ const subsetBase = mathFunctions.subset as (...args: unknown[]) => unknown;
 const compatSubset = createCompatSubsetG09(subsetBase, {
   add: mathFunctions.add,
   zeros: mathFunctions.zeros,
+  matrix: instance.matrix as (...args: unknown[]) => unknown,
 });
 
 type RuntimeIndex = ReturnType<typeof instance.index> & {

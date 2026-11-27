@@ -736,6 +736,12 @@ export function wireMathjsInstanceApi(
     if (typeof printTransform === 'function') {
       scope.print = printTransform;
     }
+    for (const key of ['map', 'filter', 'forEach'] as const) {
+      const tr = expressionLayers.transform[key];
+      if (typeof tr === 'function') {
+        scope[key] = tr;
+      }
+    }
     if (typeof instance.num === 'function') scope.num = instance.num;
     if (typeof instance.den === 'function') scope.den = instance.den;
     if (wrappedUnit !== undefined) scope.Unit = wrappedUnit;
