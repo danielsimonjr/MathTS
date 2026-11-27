@@ -388,7 +388,7 @@ const compatMad = createCompatMad({
 
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
-  const bound = ((...args: unknown[]) => fn(...args)) as T;
+  const bound = ((...args: unknown[]) => compatDecimalResult(fn(...args))) as T;
   copyFunctionSurface(fn, bound);
   return bound;
 }
@@ -471,9 +471,9 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
       return fn.apply(this, args);
     };
     if (!usesOverlay()) {
-      return invoke();
+      return compatDecimalResult(invoke());
     }
-    return mathFunctions.runWithConfig(currentConfig, invoke);
+    return compatDecimalResult(mathFunctions.runWithConfig(currentConfig, invoke));
   };
   copyFunctionSurface(fn, wrapped);
   return wrapped as T;

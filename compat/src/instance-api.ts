@@ -1,4 +1,4 @@
-import { compatDecimalResult } from './bignumber.js';
+import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
 import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
 /**
  * mathjs instance methods on `create(all)`: import, typed, compile, and
@@ -224,6 +224,14 @@ export function wireMathjsInstanceApi(
   };
 
   const instanceTyped = factory_mathjsCompat.createCompatTyped();
+  instanceTyped.addConversion(
+    {
+      from: 'bigint',
+      to: 'BigNumber',
+      convert: (x: unknown) => new CompatBigNumber((x as bigint).toString()),
+    },
+    { override: true }
+  );
 
   const mathNs = instance as MathNamespace;
   mathNs.typed = instanceTyped;

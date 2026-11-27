@@ -6,6 +6,15 @@ import {
   isUnit,
 } from '@danielsimonjr/mathts-core';
 
+/** decimal.js (and mathjs) use exponent `0`, never `-0`, in deep equality tests. */
+function fixNegativeZeroExponent(bn: CompatBigNumber): CompatBigNumber {
+  const exponent = (bn as unknown as { _exponent: number })._exponent;
+  if (Object.is(exponent, -0)) {
+    return new CompatBigNumber(bn.toString());
+  }
+  return bn;
+}
+
 /** A MathTS decimal with the default string notation used by mathjs. */
 class CompatBigNumber extends NativeBigNumber {
   override toString(): string {
@@ -33,8 +42,11 @@ function isBridgeMatrix(value: object): value is {
 
 /** Give a native decimal result the compatibility display convention (deep). */
 export function compatDecimalResult(value: unknown): unknown {
-  if (value instanceof NativeBigNumber && !(value instanceof CompatBigNumber)) {
-    return new CompatBigNumber(value);
+  if (value instanceof NativeBigNumber) {
+    if (!(value instanceof CompatBigNumber)) {
+      return fixNegativeZeroExponent(new CompatBigNumber(value));
+    }
+    return fixNegativeZeroExponent(value);
   }
   if (Array.isArray(value)) {
     let changed = false;
@@ -73,7 +85,7 @@ export function compatDecimalResult(value: unknown): unknown {
     return value;
   }
   if (isBigNumber(value)) {
-    return value;
+    return value instanceof CompatBigNumber ? fixNegativeZeroExponent(value) : value;
   }
   return value;
 }

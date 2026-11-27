@@ -60,4 +60,15 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
   it('toJSON keeps mathjs shape', () => {
     expect(bn('0.2').toJSON()).toEqual({ mathjs: 'BigNumber', value: '0.2' });
   });
+
+  it('ceil matches bignumber(…) under deepStrictEqual (decimal.js exponent −0)', () => {
+    assert.deepStrictEqual(math.ceil(bn(1.3)), bn(2));
+  });
+
+  it('typed converts bigint to the compat BigNumber class', () => {
+    const double = math.typed('double', {
+      BigNumber: (x: InstanceType<typeof B>) => x.plus(x),
+    });
+    assert.deepStrictEqual(double(2n), bn(4));
+  });
 });
