@@ -1,0 +1,421 @@
+{
+  "generated": "2026-11-27",
+  "mathjs": "15.3.0",
+  "mathjs_package": "npm pack mathjs@15.3.0 (lib/esm entry/mainAny.js closure)",
+  "mathts_commit": "6a5a640ef97324b676a0599f7b4e505b089924d5",
+  "method": {
+    "native_means": "Public export of a workspace package other than @danielsimonjr/mathts-compat, including package subpaths such as @danielsimonjr/mathts-core/internal.",
+    "native_full_means": "The mathjs symbol is a public native export (or a documented constant alias such as pi→PI) and this review recorded no source-level capability gap. It is not a runtime differential.",
+    "native_partial_means": "A public native export exists and a concrete gap is stated.",
+    "compat_only_means": "No public native export. The symbol is exported by @danielsimonjr/mathts-compat.",
+    "missing_means": "Neither native public entries nor compat export the symbol.",
+    "intentional_diff_means": "The capability is deliberately shaped differently (module graph, sandbox, version string, or language globals)."
+  },
+  "package_export_counts": [
+    {
+      "name": "@danielsimonjr/mathts-arithmetic",
+      "version": "0.2.4",
+      "exports": 46
+    },
+    {
+      "name": "@danielsimonjr/mathts-ast",
+      "version": "0.2.2",
+      "exports": 16
+    },
+    {
+      "name": "@danielsimonjr/mathts-autograd",
+      "version": "0.7.1",
+      "exports": 10
+    },
+    {
+      "name": "@danielsimonjr/mathts-compat",
+      "version": "0.7.25",
+      "exports": 1159
+    },
+    {
+      "name": "@danielsimonjr/mathts-core",
+      "version": "0.30.3",
+      "exports": 327
+    },
+    {
+      "name": "@danielsimonjr/mathts-evaluator",
+      "version": "0.2.2",
+      "exports": 6
+    },
+    {
+      "name": "@danielsimonjr/mathts-expression",
+      "version": "0.14.5",
+      "exports": 102
+    },
+    {
+      "name": "@danielsimonjr/mathts-functions",
+      "version": "0.89.22",
+      "exports": 1500
+    },
+    {
+      "name": "@danielsimonjr/mathts-gpu",
+      "version": "0.4.1",
+      "exports": 25
+    },
+    {
+      "name": "@danielsimonjr/mathts-linalg",
+      "version": "0.3.2",
+      "exports": 31
+    },
+    {
+      "name": "@danielsimonjr/mathts-matrix",
+      "version": "0.13.2",
+      "exports": 163
+    },
+    {
+      "name": "@danielsimonjr/mathts-numbers",
+      "version": "0.2.2",
+      "exports": 25
+    },
+    {
+      "name": "@danielsimonjr/mathts-parallel",
+      "version": "0.12.2",
+      "exports": 70
+    },
+    {
+      "name": "@danielsimonjr/mathts-parser",
+      "version": "0.2.2",
+      "exports": 26
+    },
+    {
+      "name": "@danielsimonjr/mathts-plot",
+      "version": "0.5.4",
+      "exports": 27
+    },
+    {
+      "name": "@danielsimonjr/mathts-signal",
+      "version": "0.2.4",
+      "exports": 36
+    },
+    {
+      "name": "@danielsimonjr/mathts-statistics",
+      "version": "0.5.4",
+      "exports": 187
+    },
+    {
+      "name": "@danielsimonjr/mathts-tensor",
+      "version": "0.5.3",
+      "exports": 23
+    },
+    {
+      "name": "@danielsimonjr/mathts-trigonometry",
+      "version": "0.2.4",
+      "exports": 20
+    },
+    {
+      "name": "@danielsimonjr/mathts-typed-function",
+      "version": "0.3.0",
+      "exports": 35
+    },
+    {
+      "name": "@danielsimonjr/mathts-units",
+      "version": "0.8.2",
+      "exports": 55
+    },
+    {
+      "name": "@danielsimonjr/mathts-wasm",
+      "version": "0.5.1",
+      "exports": 326
+    },
+    {
+      "name": "@danielsimonjr/mathts-workbook",
+      "version": "0.6.4",
+      "exports": 28
+    },
+    {
+      "name": "@danielsimonjr/mathts-workerpool",
+      "version": "0.6.0",
+      "exports": 31
+    }
+  ],
+  "export_rows": 1137,
+  "export_status": {
+    "intentional-diff": 377,
+    "native-full": 433,
+    "compat-only": 260,
+    "native-partial": 67
+  },
+  "functional_rows": 395,
+  "functional_status": {
+    "intentional-diff": 6,
+    "native-full": 383,
+    "compat-only": 2,
+    "native-partial": 4
+  },
+  "factory_rows": 371,
+  "factory_status": {
+    "native-partial": 63,
+    "native-full": 50,
+    "compat-only": 258
+  },
+  "dependency_rows": 371,
+  "dependency_status": {
+    "intentional-diff": 371
+  },
+  "feature_rows": 33,
+  "feature_status": {
+    "intentional-diff": 8,
+    "native-partial": 6,
+    "compat-only": 3,
+    "native-full": 16
+  },
+  "categories": [
+    {
+      "category": "algebra",
+      "total": 20,
+      "native-full": 20,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "arithmetic",
+      "total": 37,
+      "native-full": 37,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "bitwise",
+      "total": 7,
+      "native-full": 7,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "class",
+      "total": 15,
+      "native-full": 15,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "combinatorics",
+      "total": 4,
+      "native-full": 4,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "complex",
+      "total": 4,
+      "native-full": 4,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "constants",
+      "total": 17,
+      "native-full": 11,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 6
+    },
+    {
+      "category": "construction",
+      "total": 12,
+      "native-full": 12,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "core",
+      "total": 4,
+      "native-full": 0,
+      "native-partial": 4,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "expression",
+      "total": 5,
+      "native-full": 5,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "expression-node",
+      "total": 16,
+      "native-full": 16,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "fraction",
+      "total": 2,
+      "native-full": 2,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "geometry",
+      "total": 2,
+      "native-full": 2,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "logical",
+      "total": 5,
+      "native-full": 5,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "matrix",
+      "total": 40,
+      "native-full": 40,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "numeric",
+      "total": 1,
+      "native-full": 1,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "other",
+      "total": 15,
+      "native-full": 13,
+      "native-partial": 0,
+      "compat-only": 2,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "physical-constants",
+      "total": 51,
+      "native-full": 51,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "probability",
+      "total": 12,
+      "native-full": 12,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "relational",
+      "total": 11,
+      "native-full": 11,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "set",
+      "total": 10,
+      "native-full": 10,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "signal",
+      "total": 2,
+      "native-full": 2,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "special",
+      "total": 2,
+      "native-full": 2,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "statistics",
+      "total": 13,
+      "native-full": 13,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "trigonometry",
+      "total": 25,
+      "native-full": 25,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "type-guard",
+      "total": 43,
+      "native-full": 43,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "units",
+      "total": 2,
+      "native-full": 2,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    },
+    {
+      "category": "utils",
+      "total": 18,
+      "native-full": 18,
+      "native-partial": 0,
+      "compat-only": 0,
+      "missing": 0,
+      "intentional-diff": 0
+    }
+  ]
+}
