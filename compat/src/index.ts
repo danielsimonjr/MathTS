@@ -472,19 +472,22 @@ function bindBinaryNumericShim<T extends (...args: unknown[]) => unknown>(
       BigNumberCtor
     );
   const bound = (op === 0
-    ? (...args: unknown[]) =>
-        args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number'
+    ? function (...args: unknown[]) {
+        return args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number'
           ? args[0] + args[1]
-          : slow(args)
+          : slow(args);
+      }
     : op === 1
-      ? (...args: unknown[]) =>
-          args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number'
+      ? function (...args: unknown[]) {
+          return args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number'
             ? args[0] - args[1]
-            : slow(args)
-      : (...args: unknown[]) =>
-          args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number'
+            : slow(args);
+        }
+      : function (...args: unknown[]) {
+          return args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number'
             ? args[0] * args[1]
-            : slow(args)) as unknown as T;
+            : slow(args);
+        }) as unknown as T;
   copyFunctionSurface(fn, bound);
   return bound;
 }

@@ -134,32 +134,21 @@ export function asMathjsExpressionScopeValue(value: unknown): unknown {
   if (ownProto?.constructor === fn) return fn;
   const cached = scopeFnWrapperCache.get(fn);
   if (cached !== undefined) return cached;
-  function scopeFn(this: unknown, ...args: never[]): unknown {
-    return fn.apply(this, args);
+  function scopeFn(this: unknown, a?: unknown, b?: unknown): unknown {
+    const argc = arguments.length;
+    if (argc === 2) return (fn as (x: unknown, y: unknown) => unknown).call(this, a, b);
+    if (argc === 1) return (fn as (x: unknown) => unknown).call(this, a);
+    if (argc === 0) return (fn as () => unknown).call(this);
+    return fn.apply(this, Array.prototype.slice.call(arguments) as never[]);
   }
-  const proxy = new Proxy(scopeFn, {
-    get(target, prop) {
-      if (prop === 'prototype') return target.prototype;
-      return Reflect.get(fn, prop, fn);
-    },
-    has(_target, prop) {
-      return Reflect.has(fn, prop);
-    },
-    apply(_target, thisArg, argArray) {
-      return Reflect.apply(fn, thisArg, argArray);
-    },
-    construct(_target, argArray, newTarget) {
-      return Reflect.construct(
-        fn as unknown as new (...args: unknown[]) => object,
-        argArray,
-        newTarget
-      );
-    },
-  });
-  scopeFn.prototype.constructor = proxy;
-  scopeFnWrapperCache.set(fn, proxy);
-  scopeFnUnwrapMap.set(proxy, fn);
-  return proxy;
+  const descriptors = Object.getOwnPropertyDescriptors(fn);
+  delete descriptors.prototype;
+  delete descriptors.length;
+  delete descriptors.name;
+  Object.defineProperties(scopeFn, descriptors);
+  scopeFnWrapperCache.set(fn, scopeFn);
+  scopeFnUnwrapMap.set(scopeFn, fn);
+  return scopeFn;
 }
 
 function validateScope(scope: Map<string, unknown>): void {
