@@ -20,7 +20,11 @@
 import { instanceSymbols } from './instance-symbols.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
-import { BigNumber as CompatBigNumberCtor, compatDecimalResult } from './bignumber.js';
+import {
+  BigNumber as CompatBigNumberCtor,
+  compatDecimalResult,
+  promoteBooleanScalarsForBigNumber,
+} from './bignumber.js';
 import { applyG08CompatOverrides } from './g08-inverse-hyperbolic-compat.js';
 import { compatFreqz, compatZpk2tf } from './compat-signal-factories.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
@@ -80,6 +84,7 @@ import {
   createCompatRandomInstance,
   withBitNotIntegerMessage,
   withCompatBitNotInfiniteBigNumber,
+  withCompatBitShiftBigNumberParity,
   withCompatBitwiseInfiniteBigNumberBinary,
   withMathjsNormMatrixRules,
   withMatrixMapHintOnUnary,
@@ -388,7 +393,8 @@ const compatMad = createCompatMad({
 
 /** Per-instance forwarder (unique identity, no config wrapper overhead). */
 function bindShim<T extends (...args: unknown[]) => unknown>(fn: T): T {
-  const bound = ((...args: unknown[]) => compatDecimalResult(fn(...args))) as T;
+  const bound = ((...args: unknown[]) =>
+    compatDecimalResult(fn(...promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor)))) as T;
   copyFunctionSurface(fn, bound);
   return bound;
 }
@@ -457,6 +463,28 @@ function copyFunctionSurface(
   }
 }
 
+function coerceBigNumberResultForNumberMode(
+  config: MathJSConfig,
+  args: readonly unknown[],
+  result: unknown
+): unknown {
+  if (config.number === 'BigNumber') return result;
+  if (args.length === 1 && typeof args[0] === 'bigint' && result instanceof CompatBigNumberCtor) {
+    return (result as InstanceType<typeof CompatBigNumberCtor>).toNumber();
+  }
+  return result;
+}
+
+function withCoercedNumberConfigScalar<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  config: MathJSConfig
+): T {
+  const wrapped = ((...args: unknown[]) =>
+    coerceBigNumberResultForNumberMode(config, args, fn(...args))) as T;
+  copyFunctionSurface(fn, wrapped);
+  return wrapped;
+}
+
 function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
   fn: T,
   currentConfig: MathJSConfig,
@@ -464,16 +492,19 @@ function wrapWithInstanceConfig<T extends (...args: unknown[]) => unknown>(
 ): T {
   const wrapped = function (this: unknown, ...args: unknown[]) {
     const construct = new.target;
+    const callArgs = promoteBooleanScalarsForBigNumber(args, CompatBigNumberCtor);
     const invoke = (): unknown => {
       if (construct) {
-        return Reflect.construct(fn, args, construct === wrapped ? fn : construct);
+        return Reflect.construct(fn, callArgs, construct === wrapped ? fn : construct);
       }
-      return fn.apply(this, args);
+      return fn.apply(this, callArgs);
     };
+    const finish = (raw: unknown): unknown =>
+      compatDecimalResult(coerceBigNumberResultForNumberMode(currentConfig, callArgs, raw));
     if (!usesOverlay()) {
-      return compatDecimalResult(invoke());
+      return finish(invoke());
     }
-    return compatDecimalResult(mathFunctions.runWithConfig(currentConfig, invoke));
+    return finish(mathFunctions.runWithConfig(currentConfig, invoke));
   };
   copyFunctionSurface(fn, wrapped);
   return wrapped as T;
@@ -748,6 +779,8 @@ export function create(
     // #1587: a Fraction argument throws the mathjs conversion error.
     exp: withMatrixMapHintOnUnary('exp', withFractionRejection(shims.exp)),
     log: withFractionRejection(shims.log),
+    log10: withCoercedNumberConfigScalar(withFractionRejection(mathFunctions.log10), currentConfig),
+    log2: withCoercedNumberConfigScalar(withFractionRejection(mathFunctions.log2), currentConfig),
 
     // Trigonometry — #1587: a Fraction argument throws the mathjs conversion error.
     sin: withFractionRejection(shims.sin),
@@ -901,8 +934,6 @@ export function create(
     csch: withFractionRejection(mathFunctions.csch),
     coth: withFractionRejection(mathFunctions.coth),
     sech: withFractionRejection(mathFunctions.sech),
-    log10: withFractionRejection(mathFunctions.log10),
-    log2: withFractionRejection(mathFunctions.log2),
     // #1550: the mathjs-shaped factories keep a Unit operand and broadcast nthRoot.
     unaryMinus: mathFunctions.factory_unaryMinus,
     unaryPlus: compatUnaryPlus,
@@ -954,8 +985,20 @@ export function create(
       2,
       withCompatBitwiseInfiniteBigNumberBinary(mathFunctions.bitXor, 'xor')
     ),
-    leftShift: withFixedArity('leftShift', 2, mathFunctions.leftShift),
-    rightArithShift: withFixedArity('rightArithShift', 2, mathFunctions.rightArithShift),
+    leftShift: withFixedArity(
+      'leftShift',
+      2,
+      withCompatBitShiftBigNumberParity(
+        mathFunctions.leftShift as (a: unknown, b: unknown) => unknown
+      )
+    ),
+    rightArithShift: withFixedArity(
+      'rightArithShift',
+      2,
+      withCompatBitShiftBigNumberParity(
+        mathFunctions.rightArithShift as (a: unknown, b: unknown) => unknown
+      )
+    ),
     rightLogShift: withFixedArity('rightLogShift', 2, mathFunctions.rightLogShift),
     bitNot: withFixedArity(
       'bitNot',

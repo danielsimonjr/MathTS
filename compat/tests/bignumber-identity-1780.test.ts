@@ -65,6 +65,12 @@ describe('BigNumber class identity and valueOf (#1780)', () => {
     assert.deepStrictEqual(math.ceil(bn(1.3)), bn(2));
   });
 
+  it('divide promotes booleans when the other operand is a BigNumber', () => {
+    const a = bn('0.3');
+    assert.deepStrictEqual(math.divide(a, true), a);
+    assert.deepStrictEqual(math.divide(true, bn('2')), bn('0.5'));
+  });
+
   it('typed converts bigint to the compat BigNumber class', () => {
     const double = math.typed('double', {
       BigNumber: (x: InstanceType<typeof B>) => x.plus(x),

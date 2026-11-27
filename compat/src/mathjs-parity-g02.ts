@@ -9,7 +9,11 @@
  * dispatch, the `mad` result behavior, and the `expm` Matrix return).
  */
 
-import { compatDecimalResult } from './bignumber.js';
+import {
+  BigNumber as CompatBigNumber,
+  compatDecimalResult,
+  promoteBooleanScalarsForBigNumber,
+} from './bignumber.js';
 import { isComplex, isFraction } from '@danielsimonjr/mathts-core';
 import type { Fraction as CompatFractionType } from '@danielsimonjr/mathts-core';
 import type { CompatBigNumberInstance as CompatBigNumberType } from './bignumber.js';
@@ -536,9 +540,11 @@ export function withConvertedScalars(
   convert: (v: unknown) => unknown,
   fn: UnaryLike
 ): (...args: unknown[]) => unknown {
-  return keepSurface(fn, (...args: unknown[]): unknown =>
-    compatDecimalResult(apply(fn, args.map(convert)))
-  );
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    const converted = args.map(convert);
+    const promoted = promoteBooleanScalarsForBigNumber(converted, CompatBigNumber);
+    return compatDecimalResult(apply(fn, promoted));
+  });
 }
 
 // =============================================================================

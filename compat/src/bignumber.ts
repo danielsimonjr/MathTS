@@ -40,6 +40,38 @@ function isBridgeMatrix(value: object): value is {
   return candidate.isMatrix === true && typeof candidate.map === 'function';
 }
 
+function isExpressionNode(value: object): value is {
+  isNode: boolean;
+  evaluate: (...args: unknown[]) => unknown;
+} {
+  const candidate = value as { isNode?: boolean; evaluate?: unknown };
+  return candidate.isNode === true && typeof candidate.evaluate === 'function';
+}
+
+const nodeEvaluateWrapped = Symbol('compatNodeEvaluateWrapped');
+
+/** When one operand is a BigNumber, mathjs promotes booleans to 0/1 BigNumbers. */
+export function promoteBooleanScalarsForBigNumber(
+  args: readonly unknown[],
+  BigNumberCtor: typeof CompatBigNumber
+): unknown[] {
+  const hasBigNumber = args.some(
+    (a) => a instanceof CompatBigNumber || (a instanceof NativeBigNumber && isBigNumber(a))
+  );
+  if (!hasBigNumber) return [...args];
+  return args.map((a) => (typeof a === 'boolean' ? new BigNumberCtor(a ? 1 : 0) : a));
+}
+
+function patchNodeEvaluate(node: { evaluate: (...args: unknown[]) => unknown }): void {
+  const marker = node as { [nodeEvaluateWrapped]?: boolean };
+  if (marker[nodeEvaluateWrapped]) return;
+  const original = node.evaluate;
+  node.evaluate = function (this: unknown, ...args: unknown[]) {
+    return compatDecimalResult(original.apply(this, args));
+  };
+  marker[nodeEvaluateWrapped] = true;
+}
+
 /** Give a native decimal result the compatibility display convention (deep). */
 export function compatDecimalResult(value: unknown): unknown {
   if (value instanceof NativeBigNumber) {
@@ -61,6 +93,16 @@ export function compatDecimalResult(value: unknown): unknown {
     return value;
   }
   if (isBridgeMatrix(value)) {
+    let changed = false;
+    const mapped = value.map((entry) => {
+      const next = compatDecimalResult(entry);
+      if (next !== entry) changed = true;
+      return next;
+    });
+    return changed ? mapped : value;
+  }
+  if (isExpressionNode(value)) {
+    patchNodeEvaluate(value);
     return value;
   }
   if (isComplex(value)) {

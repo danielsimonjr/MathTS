@@ -2,7 +2,7 @@
  * Remap MathTS typed / factory errors to mathjs 15.3.0 message and class shapes (#1773).
  */
 
-import { compatDecimalResult } from './bignumber.js';
+import { BigNumber as CompatBigNumber, compatDecimalResult } from './bignumber.js';
 import {
   FRACTION_TO_BIGNUMBER_ERROR,
   invalidNumericStringError,
@@ -238,7 +238,46 @@ export function withCompatBitNotInfiniteBigNumber(
         return bn.neg();
       }
     }
-    return fn(x);
+    return compatDecimalResult(fn(x));
+  };
+}
+
+function asCompatBigNumber(x: unknown): BigNumber | null {
+  if (isBigNumber(x)) return x;
+  if (typeof x === 'object' && x !== null && (x as BigNumber).isBigNumber === true) {
+    return x as BigNumber;
+  }
+  return null;
+}
+
+/**
+ * mathjs bitwise shifts on BigNumbers: negative shift → NaN; infinite patterns (#1780).
+ */
+export function withCompatBitShiftBigNumberParity(
+  fn: (a: unknown, b: unknown) => unknown
+): (a: unknown, b: unknown) => unknown {
+  return (a: unknown, b: unknown): unknown => {
+    const base = asCompatBigNumber(a);
+    const shift = asCompatBigNumber(b);
+    if (base && shift) {
+      if (shift.isFinite() && shift.lt(0)) {
+        return compatDecimalResult(new CompatBigNumber(NaN));
+      }
+      if (!base.isFinite()) {
+        if (!shift.isFinite()) {
+          return compatDecimalResult(new CompatBigNumber(NaN));
+        }
+        return compatDecimalResult(base);
+      }
+    }
+    try {
+      return compatDecimalResult(fn(a, b));
+    } catch (err) {
+      if (base && !base.isFinite() && shift && shift.isFinite()) {
+        return compatDecimalResult(base);
+      }
+      throw err;
+    }
   };
 }
 

@@ -213,6 +213,9 @@ export function bignumber(value?: unknown): unknown {
   if (value instanceof CompatBigNumber) {
     return value;
   }
+  if (typeof value === 'bigint') {
+    return new CompatBigNumber(value.toString());
+  }
   return compatDecimalResult(compatBignumber(value));
 }
 
