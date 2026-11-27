@@ -92,6 +92,15 @@ function complexJsDivide(a: Complex, b: Complex): Complex {
   if ((tZero && zZero) || (tInf && zInf)) return new Complex(NaN, NaN);
   if (zZero || tInf) return new Complex(Infinity, Infinity);
   if (tZero || zInf) return new Complex(0, 0);
+  // complex.js divides each component by a real divisor; the general formula rounds
+  // differently in the last digit (#1784: `(300 + 400i) kPa` to `lbf / in^2`).
+  if (complexComponentNumber(b.im) === 0) {
+    const divisor = complexComponentNumber(b.re);
+    return new Complex(
+      complexComponentNumber(a.re) / divisor,
+      complexComponentNumber(a.im) / divisor
+    );
+  }
   return a.divide(b);
 }
 
