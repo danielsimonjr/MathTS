@@ -10,7 +10,7 @@ import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
  */
 
 import type { mathTyped } from '@danielsimonjr/mathts-core';
-import { deepMap, isMatrix } from '@danielsimonjr/mathts-core/internal';
+import { deepMap, isIndex, isMatrix } from '@danielsimonjr/mathts-core/internal';
 import { isCompatFactory } from './create-factory-validation.js';
 import { createCompatParserApi, installParserHasInstance } from './compat-parser-api.js';
 import { newOperatorGuard } from './constructors-without-new.js';
@@ -50,6 +50,14 @@ import {
   mathWithTransformValue,
   MATH_WITH_TRANSFORM_EXCLUDED,
 } from './g13-transforms.js';
+import {
+  asMathjsExpressionScopeValue,
+  compileWithMathjsFactory,
+  evaluateWithMathjsFactoryCompile,
+  wrapCompatSandboxIndex,
+  wrapMathjsFactoryCompiledNode,
+  type CompatFactoryCompileContext,
+} from './mathjs-factory-expression.js';
 
 /** Compat instance evaluate options: adds `{ safe: true }` mathjs opt-in (#1549). */
 export type CompatEvaluateOptions = PhysicsEvaluateOptions & { safe?: boolean };
@@ -326,8 +334,22 @@ export function wireMathjsInstanceApi(
     if (INTERNAL_NAMES.has(key)) continue;
     const read =
       transforms[key] !== undefined
-        ? () => mathWithTransformValue(transforms, key)
-        : () => instance[key];
+        ? () => asMathjsExpressionScopeValue(mathWithTransformValue(transforms, key))
+        : () => {
+            const current = instance[key];
+            if (typeof current !== 'function') return current;
+            const wrapped = asMathjsExpressionScopeValue(current);
+            if (wrapped !== current) {
+              const desc = Object.getOwnPropertyDescriptor(instance, key);
+              if (desc && desc.writable && desc.configurable && 'value' in desc) {
+                instance[key] = wrapped;
+                if (key === 'compile' && instance.compileExpr === current) {
+                  instance.compileExpr = wrapped;
+                }
+              }
+            }
+            return wrapped;
+          };
     wholesaleGetters.set(key, read);
     Object.defineProperty(mwt, key, {
       enumerable: true,
@@ -336,7 +358,7 @@ export function wireMathjsInstanceApi(
       // `import` and the transform bookkeeping assign and delete these entries.
       set(value: unknown) {
         Object.defineProperty(mwt, key, {
-          value,
+          value: asMathjsExpressionScopeValue(value),
           writable: true,
           enumerable: true,
           configurable: true,
@@ -397,11 +419,243 @@ export function wireMathjsInstanceApi(
     for (const name of EVALUATE_SCOPE_OVERRIDES) {
       const fn = instance[name];
       if (typeof fn === 'function') {
-        expressionLayers.mathWithTransform[name] = fn;
+        expressionLayers.mathWithTransform[name] = asMathjsExpressionScopeValue(fn);
       } else {
         delete expressionLayers.mathWithTransform[name];
       }
     }
+  }
+
+  /** mathjs `node._compile(math, …)` namespace: includes `parse`/`evaluate`/… unlike public `mathWithTransform`. */
+  let factoryCompileMath: Record<string, unknown> = {};
+  let factoryCompileCtx: CompatFactoryCompileContext = {
+    mathWithTransform: factoryCompileMath,
+    unitCtor: undefined,
+  };
+
+  function rebuildFactoryCompileMath(): void {
+    const scope: Record<string, unknown> = {
+      compatBlockResultSet: true,
+    };
+    const applyTransform = expressionLayers.transform.apply;
+    if (typeof applyTransform === 'function') {
+      scope.apply = asMathjsExpressionScopeValue(applyTransform);
+    }
+    const imported = buildEvaluatorScope();
+    const scrubbedImports = { ...imported };
+    for (const key of EVALUATE_SCOPE_OMIT) {
+      delete scrubbedImports[key];
+    }
+    for (const [key, get] of wholesaleGetters) {
+      if (EVALUATE_SCOPE_OMIT.has(key)) continue;
+      // Valueless units such as `chain` must compile as symbols, not the Chain constructor.
+      if (key === 'chain') continue;
+      Object.defineProperty(scope, key, {
+        enumerable: true,
+        configurable: true,
+        get,
+        set(value: unknown) {
+          Object.defineProperty(scope, key, {
+            value,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+        },
+      });
+    }
+    if (evaluator !== undefined) {
+      const activeEval = evaluator;
+      for (const name of ['mean', 'quantileSeq'] as const) {
+        Object.defineProperty(scope, name, {
+          enumerable: true,
+          configurable: true,
+          get: () => {
+            const fn = activeEval.evaluate(name);
+            return typeof fn === 'function' ? asMathjsExpressionScopeValue(fn) : undefined;
+          },
+          set(value: unknown) {
+            Object.defineProperty(scope, name, {
+              value,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        });
+      }
+    }
+    for (const [key, val] of Object.entries(scrubbedImports)) {
+      // Instance wholesale getters (config-aware) must win over stale `mathWithTransform` copies.
+      if (wholesaleGetters.has(key)) continue;
+      scope[key] = val;
+    }
+    delete scope.chain;
+    delete scope.import;
+    /** mathjs keeps `import` off the compile namespace (security tests expect `Undefined function import`). */
+    const FACTORY_OMIT_NO_RESTORE = new Set([
+      'import',
+      'chain',
+      'typed',
+      'importFactory',
+      'compileExpr',
+    ]);
+    for (const key of EVALUATE_SCOPE_OMIT) {
+      if (
+        FACTORY_OMIT_NO_RESTORE.has(key) ||
+        INTERNAL_NAMES.has(key) ||
+        Object.hasOwn(scope, key)
+      ) {
+        continue;
+      }
+      const wholesale = wholesaleGetters.get(key);
+      if (wholesale !== undefined) {
+        Object.defineProperty(scope, key, {
+          enumerable: true,
+          configurable: true,
+          get: wholesale,
+          set(value: unknown) {
+            Object.defineProperty(scope, key, {
+              value,
+              writable: true,
+              enumerable: true,
+              configurable: true,
+            });
+          },
+        });
+        continue;
+      }
+      const instFn = (instance as Record<string, unknown>)[key];
+      if (typeof instFn === 'function') {
+        scope[key] = asMathjsExpressionScopeValue(instFn);
+      }
+    }
+    for (const [key, binding] of Object.entries(mathjsExpressionBindings)) {
+      if (!Object.hasOwn(scope, key)) scope[key] = binding;
+    }
+    const matrixLiteralsKey = Symbol.for('mathts.expression.matrixLiterals');
+    Object.defineProperty(scope, matrixLiteralsKey, {
+      value: () => currentConfig.matrix === 'Matrix',
+      enumerable: false,
+      configurable: true,
+    });
+    for (const name of EVALUATE_SCOPE_OVERRIDES) {
+      const fn = instance[name];
+      if (typeof fn === 'function') {
+        scope[name] = asMathjsExpressionScopeValue(fn);
+      }
+    }
+    for (const [name, get] of Object.entries(constants)) {
+      if (EVALUATE_SCOPE_OMIT.has(name)) continue;
+      if (Object.hasOwn(scrubbedImports, name)) continue;
+      Object.defineProperty(scope, name, { enumerable: true, get });
+    }
+    if (typeof instance.num === 'function') scope.num = asMathjsExpressionScopeValue(instance.num);
+    if (typeof instance.den === 'function') scope.den = asMathjsExpressionScopeValue(instance.den);
+    if (wrappedUnit !== undefined) scope.Unit = wrappedUnit;
+    if (instance.ResultSet !== undefined) scope.ResultSet = instance.ResultSet;
+    if (evaluator !== undefined) {
+      const innerParse = evaluator.parse;
+      const sandboxParse = (expr: string) =>
+        wrapMathjsFactoryCompiledNode(
+          innerParse(expr),
+          {
+            mathWithTransform: factoryCompileMath,
+            unitCtor: instance.Unit,
+            instance: instance as Record<string, unknown>,
+          },
+          true
+        );
+      Object.defineProperty(scope, 'parse', {
+        value: sandboxParse,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (typeof scope.index === 'function') {
+      scope.index = asMathjsExpressionScopeValue(
+        wrapCompatSandboxIndex(scope.index as (...args: unknown[]) => unknown)
+      );
+    }
+    if (typeof mathjsExpressionBindings.parser === 'function') {
+      scope.parser = mathjsExpressionBindings.parser;
+    }
+    if (typeof mathjsExpressionBindings.evaluate === 'function') {
+      scope.evaluate = mathjsExpressionBindings.evaluate;
+    }
+    if (typeof mathjsExpressionBindings.help === 'function') {
+      scope.help = mathjsExpressionBindings.help;
+    }
+    for (const key of ['simplify', 'derivative', 'resolve'] as const) {
+      if (Object.hasOwn(scope, key)) continue;
+      const val = (instance as Record<string, unknown>)[key];
+      if (typeof val === 'function') {
+        scope[key] = asMathjsExpressionScopeValue(val);
+      }
+    }
+    const userReviver = instance.reviver as (key: string, value: unknown) => unknown;
+    scope.reviver = (key: string, value: unknown) => {
+      const revived = userReviver(key, value);
+      if (
+        revived !== null &&
+        revived !== undefined &&
+        typeof revived === 'object' &&
+        (revived as { isNode?: boolean }).isNode === true
+      ) {
+        return wrapMathjsFactoryCompiledNode(
+          revived as import('@danielsimonjr/mathts-expression').MathNode,
+          factoryCompileCtx
+        );
+      }
+      return revived;
+    };
+    const innerConfigFn = instance.config;
+    if (typeof innerConfigFn === 'function') {
+      const configWrapper = (...args: unknown[]) => {
+        const result = (innerConfigFn as (...a: unknown[]) => unknown)(...args);
+        syncEvaluateScopeOverrides();
+        rebuildFactoryCompileMath();
+        return result;
+      };
+      Object.defineProperty(scope, 'config', {
+        value: configWrapper,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (typeof scope.subset === 'function') {
+      const origSubset = scope.subset as (...args: unknown[]) => unknown;
+      const subsetWrapper = (...args: unknown[]) => {
+        if (args.length >= 2) {
+          const idx = args[1];
+          if (
+            idx !== null &&
+            typeof idx === 'object' &&
+            (idx as { isIndex?: boolean }).isIndex === true &&
+            !isIndex(idx)
+          ) {
+            throw new TypeError(
+              'Unexpected type of argument in function subset (expected: Index, actual: Object, index: 1)'
+            );
+          }
+        }
+        return origSubset(...args);
+      };
+      Object.defineProperty(scope, 'subset', {
+        value: subsetWrapper,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    factoryCompileMath = scope;
+    factoryCompileCtx = {
+      mathWithTransform: scope,
+      unitCtor: instance.Unit,
+      instance: instance as Record<string, unknown>,
+    };
   }
 
   /**
@@ -522,6 +776,12 @@ export function wireMathjsInstanceApi(
     evaluator.evaluate = patchBatchEvaluateScope(evaluator.evaluate);
     evaluatorEvaluateRef.current = evaluator.evaluate;
     patchEvaluatorToTex(evaluator);
+    const expressionCompileApi = {
+      parse: (expr: string) =>
+        wrapMathjsFactoryCompiledNode(evaluator.parse(expr), factoryCompileCtx),
+      compileTree: (expr: string, options?: PhysicsEvaluateOptions) =>
+        evaluator.compile(expr, options),
+    };
     const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
       entries?: unknown[]
     ) => unknown;
@@ -538,14 +798,39 @@ export function wireMathjsInstanceApi(
         }
         return normalizeDecimal(
           mapExpressions(expression, (text) =>
-            wrapBlockArrayAsResultSet(evaluator.evaluate(text, scope, opts), text, ResultSetCtor)
+            wrapBlockArrayAsResultSet(
+              evaluateWithMathjsFactoryCompile(
+                expressionCompileApi,
+                text,
+                scope as Record<string, unknown> | undefined,
+                opts,
+                options?.safe !== true,
+                {
+                  mathWithTransform: factoryCompileMath,
+                  unitCtor: instance.Unit,
+                  instance: instance as Record<string, unknown>,
+                }
+              ),
+              text,
+              ResultSetCtor
+            )
           )
         );
       }
     );
     instance.compile = runBound((expression: unknown, options?: CompatEvaluateOptions) =>
       mapExpressions(expression, (text) => {
-        const compiled = evaluator.compile(text, policyOptions(options));
+        const compiled = compileWithMathjsFactory(
+          expressionCompileApi,
+          text,
+          policyOptions(options),
+          options?.safe !== true,
+          {
+            mathWithTransform: factoryCompileMath,
+            unitCtor: instance.Unit,
+            instance: instance as Record<string, unknown>,
+          }
+        );
         return {
           evaluate: runBound((...ea: unknown[]) =>
             normalizeDecimal((compiled.evaluate as (...a: unknown[]) => unknown)(...ea))
@@ -559,6 +844,7 @@ export function wireMathjsInstanceApi(
     expressionApi.compile = (expr, options) => (instance.compile as CompatCompile)(expr, options);
     expressionApi.parser = (options) => new ParserClass(options);
     rebindInstanceHelp();
+    rebuildFactoryCompileMath();
     return evaluator;
   }
 
@@ -570,6 +856,7 @@ export function wireMathjsInstanceApi(
     }
     internalImport(functions, options);
     scrubDenylist(expressionLayers.mathWithTransform);
+    syncEvaluateScopeOverrides();
     if (importRequiresEvaluatorRebind(functions)) {
       rebindEvaluator();
     }
@@ -623,14 +910,30 @@ export function wireMathjsInstanceApi(
   instance.typed = instanceTyped;
 
   const initialEvaluator = rebindEvaluator();
+  syncEvaluateScopeOverrides();
+  const innerConfig = instance.config as ((...args: unknown[]) => unknown) | undefined;
+  if (typeof innerConfig === 'function') {
+    const configWrapper = ((...args: unknown[]) => {
+      const result = innerConfig(...args);
+      syncEvaluateScopeOverrides();
+      rebuildFactoryCompileMath();
+      return result;
+    }) as typeof innerConfig;
+    Object.defineProperties(configWrapper, Object.getOwnPropertyDescriptors(innerConfig));
+    instance.config = configWrapper;
+  }
   if (bindParse) {
     instance.parse = new Proxy(initialEvaluator.parse, {
       apply: (_target, receiver, args) => {
         const node = runWithConfig(currentConfig, () =>
           Reflect.apply(evaluator.parse, receiver, args)
         );
+        const wrapped = wrapMathjsFactoryCompiledNode(
+          node as import('@danielsimonjr/mathts-expression').MathNode,
+          factoryCompileCtx
+        );
         return wrapParseNodeForCompatToString(
-          node as { toString(options?: unknown): string },
+          wrapped as { toString(options?: unknown): string },
           currentConfig.number as string | undefined
         );
       },

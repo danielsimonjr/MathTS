@@ -4,6 +4,7 @@
  */
 import { embeddedDocs } from '@danielsimonjr/mathts-expression';
 import { hasOwnProperty } from '@danielsimonjr/mathts-core/internal';
+import { unwrapMathjsExpressionScopeValue } from './mathjs-factory-expression.js';
 
 /** Shape of one mathjs 15.3.0 embedded documentation entry used by compat `help()`. */
 export interface CompatHelpDoc {
@@ -60,8 +61,13 @@ export function resolveCompatHelpSearchName(
 ): string {
   let searchName: unknown = search;
   if (typeof search !== 'string') {
+    const unwrappedSearch = unwrapMathjsExpressionScopeValue(search);
     for (const prop in mathWithTransform) {
-      if (hasOwnProperty(mathWithTransform, prop) && search === mathWithTransform[prop]) {
+      if (
+        hasOwnProperty(mathWithTransform, prop) &&
+        (search === mathWithTransform[prop] ||
+          unwrappedSearch === unwrapMathjsExpressionScopeValue(mathWithTransform[prop]))
+      ) {
         searchName = prop;
         break;
       }
