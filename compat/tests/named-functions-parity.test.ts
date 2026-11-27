@@ -389,7 +389,7 @@ describe('named compatibility function imports', () => {
       expect(actual.denominator).toBe(expected.d);
     }
     expect(String(math.evaluate('fraction(sqrt(10))'))).toBe(
-      oracle.fraction(Math.sqrt(10)).toFraction()
+      String(oracle.evaluate('fraction(sqrt(10))'))
     );
   });
 
@@ -420,7 +420,8 @@ describe('named compatibility function imports', () => {
         expect(actual.denominator).toBe(expected.d);
       }
     }
-    expect(fraction('1e4').numerator).toBe(10000n);
+    expect(() => fraction('1e4')).toThrow();
+    expect(() => oracle.fraction('1e4')).toThrow();
   });
 
   it('dispatches complex projections over real numbers and collections', () => {

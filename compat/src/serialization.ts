@@ -1,4 +1,5 @@
 import { isBigNumber, isFraction } from '@danielsimonjr/mathts-core';
+import { isMathjsFraction } from './mathjs-fraction-class.js';
 import {
   factory_mathjsCompat,
   replacer as nativeReplacer,
@@ -12,6 +13,9 @@ export function compatReplacer(this: unknown, key: string, value: unknown): unkn
     this !== null && typeof this === 'object'
       ? Object.getOwnPropertyDescriptor(this, key)?.value
       : undefined;
+  if (isMathjsFraction(original)) {
+    return original.toJSON();
+  }
   if (isFraction(original)) {
     return {
       mathjs: 'Fraction',

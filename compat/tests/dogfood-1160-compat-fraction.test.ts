@@ -85,7 +85,7 @@ describe('#1160 compat fraction: direct calls', () => {
     expect(String(frac('1/3'))).toBe('0.(3)');
     expect(String(frac(0.5))).toBe('0.5');
     expect(String(frac(1, 2))).toBe('0.5');
-    expect(String(frac(1.5, 2))).toBe('0.75');
+    expect(() => frac(1.5, 2)).toThrow(/Parameters must be integer/);
   });
 
   it('converts a value that the old shim rejected, as mathjs does', () => {

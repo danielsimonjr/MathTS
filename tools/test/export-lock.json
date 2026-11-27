@@ -13196,6 +13196,9 @@
       "MathJSConfig": {
         "kind": "type"
       },
+      "MathjsFraction": {
+        "kind": "type"
+      },
       "Matrix": {
         "kind": "function"
       },
@@ -13651,6 +13654,9 @@
       },
       "conjDependencies": {
         "kind": "object"
+      },
+      "coreFractionToMathjs": {
+        "kind": "function"
       },
       "corr": {
         "kind": "function"
@@ -14870,6 +14876,9 @@
       "deepEqualDependencies": {
         "kind": "object"
       },
+      "default": {
+        "kind": "object"
+      },
       "den": {
         "kind": "function"
       },
@@ -15353,6 +15362,9 @@
       "isMap": {
         "kind": "function"
       },
+      "isMathjsFraction": {
+        "kind": "function"
+      },
       "isMatrix": {
         "kind": "function"
       },
@@ -15601,6 +15613,9 @@
       },
       "mapTransformDependencies": {
         "kind": "object"
+      },
+      "mathjsToCoreFraction": {
+        "kind": "function"
       },
       "matrix": {
         "kind": "function"

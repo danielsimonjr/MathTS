@@ -15,6 +15,7 @@ import {
   sparse,
   Complex,
   Fraction,
+  type MathjsFraction,
   BigNumber,
   DenseMatrix,
   transpose,
@@ -127,7 +128,7 @@ describe('@danielsimonjr/mathts-compat', () => {
 
   describe('fraction()', () => {
     it('should create fraction from numerator and denominator', () => {
-      const f = fraction(1, 2);
+      const f = fraction(1, 2) as MathjsFraction;
 
       expect(f).toBeInstanceOf(Fraction);
       expect(f.numerator).toBe(1n);
@@ -135,21 +136,21 @@ describe('@danielsimonjr/mathts-compat', () => {
     });
 
     it('should create fraction from string', () => {
-      const f = fraction('3/4');
+      const f = fraction('3/4') as MathjsFraction;
 
       expect(f.numerator).toBe(3n);
       expect(f.denominator).toBe(4n);
     });
 
     it('should create fraction from number', () => {
-      const f = fraction(0.5);
+      const f = fraction(0.5) as MathjsFraction;
 
       expect(f.numerator).toBe(1n);
       expect(f.denominator).toBe(2n);
     });
 
     it('should return zero fraction for undefined', () => {
-      const f = fraction();
+      const f = fraction() as MathjsFraction;
 
       expect(f.numerator).toBe(0n);
       expect(f.denominator).toBe(1n);

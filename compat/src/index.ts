@@ -37,7 +37,16 @@ import type {
   Complex,
   UnitInstance,
 } from '@danielsimonjr/mathts-core';
-import { Fraction, Complex as CompatComplex } from '@danielsimonjr/mathts-core';
+import {
+  Complex as CompatComplex,
+  isFraction as isCoreFraction,
+  type TypedFunction,
+} from '@danielsimonjr/mathts-core';
+import {
+  isMathjsFraction,
+  mathjsFractionClass,
+  type MathjsFraction,
+} from './mathjs-fraction-class.js';
 import {
   isCompatMathInstance,
   wireMathjsInstanceApi,
@@ -45,8 +54,12 @@ import {
   type WiredCompatInstance,
 } from './instance-api.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
+import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
+import { wrapEqualForMathjsFraction } from './mathjs-fraction-relational.js';
+import { wrapMultiplyScalarForMathjsFraction } from './mathjs-fraction-unary-predicates.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
 import {
+  compareMathjsFractionSign,
   createCompatBernoulli,
   createCompatCompare,
   createCompatPinv,
@@ -357,7 +370,10 @@ const isOwnBridgeMatrix = (x: unknown): boolean => {
   return proto === bridgeDenseProto || proto === bridgeSparseProto;
 };
 const convertForeignScalar = createForeignScalarConverter({
-  FractionClass: Fraction,
+  FractionClass: mathjsFractionClass as unknown as new (
+    n: bigint,
+    d: bigint
+  ) => import('@danielsimonjr/mathts-core').Fraction,
   BigNumberClass: CompatBigNumberCtor,
   ComplexClass: CompatComplex,
   denseFrom: mathFunctions.matrix as (nested: unknown) => unknown,
@@ -377,11 +393,25 @@ const compatExpm = createCompatExpm(
   mathFunctions.matrix as (...args: unknown[]) => unknown
 );
 const compatMad = createCompatMad({
-  subtract: mathFunctions.subtract as (...args: unknown[]) => unknown,
-  abs: mathFunctions.abs as (...args: unknown[]) => unknown,
-  add: mathFunctions.add as (...args: unknown[]) => unknown,
-  divide: mathFunctions.divide as (...args: unknown[]) => unknown,
-  compare: mathFunctions.compare as (...args: unknown[]) => unknown,
+  subtract: shims.subtract as (...args: unknown[]) => unknown,
+  abs: shims.abs as (...args: unknown[]) => unknown,
+  add: shims.add as (...args: unknown[]) => unknown,
+  divide: shims.divide as (...args: unknown[]) => unknown,
+  compare: ((a: unknown, b: unknown) => {
+    const left = convertForeignScalar(a);
+    const right = convertForeignScalar(b);
+    if (
+      (typeof left === 'object' &&
+        left !== null &&
+        (left as { isFraction?: boolean }).isFraction) ||
+      (typeof right === 'object' &&
+        right !== null &&
+        (right as { isFraction?: boolean }).isFraction)
+    ) {
+      return compareMathjsFractionSign(left, right);
+    }
+    return (mathFunctions.compare as (x: unknown, y: unknown) => unknown)(left, right);
+  }) as (...args: unknown[]) => unknown,
   unaryPlus: mathFunctions.factory_unaryPlus as (...args: unknown[]) => unknown,
   convert: convertForeignScalar,
 });
@@ -601,7 +631,10 @@ export function create(
     {
       convert: convertForeignScalar,
       BigNumberClass: CompatBigNumberCtor,
-      FractionClass: Fraction,
+      FractionClass: mathjsFractionClass as unknown as new (
+        n: bigint,
+        d: bigint
+      ) => import('@danielsimonjr/mathts-core').Fraction,
       precision: () => currentConfig.precision ?? 64,
     }
   );
@@ -705,9 +738,9 @@ export function create(
     create: createSibling,
 
     // G04: mathjs unit equality / ordering through activated factories (#1552).
-    equal: unitRelational.equal,
+    equal: wrapEqualForMathjsFraction(unitRelational.equal as TypedFunction),
     unequal: unitRelational.unequal,
-    equalScalar: unitRelational.equalScalar,
+    equalScalar: wrapEqualForMathjsFraction(unitRelational.equalScalar as TypedFunction),
     deepEqual: unitRelational.deepEqual,
     compare: createCompatCompare(unitRelational.compare, convertForeignScalar),
     larger: unitRelational.larger,
@@ -736,13 +769,17 @@ export function create(
     multiply: bindShim(shims.multiply),
     divide: shims.divide,
     dotMultiply: bindShim(shims.dotMultiply),
+    multiplyScalar: bindShim(
+      wrapMultiplyScalarForMathjsFraction(mathFunctions.multiplyScalar as unknown as TypedFunction)
+    ),
     pow: bindShim(createCompatPow(() => Boolean(currentConfig.predictable))),
     zpk2tf: bindShim(compatZpk2tf),
     freqz: bindShim(compatFreqz),
-    isPositive: mathFunctions.isPositive,
-    isNegative: mathFunctions.isNegative,
-    isInteger: mathFunctions.isInteger,
-    fix: withConvertedScalars(convertForeignScalar, mathFunctions.factory_fix),
+    isPositive: bindShim(shims.isPositive),
+    isNegative: bindShim(shims.isNegative),
+    isInteger: bindShim(shims.isInteger),
+    isZero: bindShim(shims.isZero),
+    fix: withConvertedScalars(convertForeignScalar, shims.fix as (...args: unknown[]) => unknown),
     sqrt: withFractionRejection(shims.sqrt),
     abs: shims.abs,
     // #1587: a Fraction argument throws the mathjs conversion error.
@@ -1177,6 +1214,16 @@ export function create(
 
   // Only the parser of the functions namespace is bound to the instance: a parser that
   // the caller supplies stays as given (#1250).
+  if (localUnits) {
+    patchCompatUnitDenormalize(localUnits.Unit, {
+      divideScalar: (a, b) => (instance.divideScalar as (x: unknown, y: unknown) => unknown)(a, b),
+      multiplyScalar: (a, b) =>
+        (instance.multiplyScalar as (x: unknown, y: unknown) => unknown)(a, b),
+      pow: (base, exponent) =>
+        (instance.pow as (x: unknown, y: unknown) => unknown)(base, exponent),
+    });
+  }
+
   wireMathjsInstanceApi(
     instance as Record<string, unknown>,
     currentConfig,
@@ -1308,9 +1355,9 @@ export { compatExpm as expm, compatMad as mad, compatArgDefault as arg };
 // These four names are also star-exported by ./shims.js (the G03 sign-predicate
 // wrappers). The explicit re-export keeps the functions implementation winning,
 // exactly as the previous explicit block in this file did.
-export { fix, isInteger, isNegative, isPositive } from './function-reexports.js';
+export { fix, isInteger, isNegative, isPositive, isZero } from './shims.js';
 
-type UnitMagnitude = number | ConfiguredBigNumber | Fraction;
+type UnitMagnitude = number | ConfiguredBigNumber | MathjsFraction;
 
 /** Construct or clone a unit using the MathJS scalar signatures. */
 const namedCreateUnit: typeof mathFunctions.createUnit =
@@ -1329,10 +1376,8 @@ export { BigNumber } from './bignumber.js';
 // Re-export core types
 export {
   Complex,
-  Fraction,
   isBigNumber,
   isComplex,
-  isFraction,
   isNumber,
   I,
   COMPLEX_ZERO,
@@ -1345,8 +1390,16 @@ export {
   BIGNUMBER_E,
 } from '@danielsimonjr/mathts-core';
 
+export { mathjsFractionClass as Fraction, isMathjsFraction, type MathjsFraction };
+export function isFraction(value: unknown): value is MathjsFraction {
+  return isMathjsFraction(value) || isCoreFraction(value);
+}
+
 // Re-export matrix types
 export { DenseMatrix, SparseMatrix } from '@danielsimonjr/mathts-matrix';
 
 // Re-export parallel utilities
 export { computePool } from '@danielsimonjr/mathts-parallel';
+
+/** Default mathjs instance (`defaultInstance.js` redirect in the unit-test harness). */
+export default create(all);

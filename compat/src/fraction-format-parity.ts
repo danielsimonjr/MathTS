@@ -5,7 +5,7 @@
  */
 import {
   isBigNumber,
-  isFraction,
+  isFraction as isCoreFraction,
   isMatrix,
   isSparseMatrix,
   isUnit,
@@ -13,8 +13,19 @@ import {
 } from '@danielsimonjr/mathts-core';
 import type { StringOptions } from '@danielsimonjr/mathts-expression';
 import Frac from 'fraction.js';
+import { isMathjsFraction } from './mathjs-fraction-class.js';
+
+function isCompatFraction(value: unknown): value is Fraction {
+  return isMathjsFraction(value) || isCoreFraction(value);
+}
 
 function formatFractionRatio(value: Fraction): string {
+  const js = value as Fraction & { n?: bigint; d?: bigint; s?: bigint };
+  if (js.n !== undefined && js.d !== undefined) {
+    const sign = js.s !== undefined && js.s < 0n ? '-' : '';
+    const n = js.n < 0n ? -js.n : js.n;
+    return `${sign}${n}/${js.d}`;
+  }
   return `${value.numerator}/${value.denominator}`;
 }
 
@@ -29,7 +40,7 @@ function promoteUnitMagnitudeRatio(rendered: string): string {
 
 function arrayContainsFraction(value: unknown[]): boolean {
   for (const entry of value) {
-    if (isFraction(entry)) {
+    if (isCompatFraction(entry)) {
       return true;
     }
     if (Array.isArray(entry) && arrayContainsFraction(entry)) {
@@ -46,7 +57,7 @@ function matrixContainsFraction(value: {
   if (typeof value.forEach === 'function' && isSparseMatrix(value)) {
     let found = false;
     value.forEach((entry) => {
-      if (isFraction(entry)) {
+      if (isCompatFraction(entry)) {
         found = true;
       }
     });
@@ -67,6 +78,15 @@ function fractionOptionsUseDecimal(options: unknown): boolean {
 /** Decimal string via fraction.js — the same helper mathjs 15.3.0 uses internally. */
 export function mathjsFractionDecimalString(numerator: bigint, denominator: bigint): string {
   return new Frac(numerator, denominator).toString();
+}
+
+/** Decimal `string()` output for any fraction-like value. */
+export function mathjsFractionDecimalStringFromValue(value: Fraction): string {
+  const js = value as Fraction & { n?: bigint; d?: bigint };
+  if (js.n !== undefined && js.d !== undefined) {
+    return mathjsFractionDecimalString(js.n, js.d);
+  }
+  return mathjsFractionDecimalString(value.numerator, value.denominator);
 }
 
 type NativeFormat = (value: unknown, options?: unknown) => string;
@@ -117,7 +137,7 @@ function formatSparseCompat(
 }
 
 function formatCompatValue(value: unknown, options: unknown, nativeFormat: NativeFormat): string {
-  if (isFraction(value) && !fractionOptionsUseDecimal(options)) {
+  if (isCompatFraction(value) && !fractionOptionsUseDecimal(options)) {
     return formatFractionRatio(value);
   }
   if (Array.isArray(value)) {
@@ -164,7 +184,7 @@ function formatCompatValue(value: unknown, options: unknown, nativeFormat: Nativ
     const unit = value as { format?: (opts?: unknown) => string; value?: unknown };
     if (typeof unit.format === 'function') {
       const rendered = unit.format(options);
-      if (isFraction(unit.value)) {
+      if (isCompatFraction(unit.value)) {
         return promoteUnitMagnitudeRatio(rendered);
       }
       return rendered;
@@ -219,8 +239,8 @@ export function createCompatFormat(nativeFormat: NativeFormat): NativeFormat {
 type NativeString = (value: unknown) => unknown;
 
 function stringCompatValue(value: unknown, nativeString: NativeString): unknown {
-  if (isFraction(value)) {
-    return mathjsFractionDecimalString(value.numerator, value.denominator);
+  if (isCompatFraction(value)) {
+    return mathjsFractionDecimalStringFromValue(value);
   }
   if (Array.isArray(value)) {
     if (!arrayContainsFraction(value)) {
@@ -343,7 +363,7 @@ export function fractionCompatConstantStringOptions(options?: StringOptions): St
         return chained;
       }
       const constant = node as { isConstantNode?: boolean; value?: unknown };
-      if (constant.isConstantNode && isFraction(constant.value)) {
+      if (constant.isConstantNode && isCompatFraction(constant.value)) {
         return formatFractionRatio(constant.value);
       }
       return undefined;

@@ -37,9 +37,9 @@ describe('compat transpose of a numeric scalar', () => {
 
   it('preserves the value and type of numeric objects', () => {
     const math = create(all);
-    const values = [math.bignumber('2.5'), math.fraction(1, 3), math.complex(2, 3)];
+    const values = [math.bignumber('2.5'), math.fraction(1, 3), math.complex(2, 3)] as const;
     for (const value of values) {
-      const result = math.transpose(value);
+      const result = math.transpose(value as unknown as Parameters<typeof math.transpose>[0]);
       expect(result).toEqual(value);
       expect(result).not.toBe(value);
     }
