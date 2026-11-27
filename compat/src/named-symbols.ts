@@ -1,3 +1,4 @@
+import type { Complex as CoreComplex } from '@danielsimonjr/mathts-core';
 import { compatVersion, instanceSymbols } from './instance-symbols.js';
 
 // Direct imports share the constructors and predicates used by configured instances.
@@ -8,6 +9,8 @@ const compatArrayNode: (typeof instanceSymbols)['ArrayNode'] = instanceSymbols.A
 const compatAssignmentNode: (typeof instanceSymbols)['AssignmentNode'] =
   instanceSymbols.AssignmentNode;
 const compatBlockNode: (typeof instanceSymbols)['BlockNode'] = instanceSymbols.BlockNode;
+const compatComplex: (typeof instanceSymbols)['Complex'] = instanceSymbols.Complex;
+type compatComplex = CoreComplex;
 const compatConditionalNode: (typeof instanceSymbols)['ConditionalNode'] =
   instanceSymbols.ConditionalNode;
 const compatConstantNode: (typeof instanceSymbols)['ConstantNode'] = instanceSymbols.ConstantNode;
@@ -99,6 +102,7 @@ export {
   compatArrayNode as ArrayNode,
   compatAssignmentNode as AssignmentNode,
   compatBlockNode as BlockNode,
+  compatComplex as Complex,
   compatConditionalNode as ConditionalNode,
   compatConstantNode as ConstantNode,
   compatDimensionError as DimensionError,

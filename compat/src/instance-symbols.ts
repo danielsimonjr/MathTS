@@ -1,5 +1,5 @@
 import { BigNumber } from './bignumber.js';
-import { Complex, Fraction, Range, isNumber, isUnit } from '@danielsimonjr/mathts-core';
+import { Fraction, Range, isNumber, isUnit } from '@danielsimonjr/mathts-core';
 import {
   DimensionError,
   IndexError,
@@ -9,7 +9,7 @@ import { factory_mathjsCompat, Help, num, den } from '@danielsimonjr/mathts-func
 import { isDenseMatrix, isSparseMatrix, isMatrix } from '@danielsimonjr/mathts-matrix';
 import { callableWithoutNew, newOperatorGuard } from './constructors-without-new.js';
 import { mathjsComplexProxy, type MathjsComplexConstructor } from './mathjs-complex-class.js';
-import { installMathjsComplexPrototype } from './mathjs-complex-prototype.js';
+import { CompatComplexBase } from './mathjs-complex-prototype.js';
 import packageMetadata from '../package.json' with { type: 'json' };
 
 /**
@@ -41,8 +41,7 @@ type BigNumberConstructor = typeof BigNumber & {
   (value?: number | string | bigint | boolean | null): BigNumber;
 };
 
-installMathjsComplexPrototype();
-const CompatComplex = mathjsComplexProxy(Complex, { isNumber, isUnit });
+const CompatComplex = mathjsComplexProxy(CompatComplexBase, { isNumber, isUnit });
 
 /**
  * mathjs guard classes: a new-less call throws the mathjs SyntaxError, while

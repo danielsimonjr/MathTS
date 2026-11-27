@@ -1328,7 +1328,6 @@ export { BigNumber } from './bignumber.js';
 
 // Re-export core types
 export {
-  Complex,
   Fraction,
   isBigNumber,
   isComplex,
