@@ -64,7 +64,7 @@ describe('compat Unit constructor isolation (#1557)', () => {
 
     const meter = new math.Unit(1, 'm');
     expect(meter).toBeInstanceOf(math.Unit);
-    expect(() => math.evaluate('d')).toThrow(/Undefined symbol "d"/);
+    expect(() => math.evaluate('d')).toThrow(/Undefined symbol "?d"?/);
     expect(String(math.evaluate('cm'))).toBe(String(evaluate('cm')));
   });
 
