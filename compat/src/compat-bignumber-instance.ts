@@ -58,6 +58,9 @@ export function createInstanceBigNumberClass(
     writable: true,
     configurable: true,
   });
+  Callable.fromJSON = function fromJSON(json: { value: string }): CompatBigNumberClass {
+    return new Callable(json.value);
+  };
   return Callable;
 }
 

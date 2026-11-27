@@ -27,11 +27,8 @@ import {
 import { createCompatHelpEvaluate } from './help-evaluate.js';
 import { importFactory, type ImportOptions } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
-import {
-  compatReplacer as replacer,
-  compatReviver as reviver,
-  reviveInstanceValue,
-} from './serialization.js';
+import { attachParserJsonMethods, patchParserFunctionExpr } from './compat-parser-json.js';
+import { compatReplacer, compatReviver } from './serialization.js';
 import { COMPAT_INTERNAL_NAMES } from './internal-names.generated.js';
 const INTERNAL_NAMES: ReadonlySet<string> = new Set<string>(COMPAT_INTERNAL_NAMES);
 import {
@@ -40,7 +37,6 @@ import {
 } from './mathjs-expression-bindings.js';
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
 import { wrapCompatUnitConstructor } from './mathjs-unit.js';
-import { instanceSymbols } from './instance-symbols.js';
 import { wrapFactoryCreator, type CompatFactory } from './factory-mathjs-errors.js';
 import { patchParseForMathjsToTex } from './totex-parity.js';
 import {
@@ -110,8 +106,8 @@ export interface WiredCompatInstance {
   typed: typeof mathTyped & { isTypedFunction: (value: unknown) => boolean };
   compile: CompatCompile;
   evaluate: CompatEvaluate;
-  reviver: typeof reviver;
-  replacer: typeof replacer;
+  reviver: typeof compatReviver;
+  replacer: typeof compatReplacer;
   expression: CompatExpressionLayers;
 }
 
@@ -536,12 +532,20 @@ export function wireMathjsInstanceApi(
     options?: CompatEvaluateOptions
   ): ReturnType<typeof functionsParser> {
     const made = functionsParser(options);
-    made.evaluate = (expr: string): unknown =>
-      (instance.evaluate as WiredCompatInstance['evaluate'])(expr, made.scope, options);
+    made.evaluate = (expr: string): unknown => {
+      const result = (instance.evaluate as WiredCompatInstance['evaluate'])(
+        expr,
+        made.scope,
+        options
+      );
+      patchParserFunctionExpr(made.scope, expr);
+      return result;
+    };
     return Object.assign(this, made);
   }
   const ParserClass = newOperatorGuard(Parser) as unknown as WiredCompatInstance['Parser'];
   instance.Parser = ParserClass;
+  attachParserJsonMethods(ParserClass, (options) => new ParserClass(options));
   if (bindParser) {
     const instanceParser: typeof functionsParser = (options) => new ParserClass(options);
     instance.parser = instanceParser;
@@ -549,20 +553,6 @@ export function wireMathjsInstanceApi(
 
   instance.import = mathImport;
   instance.typed = instanceTyped;
-  const reviveClasses: Record<string, unknown> = {
-    ...instanceSymbols,
-    Unit: instance.Unit,
-    Chain: instance.Chain,
-    BigNumber: instanceSymbols.BigNumber,
-  };
-  instance.reviver = (key: string, value: unknown) =>
-    reviveInstanceValue(
-      key,
-      value,
-      instance.Unit as typeof factory_mathjsCompat.constructors.Unit,
-      reviveClasses
-    );
-  instance.replacer = replacer;
 
   const initialEvaluator = rebindEvaluator();
   if (bindParse) {
@@ -588,8 +578,8 @@ export function wireMathjsInstanceApi(
     typed: instanceTyped,
     compile: instance.compile as WiredCompatInstance['compile'],
     evaluate: instance.evaluate as WiredCompatInstance['evaluate'],
-    reviver,
-    replacer,
+    reviver: compatReviver,
+    replacer: compatReplacer,
     expression: expressionLayers,
   };
 }
