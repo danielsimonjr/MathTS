@@ -139,6 +139,7 @@ import {
 } from './mathjs-parity-errors.js';
 import { isComplex, isUnit } from '@danielsimonjr/mathts-core';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
+import { bindMathjsFactorySetSource } from './mathjs-parity-set.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
   compatMathjsLyap,
@@ -172,6 +173,10 @@ import {
   permutations as namedPermutations,
   print as namedPrint,
   setUnion as namedSetUnion,
+  setCartesian as namedSetCartesian,
+  setDistinct as namedSetDistinct,
+  setIntersect as namedSetIntersect,
+  setPowerset as namedSetPowerset,
   toBest as namedToBest,
   xgcd as namedXgcd,
   string as namedCompatString,
@@ -1303,6 +1308,10 @@ export function create(
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,
+    setCartesian: namedSetCartesian,
+    setDistinct: namedSetDistinct,
+    setIntersect: namedSetIntersect,
+    setPowerset: namedSetPowerset,
     compareText: namedCompareText,
     equalText: namedEqualText,
     toBest: namedToBest,
@@ -1809,6 +1818,7 @@ export { all };
 // import of this one (runtime or type-only). Architecture docs pin 2 runtime
 // cycles; the bind types live in compat-types.ts.
 bindDefaultInstanceSource(create, all);
+bindMathjsFactorySetSource(create);
 
 // =============================================================================
 // Re-exports for direct use
@@ -1830,6 +1840,10 @@ export {
   namedPrint as print,
   namedCompatString as string,
   namedSetUnion as setUnion,
+  namedSetCartesian as setCartesian,
+  namedSetDistinct as setDistinct,
+  namedSetIntersect as setIntersect,
+  namedSetPowerset as setPowerset,
   namedCompareText as compareText,
   namedEqualText as equalText,
   namedToBest as toBest,

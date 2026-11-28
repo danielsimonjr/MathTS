@@ -38,6 +38,12 @@ import {
   createMathjsSymbolicEqual,
   createMathjsZeta,
 } from './mathjs-parity-1585.js';
+import {
+  namedSetCartesian,
+  namedSetDistinct,
+  namedSetIntersect,
+  namedSetPowerset,
+} from './mathjs-parity-set.js';
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
 
 let createInstance:
@@ -287,6 +293,10 @@ export {
   namedPrint as print,
   namedCompatString as string,
   namedSetUnion as setUnion,
+  namedSetCartesian as setCartesian,
+  namedSetDistinct as setDistinct,
+  namedSetIntersect as setIntersect,
+  namedSetPowerset as setPowerset,
   namedCompareText as compareText,
   namedEqualText as equalText,
   namedToBest as toBest,
