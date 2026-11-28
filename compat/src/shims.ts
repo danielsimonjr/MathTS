@@ -1158,6 +1158,12 @@ export function isFraction_(x: unknown): x is Fraction | MathjsFraction {
   return isFraction(x) || isMathjsFraction(x);
 }
 
+function isDecimalJsInstance(x: unknown): boolean {
+  if (typeof x !== 'object' || x === null) return false;
+  const ctor = (x as { constructor?: { isDecimal?: (v: unknown) => boolean } }).constructor;
+  return typeof ctor?.isDecimal === 'function' && ctor.isDecimal(x) === true;
+}
+
 /**
  * Return `true` if `x` is a BigNumber. This shim calls the core `isBigNumber` check.
  *
@@ -1165,7 +1171,7 @@ export function isFraction_(x: unknown): x is Fraction | MathjsFraction {
  * @returns `true` if `x` is a BigNumber.
  */
 export function isBigNumber_(x: unknown): x is BigNumber {
-  return isBigNumber(x);
+  return isBigNumber(x) || isDecimalJsInstance(x);
 }
 
 /**

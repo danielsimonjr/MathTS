@@ -11,11 +11,13 @@
  */
 
 import type { CompiledExpression, MathNode } from '@danielsimonjr/mathts-expression';
-import { keywords } from '@danielsimonjr/mathts-expression';
+import { keywords, Node as ExprNodeBase } from '@danielsimonjr/mathts-expression';
 import type { PhysicsEvaluateOptions } from '@danielsimonjr/mathts-functions';
 import { createMap } from '@danielsimonjr/mathts-core/internal';
+import { preprocessMathjsCompatParseInput } from './mathjs-parse-preprocess.js';
 import { guardMathjsObjectLiteralKeys } from './mathjs-parse-sandbox.js';
 import { remapMathjsSandboxEvaluateError } from './mathjs-sandbox-errors.js';
+import { MATH_WITH_TRANSFORM_EXCLUDED } from './g13-transforms.js';
 
 type ScopedParse = (expr: string) => MathNode;
 
@@ -24,12 +26,21 @@ type TreeCompile = (expr: string, options?: PhysicsEvaluateOptions) => CompiledE
 /** Factory AST node with `_compile` (not on the public MathNode type). */
 type FactoryCompileNode = MathNode & {
   isSymbolNode?: boolean;
+  isAssignmentNode?: boolean;
   name?: string;
+  value?: FactoryCompileNode;
   _compile(
     math: Record<string, unknown>,
     argNames: Record<string, boolean>
   ): (scope: Map<string, unknown>, args: Record<string, unknown>, context: unknown) => unknown;
 };
+
+function snapshotAssignmentValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return typeof structuredClone === 'function' ? structuredClone(value) : value.slice();
+  }
+  return value;
+}
 
 type UnitConstructor = {
   new (value: null, name: string): unknown;
@@ -49,6 +60,8 @@ export interface CompatFactoryCompileContext {
   unitCtor?: unknown;
   /** Resolves inherited API names (e.g. lazy `besselJ0`) like mathjs `name in math`. */
   instance?: Record<string, unknown>;
+  /** Post-process compiled literal results (Fraction number mode, …). */
+  normalizeValue?: (value: unknown) => unknown;
 }
 
 function resolveInheritedInstanceBinding(
@@ -74,8 +87,10 @@ export function compileScopeForFactoryCompile(
   unitCtor?: unknown,
   instance?: Record<string, unknown>
 ): Record<string, unknown> {
-  const cached = compileScopeCache.get(mathWithTransform);
-  if (cached !== undefined) return cached;
+  if (instance === undefined) {
+    const cached = compileScopeCache.get(mathWithTransform);
+    if (cached !== undefined) return cached;
+  }
   const withUnit =
     unitCtor === undefined
       ? mathWithTransform
@@ -94,6 +109,7 @@ export function compileScopeForFactoryCompile(
     return withUnit;
   }
   const unitClass = unitCtor as UnitConstructor | undefined;
+  const instanceOverrides = new Set(['createUnit', 'unit']);
   const wrapped = new Proxy(withUnit, {
     has(target, prop) {
       if (prop === 'chain' || prop === 'import') return false;
@@ -104,6 +120,13 @@ export function compileScopeForFactoryCompile(
     },
     get(target, prop, receiver) {
       if (prop === 'chain' || prop === 'import') return undefined;
+      if (
+        typeof prop === 'string' &&
+        instanceOverrides.has(prop) &&
+        typeof (instance as Record<string, unknown>)[prop] === 'function'
+      ) {
+        return asMathjsExpressionScopeValue((instance as Record<string, unknown>)[prop]);
+      }
       if (Reflect.has(target, prop)) return Reflect.get(target, prop, receiver);
       if (typeof prop === 'string') {
         const inherited = resolveInheritedInstanceBinding(instance, prop);
@@ -112,7 +135,6 @@ export function compileScopeForFactoryCompile(
       return Reflect.get(target, prop, receiver);
     },
   });
-  compileScopeCache.set(mathWithTransform, wrapped);
   return wrapped;
 }
 
@@ -175,36 +197,273 @@ function validateScope(scope: Map<string, unknown>): void {
   }
 }
 
-/** Route `node.compile()` through mathjs factory `_compile` (#1777). */
+/** Options for {@link wrapMathjsFactoryCompiledNode} / {@link patchFactoryCompiledNodeInPlace}. */
+export type WrapFactoryCompiledNodeOptions = {
+  /** Expose `isTensor` for sandbox index shapes (#1777). */
+  sandboxTensor?: boolean;
+  /** Re-wrap child nodes from `map` / `transform` / `clone` (#1786). */
+  wrapSubtree?: boolean;
+};
+
+const FACTORY_COMPILE_PATCHED = new WeakSet<object>();
+
+function normalizeWrapOptions(
+  sandboxMethodsOrOptions: boolean | WrapFactoryCompiledNodeOptions
+): WrapFactoryCompiledNodeOptions {
+  if (typeof sandboxMethodsOrOptions === 'boolean') {
+    return {
+      sandboxTensor: sandboxMethodsOrOptions,
+      wrapSubtree: sandboxMethodsOrOptions,
+    };
+  }
+  return {
+    sandboxTensor: sandboxMethodsOrOptions.sandboxTensor === true,
+    wrapSubtree: sandboxMethodsOrOptions.wrapSubtree !== false,
+  };
+}
+
+/** Route `node.compile()` through mathjs factory `_compile` without breaking `instanceof` (#1786). */
 export function wrapMathjsFactoryCompiledNode<T extends MathNode>(
   node: T,
   ctx: CompatFactoryCompileContext,
-  sandboxMethods = false
+  sandboxMethodsOrOptions: boolean | WrapFactoryCompiledNodeOptions = false
 ): T {
-  return new Proxy(node, {
-    get(target, prop, receiver) {
-      if (sandboxMethods && prop === 'isTensor') return true;
-      if (prop === 'compile') {
-        return () => compileParsedFactoryNode(target, ctx);
-      }
-      const value = Reflect.get(target, prop, receiver);
-      if (typeof value !== 'function' || prop === 'constructor') return value;
-      if (sandboxMethods && (prop === 'map' || prop === 'transform' || prop === 'clone')) {
-        return (...args: unknown[]) => {
-          const result = (value as (...a: unknown[]) => unknown).apply(target, args);
-          if (
-            result !== null &&
-            typeof result === 'object' &&
-            (result as { isNode?: boolean }).isNode === true
-          ) {
-            return wrapMathjsFactoryCompiledNode(result as MathNode, ctx, true);
-          }
-          return result;
-        };
-      }
-      return value.bind(target);
+  const options = normalizeWrapOptions(sandboxMethodsOrOptions);
+  if (FACTORY_COMPILE_PATCHED.has(node as object)) return node;
+  FACTORY_COMPILE_PATCHED.add(node as object);
+
+  if (options.sandboxTensor) {
+    Object.defineProperty(node, 'isTensor', {
+      value: true,
+      writable: true,
+      configurable: true,
+      enumerable: false,
+    });
+  }
+
+  const compileImpl = (): CompiledExpression => compileParsedFactoryNode(node, ctx);
+  Object.defineProperty(node, 'compile', {
+    value: compileImpl,
+    writable: true,
+    configurable: true,
+    enumerable: false,
+  });
+  Object.defineProperty(node, 'evaluate', {
+    value: (scope?: Record<string, unknown>) => {
+      const value = compileImpl().evaluate(scope);
+      return ctx.normalizeValue === undefined ? value : ctx.normalizeValue(value);
     },
-  }) as T;
+    writable: true,
+    configurable: true,
+    enumerable: false,
+  });
+
+  const self = node;
+  const patchNodeMethod = (method: string, impl: (...args: unknown[]) => unknown): void => {
+    Object.defineProperty(node, method, {
+      value: impl,
+      writable: true,
+      configurable: true,
+      enumerable: false,
+    });
+  };
+
+  const bindTreeWalk = (method: string): void => {
+    const original = Reflect.get(node, method);
+    if (typeof original !== 'function') return;
+    patchNodeMethod(method, function walkBinder(this: unknown, ...args: unknown[]) {
+      const callback = args[0];
+      if (typeof callback === 'function') {
+        args[0] = (child: unknown, path: unknown, parent: unknown) =>
+          (callback as (n: unknown, p: unknown, par: unknown) => unknown).call(
+            undefined,
+            child === self ? node : child,
+            path,
+            parent === null ? parent : parent === self ? node : parent
+          );
+      }
+      return (original as (...a: unknown[]) => unknown).call(this, ...args);
+    });
+  };
+
+  if (options.wrapSubtree) {
+    bindTreeWalk('forEach');
+    bindTreeWalk('map');
+    bindTreeWalk('filter');
+
+    const maybeWrapChild = (result: unknown): unknown => {
+      if (!isFactoryMathNode(result)) return result;
+      return wrapMathjsFactoryCompiledNode(result as MathNode, ctx, options);
+    };
+
+    for (const method of ['map', 'transform', 'clone'] as const) {
+      const original = Reflect.get(node, method);
+      if (typeof original !== 'function') continue;
+      patchNodeMethod(method, function wrapTreeOp(this: unknown, ...args: unknown[]) {
+        return maybeWrapChild((original as (...a: unknown[]) => unknown).call(this, ...args));
+      });
+    }
+  }
+
+  if (options.wrapSubtree) {
+    const traverseOrig = Reflect.get(node, 'traverse');
+    if (typeof traverseOrig === 'function') {
+      patchNodeMethod('traverse', function traverseBinder(this: unknown, ...args: unknown[]) {
+        const callback = args[0];
+        if (typeof callback === 'function') {
+          args[0] = (child: unknown, path: unknown, parent: unknown) => {
+            const parentArg = parent === null ? parent : parent === self ? node : parent;
+            if (path === null && parent === null) {
+              return (callback as (n: unknown, p: unknown, par: unknown) => unknown)(
+                this,
+                path,
+                parentArg
+              );
+            }
+            const nodeArg = child === self ? node : child;
+            return (callback as (n: unknown, p: unknown, par: unknown) => unknown)(
+              nodeArg,
+              path,
+              parentArg
+            );
+          };
+        }
+        return (traverseOrig as (...a: unknown[]) => unknown).call(this, ...args);
+      });
+    }
+  } else {
+    patchNodeMethod('traverse', (...args: unknown[]) =>
+      (ExprNodeBase.prototype.traverse as (...a: unknown[]) => unknown).call(node, ...args)
+    );
+    patchNodeMethod('filter', (...args: unknown[]) =>
+      (ExprNodeBase.prototype.filter as (...a: unknown[]) => unknown).call(node, ...args)
+    );
+  }
+
+  return node;
+}
+
+function isFactoryMathNode(value: unknown): value is MathNode {
+  return (
+    value !== null && typeof value === 'object' && (value as { isNode?: boolean }).isNode === true
+  );
+}
+
+/** Custom `parse(..., { nodes })` entries must keep their prototype for `instanceof` / `filter`. */
+function isStandardFactoryParseNode(node: MathNode): boolean {
+  const flags = node as {
+    isSymbolNode?: boolean;
+    isOperatorNode?: boolean;
+    isConstantNode?: boolean;
+    isFunctionNode?: boolean;
+    isAssignmentNode?: boolean;
+    isArrayNode?: boolean;
+    isBlockNode?: boolean;
+    isConditionalNode?: boolean;
+    isAccessorNode?: boolean;
+    isIndexNode?: boolean;
+    isObjectNode?: boolean;
+    isParenthesisNode?: boolean;
+    isRangeNode?: boolean;
+    isRelationalNode?: boolean;
+    isFunctionAssignmentNode?: boolean;
+  };
+  return (
+    flags.isSymbolNode === true ||
+    flags.isOperatorNode === true ||
+    flags.isConstantNode === true ||
+    flags.isFunctionNode === true ||
+    flags.isAssignmentNode === true ||
+    flags.isArrayNode === true ||
+    flags.isBlockNode === true ||
+    flags.isConditionalNode === true ||
+    flags.isAccessorNode === true ||
+    flags.isIndexNode === true ||
+    flags.isObjectNode === true ||
+    flags.isParenthesisNode === true ||
+    flags.isRangeNode === true ||
+    flags.isRelationalNode === true ||
+    flags.isFunctionAssignmentNode === true
+  );
+}
+
+/**
+ * mathjs binds `runtimeMath` only on the parse root; nested nodes otherwise compile
+ * against the module default scope (#1786). Every subtree node routes `compile()`
+ * through factory `_compile` with the instance `mathWithTransform`.
+ */
+export function deepWrapParsedExpressionTree<T extends MathNode>(
+  node: T,
+  ctx: CompatFactoryCompileContext,
+  wrapOptions?: WrapFactoryCompiledNodeOptions
+): T {
+  const options: WrapFactoryCompiledNodeOptions = {
+    sandboxTensor: wrapOptions?.sandboxTensor === true,
+    wrapSubtree: wrapOptions?.wrapSubtree !== false,
+  };
+  if (!isStandardFactoryParseNode(node)) {
+    if (typeof (node as { _compile?: unknown })._compile === 'function') {
+      wrapMathjsFactoryCompiledNode(node, ctx, { wrapSubtree: false });
+    }
+    return node;
+  }
+  const pending: MathNode[] = [node];
+  while (pending.length > 0) {
+    const current = pending.pop() as MathNode;
+    if (!isStandardFactoryParseNode(current)) continue;
+    wrapMathjsFactoryCompiledNode(current, ctx, options);
+    current.forEach((child) => {
+      if (isFactoryMathNode(child)) pending.push(child);
+    });
+  }
+  return node;
+}
+
+const EXPR_NODE_CLASS_NAMES = [
+  'Node',
+  'AccessorNode',
+  'ArrayNode',
+  'AssignmentNode',
+  'BlockNode',
+  'ConditionalNode',
+  'ConstantNode',
+  'FunctionAssignmentNode',
+  'FunctionNode',
+  'IndexNode',
+  'ObjectNode',
+  'OperatorNode',
+  'ParenthesisNode',
+  'RangeNode',
+  'RelationalNode',
+  'SymbolNode',
+] as const;
+
+/** Replace AST constructors on a compat instance so `new ArrayNode().compile()` uses factory `_compile` (#1786). */
+export function wireInstanceExprNodeConstructors(
+  instance: Record<string, unknown>,
+  getCtx: () => CompatFactoryCompileContext,
+  wrapOptions?: Omit<WrapFactoryCompiledNodeOptions, 'wrapSubtree'>
+): void {
+  for (const name of EXPR_NODE_CLASS_NAMES) {
+    if (!MATH_WITH_TRANSFORM_EXCLUDED.has(name)) continue;
+    const Original = instance[name];
+    if (typeof Original !== 'function') continue;
+    const originalProto = Original.prototype as object;
+    const Wrapped = function ExprNodeCompatCtor(this: object, ...args: unknown[]) {
+      if (new.target === undefined) {
+        throw new TypeError(`Class constructor ${name} cannot be invoked without 'new'`);
+      }
+      const node = Reflect.construct(Original as new (...a: unknown[]) => MathNode, args);
+      return wrapMathjsFactoryCompiledNode(node, getCtx(), {
+        sandboxTensor: wrapOptions?.sandboxTensor,
+        wrapSubtree: true,
+      });
+    };
+    Object.setPrototypeOf(Wrapped, Original);
+    Wrapped.prototype = originalProto;
+    Object.defineProperties(Wrapped, Object.getOwnPropertyDescriptors(Original));
+    instance[name] = Wrapped;
+  }
 }
 
 /**
@@ -234,7 +493,33 @@ export function compileParsedFactoryNode(
 ): CompiledExpression {
   const math = compileScopeForFactoryCompile(ctx.mathWithTransform, ctx.unitCtor, ctx.instance);
   const factoryNode = node as FactoryCompileNode;
-  const evalFn = factoryNode._compile(math, {});
+  let evalFn = factoryNode._compile.call(node, math, {});
+  if (
+    (factoryNode.isAssignmentNode === true || factoryNode.type === 'AssignmentNode') &&
+    factoryNode.value !== undefined
+  ) {
+    const evalValue = factoryNode.value._compile.call(factoryNode.value, math, {});
+    const runAssign = evalFn;
+    evalFn = (scope, args, context) => {
+      const returnedValue = snapshotAssignmentValue(evalValue(scope, args, context));
+      const valueNode = factoryNode.value;
+      let savedRhs: unknown;
+      let rhsName: string | undefined;
+      if (
+        valueNode?.isSymbolNode === true &&
+        typeof valueNode.name === 'string' &&
+        scope.has(valueNode.name)
+      ) {
+        rhsName = valueNode.name;
+        savedRhs = snapshotAssignmentValue(scope.get(rhsName));
+      }
+      runAssign(scope, args, context);
+      if (rhsName !== undefined) {
+        scope.set(rhsName, savedRhs);
+      }
+      return returnedValue;
+    };
+  }
   const unitCtor = ctx.unitCtor as UnitConstructor | undefined;
   const symbolName =
     factoryNode.isSymbolNode === true && typeof factoryNode.name === 'string'
@@ -258,7 +543,8 @@ export function compileParsedFactoryNode(
         return new unitCtor(null, symbolName);
       }
       try {
-        return evalFn(s, args, context);
+        const value = evalFn(s, args, context);
+        return ctx.normalizeValue === undefined ? value : ctx.normalizeValue(value);
       } catch (error) {
         remapMathjsSandboxEvaluateError(error);
       }
@@ -266,7 +552,11 @@ export function compileParsedFactoryNode(
   };
 }
 
-/** Evaluate one expression under the mathjs compile path (#1777). */
+function compatParseInput(expr: string): string {
+  return preprocessMathjsCompatParseInput(expr);
+}
+
+/** Evaluate one expression string via factory `node._compile` / compat preprocess (#1777, #1786). */
 export function evaluateWithMathjsFactoryCompile(
   api: CompatExpressionCompileApi,
   expr: string,
@@ -275,11 +565,12 @@ export function evaluateWithMathjsFactoryCompile(
   mathjsPolicy: boolean,
   ctx: CompatFactoryCompileContext
 ): unknown {
-  guardMathjsObjectLiteralKeys(expr);
+  const input = compatParseInput(expr);
+  guardMathjsObjectLiteralKeys(input);
   if (!mathjsPolicy) {
-    return api.compileTree(expr, options).evaluate(scope);
+    return api.compileTree(input, options).evaluate(scope);
   }
-  const node = api.parse(expr);
+  const node = api.parse(input);
   try {
     return compileParsedFactoryNode(node, ctx).evaluate(scope);
   } catch (error) {
@@ -295,9 +586,10 @@ export function compileWithMathjsFactory(
   mathjsPolicy: boolean,
   ctx: CompatFactoryCompileContext
 ): CompiledExpression {
-  guardMathjsObjectLiteralKeys(expr);
+  const input = compatParseInput(expr);
+  guardMathjsObjectLiteralKeys(input);
   if (!mathjsPolicy) {
-    return api.compileTree(expr, options);
+    return api.compileTree(input, options);
   }
-  return compileParsedFactoryNode(api.parse(expr), ctx);
+  return compileParsedFactoryNode(api.parse(input), ctx);
 }

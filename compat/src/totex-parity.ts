@@ -73,7 +73,12 @@ function patchRelationalNodesForMathjsParenthesisQuirk(node: MathNodeLike): void
 function patchBooleanOperatorToTex(node: MathNodeLike): void {
   if (typeof node.toTex !== 'function') return;
   const original = node.toTex.bind(node);
-  node.toTex = (options?: ToTexOptions) => mathjsCompatToTexString(original(options));
+  Object.defineProperty(node, 'toTex', {
+    value: (options?: ToTexOptions) => mathjsCompatToTexString(original(options)),
+    writable: true,
+    enumerable: false,
+    configurable: true,
+  });
 }
 
 function patchOneParsedTree(

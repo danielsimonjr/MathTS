@@ -108,6 +108,7 @@ import {
   type WiredCompatInstance,
 } from './instance-api.js';
 import { bindInstanceSerialization } from './serialization.js';
+import { parseMathjsNumberLiteral } from './mathjs-number-literal.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { withMathjsComplexBinary } from './mathjs-complex.js';
 import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
@@ -785,6 +786,11 @@ export function create(
     divide: mathFunctions.divide as (...args: unknown[]) => unknown,
     sqrt: mathFunctions.sqrt as (...args: unknown[]) => unknown,
     matrix: mathFunctions.matrix as (data: unknown, storage?: string) => unknown,
+    mapSlices: mathFunctions.mapSlices as (
+      array: unknown,
+      dim: number,
+      callback: (slice: unknown) => unknown
+    ) => unknown,
   };
   const compatStd = createCompatMathjsStatistics(
     'std',
@@ -1530,6 +1536,9 @@ export function create(
     typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
     number: keepSurface(mathFunctions.number, (...args: unknown[]) => {
       if (args.length === 0) return 0;
+      if (args.length === 1 && typeof args[0] === 'string') {
+        return parseMathjsNumberLiteral(args[0]);
+      }
       if (args.length === 1) return mathFunctions.number(args[0]);
       if (isUnit(args[0])) {
         if (args.length > 2) throw tooManyArgumentsError('number', 2, args.length);
@@ -1980,6 +1989,29 @@ export function create(
   instance.SparseMatrix = compatMatrixConstructors.SparseMatrix;
   instance.ImmutableDenseMatrix = compatMatrixConstructors.ImmutableDenseMatrix;
   instance.FibonacciHeap = compatMatrixConstructors.FibonacciHeap;
+  const canonicalI = new CompatComplexBase(0, 1);
+  instance.i = canonicalI;
+  instance.Complex = CompatComplexBase as typeof instance.Complex;
+  flat.i = canonicalI;
+  const sqrtImpl = instance.sqrt as (...args: unknown[]) => unknown;
+  const sqrtWithCanonicalI = (...args: unknown[]): unknown => {
+    if (args.length === 1 && args[0] === -1) return canonicalI;
+    return toCompatComplex(sqrtImpl(...args));
+  };
+  instance.sqrt = sqrtWithCanonicalI;
+  flat.sqrt = withFractionRejection(sqrtWithCanonicalI);
+  const multiplyImpl = instance.multiply as (...args: unknown[]) => unknown;
+  const multiplyWithBigintUnit = (...args: unknown[]): unknown => {
+    if (currentConfig.number === 'bigint') {
+      const mapped = args.map((entry) => (typeof entry === 'bigint' ? Number(entry) : entry));
+      if (mapped.some((entry, index) => entry !== args[index])) {
+        return multiplyImpl(...mapped);
+      }
+    }
+    return multiplyImpl(...args);
+  };
+  instance.multiply = multiplyWithBigintUnit;
+  flat.multiply = bindBinaryNumericShim(multiplyWithBigintUnit, 2, instanceBigNumberClass);
   wireMathjsInstanceApi(
     instance as Record<string, unknown>,
     currentConfig,
