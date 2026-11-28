@@ -7,10 +7,9 @@ describe('chain-create direct coverage (#1575)', () => {
     const math = create(all);
     const imports: string[] = [];
     const { chain, Chain } = createChain(math as Record<string, unknown>, {
-      on: ((name: string, cb: (n: string) => void) => {
-        math.on(name, cb as never);
-        return math;
-      }) as typeof math.on,
+      on: (name: string, cb: (...args: unknown[]) => void) => {
+        math.on(name, cb);
+      },
       format: (value) => `fmt:${String(value)}`,
     });
     math.on('import', (n: unknown) => {
