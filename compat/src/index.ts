@@ -167,6 +167,12 @@ import { isComplex, isUnit } from '@danielsimonjr/mathts-core';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
+  createCompatDerivative,
+  createCompatResolve,
+  createCompatSimplify,
+  createCompatSimplifyCore,
+} from './mathjs-symbolic-adapters.js';
+import {
   compatMathjsLyap,
   compatMathjsSchur,
   compatMathjsSolveODE,
@@ -1714,6 +1720,11 @@ export function create(
       }
       return promoted;
     },
+    // #1790 — mathjs 15.3.0 simplify / resolve / derivative string parity.
+    simplify: createCompatSimplify(currentConfig),
+    simplifyCore: createCompatSimplifyCore(),
+    derivative: createCompatDerivative(),
+    resolve: createCompatResolve(),
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]

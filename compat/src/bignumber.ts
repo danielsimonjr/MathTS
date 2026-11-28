@@ -53,6 +53,8 @@ function isExpressionNode(value: object): value is {
 }
 
 const nodeEvaluateWrapped = Symbol('compatNodeEvaluateWrapped');
+const nodeEvaluateOriginal = Symbol('compatNodeEvaluateOriginal');
+const skipCompatNodeEvaluatePatch = Symbol('compatSkipNodeEvaluatePatch');
 
 /** When one operand is a BigNumber, mathjs promotes booleans to 0/1 BigNumbers. */
 export function promoteBooleanScalarsForBigNumber(
@@ -98,10 +100,61 @@ function patchNodeEvaluate(
   const marker = node as { [nodeEvaluateWrapped]?: boolean };
   if (marker[nodeEvaluateWrapped]) return;
   const original = node.evaluate;
+  (node as { [nodeEvaluateOriginal]?: typeof original })[nodeEvaluateOriginal] = original;
   node.evaluate = function (this: unknown, ...args: unknown[]) {
     return compatDecimalResult(original.apply(this, args), instanceCtor);
   };
   marker[nodeEvaluateWrapped] = true;
+}
+
+function isExpressionNodeLike(
+  value: unknown
+): value is { isNode: boolean; evaluate: (...args: unknown[]) => unknown } {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as { isNode?: boolean; evaluate?: unknown };
+  return candidate.isNode === true && typeof candidate.evaluate === 'function';
+}
+
+/**
+ * Remove compat `evaluate` wrappers from expression trees (symbolic algebra parity #1790).
+ */
+export function stripCompatNodeEvaluatePatches(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    let changed = false;
+    const next = value.map((entry) => {
+      const stripped = stripCompatNodeEvaluatePatches(entry);
+      if (stripped !== entry) changed = true;
+      return stripped;
+    });
+    return changed ? next : value;
+  }
+  if (!isExpressionNodeLike(value)) return value;
+  (value as { [skipCompatNodeEvaluatePatch]?: boolean })[skipCompatNodeEvaluatePatch] = true;
+  const marker = value as {
+    [nodeEvaluateWrapped]?: boolean;
+    [nodeEvaluateOriginal]?: (...args: unknown[]) => unknown;
+    map?: (fn: (child: unknown) => unknown) => unknown;
+  };
+  if (marker[nodeEvaluateWrapped] && marker[nodeEvaluateOriginal]) {
+    const proto = Object.getPrototypeOf(value) as { evaluate?: unknown };
+    if (proto.evaluate === marker[nodeEvaluateOriginal]) {
+      Reflect.deleteProperty(value, 'evaluate');
+    } else {
+      value.evaluate = marker[nodeEvaluateOriginal];
+    }
+    delete marker[nodeEvaluateWrapped];
+    delete marker[nodeEvaluateOriginal];
+  }
+  Reflect.deleteProperty(marker, nodeEvaluateWrapped);
+  Reflect.deleteProperty(marker, nodeEvaluateOriginal);
+  Reflect.deleteProperty(marker, skipCompatNodeEvaluatePatch);
+  if (typeof marker.map === 'function') {
+    marker.map((child) => {
+      stripCompatNodeEvaluatePatches(child);
+      return child;
+    });
+  }
+  return value;
 }
 
 /** Give a native decimal result the compatibility display convention (deep). */
@@ -148,7 +201,10 @@ export function compatDecimalResult(
     return changed ? mapped : value;
   }
   if (isExpressionNode(value)) {
-    patchNodeEvaluate(value, instanceCtor);
+    const marker = value as { [skipCompatNodeEvaluatePatch]?: boolean };
+    if (!marker[skipCompatNodeEvaluatePatch]) {
+      patchNodeEvaluate(value, instanceCtor);
+    }
     return value;
   }
   if (isComplex(value)) {

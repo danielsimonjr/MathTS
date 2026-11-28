@@ -1,4 +1,10 @@
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
+import {
+  createMathjsDerivative,
+  createMathjsResolve,
+  createMathjsSimplify,
+  createMathjsSimplifyCore,
+} from './mathjs-symbolic-adapters.js';
 import { compatHelpDocForSearch } from './compat-help.js';
 import { instanceSymbols } from './instance-symbols.js';
 
@@ -2769,7 +2775,8 @@ const intersectDependencies: UnaryBundle<'createIntersect'> & {
   createIntersect: mathjsCreateIntersect,
 };
 
-const mathjsCreateResolve: CompatFactoryExports['createResolve'] = factories.createResolve;
+const mathjsCreateResolve: CompatFactoryExports['createResolve'] =
+  createMathjsResolve as CompatFactoryExports['createResolve'];
 const resolveDependencies: UnaryBundle<'createResolve'> & {
   ConstantNodeDependencies: typeof ConstantNodeDependencies;
   FunctionNodeDependencies: typeof FunctionNodeDependencies;
@@ -3384,7 +3391,7 @@ const createReviver: ConstructorFactory<(_key: string, value: unknown) => unknow
 const reviverDependencies: { createReviver: typeof createReviver } = { createReviver };
 
 const mathjsCreateSimplifyCore: CompatFactoryExports['createSimplifyCore'] =
-  factories.createSimplifyCore;
+  createMathjsSimplifyCore as CompatFactoryExports['createSimplifyCore'];
 const simplifyCoreDependencies: UnaryBundle<'createSimplifyCore'> & {
   AccessorNodeDependencies: typeof AccessorNodeDependencies;
   ArrayNodeDependencies: typeof ArrayNodeDependencies;
@@ -3457,7 +3464,8 @@ const simplifyConstantDependencies: UnaryBundle<'createSimplifyConstant'> & {
   createSimplifyConstant: mathjsCreateSimplifyConstant,
 };
 
-const mathjsCreateSimplify: CompatFactoryExports['createSimplify'] = factories.createSimplify;
+const mathjsCreateSimplify: CompatFactoryExports['createSimplify'] =
+  createMathjsSimplify as CompatFactoryExports['createSimplify'];
 const simplifyDependencies: UnaryBundle<'createSimplify'> & {
   AccessorNodeDependencies: typeof AccessorNodeDependencies;
   ArrayNodeDependencies: typeof ArrayNodeDependencies;
@@ -3508,7 +3516,8 @@ const symbolicEqualDependencies: UnaryBundle<'createSymbolicEqual'> & {
   createSymbolicEqual: mathjsCreateSymbolicEqual,
 };
 
-const mathjsCreateDerivative: CompatFactoryExports['createDerivative'] = factories.createDerivative;
+const mathjsCreateDerivative: CompatFactoryExports['createDerivative'] =
+  createMathjsDerivative as CompatFactoryExports['createDerivative'];
 const derivativeDependencies: UnaryBundle<'createDerivative'> & {
   ConstantNodeDependencies: typeof ConstantNodeDependencies;
   FunctionNodeDependencies: typeof FunctionNodeDependencies;
