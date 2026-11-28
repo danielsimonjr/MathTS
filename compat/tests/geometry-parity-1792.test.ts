@@ -2,6 +2,7 @@
  * #1792 — `distance` and `intersect` match mathjs 15.3.0 on the compat instance.
  */
 import { describe, expect, it } from 'vitest';
+import { geometrySubtract } from '../src/mathjs-geometry-parity.js';
 import { all, create } from '../src/index.js';
 
 describe('geometry parity (#1792)', () => {
@@ -54,6 +55,10 @@ describe('geometry parity (#1792)', () => {
     expect(math.distance([10, 2, -5, 13, -6, 12, 0, 16, 8], [1, 11, 4, 4, 3, 3, -9, 7, 17])).toBe(
       27
     );
+    expect(
+      math.distance({ pointX: 2, pointY: 3, pointZ: 1 }, { x0: 1, y0: 1, z0: 2, a: 5, b: 0, c: 1 })
+    ).toBe(2.3204774044612857);
+    expect(math.distance([0, 0], math.matrix([10, 10]))).toBe(14.142135623730951);
   });
 
   it('distance rejects invalid argument shapes like mathjs', () => {
@@ -62,11 +67,66 @@ describe('geometry parity (#1792)', () => {
     expect(() => math.distance([1, 3], ['abc', 'def'])).toThrow(TypeError);
     expect(() =>
       math.distance(
+        { pointX: 'a', pointY: 'b', pointZ: 'c' },
+        { x0: 1, y0: 1, z0: 2, a: 5, b: 0, c: 1 }
+      )
+    ).toThrow(TypeError);
+    expect(() =>
+      math.distance(
         { wrongkeyname: 1, pointY: 4 },
         { lineOnePtX: 1, lineOnePtY: 3 },
         { lineTwoPtX: 2, lineTwoPtY: 8 }
       )
     ).toThrow('Key names do not match');
+    expect(() => math.distance('1')).toThrow(TypeError);
+    expect(() => math.distance(['abc', 'def'], [1, 3])).toThrow(TypeError);
+    expect(() => math.distance([0, 0], [3, 0], [3, 0])).toThrow(TypeError);
+    expect(() =>
+      math.distance(
+        { pointX: 0, pointY: 0 },
+        { lineOnePtX: 3, lineOnePtY: 0 },
+        { lineTwoPtX: 3, lineTwoPtY: 0 }
+      )
+    ).toThrow(TypeError);
+    expect(() => math.distance([1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6])).toThrow(TypeError);
+    expect(() => math.distance([9, 4, 3.6])).toThrow(TypeError);
+    expect(() =>
+      math.distance(
+        { pointX: 10, pointY: 10 },
+        { xCoeffLine: 8, yCoeffLine: 1, constant: 3, extraElement: 4 }
+      )
+    ).toThrow(TypeError);
+    expect(() =>
+      math.distance([
+        [1, 2, 4],
+        [1, 2],
+        [8, 1, 3],
+      ])
+    ).toThrow(TypeError);
+    expect(() =>
+      math.distance([
+        [1, 2],
+        [2, 3],
+        [2, 4, 5],
+      ])
+    ).toThrow(TypeError);
+    expect(math.distance([0.1123, -0.242], [0.1316, -0.2421, 0.122135])).toBe(0.7094821347343443);
+    expect(math.distance([8, 3], [10, 0], [5, 0])).toBe(3);
+    expect(
+      math.distance(
+        { pointOneX: 4, pointOneY: 5, pointOneZ: 8 },
+        { pointTwoX: 2, pointTwoY: 7, pointTwoZ: 9 }
+      )
+    ).toBe(3);
+  });
+
+  it('geometrySubtract handles fraction pairs like mathjs', () => {
+    const f = math.fraction;
+    const a = f(7, 4);
+    const b = f(1, 4);
+    const diff = geometrySubtract(a, b) as ReturnType<typeof f>;
+    expect(diff.toString()).toBe('1.5');
+    expect(geometrySubtract([f(3, 2), f(1, 2)], [f(1, 2), f(1, 4)])).toEqual([f(1, 1), f(1, 4)]);
   });
 
   it('intersect accepts row and column vectors', () => {
