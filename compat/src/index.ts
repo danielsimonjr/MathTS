@@ -108,6 +108,7 @@ import {
   type WiredCompatInstance,
 } from './instance-api.js';
 import { bindInstanceSerialization } from './serialization.js';
+import { parseMathjsNumberLiteral } from './mathjs-number-literal.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { withMathjsComplexBinary } from './mathjs-complex.js';
 import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
@@ -1511,6 +1512,9 @@ export function create(
     typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
     number: keepSurface(mathFunctions.number, (...args: unknown[]) => {
       if (args.length === 0) return 0;
+      if (args.length === 1 && typeof args[0] === 'string') {
+        return parseMathjsNumberLiteral(args[0]);
+      }
       if (args.length === 1) return mathFunctions.number(args[0]);
       if (isUnit(args[0])) {
         if (args.length > 2) throw tooManyArgumentsError('number', 2, args.length);

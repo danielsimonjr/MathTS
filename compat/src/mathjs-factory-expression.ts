@@ -16,6 +16,7 @@ import type { PhysicsEvaluateOptions } from '@danielsimonjr/mathts-functions';
 import { createMap } from '@danielsimonjr/mathts-core/internal';
 import { guardMathjsObjectLiteralKeys } from './mathjs-parse-sandbox.js';
 import { remapMathjsSandboxEvaluateError } from './mathjs-sandbox-errors.js';
+import { MATH_WITH_TRANSFORM_EXCLUDED } from './g13-transforms.js';
 
 type ScopedParse = (expr: string) => MathNode;
 
@@ -175,21 +176,42 @@ function validateScope(scope: Map<string, unknown>): void {
   }
 }
 
+export type WrapFactoryCompiledNodeOptions = {
+  /** Expose `isTensor` for sandbox index shapes (#1777). */
+  sandboxTensor?: boolean;
+  /** Re-wrap child nodes from `map` / `transform` / `clone` (#1786). */
+  wrapSubtree?: boolean;
+};
+
 /** Route `node.compile()` through mathjs factory `_compile` (#1777). */
 export function wrapMathjsFactoryCompiledNode<T extends MathNode>(
   node: T,
   ctx: CompatFactoryCompileContext,
-  sandboxMethods = false
+  sandboxMethodsOrOptions: boolean | WrapFactoryCompiledNodeOptions = false
 ): T {
+  const options: WrapFactoryCompiledNodeOptions =
+    typeof sandboxMethodsOrOptions === 'boolean'
+      ? {
+          sandboxTensor: sandboxMethodsOrOptions,
+          wrapSubtree: sandboxMethodsOrOptions,
+        }
+      : {
+          sandboxTensor: sandboxMethodsOrOptions.sandboxTensor === true,
+          wrapSubtree: sandboxMethodsOrOptions.wrapSubtree !== false,
+        };
   return new Proxy(node, {
     get(target, prop, receiver) {
-      if (sandboxMethods && prop === 'isTensor') return true;
+      if (options.sandboxTensor && prop === 'isTensor') return true;
       if (prop === 'compile') {
         return () => compileParsedFactoryNode(target, ctx);
       }
+      if (prop === 'evaluate') {
+        return (scope?: Record<string, unknown>) =>
+          compileParsedFactoryNode(target, ctx).evaluate(scope);
+      }
       const value = Reflect.get(target, prop, receiver);
       if (typeof value !== 'function' || prop === 'constructor') return value;
-      if (sandboxMethods && (prop === 'map' || prop === 'transform' || prop === 'clone')) {
+      if (options.wrapSubtree && (prop === 'map' || prop === 'transform' || prop === 'clone')) {
         return (...args: unknown[]) => {
           const result = (value as (...a: unknown[]) => unknown).apply(target, args);
           if (
@@ -197,7 +219,7 @@ export function wrapMathjsFactoryCompiledNode<T extends MathNode>(
             typeof result === 'object' &&
             (result as { isNode?: boolean }).isNode === true
           ) {
-            return wrapMathjsFactoryCompiledNode(result as MathNode, ctx, true);
+            return wrapMathjsFactoryCompiledNode(result as MathNode, ctx, options);
           }
           return result;
         };
@@ -205,6 +227,83 @@ export function wrapMathjsFactoryCompiledNode<T extends MathNode>(
       return value.bind(target);
     },
   }) as T;
+}
+
+function isFactoryMathNode(value: unknown): value is MathNode {
+  return (
+    value !== null && typeof value === 'object' && (value as { isNode?: boolean }).isNode === true
+  );
+}
+
+/**
+ * mathjs binds `runtimeMath` only on the parse root; nested nodes otherwise compile
+ * against the module default scope (#1786). Every subtree node routes `compile()`
+ * through factory `_compile` with the instance `mathWithTransform`.
+ */
+export function deepWrapParsedExpressionTree<T extends MathNode>(
+  node: T,
+  ctx: CompatFactoryCompileContext,
+  wrapOptions?: Omit<WrapFactoryCompiledNodeOptions, 'wrapSubtree'>
+): T {
+  let withChildren = node;
+  const canMapChildren =
+    (node as { type?: string }).type !== 'Node' &&
+    typeof (node as { map?: unknown }).map === 'function';
+  if (canMapChildren) {
+    withChildren = node.map((child) =>
+      isFactoryMathNode(child) ? deepWrapParsedExpressionTree(child, ctx, wrapOptions) : child
+    ) as T;
+  }
+  return wrapMathjsFactoryCompiledNode(withChildren, ctx, {
+    sandboxTensor: wrapOptions?.sandboxTensor === true,
+    wrapSubtree: false,
+  });
+}
+
+const EXPR_NODE_CLASS_NAMES = [
+  'Node',
+  'AccessorNode',
+  'ArrayNode',
+  'AssignmentNode',
+  'BlockNode',
+  'ConditionalNode',
+  'ConstantNode',
+  'FunctionAssignmentNode',
+  'FunctionNode',
+  'IndexNode',
+  'ObjectNode',
+  'OperatorNode',
+  'ParenthesisNode',
+  'RangeNode',
+  'RelationalNode',
+  'SymbolNode',
+] as const;
+
+/** Replace AST constructors on a compat instance so `new ArrayNode().compile()` uses factory `_compile` (#1786). */
+export function wireInstanceExprNodeConstructors(
+  instance: Record<string, unknown>,
+  getCtx: () => CompatFactoryCompileContext,
+  wrapOptions?: Omit<WrapFactoryCompiledNodeOptions, 'wrapSubtree'>
+): void {
+  for (const name of EXPR_NODE_CLASS_NAMES) {
+    if (!MATH_WITH_TRANSFORM_EXCLUDED.has(name)) continue;
+    const Original = instance[name];
+    if (typeof Original !== 'function') continue;
+    const originalProto = Original.prototype as object;
+    const Wrapped = function ExprNodeCompatCtor(this: object, ...args: unknown[]) {
+      if (new.target === undefined) {
+        throw new TypeError(`Class constructor ${name} cannot be invoked without 'new'`);
+      }
+      const node = Reflect.construct(Original as new (...a: unknown[]) => MathNode, args);
+      return deepWrapParsedExpressionTree(node, getCtx(), {
+        sandboxTensor: wrapOptions?.sandboxTensor,
+      });
+    };
+    Object.setPrototypeOf(Wrapped, Original);
+    Wrapped.prototype = originalProto;
+    Object.defineProperties(Wrapped, Object.getOwnPropertyDescriptors(Original));
+    instance[name] = Wrapped;
+  }
 }
 
 /**

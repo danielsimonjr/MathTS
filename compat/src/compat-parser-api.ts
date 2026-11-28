@@ -8,7 +8,11 @@ const COMPAT_PARSER_INSTANCES = new WeakSet<object>();
 
 /** Build a parser API object the expression sandbox may call methods on. */
 export function createCompatParserApi<T extends Record<string, unknown>>(api: T): T {
-  const parserApi = Object.assign(Object.create(Object.prototype), api) as T;
+  const parserApi = Object.assign(Object.create(Object.prototype), {
+    isParser: true,
+    type: 'Parser',
+    ...api,
+  }) as T;
   COMPAT_PARSER_INSTANCES.add(parserApi);
   return parserApi;
 }

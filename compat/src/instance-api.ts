@@ -4,7 +4,11 @@ import {
   type CompatDecimalBigNumberCtor,
 } from './bignumber.js';
 import { wrapParseNodeForCompatToString } from './fraction-format-parity.js';
-import { isMathjsFraction } from './mathjs-fraction-class.js';
+import {
+  isMathjsFraction,
+  mathjsFractionClass,
+  type MathjsFraction,
+} from './mathjs-fraction-class.js';
 import { mathjsToCoreFraction } from './shims.js';
 import { Fraction as CoreFraction, isFraction as isCoreFraction } from '@danielsimonjr/mathts-core';
 /**
@@ -13,7 +17,8 @@ import { Fraction as CoreFraction, isFraction as isCoreFraction } from '@daniels
  */
 
 import type { mathTyped } from '@danielsimonjr/mathts-core';
-import { deepMap, isIndex, isMatrix } from '@danielsimonjr/mathts-core/internal';
+import { deepMap, isIndex, isMatrix, isUnit } from '@danielsimonjr/mathts-core/internal';
+import { isComplex } from '@danielsimonjr/mathts-core';
 import { isCompatFactory } from './create-factory-validation.js';
 import { createCompatParserApi, installParserHasInstance } from './compat-parser-api.js';
 import { newOperatorGuard } from './constructors-without-new.js';
@@ -44,6 +49,14 @@ import {
   type CompatEvaluatorEvaluate,
   type CompatExpressionApi,
 } from './mathjs-expression-bindings.js';
+import { createParseScopeNumber, createParseScopeNumeric } from './mathjs-number-literal.js';
+import { createCompatScopedParse } from './compat-scoped-parse.js';
+import { numeric as functionsNumeric } from '@danielsimonjr/mathts-functions';
+import {
+  wireInstanceExprNodeConstructors,
+  type CompatFactoryCompileContext,
+} from './mathjs-factory-expression.js';
+import { tooFewArgumentsError, tooManyArgumentsError } from './mathjs-parity-g02.js';
 import { wrapBlockArrayAsResultSet } from './g12-mathjs-parity.js';
 import { wrapCompatUnitConstructor } from './mathjs-unit.js';
 import { wrapFactoryCreator, type CompatFactory } from './factory-mathjs-errors.js';
@@ -56,10 +69,9 @@ import {
 import {
   asMathjsExpressionScopeValue,
   compileWithMathjsFactory,
+  deepWrapParsedExpressionTree,
   evaluateWithMathjsFactoryCompile,
   wrapCompatSandboxIndex,
-  wrapMathjsFactoryCompiledNode,
-  type CompatFactoryCompileContext,
 } from './mathjs-factory-expression.js';
 
 /** Compat instance evaluate options: adds `{ safe: true }` mathjs opt-in (#1549). */
@@ -135,7 +147,10 @@ function mapExpressions(expression: unknown, operation: (expression: string) => 
   }
 
   if (Array.isArray(expression)) return deepMap(expression as unknown[], run);
-  if (isMatrix(expression)) return (expression as unknown as BridgeMatrix).map(run);
+  if (isMatrix(expression)) {
+    const matrix = expression as BridgeMatrix;
+    return matrix.map((value: unknown) => run(value));
+  }
   return run(expression);
 }
 
@@ -267,6 +282,18 @@ export function wireMathjsInstanceApi(
   };
 
   const instanceTyped = factory_mathjsCompat.createCompatTyped();
+  try {
+    instanceTyped.addType(
+      {
+        name: 'identifier',
+        test: (s: unknown): boolean =>
+          typeof s === 'string' && /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(s),
+      },
+      false
+    );
+  } catch {
+    /* already registered on this typed instance */
+  }
   const instanceBigNumber =
     (instance.BigNumber as typeof CompatBigNumber | undefined) ?? CompatBigNumber;
   instanceTyped.addConversion(
@@ -274,6 +301,14 @@ export function wireMathjsInstanceApi(
       from: 'bigint',
       to: 'BigNumber',
       convert: (x: unknown) => new instanceBigNumber((x as bigint).toString()),
+    },
+    { override: true }
+  );
+  instanceTyped.addConversion(
+    {
+      from: 'bigint',
+      to: 'Fraction',
+      convert: (x: unknown) => new mathjsFractionClass((x as bigint).toString()) as MathjsFraction,
     },
     { override: true }
   );
@@ -563,14 +598,14 @@ export function wireMathjsInstanceApi(
     if (evaluator !== undefined) {
       const innerParse = evaluator.parse;
       const sandboxParse = (expr: string) =>
-        wrapMathjsFactoryCompiledNode(
+        deepWrapParsedExpressionTree(
           innerParse(expr),
           {
             mathWithTransform: factoryCompileMath,
             unitCtor: instance.Unit,
             instance: instance as Record<string, unknown>,
           },
-          true
+          { sandboxTensor: true }
         );
       Object.defineProperty(scope, 'parse', {
         value: sandboxParse,
@@ -579,6 +614,16 @@ export function wireMathjsInstanceApi(
         configurable: true,
       });
     }
+    const parseScopeNumber = createParseScopeNumber((value: unknown) =>
+      typeof instance.number === 'function'
+        ? (instance.number as (v: unknown) => unknown)(value)
+        : Number(value)
+    );
+    scope.number = parseScopeNumber;
+    scope.numeric = createParseScopeNumeric(
+      parseScopeNumber,
+      functionsNumeric as (v: unknown, t?: string) => unknown
+    );
     if (typeof scope.index === 'function') {
       scope.index = asMathjsExpressionScopeValue(
         wrapCompatSandboxIndex(scope.index as (...args: unknown[]) => unknown)
@@ -609,7 +654,7 @@ export function wireMathjsInstanceApi(
         typeof revived === 'object' &&
         (revived as { isNode?: boolean }).isNode === true
       ) {
-        return wrapMathjsFactoryCompiledNode(
+        return deepWrapParsedExpressionTree(
           revived as import('@danielsimonjr/mathts-expression').MathNode,
           factoryCompileCtx
         );
@@ -725,6 +770,18 @@ export function wireMathjsInstanceApi(
    * `import` added or overrode (data properties, not the wholesale getters)
    * need to reach the evaluator.
    */
+  function buildInstanceParseScope(): Record<string, unknown> {
+    const imported = buildEvaluatorScope();
+    const scope: Record<string, unknown> = {
+      ...(expressionLayers.mathWithTransform as Record<string, unknown>),
+      ...imported,
+    };
+    for (const key of EVALUATE_SCOPE_OMIT) {
+      delete scope[key];
+    }
+    return scope;
+  }
+
   function buildEvaluatorScope(): Record<string, unknown> {
     const scope: Record<string, unknown> = {
       // mathjs 15.3.0: every block evaluates to a ResultSet (#1556) — compat only.
@@ -767,6 +824,16 @@ export function wireMathjsInstanceApi(
         scope[key] = desc.value;
       }
     }
+    const parseScopeNumber = createParseScopeNumber((value: unknown) =>
+      typeof instance.number === 'function'
+        ? (instance.number as (v: unknown) => unknown)(value)
+        : Number(value)
+    );
+    scope.number = parseScopeNumber;
+    scope.numeric = createParseScopeNumeric(
+      parseScopeNumber,
+      functionsNumeric as (v: unknown, t?: string) => unknown
+    );
     return scope;
   }
 
@@ -823,53 +890,113 @@ export function wireMathjsInstanceApi(
       normalizeDecimal,
       mathjsExpressionBindings
     );
+    const parseScopeNumber = createParseScopeNumber((value: unknown) =>
+      typeof instance.number === 'function'
+        ? (instance.number as (v: unknown) => unknown)(value)
+        : Number(value)
+    );
+    const parseScopeNumeric = createParseScopeNumeric(
+      parseScopeNumber,
+      functionsNumeric as (v: unknown, t?: string) => unknown
+    );
+    evaluator.parse = createCompatScopedParse(
+      buildInstanceParseScope(),
+      instance as Record<string, unknown>,
+      true,
+      parseScopeNumeric,
+      (value: unknown) => coerceFractionConfig(compatDecimalResult(value, instanceBigNumberCtor))
+    );
     evaluator.evaluate = patchBatchEvaluateScope(evaluator.evaluate);
     evaluatorEvaluateRef.current = evaluator.evaluate;
     patchEvaluatorToTex(evaluator);
     const expressionCompileApi = {
       parse: (expr: string) =>
-        wrapMathjsFactoryCompiledNode(evaluator.parse(expr), factoryCompileCtx),
+        deepWrapParsedExpressionTree(evaluator.parse(expr), factoryCompileCtx),
       compileTree: (expr: string, options?: PhysicsEvaluateOptions) =>
         evaluator.compile(expr, options),
     };
     const ResultSetCtor = factory_mathjsCompat.constructors.ResultSet as new (
       entries?: unknown[]
     ) => unknown;
-    instance.evaluate = runBound(
-      (expression: unknown, scope?: ExpressionScope, options?: CompatEvaluateOptions) => {
-        const opts = policyOptions(options);
+    instance.evaluate = runBound(function (
+      expression: unknown,
+      scope?: ExpressionScope,
+      options?: CompatEvaluateOptions
+    ) {
+      if (arguments.length === 0) {
+        throw tooFewArgumentsError('evaluate', 0);
+      }
+      const effectiveArgc = arguments.length === 3 && options === undefined ? 2 : arguments.length;
+      if (effectiveArgc > 2) {
+        throw tooManyArgumentsError('evaluate', 2, arguments.length);
+      }
+      const opts = policyOptions(options);
+      if (typeof expression === 'boolean') {
+        return expression;
+      }
+      if (isUnit(expression) || isComplex(expression)) {
+        throw new TypeError('Unexpected type of argument');
+      }
+      const matrixCtor = instance.matrix as ((data: unknown) => unknown) | undefined;
+      if (
+        Array.isArray(expression) &&
+        expression.length > 0 &&
+        expression.every((entry) => typeof entry === 'string')
+      ) {
+        const sharedScope = scope === undefined ? {} : scope;
+        return normalizeDecimal(evaluator.evaluate(expression as string[], sharedScope, opts));
+      }
+      if (isMatrix(expression)) {
+        const matrix = expression as { toArray?: () => unknown[] };
+        const flat = typeof matrix.toArray === 'function' ? matrix.toArray() : undefined;
         if (
-          Array.isArray(expression) &&
-          expression.length > 0 &&
-          expression.every((entry) => typeof entry === 'string')
+          Array.isArray(flat) &&
+          flat.length > 0 &&
+          flat.every((entry) => typeof entry === 'string')
         ) {
           const sharedScope = scope === undefined ? {} : scope;
-          return normalizeDecimal(evaluator.evaluate(expression as string[], sharedScope, opts));
+          const values = normalizeDecimal(
+            evaluator.evaluate(flat as string[], sharedScope, opts)
+          ) as unknown[];
+          return typeof matrixCtor === 'function' ? matrixCtor(values) : values;
         }
-        return normalizeDecimal(
-          mapExpressions(expression, (text) =>
-            wrapBlockArrayAsResultSet(
-              evaluateWithMathjsFactoryCompile(
-                expressionCompileApi,
-                text,
-                scope as Record<string, unknown> | undefined,
-                opts,
-                options?.safe !== true,
-                {
-                  mathWithTransform: factoryCompileMath,
-                  unitCtor: instance.Unit,
-                  instance: instance as Record<string, unknown>,
-                }
-              ),
-              text,
-              ResultSetCtor
-            )
-          )
-        );
       }
-    );
-    instance.compile = runBound((expression: unknown, options?: CompatEvaluateOptions) =>
-      mapExpressions(expression, (text) => {
+      return normalizeDecimal(
+        mapExpressions(expression, (text) =>
+          wrapBlockArrayAsResultSet(
+            evaluateWithMathjsFactoryCompile(
+              expressionCompileApi,
+              text,
+              scope as Record<string, unknown> | undefined,
+              opts,
+              options?.safe !== true,
+              {
+                mathWithTransform: factoryCompileMath,
+                unitCtor: instance.Unit,
+                instance: instance as Record<string, unknown>,
+              }
+            ),
+            text,
+            ResultSetCtor
+          )
+        )
+      );
+    });
+    instance.compile = runBound(function (expression: unknown, options?: CompatEvaluateOptions) {
+      if (arguments.length === 0) {
+        throw tooFewArgumentsError('compile', 0);
+      }
+      if (arguments.length > 2) {
+        throw tooManyArgumentsError('compile', 2, arguments.length);
+      }
+      if (
+        arguments.length === 2 &&
+        options !== undefined &&
+        (typeof options !== 'object' || options === null || Array.isArray(options))
+      ) {
+        throw tooManyArgumentsError('compile', 1, arguments.length);
+      }
+      return mapExpressions(expression, (text) => {
         const compiled = compileWithMathjsFactory(
           expressionCompileApi,
           text,
@@ -886,8 +1013,8 @@ export function wireMathjsInstanceApi(
             normalizeDecimal((compiled.evaluate as (...a: unknown[]) => unknown)(...ea))
           ),
         };
-      })
-    );
+      });
+    });
     instance.compileExpr = instance.compile;
     expressionApi.evaluate = (expr, scope, options) =>
       (instance.evaluate as CompatEvaluate)(expr, scope, options);
@@ -895,10 +1022,15 @@ export function wireMathjsInstanceApi(
     expressionApi.parser = (options) => new ParserClass(options);
     rebindInstanceHelp();
     rebuildFactoryCompileMath();
+    wireInstanceExprNodeConstructors(instance, () => factoryCompileCtx);
     return evaluator;
   }
 
   function mathImport(functions: unknown, options?: ImportOptions): void {
+    if (arguments.length === 0 || arguments.length > 2) {
+      const ArgsError = instance.ArgumentsError as new (name: string) => Error;
+      throw new ArgsError('import');
+    }
     if (containsInstance(functions, new Set())) {
       throw new TypeError(
         'import of a math instance is not supported; import its functions (an object of functions or factories) instead'
@@ -935,11 +1067,50 @@ export function wireMathjsInstanceApi(
       }
       return evaluateSingle(expr);
     };
+    const isValidParserVariableName = (name: string): boolean => {
+      if (name.length === 0) return false;
+      const parseFn = instance.parse as {
+        isAlpha?: (c: string, p: string, n: string) => boolean;
+        isDigit?: (c: string) => boolean;
+      };
+      const isAlpha = parseFn.isAlpha;
+      const isDigit = parseFn.isDigit;
+      if (typeof isAlpha !== 'function' || typeof isDigit !== 'function')
+        return /^[A-Za-z_]\w*$/.test(name);
+      for (let i = 0; i < name.length; i++) {
+        const valid =
+          isAlpha(name.charAt(i), name.charAt(i - 1), name.charAt(i + 1)) ||
+          (i > 0 && isDigit(name.charAt(i)));
+        if (!valid) return false;
+      }
+      return true;
+    };
+    const getParserValue = (name: string): unknown =>
+      Object.hasOwn(made.scope, name) ? made.scope[name] : undefined;
     const api = {
       scope: made.scope,
       evaluate: evaluateParserExpr,
-      get: made.get.bind(made),
-      set: made.set.bind(made),
+      get: getParserValue,
+      getAll(): Record<string, unknown> {
+        const object: Record<string, unknown> = {};
+        for (const key of Object.keys(made.scope)) {
+          if (!Object.hasOwn(made.scope, key)) continue;
+          if (key === 'constructor' || key === 'hasOwnProperty' || key === 'toString') {
+            throw new Error('No access to property "' + key + '"');
+          }
+          object[key] = made.scope[key];
+        }
+        return object;
+      },
+      set(name: string, value: unknown): unknown {
+        if (!isValidParserVariableName(name)) {
+          throw new Error(
+            `Invalid variable name: '${name}'. Variable names must follow the specified rules.`
+          );
+        }
+        made.scope[name] = value;
+        return value;
+      },
       remove: made.remove.bind(made),
       clear: made.clear.bind(made),
       toJSON: () => parserToJSON(made.scope),
@@ -975,10 +1146,16 @@ export function wireMathjsInstanceApi(
   if (bindParse) {
     instance.parse = new Proxy(initialEvaluator.parse, {
       apply: (_target, receiver, args) => {
+        if (args.length === 0) {
+          throw tooFewArgumentsError('parse', 0);
+        }
+        if (args.length > 2) {
+          throw tooManyArgumentsError('parse', 2, args.length);
+        }
         const node = runWithConfig(currentConfig, () =>
           Reflect.apply(evaluator.parse, receiver, args)
         );
-        const wrapped = wrapMathjsFactoryCompiledNode(
+        const wrapped = deepWrapParsedExpressionTree(
           node as import('@danielsimonjr/mathts-expression').MathNode,
           factoryCompileCtx
         );
