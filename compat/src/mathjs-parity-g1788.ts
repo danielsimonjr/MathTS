@@ -93,6 +93,7 @@ export interface CompatRelationalMatrixCtors {
   SparseMatrix: new (...args: unknown[]) => unknown;
 }
 
+/** Activated relational factories plus compat matrix constructors for unit routing (#1788). */
 export function createCompatRelationalOps(
   convertForeignScalar: (v: unknown) => unknown,
   matrixCtors?: CompatRelationalMatrixCtors
@@ -240,6 +241,7 @@ export function withFractionScalarOrdering(
   });
 }
 
+/** Pure bigint-bigint `compareNatural` signs without typed dispatch (#1788). */
 export function withCompareNaturalBigintParity(
   fn: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
@@ -251,6 +253,7 @@ export function withCompareNaturalBigintParity(
   });
 }
 
+/** mathjs `compareNatural` with numeric compare signs and bigint parity (#1788). */
 export function createCompatCompareNatural(
   compare: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
@@ -658,6 +661,7 @@ export function withProdDimUnsupported(
   });
 }
 
+/** Remap `mad` factory type errors to mathjs 15.3.0 wording (#1788). */
 export function withMadInvalidTypeGuard(
   fn: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
@@ -711,6 +715,7 @@ export function withCumsumUnaryPlusConversion(
   });
 }
 
+/** Remap `cumsum` factory errors to mathjs unexpected-argument text (#1788). */
 export function withCumsumMathjsParity(
   fn: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
@@ -736,6 +741,7 @@ export function withCumsumMathjsParity(
   });
 }
 
+/** Reject `mode` on empty input like mathjs statistics factories (#1788). */
 export function withModeEmptyGuard(
   fn: (...args: unknown[]) => unknown
 ): (...args: unknown[]) => unknown {
@@ -750,6 +756,7 @@ export function withModeEmptyGuard(
   });
 }
 
+/** Empty `sum([])` returns typed zero (incl. Fraction/bigint modes) per mathjs (#1788). */
 export function withSumEmptyArrayZero(
   fn: (...args: unknown[]) => unknown,
   getNumberMode: () => string,
@@ -821,6 +828,7 @@ export function withMedianMathjsFractionReturn(
   });
 }
 
+/** Coerce even-count bigint medians to `bigint` when `number: 'bigint'` (#1788). */
 export function withMedianBigintReturn(
   median: (...args: unknown[]) => unknown,
   getNumberMode: () => string
@@ -1022,6 +1030,7 @@ function flattenMedianOperands(args: unknown[]): unknown[] {
   return out;
 }
 
+/** Instance ops for mathjs-shaped median (partition select, add, divide) (#1788). */
 export interface CompatMathjsMedianDeps {
   add: (...args: unknown[]) => unknown;
   divide: (a: unknown, b: unknown) => unknown;
