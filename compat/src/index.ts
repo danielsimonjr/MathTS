@@ -111,7 +111,10 @@ import { bindInstanceSerialization } from './serialization.js';
 import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { withMathjsComplexBinary } from './mathjs-complex.js';
 import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
-import { wrapEqualForMathjsFraction } from './mathjs-fraction-relational.js';
+import {
+  wrapEqualForMathjsFraction,
+  wrapUnequalForMathjsFraction,
+} from './mathjs-fraction-relational.js';
 import { wrapMultiplyScalarForMathjsFraction } from './mathjs-fraction-unary-predicates.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
 import {
@@ -225,6 +228,7 @@ import {
   withCompareNaturalBigintParity,
   withFractionScalarOrdering,
   withCompareTextInvalidMix,
+  withConvertedRelationalScalars,
   withCompatInstanceConfig,
   withCumsumMathjsParity,
   withCumsumUnaryPlusConversion,
@@ -1048,39 +1052,35 @@ export function create(
     ) => unknown,
     instanceBigNumberClass
   );
-  const compatQuantileSeq = createCompatMathjsQuantileSeq(
-    compatStatisticsFactories.quantileSeq,
-    {
-      partitionSelect: mathFunctions.partitionSelect as (arr: unknown[], k: number) => unknown,
-      compare: (a: unknown, b: unknown) => {
-        const sign = factory_compare as (x: unknown, y: unknown) => unknown;
-        const out = sign(a, b);
-        if (typeof out === 'number') return out;
-        if (
-          typeof out === 'object' &&
-          out !== null &&
-          typeof (out as { valueOf?: () => number }).valueOf === 'function'
-        ) {
-          return (out as { valueOf: () => number }).valueOf();
-        }
-        return Number(out);
-      },
-      add: mathFunctions.add as (...args: unknown[]) => unknown,
-      subtract: mathFunctions.subtract as (a: unknown, b: unknown) => unknown,
-      multiply: mathFunctions.multiply as (...args: unknown[]) => unknown,
-      smaller: mathFunctions.smaller as (a: unknown, b: unknown) => boolean,
-      smallerEq: mathFunctions.smallerEq as (a: unknown, b: unknown) => boolean,
-      larger: mathFunctions.larger as (a: unknown, b: unknown) => boolean,
-      isInteger: mathFunctions.isInteger as (x: unknown) => boolean,
-      mapSlices: mathFunctions.mapSlices as (
-        data: unknown,
-        dim: number,
-        fn: (slice: unknown) => unknown
-      ) => unknown,
-      bignumber: scopedBignumber,
+  const compatQuantileSeq = createCompatMathjsQuantileSeq(compatStatisticsFactories.quantileSeq, {
+    partitionSelect: mathFunctions.partitionSelect as (arr: unknown[], k: number) => unknown,
+    compare: (a: unknown, b: unknown) => {
+      const sign = factory_compare as (x: unknown, y: unknown) => unknown;
+      const out = sign(a, b);
+      if (typeof out === 'number') return out;
+      if (
+        typeof out === 'object' &&
+        out !== null &&
+        typeof (out as { valueOf?: () => number }).valueOf === 'function'
+      ) {
+        return (out as { valueOf: () => number }).valueOf();
+      }
+      return Number(out);
     },
-    instanceBigNumberClass
-  );
+    add: mathFunctions.add as (...args: unknown[]) => unknown,
+    subtract: mathFunctions.subtract as (a: unknown, b: unknown) => unknown,
+    multiply: mathFunctions.multiply as (...args: unknown[]) => unknown,
+    smaller: mathFunctions.smaller as (a: unknown, b: unknown) => boolean,
+    smallerEq: mathFunctions.smallerEq as (a: unknown, b: unknown) => boolean,
+    larger: mathFunctions.larger as (a: unknown, b: unknown) => boolean,
+    isInteger: mathFunctions.isInteger as (x: unknown) => boolean,
+    mapSlices: mathFunctions.mapSlices as (
+      data: unknown,
+      dim: number,
+      fn: (slice: unknown) => unknown
+    ) => unknown,
+    bignumber: scopedBignumber,
+  });
   const compatCorr = createCompatMathjsCorr({
     matrix: shims.matrix as (data: unknown) => unknown,
     add: mathFunctions.add as (...args: unknown[]) => unknown,
@@ -1099,12 +1099,35 @@ export function create(
     create: createSibling,
 
     // G04 / #1788: activated relational factories (relTol, null, units).
-    equal: withRelationalBinaryArity('equal', scopeInstanceConfig(unitRelational.equal)),
-    unequal: withRelationalBinaryArity('unequal', scopeInstanceConfig(unitRelational.unequal)),
+    equal: withRelationalBinaryArity(
+      'equal',
+      scopeInstanceConfig(
+        withConvertedRelationalScalars(
+          convertForeignScalar,
+          wrapEqualForMathjsFraction(unitRelational.equal as TypedFunction) as (
+            ...args: unknown[]
+          ) => unknown
+        )
+      )
+    ),
+    unequal: withRelationalBinaryArity(
+      'unequal',
+      scopeInstanceConfig(
+        withConvertedRelationalScalars(
+          convertForeignScalar,
+          wrapUnequalForMathjsFraction(unitRelational.unequal as TypedFunction) as (
+            ...args: unknown[]
+          ) => unknown
+        )
+      )
+    ),
     equalScalar: scopeInstanceConfig(
-      wrapEqualForMathjsFraction(unitRelational.equalScalar as TypedFunction) as (
-        ...args: unknown[]
-      ) => unknown
+      withConvertedRelationalScalars(
+        convertForeignScalar,
+        wrapEqualForMathjsFraction(unitRelational.equalScalar as TypedFunction) as (
+          ...args: unknown[]
+        ) => unknown
+      )
     ),
     deepEqual: withRelationalBinaryArity(
       'deepEqual',

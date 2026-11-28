@@ -42,6 +42,19 @@ function tryMathjsFractionEquals(a: unknown, b: unknown): boolean | null {
   return null;
 }
 
+/** Negated {@link tryMathjsFractionEquals} when either operand is a mathjs Fraction. */
+export function wrapUnequalForMathjsFraction(fn: TypedFunction): TypedFunction {
+  const shim = function (this: unknown, ...args: unknown[]): unknown {
+    if (args.length === 2) {
+      const fractionResult = tryMathjsFractionEquals(args[0], args[1]);
+      if (fractionResult !== null) return !fractionResult;
+    }
+    return fn.apply(this, args);
+  };
+  copyTypedSurface(shim, fn);
+  return shim as TypedFunction;
+}
+
 /** Route scalar equality through fraction.js when either operand is a mathjs Fraction. */
 export function wrapEqualForMathjsFraction(fn: TypedFunction): TypedFunction {
   const shim = function (this: unknown, ...args: unknown[]): unknown {

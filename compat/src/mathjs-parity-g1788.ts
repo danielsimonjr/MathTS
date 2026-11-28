@@ -93,6 +93,16 @@ export interface CompatRelationalMatrixCtors {
   SparseMatrix: new (...args: unknown[]) => unknown;
 }
 
+/** Convert foreign scalars on both operands before a binary relational call (#1788). */
+export function withConvertedRelationalScalars(
+  convert: (v: unknown) => unknown,
+  fn: (...args: unknown[]) => unknown
+): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (x: unknown, y: unknown): unknown =>
+    (fn as (a: unknown, b: unknown) => unknown)(convert(x), convert(y))
+  );
+}
+
 /** Activated relational factories plus compat matrix constructors for unit routing (#1788). */
 export function createCompatRelationalOps(
   convertForeignScalar: (v: unknown) => unknown,
@@ -248,6 +258,18 @@ export function withCompareNaturalBigintParity(
   return keepSurface(fn, (x: unknown, y: unknown): unknown => {
     if (typeof x === 'bigint' && typeof y === 'bigint') {
       return x < y ? -1 : x > y ? 1 : 0;
+    }
+    if (typeof x === 'bigint' && typeof y === 'number') {
+      const nx = Number(x);
+      if (nx < y) return -1;
+      if (nx > y) return 1;
+      return 'bigint' < 'number' ? -1 : 1;
+    }
+    if (typeof x === 'number' && typeof y === 'bigint') {
+      const ny = Number(y);
+      if (x < ny) return -1;
+      if (x > ny) return 1;
+      return 'number' < 'bigint' ? -1 : 1;
     }
     return fn(x, y);
   });
@@ -940,34 +962,18 @@ function probNumber(value: unknown): number {
   return Number(value);
 }
 
-function upgradeInstanceBigNumbers(value: unknown, BigNumberCtor: InstanceBigNumberCtor): unknown {
-  if (value instanceof BigNumberCtor) return value;
-  if (Array.isArray(value)) {
-    return value.map((entry) => upgradeInstanceBigNumbers(entry, BigNumberCtor));
-  }
-  if (isOwnBigNumber(value) || isBigNumberLike(value)) {
-    return new BigNumberCtor((value as { toString(): string }).toString());
-  }
-  return value;
-}
-
 function coerceQuantileBigNumbers(
   value: unknown,
-  BigNumberCtor: InstanceBigNumberCtor,
+  bignumber: (x: unknown) => unknown,
   wantsBigNumber: boolean
 ): unknown {
   if (!wantsBigNumber) return value;
-  if (isOwnBigNumber(value) || isBigNumberLike(value) || value instanceof BigNumberCtor) {
-    return value;
-  }
   if (Array.isArray(value)) {
-    return value.map((entry) => coerceQuantileBigNumbers(entry, BigNumberCtor, wantsBigNumber));
+    return value.map((entry) => coerceQuantileBigNumbers(entry, bignumber, wantsBigNumber));
   }
-  if (value instanceof BigNumberCtor) return value;
-  if (isBigNumberLike(value) || isOwnBigNumber(value)) {
-    return new BigNumberCtor((value as { toString(): string }).toString());
+  if (isOwnBigNumber(value) || isBigNumberLike(value) || typeof value === 'number') {
+    return bignumber(value);
   }
-  if (typeof value === 'number') return new BigNumberCtor(String(value));
   return value;
 }
 
@@ -1109,8 +1115,7 @@ export function createCompatMathjsMedian(
  */
 export function createCompatMathjsQuantileSeq(
   native: (...args: unknown[]) => unknown,
-  deps: MathjsQuantileDeps,
-  BigNumberCtor: InstanceBigNumberCtor
+  deps: MathjsQuantileDeps
 ): (...args: unknown[]) => unknown {
   const wantsBigNumberArg = (args: unknown[]): boolean => {
     const walk = (value: unknown): boolean => {
@@ -1126,7 +1131,7 @@ export function createCompatMathjsQuantileSeq(
       const flat = valueOfFlat(slice);
       const value = mathjsQuantileInterp(flat, p, sorted, deps);
       return wantsBigNumberArg([prob])
-        ? coerceQuantileBigNumbers(value, BigNumberCtor, true)
+        ? coerceQuantileBigNumbers(value, deps.bignumber, true)
         : value;
     };
     return deps.mapSlices(data, dim, fn);
@@ -1143,15 +1148,14 @@ export function createCompatMathjsQuantileSeq(
       if (args.length === 3 && isProb(args[1]) && isDim(args[2])) {
         const sorted = false;
         const out = runMathjsDim(args[0], args[1], sorted, args[2] as number);
-        return coerceQuantileBigNumbers(out, BigNumberCtor, wantsBn);
+        return coerceQuantileBigNumbers(out, deps.bignumber, wantsBn);
       }
       if (args.length === 4 && isProb(args[1]) && isSorted(args[2]) && isDim(args[3])) {
         const out = runMathjsDim(args[0], args[1], args[2], args[3] as number);
-        return coerceQuantileBigNumbers(out, BigNumberCtor, wantsBn);
+        return coerceQuantileBigNumbers(out, deps.bignumber, wantsBn);
       }
       const out = native(...args);
-      if (!wantsBn) return out;
-      return upgradeInstanceBigNumbers(out, BigNumberCtor);
+      return coerceQuantileBigNumbers(out, deps.bignumber, wantsBn);
     } catch (err) {
       if (
         err instanceof Error &&
@@ -1232,7 +1236,7 @@ export function createCompatMathjsCorr(deps: MathjsCorrDeps): (...args: unknown[
     return correlation(A, B);
   }
 
-  return function compatCorr(A: unknown, B: unknown): unknown {
+  const corrImpl = (A: unknown, B: unknown): unknown => {
     const matrixLike = (x: unknown): x is { toArray: () => unknown[] } =>
       typeof x === 'object' &&
       x !== null &&
@@ -1243,6 +1247,29 @@ export function createCompatMathjsCorr(deps: MathjsCorrDeps): (...args: unknown[
     }
     return corrArrays(A as unknown[], B as unknown[]);
   };
+
+  const corrActualType = (x: unknown): string => {
+    if (Array.isArray(x)) return 'Array';
+    if (isMatrixLikeValue(x)) return 'Matrix';
+    if (x === null) return 'null';
+    return typeof x;
+  };
+
+  const native = factoryCorr as (...args: unknown[]) => unknown;
+  return keepSurface(native, (A: unknown, B: unknown): unknown => {
+    const isCorrCollection = (x: unknown): boolean => Array.isArray(x) || isMatrixLikeValue(x);
+    if (!isCorrCollection(A)) {
+      throw new TypeError(
+        `Unexpected type of argument in function corr (expected: Array or Matrix, actual: ${corrActualType(A)}, index: 0)`
+      );
+    }
+    if (!isCorrCollection(B)) {
+      throw new TypeError(
+        `Unexpected type of argument in function corr (expected: Array or Matrix, actual: ${corrActualType(B)}, index: 1)`
+      );
+    }
+    return corrImpl(A, B);
+  });
 }
 
 /** Activated statistics factories for the compat instance (#1788). */
