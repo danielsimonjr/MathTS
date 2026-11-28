@@ -18,7 +18,12 @@ export default defineConfig({
     hookTimeout: 30_000,
     globals: true,
     environment: 'node',
-    include: ['tests/**/*.test.ts'],
-    exclude: ['**/*.browser.test.ts', 'node_modules/**'],
+    include: ['tests/**/*.test.ts', 'tests/**/*.vitest-spec.ts'],
+    exclude: [
+      '**/*.browser.test.ts',
+      'node_modules/**',
+      // Bun-only mock.module setup; vitest runs tests/unary-fast-path.vitest-spec.ts instead.
+      'tests/unary-fast-path.test.ts',
+    ],
   },
 });

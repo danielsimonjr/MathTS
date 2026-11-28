@@ -69,7 +69,8 @@ function valueUsesBigNumber(value: unknown): boolean {
   if (
     typeof value === 'object' &&
     value !== null &&
-    (value as { isBigNumber?: boolean }).isBigNumber === true
+    ((value as { isBigNumber?: boolean }).isBigNumber === true ||
+      (value as { type?: string }).type === 'BigNumber')
   ) {
     return true;
   }
@@ -133,8 +134,40 @@ export function createCompatDiag(
 export function normalizeCompatRangeResult(
   args: readonly unknown[],
   result: unknown,
-  BigNumberClass: InstanceBigNumberCtor
+  BigNumberClass: InstanceBigNumberCtor,
+  matrix?: (data: unknown[]) => unknown
 ): unknown {
+  const includeEnd = args.length >= 1 && args[args.length - 1] === true;
+  const rangeEnds = includeEnd ? args.slice(0, -1) : args;
+  const endpointUsesBigNumber =
+    rangeEnds.length > 0 &&
+    rangeEnds.every(
+      (value) =>
+        isBigNumber(value) ||
+        (typeof value === 'object' &&
+          value !== null &&
+          ((value as { isBigNumber?: boolean }).isBigNumber === true ||
+            (value as { type?: string }).type === 'BigNumber'))
+    );
+  if (matrix && includeEnd && rangeEnds.length === 2 && endpointUsesBigNumber) {
+    const toArr = (value: unknown): unknown[] => {
+      if (typeof value === 'object' && value !== null) {
+        const boxed = value as { isMatrix?: boolean; toArray?: () => unknown[] };
+        if (boxed.isMatrix && typeof boxed.toArray === 'function') {
+          return boxed.toArray();
+        }
+      }
+      return Array.isArray(value) ? value : [];
+    };
+    const arr = toArr(result);
+    const endText = String(rangeEnds[1]);
+    const lastText = arr.length > 0 ? String(arr[arr.length - 1]) : '';
+    if (lastText !== endText) {
+      const next = arr.map((entry) => new BigNumberClass(String(entry)));
+      next.push(new BigNumberClass(endText));
+      return matrix(next);
+    }
+  }
   if (!argsUseBigNumber(args)) {
     return compatDecimalResult(result);
   }

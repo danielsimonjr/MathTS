@@ -101,6 +101,7 @@ import {
   det as _det,
   size as _size,
   factory_mathjsCompat,
+  factory_gcd,
   complex as _complex,
   config,
   isPositive as _isPositive,
@@ -110,6 +111,15 @@ import {
   isZero as _isZero,
   factory_fix as _factoryFix,
 } from '@danielsimonjr/mathts-functions';
+import { instanceSymbols } from './instance-symbols.js';
+import { inheritMatrixDatatype, promoteToCompatMatrix } from './compat-matrix-model.js';
+import {
+  shouldUnionSparsePatterns,
+  unionSparseForAdd,
+  type CscLike,
+} from './compat-sparse-pattern.js';
+import { createCompatMatrixFactory, createCompatSparseFactory } from './compat-matrix-factory.js';
+import { compatMatrixConstructors } from './instance-symbols.js';
 import {
   wrapFixForMathjsFraction,
   wrapUnaryForMathjsFraction,
@@ -230,6 +240,28 @@ export function bignumber(value?: unknown): unknown {
 /** Matrix values returned from the compat `matrix` shim (native, or the bridge matrix of `functions`). */
 export type CompatMatrixValue = DenseMatrix | SparseMatrix | BridgeMatrix;
 
+function promoteIfMatrix<T>(value: T): T {
+  return promoteToCompatMatrix(value) as T;
+}
+
+function finishMatrixArithmetic(result: unknown, sources: readonly unknown[]): unknown {
+  if (
+    result !== null &&
+    typeof result === 'object' &&
+    (result as { isMatrix?: boolean }).isMatrix === true
+  ) {
+    inheritMatrixDatatype(result, sources);
+    return promoteIfMatrix(result);
+  }
+  return result;
+}
+
+function isSparseStorageMatrix(x: unknown): boolean {
+  if (!isCompatBridgeMatrix(x)) return false;
+  if (isSparseMatrix(x)) return true;
+  return (x as { storage?: () => string }).storage?.() === 'sparse';
+}
+
 /** mathjs bridge matrix from `functions` factories (`prototype.isMatrix === true`). */
 function isCompatBridgeMatrix(x: unknown): boolean {
   if (isDenseMatrix(x) || isSparseMatrix(x)) {
@@ -287,52 +319,38 @@ function compatToDenseMatrix(m: unknown): DenseMatrix {
  * matrix([[1,2],[3,4]], 'sparse')
  * matrix(sparseMatrix, 'dense')
  */
-export function matrix(data?: readonly unknown[], format?: string): BridgeMatrix;
-export function matrix(
-  data?: readonly unknown[] | DenseMatrix | SparseMatrix,
-  format?: string
-): CompatMatrixValue;
-export function matrix(
-  data?: readonly unknown[] | DenseMatrix | SparseMatrix,
-  format?: string
-): CompatMatrixValue {
-  if (arguments.length === 0) {
-    return _factoryMatrix();
+const _compatMatrixImpl = createCompatMatrixFactory((...args: unknown[]) => {
+  if (args.length === 1 && Array.isArray(args[0])) {
+    return _factoryMatrix(sanitizeSparseNestedInput(args[0] as unknown[][]));
   }
-  if (isDenseMatrix(data) || isSparseMatrix(data)) {
-    // A native matrix of the format that is asked for, or of no format, is returned as it is.
-    if (format === undefined) return data;
-    // The factory checks the format, so an unknown one throws the mathjs TypeError here too.
-    _factoryMatrix([], format);
-    // The nested data of a matrix with a zero axis does not show its size, so the size of the
-    // source goes with the data (#1337).
-    if (format === 'sparse' && isDenseMatrix(data)) {
-      return _factorySparse({
-        data: data.toArray(),
-        size: matrixSize(data),
-      });
-    }
-    if (format !== 'sparse' && isSparseMatrix(data)) {
-      return denseOfNested(data.toArray(), data);
-    }
-    return data;
+  return (_factoryMatrix as (...a: unknown[]) => unknown)(...args);
+}, compatMatrixConstructors);
+
+const _compatSparseImpl = createCompatSparseFactory((...args: unknown[]) => {
+  if (args.length >= 1 && Array.isArray(args[0])) {
+    return _factorySparse(sanitizeSparseNestedInput(args[0] as unknown[][]));
   }
-  // An explicit undefined data argument reaches the factory, which throws the mathjs TypeError.
-  return _factoryMatrix(data, format);
+  return (_factorySparse as (...a: unknown[]) => unknown)(...args);
+}, compatMatrixConstructors);
+
+function matrixImpl(...args: unknown[]): CompatMatrixValue {
+  return _compatMatrixImpl(...args) as CompatMatrixValue;
 }
+export const matrix: typeof _factoryMatrix = withTypedSurface(
+  matrixImpl as unknown as typeof _factoryMatrix,
+  _factoryMatrix as object
+) as typeof _factoryMatrix;
 
 /**
  * Create a sparse matrix (mathjs-compatible)
  */
-export function sparse(data?: number[][]): BridgeMatrix {
-  if (data === undefined) {
-    return _factorySparse();
-  }
-  if (Array.isArray(data)) {
-    return _factorySparse(sanitizeSparseNestedInput(data as unknown[][]));
-  }
-  return _factorySparse(data);
+function sparseImpl(...args: unknown[]): BridgeMatrix {
+  return _compatSparseImpl(...args) as BridgeMatrix;
 }
+export const sparse: typeof _factorySparse = withTypedSurface(
+  sparseImpl as unknown as typeof _factorySparse,
+  _factorySparse as object
+) as typeof _factorySparse;
 
 // =============================================================================
 // Arithmetic Function Shims
@@ -361,6 +379,22 @@ const unwrap = (r: unknown): unknown => {
   return (r as { toArray(): unknown }).toArray();
 };
 
+/** True when a nested array is a full 2-D rectangle (every row is an array of equal width, no deeper nesting). */
+const isRectangularNestedArray = (x: unknown): boolean => {
+  if (!Array.isArray(x)) return false;
+  if (x.length === 0) return true;
+  const head = x[0];
+  if (!Array.isArray(head)) return false;
+  const width = head.length;
+  for (const row of x) {
+    if (!Array.isArray(row) || row.length !== width) return false;
+    for (const cell of row) {
+      if (Array.isArray(cell)) return false;
+    }
+  }
+  return true;
+};
+
 /** The axis lengths of an Array or a matrix operand, read along the first elements; null for a scalar. */
 const axesOf = (x: unknown): number[] | null => {
   if (isCompatBridgeMatrix(x)) return matrixSize(x) ?? null;
@@ -380,6 +414,8 @@ const matrixPackageCanTake = (a: unknown, b: unknown, elementwise: boolean): boo
   const sb = axesOf(b);
   if (sa !== null && sa.length !== 2) return false;
   if (sb !== null && sb.length !== 2) return false;
+  if (Array.isArray(a) && !isRectangularNestedArray(a)) return false;
+  if (Array.isArray(b) && !isRectangularNestedArray(b)) return false;
   return !(elementwise && sa !== null && sb !== null && (sa[0] !== sb[0] || sa[1] !== sb[1]));
 };
 
@@ -408,6 +444,21 @@ const applyArithmetic = (
   elementwise: boolean,
   complexFn?: (a: unknown, b: unknown) => unknown
 ): unknown => {
+  if (
+    elementwise &&
+    isSparseStorageMatrix(a) &&
+    isSparseStorageMatrix(b) &&
+    shouldUnionSparsePatterns(a, b)
+  ) {
+    return finishMatrixArithmetic(
+      unionSparseForAdd(
+        compatMatrixConstructors.SparseMatrix as new (data: unknown) => CscLike,
+        a as CscLike,
+        b as CscLike
+      ),
+      [a, b]
+    );
+  }
   // Boxed operands carry the storage format and may hold non-double scalar types.
   // Keep them in the typed path rather than coercing them to the numeric backend.
   if (isBoxedMatrix(a) || isBoxedMatrix(b)) {
@@ -416,7 +467,7 @@ const applyArithmetic = (
     if (complexFn && (isComplex(boxedA) || isComplex(boxedB))) {
       return compatDecimalResult(complexFn(boxedA, boxedB));
     }
-    return compatDecimalResult(scalarFn(boxedA, boxedB));
+    return compatDecimalResult(finishMatrixArithmetic(scalarFn(boxedA, boxedB), [boxedA, boxedB]));
   }
   // Riemann-sphere only for Complex scalars; number/BigNumber/bigint stay native.
   if (complexFn && (isComplex(a) || isComplex(b))) {
@@ -444,7 +495,7 @@ const applyArithmetic = (
     }
     const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
     const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
-    return compatDecimalResult(unwrap(matrixFn(aa, bb)));
+    return compatDecimalResult(finishMatrixArithmetic(unwrap(matrixFn(aa, bb)), [a, b]));
   }
   if ((Array.isArray(a) || Array.isArray(b)) && complexFn) {
     return compatDecimalResult(unwrap(callWithNumericStringOperands(complexFn, a, b)));
@@ -951,6 +1002,27 @@ export const max: TypedFunction = _max;
 // Number Theory Shims
 // =============================================================================
 
+const _compatGcd = withTypedSurface((...args: unknown[]): unknown => {
+  try {
+    return compatDecimalResult((factory_gcd as (...a: unknown[]) => unknown)(...args));
+  } catch (err) {
+    if (err instanceof Error && err.message === 'gcd() supports only 1d matrices!') {
+      const ArgsError = instanceSymbols.ArgumentsError as unknown as new (fn: string) => Error;
+      throw new ArgsError('gcd() supports only 1d matrices!');
+    }
+    throw err;
+  }
+}, factory_gcd);
+
+/**
+ * Instance `gcd` (mathjs factory, Fraction results promoted). The public
+ * `gcd` export stays an alias of the functions implementation so it is not a
+ * second definition of `gcd`.
+ */
+function compatInstanceGcd(...args: unknown[]): unknown {
+  return _compatGcd(...args);
+}
+
 export const gcd: TypedFunction = _gcd;
 export const lcm: TypedFunction = _lcm;
 
@@ -1007,8 +1079,11 @@ export function transpose(m: unknown): unknown {
   if (arguments.length > 1) {
     throw tooManyArgumentsError('transpose', 1, arguments.length);
   }
-  if (isDenseMatrix(m) || isSparseMatrix(m)) return m.transpose();
-  return _transpose(m);
+  if (isDenseMatrix(m) || isSparseMatrix(m)) {
+    return promoteIfMatrix(inheritMatrixDatatype(m.transpose(), [m]));
+  }
+  const t = _transpose(m);
+  return promoteIfMatrix(inheritMatrixDatatype(t, [m]));
 }
 
 /** Compute the determinant with typed scalar arithmetic, preserving fractional and complex values. */
@@ -1179,8 +1254,8 @@ const _shims = {
   min,
   max,
 
-  // Number theory
-  gcd,
+  // Number theory — instance `gcd` is the mathjs factory; the export `gcd` is the alias.
+  gcd: compatInstanceGcd,
   lcm,
 
   // Rounding
