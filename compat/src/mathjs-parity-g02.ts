@@ -594,11 +594,7 @@ export function createCompatMathjsStatistics(
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
       if (typeof arg !== 'string') continue;
-      if (
-        args.length === 2 &&
-        i === 1 &&
-        (Array.isArray(args[0]) || isMatrixLikeValue(args[0]))
-      ) {
+      if (args.length === 2 && i === 1 && (Array.isArray(args[0]) || isMatrixLikeValue(args[0]))) {
         continue;
       }
       if (isNorm(arg)) {

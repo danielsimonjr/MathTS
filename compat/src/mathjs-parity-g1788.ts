@@ -26,7 +26,10 @@ import {
   corr as factoryCorr,
   median as factoryMedian,
 } from '@danielsimonjr/mathts-functions';
-import { promoteBooleanScalarsForBigNumber, BigNumber as CompatBigNumberCtor } from './bignumber.js';
+import {
+  promoteBooleanScalarsForBigNumber,
+  BigNumber as CompatBigNumberCtor,
+} from './bignumber.js';
 import { isMathjsFraction, mathjsFractionClass } from './mathjs-fraction-class.js';
 import { isUnit, type TypedFunction } from '@danielsimonjr/mathts-core';
 import {
@@ -134,10 +137,7 @@ export function createCompatRelationalOps(
     const hasFraction = isMathjsFraction(x) || isMathjsFraction(y);
     const hasBigint = typeof x === 'bigint' || typeof y === 'bigint';
     if (!hasFraction || !hasBigint) return [x, y];
-    return [
-      typeof x === 'bigint' ? Number(x) : x,
-      typeof y === 'bigint' ? Number(y) : y,
-    ];
+    return [typeof x === 'bigint' ? Number(x) : x, typeof y === 'bigint' ? Number(y) : y];
   };
   const withFactoryScalars = (
     parityFn: (...args: unknown[]) => unknown,
@@ -201,7 +201,11 @@ export function withRelationalBinaryArity(
  * of the typed dispatch export (which ignores tolerance).
  */
 /** mathjs `compareNatural` compares same-type bigints without `_compareNatural`'s type table. */
-function relationalSignFromCompare(compare: (...args: unknown[]) => unknown, x: unknown, y: unknown): number {
+function relationalSignFromCompare(
+  compare: (...args: unknown[]) => unknown,
+  x: unknown,
+  y: unknown
+): number {
   const result = compare(x, y);
   if (typeof result === 'number') return result;
   if (
@@ -227,10 +231,7 @@ export function withFractionScalarOrdering(
     if (mixedFractionScalar) {
       const [nx, ny] =
         typeof x === 'bigint' || typeof y === 'bigint'
-          ? [
-              typeof x === 'bigint' ? Number(x) : x,
-              typeof y === 'bigint' ? Number(y) : y,
-            ]
+          ? [typeof x === 'bigint' ? Number(x) : x, typeof y === 'bigint' ? Number(y) : y]
           : [x, y];
       const sign = relationalSignFromCompare(compare, nx, ny);
       return kind === 'largerEq' ? sign >= 0 : sign <= 0;
@@ -688,10 +689,7 @@ export function withMadInvalidTypeGuard(
   });
 }
 
-function deepUnaryPlusConvert(
-  unaryPlus: (x: unknown) => unknown,
-  value: unknown
-): unknown {
+function deepUnaryPlusConvert(unaryPlus: (x: unknown) => unknown, value: unknown): unknown {
   if (typeof value === 'string') return unaryPlus(value);
   if (Array.isArray(value)) return value.map((entry) => deepUnaryPlusConvert(unaryPlus, entry));
   if (isMatrixLikeValue(value) && typeof (value as { map?: unknown }).map === 'function') {
@@ -867,7 +865,11 @@ function valueOfFlat(data: unknown): unknown[] {
     }
     return out.reverse();
   }
-  if (typeof data === 'object' && data !== null && typeof (data as { valueOf?: unknown }).valueOf === 'function') {
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    typeof (data as { valueOf?: unknown }).valueOf === 'function'
+  ) {
     const raw = (data as { valueOf: () => unknown }).valueOf();
     return valueOfFlat(raw);
   }
@@ -900,9 +902,7 @@ function mathjsQuantileInterp(
   const integerPart = Math.floor(index);
   const fracPart = index % 1;
   if (Number.isInteger(index)) {
-    return sorted
-      ? flat[index]
-      : deps.partitionSelect(flat.slice(), integerPart);
+    return sorted ? flat[index] : deps.partitionSelect(flat.slice(), integerPart);
   }
   let left: unknown;
   let right: unknown;
@@ -918,25 +918,21 @@ function mathjsQuantileInterp(
     }
   }
   const oneMinus = deps.subtract(1, fracPart);
-  return deps.add(
-    deps.multiply(left, oneMinus),
-    deps.multiply(right, fracPart)
-  );
+  return deps.add(deps.multiply(left, oneMinus), deps.multiply(right, fracPart));
 }
 
 function probNumber(value: unknown): number {
   if (typeof value === 'number') return value;
   if (isOwnBigNumber(value) || isBigNumberLike(value)) {
-    return (value as { toNumber?: () => number }).toNumber?.() ??
-      Number((value as { toString(): string }).toString());
+    return (
+      (value as { toNumber?: () => number }).toNumber?.() ??
+      Number((value as { toString(): string }).toString())
+    );
   }
   return Number(value);
 }
 
-function upgradeInstanceBigNumbers(
-  value: unknown,
-  BigNumberCtor: InstanceBigNumberCtor
-): unknown {
+function upgradeInstanceBigNumbers(value: unknown, BigNumberCtor: InstanceBigNumberCtor): unknown {
   if (value instanceof BigNumberCtor) return value;
   if (Array.isArray(value)) {
     return value.map((entry) => upgradeInstanceBigNumbers(entry, BigNumberCtor));
@@ -1072,8 +1068,7 @@ export function createCompatMathjsMedian(
     return unaryPlus(mid);
   };
   const factoryMedianFn = factoryMedian as (...args: unknown[]) => unknown;
-  const isCollectionOperand = (x: unknown): boolean =>
-    Array.isArray(x) || isMatrixLikeValue(x);
+  const isCollectionOperand = (x: unknown): boolean => Array.isArray(x) || isMatrixLikeValue(x);
   return keepSurface(factoryMedianFn, (...args: unknown[]): unknown => {
     if (args.length >= 2 && args.every(isCollectionOperand)) {
       throw new Error('Scalar values expected');
@@ -1091,8 +1086,7 @@ export function createCompatMathjsMedian(
     if (flat.some(isCompatFractionLike)) {
       return innerMedian(flat);
     }
-    const needsCompat =
-      flat.some((v) => typeof v === 'bigint') && flat.length % 2 === 0;
+    const needsCompat = flat.some((v) => typeof v === 'bigint') && flat.length % 2 === 0;
     if (!needsCompat) {
       return factoryMedianFn(...args);
     }
@@ -1117,12 +1111,7 @@ export function createCompatMathjsQuantileSeq(
     };
     return args.some(walk);
   };
-  const runMathjsDim = (
-    data: unknown,
-    prob: unknown,
-    sorted: boolean,
-    dim: number
-  ): unknown => {
+  const runMathjsDim = (data: unknown, prob: unknown, sorted: boolean, dim: number): unknown => {
     const p = probNumber(prob);
     const fn = (slice: unknown): unknown => {
       const flat = valueOfFlat(slice);

@@ -45,6 +45,8 @@ describe('mathjs #1788 statistics', () => {
 
   it('mode throws when called with no arguments', () => {
     const math = create(all);
-    expect(() => (math.mode as unknown as () => unknown)()).toThrow(/requires one or more parameters/);
+    expect(() => (math.mode as unknown as () => unknown)()).toThrow(
+      /requires one or more parameters/
+    );
   });
 });

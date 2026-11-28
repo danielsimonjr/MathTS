@@ -1039,10 +1039,9 @@ export function create(
       return (factory_compare as (a: unknown, b: unknown) => unknown)(x, y);
     }
   );
-  const compatCompareForNatural = createCompatCompare(
-    compareForNatural,
-    convertForeignScalar
-  ) as (...args: unknown[]) => unknown;
+  const compatCompareForNatural = createCompatCompare(compareForNatural, convertForeignScalar) as (
+    ...args: unknown[]
+  ) => unknown;
   const compatCompareRelational = withCompareInstanceBigNumberResult(
     createCompatCompare(unitRelational.compare, convertForeignScalar) as (
       ...args: unknown[]
