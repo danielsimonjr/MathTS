@@ -1,6 +1,7 @@
 import { isBigNumber } from '@danielsimonjr/mathts-core';
 import { clone } from '@danielsimonjr/mathts-core/internal';
 import { realScale } from './real-scale.js';
+import { dedupeEigenpairs } from './eigenvector-dedupe.js';
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
 
@@ -840,7 +841,16 @@ export function createComplexEigsRobust({
       vectors.push(...solutions.map((v) => ({ value: lambda, vector: v })));
     }
 
-    return vectors;
+    const precNum =
+      typeof prec === 'number' ? prec : Number(isBigNumber(prec) ? prec.toNumber() : prec);
+    return dedupeEigenpairs(
+      vectors,
+      precNum,
+      (a, b) => subtract(a, b) as Scalar,
+      abs,
+      dot,
+      (v) => norm(v) as Scalar
+    );
   }
 
   function vectorMagnitude(vector: Scalar[]): Scalar {

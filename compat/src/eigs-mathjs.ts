@@ -16,4 +16,39 @@ const scope: Record<string, unknown> = {
   typed: mathFunctions.factory_mathjsCompat.createCompatTyped(),
 };
 
-export const compatMathjsEigs = createEigs(scope) as (...args: unknown[]) => unknown;
+const computeEigs = createEigs(scope) as (...args: unknown[]) => {
+  values: unknown[];
+  eigenvectors?: { value: unknown; vector: unknown }[];
+};
+
+let instanceBignumber: ((value: unknown) => unknown) | null = null;
+
+/** Called from compat `create(all)` so eigenvalues use InstanceBigNumber (mathjs dogfood #1791). */
+export function wireCompatEigsInstanceBignumber(bn: (value: unknown) => unknown): void {
+  instanceBignumber = bn;
+}
+
+function promoteInstanceBigNumbers(result: ReturnType<typeof computeEigs>): typeof result {
+  const { values } = result;
+  if (!values?.length || !instanceBignumber) return result;
+  const head = values[0];
+  if (
+    head === null ||
+    typeof head !== 'object' ||
+    !('isBigNumber' in head) ||
+    (head as { isBigNumber?: boolean }).isBigNumber !== true
+  ) {
+    return result;
+  }
+  const inst = (v: unknown) => instanceBignumber!(v);
+  values.forEach((v, i) => {
+    values[i] = inst(v);
+  });
+  for (const pair of result.eigenvectors ?? []) {
+    pair.value = inst(pair.value);
+  }
+  return result;
+}
+
+export const compatMathjsEigs = (...args: unknown[]) =>
+  promoteInstanceBigNumbers(computeEigs(...args));

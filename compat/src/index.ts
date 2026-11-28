@@ -165,7 +165,7 @@ import {
 } from './mathjs-parity-errors.js';
 import { isComplex, isUnit } from '@danielsimonjr/mathts-core';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
-import { compatMathjsEigs } from './eigs-mathjs.js';
+import { compatMathjsEigs, wireCompatEigsInstanceBignumber } from './eigs-mathjs.js';
 import {
   compatMathjsLyap,
   compatMathjsSchur,
@@ -902,6 +902,7 @@ export function create(
     },
     tooManyArgumentsError
   );
+  wireCompatEigsInstanceBignumber(scopedBignumber);
   const readInstancePi = (): unknown => {
     const build = (): unknown => {
       const pi = configuredMathjsConstant('pi', Math.PI, {

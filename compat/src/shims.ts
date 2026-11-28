@@ -474,28 +474,39 @@ const applyArithmetic = (
     return compatDecimalResult(complexFn(a, b));
   }
   if (isMatrixLike(a) || isMatrixLike(b)) {
+    const typedMatrixOperand = (x: unknown): unknown => {
+      if (isMatrixLike(x)) {
+        if (Array.isArray(x) && hasNonNumberEntry(x)) return _factoryMatrix(x);
+        return isBoxedMatrix(x) ? x : toDenseMatrix(x);
+      }
+      return x;
+    };
+    if (matrixPackageCanTake(a, b, elementwise)) {
+      const aa = typedMatrixOperand(a);
+      const bb = typedMatrixOperand(b);
+      const fn =
+        (Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))
+          ? scalarFn
+          : matrixFn;
+      return compatDecimalResult(finishMatrixArithmetic(unwrap(fn(aa, bb)), [a, b]));
+    }
     // A nested array with a BigNumber / Fraction / Complex leaf leaves the
     // numeric backend; the typed function keeps the scalar type (#1774).
     if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
       return compatDecimalResult(unwrap(scalarFn(a, b)));
     }
-    if (!matrixPackageCanTake(a, b, elementwise)) {
-      if (
-        complexFn &&
-        (Array.isArray(a) ||
-          Array.isArray(b) ||
-          isMatrixLike(a) ||
-          isMatrixLike(b) ||
-          isCompatBridgeMatrix(a) ||
-          isCompatBridgeMatrix(b))
-      ) {
-        return compatDecimalResult(unwrap(callWithNumericStringOperands(complexFn, a, b)));
-      }
-      return compatDecimalResult(unwrap(scalarFn(a, b)));
+    if (
+      complexFn &&
+      (Array.isArray(a) ||
+        Array.isArray(b) ||
+        isMatrixLike(a) ||
+        isMatrixLike(b) ||
+        isCompatBridgeMatrix(a) ||
+        isCompatBridgeMatrix(b))
+    ) {
+      return compatDecimalResult(unwrap(callWithNumericStringOperands(complexFn, a, b)));
     }
-    const aa = isMatrixLike(a) ? toDenseMatrix(a) : a;
-    const bb = isMatrixLike(b) ? toDenseMatrix(b) : b;
-    return compatDecimalResult(finishMatrixArithmetic(unwrap(matrixFn(aa, bb)), [a, b]));
+    return compatDecimalResult(unwrap(scalarFn(a, b)));
   }
   if ((Array.isArray(a) || Array.isArray(b)) && complexFn) {
     return compatDecimalResult(unwrap(callWithNumericStringOperands(complexFn, a, b)));
