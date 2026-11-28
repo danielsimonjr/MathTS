@@ -120,6 +120,8 @@ import {
   createCompatCompare,
   createCompatPinv,
 } from './mathjs-parity-g06.js';
+import { createCompatMathjsDet } from './mathjs-det.js';
+import { createCompatMathjsQr } from './mathjs-parity-linalg-1791.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import {
   createCompatArg,
@@ -812,6 +814,25 @@ export function create(
       ReturnType<typeof mathFunctions.factory_mathjsCompat.compatFactoryExports>['createTo']
     >[0]['matrix'],
   }) as (...args: unknown[]) => unknown;
+  const compatDet = withFixedArity(
+    'det',
+    1,
+    createCompatMathjsDet(mathFunctions.det as (...args: unknown[]) => unknown)
+  );
+  const compatQr = createCompatMathjsQr({
+    matrix: shims.matrix as (data: unknown, storage?: 'dense' | 'sparse') => unknown,
+    complex: shims.complex as (re: number, im?: number) => unknown,
+    evaluate: mathFunctions.evaluate as (expr: string) => unknown,
+    nativeQr: mathFunctions.qr as (...args: unknown[]) => unknown,
+    isSparseMatrix: (x) =>
+      typeof x === 'object' &&
+      x !== null &&
+      (x as { isSparseMatrix?: boolean }).isSparseMatrix === true,
+    isSparseMatrixValue: (x) =>
+      typeof x === 'object' &&
+      x !== null &&
+      (x as { isSparseMatrix?: boolean }).isSparseMatrix === true,
+  });
   const compatPinv = createCompatPinv(mathFunctions.pinv as (...args: unknown[]) => unknown, {
     convert: convertForeignScalar,
     divide: shims.divide as (...args: unknown[]) => unknown,
@@ -964,10 +985,10 @@ export function create(
     deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
     // #1550: the activated compare factory keeps a Fraction/BigNumber result.
     compare: mathFunctions.factory_compare as UnitRelationalOps['compare'],
-    larger: mathFunctions.larger as UnitRelationalOps['larger'],
-    smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
-    largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
-    smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
+    larger: mathFunctions.factory_larger as UnitRelationalOps['larger'],
+    smaller: mathFunctions.factory_smaller as UnitRelationalOps['smaller'],
+    largerEq: mathFunctions.factory_largerEq as UnitRelationalOps['largerEq'],
+    smallerEq: mathFunctions.factory_smallerEq as UnitRelationalOps['smallerEq'],
   };
   const unitRelational = applyUnitRelationalParity(unitRelationalBase);
 
@@ -1229,7 +1250,8 @@ export function create(
 
     // Matrix-specific
     transpose: shims.transpose,
-    det: shims.det,
+    det: compatDet,
+    qr: compatQr,
     identity: withFractionRejection(
       withConvertedScalars(convertForeignScalar, withIdentityValidation(shims.identity))
     ),

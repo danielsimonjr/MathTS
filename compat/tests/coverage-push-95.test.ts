@@ -131,14 +131,14 @@ describe('coverage push — matrix model, sparse, shims, parity (#1785)', () => 
     expect(math.add(math.complex(1, 1), math.matrix([1]))).toBeDefined();
     expect(math.evaluate('schur([1,2;3,4])')).toBeDefined();
     expect(math.max(math.matrix([4]), 0)).toBe(4);
-    expect(
+    expect(() =>
       math.qr(
         math.sparse([
           [1, 0],
           [0, 1],
         ])
       )
-    ).toBeDefined();
+    ).toThrow(/sparse/);
     expect(
       math.lusolve(
         math.sparse([

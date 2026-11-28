@@ -219,7 +219,15 @@ function identityData(n: number): RawData[] {
  * Dense Householder QR on raw data (mathjs `_denseQRimpl`). The lower triangle
  * of `R` is flushed to scalar or Complex zero, matching the mathjs factory.
  */
-function qrDense(data: RawData): { Q: RawData[]; R: RawData } {
+type QrDenseScalars = {
+  complex: (re: number, im?: number) => unknown;
+};
+
+/** Dense Householder QR on nested array data — mathjs `_denseQRimpl` (#1791). */
+export function mathjsCompatQrDense(
+  data: RawData,
+  scalars?: QrDenseScalars
+): { Q: RawData[]; R: RawData } {
   const rows = data.length;
   const cols = (data[0] as RawData | undefined)?.length as number | undefined;
   const Q = identityData(rows);
@@ -232,7 +240,8 @@ function qrDense(data: RawData): { Q: RawData[]; R: RawData } {
   const multiplyScalar = mathFunctions.multiplyScalar as (a: unknown, b: unknown) => unknown;
   const divideScalarMath = mathFunctions.divideScalar as (a: unknown, b: unknown) => unknown;
   const isComplexValue = mathFunctions.isComplex as (x: unknown) => boolean;
-  const complexCtor = mathFunctions.complex as (re: number, im?: number) => unknown;
+  const complexCtor =
+    scalars?.complex ?? (mathFunctions.complex as (re: number, im?: number) => unknown);
   /** complex.js Smith's division — mathjs 15.3.0 QR uses this, not MathTS scaled divide. */
   const divideScalar = (a: unknown, b: unknown): unknown => {
     if (!isComplexValue(a) && !isComplexValue(b)) return divideScalarMath(a, b);
@@ -350,7 +359,7 @@ function schurArrays(data: RawData): { U: RawData; T: RawData } {
   let A0: RawData;
   do {
     A0 = A;
-    const qr = qrDense(A);
+    const qr = mathjsCompatQrDense(A);
     A = multiply(qr.R, qr.Q);
     U = multiply(U, qr.Q);
     if (k++ > 100) break;

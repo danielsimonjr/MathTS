@@ -24,6 +24,8 @@ import {
   isMatrixLikeValue,
   isOwnBigNumber,
   keepSurface,
+  tooFewArgumentsError,
+  tooManyArgumentsError,
 } from './mathjs-parity-g02.js';
 import { compatDecimalResult } from './bignumber.js';
 import type { Fraction as CompatFractionType } from '@danielsimonjr/mathts-core';
@@ -292,10 +294,13 @@ function mathjsPinvMatrix(
 export function createCompatPinv(native: AnyFn, deps: CompatPinvDependencies): AnyFn {
   const { convert, divide, equal } = deps;
   return keepSurface(native, (...args: unknown[]): unknown => {
-    const converted = args.map(convert);
-    if (converted.length !== 1) {
-      return native(...converted);
+    if (args.length < 1) {
+      throw tooFewArgumentsError('pinv', args.length);
     }
+    if (args.length > 1) {
+      throw tooManyArgumentsError('pinv', 1, args.length);
+    }
+    const converted = args.map(convert);
     const x = converted[0];
     if (isMatrixLikeValue(x)) {
       const data = matrixData(x, deps.isMatrix);
