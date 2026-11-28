@@ -12,6 +12,7 @@ import {
   keepSurface,
 } from './mathjs-parity-g02.js';
 import { isUnit } from '@danielsimonjr/mathts-core';
+import { mathjsFractionClass } from './mathjs-fraction-class.js';
 
 type BinaryFactory = (...args: unknown[]) => unknown;
 
@@ -31,10 +32,10 @@ export function promoteBooleanForBigIntOperands(args: unknown[]): unknown[] {
 
 /** True when a plain number would lose precision converting into a Fraction operand. */
 export function isLossyNumberToFraction(n: number): boolean {
-  if (!Number.isFinite(n) || Number.isInteger(n)) return false;
-  // mathjs rejects irrationals and non-exact binary fractions when the other side is already Fraction.
-  const rounded = Math.round(n);
-  return rounded !== n || Math.abs(n - rounded) > Number.EPSILON;
+  if (!Number.isFinite(n)) return true;
+  if (Number.isInteger(n)) return false;
+  const approx = new mathjsFractionClass(n) as { valueOf(): number };
+  return Math.abs(approx.valueOf() - n) > Number.EPSILON;
 }
 
 /**

@@ -150,6 +150,7 @@ import {
   arrayContainsMatrix,
   isUnitOperand,
   multiplyMatrixRowLists,
+  shouldUseFactoryScalarForFractionPair,
   shouldUseFactoryScalarForMultiply,
 } from './mathjs-parity-1787-arithmetic.js';
 import {
@@ -682,6 +683,9 @@ const addPairScalars = (a: unknown, b: unknown): unknown => {
   if (bigFrac !== null) return bigFrac;
   const frac = mathjsFactoryFractionAdd(a, b);
   if (frac !== null) return frac;
+  if (shouldUseFactoryScalarForFractionPair(a, b)) {
+    return publicAddScalar(a, b);
+  }
   return useTypedArithmeticForPair(a, b) ? _add(a, b) : publicAddScalar(a, b);
 };
 
