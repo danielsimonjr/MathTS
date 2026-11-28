@@ -80,6 +80,25 @@ describe('geometry parity (#1792)', () => {
     ).toThrow('Key names do not match');
     expect(() => math.distance('1')).toThrow(TypeError);
     expect(() => math.distance(['abc', 'def'], [1, 3])).toThrow(TypeError);
+    expect(() => math.distance(['2', '3'], math.matrix([1, 2]), [1, 2])).toThrow(TypeError);
+    expect(() => math.distance([2, 3], math.matrix(['a', 'b']), [1, 2])).toThrow(TypeError);
+    expect(() => math.distance([2, 3], math.matrix([1, 2]), ['a', 'b'])).toThrow(TypeError);
+    expect(() => math.distance(['a', ' b', 'c', 'd'], [1, 2, 3, 4])).toThrow(TypeError);
+    expect(() => math.distance([1, 2, 3, 4], ['a', ' b', 'c', 'd'])).toThrow(TypeError);
+    expect(() =>
+      math.distance(
+        { pointX: 'l', pointY: 4 },
+        { lineOnePtX: 1, lineOnePtY: 3 },
+        { lineTwoPtX: 2, lineTwoPtY: 8 }
+      )
+    ).toThrow(TypeError);
+    expect(() =>
+      math.distance(
+        { pointX: 1, pointY: 4 },
+        { wrongkeyname: 1, lineOnePtY: 3 },
+        { lineTwoPtX: 2, lineTwoPtY: 8 }
+      )
+    ).toThrow('Key names do not match');
     expect(() => math.distance([0, 0], [3, 0], [3, 0])).toThrow(TypeError);
     expect(() =>
       math.distance(
@@ -156,6 +175,15 @@ describe('geometry parity (#1792)', () => {
         }
       ).valueOf()
     ).toEqual([7, -4, 3]);
+  });
+
+  it('intersect throws for argument count and types like mathjs', () => {
+    expect(() => math.intersect([2, 0, 1], [1, 1, 6], [2, 0, 1], [1, 1, 6], [0, 8, 1])).toThrow(
+      /Too many arguments/
+    );
+    expect(() => math.intersect([2, 8, 9], 3, 6)).toThrow(TypeError);
+    expect(() => math.intersect('a', 'b', 'c', 'd')).toThrow(TypeError);
+    expect(math.intersect([0, 1, 0], [0, 0, 0], [1, 1, 0], [1, 0, 0])).toBeNull();
   });
 
   it('intersect empty arrays use mathjs dimensional message', () => {
