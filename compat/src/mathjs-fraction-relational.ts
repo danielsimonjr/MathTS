@@ -2,11 +2,7 @@
  * mathjs 15.3.0 relational kernels use fraction.js `equals` / `compare`, not core `Fraction`.
  */
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
-import {
-  isMathjsFraction,
-  mathjsFractionClass,
-  type MathjsFraction,
-} from './mathjs-fraction-class.js';
+import { isMathjsFraction, mathjsFractionClass } from './mathjs-fraction-class.js';
 
 function copyTypedSurface(shim: object, typedFn: object): void {
   for (const key of Reflect.ownKeys(typedFn)) {

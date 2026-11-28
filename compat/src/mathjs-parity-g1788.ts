@@ -263,13 +263,14 @@ export function withCompareNaturalBigintParity(
       const nx = Number(x);
       if (nx < y) return -1;
       if (nx > y) return 1;
-      return 'bigint' < 'number' ? -1 : 1;
+      // mathjs type-order tie-break when numeric compare is 0
+      return -1;
     }
     if (typeof x === 'number' && typeof y === 'bigint') {
       const ny = Number(y);
       if (x < ny) return -1;
       if (x > ny) return 1;
-      return 'number' < 'bigint' ? -1 : 1;
+      return -1;
     }
     return fn(x, y);
   });
