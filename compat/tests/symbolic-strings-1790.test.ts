@@ -26,9 +26,7 @@ describe('#1790 symbolic string parity', () => {
       ['x', 3],
       ['y', 4],
     ]);
-    expect(
-      (math.resolve(math.parse('x + y'), scope) as ExpressionNode).toString()
-    ).toBe('3 + 4');
+    expect((math.resolve(math.parse('x + y'), scope) as ExpressionNode).toString()).toBe('3 + 4');
   });
 
   it('derivative of acoth has correct sign', () => {
@@ -40,9 +38,9 @@ describe('#1790 symbolic string parity', () => {
 
   it('preserves bigint values when number mode is bigint', () => {
     const bigintMath = create(all, { number: 'bigint' }) as SymbolicMath;
-    expect(
-      (bigintMath.simplify('70000000000000000123 + 1') as ExpressionNode).evaluate()
-    ).toBe(70000000000000000124n);
+    expect((bigintMath.simplify('70000000000000000123 + 1') as ExpressionNode).evaluate()).toBe(
+      70000000000000000124n
+    );
     expect(
       (bigintMath.simplify('70000000000000000123 + bigint(5000)') as ExpressionNode).evaluate()
     ).toBe(70000000000000005123n);

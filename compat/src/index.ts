@@ -1355,6 +1355,14 @@ export function create(
     );
   };
   copyFunctionSurface(g18RangeNative as (...args: unknown[]) => unknown, g18Range);
+  const symbolicAlgebraHolder: { instance?: Record<string, unknown> } = {};
+  const symbolicUnitCtor = (localUnits?.Unit ?? instanceSymbols.Unit) as {
+    isValuelessUnit: (name: string) => boolean;
+  };
+  const symbolicAlgebraCtx = () => ({
+    mathScope: symbolicAlgebraHolder.instance ?? flat,
+    Unit: symbolicUnitCtor,
+  });
   const compatDefaultOverrides = {
     // #1587: a Fraction argument throws the mathjs conversion error, on top of
     // the G08 complex.js adapters (inverse hyperbolics) and the factories.
@@ -1721,10 +1729,10 @@ export function create(
       return promoted;
     },
     // #1790 — mathjs 15.3.0 simplify / resolve / derivative string parity.
-    simplify: createCompatSimplify(currentConfig),
-    simplifyCore: createCompatSimplifyCore(),
-    derivative: createCompatDerivative(),
-    resolve: createCompatResolve(),
+    simplify: createCompatSimplify(currentConfig, symbolicAlgebraCtx),
+    simplifyCore: createCompatSimplifyCore(symbolicAlgebraCtx),
+    derivative: createCompatDerivative(symbolicAlgebraCtx),
+    resolve: createCompatResolve(symbolicAlgebraCtx),
   };
   const overriddenNames = Object.keys(compatDefaultOverrides).filter(
     (name) => originalSurface[name] === functionsNamespace[name]
@@ -1778,6 +1786,7 @@ export function create(
   const inheritedKeys = flatKeys.filter((key) => !parityNames.has(key));
   const { levels, perLevel } = createPrototypeLevels(inheritedKeys.length);
   const instance = Object.create(levels[0] ?? Object.prototype) as Record<string, unknown>;
+  symbolicAlgebraHolder.instance = instance;
   const constantReaders = compatConstantReaders(
     flat,
     currentConfig,
