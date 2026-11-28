@@ -5,9 +5,16 @@
  */
 
 import { DimensionError } from '@danielsimonjr/mathts-core';
+import { COMPAT_MATRIX_WRAPPER, isCompatWrappedMatrix } from './compat-matrix-model.js';
+import {
+  applyCompatLegacySubsetGet,
+  forwardSubsetArgs,
+  applySubsetGetMatrixShape,
+} from './mathjs-parity-1785-surfaces.js';
 import {
   arraySize,
   broadcastTo,
+  clone,
   isEmptyIndex,
   isIndex,
   unsqueeze,
@@ -40,12 +47,15 @@ type BridgeMatrixMutable = {
 type G09SubsetDeps = {
   add: (...args: unknown[]) => unknown;
   zeros: (dims: number | number[]) => unknown;
+  matrix: (...args: unknown[]) => unknown;
+  sparse?: (...args: unknown[]) => unknown;
 };
 
 const SHAPE_MISMATCH_ZERO_INDEX =
   'shape mismatch: mismatch is found in arg with shape (1) not possible to broadcast dimension 1 with size 1 to size 0';
 
-const G09_MATRIX_SUBSET_PATCHED = Symbol('g09MatrixSubsetPatched');
+/** Marker on a dense matrix prototype once `installG09BridgeMatrixSubsetPatch` ran (#1557 / #1785). */
+export const G09_MATRIX_SUBSET_PATCHED = Symbol('g09MatrixSubsetPatched');
 
 const MATHJS_DENSE_MATRIX_NAME = 'MathJSDenseMatrix';
 
@@ -75,6 +85,10 @@ function keepSurface<T extends (...args: unknown[]) => unknown>(from: UnaryLike,
 
 function isBridgeDenseMatrix(value: unknown): value is BridgeMatrixMutable {
   if (typeof value !== 'object' || value === null) return false;
+  if (isCompatWrappedMatrix(value)) {
+    const proto = Object.getPrototypeOf(value) as Record<symbol, unknown> | null;
+    return proto?.[COMPAT_MATRIX_WRAPPER] === 'dense';
+  }
   const obj = value as BridgeMatrixMutable & {
     constructor?: { name?: string };
     isMatrix?: boolean;
@@ -99,6 +113,29 @@ function isRuntimeIndex(value: unknown): value is RuntimeIndex {
   return typeof obj.isScalar === 'function' && typeof obj.size === 'function';
 }
 
+type ScalarIndexDims = { _dimensions?: number[] };
+
+function tryArraySubsetWithNullDefault(args: readonly unknown[]): unknown | undefined {
+  if (args.length !== 4 || args[3] !== null || !Array.isArray(args[0])) {
+    return undefined;
+  }
+  const index = args[1];
+  if (!isRuntimeIndex(index) || !index.isScalar()) {
+    return undefined;
+  }
+  const dims = (index as unknown as ScalarIndexDims)._dimensions;
+  if (!Array.isArray(dims) || dims.length !== 1 || typeof dims[0] !== 'number') {
+    return undefined;
+  }
+  const position = dims[0];
+  const out: unknown[] = (args[0] as unknown[]).slice();
+  while (out.length < position) {
+    out.push(null);
+  }
+  out[position] = args[2];
+  return out;
+}
+
 function isScalarReplacement(replacement: unknown): boolean {
   if (replacement === null || replacement === undefined) return true;
   if (Array.isArray(replacement)) return false;
@@ -112,6 +149,13 @@ function sizesEqual(a: number[], b: number[]): boolean {
 
 function replacementSize(replacement: unknown): number[] {
   if (isBridgeDenseMatrix(replacement)) return replacement.size();
+  if (
+    typeof replacement === 'object' &&
+    replacement !== null &&
+    typeof (replacement as { size?: unknown }).size === 'function'
+  ) {
+    return (replacement as { size: () => number[] }).size();
+  }
   if (Array.isArray(replacement)) return arraySize(replacement);
   if (
     typeof replacement === 'object' &&
@@ -119,6 +163,9 @@ function replacementSize(replacement: unknown): number[] {
     typeof (replacement as { toArray?: unknown }).toArray === 'function'
   ) {
     return arraySize((replacement as { toArray: () => NestedArray<unknown> }).toArray());
+  }
+  if (isMatrixValue(replacement)) {
+    throw new DimensionError([1, 1], [0, 0], '>');
   }
   return arraySize(replacement as NestedArray<unknown>);
 }
@@ -184,7 +231,11 @@ export function reshapeG09AssignmentRhsInPlace(
     while (k < selection.length && selection[k] === 1 && repSize[k] === 1) k++;
     let outer = 0;
     for (; k < selection.length && selection[k] === 1; k++) outer++;
-    rep = unsqueeze(rep, selection.length, outer, repSize);
+    // Unsqueeze a copy. The native bridge re-reads `arraySize` of the replacement, and
+    // writing that result back into the same array makes a cycle (`Invalid array length`).
+    const source = clone(rep);
+    const sized = repSize.slice();
+    rep = unsqueeze(source, selection.length, outer, sized);
     if (isBridgeDenseMatrix(replacement)) {
       replacement._data = rep;
       replacement._size = [...selection];
@@ -224,49 +275,72 @@ function shouldDeferEmptyIndexNoop(index: RuntimeIndex, isSet: boolean): boolean
   return size.length > 0 && size.some((d: number) => d === 0);
 }
 
-type SubsetPatchedCtor = {
-  name?: string;
-  prototype: BridgeMatrixMutable;
+type SubsetPatchedProto = BridgeMatrixMutable & {
+  subset(index: unknown, replacement?: unknown, defaultValue?: unknown): unknown;
   [G09_MATRIX_SUBSET_PATCHED]?: boolean;
 };
 
 /** Patch bridge `DenseMatrix#subset` once so RHS values reshape like mathjs before `_setSubset`. */
 export function installG09BridgeMatrixSubsetPatch(sampleMatrix: unknown): void {
   if (!isBridgeDenseMatrix(sampleMatrix)) return;
-  const ctor = sampleMatrix.constructor as SubsetPatchedCtor;
-  if (ctor.name !== MATHJS_DENSE_MATRIX_NAME) return;
-  if (ctor[G09_MATRIX_SUBSET_PATCHED]) return;
-  const proto = ctor.prototype;
+  const proto = Object.getPrototypeOf(sampleMatrix) as SubsetPatchedProto;
+  if (proto[G09_MATRIX_SUBSET_PATCHED]) return;
   const original = proto.subset;
   proto.subset = function (
     this: BridgeMatrixMutable,
-    index: unknown,
-    replacement?: unknown,
-    defaultValue?: unknown
+    index?: unknown,
+    replacement?: unknown
   ): unknown {
-    if (replacement !== undefined && isRuntimeIndex(index)) {
+    const argc = arguments.length;
+    if (argc >= 2 && argc <= 3 && replacement !== undefined && isRuntimeIndex(index)) {
       validateG09ZeroSizedSet(index, replacement);
       reshapeG09AssignmentRhsInPlace(index, replacement);
     }
-    return original.call(this, index, replacement, defaultValue);
+    const forward = original as (this: BridgeMatrixMutable, ...args: unknown[]) => unknown;
+    const forwarded: unknown[] = [];
+    for (let i = 0; i < argc; i++) forwarded.push(arguments[i]);
+    return forward.apply(this, forwarded);
   };
-  Object.defineProperty(ctor, G09_MATRIX_SUBSET_PATCHED, { value: true, configurable: true });
+  Object.defineProperty(proto, G09_MATRIX_SUBSET_PATCHED, { value: true, configurable: true });
 }
 
 /** Wrap `subset` so zero-length selections throw and empty-index no-ops match mathjs 15.3.0. */
 export function createCompatSubsetG09(
   subset: UnaryLike,
-  _deps: G09SubsetDeps
+  deps: G09SubsetDeps,
+  getLegacySubset: () => boolean = () => false
 ): (...args: unknown[]) => unknown {
+  const matrixFromScalar = (value: unknown): unknown => deps.matrix([value]);
   return keepSurface(subset, (...args: unknown[]): unknown => {
+    const arrayNull = tryArraySubsetWithNullDefault(args);
+    if (arrayNull !== undefined) {
+      return arrayNull;
+    }
     if (args.length >= 3) {
       const value = args[0];
       const index = args[1];
       const replacement = args[2];
+      if (
+        isRuntimeIndex(index) &&
+        shouldDeferEmptyIndexNoop(index, true) &&
+        args[2] === undefined
+      ) {
+        if (Array.isArray(value) || isBridgeDenseMatrix(value)) {
+          return value;
+        }
+      }
       // Sparse matrices keep their own subset contract (do not mutate the caller
       // replacement). G09 reshape/throw applies to the dense bridge used by
       // indexed assignment, not to SparseMatrix.
       if (isBridgeDenseMatrix(value) && isRuntimeIndex(index)) {
+        if (isEmptyIndex(index)) {
+          const size = (value as { size?: () => number[] }).size?.() ?? [];
+          const matrixEmpty = size.length === 0 || size.some((dim) => dim === 0);
+          // mathjs `subset` returns the same matrix when the index is empty and the
+          // matrix itself has axes. An empty matrix still goes through the zero-size
+          // checks (assignment `e[:, 1] = 5` on `e = []`).
+          if (!matrixEmpty) return value;
+        }
         if (isEmptyIndex(index) && !shouldDeferEmptyIndexNoop(index, true)) {
           return value;
         }
@@ -279,6 +353,37 @@ export function createCompatSubsetG09(
         return apply(subset, args);
       }
     }
-    return apply(subset, args);
+    const result = forwardSubsetArgs(subset as (...a: unknown[]) => unknown, ...args);
+    if (args.length === 2) {
+      if (Array.isArray(args[0])) {
+        if (
+          typeof result === 'object' &&
+          result !== null &&
+          (result as { isMatrix?: boolean }).isMatrix === true &&
+          typeof (result as { valueOf?: () => unknown }).valueOf === 'function'
+        ) {
+          const flat = (result as { valueOf: () => unknown }).valueOf();
+          return flat;
+        }
+        return result;
+      }
+      const legacy = getLegacySubset();
+      const adjusted = applyCompatLegacySubsetGet(result, args[1], legacy, matrixFromScalar);
+      const matrixOut = (data: unknown): unknown => {
+        const src = args[0];
+        if (
+          typeof src === 'object' &&
+          src !== null &&
+          typeof (src as { storage?: () => string }).storage === 'function' &&
+          (src as { storage: () => string }).storage() === 'sparse'
+        ) {
+          const sparse = deps.sparse ?? deps.matrix;
+          return sparse(data);
+        }
+        return deps.matrix(data);
+      };
+      return applySubsetGetMatrixShape(adjusted, args[1], legacy, matrixOut);
+    }
+    return result;
   });
 }

@@ -282,6 +282,100 @@ export function withInvalidNumericStringGuard(fn: UnaryLike): (...args: unknown[
   });
 }
 
+/**
+ * 1-D matrix reductions along dimension 0 return a scalar in mathjs 15.3.0 (#1785),
+ * not a length-1 matrix.
+ */
+export function withReductionDim0ScalarReturn(fn: UnaryLike): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    const result = apply(fn, args);
+    if (
+      args.length === 2 &&
+      args[1] === 0 &&
+      typeof args[0] === 'object' &&
+      args[0] !== null &&
+      !Array.isArray(args[0]) &&
+      isMatrixLikeValue(args[0])
+    ) {
+      const size = (args[0] as { size(): number[] }).size();
+      if (size.length === 1) {
+        if (typeof result !== 'object') return result;
+        if (isMatrixLikeValue(result)) {
+          const rSize = (result as { size(): number[] }).size();
+          if (rSize.length === 1 && rSize[0] === 1) {
+            const flat = (result as { toArray(): unknown }).toArray();
+            if (Array.isArray(flat) && flat.length === 1) return flat[0];
+          }
+        }
+      }
+    }
+    return result;
+  });
+}
+
+function isStatisticsCollectionOperand(x: unknown): boolean {
+  if (Array.isArray(x)) return true;
+  return isMatrixLikeValue(x);
+}
+
+/** mathjs rejects multiple bare collections without a dimension (#1785). */
+export function withStatisticsMultiCollectionGuard(fn: UnaryLike): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length >= 2 && args.every(isStatisticsCollectionOperand)) {
+      throw new Error('Scalar values expected');
+    }
+    return apply(fn, args);
+  });
+}
+
+/** mathjs throws on empty array reductions (#1785). */
+export function withStatisticsEmptyCollectionThrow(
+  name: 'max' | 'min' | 'sum',
+  fn: UnaryLike
+): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (args.length === 1 && Array.isArray(args[0]) && (args[0] as unknown[]).length === 0) {
+      throw new Error(`Cannot calculate ${name} of an empty array`);
+    }
+    return apply(fn, args);
+  });
+}
+
+/**
+ * When `config.number === 'bigint'`, all-integer string args reduce to bigint (#1785).
+ */
+export function withBigIntStatisticsStrings(
+  fn: UnaryLike,
+  getNumberMode: () => string,
+  bigintStringReducer?: (...args: unknown[]) => unknown
+): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    if (
+      getNumberMode() === 'bigint' &&
+      args.length > 0 &&
+      args.every((a) => typeof a === 'string') &&
+      typeof bigintStringReducer === 'function'
+    ) {
+      return bigintStringReducer(...args);
+    }
+    const result = apply(fn, args);
+    if (getNumberMode() !== 'bigint') return result;
+    const allIntegerStrings =
+      args.length > 0 &&
+      args.every(
+        (a) =>
+          typeof a === 'string' &&
+          a.trim() !== '' &&
+          !Number.isNaN(Number(a)) &&
+          Number.isInteger(Number(a))
+      );
+    if (allIntegerStrings && typeof result === 'number' && Number.isInteger(result)) {
+      return BigInt(result);
+    }
+    return result;
+  });
+}
+
 /** `min` / `max` on Complex values throw mathjs's ordering error, not "Unexpected type". */
 export function withComplexOrderingGuard(
   name: 'min' | 'max',
@@ -771,6 +865,26 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
     return apply(unaryPlus, [partitionSelect(list, (num - 1) / 2)]);
   }
 
+  function absMatrixSafe(value: unknown): unknown {
+    // Elementwise abs on a compat dense matrix. The functions unary walks
+    // `matrix.get(row, col)`, which mathjs DenseMatrix#get rejects (one array
+    // index). Walk toArray instead.
+    if (isMatrixLikeValue(value) && !Array.isArray(value)) {
+      const matrix = value as {
+        toArray(): unknown;
+        create?: (data: unknown) => unknown;
+      };
+      const mapped = mapAbsLeaves(matrix.toArray());
+      return typeof matrix.create === 'function' ? matrix.create(mapped) : mapped;
+    }
+    return apply(abs, [value]);
+  }
+
+  function mapAbsLeaves(data: unknown): unknown {
+    if (Array.isArray(data)) return data.map((entry) => mapAbsLeaves(entry));
+    return apply(abs, [data]);
+  }
+
   return (...args: unknown[]): unknown => {
     if (args.length === 0) throw tooFewArgumentsError('mad', 0);
     if (
@@ -796,7 +910,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
     assertNoComplexOrdering(values);
     try {
       const med = medianShape([...values]);
-      return medianShape(values.map((value) => apply(abs, [apply(subtract, [value, med])])));
+      return medianShape(values.map((value) => absMatrixSafe(apply(subtract, [value, med]))));
     } catch (err) {
       if (err instanceof TypeError && err.message.includes('median')) {
         throw new TypeError(err.message.replace('median', 'mad'), { cause: err });

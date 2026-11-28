@@ -479,7 +479,7 @@ honours `includeEnd` on those paths.
 **Dependencies** (1):
 `createTyped`
 
-**Factory / uncategorized** (674):
+**Factory / uncategorized** (673):
 `abs`
 `acos`
 `acosh`
@@ -1041,7 +1041,6 @@ honours `includeEnd` on those paths.
 `mapSlices`
 `mathjsToCoreFraction`
 `matrix`
-`Matrix`
 `matrixFromColumns`
 `matrixFromFunction`
 `matrixFromRows`
@@ -1613,7 +1612,7 @@ honours `includeEnd` on those paths.
 `zetaDependencies`
 `zpk2tfDependencies`
 
-### Classes & types (30)
+### Classes & types (31)
 
 `AccessorNode`
 `ArrayNode`
@@ -1633,6 +1632,7 @@ honours `includeEnd` on those paths.
 `ImmutableDenseMatrix`
 `Index`
 `IndexNode`
+`Matrix`
 `Node`
 `ObjectNode`
 `OperatorNode`

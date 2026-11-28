@@ -170,6 +170,7 @@ describe('G09 src surface (#1557)', () => {
     const wrapped = createCompatSubsetG09(frozen as (...args: never[]) => unknown, {
       add: () => 0,
       zeros: () => 0,
+      matrix: (data: unknown) => data,
     });
     expect(wrapped(1, 2)).toBe('ok');
   });
