@@ -29,6 +29,7 @@ export type CompatUnitParityClass = MathjsUnitParseHost & {
   prototype: object;
   parse: MathjsUnitParse;
   UNITS: Record<string, unknown>;
+  _findUnit: (name: string, unrestricted?: boolean) => { unit: unknown; prefix: unknown } | null;
   createUnitSingle: (name: unknown, definition?: unknown, options?: unknown) => unknown;
 };
 
@@ -94,6 +95,28 @@ function installCreateUnitSingle(
   };
 }
 
+/** `createUnit` may point alias names at a canonical unit with a string UNITS entry. */
+function installFindUnitStringAliases(Unit: CompatUnitParityClass): void {
+  const native = Unit._findUnit.bind(Unit);
+  Unit._findUnit = ((name: string, unrestricted?: boolean) => {
+    const units = Unit.UNITS;
+    if (Object.hasOwn(units, name)) {
+      const entry = units[name];
+      if (typeof entry === 'string') {
+        const resolved = native(entry, unrestricted);
+        if (resolved !== null) {
+          const unit =
+            typeof resolved.unit === 'object' && resolved.unit !== null
+              ? { ...(resolved.unit as Record<string, unknown>), name }
+              : resolved.unit;
+          return { unit, prefix: resolved.prefix };
+        }
+      }
+    }
+    return native(name, unrestricted);
+  }) as CompatUnitParityClass['_findUnit'];
+}
+
 function installToBest(Unit: CompatUnitParityClass): void {
   const proto = Unit.prototype as ToBestPrototype;
   const native = proto.toBest;
@@ -118,6 +141,7 @@ export function patchCompatUnitParity(
 ): void {
   Unit.parse = createMathjsUnitParse(Unit, options.numberMode);
   installIsValidAlpha(Unit);
+  installFindUnitStringAliases(Unit);
   installCreateUnitSingle(Unit, options);
   installToBest(Unit);
 }

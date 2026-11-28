@@ -109,10 +109,14 @@ export function wrapCompatUnitClass<T extends CompatUnitConstructorLike>(
   const isVisibleKey = (prop: string): boolean =>
     MATHJS_UNIT_NAME_SET.has(prop) || !originalKeys.has(prop) || registeredNames.has(prop);
 
-  Base.isValuelessUnit = (name: string): boolean =>
-    isMathjsValuelessUnitName(name) ||
-    registeredNames.has(name) ||
-    (Object.hasOwn(units, name) && !originalKeys.has(name));
+  Base.isValuelessUnit = (name: string): boolean => {
+    if (isMathjsValuelessUnitName(name) || registeredNames.has(name)) return true;
+    if (!Object.hasOwn(units, name)) return false;
+    if (typeof units[name] === 'string') return true;
+    if (!originalKeys.has(name)) return true;
+    const entry = units[name];
+    return typeof entry === 'object' && entry !== null && registeredNames.has(name);
+  };
 
   Base.UNITS = new Proxy(units, {
     get(target, prop, receiver) {
@@ -208,11 +212,59 @@ function constructNonFiniteUnit<U extends { value: unknown; _normalize(value: un
   return built;
 }
 
+/** Coerce matrix literal aliases from `evaluate` into plain arrays for mathjs parity. */
+function normalizeCreateUnitDefinitionArg(def: unknown): unknown {
+  if (!def || typeof def !== 'object' || Array.isArray(def)) return def;
+  const aliases = (def as { aliases?: unknown }).aliases;
+  if (aliases !== null && typeof aliases === 'object' && !Array.isArray(aliases)) {
+    const matrix = aliases as { data?: unknown; _data?: unknown };
+    const data = Array.isArray(matrix.data)
+      ? matrix.data
+      : Array.isArray(matrix._data)
+        ? matrix._data
+        : undefined;
+    if (data !== undefined) {
+      return { ...(def as Record<string, unknown>), aliases: data.slice() };
+    }
+  }
+  return def;
+}
+
+/** Aliases from a definition object (plain arrays or matrix literals from `evaluate`). */
+function readCreateUnitAliasList(def: unknown): string[] {
+  if (!def || typeof def !== 'object' || Array.isArray(def)) return [];
+  const aliases = (def as { aliases?: unknown }).aliases;
+  if (Array.isArray(aliases)) {
+    return aliases.filter((entry): entry is string => typeof entry === 'string');
+  }
+  if (aliases !== null && typeof aliases === 'object') {
+    const matrix = aliases as { data?: unknown; _data?: unknown };
+    const data = Array.isArray(matrix.data)
+      ? matrix.data
+      : Array.isArray(matrix._data)
+        ? matrix._data
+        : undefined;
+    if (data !== undefined) {
+      return data.filter((entry): entry is string => typeof entry === 'string');
+    }
+    if (typeof (aliases as { forEach?: unknown }).forEach === 'function') {
+      return Array.from(aliases as Iterable<unknown>).filter(
+        (entry): entry is string => typeof entry === 'string'
+      );
+    }
+  }
+  return [];
+}
+
 /** Record names `createUnit` just registered so `isValuelessUnit` can see overrides. */
 function rememberCreateUnitNames(args: unknown[], registeredNames: Set<string>): void {
   const head = args[0];
-  if (typeof head === 'string') registeredNames.add(head);
-  else if (head && typeof head === 'object')
+  if (typeof head === 'string') {
+    registeredNames.add(head);
+    for (const alias of readCreateUnitAliasList(args[1])) registeredNames.add(alias);
+    return;
+  }
+  if (head && typeof head === 'object')
     for (const key of Object.keys(head as object)) registeredNames.add(key);
 }
 
@@ -283,6 +335,9 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(
   const coreUnitsDefinedByMathjsDocs = new Set(['knot', 'mph']);
 
   const wrappedCreateUnit = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args.length >= 2) {
+      args[1] = normalizeCreateUnitDefinitionArg(args[1]);
+    }
     const head = args[0];
     const optionsArg =
       head && typeof head === 'object' && !Array.isArray(head)
@@ -298,9 +353,11 @@ export function wrapCompatUnitSources<T extends LocalUnitSources>(
       !overrideRequested &&
       typeof head === 'string' &&
       coreUnitsDefinedByMathjsDocs.has(head) &&
-      builtinUnitKeys.has(head)
+      (builtinUnitKeys.has(head) || Object.hasOwn(Unit.UNITS, head))
     ) {
       rememberCreateUnitNames(args, registeredNames);
+      const units = Unit.UNITS as Record<string, unknown>;
+      for (const alias of readCreateUnitAliasList(args[1])) units[alias] = head;
       return undefined;
     }
     if (!overrideRequested && typeof head === 'string' && registeredNames.has(head)) {

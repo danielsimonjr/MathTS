@@ -9,8 +9,7 @@ import {
   mathjsFractionClass,
   type MathjsFraction,
 } from './mathjs-fraction-class.js';
-import { mathjsToCoreFraction } from './shims.js';
-import { Fraction as CoreFraction, isFraction as isCoreFraction } from '@danielsimonjr/mathts-core';
+import { isFraction as isCoreFraction } from '@danielsimonjr/mathts-core';
 /**
  * mathjs instance methods on `create(all)`: import, typed, compile, and
  * expression scope wired for per-instance evaluate.
@@ -53,6 +52,7 @@ import { createParseScopeNumber, createParseScopeNumeric } from './mathjs-number
 import { createCompatScopedParse } from './compat-scoped-parse.js';
 import { buildCompatExpressionNodeConstructors } from './compat-expression-nodes.js';
 import { preprocessMathjsCompatParseInput } from './mathjs-parse-preprocess.js';
+import { sanitizeMathjsConfigOptions, scrubConfigCloneFunction } from './mathjs-config-sanitize.js';
 import { numeric as functionsNumeric } from '@danielsimonjr/mathts-functions';
 import {
   wireInstanceExprNodeConstructors,
@@ -473,9 +473,11 @@ export function wireMathjsInstanceApi(
 
   /** mathjs `node._compile(math, …)` namespace: includes `parse`/`evaluate`/… unlike public `mathWithTransform`. */
   let factoryCompileMath: Record<string, unknown> = {};
+  let normalizeCompiledValue: (value: unknown) => unknown = (value) => value;
   let factoryCompileCtx: CompatFactoryCompileContext = {
     mathWithTransform: factoryCompileMath,
     unitCtor: undefined,
+    normalizeValue: (value) => normalizeCompiledValue(value),
   };
 
   function rebuildFactoryCompileMath(): void {
@@ -668,7 +670,9 @@ export function wireMathjsInstanceApi(
     const innerConfigFn = instance.config;
     if (typeof innerConfigFn === 'function') {
       const configWrapper = (...args: unknown[]) => {
-        const result = (innerConfigFn as (...a: unknown[]) => unknown)(...args);
+        const configArgs = args.length > 0 ? sanitizeMathjsConfigOptions(args[0]) : args;
+        const result = (innerConfigFn as (...a: unknown[]) => unknown)(...configArgs);
+        scrubConfigCloneFunction(result);
         syncEvaluateScopeOverrides();
         rebuildFactoryCompileMath();
         return result;
@@ -718,6 +722,7 @@ export function wireMathjsInstanceApi(
       mathWithTransform: scope,
       unitCtor: instance.Unit,
       instance: instance as Record<string, unknown>,
+      normalizeValue: (value) => normalizeCompiledValue(value),
     };
   }
 
@@ -856,8 +861,11 @@ export function wireMathjsInstanceApi(
     const instanceBigNumberCtor = instance.BigNumber as CompatDecimalBigNumberCtor;
     const coerceFractionConfig = (value: unknown): unknown => {
       if (currentConfig.number !== 'Fraction') return value;
-      if (isMathjsFraction(value)) return mathjsToCoreFraction(value);
-      if (isCoreFraction(value)) return value;
+      if (isMathjsFraction(value)) return value;
+      if (isCoreFraction(value)) {
+        const core = value as unknown as { n: number | bigint; d: number | bigint };
+        return new mathjsFractionClass(core.n, core.d);
+      }
       if (Array.isArray(value)) {
         let changed = false;
         const mapped = value.map((entry) => {
@@ -888,12 +896,16 @@ export function wireMathjsInstanceApi(
         const s = typeof parts.s === 'bigint' ? parts.s : BigInt(parts.s ?? 1);
         const n = typeof parts.n === 'bigint' ? parts.n : BigInt(parts.n);
         const d = typeof parts.d === 'bigint' ? parts.d : BigInt(parts.d);
-        return new CoreFraction(s < 0n ? -n : n, d);
+        return new mathjsFractionClass(s < 0n ? -n : n, d);
+      }
+      if (typeof value === 'number' || typeof value === 'string') {
+        return new mathjsFractionClass(String(value));
       }
       return value;
     };
     const normalizeDecimal = (value: unknown): unknown =>
       coerceFractionConfig(compatDecimalResult(value, instanceBigNumberCtor));
+    normalizeCompiledValue = normalizeDecimal;
     evaluator = createInstanceEvaluator(
       buildEvaluatorScope(),
       COMPAT_INTERNAL_NAMES,
@@ -1160,7 +1172,9 @@ export function wireMathjsInstanceApi(
   const innerConfig = instance.config as ((...args: unknown[]) => unknown) | undefined;
   if (typeof innerConfig === 'function') {
     const configWrapper = ((...args: unknown[]) => {
-      const result = innerConfig(...args);
+      const configArgs = args.length > 0 ? sanitizeMathjsConfigOptions(args[0]) : args;
+      const result = innerConfig(...configArgs);
+      scrubConfigCloneFunction(result);
       syncEvaluateScopeOverrides();
       rebuildFactoryCompileMath();
       return result;
@@ -1178,7 +1192,7 @@ export function wireMathjsInstanceApi(
           throw tooManyArgumentsError('parse', 2, args.length);
         }
         const exprArg = args[0];
-        const parseArgs =
+        let parseArgs: unknown[] =
           typeof exprArg === 'string'
             ? [preprocessMathjsCompatParseInput(exprArg), ...args.slice(1)]
             : Array.isArray(exprArg)
@@ -1187,6 +1201,33 @@ export function wireMathjsInstanceApi(
                   ...args.slice(1),
                 ]
               : args;
+        if (parseArgs[1] !== null && typeof parseArgs[1] === 'object') {
+          const opts = { ...(parseArgs[1] as Record<string, unknown>) };
+          const nodes = opts.nodes;
+          if (nodes !== null && typeof nodes === 'object') {
+            const wrappedNodes: Record<string, unknown> = {};
+            for (const [key, ctor] of Object.entries(nodes as Record<string, unknown>)) {
+              if (typeof ctor !== 'function') {
+                wrappedNodes[key] = ctor;
+                continue;
+              }
+              const Ctor = ctor as new (args: unknown) => unknown;
+              function WrappedCustomNode(this: unknown, ...ctorArgs: unknown[]): unknown {
+                if (new.target === undefined) {
+                  throw new TypeError(`Class constructor ${key} cannot be invoked without 'new'`);
+                }
+                const nodeArgs =
+                  ctorArgs.length > 0 && ctorArgs[0] !== undefined ? ctorArgs[0] : [];
+                return Reflect.construct(Ctor, [nodeArgs], new.target);
+              }
+              Object.setPrototypeOf(WrappedCustomNode, Ctor);
+              WrappedCustomNode.prototype = Ctor.prototype;
+              wrappedNodes[key] = WrappedCustomNode;
+            }
+            opts.nodes = wrappedNodes;
+            parseArgs = [parseArgs[0], opts];
+          }
+        }
         const node = runWithConfig(currentConfig, () =>
           Reflect.apply(evaluator.parse, receiver, parseArgs)
         );

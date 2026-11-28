@@ -16,6 +16,10 @@ import {
 } from './bignumber.js';
 import { isComplex, isFraction } from '@danielsimonjr/mathts-core';
 import { improveMathjsStatisticsError } from './mathjs-statistics-errors.js';
+import {
+  mathjsCollectionStdAlongDim,
+  mathjsCollectionVarianceAlongDim,
+} from './mathjs-collection-variance.js';
 import type { Fraction as CompatFractionType } from '@danielsimonjr/mathts-core';
 import type { CompatBigNumberInstance as CompatBigNumberType } from './bignumber.js';
 
@@ -491,6 +495,7 @@ export interface CompatStatisticsDeps {
   divide: UnaryLike;
   sqrt: UnaryLike;
   matrix: (data: unknown, storage?: string) => unknown;
+  mapSlices?: (array: unknown, dim: number, callback: (slice: unknown) => unknown) => unknown;
 }
 
 function mathjsComplexVariance(
@@ -592,6 +597,44 @@ export function createCompatMathjsStatistics(
           if (flat.some(isComplexLike)) return complexVariance(flat, 'unbiased');
           return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
         }
+        if (args.length === 2 && isDim(args[1]) && Array.isArray(args[0]) && deps.mapSlices) {
+          const ops = {
+            add: deps.add as (...a: unknown[]) => unknown,
+            subtract: deps.subtract as (...a: unknown[]) => unknown,
+            multiply: deps.multiply as (...a: unknown[]) => unknown,
+            divide: deps.divide as (...a: unknown[]) => unknown,
+            sqrt: deps.sqrt as (...a: unknown[]) => unknown,
+            mapSlices: deps.mapSlices,
+          };
+          const alongDim =
+            name === 'std'
+              ? mathjsCollectionStdAlongDim(args[0], args[1], 'unbiased', ops)
+              : mathjsCollectionVarianceAlongDim(args[0], args[1], 'unbiased', ops);
+          return reboxMatrixStatistics(args, alongDim, deps.matrix);
+        }
+        if (
+          args.length === 3 &&
+          isDim(args[1]) &&
+          typeof args[2] === 'string' &&
+          isNorm(args[2]) &&
+          Array.isArray(args[0]) &&
+          deps.mapSlices
+        ) {
+          const norm = args[2];
+          const ops = {
+            add: deps.add as (...a: unknown[]) => unknown,
+            subtract: deps.subtract as (...a: unknown[]) => unknown,
+            multiply: deps.multiply as (...a: unknown[]) => unknown,
+            divide: deps.divide as (...a: unknown[]) => unknown,
+            sqrt: deps.sqrt as (...a: unknown[]) => unknown,
+            mapSlices: deps.mapSlices,
+          };
+          const alongDim =
+            name === 'std'
+              ? mathjsCollectionStdAlongDim(args[0], args[1], norm, ops)
+              : mathjsCollectionVarianceAlongDim(args[0], args[1], norm, ops);
+          return reboxMatrixStatistics(args, alongDim, deps.matrix);
+        }
         if (args.length === 2 && isDim(args[1])) {
           return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
         }
@@ -614,7 +657,10 @@ export function createCompatMathjsStatistics(
       }
       return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
     } catch (err) {
-      throw improveMathjsStatisticsError(err, name);
+      const badValue = args.find(
+        (arg) => arg instanceof Date || arg === null || (Array.isArray(arg) && arg.includes(null))
+      );
+      throw improveMathjsStatisticsError(err, name, badValue);
     }
   });
 }

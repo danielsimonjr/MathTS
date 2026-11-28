@@ -27,6 +27,22 @@ export function improveMathjsStatisticsError(
       `Cannot calculate ${fnName}, unexpected type of argument (type: null, value: null)`
     );
   }
+  if (/add: unexpected type/i.test(errText) && /date/i.test(errText)) {
+    const dateArg = value instanceof Date ? value : undefined;
+    const details = dateArg
+      ? ` (type: Date, value: ${dateArg.toISOString()})`
+      : ' (type: Date, value: unknown)';
+    return new TypeError(`Cannot calculate ${fnName}, unexpected type of argument${details}`);
+  }
+  if (
+    /add: unexpected type/i.test(errText) &&
+    value === undefined &&
+    /\[object Date\]/i.test(errText)
+  ) {
+    return new TypeError(
+      `Cannot calculate ${fnName}, unexpected type of argument (type: Date, value: unknown)`
+    );
+  }
   if (errText.includes('Unexpected type')) {
     const details =
       value !== undefined
