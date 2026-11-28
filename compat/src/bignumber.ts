@@ -52,9 +52,9 @@ function isExpressionNode(value: object): value is {
   return candidate.isNode === true && typeof candidate.evaluate === 'function';
 }
 
-const nodeEvaluateWrapped = Symbol('compatNodeEvaluateWrapped');
-const nodeEvaluateOriginal = Symbol('compatNodeEvaluateOriginal');
-const skipCompatNodeEvaluatePatch = Symbol('compatSkipNodeEvaluatePatch');
+const nodeEvaluatePatchedNodes = new WeakSet<object>();
+const nodeEvaluateOriginals = new WeakMap<object, (...args: unknown[]) => unknown>();
+const skipNodeEvaluatePatchNodes = new WeakSet<object>();
 
 /** When one operand is a BigNumber, mathjs promotes booleans to 0/1 BigNumbers. */
 export function promoteBooleanScalarsForBigNumber(
@@ -97,14 +97,13 @@ function patchNodeEvaluate(
   node: { evaluate: (...args: unknown[]) => unknown },
   instanceCtor: CompatDecimalBigNumberCtor
 ): void {
-  const marker = node as { [nodeEvaluateWrapped]?: boolean };
-  if (marker[nodeEvaluateWrapped]) return;
+  if (nodeEvaluatePatchedNodes.has(node)) return;
   const original = node.evaluate;
-  (node as { [nodeEvaluateOriginal]?: typeof original })[nodeEvaluateOriginal] = original;
+  nodeEvaluateOriginals.set(node, original);
   node.evaluate = function (this: unknown, ...args: unknown[]) {
     return compatDecimalResult(original.apply(this, args), instanceCtor);
   };
-  marker[nodeEvaluateWrapped] = true;
+  nodeEvaluatePatchedNodes.add(node);
 }
 
 function isExpressionNodeLike(
@@ -129,28 +128,79 @@ export function stripCompatNodeEvaluatePatches(value: unknown): unknown {
     return changed ? next : value;
   }
   if (!isExpressionNodeLike(value)) return value;
-  (value as { [skipCompatNodeEvaluatePatch]?: boolean })[skipCompatNodeEvaluatePatch] = true;
-  const marker = value as {
-    [nodeEvaluateWrapped]?: boolean;
-    [nodeEvaluateOriginal]?: (...args: unknown[]) => unknown;
-    map?: (fn: (child: unknown) => unknown) => unknown;
-  };
-  if (marker[nodeEvaluateWrapped] && marker[nodeEvaluateOriginal]) {
-    const proto = Object.getPrototypeOf(value) as { evaluate?: unknown };
-    if (proto.evaluate === marker[nodeEvaluateOriginal]) {
-      Reflect.deleteProperty(value, 'evaluate');
-    } else {
-      value.evaluate = marker[nodeEvaluateOriginal];
+  const marker = value as { map?: (fn: (child: unknown) => unknown) => unknown };
+  if (nodeEvaluatePatchedNodes.has(value)) {
+    const original = nodeEvaluateOriginals.get(value);
+    if (original) {
+      const proto = Object.getPrototypeOf(value) as { evaluate?: unknown };
+      if (proto.evaluate === original) {
+        Reflect.deleteProperty(value, 'evaluate');
+      } else {
+        value.evaluate = original;
+      }
     }
-    delete marker[nodeEvaluateWrapped];
-    delete marker[nodeEvaluateOriginal];
+    nodeEvaluatePatchedNodes.delete(value);
+    nodeEvaluateOriginals.delete(value);
   }
-  Reflect.deleteProperty(marker, nodeEvaluateWrapped);
-  Reflect.deleteProperty(marker, nodeEvaluateOriginal);
-  Reflect.deleteProperty(marker, skipCompatNodeEvaluatePatch);
+  if (Object.hasOwn(value, 'evaluate')) {
+    const proto = Object.getPrototypeOf(value) as { evaluate?: unknown };
+    if (typeof proto.evaluate === 'function') {
+      Reflect.deleteProperty(value, 'evaluate');
+    }
+  }
   if (typeof marker.map === 'function') {
     marker.map((child) => {
       stripCompatNodeEvaluatePatches(child);
+      return child;
+    });
+  }
+  return value;
+}
+
+/** Mark expression trees so `compatDecimalResult` does not re-patch `evaluate` (#1790). */
+function visitMatrixLikeChildren(value: object, visit: (entry: unknown) => void): void {
+  const matrixLike = value as {
+    isMatrix?: boolean;
+    map?: (fn: (entry: unknown) => unknown) => unknown;
+    _data?: unknown;
+  };
+  if (matrixLike.isMatrix !== true) return;
+  if (typeof matrixLike.map === 'function') {
+    matrixLike.map((entry) => {
+      visit(entry);
+      return entry;
+    });
+    return;
+  }
+  if (Array.isArray(matrixLike._data)) {
+    for (const entry of matrixLike._data) visit(entry);
+  }
+}
+
+export function markSymbolicAlgebraNodes(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    let changed = false;
+    const next = value.map((entry) => {
+      const marked = markSymbolicAlgebraNodes(entry);
+      if (marked !== entry) changed = true;
+      return marked;
+    });
+    return changed ? next : value;
+  }
+  if (typeof value === 'object' && value !== null) {
+    visitMatrixLikeChildren(value, (entry) => {
+      markSymbolicAlgebraNodes(entry);
+    });
+    if ((value as { isMatrix?: boolean }).isMatrix === true) {
+      return value;
+    }
+  }
+  if (!isExpressionNodeLike(value)) return value;
+  skipNodeEvaluatePatchNodes.add(value);
+  const marker = value as { map?: (fn: (child: unknown) => unknown) => unknown };
+  if (typeof marker.map === 'function') {
+    marker.map((child) => {
+      markSymbolicAlgebraNodes(child);
       return child;
     });
   }
@@ -194,6 +244,9 @@ export function compatDecimalResult(
     }
     let changed = false;
     const mapped = value.map((entry) => {
+      if (isExpressionNodeLike(entry)) {
+        return entry;
+      }
       const next = compatDecimalResult(entry, instanceCtor);
       if (next !== entry) changed = true;
       return next;
@@ -201,8 +254,7 @@ export function compatDecimalResult(
     return changed ? mapped : value;
   }
   if (isExpressionNode(value)) {
-    const marker = value as { [skipCompatNodeEvaluatePatch]?: boolean };
-    if (!marker[skipCompatNodeEvaluatePatch]) {
+    if (!skipNodeEvaluatePatchNodes.has(value)) {
       patchNodeEvaluate(value, instanceCtor);
     }
     return value;

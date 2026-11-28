@@ -49,12 +49,16 @@ function patchSymbolNodesForMathjsToTex(
     if (current.type !== 'SymbolNode' || typeof current.name !== 'string') return;
     const symbolName = current.name;
     const original = current._toTex.bind(current);
-    current._toTex = (options?: ToTexOptions) => {
-      const isUnit =
-        Unit.isValuelessUnit(symbolName) && !instanceNameBlocksUnitSymbol(symbolName, math);
-      if (!isUnit) return original(options);
-      return symbolUnitToTex(symbolName);
-    };
+    Object.defineProperty(current, '_toTex', {
+      value: (options?: ToTexOptions) => {
+        const isUnit =
+          Unit.isValuelessUnit(symbolName) && !instanceNameBlocksUnitSymbol(symbolName, math);
+        if (!isUnit) return original(options);
+        return symbolUnitToTex(symbolName);
+      },
+      enumerable: false,
+      configurable: true,
+    });
   });
 }
 
@@ -62,18 +66,26 @@ function patchRelationalNodesForMathjsParenthesisQuirk(node: MathNodeLike): void
   visitMathNode(node, (current) => {
     if (current.type !== 'RelationalNode') return;
     const original = current._toTex.bind(current);
-    current._toTex = (options?: ToTexOptions) => {
-      let tex = original(options);
-      if (options?.parenthesis === 'all') tex = mathjsCompatRelationalParenthesisToTex(tex);
-      return tex;
-    };
+    Object.defineProperty(current, '_toTex', {
+      value: (options?: ToTexOptions) => {
+        let tex = original(options);
+        if (options?.parenthesis === 'all') tex = mathjsCompatRelationalParenthesisToTex(tex);
+        return tex;
+      },
+      enumerable: false,
+      configurable: true,
+    });
   });
 }
 
 function patchBooleanOperatorToTex(node: MathNodeLike): void {
   if (typeof node.toTex !== 'function') return;
   const original = node.toTex.bind(node);
-  node.toTex = (options?: ToTexOptions) => mathjsCompatToTexString(original(options));
+  Object.defineProperty(node, 'toTex', {
+    value: (options?: ToTexOptions) => mathjsCompatToTexString(original(options)),
+    enumerable: false,
+    configurable: true,
+  });
 }
 
 function patchOneParsedTree(
@@ -84,6 +96,15 @@ function patchOneParsedTree(
   patchSymbolNodesForMathjsToTex(node, mathScope, Unit);
   patchRelationalNodesForMathjsParenthesisQuirk(node);
   patchBooleanOperatorToTex(node);
+}
+
+/** Apply mathjs `parse` toTex patches to trees from `resolve` / symbolic algebra (#1790). */
+export function patchParsedTreeForMathjsCompat(
+  node: MathNodeLike,
+  mathScope: Record<string, unknown>,
+  Unit: UnitLike
+): void {
+  patchOneParsedTree(node, mathScope, Unit);
 }
 
 /**
