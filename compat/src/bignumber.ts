@@ -177,6 +177,7 @@ function visitMatrixLikeChildren(value: object, visit: (entry: unknown) => void)
   }
 }
 
+/** Mark symbolic algebra trees so compat instance wrapping skips expression `evaluate`. */
 export function markSymbolicAlgebraNodes(value: unknown): unknown {
   if (Array.isArray(value)) {
     let changed = false;
