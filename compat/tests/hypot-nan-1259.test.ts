@@ -2,6 +2,8 @@
  * #1259 through the compat instance: `hypot`, `abs` of a Complex, `norm` and `distance` follow
  * the IEEE 754 rule. An infinite argument gives +Infinity, also with a NaN; else a NaN gives NaN.
  * The oracle is `Math.hypot`. mathjs 15.2.0 gives NaN for these rows; MathTS deviates on purpose.
+ * `distance` matches mathjs 15.3.0 euclidean accumulation (#1792), including `NaN` when a
+ * coordinate is `NaN` even if another is infinite.
  */
 import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
@@ -37,6 +39,6 @@ describe('compat Euclidean magnitudes follow the IEEE rule (#1259)', () => {
     expect(m.abs(m.complex(Infinity, NaN))).toBe(Infinity);
     expect(m.abs(m.complex(NaN, 3))).toBeNaN();
     expect(m.distance([0, 0], [Infinity, Infinity])).toBe(Infinity);
-    expect(m.distance([0, 0], [Infinity, NaN])).toBe(Infinity);
+    expect(m.distance([0, 0], [Infinity, NaN])).toBeNaN();
   });
 });
