@@ -113,7 +113,9 @@ describe('G08 inverse-hyperbolic adapter edges (branch coverage)', () => {
       expect(isComplexShape(complexJsAcsc(z))).toBe(true);
       expect(isComplexShape(complexJsAsec(z))).toBe(true);
     }
-    expect((complexJsAcsc(new Complex(0, 0)) as Complex).im).toBe(Infinity);
+    const acscOrigin = complexJsAcsc(new Complex(0, 0)) as Complex;
+    expect(acscOrigin.re).toBe(Math.PI / 2);
+    expect(acscOrigin.im).toBe(Infinity);
     expect((complexJsAsec(new Complex(0, 0)) as Complex).im).toBe(Infinity);
   });
 

@@ -70,9 +70,17 @@ import {
   compatDecimalTrigSinh,
   compatDecimalTrigCot,
   compatDecimalTrigCoth,
+  compatDecimalTrigTan,
+  compatDecimalTrigAtan,
   createCompatBigNumberTrigWrap,
 } from './compat-bignumber-trig.js';
 import { applyG08CompatOverrides } from './g08-inverse-hyperbolic-compat.js';
+import { createCompatAtan2 } from './compat-atan2-sparse.js';
+import {
+  complexJsAcot,
+  complexJsAtan,
+  wrapCompatTrigComplexBranch,
+} from './compat-trig-complex.js';
 import { compatFreqz, compatZpk2tf } from './compat-signal-factories.js';
 import { MATHJS_PARITY_NAMES } from './parity-names.generated.js';
 import { COMPAT_INTERNAL_NAMES, type CompatInternalName } from './internal-names.generated.js';
@@ -1059,41 +1067,51 @@ export function create(
     // Trigonometry — #1587: a Fraction argument throws the mathjs conversion error.
     sin: withFractionRejection(shims.sin),
     cos: withFractionRejection(shims.cos),
-    tan: withFractionRejection(shims.tan),
+    tan: withFractionRejection(mathFunctions.factory_tan),
+    cot: withFractionRejection(mathFunctions.factory_cot),
+    acot: withFractionRejection(mathFunctions.factory_acot),
     asin: withFractionRejection(shims.asin),
     acos: withFractionRejection(shims.acos),
-    atan: withFractionRejection(shims.atan),
-    atan2: withFractionRejection((...args: unknown[]) => {
-      if (args.length === 2) {
-        const [a, b] = args;
-        const aBn = isBigNumber(a);
-        const bBn = isBigNumber(b);
-        if (
-          (aBn || bBn) &&
-          (aBn || typeof a === 'number' || typeof a === 'boolean') &&
-          (bBn || typeof b === 'number' || typeof b === 'boolean')
-        ) {
-          const outPrec = currentConfig.precision ?? 64;
-          const prev = NativeBigNumber.config();
-          try {
-            NativeBigNumber.config({ precision: outPrec + 8 });
-            const yVal = new NativeBigNumber(
-              aBn ? (a as { toString(): string }).toString() : Number(a)
-            );
-            const xVal = new NativeBigNumber(
-              bBn ? (b as { toString(): string }).toString() : Number(b)
-            );
-            const raw = NativeBigNumber.atan2(yVal, xVal);
-            NativeBigNumber.config({ precision: outPrec });
-            const rounded = raw.toSignificantDigits(outPrec);
-            return new instanceBigNumberClass(rounded.toString());
-          } finally {
-            NativeBigNumber.config(prev);
+    atan: withFractionRejection(mathFunctions.factory_atan),
+    atan2: (() => {
+      const atan2BigNumberAndTyped = (...args: unknown[]) => {
+        if (args.length === 2) {
+          const [a, b] = args;
+          const aBn = isBigNumber(a);
+          const bBn = isBigNumber(b);
+          if (
+            (aBn || bBn) &&
+            (aBn || typeof a === 'number' || typeof a === 'boolean') &&
+            (bBn || typeof b === 'number' || typeof b === 'boolean')
+          ) {
+            const outPrec = currentConfig.precision ?? 64;
+            const prev = NativeBigNumber.config();
+            try {
+              NativeBigNumber.config({ precision: outPrec + 8 });
+              const yVal = new NativeBigNumber(
+                aBn ? (a as { toString(): string }).toString() : Number(a)
+              );
+              const xVal = new NativeBigNumber(
+                bBn ? (b as { toString(): string }).toString() : Number(b)
+              );
+              const raw = NativeBigNumber.atan2(yVal, xVal);
+              NativeBigNumber.config({ precision: outPrec });
+              const rounded = raw.toSignificantDigits(outPrec);
+              return new instanceBigNumberClass(rounded.toString());
+            } finally {
+              NativeBigNumber.config(prev);
+            }
           }
         }
-      }
-      return (shims.atan2 as (...a: unknown[]) => unknown)(...args);
-    }),
+        return (shims.atan2 as (...a: unknown[]) => unknown)(...args);
+      };
+      return withFractionRejection(
+        createCompatAtan2(atan2BigNumberAndTyped, {
+          DenseMatrix: compatMatrixConstructors.DenseMatrix,
+          SparseMatrix: compatMatrixConstructors.SparseMatrix,
+        })
+      );
+    })(),
 
     // Statistics
     ...((): Record<string, unknown> => {
@@ -1294,18 +1312,34 @@ export function create(
   const functionsNamespace = mathFunctions as unknown as Record<string, unknown>;
   const wrapBnTrig = createCompatBigNumberTrigWrap(
     () => currentConfig,
-    () => instanceBigNumberClass
+    () => instanceBigNumberClass,
+    () =>
+      configuredMathjsConstant('pi', Math.PI, currentConfig, instanceBigNumberClass) as {
+        toString(): string;
+        div(n: number): { toString(): string };
+      }
   );
-  const g08Overrides = applyG08CompatOverrides({
-    factory_asinh: mathFunctions.factory_asinh,
-    factory_acosh: mathFunctions.factory_acosh,
-    factory_atanh: mathFunctions.factory_atanh,
-    acoth: mathFunctions.acoth,
-    acsch: mathFunctions.acsch,
-    asech: mathFunctions.asech,
-    factory_acsc: mathFunctions.factory_acsc,
-    factory_asec: mathFunctions.factory_asec,
-  });
+  const g08Overrides = applyG08CompatOverrides(
+    {
+      factory_asinh: mathFunctions.factory_asinh,
+      factory_acosh: mathFunctions.factory_acosh,
+      factory_atanh: mathFunctions.factory_atanh,
+      acoth: mathFunctions.acoth,
+      acsch: mathFunctions.acsch,
+      asech: mathFunctions.asech,
+      factory_acsc: mathFunctions.factory_acsc,
+      factory_asec: mathFunctions.factory_asec,
+    },
+    { predictable: () => Boolean(currentConfig.predictable) }
+  );
+  const atanComplexBranch = wrapCompatTrigComplexBranch(
+    shims.atan as (...args: unknown[]) => unknown,
+    complexJsAtan
+  );
+  const acotComplexBranch = wrapCompatTrigComplexBranch(
+    mathFunctions.factory_acot as (...args: unknown[]) => unknown,
+    complexJsAcot
+  );
   const g07Logical = createG07LogicalParity();
   const {
     rangeEvaluate: g18RangeEvaluate,
@@ -1366,7 +1400,7 @@ export function create(
       wrapBnTrig(g08Overrides.acosh, compatDecimalTrigAcosh, { extendedPrecision: true })
     ),
     acot: withFractionRejection(
-      wrapBnTrig(mathFunctions.factory_acot, compatDecimalTrigAcot, { extendedPrecision: true })
+      wrapBnTrig(acotComplexBranch, compatDecimalTrigAcot, { workExtraDigits: 10 })
     ),
     acoth: withFractionRejection(
       wrapBnTrig(g08Overrides.acoth, compatDecimalTrigAcoth, { extendedPrecision: true })
@@ -1388,12 +1422,18 @@ export function create(
       wrapBnTrig(g08Overrides.asinh, compatDecimalTrigAsinh, { extendedPrecision: true })
     ),
     atanh: withFractionRejection(g08Overrides.atanh),
+    atan: withFractionRejection(
+      wrapBnTrig(atanComplexBranch, compatDecimalTrigAtan, { workExtraDigits: 10 })
+    ),
+    tan: withFractionRejection(
+      wrapBnTrig(mathFunctions.factory_tan, compatDecimalTrigTan, { workExtraDigits: 10 })
+    ),
     cbrt: withFractionRejection(mathFunctions.factory_cbrt),
     cosh: withFractionRejection(
       wrapBnTrig(mathFunctions.factory_cosh, compatDecimalTrigCosh, { extendedPrecision: true })
     ),
     cot: withFractionRejection(
-      wrapBnTrig(mathFunctions.factory_cot, compatDecimalTrigCot, { extendedPrecision: true })
+      wrapBnTrig(mathFunctions.factory_cot, compatDecimalTrigCot, { workExtraDigits: 10 })
     ),
     coth: withFractionRejection(
       wrapBnTrig(mathFunctions.coth as (...args: unknown[]) => unknown, compatDecimalTrigCoth, {

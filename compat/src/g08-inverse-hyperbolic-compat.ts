@@ -43,8 +43,17 @@ export type G08FactoryBundle = {
   factory_asec: Fn;
 };
 
+/** Options for {@link applyG08CompatOverrides}. */
+export type G08CompatOverrideOptions = {
+  /** Whether the owning compat instance has `predictable: true` (#1789). */
+  predictable?: () => boolean;
+};
+
 /** Build wrapped G08 factories for `compatDefaultOverrides`. */
-export function applyG08CompatOverrides(factories: G08FactoryBundle): {
+export function applyG08CompatOverrides(
+  factories: G08FactoryBundle,
+  options: G08CompatOverrideOptions = {}
+): {
   asinh: Fn;
   acosh: Fn;
   atanh: Fn;
@@ -77,10 +86,12 @@ export function applyG08CompatOverrides(factories: G08FactoryBundle): {
     acsc: wrapG08InverseHyperbolic(factories.factory_acsc, complexJsAcsc, {
       zeroCase: 'acsc',
       recompute: recomputeInsideUnitDisk,
+      predictable: options.predictable,
     }),
     asec: wrapG08InverseHyperbolic(factories.factory_asec, complexJsAsec, {
       zeroCase: 'asec',
       recompute: recomputeInsideUnitDisk,
+      predictable: options.predictable,
     }),
   };
 }

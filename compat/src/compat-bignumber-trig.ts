@@ -1,8 +1,10 @@
 /**
- * BigNumber unary trig using core's NativeBigNumber (#1780), matching mathjs 15.3.0
- * per-instance BigNumber precision and constructor identity without external decimal.js.
+ * BigNumber unary trig for mathjs 15.3.0 (#1780, #1789): results use the compat
+ * instance BigNumber class; pole-adjacent `sin`/`cos`/`tan`/`cot`/`atan` use
+ * decimal.js (as mathjs does) while inverse chains keep NativeBigNumber division.
  */
 
+import { Decimal } from 'decimal.js';
 import { BigNumber as NativeBigNumber, isBigNumber } from '@danielsimonjr/mathts-core';
 import { runWithConfig } from '@danielsimonjr/mathts-functions';
 import { BigNumber as CompatBigNumber, type CompatDecimalBigNumberCtor } from './bignumber.js';
@@ -11,13 +13,20 @@ import { INSTANCE_PRECISION_GETTER } from './compat-bignumber-instance.js';
 type ConfigSlice = Parameters<typeof runWithConfig>[0];
 type UnaryFn = (...args: unknown[]) => unknown;
 type BigNumberCtor = typeof NativeBigNumber;
+type GetPi = () => { toString(): string; div(n: number | NativeBigNumber): { toString(): string } };
+
+type DecimalValue = Decimal;
 
 type TrigContext = {
   x: NativeBigNumber;
   D: BigNumberCtor;
   operandPrec: number;
   instancePrec: number;
+  workExtraDigits: number;
+  getPi: GetPi;
   atOperandPrec: (fn: (d: NativeBigNumber) => NativeBigNumber) => NativeBigNumber;
+  atOperandDecimal: (fn: (d: DecimalValue) => DecimalValue) => NativeBigNumber;
+  atOperandDecimalMathjs: (fn: (d: DecimalValue) => DecimalValue) => NativeBigNumber;
   atInstancePrec: (fn: (D: BigNumberCtor) => NativeBigNumber) => NativeBigNumber;
 };
 
@@ -69,11 +78,79 @@ function copyFunctionSurface(from: UnaryFn, to: UnaryFn): void {
 }
 
 /** Apply one NativeBigNumber unary trig op when the sole argument is a BigNumber (#1780). */
+function resolveMathjsDecimalOperand(
+  operand: NativeBigNumber,
+  getPi: GetPi,
+  workPrec: number,
+  operandPrec: number
+): DecimalValue {
+  const D = Decimal.clone({ precision: workPrec, modulo: Decimal.EUCLID });
+  const text = operand.toString();
+  const pi = getPi();
+  const piBn = new NativeBigNumber(pi.toString());
+  if (text === pi.toString()) {
+    return D.acos(new D(-1));
+  }
+  const doubled = new NativeBigNumber(text).multiply(2);
+  const halfDelta = doubled.subtract(piBn).abs();
+  const epsilon = new NativeBigNumber(1).div(new NativeBigNumber(10).pow(operandPrec - 1));
+  if (halfDelta.compareTo(epsilon) <= 0) {
+    return D.acos(new D(-1)).div(2);
+  }
+  return new D(text);
+}
+
+function decimalToMathjsString(value: DecimalValue, prec: number): string {
+  const normalized = value.toSignificantDigits(prec);
+  return normalized.e <= -7 || normalized.e >= 21
+    ? normalized.toExponential()
+    : normalized.toFixed();
+}
+
+/**
+ * Wrap unary trig factories so BigNumber arguments follow mathjs 15.3.0 decimal.js rounding (#1789).
+ *
+ * @param getConfig - Active compat instance configuration slice.
+ * @param getBigNumberCtor - The instance-scoped `BigNumber` class constructor.
+ * @param getPi - Lazy `pi` constant for half-π decimal reconstruction.
+ * @returns A helper that wraps a factory plus a {@link TrigCompute} descriptor.
+ */
 export function createCompatBigNumberTrigWrap(
   getConfig: () => ConfigSlice,
-  getBigNumberCtor: () => CompatDecimalBigNumberCtor
+  getBigNumberCtor: () => CompatDecimalBigNumberCtor,
+  getPi: GetPi
 ) {
-  const applyBigNumberUnary = (operand: { toString(): string }, compute: TrigCompute): unknown => {
+  const decimalAtPrecision = (
+    operand: { toString(): string },
+    prec: number,
+    workExtra: number,
+    fn: (d: DecimalValue) => DecimalValue,
+    clonePrec?: number
+  ): NativeBigNumber => {
+    const workPrec = clonePrec ?? prec + workExtra;
+    const D = Decimal.clone({ precision: workPrec, modulo: Decimal.EUCLID });
+    const x = resolveMathjsDecimalOperand(
+      new NativeBigNumber(operand.toString()),
+      getPi,
+      workPrec,
+      prec
+    );
+    const y = fn(x);
+    D.config({ precision: prec });
+    return new NativeBigNumber(decimalToMathjsString(y, prec));
+  };
+
+  const decimalAtOperandPrecOnly = (
+    operand: { toString(): string },
+    prec: number,
+    fn: (d: DecimalValue) => DecimalValue
+  ): NativeBigNumber => decimalAtPrecision(operand, prec, 0, fn, prec);
+
+  const applyBigNumberUnary = (
+    operand: { toString(): string },
+    compute: TrigCompute,
+    workExtraDigits: number
+  ): unknown => {
     const configSlice = getConfig();
     const instancePrec = configSlice.precision ?? 64;
     const operandPrec = precisionOfOperand(operand, instancePrec);
@@ -84,24 +161,34 @@ export function createCompatBigNumberTrigWrap(
 
     const prev = NativeBigNumber.config();
     try {
-      NativeBigNumber.config({ precision: Math.max(operandPrec, instancePrec) + 24 });
+      NativeBigNumber.config({
+        precision: Math.max(operandPrec, instancePrec) + workExtraDigits,
+      });
       const x = new NativeBigNumber(operand.toString());
       const ctx: TrigContext = {
         x,
         D: NativeBigNumber,
         operandPrec,
         instancePrec,
+        workExtraDigits,
+        getPi,
         atOperandPrec(fn) {
-          NativeBigNumber.config({ precision: operandPrec + 24 });
+          NativeBigNumber.config({ precision: operandPrec + workExtraDigits });
           const res = fn(x);
           NativeBigNumber.config({ precision: operandPrec });
           return res.isFinite() ? res.toSignificantDigits(operandPrec) : res;
         },
         atInstancePrec(fn) {
-          NativeBigNumber.config({ precision: instancePrec + 24 });
+          NativeBigNumber.config({ precision: instancePrec + workExtraDigits });
           const res = fn(NativeBigNumber);
           NativeBigNumber.config({ precision: instancePrec });
           return res.isFinite() ? res.toSignificantDigits(instancePrec) : res;
+        },
+        atOperandDecimal(fn) {
+          return decimalAtPrecision(operand, operandPrec, workExtraDigits, fn);
+        },
+        atOperandDecimalMathjs(fn) {
+          return decimalAtOperandPrecOnly(operand, operandPrec, fn);
         },
       };
       const out = compute.run(ctx);
@@ -119,12 +206,13 @@ export function createCompatBigNumberTrigWrap(
   return function wrapCompatBigNumberUnaryTrig(
     base: UnaryFn,
     compute: TrigCompute,
-    _options?: { extendedPrecision?: boolean }
+    options?: { extendedPrecision?: boolean; workExtraDigits?: number }
   ): UnaryFn {
+    const extraDigits = options?.workExtraDigits ?? (options?.extendedPrecision ? 32 : 24);
     const wrapped: UnaryFn = (...args: unknown[]) => {
       const x = args[0];
       if (isCompatBigNumberArgument(x)) {
-        return applyBigNumberUnary(x as { toString(): string }, compute);
+        return applyBigNumberUnary(x as { toString(): string }, compute, extraDigits);
       }
       return base(...args);
     };
@@ -147,11 +235,19 @@ export const compatDecimalTrigAcosh: TrigCompute = {
 };
 export const compatDecimalTrigSin: TrigCompute = {
   resultOwner: 'operand',
-  run: (ctx) => ctx.atOperandPrec((d) => d.sin()),
+  run: (ctx) => ctx.atOperandDecimal((d) => d.sin()),
 };
 export const compatDecimalTrigCos: TrigCompute = {
   resultOwner: 'operand',
-  run: (ctx) => ctx.atOperandPrec((d) => d.cos()),
+  run: (ctx) => ctx.atOperandDecimal((d) => d.cos()),
+};
+export const compatDecimalTrigTan: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandDecimalMathjs((d) => d.tan()),
+};
+export const compatDecimalTrigAtan: TrigCompute = {
+  resultOwner: 'operand',
+  run: (ctx) => ctx.atOperandDecimalMathjs((d) => d.atan()),
 };
 export const compatDecimalTrigCosh: TrigCompute = {
   resultOwner: 'operand',
@@ -169,11 +265,12 @@ export const compatDecimalTrigCoth: TrigCompute = {
   },
 };
 export const compatDecimalTrigAcot: TrigCompute = {
-  resultOwner: 'instance',
-  run: (ctx) => {
-    const inv = ctx.atInstancePrec((D) => new D(1).div(ctx.x));
-    return ctx.atInstancePrec(() => inv.atan());
-  },
+  resultOwner: 'operand',
+  run: (ctx) =>
+    ctx.atOperandDecimalMathjs((d) => {
+      const Ctor = d.constructor as typeof Decimal;
+      return new Ctor(1).div(d).atan();
+    }),
 };
 export const compatDecimalTrigAcoth: TrigCompute = {
   resultOwner: 'instance',
@@ -211,10 +308,10 @@ export const compatDecimalTrigSech: TrigCompute = {
   },
 };
 export const compatDecimalTrigCot: TrigCompute = {
-  resultOwner: 'instance',
+  resultOwner: 'operand',
   run: (ctx) => {
-    const t = ctx.atOperandPrec((d) => d.tan());
-    return ctx.atInstancePrec((D) => new D(1).div(t));
+    const tan = ctx.atOperandDecimalMathjs((d) => d.tan());
+    return ctx.atInstancePrec((D) => new D(1).div(new NativeBigNumber(tan.toString())));
   },
 };
 export const compatDecimalTrigCsch: TrigCompute = {

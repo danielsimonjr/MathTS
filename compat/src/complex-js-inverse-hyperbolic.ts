@@ -30,7 +30,8 @@ function hypotComplexJs(a: number, b: number): number {
 }
 
 /** complex.js 2.4.2 `sqrt` — must not use core `Complex.sqrt` (different branch sheet). */
-function complexJsSqrt(re: number, im: number): { re: number; im: number } {
+/** complex.js 2.4.2 `sqrt` pair form (compat oracle only). */
+export function complexJsSqrt(re: number, im: number): { re: number; im: number } {
   const a = re;
   const b = im;
   if (b === 0) {
@@ -46,7 +47,8 @@ function complexJsSqrt(re: number, im: number): { re: number; im: number } {
   return { re: sqrtIm, im: b < 0 ? -sqrtRe : sqrtRe };
 }
 
-function complexJsLog(re: number, im: number): { re: number; im: number } {
+/** complex.js 2.4.2 `log` pair form (compat oracle only). */
+export function complexJsLog(re: number, im: number): { re: number; im: number } {
   if (im === 0 && re > 0) {
     return { re: Math.log(re), im: 0 };
   }
@@ -145,7 +147,7 @@ export function complexJsAcsc(z: Complex): Complex {
   const a = z.re;
   const b = z.im;
   if (a === 0 && b === 0) {
-    return new Complex(0, Infinity);
+    return new Complex(Math.PI / 2, Infinity);
   }
   const d = a * a + b * b;
   if (d !== 0) {
@@ -201,22 +203,50 @@ export type G08RecomputePolicy = (x: number) => boolean;
 /** Real arguments strictly between -1 and 1 use complex.js after factory complex promotion. */
 export const recomputeInsideUnitDisk: G08RecomputePolicy = (x) => x > -1 && x < 1;
 
-/** Wrap a factory so Complex and selected real promotions use the complex.js adapter. */
+/** Map mathjs boolean / number zeros before inverse-trig specials run (#1789). */
+function scalarArgForG08(x: unknown): unknown {
+  if (x === false) return 0;
+  if (x === true) return 1;
+  return x;
+}
+
+/** Whether `x` is numeric zero after mathjs boolean promotion (#1789). */
+function isG08NumericZero(x: unknown): boolean {
+  return typeof x === 'number' && Object.is(x, 0);
+}
+
+/**
+ * Wrap a factory so Complex and selected real promotions use the complex.js adapter (#1789).
+ *
+ * @param base - Underlying typed inverse-hyperbolic factory.
+ * @param mathjs - complex.js oracle for a single `Complex` argument.
+ * @param options - Zero-case, real recompute, and predictable-config overrides.
+ * @returns The compat wrapper around `base`.
+ */
 export function wrapG08InverseHyperbolic(
   base: (...args: unknown[]) => unknown,
   mathjs: CjsFn,
-  options: { zeroCase?: G08ZeroCase; recompute?: G08RecomputePolicy } = {}
+  options: {
+    zeroCase?: G08ZeroCase;
+    recompute?: G08RecomputePolicy;
+    predictable?: () => boolean;
+  } = {}
 ): (...args: unknown[]) => unknown {
   const zeroCase = options.zeroCase ?? 'none';
   const recompute = options.recompute ?? (() => true);
+  const predictable = options.predictable ?? (() => false);
   const wrapped = function (this: unknown, ...args: unknown[]) {
-    const x = args[0];
+    const x = scalarArgForG08(args[0]);
     if (isComplex(x)) return compatDecimalResult(mathjs(x));
-    if (typeof x === 'number' && Object.is(x, 0)) {
+    if (isG08NumericZero(x) && !predictable()) {
       if (zeroCase === 'acoth') return new Complex(0, Math.PI / 2);
-      if (zeroCase === 'acsc' || zeroCase === 'asec') return new Complex(0, Infinity);
+      if (zeroCase === 'acsc') return new Complex(Math.PI / 2, Infinity);
+      if (zeroCase === 'asec') return new Complex(0, Infinity);
     }
-    const result = base.apply(this, args);
+    if (isG08NumericZero(x) && predictable()) {
+      return base.apply(this, [x]);
+    }
+    const result = base.apply(this, args[0] === x ? args : [x]);
     if (!isComplex(result)) return compatDecimalResult(result);
     if (typeof x === 'number' && recompute(x)) {
       return compatDecimalResult(mathjs(new Complex(x, 0)));
