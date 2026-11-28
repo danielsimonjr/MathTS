@@ -14,6 +14,7 @@ import {
 import {
   arraySize,
   broadcastTo,
+  clone,
   isEmptyIndex,
   isIndex,
   unsqueeze,
@@ -230,7 +231,11 @@ export function reshapeG09AssignmentRhsInPlace(
     while (k < selection.length && selection[k] === 1 && repSize[k] === 1) k++;
     let outer = 0;
     for (; k < selection.length && selection[k] === 1; k++) outer++;
-    rep = unsqueeze(rep, selection.length, outer, repSize);
+    // Unsqueeze a copy. The native bridge re-reads `arraySize` of the replacement, and
+    // writing that result back into the same array makes a cycle (`Invalid array length`).
+    const source = clone(rep);
+    const sized = repSize.slice();
+    rep = unsqueeze(source, selection.length, outer, sized);
     if (isBridgeDenseMatrix(replacement)) {
       replacement._data = rep;
       replacement._size = [...selection];
@@ -283,15 +288,18 @@ export function installG09BridgeMatrixSubsetPatch(sampleMatrix: unknown): void {
   const original = proto.subset;
   proto.subset = function (
     this: BridgeMatrixMutable,
-    index: unknown,
-    replacement?: unknown,
-    defaultValue?: unknown
+    index?: unknown,
+    replacement?: unknown
   ): unknown {
-    if (replacement !== undefined && isRuntimeIndex(index)) {
+    const argc = arguments.length;
+    if (argc >= 2 && argc <= 3 && replacement !== undefined && isRuntimeIndex(index)) {
       validateG09ZeroSizedSet(index, replacement);
       reshapeG09AssignmentRhsInPlace(index, replacement);
     }
-    return original.call(this, index, replacement, defaultValue);
+    const forward = original as (this: BridgeMatrixMutable, ...args: unknown[]) => unknown;
+    const forwarded: unknown[] = [];
+    for (let i = 0; i < argc; i++) forwarded.push(arguments[i]);
+    return forward.apply(this, forwarded);
   };
   Object.defineProperty(proto, G09_MATRIX_SUBSET_PATCHED, { value: true, configurable: true });
 }
@@ -325,6 +333,14 @@ export function createCompatSubsetG09(
       // replacement). G09 reshape/throw applies to the dense bridge used by
       // indexed assignment, not to SparseMatrix.
       if (isBridgeDenseMatrix(value) && isRuntimeIndex(index)) {
+        if (isEmptyIndex(index)) {
+          const size = (value as { size?: () => number[] }).size?.() ?? [];
+          const matrixEmpty = size.length === 0 || size.some((dim) => dim === 0);
+          // mathjs `subset` returns the same matrix when the index is empty and the
+          // matrix itself has axes. An empty matrix still goes through the zero-size
+          // checks (assignment `e[:, 1] = 5` on `e = []`).
+          if (!matrixEmpty) return value;
+        }
         if (isEmptyIndex(index) && !shouldDeferEmptyIndexNoop(index, true)) {
           return value;
         }

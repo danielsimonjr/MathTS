@@ -4,7 +4,13 @@
  */
 
 import { DimensionError } from '@danielsimonjr/mathts-core';
-import { arraySize, clone, isIndex, validateIndex } from '@danielsimonjr/mathts-core/internal';
+import {
+  arraySize,
+  clone,
+  isIndex,
+  validateIndex,
+  type NestedArray,
+} from '@danielsimonjr/mathts-core/internal';
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import { compatDecimalResult } from './bignumber.js';
 import { COMPAT_MATRIX_WRAPPER } from './compat-matrix-model.js';
@@ -331,7 +337,7 @@ function patchCompatSparseMatrixPrototype(
   const nativeClone = nativeProto.clone as () => SparseInstance;
   wrapperProto.clone = function cloneWrapped(this: SparseInstance): SparseInstance {
     const c = nativeClone.call(this);
-    if (c._values) c._values = c._values.map((entry) => clone(entry as never));
+    if (c._values) c._values = c._values.map((entry) => clone(entry));
     decorateSparseInstance(c, wrapperProto);
     return c;
   };
@@ -372,7 +378,7 @@ function patchCompatSparseMatrixPrototype(
       ) {
         repSize = (replacement as { size(): number[] }).size();
       } else {
-        repSize = arraySize(replacement as never);
+        repSize = arraySize(replacement as NestedArray<unknown>);
       }
       if (repSize.length !== 0) {
         throw new TypeError('Scalar expected');
@@ -458,6 +464,18 @@ export function wrapCompatSparseMatrixClass(
       }
       const nativeArgs = dataArg !== data ? [dataArg, ...argArray.slice(1)] : argArray;
       const inst = Reflect.construct(target, nativeArgs, newTarget) as SparseInstance;
+      if (isMatrixInput(data)) {
+        const source = data as SparseInstance;
+        // The native constructor copies CSC storage only for `instanceof MathJSSparseMatrix`.
+        // A compat-wrapped source has a different prototype, so the CSC path keeps the
+        // caller's arrays. Copy them here (#1785).
+        if (source._values && inst._values === source._values) {
+          inst._values = source._values.slice();
+          inst._index = source._index.slice();
+          inst._ptr = source._ptr.slice();
+          inst._size = source._size.slice();
+        }
+      }
       if (typeof datatype === 'string') {
         applySparseDatatype(inst, datatype, helpers);
       } else if (isMatrixInput(data)) {

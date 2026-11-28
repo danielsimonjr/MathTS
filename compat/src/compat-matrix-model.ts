@@ -10,6 +10,7 @@ import {
   isIndex,
   resize as resizeArray,
   validate,
+  type NestedArray,
 } from '@danielsimonjr/mathts-core/internal';
 import { config as mathtsConfig } from '@danielsimonjr/mathts-functions';
 import { isDenseMatrix, isSparseMatrix } from '@danielsimonjr/mathts-matrix';
@@ -452,16 +453,11 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
     return forwardSubsetArgs(invoke, index, replacement, defaultValue);
   };
 
-  const originalGet = nativeProto.get as (index: unknown, col?: unknown) => unknown;
-  wrapperProto.get = function getWrapped(this: MatrixLike, index: unknown, col?: unknown): unknown {
-    if (arguments.length === 2 && typeof index === 'number' && typeof col === 'number') {
-      return originalGet.call(this, index, col);
-    }
-    if (arguments.length === 2) {
-      throw new TypeError('Array expected');
-    }
+  const originalGet = nativeProto.get as (index: unknown) => unknown;
+  wrapperProto.get = function getWrapped(this: MatrixLike, index: unknown): unknown {
+    // mathjs DenseMatrix#get takes one array index (`utils/array.get`).
     if (!isArray(index)) {
-      throw new TypeError('Array expected for index');
+      throw new Error('Array expected for index');
     }
     return originalGet.call(this, index);
   };
@@ -515,10 +511,10 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
       return v as number;
     }
     target._size = dims.slice();
-    const base = copy ? clone(target._data as never) : (target._data as never);
-    target._data = resizeArray(base, dims, null as never) as typeof target._data;
+    const base = copy ? clone(target._data) : target._data;
+    target._data = resizeArray(base as NestedArray<unknown>, dims, null);
     if (copy) {
-      target._data = clone(target._data as never);
+      target._data = clone(target._data);
     }
     return target;
   };
@@ -537,7 +533,7 @@ export function patchCompatDenseMatrixPrototype(Native: MatrixCtor): object {
   const originalClone = nativeProto.clone as () => DenseInstance;
   wrapperProto.clone = function cloneWrapped(this: MatrixLike): MatrixLike {
     const c = originalClone.call(this) as MatrixLike & { _data: unknown; _size: number[] };
-    c._data = clone(c._data as never);
+    c._data = clone(c._data);
     c._datatype = this._datatype;
     decorateDenseInstance(c, wrapperProto);
     return c;
@@ -569,7 +565,7 @@ function buildDenseConstructorArgs(argArray: unknown[], helpers: DenseHelpers): 
     if (source.type === 'DenseMatrix' || helpers.checks.isDenseMatrix(source)) {
       return [
         {
-          data: clone(source._data as never),
+          data: clone(source._data),
           size: clone(source._size),
         },
       ];
@@ -588,15 +584,15 @@ function buildDenseConstructorArgs(argArray: unknown[], helpers: DenseHelpers): 
     isArray((data as { size?: unknown }).size)
   ) {
     const block = data as { data: unknown[]; size: number[]; datatype?: string };
-    validate(block.data as never, block.size);
+    validate(block.data as NestedArray<unknown>, block.size);
     return block.datatype !== undefined
       ? [{ data: block.data, size: block.size, datatype: block.datatype }]
       : [{ data: block.data, size: block.size }];
   }
   if (isArray(data)) {
     const processed = preprocessMatrixData(data, helpers.checks);
-    const size = arraySize(processed as never);
-    validate(processed as never, size);
+    const size = arraySize(processed as NestedArray<unknown>);
+    validate(processed as NestedArray<unknown>, size);
     return [{ data: processed, size, datatype }];
   }
   throw new TypeError(`Unsupported type of data (${helpers.typeOf(data)})`);
@@ -874,16 +870,37 @@ function rewrapIndexDimensions(index: CompatMatrixIndexLike, ImmutableCtor: Matr
 /**
  * Index stores {@link ImmutableDenseMatrix} dimensions from the factory closure;
  * re-wrap them with the compat instance constructors (#1785).
+ *
+ * `clone` is an own property of each instance. The native `Index.prototype` is
+ * left unchanged.
  */
 export function wrapCompatIndexClass(
   NativeIndex: CompatClass & (new (...args: unknown[]) => CompatMatrixIndexLike),
   ImmutableDenseMatrix: MatrixCtor
 ): typeof NativeIndex {
+  const attachClone = (inst: CompatMatrixIndexLike): void => {
+    const nativeClone = inst.clone;
+    if ((nativeClone as { compatWrapped?: boolean }).compatWrapped === true) return;
+    const wrapped = function cloneIndexWrapped(this: CompatMatrixIndexLike): CompatMatrixIndexLike {
+      const copy = nativeClone.call(this);
+      rewrapIndexDimensions(copy, ImmutableDenseMatrix);
+      attachClone(copy);
+      return copy;
+    };
+    (wrapped as { compatWrapped?: boolean }).compatWrapped = true;
+    Object.defineProperty(inst, 'clone', {
+      value: wrapped,
+      writable: true,
+      configurable: true,
+    });
+  };
+
   const Guarded = newOperatorGuard(NativeIndex) as typeof NativeIndex;
   const Wrapped = new Proxy(Guarded, {
     construct(_target, argArray: unknown[], newTarget) {
       const inst = Reflect.construct(NativeIndex, argArray, newTarget) as CompatMatrixIndexLike;
       rewrapIndexDimensions(inst, ImmutableDenseMatrix);
+      attachClone(inst);
       return inst;
     },
     apply() {
@@ -900,6 +917,7 @@ export function wrapCompatIndexClass(
     ) => {
       const inst = nativeCreate(dims);
       rewrapIndexDimensions(inst, ImmutableDenseMatrix);
+      attachClone(inst);
       return inst;
     };
   }
@@ -913,20 +931,10 @@ export function wrapCompatIndexClass(
     ) => {
       const inst = nativeFromJSON(json);
       rewrapIndexDimensions(inst, ImmutableDenseMatrix);
+      attachClone(inst);
       return inst;
     };
   }
-
-  const nativeClone = NativeIndex.prototype.clone as (
-    this: CompatMatrixIndexLike
-  ) => CompatMatrixIndexLike;
-  Wrapped.prototype.clone = function cloneIndexWrapped(
-    this: CompatMatrixIndexLike
-  ): CompatMatrixIndexLike {
-    const copy = nativeClone.call(this);
-    rewrapIndexDimensions(copy, ImmutableDenseMatrix);
-    return copy;
-  };
 
   return Wrapped;
 }

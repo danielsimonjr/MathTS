@@ -1014,7 +1014,16 @@ const _compatGcd = withTypedSurface((...args: unknown[]): unknown => {
   }
 }, factory_gcd);
 
-export const gcd: TypedFunction = _compatGcd as TypedFunction;
+/**
+ * Instance `gcd` (mathjs factory, Fraction results promoted). The public
+ * `gcd` export stays an alias of the functions implementation so it is not a
+ * second definition of `gcd`.
+ */
+function compatInstanceGcd(...args: unknown[]): unknown {
+  return _compatGcd(...args);
+}
+
+export const gcd: TypedFunction = _gcd;
 export const lcm: TypedFunction = _lcm;
 
 // =============================================================================
@@ -1245,8 +1254,8 @@ const _shims = {
   min,
   max,
 
-  // Number theory
-  gcd,
+  // Number theory — instance `gcd` is the mathjs factory; the export `gcd` is the alias.
+  gcd: compatInstanceGcd,
   lcm,
 
   // Rounding

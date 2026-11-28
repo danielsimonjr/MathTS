@@ -77,9 +77,9 @@ describe('create(all) keeps compat shims overlaid on the functions namespace', (
   });
 
   it('matrix-specific shims (identity/zeros/transpose) work through the instance', () => {
-    const id = math.identity(2) as { get: (r: number, c: number) => number };
-    expect(id.get(0, 0)).toBe(1);
-    expect(id.get(0, 1)).toBe(0);
+    const id = math.identity(2) as { get: (index: number[]) => number };
+    expect(id.get([0, 0])).toBe(1);
+    expect(id.get([0, 1])).toBe(0);
   });
 });
 

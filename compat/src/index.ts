@@ -495,7 +495,9 @@ function bindBinaryNumericShim<T extends (...args: unknown[]) => unknown>(
 ): T {
   const slow = (args: unknown[]) =>
     compatDecimalResult(
-      fn(...promoteBooleanScalarsForBigNumber(args, BigNumberCtor)),
+      fn(
+        ...promoteBooleanScalarsForBigNumber(args, BigNumberCtor, { promoteTrailingBoolean: true })
+      ),
       BigNumberCtor
     );
   const bound = (op === 0
@@ -999,6 +1001,17 @@ export function create(
     bignumber: scopedBignumber,
     matrix: shims.matrix,
     sparse: shims.sparse,
+    // mathjs rejects a BigNumber symbolic order before the numeric kernel.
+    // A real SparseMatrix (sparse() clones) reaches that check; a BigNumber
+    // order must stay a typed-function TypeError, matching mathjs 15.3.0.
+    slu: (...args: unknown[]) => {
+      if (isBigNumber(args[1])) {
+        throw new TypeError(
+          'Unexpected type of argument in function slu (expected: number or bigint or string or boolean, actual: BigNumber, index: 1)'
+        );
+      }
+      return (mathFunctions.slu as (...callArgs: unknown[]) => unknown)(...args);
+    },
 
     // Arithmetic
     add: bindBinaryNumericShim(shims.add, 0, instanceBigNumberClass),

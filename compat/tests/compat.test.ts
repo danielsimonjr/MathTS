@@ -40,6 +40,11 @@ import {
   tau,
 } from '../src/index.js';
 
+/** mathjs `DenseMatrix#get` takes one array index. */
+function cell(matrix: object, index: number[]): unknown {
+  return (matrix as unknown as { get(index: number[]): unknown }).get(index);
+}
+
 describe('@danielsimonjr/mathts-compat', () => {
   describe('create() factory', () => {
     it('should create a math instance with all functions', () => {
@@ -187,9 +192,9 @@ describe('@danielsimonjr/mathts-compat', () => {
 
       expect(isMatrix(m)).toBe(true);
       expect(typeof (m as { subset?: unknown }).subset).toBe('function');
-      const get = (m as { get(i: number, j: number): number }).get.bind(m);
-      expect(get(0, 0)).toBe(1);
-      expect(get(1, 1)).toBe(4);
+      const get = (m as { get(index: number[]): number }).get.bind(m);
+      expect(get([0, 0])).toBe(1);
+      expect(get([1, 1])).toBe(4);
     });
 
     it('should create SparseMatrix when format is sparse', () => {
@@ -238,8 +243,8 @@ describe('@danielsimonjr/mathts-compat', () => {
 
       expect(t.rows).toBe(3);
       expect(t.cols).toBe(2);
-      expect(t.get(0, 0)).toBe(1);
-      expect(t.get(0, 1)).toBe(4);
+      expect(cell(t, [0, 0])).toBe(1);
+      expect(cell(t, [0, 1])).toBe(4);
     });
 
     it('transpose() should work with arrays (array in → array out, like mathjs)', () => {
@@ -278,10 +283,10 @@ describe('@danielsimonjr/mathts-compat', () => {
       // portable TypedFunction surface, so the matrix shape is asserted here.
       const I = identity(3) as DenseMatrix;
 
-      expect(I.get(0, 0)).toBe(1);
-      expect(I.get(1, 1)).toBe(1);
-      expect(I.get(2, 2)).toBe(1);
-      expect(I.get(0, 1)).toBe(0);
+      expect(cell(I, [0, 0])).toBe(1);
+      expect(cell(I, [1, 1])).toBe(1);
+      expect(cell(I, [2, 2])).toBe(1);
+      expect(cell(I, [0, 1])).toBe(0);
     });
 
     it('zeros() should create zero matrix', () => {
@@ -293,7 +298,7 @@ describe('@danielsimonjr/mathts-compat', () => {
 
       expect(z.rows).toBe(2);
       expect(z.cols).toBe(3);
-      expect(z.get(0, 0)).toBe(0);
+      expect(cell(z, [0, 0])).toBe(0);
     });
 
     it('ones() should create ones matrix', () => {
@@ -303,8 +308,8 @@ describe('@danielsimonjr/mathts-compat', () => {
         (o as unknown as { isDenseMatrix?: boolean }).isDenseMatrix ?? o instanceof DenseMatrix
       ).toBe(true);
 
-      expect(o.get(0, 0)).toBe(1);
-      expect(o.get(1, 1)).toBe(1);
+      expect(cell(o, [0, 0])).toBe(1);
+      expect(cell(o, [1, 1])).toBe(1);
     });
 
     it('size() should return matrix dimensions', () => {

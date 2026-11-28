@@ -151,7 +151,7 @@ export function createCompatMatrixFactory(
         (typeof (data as { datatype?: () => string }).datatype === 'function'
           ? (data as { datatype: () => string }).datatype()
           : undefined);
-      const arr = clone((data as { toArray(): unknown }).toArray() as never);
+      const arr = clone((data as { toArray(): unknown }).toArray());
       const size = clone((data as { size(): number[] }).size());
       if (parsed === 'sparse' || (parsed === undefined && storage === 'sparse')) {
         const copied = new SparseMatrix({ data: arr, size }, dt);
@@ -188,19 +188,14 @@ export function createCompatSparseFactory(
     if (args.length === 1 && typeof data === 'string') {
       return promoteMatrix(new SparseMatrix([], data), ctors, data);
     }
-    if (args.length === 1 && isCompatMatrixValue(data)) {
-      if (isCompatWrappedMatrix(data) || isNativeMathtsMatrix(data)) {
-        return data;
-      }
-    }
     if (args.length === 1) {
       rejectInvalidMatrixArg('sparse', data);
     }
     if (isCompatMatrixValue(data)) {
       const srcDatatype = (data as { _datatype?: string })._datatype;
       const dt = datatype ?? srcDatatype;
-      const clone = new SparseMatrix((data as { toArray(): unknown }).toArray(), dt);
-      return promoteMatrix(clone, ctors, dt);
+      const copied = new SparseMatrix(data, dt);
+      return promoteMatrix(copied, ctors, dt);
     }
     if (datatype !== undefined) {
       return promoteMatrix(factorySparse(data, datatype), ctors, datatype);

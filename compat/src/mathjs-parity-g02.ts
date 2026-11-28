@@ -865,6 +865,26 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
     return apply(unaryPlus, [partitionSelect(list, (num - 1) / 2)]);
   }
 
+  function absMatrixSafe(value: unknown): unknown {
+    // Elementwise abs on a compat dense matrix. The functions unary walks
+    // `matrix.get(row, col)`, which mathjs DenseMatrix#get rejects (one array
+    // index). Walk toArray instead.
+    if (isMatrixLikeValue(value) && !Array.isArray(value)) {
+      const matrix = value as {
+        toArray(): unknown;
+        create?: (data: unknown) => unknown;
+      };
+      const mapped = mapAbsLeaves(matrix.toArray());
+      return typeof matrix.create === 'function' ? matrix.create(mapped) : mapped;
+    }
+    return apply(abs, [value]);
+  }
+
+  function mapAbsLeaves(data: unknown): unknown {
+    if (Array.isArray(data)) return data.map((entry) => mapAbsLeaves(entry));
+    return apply(abs, [data]);
+  }
+
   return (...args: unknown[]): unknown => {
     if (args.length === 0) throw tooFewArgumentsError('mad', 0);
     if (
@@ -890,7 +910,7 @@ export function createCompatMad(deps: MadDependencies): (...args: unknown[]) => 
     assertNoComplexOrdering(values);
     try {
       const med = medianShape([...values]);
-      return medianShape(values.map((value) => apply(abs, [apply(subtract, [value, med])])));
+      return medianShape(values.map((value) => absMatrixSafe(apply(subtract, [value, med]))));
     } catch (err) {
       if (err instanceof TypeError && err.message.includes('median')) {
         throw new TypeError(err.message.replace('median', 'mad'), { cause: err });

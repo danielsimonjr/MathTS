@@ -136,8 +136,9 @@ describe('compat dense/sparse instance adapters (#1785)', () => {
       [2, 4],
     ]);
     expect(m.toJSON().datatype).toBe('number');
-    expect(m.get(0, 1)).toBe(2);
-    expect(() => m.get([0], 1)).toThrow(/Array expected/);
+    expect(() => m.get(0, 1)).toThrow(/Array expected for index/);
+    expect(m.get([0, 1])).toBe(2);
+    expect(() => m.get([0])).toThrow(/Dimension/);
     expect(() => m.get('bad' as unknown as number[])).toThrow(/Array expected for index/);
     expect(() => m.subset('x')).toThrow(/Invalid index/);
     expect(() => m.subset({ isIndex: false } as unknown, 9)).toThrow(/Invalid index/);
@@ -166,14 +167,14 @@ describe('compat dense/sparse instance adapters (#1785)', () => {
     ]) as unknown as {
       _datatype?: string;
       set: (idx: unknown, value: unknown) => unknown;
-      get: (r: number, c: number) => unknown;
+      get: (index: number[]) => unknown;
       valueOf: () => unknown;
       subset: (idx: unknown, rep?: unknown) => unknown;
     };
     big._datatype = 'BigNumber';
     big.subset(bn.index(0, 0) as unknown, bn.bignumber(2));
     big.set([2, 2], 5);
-    expect(big.get(2, 2)).toBeDefined();
+    expect(big.get([2, 2])).toBeDefined();
     const grid = big.valueOf() as unknown[][];
     expect(grid[1][1]).toBeDefined();
     const frac = create(all, { number: 'Fraction' });
