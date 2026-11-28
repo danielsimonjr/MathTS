@@ -554,12 +554,14 @@ export function createCompatMathjsStatistics(
     if (args.length === 0) {
       throw new TypeError(`Too few arguments in function ${name} (expected: any, index: 0)`);
     }
-    for (const arg of args) {
-      if (
-        typeof arg === 'string' &&
-        !isNorm(arg) &&
-        (arg.trim() === '' || Number.isNaN(Number(arg)))
-      ) {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      if (typeof arg !== 'string') continue;
+      if (isNorm(arg)) continue;
+      if (i > 0 && (Array.isArray(args[0]) || isMatrixLikeValue(args[0])) && args.length <= 3) {
+        continue;
+      }
+      if (arg.trim() === '' || Number.isNaN(Number(arg))) {
         if (args.length === 1 && !Array.isArray(arg)) {
           throw invalidNumericStringError(arg);
         }

@@ -207,13 +207,30 @@ import {
   range as namedRange,
 } from './named-instance-exports.js';
 import {
-  applyUnitRelationalParity,
   factoryMaxUnits,
   factoryMinUnits,
   factorySignUnits,
   wrapUnitExtrema,
-  type UnitRelationalOps,
 } from './unit-relational.js';
+import {
+  compatStatisticsFactories,
+  createCompatCompareNatural,
+  createCompatMathjsCorr,
+  createCompatRelationalOps,
+  withCompareTextInvalidMix,
+  withCompatInstanceConfig,
+  withCumsumMathjsParity,
+  withEqualTextBigNumberRejection,
+  withMadInvalidTypeGuard,
+  withMeanMathjsParity,
+  withMedianBigintReturn,
+  withMedianMathjsParity,
+  withModeEmptyGuard,
+  withProdDimUnsupported,
+  withRelationalBinaryArity,
+  withStdVarianceMathjsParity,
+  withSumEmptyArrayZero,
+} from './mathjs-parity-g1788.js';
 
 // =============================================================================
 // Configuration
@@ -552,7 +569,29 @@ function bindShim<T extends (...args: unknown[]) => unknown>(
 /** Hot scalar ops skip lazy config wrappers (#735); still per-instance refs. */
 const HOT_SCALAR_SHIM_KEYS = new Set(['add', 'subtract', 'multiply']);
 /** Already applies `runWithConfig` / parity logic — skip the generic wrapper (#1780). */
-const SELF_SCOPED_FUNCTION_KEYS = new Set(['bignumber']);
+const SELF_SCOPED_FUNCTION_KEYS = new Set([
+  'bignumber',
+  // #1788 relational + statistics: `scopeInstanceConfig` / factory paths
+  'equal',
+  'unequal',
+  'equalScalar',
+  'deepEqual',
+  'compare',
+  'compareNatural',
+  'larger',
+  'smaller',
+  'largerEq',
+  'smallerEq',
+  'mean',
+  'median',
+  'std',
+  'variance',
+  'sum',
+  'cumsum',
+  'prod',
+  'mode',
+  'quantileSeq',
+]);
 
 /**
  * Front for a unary scalar shim (#889): a lone number in the real domain takes the Math
@@ -776,15 +815,21 @@ export function create(
     sqrt: mathFunctions.sqrt as (...args: unknown[]) => unknown,
     matrix: mathFunctions.matrix as (data: unknown, storage?: string) => unknown,
   };
-  const compatStd = createCompatMathjsStatistics(
+  const compatStd = withStdVarianceMathjsParity(
     'std',
-    shims.std as (...args: unknown[]) => unknown,
-    g02StatisticsDeps
+    createCompatMathjsStatistics(
+      'std',
+      mathFunctions.factory_std as (...args: unknown[]) => unknown,
+      g02StatisticsDeps
+    )
   );
-  const compatVariance = createCompatMathjsStatistics(
+  const compatVariance = withStdVarianceMathjsParity(
     'variance',
-    shims.variance as (...args: unknown[]) => unknown,
-    g02StatisticsDeps
+    createCompatMathjsStatistics(
+      'variance',
+      mathFunctions.factory_variance as (...args: unknown[]) => unknown,
+      g02StatisticsDeps
+    )
   );
   const compatErf = createCompatErfExpression(mathFunctions.erf as (...args: unknown[]) => unknown);
   const compatGamma = createCompatGammaBigNumberGuard(
@@ -956,19 +1001,30 @@ export function create(
         ),
       }
     : surfaceOf(factories);
-  const unitRelationalBase: UnitRelationalOps = {
-    equal: mathFunctions.equal as UnitRelationalOps['equal'],
-    unequal: mathFunctions.unequal as UnitRelationalOps['unequal'],
-    equalScalar: mathFunctions.equalScalar as UnitRelationalOps['equalScalar'],
-    deepEqual: mathFunctions.deepEqual as UnitRelationalOps['deepEqual'],
-    // #1550: the activated compare factory keeps a Fraction/BigNumber result.
-    compare: mathFunctions.factory_compare as UnitRelationalOps['compare'],
-    larger: mathFunctions.larger as UnitRelationalOps['larger'],
-    smaller: mathFunctions.smaller as UnitRelationalOps['smaller'],
-    largerEq: mathFunctions.largerEq as UnitRelationalOps['largerEq'],
-    smallerEq: mathFunctions.smallerEq as UnitRelationalOps['smallerEq'],
-  };
-  const unitRelational = applyUnitRelationalParity(unitRelationalBase);
+  const scopeInstanceConfig = (fn: (...args: unknown[]) => unknown) =>
+    withCompatInstanceConfig(
+      fn,
+      () => currentConfig as Parameters<typeof mathFunctions.runWithConfig>[0],
+      usesOverlay
+    );
+  const unitRelational = createCompatRelationalOps(convertForeignScalar, {
+    DenseMatrix: compatMatrixConstructors.DenseMatrix,
+    SparseMatrix: compatMatrixConstructors.SparseMatrix,
+  });
+  const compatCompareRelational = createCompatCompare(
+    unitRelational.compare,
+    convertForeignScalar
+  ) as (...args: unknown[]) => unknown;
+  const compatCorr = createCompatMathjsCorr({
+    matrix: shims.matrix as (data: unknown) => unknown,
+    add: mathFunctions.add as (...args: unknown[]) => unknown,
+    subtract: mathFunctions.subtract as (a: unknown, b: unknown) => unknown,
+    multiply: mathFunctions.multiply as (...args: unknown[]) => unknown,
+    divide: mathFunctions.divide as (a: unknown, b: unknown) => unknown,
+    pow: mathFunctions.pow as (a: unknown, b: unknown) => unknown,
+    sqrt: mathFunctions.sqrt as (x: unknown) => unknown,
+    sum: compatStatisticsFactories.sum,
+  });
 
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
@@ -976,16 +1032,27 @@ export function create(
     ...originalSurface,
     create: createSibling,
 
-    // G04: mathjs unit equality / ordering through activated factories (#1552).
-    equal: wrapEqualForMathjsFraction(unitRelational.equal as TypedFunction),
-    unequal: unitRelational.unequal,
-    equalScalar: wrapEqualForMathjsFraction(unitRelational.equalScalar as TypedFunction),
-    deepEqual: unitRelational.deepEqual,
-    compare: createCompatCompare(unitRelational.compare, convertForeignScalar),
-    larger: unitRelational.larger,
-    smaller: unitRelational.smaller,
-    largerEq: unitRelational.largerEq,
-    smallerEq: unitRelational.smallerEq,
+    // G04 / #1788: activated relational factories (relTol, null, units).
+    equal: withRelationalBinaryArity('equal', scopeInstanceConfig(unitRelational.equal)),
+    unequal: withRelationalBinaryArity('unequal', scopeInstanceConfig(unitRelational.unequal)),
+    equalScalar: scopeInstanceConfig(
+      wrapEqualForMathjsFraction(unitRelational.equalScalar as TypedFunction) as (
+        ...args: unknown[]
+      ) => unknown
+    ),
+    deepEqual: withRelationalBinaryArity(
+      'deepEqual',
+      scopeInstanceConfig(unitRelational.deepEqual)
+    ),
+    compare: withRelationalBinaryArity('compare', scopeInstanceConfig(compatCompareRelational)),
+    compareNatural: scopeInstanceConfig(createCompatCompareNatural()),
+    larger: withRelationalBinaryArity('larger', scopeInstanceConfig(unitRelational.larger)),
+    smaller: withRelationalBinaryArity('smaller', scopeInstanceConfig(unitRelational.smaller)),
+    largerEq: withRelationalBinaryArity('largerEq', scopeInstanceConfig(unitRelational.largerEq)),
+    smallerEq: withRelationalBinaryArity(
+      'smallerEq',
+      scopeInstanceConfig(unitRelational.smallerEq)
+    ),
 
     // Per-instance config — does not mutate the functions singleton; wrapped
     // methods run under runWithConfig(currentConfig, …).
@@ -1096,23 +1163,46 @@ export function create(
         false
       );
       return {
-        sum: createCompatSum(
-          createCompatEmptySum(
-            withReductionDim0ScalarReturn(
-              withStatisticsMultiCollectionGuard(
-                withBigIntStatisticsStrings(
-                  withSingleNumericStringGuard(withRawSingleValue(shims.sum)),
-                  () => currentConfig.number ?? 'number'
-                )
+        sum: scopeInstanceConfig(
+          withSumEmptyArrayZero(
+            createCompatSum(
+              createCompatEmptySum(
+                withReductionDim0ScalarReturn(
+                  withStatisticsMultiCollectionGuard(
+                    withBigIntStatisticsStrings(
+                      withSingleNumericStringGuard(
+                        withRawSingleValue(compatStatisticsFactories.sum)
+                      ),
+                      () => currentConfig.number ?? 'number'
+                    )
+                  )
+                ),
+                () => currentConfig.number ?? 'number',
+                instanceBigNumberClass
               )
             ),
             () => currentConfig.number ?? 'number',
             instanceBigNumberClass
           )
         ),
-        mean: shims.mean,
-        std: compatStd,
-        variance: compatVariance,
+        mean: scopeInstanceConfig(withMeanMathjsParity(compatStatisticsFactories.mean)),
+        median: scopeInstanceConfig(
+          withMedianBigintReturn(
+            withMedianMathjsParity(mathFunctions.median as (...args: unknown[]) => unknown),
+            () => currentConfig.number ?? 'number'
+          )
+        ),
+        corr: compatCorr,
+        cumsum: scopeInstanceConfig(withCumsumMathjsParity(compatStatisticsFactories.cumsum)),
+        prod: scopeInstanceConfig(
+          withProdDimUnsupported(mathFunctions.prod as (...args: unknown[]) => unknown)
+        ),
+        mode: scopeInstanceConfig(
+          withModeEmptyGuard(mathFunctions.mode as (...args: unknown[]) => unknown)
+        ),
+        quantileSeq: scopeInstanceConfig(compatStatisticsFactories.quantileSeq),
+        std: scopeInstanceConfig(compatStd),
+        variance: scopeInstanceConfig(compatVariance),
         min: withMixedTypeVariadicMaxMin(
           withReductionDim0ScalarReturn(
             withStatisticsMultiCollectionGuard(
@@ -1133,7 +1223,7 @@ export function create(
                             )
                           : args;
                       return wrapUnitExtrema(
-                        shims.min as (...a: unknown[]) => unknown,
+                        compatStatisticsFactories.min,
                         factoryMinUnits
                       )(...mapped);
                     }, g02IsComplexLike)
@@ -1166,7 +1256,7 @@ export function create(
                             )
                           : args;
                       return wrapUnitExtrema(
-                        shims.max as (...a: unknown[]) => unknown,
+                        compatStatisticsFactories.max,
                         factoryMaxUnits
                       )(...mapped);
                     }, g02IsComplexLike)
@@ -1428,7 +1518,7 @@ export function create(
     size: withFixedArity('size', 1, mathFunctions.size),
     inv: withFixedArity('inv', 1, mathFunctions.inv),
     // #1583 / #1588: the mathjs-shaped mad and the Matrix-returning expm.
-    mad: compatMad,
+    mad: withMadInvalidTypeGuard(compatMad),
     expm: compatExpm,
     pinv: compatPinv,
     format: (() => {
@@ -1453,8 +1543,8 @@ export function create(
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,
-    compareText: namedCompareText,
-    equalText: namedEqualText,
+    compareText: withCompareTextInvalidMix(namedCompareText as (...args: unknown[]) => unknown),
+    equalText: withEqualTextBigNumberRejection(namedEqualText as (...args: unknown[]) => unknown),
     toBest: namedToBest,
     to: compatTo,
     unit: localUnits?.unit ?? namedUnit,
