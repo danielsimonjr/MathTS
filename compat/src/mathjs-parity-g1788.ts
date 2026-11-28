@@ -251,6 +251,12 @@ export function withFractionScalarOrdering(
   });
 }
 
+/** Type-name ordering when numeric `compareNatural` ties across typeof (#1788). */
+function compareNaturalMixedTypeOrder(leftType: string, rightType: string): number {
+  if (leftType === rightType) return 0;
+  return leftType < rightType ? -1 : 1;
+}
+
 /** Pure bigint-bigint `compareNatural` signs without typed dispatch (#1788). */
 export function withCompareNaturalBigintParity(
   fn: (...args: unknown[]) => unknown
@@ -263,14 +269,13 @@ export function withCompareNaturalBigintParity(
       const nx = Number(x);
       if (nx < y) return -1;
       if (nx > y) return 1;
-      // mathjs type-order tie-break when numeric compare is 0
-      return -1;
+      return compareNaturalMixedTypeOrder('bigint', 'number');
     }
     if (typeof x === 'number' && typeof y === 'bigint') {
       const ny = Number(y);
       if (x < ny) return -1;
       if (x > ny) return 1;
-      return -1;
+      return compareNaturalMixedTypeOrder('number', 'bigint');
     }
     return fn(x, y);
   });
