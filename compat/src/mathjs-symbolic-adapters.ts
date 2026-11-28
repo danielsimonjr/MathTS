@@ -172,7 +172,7 @@ function resolveSymbolicCtx(ctx?: SymbolicContextSource): SymbolicAlgebraContext
   return typeof ctx === 'function' ? ctx() : ctx;
 }
 
-/** @returns mathjs-shaped `simplifyCore`. */
+/** Create a compat `simplifyCore` matching mathjs 15.3.0. */
 export function createCompatSimplifyCore(ctx?: SymbolicContextSource): SymbolicFn {
   return (...args: unknown[]) =>
     finalizeSymbolicAlgebraResult(moduleScope.simplifyCore(...args), resolveSymbolicCtx(ctx));
@@ -213,7 +213,7 @@ function reparseResolvedNodes(value: unknown, parseFn: (expr: string) => unknown
   return value;
 }
 
-/** @returns mathjs-shaped `resolve`. */
+/** Create a compat `resolve` matching mathjs 15.3.0. */
 export function createCompatResolve(ctx?: SymbolicContextSource): SymbolicFn {
   return (...args: unknown[]) => {
     const hadScope = args.length > 1 && args[1] != null;
@@ -239,7 +239,7 @@ export function createCompatResolve(ctx?: SymbolicContextSource): SymbolicFn {
   };
 }
 
-/** @returns mathjs-shaped `simplify`. */
+/** Create a compat `simplify` matching mathjs 15.3.0. */
 export function createCompatSimplify(
   config: Partial<MathJSConfig> = mathFunctions.config(),
   ctx?: SymbolicContextSource
@@ -256,7 +256,7 @@ export function createCompatSimplify(
   return copySymbolicSurface(scoped, wrapped);
 }
 
-/** @returns mathjs-shaped `derivative`. */
+/** Create a compat `derivative` matching mathjs 15.3.0. */
 export function createCompatDerivative(ctx?: SymbolicContextSource): SymbolicFn {
   const wrapped = (...args: unknown[]) => {
     try {

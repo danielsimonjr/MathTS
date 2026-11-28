@@ -112,7 +112,7 @@ export const createMathjsSimplifyCore = /* #__PURE__ */ factory(
      *           Convert equivalent function calls into operators
      *     v10.2 Created by moving an internal function of `simplify` to top level
      *
-     * @param {Node | string} node
+     * @param {Node | string} nodeToSimplify
      *     The expression to be simplified
      * @param {Object} options
      *     Simplification options, as per simplify()

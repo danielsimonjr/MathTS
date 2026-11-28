@@ -23,32 +23,7 @@ export const createMathjsResolve = /* #__PURE__ */ factory(
   name,
   dependencies,
   ({ typed, parse, ConstantNode, FunctionNode, OperatorNode, ParenthesisNode }) => {
-    /**
-     * resolve(expr, scope) replaces variable nodes with their scoped values
-     *
-     * Syntax:
-     *
-     *     math.resolve(expr, scope)
-     *
-     * Examples:
-     *
-     *     math.resolve('x + y', {x:1, y:2})           // Node '1 + 2'
-     *     math.resolve(math.parse('x+y'), {x:1, y:2}) // Node '1 + 2'
-     *     math.simplify('x+y', {x:2, y: math.parse('x+x')}).toString() // "6"
-     *
-     * See also:
-     *
-     *     simplify, evaluate
-     *
-     * @param {Node | Node[]} node
-     *     The expression tree (or trees) to be simplified
-     * @param {Object} scope
-     *     Scope specifying variables to be resolved
-     * @return {Node | Node[]} Returns `node` with variables recursively substituted.
-     * @throws {ReferenceError}
-     *     If there is a cyclic dependency among the variables in `scope`,
-     *     resolution is impossible and a ReferenceError is thrown.
-     */
+    /** Coerce resolve scope values to a `Map` for typed dispatch (#1790). */
     function asResolveScope(scope) {
       if (scope == null) return scope;
       if (scope instanceof Map) return scope;
@@ -101,6 +76,14 @@ export const createMathjsResolve = /* #__PURE__ */ factory(
       return node.map((child) => _resolve(child, scope, within));
     }
 
+    /**
+     * resolve(expr, scope) replaces variable nodes with their scoped values.
+     *
+     * @param {Node | Node[]} expr The expression tree (or trees) to be simplified.
+     * @param {Object} scope Scope specifying variables to be resolved.
+     * @return {Node | Node[]} Returns `expr` with variables recursively substituted.
+     * @throws {ReferenceError} On cyclic variable definitions in `scope`.
+     */
     return typed('resolve', {
       Node: _resolve,
       'Node, Map | null | undefined': _resolve,
