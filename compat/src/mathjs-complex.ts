@@ -94,14 +94,22 @@ function complexJsDivide(a: Complex, b: Complex): Complex {
   if (tZero || zInf) return new Complex(0, 0);
   // complex.js divides each component by a real divisor; the general formula rounds
   // differently in the last digit (#1784: `(300 + 400i) kPa` to `lbf / in^2`).
-  if (complexComponentNumber(b.im) === 0) {
-    const divisor = complexComponentNumber(b.re);
-    return new Complex(
-      complexComponentNumber(a.re) / divisor,
-      complexComponentNumber(a.im) / divisor
-    );
+  const br = complexComponentNumber(b.re);
+  const bi = complexComponentNumber(b.im);
+  if (bi === 0) {
+    return new Complex(complexComponentNumber(a.re) / br, complexComponentNumber(a.im) / br);
   }
-  return a.divide(b);
+  // complex.js `div` (used by mathjs 15.3.0) — stable denominator scaling (#1787).
+  const ar = complexComponentNumber(a.re);
+  const ai = complexComponentNumber(a.im);
+  if (Math.abs(br) < Math.abs(bi)) {
+    const x = br / bi;
+    const t = br * x + bi;
+    return new Complex((ar * x + ai) / t, (ai * x - ar) / t);
+  }
+  const x = bi / br;
+  const t = bi * x + br;
+  return new Complex((ar + ai * x) / t, (ai - ar * x) / t);
 }
 
 /**
@@ -122,6 +130,11 @@ export function withMathjsComplexBinary(
     // pairs must stay on native typed add/mul/div (otherwise `0.1 + 0.2` under
     // number:'BigNumber' becomes Complex and the full-surface sweep fails).
     if (!isComplex(a) && !isComplex(b)) return native(a, b);
+    const aInf = typeof a === 'number' && !Number.isFinite(a);
+    const bInf = typeof b === 'number' && !Number.isFinite(b);
+    if (op === 'mul' && (aInf || bInf) && (isComplex(a) || isComplex(b))) {
+      return new Complex(Infinity, Infinity);
+    }
     const ca = asComplex(a);
     const cb = asComplex(b);
     if (ca !== null && cb !== null) return combine(ca, cb);

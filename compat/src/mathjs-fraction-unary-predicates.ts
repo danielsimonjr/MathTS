@@ -4,13 +4,14 @@
  * surface so mathjs-tagged fraction.js instances follow mathjs rules (#1779 / G03).
  */
 import type { TypedFunction } from '@danielsimonjr/mathts-core';
-import { isMatrix } from '@danielsimonjr/mathts-core';
+import { isFraction, isMatrix } from '@danielsimonjr/mathts-core';
 import { deepMap } from '@danielsimonjr/mathts-core/internal';
 import {
   isMathjsFraction,
   mathjsFractionClass,
   type MathjsFraction,
 } from './mathjs-fraction-class.js';
+import { isUnitOperand } from './mathjs-parity-1787-arithmetic.js';
 
 function isCollection(value: unknown): boolean {
   return Array.isArray(value) || isMatrix(value);
@@ -128,10 +129,85 @@ function mathjsFractionMul(a: unknown, b: unknown): unknown | null {
   return null;
 }
 
+function asMathjsFraction(x: unknown): MathjsFraction | null {
+  if (isMathjsFraction(x)) return x;
+  if (isFraction(x)) {
+    return new mathjsFractionClass(x.numerator, x.denominator) as MathjsFraction;
+  }
+  return null;
+}
+
+function mathjsFractionDiv(a: unknown, b: unknown): unknown | null {
+  if (isUnitOperand(a) || isUnitOperand(b)) return null;
+  const leftFrac = asMathjsFraction(a);
+  const rightFrac = asMathjsFraction(b);
+  if (leftFrac !== null && (rightFrac !== null || typeof b === 'number')) {
+    return leftFrac.div((rightFrac ?? b) as number | MathjsFraction);
+  }
+  if (rightFrac !== null && (leftFrac !== null || typeof a === 'number')) {
+    const left = leftFrac ?? new mathjsFractionClass(a as number);
+    return left.div(rightFrac);
+  }
+  return null;
+}
+
+/** divideScalar without typed-function coercion (unit magnitude paths). */
+export function mathjsCompatibleDivideScalar(a: unknown, b: unknown): unknown | null {
+  return mathjsFractionDiv(a, b);
+}
+
+/** Run factory `divideScalar` through mathjs fraction.js for magnitude pairs. */
+export function wrapDivideScalarForMathjsFraction(fn: TypedFunction): TypedFunction {
+  const shim = function (this: unknown, ...args: unknown[]): unknown {
+    if (args.length === 2) {
+      if (isUnitOperand(args[0]) || isUnitOperand(args[1])) {
+        return fn.apply(this, args);
+      }
+      const frac = mathjsFractionDiv(args[0], args[1]);
+      if (frac !== null) return frac;
+    }
+    return fn.apply(this, args);
+  };
+  copyTypedSurface(shim, fn);
+  return shim as TypedFunction;
+}
+
+/** Skip fraction.js fast paths when a `Unit` is involved (magnitude typing stays in the factory). */
+export function wrapFactoryScalarSkipUnitFraction(fn: TypedFunction): TypedFunction {
+  const shim = function (this: unknown, ...args: unknown[]): unknown {
+    if (args.length === 2 && (isUnitOperand(args[0]) || isUnitOperand(args[1]))) {
+      return fn.apply(this, args);
+    }
+    return wrapMultiplyScalarForMathjsFraction(fn).apply(this, args);
+  };
+  copyTypedSurface(shim, fn);
+  return shim as TypedFunction;
+}
+
+/** Factory `divideScalar` without the multiplyScalar fraction fast path (avoid `div` → `mul`). */
+export function wrapFactoryScalarSkipUnitOnly(fn: TypedFunction): TypedFunction {
+  const shim = function (this: unknown, ...args: unknown[]): unknown {
+    if (args.length === 2 && (isUnitOperand(args[0]) || isUnitOperand(args[1]))) {
+      return fn.apply(this, args);
+    }
+    return fn.apply(this, args);
+  };
+  copyTypedSurface(shim, fn);
+  return shim as TypedFunction;
+}
+
+/** Instance `divideScalar`: mathjs fraction magnitudes, then factory typed dispatch. */
+export function wrapCompatDivideScalarSurface(fn: TypedFunction): TypedFunction {
+  return wrapFactoryScalarSkipUnitOnly(wrapDivideScalarForMathjsFraction(fn));
+}
+
 /** `multiplyScalar` / sparse dot paths use fraction.js `mul`, not core `multiply`. */
 export function wrapMultiplyScalarForMathjsFraction(fn: TypedFunction): TypedFunction {
   const shim = function (this: unknown, ...args: unknown[]): unknown {
     if (args.length === 2) {
+      if (isUnitOperand(args[0]) || isUnitOperand(args[1])) {
+        return fn.apply(this, args);
+      }
       const frac = mathjsFractionMul(args[0], args[1]);
       if (frac !== null) return frac;
     }
