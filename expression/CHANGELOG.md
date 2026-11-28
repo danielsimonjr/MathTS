@@ -1,5 +1,37 @@
 # @danielsimonjr/mathts-expression
 
+## 0.15.0
+
+### Minor Changes
+
+- ff586ee: Typed-package surface exports and decisions (#1567–#1571): `core` exports canonical error classes and lowercase constant aliases; `functions` exports matrix helpers, `ArgumentsError`, and 63 `create*` factory aliases; `expression` exports `docs`, `ResultSet`, Node classes, and `Parser`. Compat adapters restore mathjs 15.3.0 broadcast errors, block `evaluate` `ResultSet` shapes, shared `DimensionError`, and the embedded-docs map. Native typed arithmetic is unchanged (`RangeError` on mismatched vectors). Expression `ResultSet`/parse identity fixes are native **good idea** changes for `instanceof` parity.
+
+### Patch Changes
+
+- 6161427: Compat `version` reports the emulated mathjs version (#1581): `version` is `"15.3.0"` on the compat instance, the named export, and the expression scope, and a `compatVersion` named export carries the compat package version; `help('version')` and other doc examples evaluate through the instance evaluator.
+  
+  Native expression compile looks up scope with `has` then `get`, so an explicit `undefined` binding is not treated as a missing symbol (`evaluate('pi', { pi: undefined })` returns `undefined`). BREAKING: code reading the compat package version from `math.version` must read `compatVersion`.
+- f151e6a: Compat `create(all)` matches mathjs **15.3.0** expression behavior by default (#1549, #1556, #1562, #1576, #1580): assignment, in-expression `help` / `config` / `parse` / `evaluate` / `compile` / `parser`, and `ResultSet` block results. Pass `{ safe: true }` on compat `evaluate` / `compile` / `parser` to opt back into the MathTS sandbox. Native `@danielsimonjr/mathts-expression` and `evaluate` from `@danielsimonjr/mathts-functions` stay safe by default (`{ unsafe: true }` opt-out); block statements keep native return semantics (ResultSet is enabled only when `compatBlockResultSet` is in the math scope). Expression assignment compilation fixes index/property scope-binding bugs (security). `createInstanceEvaluator` accepts optional compat-only unsafe-scope bindings without changing default native evaluate. Native bug (#1551): `isPositive` / `isNegative` / `fix` on Fraction now call `isPositive()` / `isNegative()` instead of reading undefined fraction.js `.s` / `.n` fields. Compat `isValuelessUnit('d')` uses an instance-local constructor (`wrapCompatUnitConstructor` in `compat/src/mathjs-unit.ts`) and does not patch the shared core `Unit` class (#1557). G14 PR #1730 owns `Unit.UNITS` / `wrapCompatUnitClass`; this PR owns the constructor wrapper until that lands.
+- 59a9656: Expose the mathjs factories through compat's `all` bundle for custom instances.
+  Export `num`, `den`, `compile`, and the mathjs type predicates from the functions package.
+  Use mathjs scalar signatures for trigonometric, exponential, and counting functions across named imports and instance expressions. Parsed nodes use the instance’s expression bindings. Compat also matches mathjs Unicode tokenization and complex square roots on the real axis.
+  Compatibility units now normalize and format readings using the mathjs order of floating-point operations. Native MathTS units retain exact conversion scales.
+  Each full compatibility instance keeps its own custom unit definitions for conversion, expressions, and JSON restoration.
+  Compatibility combinations follow mathjs floating-point rounding for safe integer inputs. Compatibility xgcd uses mathjs coefficient arithmetic and the configured matrix output.
+  Decimal combinations round each multiplication and division at the configured precision. Combinations with replacement use the mathjs range products for number inputs.
+  BigNumber exponential and precision formatting now round the significand before choosing notation and account for carries into the next exponent.
+- c4d21a3: Compat `create(all)` now populates `instance.expression.transform` with all 26 mathjs 15.3.0 transform functions (including `apply`) and mirrors `instance.expression.mathWithTransform` as the full instance function/constant surface with those 26 replaced by their transform versions (#1572). The `mathWithTransform` entries are live getters over the instance, so config-dependent constants (`pi`, the physical constants) stay live; the evaluator keeps its own scope so the built-in typed signatures the expression language relies on are unchanged. `@danielsimonjr/mathts-expression` adds the `createApplyTransform` factory (`expression/src/transform/apply.transform.ts`) — the one-based `apply` transform was never built, which is the root cause of the empty `transform` object — and compat instances expose the typed `expression` property.
+- Updated dependencies [e6f5401]
+- Updated dependencies [c77aae6]
+- Updated dependencies [37dd8a8]
+- Updated dependencies [ff586ee]
+- Updated dependencies [432a0b0]
+- Updated dependencies [2355d55]
+- Updated dependencies [41819c8]
+- Updated dependencies [c6d0432]
+- Updated dependencies [59a9656]
+  - @danielsimonjr/mathts-core@0.31.0
+
 ## 0.14.5
 
 ### Patch Changes

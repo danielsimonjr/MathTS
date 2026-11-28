@@ -1,5 +1,34 @@
 # @danielsimonjr/mathts-plot
 
+## 0.5.5
+
+### Patch Changes
+
+- 432a0b0: Match mathjs 15.3.0 `toTex` unit names and boolean-operator spacing on the compat instance (#1577, #1578).
+  
+  Compat wraps parse output with a thin `toTex` adapter: `Unit.UNITS` / `isValuelessUnit` follow the mathjs 15.3.0 oracle (not core's wider table), bare unit symbols honor the `math[name] === undefined` guard, and boolean operators join with no space (`true\wedgefalse`, `\negtrue`, `true\veebarfalse`). Native MathTS expression output is unchanged.
+  
+  **Native bug (good idea):** `VERSION` in `core` / `plot` / `workbook` is a tsdown `__PKG_VERSION__` define. Bun `docs:functions` can still evaluate `src/` (root tsconfig `paths`), where the identifier was undefined and the pre-commit hook aborted. Source execution now reads the same global the bun-test preload already sets, and `docs:functions` injects `--define`.
+- Updated dependencies [e6f5401]
+- Updated dependencies [6161427]
+- Updated dependencies [98ee4a0]
+- Updated dependencies [c77aae6]
+- Updated dependencies [37dd8a8]
+- Updated dependencies [ff586ee]
+- Updated dependencies [432a0b0]
+- Updated dependencies [2355d55]
+- Updated dependencies [41819c8]
+- Updated dependencies [f151e6a]
+- Updated dependencies [b86c8ab]
+- Updated dependencies [c6d0432]
+- Updated dependencies [20ccbf2]
+- Updated dependencies [59a9656]
+- Updated dependencies [c4d21a3]
+- Updated dependencies [76f7a5b]
+  - @danielsimonjr/mathts-core@0.31.0
+  - @danielsimonjr/mathts-functions@0.90.0
+  - @danielsimonjr/mathts-expression@0.15.0
+
 ## 0.5.4
 
 ### Patch Changes

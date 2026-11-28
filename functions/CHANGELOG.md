@@ -1,5 +1,51 @@
 # @danielsimonjr/mathts-functions
 
+## 0.90.0
+
+### Minor Changes
+
+- ff586ee: Typed-package surface exports and decisions (#1567–#1571): `core` exports canonical error classes and lowercase constant aliases; `functions` exports matrix helpers, `ArgumentsError`, and 63 `create*` factory aliases; `expression` exports `docs`, `ResultSet`, Node classes, and `Parser`. Compat adapters restore mathjs 15.3.0 broadcast errors, block `evaluate` `ResultSet` shapes, shared `DimensionError`, and the embedded-docs map. Native typed arithmetic is unchanged (`RangeError` on mismatched vectors). Expression `ResultSet`/parse identity fixes are native **good idea** changes for `instanceof` parity.
+- c6d0432: Match the mathjs 15.3.0 behavior changes and pin the compat parity oracle at mathjs 15.3.0.
+  
+  Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`. The compat parity oracle is mathjs 15.3.0 (#1574): the pin, the regenerated parity names, the scheduled mathjs-oracle workflow, and the full-instance differential harness in `compat/tests/parity/`.
+- 59a9656: Expose the mathjs factories through compat's `all` bundle for custom instances.
+  Export `num`, `den`, `compile`, and the mathjs type predicates from the functions package.
+  Use mathjs scalar signatures for trigonometric, exponential, and counting functions across named imports and instance expressions. Parsed nodes use the instance’s expression bindings. Compat also matches mathjs Unicode tokenization and complex square roots on the real axis.
+  Compatibility units now normalize and format readings using the mathjs order of floating-point operations. Native MathTS units retain exact conversion scales.
+  Each full compatibility instance keeps its own custom unit definitions for conversion, expressions, and JSON restoration.
+  Compatibility combinations follow mathjs floating-point rounding for safe integer inputs. Compatibility xgcd uses mathjs coefficient arithmetic and the configured matrix output.
+  Decimal combinations round each multiplication and division at the configured precision. Combinations with replacement use the mathjs range products for number inputs.
+  BigNumber exponential and precision formatting now round the significand before choosing notation and account for carries into the next exponent.
+
+### Patch Changes
+
+- e6f5401: Fix Fraction field reads (`isPositive`/`isNegative`/`isInteger`/`fix`, Unit BigNumber converter) to use `numerator`/`denominator`, and exact rational `pow` via `rationalPow` (#1551). Compat still prints whole fractions as `n/1`.
+- 98ee4a0: **`eigs` mathjs 15.3.0 quirks in compat only (#1561).** The public `eigs` of `@danielsimonjr/mathts-functions` stays the native `correctEigs` orthes/hqr2 route. The mathjs 15.3.0 factory port (precision collapse, non-unit eigenvector scale, magnitude-ordered values) lives in `compat/src/mathjs-eigs/` and is bound on `create(all)` via `compat/src/eigs-mathjs.ts`. Native `eig` Rayleigh-refines a small eigenvalue beside a 1e15 diagonal (mpmath: exactly 5). BREAKING (compat): instance `eigs` matches mathjs 15.3.0 including loose `precision`; the native package export keeps unit-normalized vectors and ignores numeric-only precision.
+- c77aae6: **Unit equality and ordering (#1552):** Typed `unitsEqual` / `unitCmp` / `Unit.equals` compare absolute SI (including degC/degF offset) with `coreEqual` / typed value compare, not `===` or a number cast. Compat still copies mathjs 15.3.0 (`0 degC == 32 degF` is false) via factory adapters (`unit-relational.ts`); `min`/`max`/`sign` of Units use the same factories.
+- 37dd8a8: G08 inverse hyperbolic (#1558–#1560): native C99 principal values for `Complex.asin`/`atanh` at infinity (so `acsc(0)`/`asec(0)`/`acoth(0)` are not NaN), `acsch(complex)` via `asinh(1/z)`, and compat `create(all)` complex.js 2.4.2 adapters for mathjs 15.3.0 quirks.
+- 41819c8: G07 (#1555): typed `nullish` keeps Fraction/Unit and is element-wise on collections; `not`/`and`/`or`/`xor` use numeric Unit/Fraction truthiness (not `!!object`). Compat `create(all)` binds mathjs factories (`nullish({}, 2)` TypeError). Native `nullish({}, 2)` still returns `{}`. Fraction `format` (`2/1`) remains G15 (#1721).
+- f151e6a: Compat `create(all)` matches mathjs **15.3.0** expression behavior by default (#1549, #1556, #1562, #1576, #1580): assignment, in-expression `help` / `config` / `parse` / `evaluate` / `compile` / `parser`, and `ResultSet` block results. Pass `{ safe: true }` on compat `evaluate` / `compile` / `parser` to opt back into the MathTS sandbox. Native `@danielsimonjr/mathts-expression` and `evaluate` from `@danielsimonjr/mathts-functions` stay safe by default (`{ unsafe: true }` opt-out); block statements keep native return semantics (ResultSet is enabled only when `compatBlockResultSet` is in the math scope). Expression assignment compilation fixes index/property scope-binding bugs (security). `createInstanceEvaluator` accepts optional compat-only unsafe-scope bindings without changing default native evaluate. Native bug (#1551): `isPositive` / `isNegative` / `fix` on Fraction now call `isPositive()` / `isNegative()` instead of reading undefined fraction.js `.s` / `.n` fields. Compat `isValuelessUnit('d')` uses an instance-local constructor (`wrapCompatUnitConstructor` in `compat/src/mathjs-unit.ts`) and does not patch the shared core `Unit` class (#1557). G14 PR #1730 owns `Unit.UNITS` / `wrapCompatUnitClass`; this PR owns the constructor wrapper until that lands.
+- b86c8ab: Compat matches mathjs 15.3.0 on `zeta`, `symbolicEqual`, and `range` (#1585) via adapters in `compat/src/mathjs-parity-1585.ts`; native `@danielsimonjr/mathts-functions` keeps the more accurate implementations. Native `zeta`/`gamma`/`lgamma`/`factorial` now have explicit `bigint` signatures so typed-function does not promote a safe integer to BigNumber. Documented under `Native MathTS differences` in `docs/api/compat.md`.
+- 20ccbf2: `MathJSSparseMatrix` construction paths (#1582) use `isStructuralZero` so BigNumber, Fraction, Complex and Unit zeros are not stored like mathjs 15.3.0; number storage keeps exact `=== 0` (tiny values such as 1e-100 stay stored). CSC sparse add/subtract/multiply with Unit operands route through factory matAlgo paths. Compat wraps the fixed native sparse class and matches mathjs on the G17 adversarial surface.
+- 76f7a5b: Use mathjs exponential notation for compatibility BigNumbers, including arithmetic results, expression conversions and JSON round trips.
+- Updated dependencies [e6f5401]
+- Updated dependencies [6161427]
+- Updated dependencies [98ee4a0]
+- Updated dependencies [c77aae6]
+- Updated dependencies [37dd8a8]
+- Updated dependencies [ff586ee]
+- Updated dependencies [432a0b0]
+- Updated dependencies [2355d55]
+- Updated dependencies [41819c8]
+- Updated dependencies [f151e6a]
+- Updated dependencies [c6d0432]
+- Updated dependencies [59a9656]
+- Updated dependencies [c4d21a3]
+  - @danielsimonjr/mathts-core@0.31.0
+  - @danielsimonjr/mathts-expression@0.15.0
+  - @danielsimonjr/mathts-matrix@0.13.3
+  - @danielsimonjr/mathts-parallel@0.12.3
+
 ## 0.89.22
 
 ### Patch Changes

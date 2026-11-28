@@ -9,6 +9,200 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Set functions keep compareNatural ordering for mixed scalars (#1793):** every mathjs set operation that orders or compares elements (`setCartesian`, `setDifference`, `setDistinct`, `setIntersect`, `setIsSubset`, `setMultiplicity`, `setPowerset`, `setSize`, `setSymDifference`, and `setUnion`) on `create(all)`, named exports, `evaluate`, and DenseMatrix now runs through the activated mathjs factories instead of the typed JSON `naturalCompare` paths, so Complex, Fraction, and BigNumber multisets match mathjs 15.3.0.
+
+### Fixed
+
+- **Compat matrix model (#1785):** `DenseMatrix`/`ImmutableDenseMatrix` `get` takes one array index; `subset` rejects a bad arity with `SyntaxError`; a `1×3×1` unsqueeze and an empty index match mathjs; `sparse(matrix)` clones CSC `_values`; `subtract(BigNumber, boolean)` stays a BigNumber.
+
+### Fixed
+
+- **setDifference mixed-type order matches mathjs (#1793, challenge #1833):** `create(all).setDifference([1, complex(2, 2), 3], [1])` returns `[2 + 2i, 3]`. `setUnion` and `setSymDifference` use the same `compareNatural` factory path, including named exports and `evaluate`.
+
+### Fixed
+
+- compat unit parity with mathjs 15.3.0 (#1784): `to` broadcasts over Array and Matrix, `toBest` defaults to the 1.2 prefix offset, `Unit` and `unit()` accept NaN and +/-Infinity, `Unit()` without `new` throws a `SyntaxError`, `Ah` is 3600 C, `Unit.parse` uses the mathjs grammar (implicit multiplication after a solidus, affine units in compounds, `SyntaxError`), a valueless unit times or divided by a BigNumber, Fraction or Complex keeps its prefix, `Unit.createUnitSingle` can redefine names that only native core ships, an assigned `Unit.isValidAlpha` reaches `createUnit` and `parse`, `VAR` has its imaginary scale, and complex magnitudes divide as complex.js does.
+
+### Fixed
+
+- compat JSON `replacer`/`reviver` round-trips `Parser`, `Chain`, and `Help` with mathjs 15.3.0 parity (#1782).
+
+### Fixed
+
+- **Compat evaluate uses mathjs factory compile for sandbox errors (#1777):** `create(all)` now compiles parsed nodes with the instance `mathWithTransform` namespace (via `node._compile`), matching mathjs 15.3.0 instead of the tree-walking compiler that reported `Undefined symbol "constructor"` for bare forbidden names. Adds object-literal key guards for keys parse would silently drop, valueless-unit symbol handling for names such as `chain`, and plain-function wrappers on `mathWithTransform` for the security surface scan. **`functions`:** exports `compatFactoryReducerScope()` so the factory compile path uses the same module reducers as tree unsafe evaluate.
+
+### Fixed
+
+- **Compat matrix model matches mathjs 15.3.0 (#1785):** `DenseMatrix`, `ImmutableDenseMatrix`, and `SparseMatrix` on `create(all)` use compat-only prototype wrappers (constructors without `new`, deep `clone`, `transpose` datatype, sparse CSC growth/`get`/`set`/`toJSON`/`fromJSON`/`Symbol.iterator`, Fraction/BigNumber datatypes). Jagged nested-array operands for `add`/`subtract`/`gcd` stay on the factory path instead of coercing to rectangular `DenseMatrix`.
+- **Matrix factory promotion (#1785):** `matrix`/`sparse`/`transpose`/`clone` re-wrap bridge matrices with compat prototypes; `Index` dimensions use compat `ImmutableDenseMatrix`; `gcd` uses the mathjs-shaped factory; logical `or`/`xor` use bridge `DenseMatrix`/`SparseMatrix`; `max`/`min`/`sum` return scalars for 1-D matrices along dimension 0.
+- **`DenseMatrix#create` scalars (#1785):** compat dense `create` returns a scalar unchanged (mathjs `reduce` parity) instead of wrapping numbers as matrices.
+- **Immutable / sparse subset guards (#1785):** `ImmutableDenseMatrix` inherits immutable `min`/`max` and mathjs-shaped get/subset errors; sparse pattern `subset` and scalar-replacement checks match mathjs messages.
+- **`matrix`/`sparse` factory routing (#1785):** compat overloads (`matrix('dense','number')`, identity clone) and arity rejections align with mathjs 15.3.0.
+- **`compatDecimalResult` + gcd (#1785):** core `Fraction` results from `factory_gcd` promote via `numerator`/`denominator`, fixing `gcd(12, fraction(8))`.
+- **Map / matrixFrom / range / statistics (#1785):** `mathjs-parity-1785-surfaces` adds jagged `map`, dense `matrixFromRows`/`matrixFromFunction`, range zero-step guard, mixed-type max/min scalar routing, empty `sum`, and reshape message/BigNumber fixes; sparse subset scalar `get` and instance `BigNumber` `valueOf`.
+- **Range includeEnd / Fraction ranges / subset shapes (#1785):** preserve trailing `range` booleans under BigNumber promotion; compat fraction `range` loop; legacy vs modern `subset` GET matrix shapes; `null` default array assignment; `concat` BigNumber dimensions.
+- **Compat CI tests (#889):** the unary fast-path counter suite runs in its own `bun test` process (`scripts/bun-test.mjs`) so `mock.module` on `@danielsimonjr/mathts-functions` installs before shims load; vitest keeps a hoisted `vi.mock` twin in `unary-fast-path.vitest-spec.ts`.
+- **Compat coverage (#1785):** focused `compat/tests` suites exercise matrix-model adapters (dense/sparse/immutable, G09 subset, G02/G06/error wrappers, and `create(all)` wiring) so `compat` line coverage stays above the 95% floor.
+
+### Fixed
+
+- **Compat `help()` matches mathjs 15.3.0 embedded docs (#1776):** resolve documentation from constant values and function references via live `mathWithTransform`, use safe embedded-doc lookup (including `compatBlockResultSet`), typed arity errors, and batch `evaluate` on doc example lists with shared assignment scope.
+
+### Fixed
+
+- **Compat `format` / `print` (#1778):** Instance `format` no longer injects `config.precision` into options objects that omit it, restoring mathjs engineering notation and fixed complex output. `format(bignumber)` with no second argument still uses instance precision; arity errors delegate to typed-function. `print` converts Matrix value containers to arrays, only intercepts two- and three-argument calls (so arity checks run), and keeps trailing-period templates intact.
+
+### Fixed
+
+- **Chain prototype inheritance (#1783):** The chain `Proxy` now falls through to the target's prototype chain for names that are not math functions, so inherited properties (as on `Object.prototype` in mathjs's unit test) remain visible and are not reported as own properties.
+
+### Added
+
+- CI fails when a package's built exports differ from the published tarball at the same version and no changeset names the package (#1573).
+
+### Fixed
+
+- **Unpublished surface check (#1573, #1771):** compare every `package.json` export subpath (not only `.`), parse package names strictly from changeset YAML frontmatter, treat `npm pack` `ETARGET` like `E404`, fail when no package was actually compared unless every comparable skip is a registry miss, skip both-side import failures only for worker entries, continue after per-entry import errors, and run only on `pull_request` with unit tests pinned in CI.
+
+### Fixed
+
+- **Meta-API parity with mathjs 15.3.0 (#1575):** align `Chain` (`type`, `value`, `toJSON`, `fromJSON`, `format`-based `toString`), instance `format` default `precision` and BigNumber precision arguments (including `evaluate('format(pi, 3)')` with `number: 'BigNumber'`), instance `create(config)` (not factory maps), module `create` rejection of non-factory inputs, lazy factory `import` for missing dependencies, reviver errors on malformed `BigNumber`/`Complex` tags, and Fraction bare `JSON.stringify` string `n`/`d`. Differential coverage in `compat/tests/parity/g20-meta.test.ts` and `challenger-g20.test.ts`.
+- **Argument-count and constructor-error parity (#1575):** the too-few-arguments errors of `add`, `subtract`, `transpose` and `det` now name the first missing argument index like mathjs (`transpose()` reports `index: 0`), `solveODE` gains the missing `function, Array, Matrix` and `function, Array, Matrix, Object` signatures (mathjs returns arrays for them), and calling `Chain` without `new` throws the mathjs `SyntaxError` ("Constructor must be called with the new operator"). Branch coverage in `compat/tests/parity/g20-adapter-branches*.test.ts`.
+
+### Fixed
+
+- **Match complex.js non-finite `Complex` arithmetic on the compat instance (#1589):** compat-only wrappers apply complex.js 2.4.3 Riemann-sphere rules for `add`/`subtract`/`multiply`/`divide`/`dotMultiply`; `freqz` and `zpk2tf` are built with those wrappers for polynomial work (including gain-type rejection under `number: 'BigNumber'`); and `evaluate` routes `zpk2tf`/`freqz` through the instance shims. Native critical packages keep IEEE `Complex` semantics. Doc sweep runs each embedded example on a fresh pair and skips stateful `config` docs so `known-gaps/` cannot mask fixed `zpk2tf` rows.
+
+### Fixed
+
+- **`__PKG_VERSION__` is defined when Bun evaluates `core`/`plot`/`workbook` source (`docs:functions`):** tsdown injects `__PKG_VERSION__` into `dist`; `bun test` sets it on `globalThis` via preload. `docs:functions` ran Bun against `src/` (root `tsconfig.json` `paths`) with neither define, so `export const VERSION = __PKG_VERSION__` threw `ReferenceError` and the pre-commit hook failed. Source now falls back to `globalThis.__PKG_VERSION__`, and `bun tools/run-docs-functions.mjs` passes `--define`. Dist output is unchanged (tsdown still inlines the package version).
+- **`toTex` unit names and logical operator spacing (#1577, #1578):** Compat `parse(expr).toTex()` matches mathjs 15.3.0: valueless unit names render as `\mathrm{…}` (`deg` as `^\circ`) when the name is not on the mathjs instance, and boolean operators use mathjs spacing (`true\wedgefalse`, `\negtrue`, `true\veebarfalse`) via a thin compat parse/`Unit` adapter. Native expression output is unchanged; rendering unit names as `\mathrm{}` natively remains a possible follow-up scoped to mathjs's unit-name set. Root cause: core's unit table is wider than mathjs's (338 vs 251 names), native `unit(2,'c')` accepted the speed-of-light symbol mathjs rejects, and native `unit(2,'ton')` threw `AmbiguousUnitError` where mathjs maps `ton`/`tons` to the US short ton — compat pins `Unit.UNITS`/`isValuelessUnit` to the mathjs oracle through a proxy, maps `ton`/`tons` to `shortton` in `unit()`, and rejects bare `c` in `unit()`.
+
+### Fixed
+
+- **Populate compat `expression.transform` and `mathWithTransform` (#1572):** Wired all 26 mathjs transforms onto `instance.expression.transform` and populated `instance.expression.mathWithTransform` with every instance function (the 26 replaced by their transform versions, `apply` reading the `mapSlices` transform like mathjs's `formerly: 'apply'`). The compat evaluator scope now overlays the one-based `expression.transform.apply` for `evaluate`, `compile`, and `parse`, and parsed ASTs resolve it via `getMathNamespaceBinding` so it is not blocked as `Function.prototype.apply`.
+
+### Changed
+
+- **`eigs` mathjs 15.3.0 quirks live in compat only (#1561):** Public native `eigs` stays `correctEigs` (matrix `eig`). The mathjs 15.3.0 factory port lives in `compat/src/mathjs-eigs/` and is bound on `create(all)` so `@danielsimonjr/mathts-functions` is not the home of mathjs quirks. BREAKING (compat): instance `eigs` matches mathjs 15.3.0 including loose `precision`; native `eigs` keeps unit-normalized vectors and the real-part value order.
+
+### Fixed
+
+- **native bug — symmetric `eig` at huge scale (#1561):** Rayleigh-quotient refinement after hqr2 recovers a small eigenvalue beside a 1e15 diagonal (mpmath: exactly 5; was 4.992). Runs only when the spectrum already spans ≥1e6 and a real eigenvalue is ≤1e-6 of the spectral radius, so clustered/repeated spectra and `eigenvectors: false` on ordinary matrices keep the previous path. `matrix/src/operations/eig.ts`.
+
+### Fixed
+
+- **Auto-resize matrix on indexed assignment (#1557):** compat matches mathjs 15.3.0 for growing indexed assignment (`e = []; e[1, 1:2] = [5, 6]; e[2, :] = [7, 8]` → `[[5, 6], [7, 8]]`, and 1-D `a = []; a[3] = 4` → `[0, 0, 4]`), for the assignment **return value** when the RHS is reshaped to the index (e.g. `e[:, 2] = [9, 9]` → `[[9], [9]]`), and for **zero-sized** index writes on an empty matrix (they throw the same `shape mismatch` / `Dimension mismatch` errors as mathjs instead of silently no-oping). Parity is covered by `compat/tests/parity/g09-resize-assign.test.ts` and the challenger differential rows in `compat/tests/parity/challenger-g09-findings.test.ts`; the fix is compat-only (`mathjs-parity-g09.ts` wraps `subset` and patches bridge-matrix assignment).
+
+### Fixed
+
+- **Inverse trig at infinity and Complex `acsch` (#1558, #1560):** `Complex.asin(±∞)` multiplied a real `∞` by the zero of `-i` and returned `NaN`; it now uses the C99/`cmath` values (`±π/2 + i∞`). `acos` is `π/2 − asin`, so `asec(0) = acos(+∞) = −i∞`. `Complex.atanh(±∞)` overflowed the unscaled divide; it now returns `±0 + iπ/2`, so `acoth(0)` is `iπ/2` rather than `NaN`. `acsch(complex)` called missing `Complex.acsch` and now uses `inverse().asinh()`. mathjs `acsc(0)`/`asec(0)` = `∞i` stays in compat adapters. Tests: `core/tests/types/complex.test.ts`, `functions/tests/g08-inverse-special-zero.test.ts`.
+- **Inverse trig/hyperbolic mathjs parity on `create(all)` (#1558, #1559, #1560):** Compat matches mathjs 15.3.0 for branch cuts, large magnitudes, and signed zeros via `compat/src/complex-js-inverse-hyperbolic.ts` (complex.js 2.4.2 adapters). Tests: `compat/tests/parity/g08-inv-hyperbolic.test.ts`, `adversarial-g08.test.ts`.
+
+### Fixed
+
+- **`Unit` `Numeric` is the live numeric classes (#1555):** `new Unit(bignumber, unit)` and `new Unit(fraction, unit)` type-check. The old `Numeric` union used duck types (`div`/`times` with a wide operand, Fraction `n`/`d`/`s`) that the live `BigNumber` and `Fraction` classes do not satisfy.
+
+- **G07 typed logical truthiness is type-aware (#1555):** `isTruthy` used `!!x`, so a zero Unit/Fraction/Complex/BigNumber was truthy in mixed `any, any` and variadic rows, and `not(fraction)` converted through Complex. Truthiness now follows the stored numeric value (Fraction by numerator; Unit by `value`, including 0 degC). `nullish({}, 2)` still returns `{}` natively (a non-nullish left value); compat still throws like mathjs 15.3.0.
+
+- **G07 typed logical bugs (#1555):** `nullish` lacked a `Fraction` row, so typed-function conversion treated a Fraction as Complex; it lacked collection rows, so `nullish` on arrays was not element-wise; `not`/`and`/`or`/`xor` treated every `Unit` as truthy because `!!unit` ignores the numeric value. Typed logical now adds `Fraction` and `Unit` nullish rows, spreads `collectionBinaryRows('nullish')`, registers `Unit` truthiness from `value`, and keeps `null`/`undefined` rows before `any, any`. `nullish({}, 2)` is not changed here (mathjs 15.3.0 throws; compat factory keeps that quirk).
+
+- **G07 `nullish` and logical `Unit` compat parity (#1555):** `mathts-compat` `create(all)` binds factory `nullish`/`not`/`and`/`or`/`xor` for mathjs 15.3.0 (`nullish({}, 2)` throws). Fraction `format` (`2/1`) is G15 (#1721), not this change.
+
+### Fixed
+
+- **Preserve BigNumber/Fraction/Complex types (#1554):** compat `pinv`, `bernoulli`, `unaryPlus`, and `compare` now preserve BigNumber, Fraction, and Complex inputs and honor `config.number` through `evaluate` instead of collapsing to `number`. `pinv` of a numeric Array / DenseMatrix / SparseMatrix follows the mathjs factory rank-factorization (a singular 1×2 matrix throws the mathjs determinant error), `bernoulli` reproduces the mathjs recurrence exactly for every index type (including early returns for `0` / `1` / odd indexes and float overflow to `±Infinity` / `NaN`), `compare` rejects Complex operands and mixed BigNumber / Fraction pairs with the mathjs errors, and `unaryPlus` rejects a non-numeric string with the mathjs `SyntaxError`. Compat-only adapters: the native `functions` / `matrix` behavior is unchanged.
+
+### Changed
+
+- **`schur` / `sylvester` / `lyap` / `solveODE` mathjs 15.3.0 parity in compat only (#1553, #1584):** `create(all)` runs the four through `compat/src/mathjs-parity-g05.ts` — `schur` is the mathjs unshifted QR iteration (oracle diagonal order, subdiagonal residue kept, BigNumber matrices accepted; BigNumber convergence uses the in-tree lexicographic `eigs` 2-norm matching mathjs's `_matrixNormTwo` sort quirk; Complex Schur uses in-tree Householder QR), `sylvester`/`lyap` are the activated factories wired to that `schur`, native `DenseMatrix` `schur` uses the same path as arrays, and `solveODE` ports the mathjs adaptive Runge-Kutta factory with initial step `(tEnd - tStart) / 1`. Native Francis-QR `schur` in `@danielsimonjr/mathts-matrix` and the scipy-style `solveODE` are unchanged. No runtime `mathjs` import. BREAKING (compat): instance `schur` diagonal order and `solveODE` step grid now match mathjs 15.3.0.
+
+### Changed
+
+- **Compat binds the mathjs-shaped factories (#1550, #1583, #1587, #1588):** Bound `create(all)` and the compat named exports to the `functions` factories for `ceil`/`floor`/`round`, `identity`, `ones`/`zeros`, `unaryMinus`/`unaryPlus`, `nthRoot`, `compare`, `arg`, `std`, `variance`, `mad` and `expm`, and re-dispatched the untyped mathjs variadic statistics signatures. `ceil(x, n)` and `identity(m, n)` accept their second argument, `ones(n)`/`zeros(n)` return a Matrix, `expm(Array)` returns a DenseMatrix, `mad` keeps the mathjs result unit, `count(true)` is `4`, `arg`/`compare` keep BigNumber and Fraction operand types, and lone `add`/`multiply`/`subtract` calls plus extra arguments and Fraction arguments on the trig/log/exp surface now throw the mathjs `TypeError`s. Complex `variance`/`std` on the compat instance use the mathjs `diff * diff` rule via adapters in `compat/` only (native `functions` statistics stay NumPy-correct). BREAKING: extra/missing arguments and trig on Fractions now throw matching mathjs errors; `ones(n)`/`zeros(n)` return a DenseMatrix instead of a `number[]`; compat `std`/`variance` of Complex data return Complex as mathjs does.
+
+### Fixed
+
+- **Fraction `ceil`/`floor` ignored the digit count (#1550):** `Fraction.ceil(places)`/`Fraction.floor(places)` existed without using `places`, so `ceil(fraction(1,3), 2)` returned `2/1`; they now scale by `10^places` exactly like fraction.js, and a negative count throws the fraction.js `RangeError`.
+- **Complex `ceil`/`floor` ignored the decimals argument (#1550):** `Complex.ceil(decimals)`/`Complex.floor(decimals)` existed without using `decimals`; they now scale by `10^decimals` (fractional and negative counts included), so `ceil(complex(1,2), 0.5)` matches mathjs.
+
+### Fixed
+
+- **Docs-only CI runs package documentation tests with that package's Vitest config:** the root config only includes `tests/docs`, `tests/integration`, and `tests/wasm`, so files such as `functions/tests/docs-reference-completeness.test.ts` exited with "No test files found" on every docs-only pull request.
+
+### Fixed
+
+- **Docs-only CI writes the export-surface file before the functions-doc check:** `docs:functions:check` fails when `docs/Architecture/package-export-surfaces.json` is absent, and that file is generated by `docs:deps` rather than committed. The docs-only Test job now runs `docs:deps` after the build and before that check.
+
+### Fixed
+
+- **`string()` with no arguments returns `''` (#1775):** the compat instance followed mathjs 15.3.0's typed `''` signature — calling `string()` no longer returns `'undefined'`, and `string(1, 2)` / `string(1, 2, 3)` now throw the mathjs `TypeError: Too many arguments in function string (expected: 1, actual: N)` instead of silently converting the first argument. All existing conversions (boolean, null, string, array/matrix element-wise, number, BigNumber, Complex, Unit, Fraction) are unchanged.
+
+### Fixed
+
+- **Fraction fraction.js parity (#1779):** The compat instance exposes the mathjs 15.3.0 `Fraction` type (fraction.js with `s`/`n`/`d`, decimal `toString()`/`valueOf()`, and string `toJSON`), routes `fraction()` through that type, and patches unit denormalization so `fraction(unit(...)).toNumeric(...)` matches the mathjs unit tests.
+
+### Fixed
+
+- **Error classes and message text match mathjs 15.3.0 (#1773):** compat instance functions now throw the same error types and wording as mathjs for null scalars, arity mismatches, invalid conversions, unit/valueless-unit cases, matrix `map` hints on unary math functions, spectral `norm` rules, `bitNot` integer messages, `random` BigNumber bounds, and invalid `numeric` strings.
+
+### Fixed
+
+- **Constructors match mathjs 15.3.0 when `new` is missing (#1774):** the compat
+  `Complex` and `BigNumber` are callable without `new` (`Complex(2, 3)` builds a
+  Complex instead of throwing `Class constructor Complex cannot be invoked
+without 'new'`), and the compat `Parser`, `Index`, `Range`, `Spa`,
+  `ArgumentsError` and `DimensionError` throw the mathjs
+  `SyntaxError('Constructor must be called with the new operator')` on a
+  new-less call. The compat `Complex` constructor also takes every complex.js
+  form — `(re, im)`, `{ re, im }`, `{ r, phi }`, `{ abs, arg }`, a two-element
+  array and the complex.js string form, with `SyntaxError('Invalid Param')` for
+  invalid input — and `Complex.fromPolar` follows the mathjs argument rules
+  (`{ r, phi }`, angle Units, the mathjs error messages). Arithmetic on nested
+  arrays with BigNumber leaves keeps the scalar type instead of failing in the
+  numeric matrix backend, and `pinv` of a BigNumber returns a compat BigNumber.
+
+### Fixed
+
+- **`Complex` `valueOf` and `format` match mathjs 15.3.0 (#1781):** compat now sets `valueOf` to the string form (not magnitude) and uses mathjs ratio-based epsilon rounding plus numeric precision shorthand in `format`.
+
+### Fixed
+
+- **Unified compat BigNumber class (#1780):** Per-instance `InstanceBigNumber` from `create()` wires `setCompatDecimalBigNumberCtor` so `compatDecimalResult`, bitwise NaN shifts, and `evaluate()` emit the same constructor as `math.bignumber()`. Lazy `bignumber` skips the generic config wrapper. `diag`/`range` promote structural zeros and mixed bounds; nested vector/matrix args detect BigNumber datatypes. `arg` uses configured full-precision `pi`; `log2` exacts small powers of two; bitwise shifts handle `±Infinity` pairs; `bignumber(bigint)` keeps full integer precision.
+- **BigNumber decimal.js trig (#1780):** `compat-bignumber-trig.ts` routes unary trig for BigNumber operands through `decimal.js`, preserving each instance's constructor (including mixed-precision `create()` children). `compatDecimalResult` no longer re-wraps compat decimals with the last `create()` ctor.
+
+### Changed
+
+- **Compat matches mathjs on `zeta`, `symbolicEqual`, and `range` (#1585):** `create(all)` uses mathjs 15.3.0 adapters in `compat/src/mathjs-parity-1585.ts` (mathjs zeta quirks, simplify-only `symbolicEqual`, BigNumber `range` string/`includeEnd` behavior). Native `@danielsimonjr/mathts-functions` stays more accurate; `docs/api/compat.md` documents the split. Parity is pinned in `compat/tests/parity/g18-parity.test.ts` and `compat/tests/parity/adversarial-g18.test.ts`; the pool sweep probes unary `zeta`.
+
+### Fixed
+
+- **`gamma` / `lgamma` / `factorial` of a bigint followed the BigNumber path:** same missing-`bigint` signature as `zeta`. Typed-function conversion prefers `bigint → BigNumber` when both `number` and `BigNumber` rows exist, so `gamma(2n)` was a `BigNumber` while `gamma(2)` was a number. Each now calls its number implementation through `bigintToNumber` (out-of-range bigints throw). `erf` already had no BigNumber row and already returned a number.
+
+- **`zeta(bigint)` returned a BigNumber in default number config (#1585):** with no `bigint` signature, typed-function conversion sent safe integers to the BigNumber path, so `zeta(2n)` was a `BigNumber` while `zeta(2)` was a number. Root cause: missing `bigint` dispatch. `functions/src/special/zeta.ts` now calls `zetaNumber(bigintToNumber(s))`; out-of-range bigints throw as elsewhere.
+
+### Added
+
+- **Typed-package surface exports and decisions (#1567, #1568, #1569, #1570, #1571):** Exported canonical error/matrix/node classes, `docs`, lowercase constant aliases (`pi`, `e`, `tau`, `phi`, `i`), and 63 `create*` aliases; documented compat-only decisions for events, `all`/`expression`, and remaining factories in `docs/migration-guide.md`. `@danielsimonjr/mathts-core` exports `DimensionError` and `IndexError` for `instanceof` checks; `@danielsimonjr/mathts-functions` exports `ArgumentsError`, `FibonacciHeap`, `ImmutableDenseMatrix`, `Spa`, and the mathjs-named `create*` aliases of its 63 `factory_*` factories; `@danielsimonjr/mathts-expression` exports `docs`, a canonical `ResultSet` class, the 16 Node classes, and the ready-made `Parser`. Native typed arithmetic still throws `RangeError` on element-wise mismatches; compat maps those to mathjs 15.3.0 error shapes. Events (`on`/`off`/`once`/`emit`), the `all` bundle, the `expression` namespace, and the remaining mathjs `create*` / `*Dependencies` bundles stay compat-only.
+- **Compat `evaluate('1; 2')` ResultSet wrap (G12 F3, #1556 overlap with G01):** the evaluate adapter wraps a semicolon block whose one visible value is a scalar as `ResultSet([value])`. Native `evaluate('1; 2')` stays `2`. Compatible with G01's `compatBlockResultSet` compiler gate (already-a-ResultSet is a no-op).
+- **G12 compat exact parity with mathjs 15.3.0 (#1567, #1571):** compat `add`/`divide` broadcast errors, multi-statement `evaluate` `ResultSet` wrapping, module/instance `DimensionError` identity, and the `docs` map match the pinned oracle (`compat/src/g12-mathjs-parity.ts`, `mathjs-docs-15.3.0.generated.json`).
+- **Native `ResultSet` guard (F6, root cause):** `isResultSet` / `type` live on prototype getters of the canonical `expression/src/ResultSet.ts` class so the package guard and typed dispatch still recognize block results.
+- **Native parse/`Parser` identity (F7–F8, root cause):** default `parse()` and `createParser()` use the exported node classes and the exported `Parser` singleton so `instanceof` matches public exports (**good idea** for tooling and tests).
+
+### Changed
+
+- **Conflict-free shared records for parallel PRs (CI speed-up, item 4):** changelog entries move to `changelog-fragments/*.md` files that the release version PR assembles newest-first into `CHANGELOG.md` (`version-packages` runs `tools/release/assemble-changelog.mjs`), with a CI gate (`tools/test/check-changelog-fragment.mjs`) that requires one fragment per release-relevant PR — docs-only PRs stay exempt, and a direct `CHANGELOG.md` edit is still accepted while in-flight PRs transition. `tools/test/bundle-budget.json` records per-entry byte ceilings (`ceilingFor`: the next multiple of a 2%-scaled power-of-two step) instead of exact bytes, so ordinary size wiggle no longer rewrites the file while a real regression still fails CI. `compat/tests/parity/known-gaps.json` is split into one JSON file per issue group merged by `known-gaps/index.ts` (the merged record is byte-identical to the old file), and `compat/src/index.ts` moves its 177-name functions re-export list to `compat/src/function-reexports.ts` (one name per line, sorted) and its default-instance/named wrappers to `compat/src/named-instance-exports.ts`; the compat export surface is unchanged (1,156 exports before and after) and all 1,275 compat tests pass. Generated complete-export indexes (`docs/api/*.md`, `docs/reference/functions.md`) list one backtick-name per line so parallel PRs that add different exports no longer conflict in `docs/api/compat.md`; `docs:functions:check` still requires a byte-equal regeneration.
+
+### Changed
+
+- **Compat expression policy matches mathjs 15.3.0 by default (#1549, #1556, #1562, #1576, #1580):** `create(all)` enables assignment, function definitions, in-expression `simplify`/`derivative`/`parse`/`evaluate`/`compile`/`parser`/`help`/`config`, `ResultSet` block results, and declared function names; pass `{ safe: true }` to opt back into the MathTS sandbox. Native `evaluate` / `compileExpr` / `parser` stay safe by default with classic block return semantics (`ResultSet` only when `compatBlockResultSet` is set in the math scope). `create(all)` wraps a real per-instance `Unit` constructor (`wrapCompatUnitConstructor`, #1557) instead of rewriting `Unit.isValuelessUnit` on the shared core class. BREAKING (compat only): default `evaluate`/`parser`/`compile` no longer throw `Security:` (pass `{ safe: true }` to harden a call).
+
+### Changed
+
+- **CI wall clock (PR A, items 1/2/3/5, #1755):** Test, Coverage, Browser and Benchmark run in parallel with Compile & Lint (each job builds what it needs; check names unchanged); the Coverage job runs the Bun suite once — `bun run test:coverage` includes the root vitest suites and its teed log feeds the skip-budget parser — instead of `bun run test` followed by a second coverage run; `tools/test/run-vitest-node.mjs` runs `functions` as four `--shard` processes mixed with other packages on Node 22, and as one unsharded vitest with all CPUs first on Node 24+ (workflow wall is max of the two Test legs), then the other packages concurrently (default `RUN_VITEST_NODE_CONCURRENCY` 4) with `--maxWorkers` capped so total workers fit the runner, drains stdout so CI logs are not truncated, and prints a per-item summary table; assembly gains a matching `test:coverage` script so the single coverage run still executes the WASM node suite; and `bun run prepush` runs lint, format, code-docs (when `repo-tools` is installed), and bundle-budget locally, reporting skipped gates honestly.
+
+### Fixed
+
 - **G17 sparse structural zeros (#1582):** factory CSC sparse construction (`MathJSSparseMatrix` constructor, `set`, `resize`, `SparseMatrix.diagonal`) uses `isStructuralZero` so BigNumber, Fraction, Complex and Unit zeros are not stored (number entries keep exact `=== 0`, so `1e-100` stays stored; `-0` is dropped; `NaN` is kept). `sparseMatrixFromVectors` uses the same predicate. Gustavson sparse×sparse product, mixed `selectedMultiply` accumulators, and `matAlgo07xSSf` are unchanged versus main: cancelled numeric zeros stay as the CSparse pattern used by `slu`/`csAmd` (#1271). Typed CSC sparse add/subtract/multiply with Unit operands routes through factory matAlgo paths instead of `toArray()` element-wise walks that paired `Unit` with numeric implicit zeros. The public CSR `SparseMatrix` (`matrix/`) stays `Float64Array` with `!== 0` (numbers only).
 
 - **Unit equality uses absolute SI, including affine offset (#1552):** `unitsEqual`, `unitCmp`, typed `compareNatural`/`compareUnits`, and `Unit.equals` compared scale-only `.value`, so `0 degC` was not equal to `32 degF` or `273.15 K`. They now compare `toSI().value` (exact for BigNumber and Fraction). Duck-typed units without `toSI` keep comparing `.value`. Number-valued unit ordering returns 0 when `coreEqual` is true, so `equal`/`compare`/`largerEq` agree on `0.1 m + 0.2 m` vs `0.3 m`. Root cause: `_normalize` applies multiplicative scale only; offset is applied in `to`/`toSI`. Compat still matches mathjs 15.3.0 (`false` for those pairs) through factory adapters.
