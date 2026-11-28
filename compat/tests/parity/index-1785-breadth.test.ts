@@ -20,8 +20,22 @@ describe('index matrix and numeric wiring breadth (#1785)', () => {
     expect(bn.range(bn.bignumber(0), bn.bignumber(2), bn.bignumber(1), true)).toBeDefined();
     expect(math.evaluate('matrix([1,2,3])')).toBeDefined();
     expect(math.evaluate('ones(2)')).toBeDefined();
-    expect(math.expm(math.matrix([[0, 0], [0, 0]]))).toBeDefined();
-    expect(math.ctranspose(math.matrix([[1, 2], [3, 4]]))).toBeDefined();
+    expect(
+      math.expm(
+        math.matrix([
+          [0, 0],
+          [0, 0],
+        ])
+      )
+    ).toBeDefined();
+    expect(
+      math.ctranspose(
+        math.matrix([
+          [1, 2],
+          [3, 4],
+        ])
+      )
+    ).toBeDefined();
     expect(math.resize(math.matrix([1, 2, 3]), [3, 1])).toBeDefined();
     const imm = math.matrix(new math.ImmutableDenseMatrix([1, 2, 3]));
     expect((imm as { type?: string }).type).toBe('ImmutableDenseMatrix');

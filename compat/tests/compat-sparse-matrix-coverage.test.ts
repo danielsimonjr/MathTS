@@ -93,6 +93,20 @@ describe('compat sparse matrix wrappers (#1785)', () => {
     expect(s.get(1, 1)).toBe(9);
   });
 
+  it('applies Fraction datatype conversions on create and set', () => {
+    const frac = create(all, { number: 'Fraction' });
+    const s = frac.sparse([[frac.fraction(1, 2), 0]]) as unknown as {
+      _datatype?: string;
+      set: (idx: unknown, v: unknown) => void;
+      get: (idx: unknown) => unknown;
+      valueOf: () => unknown;
+    };
+    s._datatype = 'Fraction';
+    s.set([0, 1], frac.fraction(2, 3));
+    expect(frac.isFraction(s.get([0, 1]))).toBe(true);
+    expect(s.valueOf()).toBeDefined();
+  });
+
   it('sparse create() builds another compat sparse matrix', () => {
     const s = math.sparse([[2, 0]]) as unknown as {
       create: (data: unknown, dt?: string) => { type?: string };

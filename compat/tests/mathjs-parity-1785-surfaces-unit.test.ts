@@ -166,33 +166,25 @@ describe('mathjs-parity-1785-surfaces unit coverage', () => {
         matrixOut: (values) => frac.matrix(values),
       }
     );
-    const dec = rangeFrac(
-      frac.fraction(2),
-      frac.fraction(0),
-      frac.fraction(-1),
-      true
-    ) as { toArray(): unknown[] };
+    const dec = rangeFrac(frac.fraction(2), frac.fraction(0), frac.fraction(-1), true) as {
+      toArray(): unknown[];
+    };
     expect(dec.toArray().length).toBeGreaterThan(1);
   });
 
   it('range dispatch appends the end BigNumber when includeEnd misses the stop', () => {
     const bn = create(all, { number: 'BigNumber' });
     const BnClass = Object.getPrototypeOf(bn.bignumber(1)).constructor as BnCtor;
-    const rangeBn = createCompatRangeDispatch(
-      bn.range.bind(bn),
-      BnClass,
-      (x) => bn.fraction(x),
-      {
-        add: (a, b) => bn.add(a, b),
-        smaller: (a, b) => bn.smaller(a, b),
-        smallerEq: (a, b) => bn.smallerEq(a, b),
-        larger: (a, b) => bn.larger(a, b),
-        largerEq: (a, b) => bn.largerEq(a, b),
-        isPositive: (x) => Boolean(bn.isPositive(x)),
-        isZero: (x) => Boolean(bn.isZero(x)),
-        matrixOut: (values) => bn.matrix(values),
-      }
-    );
+    const rangeBn = createCompatRangeDispatch(bn.range.bind(bn), BnClass, (x) => bn.fraction(x), {
+      add: (a, b) => bn.add(a, b),
+      smaller: (a, b) => bn.smaller(a, b),
+      smallerEq: (a, b) => bn.smallerEq(a, b),
+      larger: (a, b) => bn.larger(a, b),
+      largerEq: (a, b) => bn.largerEq(a, b),
+      isPositive: (x) => Boolean(bn.isPositive(x)),
+      isZero: (x) => Boolean(bn.isZero(x)),
+      matrixOut: (values) => bn.matrix(values),
+    });
     const endCase = rangeBn(bn.bignumber(0), bn.bignumber(2), true) as { toArray(): unknown[] };
     expect(endCase.toArray().length).toBeGreaterThan(0);
   });

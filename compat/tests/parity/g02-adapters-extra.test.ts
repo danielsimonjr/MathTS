@@ -38,8 +38,10 @@ describe('G02 adapter primitives (extra branch coverage)', () => {
     expect(() => emptyMax([])).toThrow(/empty array/);
     const multi = withStatisticsMultiCollectionGuard(first);
     expect(() => multi([1], [2])).toThrow(/Scalar values expected/);
-    const bigintMax = withBigIntStatisticsStrings(first, () => 'bigint', (...xs) =>
-      xs.reduce((a, b) => (a as bigint) + BigInt(String(b)), 0n)
+    const bigintMax = withBigIntStatisticsStrings(
+      first,
+      () => 'bigint',
+      (...xs) => xs.reduce((a, b) => (a as bigint) + BigInt(String(b)), 0n)
     );
     expect(bigintMax('2', '3')).toBe(5n);
     const singleNum = withSingleNumericStringGuard(first);
@@ -48,9 +50,7 @@ describe('G02 adapter primitives (extra branch coverage)', () => {
 
   it('reduction and ordering guards keep mathjs shapes', () => {
     const instance = create(all);
-    const reduce = withReductionDim0ScalarReturn(() =>
-      instance.matrix([9])
-    );
+    const reduce = withReductionDim0ScalarReturn(() => instance.matrix([9]));
     const vec = instance.matrix([1, 2, 3]);
     expect(reduce(vec, 0)).toBe(9);
     const raw = withRawSingleValue(first);
@@ -62,10 +62,12 @@ describe('G02 adapter primitives (extra branch coverage)', () => {
   it('expm, gamma guard, and statistics factory wrappers', () => {
     const instance = create(all);
     const expm = createCompatExpm(instance.expm.bind(instance), instance.matrix.bind(instance));
-    const out = expm(instance.matrix([
-      [0, 0],
-      [0, 0],
-    ]) as unknown) as { isMatrix?: boolean };
+    const out = expm(
+      instance.matrix([
+        [0, 0],
+        [0, 0],
+      ]) as unknown
+    ) as { isMatrix?: boolean };
     expect(out.isMatrix).toBe(true);
     const gamma = createCompatGammaBigNumberGuard(instance.gamma.bind(instance), (v) =>
       instance.bignumber(v as number)

@@ -14,6 +14,19 @@ import {
 } from '../src/mathjs-parity-errors.js';
 
 describe('mathjs-parity-errors adapters', () => {
+  it('withPublicFactoryScalar remaps MATHTS scalar guard and Complex parse failures', () => {
+    const throwsGuard = (..._args: unknown[]) => {
+      throw new TypeError('addScalar: unexpected type Unit at index 0');
+    };
+    const add = withPublicFactoryScalar('add', 'addScalar', throwsGuard);
+    expect(() => add('x', 1)).toThrow(/Unexpected type of argument in function addScalar/);
+    const throwsFractionParse = (..._args: unknown[]) => {
+      throw new Error('Cannot parse Fraction literal');
+    };
+    const add2 = withPublicFactoryScalar('add', 'addScalar', throwsFractionParse);
+    expect(() => add2('1/0', 1)).toThrow(/Cannot convert.*Fraction/);
+  });
+
   it('remapPublicScalarFnName rewrites factory names in messages', () => {
     const msg = 'Unexpected type in function addScalar (index: 0)';
     expect(remapPublicScalarFnName(msg, 'addScalar', 'add')).toContain('function add');
@@ -48,10 +61,7 @@ describe('mathjs-parity-errors adapters', () => {
   it('bitwise and norm wrappers match mathjs edge messages', () => {
     const instance = create(all);
     const inf = instance.bignumber(Infinity);
-    const bitAnd = withCompatBitwiseInfiniteBigNumberBinary(
-      instance.bitAnd.bind(instance),
-      'and'
-    );
+    const bitAnd = withCompatBitwiseInfiniteBigNumberBinary(instance.bitAnd.bind(instance), 'and');
     expect(() => bitAnd(inf, 'x')).toThrow();
     const bitNot = withCompatBitNotInfiniteBigNumber(instance.bitNot.bind(instance));
     expect(bitNot(inf)).toBeDefined();

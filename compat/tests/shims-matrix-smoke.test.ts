@@ -27,7 +27,7 @@ describe('shims matrix smoke', () => {
     expect(size(z)).toEqual([2, 2]);
     expect(size(o)).toEqual([2, 2]);
     expect(trace(id)).toBe(2);
-    const d = diag([1, 2, 3]);
+    expect(trace(diag([1, 2, 3]))).toBe(6);
     expect(count([1, 2, 3])).toBe(3);
     const m = matrix([
       [1, 2, 3],
@@ -45,7 +45,7 @@ describe('shims matrix smoke', () => {
     ]);
     expect(size(s)).toEqual([2, 2]);
     expect(math.isSparseMatrix(s)).toBe(true);
-    expect(math.dot(m, transpose(m))).toBeDefined();
+    expect(math.dot([1, 2], [3, 4])).toBe(11);
     expect(math.usolve(identity(2), [[1], [2]])).toBeDefined();
     expect(math.lusolve(identity(2), [[1], [2]])).toBeDefined();
   });

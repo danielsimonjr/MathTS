@@ -101,7 +101,12 @@ describe('compat-matrix-model promotion and interface (#1785)', () => {
 describe('compat dense/sparse instance adapters (#1785)', () => {
   it('covers dense constructor, get/subset/resize/map, and transpose', () => {
     const DenseCtor = math.DenseMatrix as new (...args: unknown[]) => { toArray(): unknown };
-    const fromSparse = new DenseCtor(math.sparse([[1, 0], [0, 2]]));
+    const fromSparse = new DenseCtor(
+      math.sparse([
+        [1, 0],
+        [0, 2],
+      ])
+    );
     expect(math.isDenseMatrix(fromSparse)).toBe(true);
     const fromBlock = new DenseCtor({ data: [[9], [8]], size: [2, 1] });
     expect(fromBlock.toArray()).toEqual([[9], [8]]);
@@ -184,9 +189,9 @@ describe('compat dense/sparse instance adapters (#1785)', () => {
     expect(() =>
       (imm as { subset: (i: unknown, r: number) => void }).subset(math.index(0, 0), 9)
     ).toThrow(/Immutable/);
-    const slice = (
-      imm as { subset: (i: unknown) => unknown }
-    ).subset(math.index(0, math.range(0, 2))) as { type?: string };
+    const slice = (imm as { subset: (i: unknown) => unknown }).subset(
+      math.index(0, math.range(0, 2))
+    ) as { type?: string };
     expect(slice.type).toBe('ImmutableDenseMatrix');
     const fromDense = new math.ImmutableDenseMatrix(
       math.matrix([
@@ -215,9 +220,9 @@ describe('compat dense/sparse instance adapters (#1785)', () => {
     });
     expect(math.isDenseMatrix(fromJson)).toBe(true);
     const idx = math.index([0, 1]);
-    const cloned = (math.Index as unknown as { prototype: { clone(): unknown } }).prototype.clone.call(
-      idx
-    );
+    const cloned = (
+      math.Index as unknown as { prototype: { clone(): unknown } }
+    ).prototype.clone.call(idx);
     expect(cloned).toBeDefined();
   });
 

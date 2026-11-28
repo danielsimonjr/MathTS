@@ -39,8 +39,10 @@ describe('G06 adapter unit coverage', () => {
     expect(instance.isBigNumber(pinv(instance.bignumber(2)))).toBe(true);
     const bernDeps: CompatBernoulliDependencies = {
       convert: (v: unknown) => v,
-      BigNumberClass: Object.getPrototypeOf(instance.bignumber(1)).constructor as CompatBernoulliDependencies['BigNumberClass'],
-      FractionClass: Object.getPrototypeOf(instance.fraction(1, 2)).constructor as CompatBernoulliDependencies['FractionClass'],
+      BigNumberClass: Object.getPrototypeOf(instance.bignumber(1))
+        .constructor as CompatBernoulliDependencies['BigNumberClass'],
+      FractionClass: Object.getPrototypeOf(instance.fraction(1, 2))
+        .constructor as CompatBernoulliDependencies['FractionClass'],
       precision: () => 64,
     };
     const bern = createCompatBernoulli(instance.bernoulli.bind(instance), bernDeps);
