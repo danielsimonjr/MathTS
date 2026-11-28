@@ -197,6 +197,7 @@ function validateScope(scope: Map<string, unknown>): void {
   }
 }
 
+/** Options for {@link wrapMathjsFactoryCompiledNode} / {@link patchFactoryCompiledNodeInPlace}. */
 export type WrapFactoryCompiledNodeOptions = {
   /** Expose `isTensor` for sandbox index shapes (#1777). */
   sandboxTensor?: boolean;
@@ -551,11 +552,11 @@ export function compileParsedFactoryNode(
   };
 }
 
-/** Evaluate one expression under the mathjs compile path (#1777). */
 function compatParseInput(expr: string): string {
   return preprocessMathjsCompatParseInput(expr);
 }
 
+/** Evaluate one expression string via factory `node._compile` / compat preprocess (#1777, #1786). */
 export function evaluateWithMathjsFactoryCompile(
   api: CompatExpressionCompileApi,
   expr: string,

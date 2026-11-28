@@ -6,6 +6,7 @@ export function sanitizeMathjsConfigOptions(options: unknown): unknown[] {
   return [rest];
 }
 
+/** Remove a user-supplied `config({ clone })` hook before apply (#1786 parse sandbox test). */
 export function scrubConfigCloneFunction(config: unknown): void {
   if (config === null || typeof config !== 'object') return;
   const record = config as Record<string, unknown>;

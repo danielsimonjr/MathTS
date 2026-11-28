@@ -23,6 +23,7 @@ import {
 import type { MathNode } from '@danielsimonjr/mathts-expression';
 import { compatExpressionView } from './compat-expression-view.js';
 
+/** AST node constructors wired to one compat instance parse/compile scope (#1786). */
 export type CompatExpressionNodeConstructors = Record<string, new (...args: unknown[]) => MathNode>;
 
 type BuildNodesHost = Record<string, unknown>;
