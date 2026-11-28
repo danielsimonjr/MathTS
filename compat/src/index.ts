@@ -170,6 +170,7 @@ import {
 } from './mathjs-parity-errors.js';
 import { isComplex, isUnit } from '@danielsimonjr/mathts-core';
 import { createCompatSubsetG09, installG09BridgeMatrixSubsetPatch } from './mathjs-parity-g09.js';
+import { bindMathjsFactorySetSource } from './mathjs-parity-set.js';
 import { compatMathjsEigs } from './eigs-mathjs.js';
 import {
   compatMathjsLyap,
@@ -203,6 +204,15 @@ import {
   permutations as namedPermutations,
   print as namedPrint,
   setUnion as namedSetUnion,
+  setCartesian as namedSetCartesian,
+  setDifference as namedSetDifference,
+  setDistinct as namedSetDistinct,
+  setIntersect as namedSetIntersect,
+  setIsSubset as namedSetIsSubset,
+  setMultiplicity as namedSetMultiplicity,
+  setPowerset as namedSetPowerset,
+  setSize as namedSetSize,
+  setSymDifference as namedSetSymDifference,
   toBest as namedToBest,
   xgcd as namedXgcd,
   string as namedCompatString,
@@ -1671,6 +1681,15 @@ export function create(
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,
+    setCartesian: namedSetCartesian,
+    setDifference: namedSetDifference,
+    setDistinct: namedSetDistinct,
+    setIntersect: namedSetIntersect,
+    setIsSubset: namedSetIsSubset,
+    setMultiplicity: namedSetMultiplicity,
+    setPowerset: namedSetPowerset,
+    setSize: namedSetSize,
+    setSymDifference: namedSetSymDifference,
     compareText: withRelationalBinaryArity(
       'compareText',
       withCompareTextInvalidMix(namedCompareText as (...args: unknown[]) => unknown)
@@ -2246,6 +2265,7 @@ export { all };
 // import of this one (runtime or type-only). Architecture docs pin 2 runtime
 // cycles; the bind types live in compat-types.ts.
 bindDefaultInstanceSource(create, all);
+bindMathjsFactorySetSource(create);
 
 // =============================================================================
 // Re-exports for direct use
@@ -2267,6 +2287,15 @@ export {
   namedPrint as print,
   namedCompatString as string,
   namedSetUnion as setUnion,
+  namedSetCartesian as setCartesian,
+  namedSetDifference as setDifference,
+  namedSetDistinct as setDistinct,
+  namedSetIntersect as setIntersect,
+  namedSetIsSubset as setIsSubset,
+  namedSetMultiplicity as setMultiplicity,
+  namedSetPowerset as setPowerset,
+  namedSetSize as setSize,
+  namedSetSymDifference as setSymDifference,
   namedCompareText as compareText,
   namedEqualText as equalText,
   namedToBest as toBest,
