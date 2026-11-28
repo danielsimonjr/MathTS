@@ -234,7 +234,7 @@ export function withFractionScalarOrdering(
             ]
           : [x, y];
       const sign = relationalSignFromCompare(compare, nx, ny);
-      return kind === 'largerEq' ? sign <= 0 : sign >= 0;
+      return kind === 'largerEq' ? sign >= 0 : sign <= 0;
     }
     return fn(x, y);
   });
