@@ -107,6 +107,14 @@ function decimalToMathjsString(value: DecimalValue, prec: number): string {
     : normalized.toFixed();
 }
 
+/**
+ * Wrap unary trig factories so BigNumber arguments follow mathjs 15.3.0 decimal.js rounding (#1789).
+ *
+ * @param getConfig - Active compat instance configuration slice.
+ * @param getBigNumberCtor - The instance-scoped `BigNumber` class constructor.
+ * @param getPi - Lazy `pi` constant for half-π decimal reconstruction.
+ * @returns A helper that wraps a factory plus a {@link TrigCompute} descriptor.
+ */
 export function createCompatBigNumberTrigWrap(
   getConfig: () => ConfigSlice,
   getBigNumberCtor: () => CompatDecimalBigNumberCtor,

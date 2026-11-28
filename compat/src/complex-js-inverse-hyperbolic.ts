@@ -203,7 +203,6 @@ export type G08RecomputePolicy = (x: number) => boolean;
 /** Real arguments strictly between -1 and 1 use complex.js after factory complex promotion. */
 export const recomputeInsideUnitDisk: G08RecomputePolicy = (x) => x > -1 && x < 1;
 
-/** Wrap a factory so Complex and selected real promotions use the complex.js adapter. */
 /** Map mathjs boolean / number zeros before inverse-trig specials run (#1789). */
 function scalarArgForG08(x: unknown): unknown {
   if (x === false) return 0;
@@ -216,6 +215,14 @@ function isG08NumericZero(x: unknown): boolean {
   return typeof x === 'number' && Object.is(x, 0);
 }
 
+/**
+ * Wrap a factory so Complex and selected real promotions use the complex.js adapter (#1789).
+ *
+ * @param base - Underlying typed inverse-hyperbolic factory.
+ * @param mathjs - complex.js oracle for a single `Complex` argument.
+ * @param options - Zero-case, real recompute, and predictable-config overrides.
+ * @returns The compat wrapper around `base`.
+ */
 export function wrapG08InverseHyperbolic(
   base: (...args: unknown[]) => unknown,
   mathjs: CjsFn,
