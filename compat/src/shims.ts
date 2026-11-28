@@ -101,7 +101,6 @@ import {
   det as _det,
   size as _size,
   factory_mathjsCompat,
-  factory_gcd,
   complex as _complex,
   config,
   isPositive as _isPositive,
@@ -111,7 +110,6 @@ import {
   isZero as _isZero,
   factory_fix as _factoryFix,
 } from '@danielsimonjr/mathts-functions';
-import { instanceSymbols } from './instance-symbols.js';
 import { inheritMatrixDatatype, promoteToCompatMatrix } from './compat-matrix-model.js';
 import {
   shouldUnionSparsePatterns,
@@ -1002,26 +1000,7 @@ export const max: TypedFunction = _max;
 // Number Theory Shims
 // =============================================================================
 
-const _compatGcd = withTypedSurface((...args: unknown[]): unknown => {
-  try {
-    return compatDecimalResult((factory_gcd as (...a: unknown[]) => unknown)(...args));
-  } catch (err) {
-    if (err instanceof Error && err.message === 'gcd() supports only 1d matrices!') {
-      const ArgsError = instanceSymbols.ArgumentsError as unknown as new (fn: string) => Error;
-      throw new ArgsError('gcd() supports only 1d matrices!');
-    }
-    throw err;
-  }
-}, factory_gcd);
-
-/**
- * Instance `gcd` (mathjs factory, Fraction results promoted). The public
- * `gcd` export stays an alias of the functions implementation so it is not a
- * second definition of `gcd`.
- */
-function compatInstanceGcd(...args: unknown[]): unknown {
-  return _compatGcd(...args);
-}
+import { compatInstanceGcd } from './compat-instance-gcd.js';
 
 export const gcd: TypedFunction = _gcd;
 export const lcm: TypedFunction = _lcm;
