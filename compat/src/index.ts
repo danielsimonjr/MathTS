@@ -173,6 +173,13 @@ import {
   compatMathjsSylvester,
 } from './mathjs-parity-g05.js';
 import {
+  createMathjsDistance,
+  createMathjsIntersect,
+  geometrySubtract,
+  type MathjsDistanceDeps,
+  type MathjsIntersectDeps,
+} from './mathjs-geometry-parity.js';
+import {
   bindDefaultInstanceSource,
   Chain,
   chain,
@@ -552,7 +559,7 @@ function bindShim<T extends (...args: unknown[]) => unknown>(
 /** Hot scalar ops skip lazy config wrappers (#735); still per-instance refs. */
 const HOT_SCALAR_SHIM_KEYS = new Set(['add', 'subtract', 'multiply']);
 /** Already applies `runWithConfig` / parity logic — skip the generic wrapper (#1780). */
-const SELF_SCOPED_FUNCTION_KEYS = new Set(['bignumber']);
+const SELF_SCOPED_FUNCTION_KEYS = new Set(['bignumber', 'intersect']);
 
 /**
  * Front for a unary scalar shim (#889): a lone number in the real domain takes the Math
@@ -839,6 +846,34 @@ export function create(
       precision: () => currentConfig.precision ?? 64,
     }
   );
+  const geometryTyped = mathFunctions.factory_mathjsCompat.createCompatTyped();
+  const compatDistance = createMathjsDistance({
+    typed: geometryTyped,
+    addScalar: mathFunctions.addScalar,
+    subtractScalar: mathFunctions.subtractScalar,
+    multiplyScalar: mathFunctions.multiplyScalar,
+    divideScalar: mathFunctions.divideScalar,
+    deepEqual: mathFunctions.deepEqual,
+    sqrt: mathFunctions.sqrt,
+    abs: mathFunctions.abs,
+  } as unknown as MathjsDistanceDeps);
+  const compatIntersect = createMathjsIntersect({
+    typed: geometryTyped,
+    config: currentConfig,
+    abs: mathFunctions.abs,
+    add: mathFunctions.add,
+    addScalar: mathFunctions.addScalar,
+    matrix: shims.matrix,
+    multiply: mathFunctions.multiply,
+    multiplyScalar: mathFunctions.multiplyScalar,
+    divideScalar: mathFunctions.divideScalar,
+    subtract: geometrySubtract,
+    smaller: mathFunctions.smaller,
+    equalScalar: mathFunctions.equalScalar,
+    flatten: mathFunctions.flatten,
+    isZero: mathFunctions.isZero,
+    isNumeric: mathFunctions.isNumeric,
+  } as unknown as MathjsIntersectDeps);
   const compatUnaryPlus = withInvalidNumericStringGuard(
     withConvertedScalars(
       convertForeignScalar,
@@ -1267,6 +1302,9 @@ export function create(
     sylvester: bindShim(compatMathjsSylvester),
     lyap: bindShim(compatMathjsLyap),
     solveODE: bindShim(compatMathjsSolveODE),
+    // #1792 — mathjs 15.3.0 geometry; no withCompatInstanceSurface (typed dispatch must stay direct).
+    distance: compatDistance,
+    intersect: compatIntersect,
 
     // Placeholder; rebound below once `instance` exists so chain methods can
     // resolve against the full surfaced namespace.
