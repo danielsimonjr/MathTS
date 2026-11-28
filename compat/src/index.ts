@@ -21,6 +21,7 @@ import { compatMatrixConstructors, instanceSymbols } from './instance-symbols.js
 import { setCompatSparseBignumberFactory } from './compat-sparse-matrix.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
+import { compatInstanceGcd } from './compat-instance-gcd.js';
 import {
   BigNumber as CompatBigNumberCtor,
   compatDecimalResult,
@@ -1220,8 +1221,8 @@ export function create(
       );
     },
 
-    // Number theory
-    gcd: shims.gcd,
+    // Number theory — oracle gcd tests expect factory `ArgumentsError` throws (#1785).
+    gcd: compatInstanceGcd,
     lcm: shims.lcm,
 
     // Rounding — #1550: mathjs-shaped factories; foreign oracle scalars convert first.

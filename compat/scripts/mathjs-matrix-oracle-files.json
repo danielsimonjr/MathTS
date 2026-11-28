@@ -1,0 +1,41 @@
+{
+  "mathjsVersion": "15.3.0",
+  "issue": 1785,
+  "description": "mathjs v15.3.0 unit-suite files tied to DenseMatrix/SparseMatrix model parity (#1785).",
+  "expected": {
+    "passing": 820,
+    "pending": 4,
+    "failing": 0
+  },
+  "files": [
+    "test/unit-tests/function/arithmetic/add.test.js",
+    "test/unit-tests/function/arithmetic/gcd.test.js",
+    "test/unit-tests/function/arithmetic/subtract.test.js",
+    "test/unit-tests/function/logical/or.test.js",
+    "test/unit-tests/function/logical/xor.test.js",
+    "test/unit-tests/function/matrix/ctranspose.test.js",
+    "test/unit-tests/function/matrix/map.test.js",
+    "test/unit-tests/function/matrix/mapSlices.test.js",
+    "test/unit-tests/function/matrix/matrixFrom.test.js",
+    "test/unit-tests/function/matrix/range.test.js",
+    "test/unit-tests/function/matrix/reshape.test.js",
+    "test/unit-tests/function/matrix/resize.test.js",
+    "test/unit-tests/function/matrix/rotationMatrix.test.js",
+    "test/unit-tests/function/matrix/subset.test.js",
+    "test/unit-tests/function/matrix/transpose.test.js",
+    "test/unit-tests/function/statistics/max.test.js",
+    "test/unit-tests/function/statistics/min.test.js",
+    "test/unit-tests/function/statistics/sum.test.js",
+    "test/unit-tests/function/utils/clone.test.js",
+    "test/unit-tests/type/matrix/DenseMatrix.test.js",
+    "test/unit-tests/type/matrix/FibonacciHeap.test.js",
+    "test/unit-tests/type/matrix/ImmutableDenseMatrix.test.js",
+    "test/unit-tests/type/matrix/Index.test.js",
+    "test/unit-tests/type/matrix/Matrix.test.js",
+    "test/unit-tests/type/matrix/Range.test.js",
+    "test/unit-tests/type/matrix/Spa.test.js",
+    "test/unit-tests/type/matrix/SparseMatrix.test.js",
+    "test/unit-tests/type/matrix/function/matrix.test.js",
+    "test/unit-tests/type/matrix/function/sparse.test.js"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "mathjsVersion": "15.3.0",
+  "issue": 1784,
+  "description": "mathjs v15.3.0 unit-suite files for Unit conversion / createUnit / predicates (#1784).",
+  "expected": {
+    "passing": 204,
+    "pending": 1,
+    "failing": 0
+  },
+  "files": [
+    "test/unit-tests/type/unit/Unit.test.js",
+    "test/unit-tests/type/unit/function/unit.test.js",
+    "test/unit-tests/type/unit/function/createUnit.test.js",
+    "test/unit-tests/type/unit/function/splitUnit.test.js",
+    "test/unit-tests/type/unit/physicalConstants.test.js",
+    "test/unit-tests/function/unit/to.test.js",
+    "test/unit-tests/function/unit/toBest.test.js",
+    "test/unit-tests/type/matrix/utils/isCollection.test.js"
+  ]
+}
