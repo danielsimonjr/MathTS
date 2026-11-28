@@ -180,14 +180,42 @@ export const createMathjsSimplify = /* #__PURE__ */ factory(
      * @param {SimplifyOptions} [options] Optional configuration settings
      * @return {Node} Returns the simplified form of `expr`
      */
+    try {
+      typed.addConversion({
+        from: 'Object',
+        to: 'Map',
+        convert: createMap,
+      });
+    } catch (e) {
+      if (!e?.message?.includes('already a conversion')) {
+        throw e;
+      }
+    }
     const simplify = typed('simplify', {
       Node: _simplify,
       'Node, Map': (expr, scope) => _simplify(expr, false, scope),
       'Node, Map, Object': (expr, scope, options) => _simplify(expr, false, scope, options),
+      'Node, Object': (expr, scope) => _simplify(expr, false, asSimplifyScope(scope)),
+      'Node, Object, Object': (expr, scope, options) =>
+        _simplify(expr, false, asSimplifyScope(scope), options),
       'Node, Array': _simplify,
       'Node, Array, Map': _simplify,
+      'Node, Array, Object': (expr, rules, scope) => _simplify(expr, rules, asSimplifyScope(scope)),
       'Node, Array, Map, Object': _simplify,
+      'Node, Array, Object, Object': (expr, rules, scope, options) =>
+        _simplify(expr, rules, asSimplifyScope(scope), options),
     });
+    try {
+      typed.removeConversion({
+        from: 'Object',
+        to: 'Map',
+        convert: createMap,
+      });
+    } catch (e) {
+      if (!e?.message?.includes('conversion not found')) {
+        throw e;
+      }
+    }
 
     simplify.defaultContext = defaultContext;
     simplify.realContext = realContext;
@@ -533,21 +561,23 @@ export const createMathjsSimplify = /* #__PURE__ */ factory(
       return new SymbolNode('_p' + _lastsym++);
     }
 
+    function asSimplifyScope(scope) {
+      if (scope == null || scope === false) {
+        return createEmptyMap();
+      }
+      if (scope instanceof Map) {
+        return scope;
+      }
+      if (typeof scope === 'object') {
+        return new Map(Object.entries(scope));
+      }
+      return createEmptyMap();
+    }
+
     function _simplify(expr, rules, scope = createEmptyMap(), options = {}) {
       const debug = options.consoleDebug;
       rules = _buildRules(rules || simplify.rules, options.context);
-      let resolveScope = scope;
-      if (
-        scope &&
-        typeof scope === 'object' &&
-        !(scope instanceof Map) &&
-        typeof scope.forEach === 'function'
-      ) {
-        resolveScope = {};
-        scope.forEach((value, key) => {
-          resolveScope[key] = value;
-        });
-      }
+      const resolveScope = asSimplifyScope(scope);
       let res = resolve(expr, resolveScope);
       res = removeParens(res);
       const visited = {};

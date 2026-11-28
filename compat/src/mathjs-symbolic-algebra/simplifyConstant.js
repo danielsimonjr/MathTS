@@ -1,3 +1,4 @@
+import FractionJS from 'fraction.js';
 import { factory_mathjsCompat } from '@danielsimonjr/mathts-functions';
 import {
   isArrayNode,
@@ -210,16 +211,29 @@ export const createMathjsSimplifyConstant = /* #__PURE__ */ factory(
       return _toNode(thing);
     }
 
+    function _fractionOfNumber(n) {
+      const exact = new FractionJS(n);
+      if (exact.valueOf() !== n || fraction === undefined) {
+        return null;
+      }
+      return fraction(`${exact.s < 0 ? '-' : ''}${exact.n}/${exact.d}`);
+    }
+
     // convert a number to a fraction only if it can be expressed exactly,
     // and when both numerator and denominator are small enough
     function _exactFraction(n, options) {
       const exactFractions = options && options.exactFractions !== false;
       if (exactFractions && isBounded(n) && fraction) {
-        const f = fraction(n);
+        const f = typeof n === 'number' ? _fractionOfNumber(n) : fraction(n);
+        if (f === null) {
+          return n;
+        }
         const fractionsLimit =
-          options && typeof options.fractionsLimit === 'number' ? options.fractionsLimit : Infinity; // no limit by default
+          options && typeof options.fractionsLimit === 'number' ? options.fractionsLimit : Infinity;
 
-        if (f.valueOf() === n && f.n < fractionsLimit && f.d < fractionsLimit) {
+        const num = f.numerator < 0n ? -f.numerator : f.numerator;
+        const den = f.denominator;
+        if (f.valueOf() === n && num < fractionsLimit && den < fractionsLimit) {
           return f;
         }
       }
@@ -274,11 +288,11 @@ export const createMathjsSimplifyConstant = /* #__PURE__ */ factory(
       },
 
       'Matrix, Object': function (s, options) {
-        return matrix(_exactFraction(_matrixElements(s)));
+        return matrix(_matrixElements(s).map((item) => _exactFraction(item, options)));
       },
 
       'Array, Object': function (s, options) {
-        return s.map(_exactFraction);
+        return s.map((item) => _exactFraction(item, options));
       },
     });
 
@@ -287,19 +301,23 @@ export const createMathjsSimplifyConstant = /* #__PURE__ */ factory(
     }
 
     function _fractionToNode(f) {
-      // note: we convert await from bigint values, because bigint values gives issues with divisions: 1n/2n=0n and not 0.5
+      // note: we convert away from bigint values, because bigint values gives issues with divisions: 1n/2n=0n and not 0.5
       const fromBigInt = (value) =>
         config.number === 'BigNumber' && bignumber ? bignumber(value) : Number(value);
 
-      const numeratorValue = f.s * f.n;
+      const numeratorValue = f.numerator;
+      const denominator = f.denominator;
       const numeratorNode =
         numeratorValue < 0n
-          ? new OperatorNode('-', 'unaryMinus', [new ConstantNode(-fromBigInt(numeratorValue))])
+          ? new OperatorNode('-', 'unaryMinus', [new ConstantNode(fromBigInt(-numeratorValue))])
           : new ConstantNode(fromBigInt(numeratorValue));
 
-      return f.d === 1n
+      return denominator === 1n
         ? numeratorNode
-        : new OperatorNode('/', 'divide', [numeratorNode, new ConstantNode(fromBigInt(f.d))]);
+        : new OperatorNode('/', 'divide', [
+            numeratorNode,
+            new ConstantNode(fromBigInt(denominator)),
+          ]);
     }
 
     /* Handles constant indexing of ArrayNodes, matrices, and ObjectNodes */

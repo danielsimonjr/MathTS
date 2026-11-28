@@ -276,5 +276,6 @@ export {
   createMathjsDerivative,
   createMathjsResolve,
   createMathjsSimplify,
+  createMathjsSimplifyConstant,
   createMathjsSimplifyCore,
 };

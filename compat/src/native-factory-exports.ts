@@ -3,6 +3,7 @@ import {
   createMathjsDerivative,
   createMathjsResolve,
   createMathjsSimplify,
+  createMathjsSimplifyConstant,
   createMathjsSimplifyCore,
 } from './mathjs-symbolic-adapters.js';
 import { compatHelpDocForSearch } from './compat-help.js';
@@ -3433,7 +3434,7 @@ const simplifyCoreDependencies: UnaryBundle<'createSimplifyCore'> & {
 };
 
 const mathjsCreateSimplifyConstant: CompatFactoryExports['createSimplifyConstant'] =
-  factories.createSimplifyConstant;
+  createMathjsSimplifyConstant as CompatFactoryExports['createSimplifyConstant'];
 const simplifyConstantDependencies: UnaryBundle<'createSimplifyConstant'> & {
   bignumberDependencies: typeof bignumberDependencies;
   fractionDependencies: typeof fractionDependencies;
