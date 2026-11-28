@@ -16,21 +16,13 @@ function copyTypedSurface(shim: object, typedFn: object): void {
   }
 }
 
-function coerceMathjsFraction(value: unknown): MathjsFraction | null {
-  if (isMathjsFraction(value)) return value;
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return new mathjsFractionClass(value) as MathjsFraction;
-  }
-  return null;
-}
-
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
 function tryMathjsFractionEquals(a: unknown, b: unknown): boolean | null {
-  const left = coerceMathjsFraction(a);
-  const right = coerceMathjsFraction(b);
+  const left = isMathjsFraction(a) ? a : null;
+  const right = isMathjsFraction(b) ? b : null;
   if (left === null && right === null) return null;
   if (left !== null && right !== null) return left.equals(right);
   if (left !== null && isFiniteNumber(b)) {
