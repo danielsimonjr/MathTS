@@ -12,6 +12,10 @@
  */
 
 import {
+  buildMathjsStdTransform,
+  buildMathjsVarianceTransform,
+} from './mathjs-dim-statistics-transform.js';
+import {
   createAndTransform,
   createApplyTransform,
   createBitAndTransform,
@@ -117,6 +121,16 @@ export function buildExpressionTransforms(
 ): Record<string, unknown> {
   const transforms: Record<string, unknown> = {};
   for (const create of TRANSFORM_FACTORIES) {
+    if (create.fn === 'std') {
+      const stdTransform = buildMathjsStdTransform(instance);
+      if (stdTransform !== undefined) transforms.std = stdTransform;
+      continue;
+    }
+    if (create.fn === 'variance') {
+      const varianceTransform = buildMathjsVarianceTransform(instance);
+      if (varianceTransform !== undefined) transforms.variance = varianceTransform;
+      continue;
+    }
     const missing = create.dependencies.filter(
       (dependency) => typeof instance[dependency] === 'undefined'
     );

@@ -1,3 +1,5 @@
+import { IndexError } from '@danielsimonjr/mathts-core/internal';
+
 const MATHTS_SCALAR_GUARD = /^(\w+): unexpected type (.+) at index (\d+)$/;
 
 const SCALAR_FACTORY_EXPECTED: Record<string, string> = {
@@ -28,8 +30,36 @@ function remapScalarDispatchError(err: TypeError): TypeError | null {
   );
 }
 
+function remapIndexErrorLike(error: unknown): unknown {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { isIndexError?: boolean }).isIndexError === true
+  ) {
+    const e = error as IndexError;
+    const message = e.message;
+    if (/ < 0\)$/.test(message)) {
+      return new IndexError(e.index, 1, e.max === undefined ? undefined : e.max + 1);
+    }
+    if (/[<>]/.test(message) && !/< 0\)/.test(message)) {
+      return error;
+    }
+    if (/^Index out of range \(-?\d+\)$/.test(message)) {
+      return new IndexError(e.index, 1, e.index);
+    }
+    return new IndexError(
+      e.index + 1,
+      e.min === undefined ? undefined : e.min + 1,
+      e.max === undefined ? undefined : e.max + 1
+    );
+  }
+  return error;
+}
+
 /** Remap evaluate errors to mathjs 15.3.0 security-test messages (#1777). */
 export function remapMathjsSandboxEvaluateError(error: unknown): never {
+  const indexRemapped = remapIndexErrorLike(error);
+  if (indexRemapped !== error) throw indexRemapped;
   if (error instanceof Error) {
     if (/Index must be an integer/.test(error.message)) {
       if (/\(value: \[object Object\]\)/.test(error.message)) {

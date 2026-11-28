@@ -14,6 +14,7 @@ import type { CompiledExpression, MathNode } from '@danielsimonjr/mathts-express
 import { keywords } from '@danielsimonjr/mathts-expression';
 import type { PhysicsEvaluateOptions } from '@danielsimonjr/mathts-functions';
 import { createMap } from '@danielsimonjr/mathts-core/internal';
+import { preprocessMathjsCompatParseInput } from './mathjs-parse-preprocess.js';
 import { guardMathjsObjectLiteralKeys } from './mathjs-parse-sandbox.js';
 import { remapMathjsSandboxEvaluateError } from './mathjs-sandbox-errors.js';
 import { MATH_WITH_TRANSFORM_EXCLUDED } from './g13-transforms.js';
@@ -25,12 +26,21 @@ type TreeCompile = (expr: string, options?: PhysicsEvaluateOptions) => CompiledE
 /** Factory AST node with `_compile` (not on the public MathNode type). */
 type FactoryCompileNode = MathNode & {
   isSymbolNode?: boolean;
+  isAssignmentNode?: boolean;
   name?: string;
+  value?: FactoryCompileNode;
   _compile(
     math: Record<string, unknown>,
     argNames: Record<string, boolean>
   ): (scope: Map<string, unknown>, args: Record<string, unknown>, context: unknown) => unknown;
 };
+
+function snapshotAssignmentValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return typeof structuredClone === 'function' ? structuredClone(value) : value.slice();
+  }
+  return value;
+}
 
 type UnitConstructor = {
   new (value: null, name: string): unknown;
@@ -183,50 +193,124 @@ export type WrapFactoryCompiledNodeOptions = {
   wrapSubtree?: boolean;
 };
 
-/** Route `node.compile()` through mathjs factory `_compile` (#1777). */
+const FACTORY_COMPILE_PATCHED = new WeakSet<object>();
+
+function normalizeWrapOptions(
+  sandboxMethodsOrOptions: boolean | WrapFactoryCompiledNodeOptions
+): WrapFactoryCompiledNodeOptions {
+  if (typeof sandboxMethodsOrOptions === 'boolean') {
+    return {
+      sandboxTensor: sandboxMethodsOrOptions,
+      wrapSubtree: sandboxMethodsOrOptions,
+    };
+  }
+  return {
+    sandboxTensor: sandboxMethodsOrOptions.sandboxTensor === true,
+    wrapSubtree: sandboxMethodsOrOptions.wrapSubtree !== false,
+  };
+}
+
+/** Route `node.compile()` through mathjs factory `_compile` without breaking `instanceof` (#1786). */
 export function wrapMathjsFactoryCompiledNode<T extends MathNode>(
   node: T,
   ctx: CompatFactoryCompileContext,
   sandboxMethodsOrOptions: boolean | WrapFactoryCompiledNodeOptions = false
 ): T {
-  const options: WrapFactoryCompiledNodeOptions =
-    typeof sandboxMethodsOrOptions === 'boolean'
-      ? {
-          sandboxTensor: sandboxMethodsOrOptions,
-          wrapSubtree: sandboxMethodsOrOptions,
-        }
-      : {
-          sandboxTensor: sandboxMethodsOrOptions.sandboxTensor === true,
-          wrapSubtree: sandboxMethodsOrOptions.wrapSubtree !== false,
+  const options = normalizeWrapOptions(sandboxMethodsOrOptions);
+  if (FACTORY_COMPILE_PATCHED.has(node as object)) return node;
+  FACTORY_COMPILE_PATCHED.add(node as object);
+
+  if (options.sandboxTensor) {
+    Object.defineProperty(node, 'isTensor', {
+      value: true,
+      writable: true,
+      configurable: true,
+      enumerable: false,
+    });
+  }
+
+  const compileImpl = (): CompiledExpression => compileParsedFactoryNode(node, ctx);
+  Object.defineProperty(node, 'compile', {
+    value: compileImpl,
+    writable: true,
+    configurable: true,
+    enumerable: false,
+  });
+  Object.defineProperty(node, 'evaluate', {
+    value: (scope?: Record<string, unknown>) => compileImpl().evaluate(scope),
+    writable: true,
+    configurable: true,
+    enumerable: false,
+  });
+
+  const self = node;
+  const patchNodeMethod = (method: string, impl: (...args: unknown[]) => unknown): void => {
+    Object.defineProperty(node, method, {
+      value: impl,
+      writable: true,
+      configurable: true,
+      enumerable: false,
+    });
+  };
+
+  const bindTreeWalk = (method: string): void => {
+    const original = Reflect.get(node, method);
+    if (typeof original !== 'function') return;
+    const bound = (original as (...a: unknown[]) => unknown).bind(node);
+    patchNodeMethod(method, (...args: unknown[]) => {
+      const callback = args[0];
+      if (typeof callback === 'function') {
+        args[0] = (child: unknown, path: unknown, parent: unknown) =>
+          (callback as (n: unknown, p: unknown, par: unknown) => unknown).call(
+            undefined,
+            child,
+            path,
+            parent === null ? parent : parent === self ? node : parent
+          );
+      }
+      return bound(...args);
+    });
+  };
+
+  if (options.wrapSubtree) {
+    bindTreeWalk('forEach');
+    bindTreeWalk('map');
+    bindTreeWalk('filter');
+
+    const maybeWrapChild = (result: unknown): unknown => {
+      if (!isFactoryMathNode(result)) return result;
+      return wrapMathjsFactoryCompiledNode(result as MathNode, ctx, options);
+    };
+
+    for (const method of ['map', 'transform', 'clone'] as const) {
+      const original = Reflect.get(node, method);
+      if (typeof original !== 'function') continue;
+      const bound = (original as (...a: unknown[]) => unknown).bind(node);
+      patchNodeMethod(method, (...args: unknown[]) => maybeWrapChild(bound(...args)));
+    }
+  }
+
+  const traverseOrig = Reflect.get(node, 'traverse');
+  if (typeof traverseOrig === 'function') {
+    const bound = (traverseOrig as (...a: unknown[]) => unknown).bind(node);
+    patchNodeMethod('traverse', (...args: unknown[]) => {
+      const callback = args[0];
+      if (typeof callback === 'function') {
+        args[0] = (child: unknown, path: unknown, parent: unknown) => {
+          const nodeArg = child === self ? node : child;
+          const parentArg = parent === null ? parent : parent === self ? node : parent;
+          return (callback as (n: unknown, p: unknown, par: unknown) => unknown)(
+            nodeArg,
+            path,
+            parentArg
+          );
         };
-  return new Proxy(node, {
-    get(target, prop, receiver) {
-      if (options.sandboxTensor && prop === 'isTensor') return true;
-      if (prop === 'compile') {
-        return () => compileParsedFactoryNode(target, ctx);
       }
-      if (prop === 'evaluate') {
-        return (scope?: Record<string, unknown>) =>
-          compileParsedFactoryNode(target, ctx).evaluate(scope);
-      }
-      const value = Reflect.get(target, prop, receiver);
-      if (typeof value !== 'function' || prop === 'constructor') return value;
-      if (options.wrapSubtree && (prop === 'map' || prop === 'transform' || prop === 'clone')) {
-        return (...args: unknown[]) => {
-          const result = (value as (...a: unknown[]) => unknown).apply(target, args);
-          if (
-            result !== null &&
-            typeof result === 'object' &&
-            (result as { isNode?: boolean }).isNode === true
-          ) {
-            return wrapMathjsFactoryCompiledNode(result as MathNode, ctx, options);
-          }
-          return result;
-        };
-      }
-      return value.bind(target);
-    },
-  }) as T;
+      return bound(...args);
+    });
+  }
+
+  return node;
 }
 
 function isFactoryMathNode(value: unknown): value is MathNode {
@@ -243,21 +327,21 @@ function isFactoryMathNode(value: unknown): value is MathNode {
 export function deepWrapParsedExpressionTree<T extends MathNode>(
   node: T,
   ctx: CompatFactoryCompileContext,
-  wrapOptions?: Omit<WrapFactoryCompiledNodeOptions, 'wrapSubtree'>
+  wrapOptions?: WrapFactoryCompiledNodeOptions
 ): T {
-  let withChildren = node;
-  const canMapChildren =
-    (node as { type?: string }).type !== 'Node' &&
-    typeof (node as { map?: unknown }).map === 'function';
-  if (canMapChildren) {
-    withChildren = node.map((child) =>
-      isFactoryMathNode(child) ? deepWrapParsedExpressionTree(child, ctx, wrapOptions) : child
-    ) as T;
-  }
-  return wrapMathjsFactoryCompiledNode(withChildren, ctx, {
+  const options: WrapFactoryCompiledNodeOptions = {
     sandboxTensor: wrapOptions?.sandboxTensor === true,
-    wrapSubtree: false,
-  });
+    wrapSubtree: wrapOptions?.wrapSubtree !== false,
+  };
+  const pending: MathNode[] = [node];
+  while (pending.length > 0) {
+    const current = pending.pop() as MathNode;
+    wrapMathjsFactoryCompiledNode(current, ctx, options);
+    current.forEach((child) => {
+      if (isFactoryMathNode(child)) pending.push(child);
+    });
+  }
+  return node;
 }
 
 const EXPR_NODE_CLASS_NAMES = [
@@ -295,8 +379,9 @@ export function wireInstanceExprNodeConstructors(
         throw new TypeError(`Class constructor ${name} cannot be invoked without 'new'`);
       }
       const node = Reflect.construct(Original as new (...a: unknown[]) => MathNode, args);
-      return deepWrapParsedExpressionTree(node, getCtx(), {
+      return wrapMathjsFactoryCompiledNode(node, getCtx(), {
         sandboxTensor: wrapOptions?.sandboxTensor,
+        wrapSubtree: true,
       });
     };
     Object.setPrototypeOf(Wrapped, Original);
@@ -333,7 +418,33 @@ export function compileParsedFactoryNode(
 ): CompiledExpression {
   const math = compileScopeForFactoryCompile(ctx.mathWithTransform, ctx.unitCtor, ctx.instance);
   const factoryNode = node as FactoryCompileNode;
-  const evalFn = factoryNode._compile(math, {});
+  let evalFn = factoryNode._compile(math, {});
+  if (
+    (factoryNode.isAssignmentNode === true || factoryNode.type === 'AssignmentNode') &&
+    factoryNode.value !== undefined
+  ) {
+    const evalValue = factoryNode.value._compile(math, {});
+    const runAssign = evalFn;
+    evalFn = (scope, args, context) => {
+      const returnedValue = snapshotAssignmentValue(evalValue(scope, args, context));
+      const valueNode = factoryNode.value;
+      let savedRhs: unknown;
+      let rhsName: string | undefined;
+      if (
+        valueNode?.isSymbolNode === true &&
+        typeof valueNode.name === 'string' &&
+        scope.has(valueNode.name)
+      ) {
+        rhsName = valueNode.name;
+        savedRhs = snapshotAssignmentValue(scope.get(rhsName));
+      }
+      runAssign(scope, args, context);
+      if (rhsName !== undefined) {
+        scope.set(rhsName, savedRhs);
+      }
+      return returnedValue;
+    };
+  }
   const unitCtor = ctx.unitCtor as UnitConstructor | undefined;
   const symbolName =
     factoryNode.isSymbolNode === true && typeof factoryNode.name === 'string'
@@ -366,6 +477,10 @@ export function compileParsedFactoryNode(
 }
 
 /** Evaluate one expression under the mathjs compile path (#1777). */
+function compatParseInput(expr: string): string {
+  return preprocessMathjsCompatParseInput(expr);
+}
+
 export function evaluateWithMathjsFactoryCompile(
   api: CompatExpressionCompileApi,
   expr: string,
@@ -374,11 +489,12 @@ export function evaluateWithMathjsFactoryCompile(
   mathjsPolicy: boolean,
   ctx: CompatFactoryCompileContext
 ): unknown {
-  guardMathjsObjectLiteralKeys(expr);
+  const input = compatParseInput(expr);
+  guardMathjsObjectLiteralKeys(input);
   if (!mathjsPolicy) {
-    return api.compileTree(expr, options).evaluate(scope);
+    return api.compileTree(input, options).evaluate(scope);
   }
-  const node = api.parse(expr);
+  const node = api.parse(input);
   try {
     return compileParsedFactoryNode(node, ctx).evaluate(scope);
   } catch (error) {
@@ -394,9 +510,10 @@ export function compileWithMathjsFactory(
   mathjsPolicy: boolean,
   ctx: CompatFactoryCompileContext
 ): CompiledExpression {
-  guardMathjsObjectLiteralKeys(expr);
+  const input = compatParseInput(expr);
+  guardMathjsObjectLiteralKeys(input);
   if (!mathjsPolicy) {
-    return api.compileTree(expr, options);
+    return api.compileTree(input, options);
   }
-  return compileParsedFactoryNode(api.parse(expr), ctx);
+  return compileParsedFactoryNode(api.parse(input), ctx);
 }

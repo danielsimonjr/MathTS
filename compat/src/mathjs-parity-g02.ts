@@ -15,6 +15,7 @@ import {
   promoteBooleanScalarsForBigNumber,
 } from './bignumber.js';
 import { isComplex, isFraction } from '@danielsimonjr/mathts-core';
+import { improveMathjsStatisticsError } from './mathjs-statistics-errors.js';
 import type { Fraction as CompatFractionType } from '@danielsimonjr/mathts-core';
 import type { CompatBigNumberInstance as CompatBigNumberType } from './bignumber.js';
 
@@ -549,68 +550,72 @@ export function createCompatMathjsStatistics(
   };
 
   return keepSurface(native, (...args: unknown[]): unknown => {
-    // mathjs rejects the empty forms before any dispatch: no argument is the
-    // typed-function rest error, an empty Array is the statistics SyntaxError.
-    if (args.length === 0) {
-      throw new TypeError(`Too few arguments in function ${name} (expected: any, index: 0)`);
-    }
-    for (const arg of args) {
-      if (
-        typeof arg === 'string' &&
-        !isNorm(arg) &&
-        (arg.trim() === '' || Number.isNaN(Number(arg)))
-      ) {
-        if (args.length === 1 && !Array.isArray(arg)) {
-          throw invalidNumericStringError(arg);
+    try {
+      // mathjs rejects the empty forms before any dispatch: no argument is the
+      // typed-function rest error, an empty Array is the statistics SyntaxError.
+      if (args.length === 0) {
+        throw new TypeError(`Too few arguments in function ${name} (expected: any, index: 0)`);
+      }
+      for (const arg of args) {
+        if (
+          typeof arg === 'string' &&
+          !isNorm(arg) &&
+          (arg.trim() === '' || Number.isNaN(Number(arg)))
+        ) {
+          if (args.length === 1 && !Array.isArray(arg)) {
+            throw invalidNumericStringError(arg);
+          }
+          throw new Error(`Cannot convert "${arg}" to a number`);
         }
-        throw new Error(`Cannot convert "${arg}" to a number`);
       }
-    }
-    if (args.length === 1 && Array.isArray(args[0]) && args[0].length === 0) {
-      throw statisticsEmptyParametersError(name);
-    }
-    if (args.length > 0 && isMatrixLikeValue(args[0])) {
-      // The signature forms: (A), (A, normalization), (A, dim) and
-      // (A, dim, normalization). A normalization string that mathjs would
-      // reject keeps the native rejection.
-      if (args.length === 2 && typeof args[1] === 'string') {
-        if (!isNorm(args[1])) return apply(native, args);
+      if (args.length === 1 && Array.isArray(args[0]) && args[0].length === 0) {
+        throw statisticsEmptyParametersError(name);
+      }
+      if (args.length > 0 && isMatrixLikeValue(args[0])) {
+        // The signature forms: (A), (A, normalization), (A, dim) and
+        // (A, dim, normalization). A normalization string that mathjs would
+        // reject keeps the native rejection.
+        if (args.length === 2 && typeof args[1] === 'string') {
+          if (!isNorm(args[1])) return apply(native, args);
+          const flat: unknown[] = [];
+          flattenScalars(args[0], flat);
+          if (flat.some(isComplexLike)) return complexVariance(flat, args[1]);
+          return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+        }
+        if (args.length === 3 && isDim(args[1]) && typeof args[2] === 'string') {
+          if (!isNorm(args[2])) return apply(native, args);
+          return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+        }
+        if (args.length === 1) {
+          const flat: unknown[] = [];
+          flattenScalars(args[0], flat);
+          if (flat.some(isComplexLike)) return complexVariance(flat, 'unbiased');
+          return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+        }
+        if (args.length === 2 && isDim(args[1])) {
+          return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+        }
+        // The untyped rest with collections: the argument list itself is the
+        // collection (mathjs flattens plain arrays and keeps matrix elements
+        // whole, which drives the whole computation).
         const flat: unknown[] = [];
-        flattenScalars(args[0], flat);
-        if (flat.some(isComplexLike)) return complexVariance(flat, args[1]);
-        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+        flattenScalars(args, flat);
+        if (
+          flat.some(isComplexLike) &&
+          !flat.some((v) => isMatrixLikeValue(v) && !Array.isArray(v))
+        ) {
+          return complexVariance(flat, 'unbiased');
+        }
+        return reboxMatrixStatistics(args, apply(native, [args]), deps.matrix);
       }
-      if (args.length === 3 && isDim(args[1]) && typeof args[2] === 'string') {
-        if (!isNorm(args[2])) return apply(native, args);
-        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+      // Scalar variadic: mathjs treats every argument as one value of the list.
+      if (args.some(isComplexLike)) {
+        return complexVariance(args, 'unbiased');
       }
-      if (args.length === 1) {
-        const flat: unknown[] = [];
-        flattenScalars(args[0], flat);
-        if (flat.some(isComplexLike)) return complexVariance(flat, 'unbiased');
-        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
-      }
-      if (args.length === 2 && isDim(args[1])) {
-        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
-      }
-      // The untyped rest with collections: the argument list itself is the
-      // collection (mathjs flattens plain arrays and keeps matrix elements
-      // whole, which drives the whole computation).
-      const flat: unknown[] = [];
-      flattenScalars(args, flat);
-      if (
-        flat.some(isComplexLike) &&
-        !flat.some((v) => isMatrixLikeValue(v) && !Array.isArray(v))
-      ) {
-        return complexVariance(flat, 'unbiased');
-      }
-      return reboxMatrixStatistics(args, apply(native, [args]), deps.matrix);
+      return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+    } catch (err) {
+      throw improveMathjsStatisticsError(err, name);
     }
-    // Scalar variadic: mathjs treats every argument as one value of the list.
-    if (args.some(isComplexLike)) {
-      return complexVariance(args, 'unbiased');
-    }
-    return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
   });
 }
 

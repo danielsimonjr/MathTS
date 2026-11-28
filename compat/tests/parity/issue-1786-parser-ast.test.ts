@@ -18,4 +18,31 @@ describe('issue #1786 parser/AST parity', () => {
     const expr = 'map([6, 0, 1, -0.2], boolean(x))';
     expect(math.parse(expr).evaluate({})).toEqual(math.evaluate(expr));
   });
+
+  it('rewrites bare 2e to 2*E for mathjs literal parsing', () => {
+    expect(math.evaluate('2e')).toBeCloseTo(2 * Math.E, 12);
+    expect(math.parse('2e').toString()).toContain('*');
+  });
+
+  it('sum.toTex honors per-function template objects', () => {
+    const custom = create(all);
+    custom.sum.toTex = {
+      2: '${args[0]}+${args[1]}',
+    };
+    expect(custom.parse('sum(1,2)').toTex()).toBe('1+2');
+  });
+
+  it('expression.transform.std uses one-based matrix dimensions', () => {
+    const std = math.expression.transform.std as (...args: unknown[]) => unknown;
+    expect(
+      std(
+        [
+          [2, 6],
+          [4, 10],
+        ],
+        1,
+        'uncorrected'
+      )
+    ).toEqual([1, 2]);
+  });
 });
