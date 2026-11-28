@@ -40,9 +40,15 @@ import {
 } from './mathjs-parity-1585.js';
 import {
   namedSetCartesian,
+  namedSetDifference,
   namedSetDistinct,
   namedSetIntersect,
+  namedSetIsSubset,
+  namedSetMultiplicity,
   namedSetPowerset,
+  namedSetSize,
+  namedSetSymDifference,
+  namedSetUnion,
 } from './mathjs-parity-set.js';
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
 
@@ -184,8 +190,6 @@ export {
   defaultRandomInt as randomInt,
 };
 
-/** Union of two multisets in MathJS result order. */
-const namedSetUnion: typeof mathFunctions.setUnion = mathFunctions.factory_mathjsCompat.setUnion;
 const namedString = mathFunctions.factory_mathjsCompat.string as typeof mathFunctions.string;
 const namedCompatString = /* #__PURE__ */ createCompatString(namedString);
 const namedBin = /* #__PURE__ */ createCompatBaseFormat(
@@ -294,9 +298,14 @@ export {
   namedCompatString as string,
   namedSetUnion as setUnion,
   namedSetCartesian as setCartesian,
+  namedSetDifference as setDifference,
   namedSetDistinct as setDistinct,
   namedSetIntersect as setIntersect,
+  namedSetIsSubset as setIsSubset,
+  namedSetMultiplicity as setMultiplicity,
   namedSetPowerset as setPowerset,
+  namedSetSize as setSize,
+  namedSetSymDifference as setSymDifference,
   namedCompareText as compareText,
   namedEqualText as equalText,
   namedToBest as toBest,
