@@ -344,6 +344,7 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
           computeVectors
         ) as EigenResult;
         if (computeVectors && robust.eigenvectors) {
+          alignEigenvectorSigns(result.eigenvectors, robust.eigenvectors);
           return { values: result.values, eigenvectors: robust.eigenvectors };
         }
         return robust;
@@ -364,6 +365,37 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
      * scaling of well-separated eigenvectors; #1186 keeps the near-repeated
      * ones usable and independent).
      */
+    /**
+     * The robust solver may return the same direction with opposite sign; keep the
+     * QR eigenvector orientation when both are available (#1561, #1791).
+     */
+    function alignEigenvectorSigns(
+      reference: EigenvectorResult[] | undefined,
+      target: EigenvectorResult[]
+    ): void {
+      if (!reference || reference.length !== target.length) return;
+      const negOne = number(-1) as Scalar;
+      for (let i = 0; i < target.length; i++) {
+        const ref = reference[i]?.vector;
+        const tv = target[i]?.vector;
+        if (!Array.isArray(ref) || !Array.isArray(tv) || ref.length !== tv.length) continue;
+        let sum = 0;
+        for (let j = 0; j < ref.length; j++) {
+          const a = ref[j]!;
+          const b = tv[j]!;
+          const reA = typeof a === 'number' ? a : Number(re(a));
+          const reB = typeof b === 'number' ? b : Number(re(b));
+          sum += reA * reB;
+        }
+        if (sum < 0) {
+          const vec = tv as Scalar[];
+          for (let j = 0; j < vec.length; j++) {
+            vec[j] = multiplyScalar(negOne, vec[j]!) as Scalar;
+          }
+        }
+      }
+    }
+
     function normalizeRepeatedVectors(result: EigenResult, arr: Scalar[][]): void {
       const values = result.values as Scalar[];
       const scale = entryScale(arr) || 1;
