@@ -1,5 +1,3 @@
 ### Fixed
 
-- Expression parse/compile parity (#1786): deep-wrap parsed AST nodes so nested subexpressions compile against the instance `mathWithTransform`; route `node.evaluate` through the same factory compile path as `node.compile`.
-- `evaluate` returns a matrix when given a matrix of expression strings; nullish coalescing and inline transform callbacks resolve symbols correctly.
-- Instance `typed` registers the `identifier` type and converts `bigint` to mathjs `Fraction` for custom signatures.
+- compat: mathjs 15.3.0 parser/AST parity — instance-scoped node constructors, factory compile/evaluate wiring, sized numeric literals, parser security/API, nullish coalescing, matrix batch evaluate, inline transform callbacks, `toTex`/multi-operand operators, assignment/range compile, std/variance 1-based dimensions, and typed `identifier` / Decimal-as-BigNumber (#1786).

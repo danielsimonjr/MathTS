@@ -26,7 +26,8 @@ describe('issue #1786 parser/AST parity', () => {
 
   it('sum.toTex honors per-function template objects', () => {
     const custom = create(all);
-    custom.sum.toTex = {
+    const sumFn = custom.sum as { toTex?: Record<number, string> };
+    sumFn.toTex = {
       2: '${args[0]}+${args[1]}',
     };
     expect(custom.parse('sum(1,2)').toTex()).toBe('1+2');
