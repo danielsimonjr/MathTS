@@ -37,6 +37,7 @@ type NumericBinary = (a: unknown, b: unknown) => unknown;
 type NumericUnary = (x: unknown) => unknown;
 type NumericArrayBinary = (a: unknown | unknown[], b: unknown | unknown[]) => unknown | unknown[];
 
+/** Factory dependency bundle for {@link createMathjsDistance}. */
 export interface MathjsDistanceDeps {
   typed: TypedFunction;
   addScalar: NumericBinary;
@@ -411,6 +412,7 @@ export function createMathjsDistance(deps: MathjsDistanceDeps): TypedFunction {
   }) as TypedFunction;
 }
 
+/** Factory dependency bundle for {@link createMathjsIntersect}. */
 export interface MathjsIntersectDeps {
   typed: TypedFunction;
   config: { relTol: number };
