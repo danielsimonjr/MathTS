@@ -17,8 +17,14 @@ import {
 import { isComplex, isFraction } from '@danielsimonjr/mathts-core';
 import type { Fraction as CompatFractionType } from '@danielsimonjr/mathts-core';
 import type { CompatBigNumberInstance as CompatBigNumberType } from './bignumber.js';
+import { toCompatComplex } from './mathjs-complex-prototype.js';
 
 type UnaryLike = (...args: never[]) => unknown;
+
+/** Re-box native `Complex` results to the compat prototype (#1788 oracles). */
+export function withCompatComplexResult(fn: UnaryLike): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => toCompatComplex(apply(fn, args)));
+}
 
 /** The compat BigNumber constructor. */
 type BigNumberCtor = new (v?: number | string | bigint) => CompatBigNumberType;
@@ -490,6 +496,37 @@ export interface CompatStatisticsDeps {
   divide: UnaryLike;
   sqrt: UnaryLike;
   matrix: (data: unknown, storage?: string) => unknown;
+  mapSlices: (data: unknown, dim: number, fn: (slice: unknown) => unknown) => unknown;
+}
+
+function statisticsDimNumber(dim: unknown): number {
+  if (typeof dim === 'number') return dim;
+  if (isBigNumberLike(dim) || isOwnBigNumber(dim)) {
+    const n = (dim as { toNumber?: () => number }).toNumber?.();
+    if (typeof n === 'number') return n;
+    return Number((dim as { toString(): string }).toString());
+  }
+  return Number(dim);
+}
+
+function mathjsVarianceOnNested(
+  array: unknown,
+  normalization: StatisticsNormalization,
+  ops: Pick<CompatStatisticsDeps, 'add' | 'subtract' | 'multiply' | 'divide'>
+): unknown {
+  const flat: unknown[] = [];
+  flattenScalars(array, flat);
+  if (flat.length === 0) {
+    throw new Error('Cannot calculate variance of an empty array');
+  }
+  return mathjsComplexVariance(flat, normalization, ops);
+}
+
+function mapStatisticsSqrt(value: unknown, sqrt: UnaryLike): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => mapStatisticsSqrt(entry, sqrt));
+  }
+  return apply(sqrt, [value]);
 }
 
 function mathjsComplexVariance(
@@ -554,12 +591,24 @@ export function createCompatMathjsStatistics(
     if (args.length === 0) {
       throw new TypeError(`Too few arguments in function ${name} (expected: any, index: 0)`);
     }
-    for (const arg of args) {
-      if (
-        typeof arg === 'string' &&
-        !isNorm(arg) &&
-        (arg.trim() === '' || Number.isNaN(Number(arg)))
-      ) {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      if (typeof arg !== 'string') continue;
+      if (args.length === 2 && i === 1 && (Array.isArray(args[0]) || isMatrixLikeValue(args[0]))) {
+        continue;
+      }
+      if (isNorm(arg)) {
+        if (
+          i === 1 &&
+          args.length === 3 &&
+          (Array.isArray(args[0]) || isMatrixLikeValue(args[0])) &&
+          isDim(args[2])
+        ) {
+          throw new Error(`Cannot convert "${arg}" to a number`);
+        }
+        continue;
+      }
+      if (arg.trim() === '' || Number.isNaN(Number(arg))) {
         if (args.length === 1 && !Array.isArray(arg)) {
           throw invalidNumericStringError(arg);
         }
@@ -591,6 +640,32 @@ export function createCompatMathjsStatistics(
         return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
       }
       if (args.length === 2 && isDim(args[1])) {
+        const root: unknown[] = [];
+        flattenScalars(args[0], root);
+        if (!root.some(isComplexLike)) {
+          const dim = statisticsDimNumber(args[1]);
+          const varianceAlongDim = deps.mapSlices(args[0], dim, (slice) =>
+            mathjsVarianceOnNested(slice, 'unbiased', deps)
+          );
+          const alongDim =
+            name === 'std' ? mapStatisticsSqrt(varianceAlongDim, deps.sqrt) : varianceAlongDim;
+          return reboxMatrixStatistics(args, alongDim, deps.matrix);
+        }
+        return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
+      }
+      if (args.length === 3 && isDim(args[1]) && isNorm(args[2])) {
+        const root: unknown[] = [];
+        flattenScalars(args[0], root);
+        if (!root.some(isComplexLike)) {
+          const dim = statisticsDimNumber(args[1]);
+          const norm = args[2];
+          const varianceAlongDim = deps.mapSlices(args[0], dim, (slice) =>
+            mathjsVarianceOnNested(slice, norm, deps)
+          );
+          const alongDim =
+            name === 'std' ? mapStatisticsSqrt(varianceAlongDim, deps.sqrt) : varianceAlongDim;
+          return reboxMatrixStatistics(args, alongDim, deps.matrix);
+        }
         return reboxMatrixStatistics(args, apply(native, args), deps.matrix);
       }
       // The untyped rest with collections: the argument list itself is the

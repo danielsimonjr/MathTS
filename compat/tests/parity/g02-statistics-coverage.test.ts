@@ -17,6 +17,11 @@ describe('createCompatMathjsStatistics branch coverage', () => {
     multiply: (a: unknown, b: unknown) => (a as number) * (b as number),
     sqrt: Math.sqrt,
     matrix: (values: unknown) => instance.matrix(values),
+    mapSlices: instance.mapSlices.bind(instance) as (
+      data: unknown,
+      dim: number,
+      fn: (slice: unknown) => unknown
+    ) => unknown,
   };
   const nativeVar = instance.variance.bind(instance);
   const nativeStd = instance.std.bind(instance);
