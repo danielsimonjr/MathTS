@@ -7,5 +7,11 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "../node_modules/**"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "../node_modules/**",
+    "src/mathjs-symbolic-algebra/**/*.js"
+  ]
 }
