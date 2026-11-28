@@ -56,4 +56,6 @@ export const FUNCTION_ISSUE: Record<string, string> = {
   /** #1773 error class / arity wrappers (compat-only); pool/doc name-level gaps stay here. */
   bitNot: '1773',
   number: '1773',
+  det: '1791',
+  qr: '1791',
 };

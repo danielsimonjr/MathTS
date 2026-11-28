@@ -25,7 +25,19 @@ export function createInstanceBigNumberClass(
   getConfig: () => RunWithConfigOverlay,
   usesOverlay: () => boolean
 ): InstanceBigNumberCtor {
-  class InstanceBigNumber extends CompatBigNumber {}
+  class InstanceBigNumber extends CompatBigNumber {
+    constructor(...args: ConstructorParameters<typeof CompatBigNumber>) {
+      super(...args);
+      // mathjs `approxDeepEqual` deep-walks enumerable own keys; decimal internals
+      // differ between algorithms while still `equals()` within epsilon (#1791).
+      for (const key of Object.keys(this)) {
+        const descriptor = Object.getOwnPropertyDescriptor(this, key);
+        if (descriptor?.enumerable) {
+          Object.defineProperty(this, key, { ...descriptor, enumerable: false });
+        }
+      }
+    }
+  }
   Object.defineProperty(InstanceBigNumber, INSTANCE_PRECISION_GETTER, {
     value: () => getConfig().precision ?? 64,
     enumerable: false,

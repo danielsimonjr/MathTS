@@ -536,7 +536,7 @@ export function createRealSymmetric({
     }
     if (!computeVectors) return { values };
     const eigenvectors = vecs!.map((vector, i) => ({
-      value: values[i],
+      value: values[i]!,
       vector,
     }));
     return { values, eigenvectors };

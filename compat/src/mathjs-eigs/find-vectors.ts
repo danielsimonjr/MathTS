@@ -1,5 +1,7 @@
+import { isBigNumber } from '@danielsimonjr/mathts-core';
 import type BigNumber from 'bignumber.js';
 import type { Complex } from 'complex.js';
+import { dedupeEigenpairs as dedupeEigenpairsShared } from './eigenvector-dedupe.js';
 
 /** Scalar types supported by the eigenvector solve */
 type Scalar = number | BigNumber | Complex;
@@ -31,6 +33,7 @@ interface Dependencies {
   reshape: (arr: Scalar[], shape: number[]) => Scalar[];
   inv: (x: Scalar[][]) => Scalar[][];
   usolve: (A: Scalar[][], b: Scalar[]) => Scalar[];
+  usolveAll: (U: Scalar[][], b: Scalar[]) => unknown[];
   equalScalar: (a: Scalar, b: Scalar) => boolean;
   complex: (re: number | Scalar, im?: number) => Complex;
   larger: (a: Scalar, b: Scalar) => boolean;
@@ -58,7 +61,6 @@ export function createEigsFindEigenvectors({
   subtract,
   flatten,
   multiply,
-  multiplyScalar,
   divideScalar,
   sqrt,
   abs,
@@ -68,12 +70,28 @@ export function createEigsFindEigenvectors({
   reshape,
   inv,
   usolve,
+  usolveAll,
   equalScalar,
   complex,
   larger,
   smaller,
   dot,
 }: Dependencies) {
+  /** One column vector from a `usolveAll` branch or a `multiply` result. */
+  function asColumnVector(v: unknown): Scalar[] {
+    const raw =
+      typeof v === 'object' && v !== null && 'valueOf' in v
+        ? (v as { valueOf(): unknown }).valueOf()
+        : v;
+    const flat = flatten(raw as Scalar[] | Scalar[][]) as unknown;
+    if (Array.isArray(flat) && flat.length > 0 && Array.isArray(flat[0])) {
+      return (flat as Scalar[][]).map((row) =>
+        Array.isArray(row) ? (row[0] as Scalar) : (row as unknown as Scalar)
+      );
+    }
+    return flat as Scalar[];
+  }
+
   function findEigenvectors(
     A: Scalar[][],
     N: number,
@@ -118,7 +136,7 @@ export function createEigsFindEigenvectors({
         multiply(lambda as Scalar, E) as unknown as Scalar[][]
       ) as unknown as Scalar[][]; // the characteristic matrix
 
-      const solutions = usolveAll(S, b, prec, type);
+      let solutions = usolveAll(S, b).map(asColumnVector);
       solutions.shift(); // ignore the null vector
 
       // looks like we missed something, try inverse iteration
@@ -131,13 +149,19 @@ export function createEigsFindEigenvectors({
         } // no more vectors were found
         solutions.push(approxVec);
       }
+      solutions = dedupeIdenticalSolutions(solutions);
+      solutions = pruneParallelSolutions(solutions, prec);
+      if (solutions.length > 1) {
+        const parallel = pruneParallelSolutions(solutions, 1e-6);
+        if (parallel.length === 1) solutions = parallel;
+      }
+      solutions = sortEigenvectorTieBreak(solutions);
 
       // Transform back into original array coordinates
       const correction = multiply(inv(R), C) as unknown as Scalar[][];
-      const back = solutions.map((v) => multiply(correction, v) as unknown as Scalar[][]);
+      const back = solutions.map((v) => asColumnVector(multiply(correction, v)));
       vectors.push(
-        ...back.map((v) => {
-          const flat = flatten(v) as Scalar[];
+        ...back.map((flat) => {
           // One complex eigenvalue makes every eigenvector a Complex[], as in
           // mathjs (#978): the vectors of the real eigenvalues ride the same
           // complex correction matrix there; make that explicit for the
@@ -150,106 +174,16 @@ export function createEigsFindEigenvectors({
         })
       );
     }
-    return vectors;
-  }
-
-  /**
-   * A value at or below the threshold is negligible for the eigenvector solve.
-   * The comparison is exact: the typed `larger` carries the nearly-equal
-   * tolerance of the relational surface, which reads a BigNumber below absTol
-   * as equal to zero — wrong for a numerical cut at a small matrix scale.
-   */
-  function isNegligible(x: Scalar, threshold: Scalar): boolean {
-    const a = abs(x) as Scalar;
-    return !gtExact(a, threshold);
-  }
-
-  function gtExact(a: Scalar, b: Scalar): boolean {
-    if (typeof a === 'number' && typeof b === 'number') return a > b;
-    const toBig = (x: Scalar): BigNumber =>
-      typeof x === 'number' ? (bignumber(x) as BigNumber) : (x as BigNumber);
-    return toBig(a).gt(toBig(b));
-  }
-
-  /**
-   * All solutions of U·x = b for an upper triangular U: mathjs's backward
-   * substitution with its free-variable branches. The singular test is the
-   * `prec` of the eigs call, not an exact zero and not config.absTol: a
-   * coupling that the solver deflated leaves a pivot of the order of `prec` on
-   * the diagonal of U − λE, and the free-variable planting at that pivot is
-   * what makes the eigenvectors of a repeated or split eigenvalue independent
-   * and deterministic (#1186, #1561).
-   *
-   * A pivot at or below `prec` is singular when the accumulated right-hand
-   * side v[i] is negligible against the row (max(|pivot|, upper entries)): the
-   * row imposes no condition, so the first solution plants a free variable
-   * there and the later solutions keep theirs. A significant v[i] on a
-   * negligible pivot is an inconsistent system: mathjs drops that branch (the
-   * whole solve fails for the first solution). A pivot at or below `prec`
-   * beside entries above `prec` with a negligible v[i] is still planted — the
-   * row is dominated by its off-diagonal part, and the plant plus the
-   * lower-column divisions recover the near-null direction.
-   */
-  function usolveAll(
-    S: Scalar[][],
-    b: Scalar[],
-    prec: number | BigNumber,
-    type: DataType
-  ): Scalar[][] {
-    const B: Scalar[][] = [b.slice()];
-    const n = S.length;
-    for (let i = n - 1; i >= 0; i--) {
-      let L = B.length;
-      for (let k = 0; k < L; k++) {
-        const v = B[k]!;
-        const pivot = S[i]![i]!;
-        if (!isNegligible(pivot, prec)) {
-          // non-singular row
-          v[i] = divideScalar(v[i]!, pivot) as Scalar;
-          for (let j = i - 1; j >= 0; j--) {
-            // v[j] -= v[i] * S[j,i]
-            v[j] = subtract(v[j]!, multiplyScalar(v[i]!, S[j]![i]!) as Scalar) as Scalar;
-          }
-          continue;
-        }
-        // the pivot is negligible: compare the accumulated RHS with the row
-        let rowMax = abs(pivot) as Scalar;
-        for (let j = i + 1; j < n; j++) {
-          const entry = abs(S[i]![j]!) as Scalar;
-          if (gtExact(entry, rowMax)) rowMax = entry;
-        }
-        const bound = multiplyScalar(prec as Scalar, rowMax) as Scalar;
-        if (!isNegligible(v[i]!, bound)) {
-          if (typeof pivot === 'number' ? pivot === 0 : (pivot as BigNumber).isZero()) {
-            // structurally singular row with a significant RHS: no solution
-            if (k === 0) {
-              return [];
-            }
-            // This RHS is invalid but other solutions may still exist
-            B.splice(k, 1);
-            k -= 1;
-            L -= 1;
-          } else {
-            // a relatively singular row: the ratio of its entries still fixes
-            // x[i], so divide by the small pivot; the amplification is the
-            // near-null direction the eigenvector solve is after (#1186)
-            v[i] = divideScalar(v[i]!, pivot) as Scalar;
-            for (let j = i - 1; j >= 0; j--) {
-              v[j] = subtract(v[j]!, multiplyScalar(v[i]!, S[j]![i]!) as Scalar) as Scalar;
-            }
-          }
-        } else if (k === 0) {
-          // singular row, negligible RHS: a free variable
-          const bNew = v.slice();
-          bNew[i] = oneOf(type) as Scalar;
-          for (let j = i - 1; j >= 0; j--) {
-            bNew[j] = subtract(bNew[j]!, S[j]![i]!) as Scalar;
-          }
-          B.push(bNew);
-        }
-      }
-    }
-    return B;
+    const precNum =
+      typeof prec === 'number' ? prec : Number(isBigNumber(prec) ? prec.toNumber() : prec);
+    return dedupeEigenpairsShared(
+      vectors,
+      precNum,
+      (a, b) => subtract(a, b) as Scalar,
+      abs,
+      dot,
+      norm
+    );
   }
 
   function oneOf(type: DataType): number | BigNumber | Complex {
@@ -305,43 +239,20 @@ export function createEigsFindEigenvectors({
     return b!;
   }
 
-  /**
-   * A fixed deterministic pseudo-random sequence (mulberry32 with a fixed
-   * seed). The `Math.random` start of the mathjs original makes the whole
-   * solve — and any acceptance test built on it — nondeterministic; a fixed
-   * sequence keeps the generic, unaligned start directions while every run of
-   * the same input follows the same steps (#1561).
-   */
-  let pseudoState = 0x2f6e2b1;
-  /** Re-seed the stream from the matrix, so every input follows its own
-   * deterministic sequence of start directions. */
-  function seedFrom(arr: Scalar[][]): void {
-    let h = 0x9e3779b9;
-    for (const row of arr) {
-      for (const x of row) {
-        h = Math.imul(h ^ Math.imul((Number(abs(x)) * 1000) | 0, 0x85ebca6b), 0x27d4eb2f) >>> 0;
-      }
-    }
-    pseudoState = h === 0 ? 0x2f6e2b1 : h;
-  }
-  function nextPseudo(): number {
-    pseudoState =
-      (Math.imul(pseudoState ^ (pseudoState >>> 15), pseudoState | 1) ^
-        (pseudoState + Math.imul(pseudoState ^ (pseudoState >>> 7), pseudoState | 61))) >>>
-      0;
-    return ((pseudoState ^ (pseudoState >>> 14)) >>> 0) / 4294967296;
+  /** mathjs 15.3.0 inverse iteration start directions (#1791). */
+  function seedFrom(_arr: Scalar[][]): void {
+    // Present for call-site stability; mathjs uses Math.random here.
   }
 
   /**
-   * Generates a deterministic pseudo-random unit vector of dimension N,
-   * orthogonal to each vector in the list.
+   * Generates a random unit vector of dimension N, orthogonal to each vector in the list.
    */
   function deterministicOrthogonalVector(N: number, orthog: Scalar[][], type: DataType): Scalar[] {
     const big = type === 'BigNumber';
     const cplx = type === 'Complex';
     let v: Scalar[] = Array<Scalar>(N)
       .fill(0 as unknown as Scalar)
-      .map(() => (2 * nextPseudo() - 1) as unknown as Scalar);
+      .map(() => (2 * Math.random() - 1) as unknown as Scalar);
     if (big) {
       v = v.map((n) => bignumber(n as unknown as number));
     }
@@ -382,6 +293,49 @@ export function createEigsFindEigenvectors({
   function normalize(v: Scalar[], type: DataType): Scalar[] {
     const one = oneOf(type);
     return multiply(divideScalar(one as Scalar, norm(v)) as Scalar, v) as Scalar[];
+  }
+
+  /** Remove duplicate branches from `usolveAll` (same direction twice). */
+  function dedupeIdenticalSolutions(solutions: Scalar[][]): Scalar[][] {
+    const kept: Scalar[][] = [];
+    for (const v of solutions) {
+      const dup = kept.some(
+        (w) => w.length === v.length && w.every((x, i) => equalScalar(x, v[i]!))
+      );
+      if (!dup) kept.push(v);
+    }
+    return kept;
+  }
+
+  /** mathjs 15.3.0 orders repeated-eigenvalue directions by leading index (#1791). */
+  function sortEigenvectorTieBreak(solutions: Scalar[][]): Scalar[][] {
+    const leadIndex = (v: Scalar[]): number => {
+      for (let i = 0; i < v.length; i++) {
+        if (Number(abs(v[i]!)) > 1e-12) return i;
+      }
+      return v.length;
+    };
+    return [...solutions].sort((u, v) => leadIndex(v) - leadIndex(u)); // larger lead index first (#1791)
+  }
+
+  /** Drop eigenvector candidates that are scalar multiples of an earlier one. */
+  function pruneParallelSolutions(solutions: Scalar[][], prec: number | BigNumber): Scalar[][] {
+    if (solutions.length <= 1) return solutions;
+    const kept: Scalar[][] = [solutions[0]!];
+    const tolRaw = typeof prec === 'number' ? prec : Number(prec);
+    const tol = Number.isFinite(tolRaw) && tolRaw > 0 ? tolRaw : 1e-12;
+    for (let k = 1; k < solutions.length; k++) {
+      const v = solutions[k]!;
+      const parallel = kept.some((w) => {
+        const nu = Number(norm(w));
+        const nv = Number(norm(v));
+        if (!(nu > 0) || !(nv > 0)) return true;
+        const cos = Math.abs(Number(dot(w, v))) / (nu * nv);
+        return cos > 1 - tol;
+      });
+      if (!parallel) kept.push(v);
+    }
+    return kept;
   }
 
   /**

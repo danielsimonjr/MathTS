@@ -17,6 +17,7 @@ import {
 import { isComplex, isFraction } from '@danielsimonjr/mathts-core';
 import type { Fraction as CompatFractionType } from '@danielsimonjr/mathts-core';
 import type { CompatBigNumberInstance as CompatBigNumberType } from './bignumber.js';
+import { wrapCompatExpmSquareErrors } from './mathjs-parity-linalg-1791.js';
 
 type UnaryLike = (...args: never[]) => unknown;
 
@@ -663,10 +664,7 @@ export function createCompatExpm(
   native: UnaryLike,
   matrix: (data: unknown) => unknown
 ): (...args: unknown[]) => unknown {
-  return (x?: unknown): unknown => {
-    const result = apply(native, [x]);
-    return Array.isArray(result) && Array.isArray(x) ? matrix(result) : result;
-  };
+  return wrapCompatExpmSquareErrors(native as (...args: unknown[]) => unknown, matrix);
 }
 
 // =============================================================================

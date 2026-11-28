@@ -57,13 +57,12 @@ export function mapDivideBroadcastError(err: unknown, b: unknown): never {
  * Matrix row separators (`[1,2;3,4]`) use `;` inside brackets and must not trigger wrapping.
  */
 export function isMultiStatementExpression(expr: string): boolean {
-  if (expr.includes('\n')) return true;
   let depth = 0;
   for (let i = 0; i < expr.length; i++) {
     const c = expr[i];
     if (c === '(' || c === '[') depth++;
     else if (c === ')' || c === ']') depth = Math.max(0, depth - 1);
-    else if (c === ';' && depth === 0) return true;
+    else if (depth === 0 && (c === ';' || c === '\n')) return true;
   }
   return false;
 }

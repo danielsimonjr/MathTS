@@ -250,6 +250,7 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
       complex,
       multiply,
       add,
+      lexicographicAbsSort: true,
     } as unknown as Parameters<typeof createRealSymmetric>[0]);
     const doComplexEigs = createComplexEigs({
       addScalar,
@@ -324,17 +325,29 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
         // faithful attempt its own copy so a failed validation can still run
         // the robust solver on the original matrix.
         const copy = arr.map((row) => row.slice());
+        // mathjs 15.3.0 dogfood compares `eigs(M,prec)` with
+        // `{eigenvectors:false}`; the values must match even though the
+        // public `computeVectors` flag differs (#1791). Internally the QR path
+        // always tracks transformations.
         const result = doComplexEigs(copy, N, prec, type, true);
-        // Values only: the faithful iteration's values are the mathjs ones
-        // (#1561); without eigenvectors there is no direction to judge, and
-        // mathjs runs the same iteration either way.
         if (!computeVectors) return { values: result.values };
         const sound = eigsResultIsSound(arr, result);
         if (sound) {
-          const kept = computeVectors ? result : { values: result.values };
           if (computeVectors) normalizeRepeatedVectors(result, arr);
-          return kept;
+          return result;
         }
+        const robust = doComplexEigsRobust(
+          arr.map((row) => row.slice()),
+          N,
+          prec,
+          type,
+          computeVectors
+        ) as EigenResult;
+        if (computeVectors && robust.eigenvectors) {
+          alignEigenvectorSigns(result.eigenvectors, robust.eigenvectors);
+          return { values: result.values, eigenvectors: robust.eigenvectors };
+        }
+        return robust;
       } catch {
         // convergence or back-substitution failure: the robust solver decides
       }
@@ -352,6 +365,37 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
      * scaling of well-separated eigenvectors; #1186 keeps the near-repeated
      * ones usable and independent).
      */
+    /**
+     * The robust solver may return the same direction with opposite sign; keep the
+     * QR eigenvector orientation when both are available (#1561, #1791).
+     */
+    function alignEigenvectorSigns(
+      reference: EigenvectorResult[] | undefined,
+      target: EigenvectorResult[]
+    ): void {
+      if (!reference || reference.length !== target.length) return;
+      const negOne = number(-1) as Scalar;
+      for (let i = 0; i < target.length; i++) {
+        const ref = reference[i]?.vector;
+        const tv = target[i]?.vector;
+        if (!Array.isArray(ref) || !Array.isArray(tv) || ref.length !== tv.length) continue;
+        let sum = 0;
+        for (let j = 0; j < ref.length; j++) {
+          const a = ref[j]!;
+          const b = tv[j]!;
+          const reA = typeof a === 'number' ? a : Number(re(a));
+          const reB = typeof b === 'number' ? b : Number(re(b));
+          sum += reA * reB;
+        }
+        if (sum < 0) {
+          const vec = tv as Scalar[];
+          for (let j = 0; j < vec.length; j++) {
+            vec[j] = multiplyScalar(negOne, vec[j]!) as Scalar;
+          }
+        }
+      }
+    }
+
     function normalizeRepeatedVectors(result: EigenResult, arr: Scalar[][]): void {
       const values = result.values as Scalar[];
       const scale = entryScale(arr) || 1;
@@ -520,7 +564,13 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
     function doEigs(mat: Matrix, opts: EigenOptions = {}): EigenResult {
       const computeVectors = 'eigenvectors' in opts ? opts.eigenvectors : true;
       const prec = opts.precision ?? config.relTol;
-      const result = computeValuesAndVectors(mat, prec, computeVectors!);
+      // mathjs 15.3.0 dogfood requires the same spectrum with or without
+      // `eigenvectors: false`; run the vector-tracking QR path always (#1791).
+      const result = computeValuesAndVectors(mat, prec, true);
+      if (!computeVectors) {
+        const { values } = result;
+        return { values };
+      }
       if (opts.matricize) {
         result.values = matrix(result.values as Scalar[]);
         if (computeVectors) {
@@ -574,11 +624,10 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
       // both tests below are relative to the entries they compare, so a small
       // block beside a huge entry keeps its asymmetry and its imaginary parts,
       // and a matrix with tiny entries is not read as real symmetric (#1202)
-      const precBig = bignumber(prec as number);
-      if (isReal(arr, N, precBig)) {
+      if (isReal(arr, N, prec)) {
         coerceReal(arr, N); // modifies arr by side effect
 
-        if (isSymmetric(arr, N, precBig)) {
+        if (isSymmetric(arr, N, prec)) {
           const type = coerceTypes(mat, arr, N); // modifies arr by side effect
           return doRealSymmetric(
             arr as unknown as (number | BigNumber)[][],
@@ -957,15 +1006,10 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
           : { values: [value] };
       }
       const blocks = independentBlocks(arr);
-      if (blocks.length > 1) {
-        // The block-decomposed assembly can return a pair whose coupled
-        // coordinates could not be completed; the soundness check sends such a
-        // result to the robust solver (#1561). The check reads `arr` before
-        // any solver mutates it.
-        const assembled = solveIndependentBlocks(arr, blocks, prec, type, computeVectors);
-        if (!computeVectors || eigsResultIsSound(arr, assembled)) return assembled;
-        return doComplexEigsRobust(arr, N, prec, type, computeVectors) as EigenResult;
+      if (blocks.length > 1 && !computeVectors) {
+        return solveIndependentBlocks(arr, blocks, prec, type, false);
       }
+      // mathjs 15.3.0 solves the full matrix for eigenvectors (#1791, 5×5 dogfood).
       if (type === 'Complex' || type === 'number') {
         let max = 0;
         for (const row of arr) {
@@ -1038,18 +1082,12 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
       return result;
     }
 
-    /**
-     * Check if matrix is symmetric: every pair satisfies
-     * |a_ij - a_ji| <= prec * max(|a_ij|, |a_ji|). A pair of zeros is equal.
-     */
-    function isSymmetric(arr: Scalar[][], N: number, prec: BigNumber): boolean {
+    /** mathjs 15.3.0 symmetry test: |a_ij − a_ji| > prec */
+    function isSymmetric(arr: Scalar[][], N: number, prec: number | BigNumber): boolean {
+      const p = bignumber(prec as number);
       for (let i = 0; i < N; i++) {
-        for (let j = i + 1; j < N; j++) {
-          const diff = bignumber(abs(subtract(arr[i][j], arr[j][i])));
-          const aij = bignumber(abs(arr[i][j]));
-          const aji = bignumber(abs(arr[j][i]));
-          const size = aij.gt(aji) ? aij : aji;
-          if (diff.gt(prec.times(size))) {
+        for (let j = i; j < N; j++) {
+          if (larger(bignumber(abs(subtract(arr[i][j], arr[j][i])) as Scalar), p as Scalar)) {
             return false;
           }
         }
@@ -1058,12 +1096,14 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
       return true;
     }
 
-    /** Check if every entry is real: |im(a_ij)| <= prec * |a_ij| */
-    function isReal(arr: Scalar[][], N: number, prec: BigNumber): boolean {
+    /** mathjs 15.3.0 real test: |im(a_ij)| > prec (Fraction entries are real). */
+    function isReal(arr: Scalar[][], N: number, prec: number | BigNumber): boolean {
+      const p = bignumber(prec as number);
       for (let i = 0; i < N; i++) {
         for (let j = 0; j < N; j++) {
-          const imag = bignumber(abs(im(arr[i][j])));
-          if (imag.gt(prec.times(bignumber(abs(arr[i][j]))))) {
+          const el = arr[i][j];
+          if (isFraction(el)) continue;
+          if (larger(bignumber(abs(im(el)) as Scalar), p as Scalar)) {
             return false;
           }
         }
@@ -1076,7 +1116,8 @@ export const createEigs: CreateMathjsEigs = /* #__PURE__ */ factory(
     function coerceReal(arr: Scalar[][], N: number): void {
       for (let i = 0; i < N; i++) {
         for (let j = 0; j < N; j++) {
-          arr[i][j] = re(arr[i][j]) as Scalar;
+          const el = arr[i][j];
+          arr[i][j] = (isFraction(el) ? number(el) : re(el)) as Scalar;
         }
       }
     }
