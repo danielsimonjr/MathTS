@@ -148,6 +148,7 @@ import {
   withStatisticsEmptyCollectionThrow,
   withStatisticsMultiCollectionGuard,
   withBigIntStatisticsStrings,
+  withCompatComplexResult,
 } from './mathjs-parity-g02.js';
 import {
   bindCompatMatrixPromotion,
@@ -215,9 +216,9 @@ import {
 } from './unit-relational.js';
 import {
   compatStatisticsFactories,
-  compatMedianFactory,
   createCompatCompareNatural,
   createCompatMathjsCorr,
+  createCompatMathjsMedian,
   createCompatMathjsQuantileSeq,
   createCompatRelationalOps,
   withCompareInstanceBigNumberResult,
@@ -226,6 +227,7 @@ import {
   withCompareTextInvalidMix,
   withCompatInstanceConfig,
   withCumsumMathjsParity,
+  withCumsumUnaryPlusConversion,
   withEqualTextBigNumberRejection,
   withEqualTextInvalidMix,
   withMadInvalidTypeGuard,
@@ -822,21 +824,30 @@ export function create(
     divide: mathFunctions.divide as (...args: unknown[]) => unknown,
     sqrt: mathFunctions.sqrt as (...args: unknown[]) => unknown,
     matrix: mathFunctions.matrix as (data: unknown, storage?: string) => unknown,
+    mapSlices: mathFunctions.mapSlices as (
+      data: unknown,
+      dim: number,
+      fn: (slice: unknown) => unknown
+    ) => unknown,
   };
-  const compatStd = withStdVarianceMathjsParity(
-    'std',
-    createCompatMathjsStatistics(
+  const compatStd = withCompatComplexResult(
+    withStdVarianceMathjsParity(
       'std',
-      mathFunctions.factory_std as (...args: unknown[]) => unknown,
-      g02StatisticsDeps
+      createCompatMathjsStatistics(
+        'std',
+        mathFunctions.factory_std as (...args: unknown[]) => unknown,
+        g02StatisticsDeps
+      )
     )
   );
-  const compatVariance = withStdVarianceMathjsParity(
-    'variance',
-    createCompatMathjsStatistics(
+  const compatVariance = withCompatComplexResult(
+    withStdVarianceMathjsParity(
       'variance',
-      mathFunctions.factory_variance as (...args: unknown[]) => unknown,
-      g02StatisticsDeps
+      createCompatMathjsStatistics(
+        'variance',
+        mathFunctions.factory_variance as (...args: unknown[]) => unknown,
+        g02StatisticsDeps
+      )
     )
   );
   const compatErf = createCompatErfExpression(mathFunctions.erf as (...args: unknown[]) => unknown);
@@ -1230,42 +1241,67 @@ export function create(
         (a, b) => compareMixedTypes(a, b) < 0,
         false
       );
+      const compatMedianCore = createCompatMathjsMedian({
+        add: bindBinaryNumericShim(shims.add, 0, instanceBigNumberClass),
+        divide: bindShim(shims.divide, instanceBigNumberClass, { promoteTrailingBoolean: true }),
+        multiply: bindBinaryNumericShim(shims.multiply, 2, instanceBigNumberClass),
+        compare: factory_compare as (a: unknown, b: unknown) => unknown,
+        partitionSelect: mathFunctions.partitionSelect as (arr: unknown[], k: number) => unknown,
+        unaryPlus: mathFunctions.unaryPlus as (x: unknown) => unknown,
+      });
       return {
         sum: scopeInstanceConfig(
-          withSumEmptyArrayZero(
-            createCompatSum(
-              createCompatEmptySum(
-                withReductionDim0ScalarReturn(
-                  withStatisticsMultiCollectionGuard(
-                    withBigIntStatisticsStrings(
-                      withSingleNumericStringGuard(
-                        withRawSingleValue(compatStatisticsFactories.sum)
-                      ),
-                      () => currentConfig.number ?? 'number'
+          withCompatComplexResult(
+            withSumEmptyArrayZero(
+              createCompatSum(
+                createCompatEmptySum(
+                  withReductionDim0ScalarReturn(
+                    withStatisticsMultiCollectionGuard(
+                      withBigIntStatisticsStrings(
+                        withInvalidNumericStringGuard(
+                          withSingleNumericStringGuard(
+                            withRawSingleValue(compatStatisticsFactories.sum)
+                          )
+                        ),
+                        () => currentConfig.number ?? 'number'
+                      )
                     )
-                  )
-                ),
-                () => currentConfig.number ?? 'number',
-                instanceBigNumberClass
-              )
-            ),
-            () => currentConfig.number ?? 'number',
-            instanceBigNumberClass
+                  ),
+                  () => currentConfig.number ?? 'number',
+                  instanceBigNumberClass
+                )
+              ),
+              () => currentConfig.number ?? 'number',
+              instanceBigNumberClass
+            )
           )
         ),
-        mean: scopeInstanceConfig(withMeanMathjsParity(compatStatisticsFactories.mean)),
+        mean: scopeInstanceConfig(
+          withCompatComplexResult(withMeanMathjsParity(compatStatisticsFactories.mean))
+        ),
         median: scopeInstanceConfig(
           withMedianBigintReturn(
-            withMedianMathjsFractionReturn(
-              withMedianMathjsParity(compatMedianFactory)
-            ),
+            withMedianMathjsFractionReturn(withMedianMathjsParity(compatMedianCore)),
             () => currentConfig.number ?? 'number'
           )
         ),
         corr: compatCorr,
-        cumsum: scopeInstanceConfig(withCumsumMathjsParity(compatStatisticsFactories.cumsum)),
+        cumsum: scopeInstanceConfig(
+          withCompatComplexResult(
+            withCumsumMathjsParity(
+              withCumsumUnaryPlusConversion(
+                compatStatisticsFactories.cumsum,
+                mathFunctions.unaryPlus as (x: unknown) => unknown
+              )
+            )
+          )
+        ),
         prod: scopeInstanceConfig(
-          withProdDimUnsupported(mathFunctions.prod as (...args: unknown[]) => unknown)
+          withCompatComplexResult(
+            withInvalidNumericStringGuard(
+              withProdDimUnsupported(mathFunctions.prod as (...args: unknown[]) => unknown)
+            )
+          )
         ),
         mode: scopeInstanceConfig(
           withModeEmptyGuard(mathFunctions.mode as (...args: unknown[]) => unknown)

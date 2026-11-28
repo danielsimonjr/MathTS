@@ -38,7 +38,6 @@ import {
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
 import { createCompatCompare } from './mathjs-parity-g06.js';
 import {
-  invalidNumericStringError,
   isMatrixLikeValue,
   keepSurface,
   statisticsEmptyParametersError,
@@ -393,12 +392,14 @@ function remapInvalidNumericString(err: unknown): never {
 /** Map factory type errors to mathjs 15.3.0 statistics wording. */
 export function remapStatisticsFactoryError(err: unknown, calcName: string): never {
   if (!(err instanceof Error)) throw err;
+  if (err.message.includes(`Unexpected type of argument in function ${calcName}`)) {
+    throw err;
+  }
   if (err.message.includes('is not a valid number')) {
     remapInvalidNumericString(err);
   }
   if (
     err.message.includes('add: unexpected type') ||
-    err.message.includes('Unexpected type of argument in function ' + calcName) ||
     (err.message.includes('Unexpected type of argument') && calcName !== '')
   ) {
     throw new TypeError(`Cannot calculate ${calcName}, unexpected type of argument`);
@@ -457,13 +458,21 @@ export function withStdVarianceMathjsParity(
       throw new TypeError(`Too few arguments in function ${name} (expected: any, index: 0)`);
     }
     if (statisticsContainsNaN(args)) return Number.NaN;
-    for (const arg of args) {
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
       if (isStatisticsNormalization(arg)) continue;
-      if (typeof arg === 'string' && (arg.trim() === '' || Number.isNaN(Number(arg)))) {
-        if (args.length === 1 && !Array.isArray(arg)) {
-          throw invalidNumericStringError(arg);
+      if (typeof arg === 'string') {
+        if (
+          args.length === 2 &&
+          i === 1 &&
+          (Array.isArray(args[0]) || isMatrixLikeValue(args[0])) &&
+          !isStatisticsNormalization(arg)
+        ) {
+          continue;
         }
-        throw new Error(`Cannot convert "${arg}" to a number`);
+        if (arg.trim() === '' || Number.isNaN(Number(arg))) {
+          throw new Error(`Cannot convert "${arg}" to a number`);
+        }
       }
     }
     if (args.length === 1 && Array.isArray(args[0]) && (args[0] as unknown[]).length === 0) {
@@ -499,24 +508,13 @@ export function withStdVarianceMathjsParity(
           remapStatisticsUnitError(err);
         }
         if (err.message.includes('add: unexpected type')) {
-          throw new TypeError('Cannot calculate std, unexpected type of argument');
+          throw new TypeError(`Cannot calculate ${name}, unexpected type of argument`);
         }
-        if (err.message.includes('Unexpected type of argument in function std')) {
+        if (err.message.includes(`Unexpected type of argument in function ${name}`)) {
           throw new TypeError(
             err.message.replace(
-              /Unexpected type of argument in function std/,
-              'Cannot calculate std, unexpected type of argument'
-            )
-          );
-        }
-        if (err.message.includes('add: unexpected type')) {
-          throw new TypeError('Cannot calculate variance, unexpected type of argument');
-        }
-        if (err.message.includes('Unexpected type of argument in function variance')) {
-          throw new TypeError(
-            err.message.replace(
-              /Unexpected type of argument in function variance/,
-              'Cannot calculate variance, unexpected type of argument'
+              new RegExp(`Unexpected type of argument in function ${name}`),
+              `Cannot calculate ${name}, unexpected type of argument`
             )
           );
         }
@@ -606,6 +604,11 @@ export function withMedianMathjsParity(
         if (err.message.includes('Invalid argument')) {
           throw err;
         }
+        if (err.message.includes('no ordering relation is defined for complex numbers')) {
+          throw new TypeError(
+            'Cannot calculate median, no ordering relation is defined for complex numbers'
+          );
+        }
         if (
           err.message.includes('Unexpected type of argument') ||
           err.message.includes('add: unexpected type')
@@ -662,6 +665,12 @@ export function withMadInvalidTypeGuard(
       return fn(...args);
     } catch (err) {
       if (err instanceof Error) {
+        if (
+          err.message.includes('Unexpected type of argument in function compare') ||
+          err.message.includes('Unexpected type of argument in function mad')
+        ) {
+          throw new TypeError('Cannot calculate mad, unexpected type of argument');
+        }
         if (err.message.includes('add: unexpected type')) {
           throw new TypeError('Cannot calculate mad, unexpected type of argument');
         }
@@ -676,6 +685,31 @@ export function withMadInvalidTypeGuard(
       }
       throw err;
     }
+  });
+}
+
+function deepUnaryPlusConvert(
+  unaryPlus: (x: unknown) => unknown,
+  value: unknown
+): unknown {
+  if (typeof value === 'string') return unaryPlus(value);
+  if (Array.isArray(value)) return value.map((entry) => deepUnaryPlusConvert(unaryPlus, entry));
+  if (isMatrixLikeValue(value) && typeof (value as { map?: unknown }).map === 'function') {
+    return (value as { map: (fn: (x: unknown) => unknown) => unknown }).map((entry) =>
+      deepUnaryPlusConvert(unaryPlus, entry)
+    );
+  }
+  return value;
+}
+
+/** mathjs `cumsum` coerces numeric strings through `unaryPlus` before reduction (#1788). */
+export function withCumsumUnaryPlusConversion(
+  fn: (...args: unknown[]) => unknown,
+  unaryPlus: (x: unknown) => unknown
+): (...args: unknown[]) => unknown {
+  return keepSurface(fn, (...args: unknown[]): unknown => {
+    const mapped = args.map((arg) => deepUnaryPlusConvert(unaryPlus, arg));
+    return fn(...mapped);
   });
 }
 
@@ -711,6 +745,9 @@ export function withModeEmptyGuard(
     if (args.length === 0) {
       throw statisticsEmptyParametersError('mode');
     }
+    if (args.length === 1 && Array.isArray(args[0]) && (args[0] as unknown[]).length === 0) {
+      throw statisticsEmptyParametersError('mode');
+    }
     return fn(...args);
   });
 }
@@ -732,8 +769,19 @@ export function withSumEmptyArrayZero(
       return fn(...args);
     } catch (err) {
       if (err instanceof Error) {
-        if (err.message.includes('is not a valid number')) {
+        if (
+          err.message.includes('is not a valid number') &&
+          !(args.length === 1 && typeof args[0] === 'string')
+        ) {
           remapInvalidNumericString(err);
+        }
+        if (
+          err instanceof SyntaxError &&
+          err.message.includes('is not a valid number') &&
+          args.length === 1 &&
+          typeof args[0] === 'string'
+        ) {
+          throw err;
         }
         if (
           err.message.includes('add: unexpected type') ||
@@ -885,12 +933,29 @@ function probNumber(value: unknown): number {
   return Number(value);
 }
 
+function upgradeInstanceBigNumbers(
+  value: unknown,
+  BigNumberCtor: InstanceBigNumberCtor
+): unknown {
+  if (value instanceof BigNumberCtor) return value;
+  if (Array.isArray(value)) {
+    return value.map((entry) => upgradeInstanceBigNumbers(entry, BigNumberCtor));
+  }
+  if (isOwnBigNumber(value) || isBigNumberLike(value)) {
+    return new BigNumberCtor((value as { toString(): string }).toString());
+  }
+  return value;
+}
+
 function coerceQuantileBigNumbers(
   value: unknown,
   BigNumberCtor: InstanceBigNumberCtor,
   wantsBigNumber: boolean
 ): unknown {
   if (!wantsBigNumber) return value;
+  if (isOwnBigNumber(value) || isBigNumberLike(value) || value instanceof BigNumberCtor) {
+    return value;
+  }
   if (Array.isArray(value)) {
     return value.map((entry) => coerceQuantileBigNumbers(entry, BigNumberCtor, wantsBigNumber));
   }
@@ -898,8 +963,141 @@ function coerceQuantileBigNumbers(
   if (isBigNumberLike(value) || isOwnBigNumber(value)) {
     return new BigNumberCtor((value as { toString(): string }).toString());
   }
-  if (typeof value === 'number') return new BigNumberCtor(value);
+  if (typeof value === 'number') return new BigNumberCtor(String(value));
   return value;
+}
+
+function compareMedianSign(
+  compare: (a: unknown, b: unknown) => unknown,
+  a: unknown,
+  b: unknown
+): number {
+  const result = compare(a, b);
+  if (typeof result === 'number') return result;
+  if (
+    typeof result === 'object' &&
+    result !== null &&
+    typeof (result as { valueOf?: () => number }).valueOf === 'function'
+  ) {
+    return (result as { valueOf: () => number }).valueOf();
+  }
+  return Number(result);
+}
+
+function isCompatFractionLike(value: unknown): boolean {
+  if (isMathjsFraction(value)) return true;
+  if (typeof value !== 'object' || value === null) return false;
+  return (value as { isFraction?: boolean }).isFraction === true;
+}
+
+function flattenMedianOperands(args: unknown[]): unknown[] {
+  const out: unknown[] = [];
+  const flatten = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      for (const item of value) flatten(item);
+      return;
+    }
+    if (isMatrixLikeValue(value)) {
+      flatten((value as { toArray: () => unknown }).toArray());
+      return;
+    }
+    if (isCompatFractionLike(value) || typeof value === 'bigint') {
+      out.push(value);
+      return;
+    }
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      typeof (value as { valueOf?: () => unknown }).valueOf === 'function'
+    ) {
+      const raw = (value as { valueOf: () => unknown }).valueOf();
+      if (raw !== value) {
+        flatten(raw);
+        return;
+      }
+    }
+    out.push(value);
+  };
+  if (args.length === 1 && (Array.isArray(args[0]) || isMatrixLikeValue(args[0]))) {
+    flatten(args[0]);
+  } else {
+    for (const arg of args) flatten(arg);
+  }
+  return out;
+}
+
+export interface CompatMathjsMedianDeps {
+  add: (...args: unknown[]) => unknown;
+  divide: (a: unknown, b: unknown) => unknown;
+  multiply: (a: unknown, b: unknown) => unknown;
+  compare: (a: unknown, b: unknown) => unknown;
+  partitionSelect: (arr: unknown[], k: number) => unknown;
+  unaryPlus: (x: unknown) => unknown;
+}
+
+/** mathjs 15.3.0 `_median` (#1788): instance `add`/`divide`, not factory median. */
+export function createCompatMathjsMedian(
+  deps: CompatMathjsMedianDeps
+): (...args: unknown[]) => unknown {
+  const { add, divide, multiply, compare, partitionSelect, unaryPlus } = deps;
+  const innerMedian = (array: unknown[]): unknown => {
+    const num = array.length;
+    if (num === 0) {
+      throw new Error('Cannot calculate median of an empty array');
+    }
+    const scratch = array.slice();
+    if (num % 2 === 0) {
+      const mid = num / 2 - 1;
+      const right = partitionSelect(scratch, mid + 1);
+      let left = scratch[mid];
+      for (let i = 0; i < mid; ++i) {
+        if (compareMedianSign(compare, scratch[i], left) > 0) left = scratch[i];
+      }
+      const sum = add(left, right);
+      if (
+        isCompatFractionLike(sum) ||
+        (typeof sum === 'object' &&
+          sum !== null &&
+          typeof (sum as { n?: unknown; d?: unknown }).n === 'bigint' &&
+          typeof (sum as { n?: unknown; d?: unknown }).d === 'bigint')
+      ) {
+        return multiply(sum, new mathjsFractionClass(1, 2));
+      }
+      return divide(sum, typeof sum === 'bigint' ? 2n : 2);
+    }
+    const mid = partitionSelect(scratch, (num - 1) / 2);
+    if (array.every(isCompatFractionLike) && isCompatFractionLike(mid)) {
+      return mid;
+    }
+    return unaryPlus(mid);
+  };
+  const factoryMedianFn = factoryMedian as (...args: unknown[]) => unknown;
+  const isCollectionOperand = (x: unknown): boolean =>
+    Array.isArray(x) || isMatrixLikeValue(x);
+  return keepSurface(factoryMedianFn, (...args: unknown[]): unknown => {
+    if (args.length >= 2 && args.every(isCollectionOperand)) {
+      throw new Error('Scalar values expected');
+    }
+    if (
+      (args.length === 1 &&
+        Array.isArray(args[0]) &&
+        (args[0] as unknown[]).length > 0 &&
+        (args[0] as unknown[]).every(isCompatFractionLike)) ||
+      (args.length > 1 && args.every(isCompatFractionLike))
+    ) {
+      return innerMedian(flattenMedianOperands(args));
+    }
+    const flat = flattenMedianOperands(args);
+    if (flat.some(isCompatFractionLike)) {
+      return innerMedian(flat);
+    }
+    const needsCompat =
+      flat.some((v) => typeof v === 'bigint') && flat.length % 2 === 0;
+    if (!needsCompat) {
+      return factoryMedianFn(...args);
+    }
+    return innerMedian(flat);
+  });
 }
 
 /**
@@ -911,8 +1109,14 @@ export function createCompatMathjsQuantileSeq(
   deps: MathjsQuantileDeps,
   BigNumberCtor: InstanceBigNumberCtor
 ): (...args: unknown[]) => unknown {
-  const wantsBigNumberArg = (args: unknown[]): boolean =>
-    args.some((a) => isOwnBigNumber(a) || isBigNumberLike(a));
+  const wantsBigNumberArg = (args: unknown[]): boolean => {
+    const walk = (value: unknown): boolean => {
+      if (isOwnBigNumber(value) || isBigNumberLike(value)) return true;
+      if (Array.isArray(value)) return value.some(walk);
+      return false;
+    };
+    return args.some(walk);
+  };
   const runMathjsDim = (
     data: unknown,
     prob: unknown,
@@ -923,7 +1127,9 @@ export function createCompatMathjsQuantileSeq(
     const fn = (slice: unknown): unknown => {
       const flat = valueOfFlat(slice);
       const value = mathjsQuantileInterp(flat, p, sorted, deps);
-      return wantsBigNumberArg([prob]) ? deps.bignumber(value) : value;
+      return wantsBigNumberArg([prob])
+        ? coerceQuantileBigNumbers(value, BigNumberCtor, true)
+        : value;
     };
     return deps.mapSlices(data, dim, fn);
   };
@@ -945,54 +1151,19 @@ export function createCompatMathjsQuantileSeq(
         const out = runMathjsDim(args[0], args[1], args[2], args[3] as number);
         return coerceQuantileBigNumbers(out, BigNumberCtor, wantsBn);
       }
-      if (
-        args.length === 2 &&
-        Array.isArray(args[1]) &&
-        wantsBn
-      ) {
-        const flat = valueOfFlat(args[0]);
-        const probs = args[1] as unknown[];
-        const out = probs.map((p) => {
-          const v = mathjsQuantileInterp(flat, probNumber(p), false, deps);
-          return deps.bignumber(v);
-        });
-        return coerceQuantileBigNumbers(out, BigNumberCtor, true);
-      }
-      if (args.length === 2 && isProb(args[1]) && (isOwnBigNumber(args[1]) || isBigNumberLike(args[1]))) {
-        const flat = valueOfFlat(args[0]);
-        const p = probNumber(args[1]);
-        const out = mathjsQuantileInterp(flat, p, false, deps);
-        return coerceQuantileBigNumbers(deps.bignumber(out), BigNumberCtor, true);
-      }
-      if (
-        args.length === 2 &&
-        isProb(args[1]) &&
-        largerProbOne(args[1], deps)
-      ) {
-        const flat = valueOfFlat(args[0]);
-        const n = probNumber(args[1]);
-        const probs: unknown[] = [];
-        for (let i = 0; i < n; i++) {
-          const prob = (i + 1) / (n + 1);
-          probs.push(
-            wantsBn
-              ? deps.bignumber(mathjsQuantileInterp(flat, prob, false, deps))
-              : mathjsQuantileInterp(flat, prob, false, deps)
-          );
-        }
-        return coerceQuantileBigNumbers(probs, BigNumberCtor, wantsBn);
-      }
       const out = native(...args);
-      return coerceQuantileBigNumbers(out, BigNumberCtor, wantsBn);
+      if (!wantsBn) return out;
+      return upgradeInstanceBigNumbers(out, BigNumberCtor);
     } catch (err) {
+      if (
+        err instanceof Error &&
+        err.message.includes('Unexpected type of argument in function compare')
+      ) {
+        throw err;
+      }
       remapStatisticsFactoryError(err, 'quantileSeq');
     }
   });
-}
-
-function largerProbOne(prob: unknown, deps: MathjsQuantileDeps): boolean {
-  if (typeof prob === 'number') return prob > 1;
-  return deps.larger(prob, 1);
 }
 
 /** Activated `median` factory on the compat instance (#1788). */

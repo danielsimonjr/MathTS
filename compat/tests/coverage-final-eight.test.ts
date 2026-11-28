@@ -41,6 +41,7 @@ describe('final eight lines — index compare, G02 count/variance/reduce', () =>
       multiply: instance.multiply.bind(instance),
       sqrt: instance.sqrt.bind(instance),
       matrix: instance.matrix.bind(instance),
+      mapSlices: instance.mapSlices.bind(instance),
     };
     const variance = createCompatMathjsStatistics(
       'variance',
