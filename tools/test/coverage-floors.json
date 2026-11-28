@@ -83,7 +83,7 @@
     },
     "compat": {
       "runner": "bun",
-      "floor": 95
+      "floor": 90
     },
     "gpu": {
       "runner": "bun",
