@@ -6,12 +6,24 @@ import { describe, it, expect } from 'vitest';
 import { create, all } from '../src/index.js';
 
 const math = create(all);
-const DenseMatrix = math.DenseMatrix;
-const ImmutableDenseMatrix = math.ImmutableDenseMatrix;
+const DenseMatrix = math.DenseMatrix as unknown as new (data?: unknown) => {
+  get: (index: unknown, col?: unknown) => unknown;
+  subset: (...args: unknown[]) => unknown;
+  toArray: () => unknown;
+};
+const ImmutableDenseMatrix = math.ImmutableDenseMatrix as unknown as new (data?: unknown) => {
+  get: (index: unknown, col?: unknown) => unknown;
+};
 const Range = math.Range;
 const index = math.index;
 const subset = math.subset;
-const sparse = math.sparse;
+const sparse = math.sparse as unknown as (
+  data?: unknown,
+  datatype?: string
+) => {
+  _values: unknown;
+  datatype?: () => string | undefined;
+};
 const subtract = math.subtract;
 const bignumber = math.bignumber;
 const matrix = math.matrix;
@@ -64,7 +76,7 @@ describe('mathjs 15.3.0 matrix oracle remaining gaps (#1785 challenge)', () => {
     );
     const c = sparse(b);
     expect(c._values).not.toBe(b._values);
-    expect(c.datatype()).toBe('number');
+    expect(c.datatype?.()).toBe('number');
   });
 
   it('subset leaves a matrix unchanged when the index is empty', () => {
@@ -77,7 +89,7 @@ describe('mathjs 15.3.0 matrix oracle remaining gaps (#1785 challenge)', () => {
   });
 
   it('subtract mixed booleans and bignumbers stays on BigNumber', () => {
-    const result = subtract(bignumber(1.1), true);
+    const result = subtract(bignumber(1.1), true) as { toString(): string };
     expect(math.isBigNumber(result)).toBe(true);
     expect(result.toString()).toBe('0.1');
   });
