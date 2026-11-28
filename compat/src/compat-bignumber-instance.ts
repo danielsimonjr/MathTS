@@ -31,6 +31,16 @@ export function createInstanceBigNumberClass(
     enumerable: false,
     configurable: true,
   });
+  /** mathjs `BigNumber.precision` on the per-instance class (#1789). */
+  Object.defineProperty(InstanceBigNumber, 'precision', {
+    get(): number {
+      return getConfig().precision ?? 64;
+    },
+    set(value: number) {
+      NativeBigNumber.config({ precision: value });
+    },
+    configurable: true,
+  });
 
   const installScopedMethod = (name: string, method: (...args: unknown[]) => unknown) => {
     Object.defineProperty(InstanceBigNumber.prototype, name, {
