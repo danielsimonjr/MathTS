@@ -57,7 +57,6 @@ import {
 import { compatComplexPow } from './mathjs-compat-pow.js';
 import {
   add as _add,
-  addScalar as _addScalar,
   subtract as _subtract,
   factory_subtract as _factorySubtract,
   multiply as _multiply,
@@ -146,8 +145,20 @@ import {
 import { isEmpty2DSize, matrixSize, notSquareError } from '@danielsimonjr/mathts-core/internal';
 import { mapDivideBroadcastError, mapElementwiseBroadcastError } from './g12-mathjs-parity.js';
 import { withPublicFactoryScalar } from './mathjs-parity-errors.js';
-import { subtractScalar as _factorySubtractScalar } from '@danielsimonjr/mathts-functions';
 import { toCompatComplex } from './mathjs-complex-prototype.js';
+import {
+  arrayContainsMatrix,
+  isUnitOperand,
+  multiplyMatrixRowLists,
+  shouldUseFactoryScalarForFractionPair,
+  shouldUseFactoryScalarForMultiply,
+} from './mathjs-parity-1787-arithmetic.js';
+import {
+  mathjsBigIntFractionPair,
+  mathjsFactoryFractionAdd,
+  mathjsFractionSub,
+} from './mathjs-fraction-scalar-pairs.js';
+import { publicAddScalar, publicSubtractScalar } from './compat-shim-factory-scalars.js';
 
 // =============================================================================
 // Type Creation Shims (mathjs-style factory functions)
@@ -442,7 +453,8 @@ const applyArithmetic = (
   a: unknown,
   b: unknown,
   elementwise: boolean,
-  complexFn?: (a: unknown, b: unknown) => unknown
+  complexFn?: (a: unknown, b: unknown) => unknown,
+  typedCollectionFn?: (a: unknown, b: unknown) => unknown
 ): unknown => {
   if (
     elementwise &&
@@ -471,7 +483,23 @@ const applyArithmetic = (
   }
   // Riemann-sphere only for Complex scalars; number/BigNumber/bigint stay native.
   if (complexFn && (isComplex(a) || isComplex(b))) {
+    if (typeof a === 'string' || typeof b === 'string') {
+      return compatDecimalResult(scalarFn(a, b));
+    }
     return compatDecimalResult(complexFn(a, b));
+  }
+  if (arrayContainsMatrix(a) || arrayContainsMatrix(b)) {
+    const collection = typedCollectionFn ?? scalarFn;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      const stacked = multiplyMatrixRowLists(
+        (nested) => _factoryMatrix(nested),
+        (left, right) => unwrap(matrixFn(left, right)),
+        a,
+        b
+      );
+      if (stacked !== null) return compatDecimalResult(stacked);
+    }
+    return compatDecimalResult(unwrap(collection(a, b)));
   }
   if (isMatrixLike(a) || isMatrixLike(b)) {
     // A nested array with a BigNumber / Fraction / Complex leaf leaves the
@@ -514,7 +542,8 @@ const makeArithmetic =
     matrixFn: (a: unknown, b: unknown) => unknown,
     elementwise: boolean,
     fastNumberPair?: (a: number, b: number) => number,
-    complexFn?: (a: unknown, b: unknown) => unknown
+    complexFn?: (a: unknown, b: unknown) => unknown,
+    typedCollectionFn?: (a: unknown, b: unknown) => unknown
   ) =>
   (...args: unknown[]): unknown => {
     if (args.length === 0) {
@@ -534,7 +563,7 @@ const makeArithmetic =
       return fastNumberPair(args[0], args[1]);
     }
     return args.reduce((acc, next) =>
-      applyArithmetic(scalarFn, matrixFn, acc, next, elementwise, complexFn)
+      applyArithmetic(scalarFn, matrixFn, acc, next, elementwise, complexFn, typedCollectionFn)
     );
   };
 
@@ -599,7 +628,6 @@ const _compatAdd = withMathjsComplexBinary(_add as BinaryArithmetic, 'add');
 const _compatSubtract = withMathjsComplexBinary(_subtract as BinaryArithmetic, 'sub');
 const _compatMultiply = withMathjsComplexBinary(_multiply as BinaryArithmetic, 'mul');
 
-const publicAddScalar = withPublicFactoryScalar('add', 'addScalar', _addScalar as BinaryArithmetic);
 const publicMultiplyScalar = withPublicFactoryScalar(
   'multiply',
   'multiplyScalar',
@@ -646,34 +674,39 @@ function dotMultiplyWithCompatScalar(a: unknown, b: unknown): unknown {
   }
   return fractionAwareDotMultiply(a, b);
 }
-const publicSubtractScalar = withPublicFactoryScalar(
-  'subtract',
-  'subtractScalar',
-  _factorySubtractScalar as BinaryArithmetic
-);
-
 /** Factory scalars reject matrix operands; typed `add`/`multiply`/`subtract` keep Matrix results (#993). */
 const useTypedArithmeticForPair = (a: unknown, b: unknown): boolean =>
   isCompatBridgeMatrix(a) || isCompatBridgeMatrix(b) || isBoxedMatrix(a) || isBoxedMatrix(b);
 
-function mathjsFractionAdd(a: unknown, b: unknown): unknown | null {
-  if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {
-    return a.add(b as number | MathjsFraction);
+const addPairScalars = (a: unknown, b: unknown): unknown => {
+  const bigFrac = mathjsBigIntFractionPair('add', a, b);
+  if (bigFrac !== null) return bigFrac;
+  const frac = mathjsFactoryFractionAdd(a, b);
+  if (frac !== null) return frac;
+  if (shouldUseFactoryScalarForFractionPair(a, b)) {
+    return publicAddScalar(a, b);
   }
-  if (isMathjsFraction(b) && (isMathjsFraction(a) || typeof a === 'number')) {
-    const left = isMathjsFraction(a) ? a : (new mathjsFractionClass(a as number) as MathjsFraction);
-    return left.add(b as number | MathjsFraction);
+  return useTypedArithmeticForPair(a, b) ? _add(a, b) : publicAddScalar(a, b);
+};
+
+function mathjsScalarWithUnitMultiply(a: unknown, b: unknown): unknown | null {
+  if (isUnitOperand(b) && !isUnitOperand(a)) {
+    return (b as { multiply: (x: unknown) => unknown }).multiply(a);
+  }
+  if (isUnitOperand(a) && !isUnitOperand(b)) {
+    return (a as { multiply: (x: unknown) => unknown }).multiply(b);
   }
   return null;
 }
 
-const addPairScalars = (a: unknown, b: unknown): unknown => {
-  const frac = mathjsFractionAdd(a, b);
-  if (frac !== null) return frac;
-  return useTypedArithmeticForPair(a, b) ? _add(a, b) : publicAddScalar(a, b);
-};
-
 const multiplyPairScalars = (a: unknown, b: unknown): unknown => {
+  const unitMul = mathjsScalarWithUnitMultiply(a, b);
+  if (unitMul !== null) return unitMul;
+  const bigFrac = mathjsBigIntFractionPair('mul', a, b);
+  if (bigFrac !== null) return bigFrac;
+  if (shouldUseFactoryScalarForMultiply(a, b)) {
+    return compatMultiplyScalar(a, b);
+  }
   if (useTypedArithmeticForPair(a, b)) return _multiply(a, b);
   if ((Array.isArray(a) && hasNonNumberEntry(a)) || (Array.isArray(b) && hasNonNumberEntry(b))) {
     return _multiply(a, b);
@@ -681,18 +714,9 @@ const multiplyPairScalars = (a: unknown, b: unknown): unknown => {
   return compatMultiplyScalar(a, b);
 };
 
-function mathjsFractionSub(a: unknown, b: unknown): unknown | null {
-  if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {
-    return a.sub(b as number | MathjsFraction);
-  }
-  if (isMathjsFraction(b) && (isMathjsFraction(a) || typeof a === 'number')) {
-    const left = isMathjsFraction(a) ? a : (new mathjsFractionClass(a as number) as MathjsFraction);
-    return left.sub(b as number | MathjsFraction);
-  }
-  return null;
-}
-
 const subtractPairScalars = (a: unknown, b: unknown): unknown => {
+  const bigFrac = mathjsBigIntFractionPair('sub', a, b);
+  if (bigFrac !== null) return bigFrac;
   const frac = mathjsFractionSub(a, b);
   if (frac !== null) return frac;
   return useTypedArithmeticForPair(a, b) ? _subtract(a, b) : publicSubtractScalar(a, b);
@@ -751,7 +775,8 @@ export const multiply = makeArithmetic(
   _matMultiply as (a: unknown, b: unknown) => unknown,
   false,
   (a, b) => a * b,
-  _compatMultiply
+  _compatMultiply,
+  _multiply as (a: unknown, b: unknown) => unknown
 ) as NumericStringArithmetic & typeof _multiply;
 const _dotMultiplyComplex = withMathjsComplexBinary(_dotMultiply as BinaryArithmetic, 'mul');
 const compatDotMultiply = withTypedSurface(
@@ -780,6 +805,7 @@ const _compatDivideScalar = withMathjsComplexBinary(
   'div'
 );
 function mathjsFractionDivide(a: unknown, b: unknown): unknown | null {
+  if (isUnitOperand(a) || isUnitOperand(b)) return null;
   if (isMathjsFraction(a) && (isMathjsFraction(b) || typeof b === 'number')) {
     return a.div(b as number | MathjsFraction);
   }
@@ -799,6 +825,8 @@ export const divide = withTypedSurface(function (a?: unknown, b?: unknown): unkn
       return _compatDivideScalar(a, b);
     }
     if (arguments.length === 2) {
+      const bigFrac = mathjsBigIntFractionPair('div', a, b);
+      if (bigFrac !== null) return bigFrac;
       const frac = mathjsFractionDivide(a, b);
       if (frac !== null) return frac;
     }

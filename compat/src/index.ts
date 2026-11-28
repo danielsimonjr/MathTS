@@ -21,6 +21,7 @@ import { compatMatrixConstructors, instanceSymbols } from './instance-symbols.js
 import { setCompatSparseBignumberFactory } from './compat-sparse-matrix.js';
 import * as allFactories from './all-factories.js';
 import { shims, createCompatPow } from './shims.js';
+import { factoryAddScalar1787, factorySubtractScalar1787 } from './compat-shim-factory-scalars.js';
 import {
   BigNumber as CompatBigNumberCtor,
   compatDecimalResult,
@@ -52,6 +53,7 @@ import {
 import { TRANSFORM_KEYS } from './g13-transforms.js';
 import { configuredMathjsConstant } from './instance-constants.js';
 import { withCompatLog2BigNumberExact } from './compat-log2-bignumber.js';
+import { withCompatLogBigNumberDecimalJs } from './compat-log-bignumber.js';
 import {
   compatDecimalTrigAcosh,
   compatDecimalTrigAcot,
@@ -112,8 +114,17 @@ import { wrapCompatUnitSources } from './mathjs-unit.js';
 import { withMathjsComplexBinary } from './mathjs-complex.js';
 import { patchCompatUnitDenormalize } from './patch-unit-denormalize.js';
 import { wrapEqualForMathjsFraction } from './mathjs-fraction-relational.js';
-import { wrapMultiplyScalarForMathjsFraction } from './mathjs-fraction-unary-predicates.js';
+import {
+  wrapCompatDivideScalarSurface,
+  wrapFactoryScalarSkipUnitFraction,
+} from './mathjs-fraction-unary-predicates.js';
 import { createG07LogicalParity } from './g07-logical-parity.js';
+import {
+  prepareFactoryScalarOperands,
+  tryDecimalJsBinary,
+  withFractionLogParity,
+  withMathjsNormZeroInfinity,
+} from './mathjs-parity-1787-arithmetic.js';
 import {
   compareMathjsFractionSign,
   createCompatBernoulli,
@@ -493,13 +504,22 @@ function bindBinaryNumericShim<T extends (...args: unknown[]) => unknown>(
   op: 0 | 1 | 2,
   BigNumberCtor: typeof CompatBigNumberCtor = CompatBigNumberCtor
 ): T {
-  const slow = (args: unknown[]) =>
-    compatDecimalResult(
+  const decimalOp = (['add', 'sub', 'mul'] as const)[op];
+  const slow = (args: unknown[]) => {
+    const prepared = prepareFactoryScalarOperands(args);
+    if (prepared.length === 2) {
+      const decimal = tryDecimalJsBinary(decimalOp, prepared[0], prepared[1]);
+      if (decimal !== null) return compatDecimalResult(decimal, BigNumberCtor);
+    }
+    return compatDecimalResult(
       fn(
-        ...promoteBooleanScalarsForBigNumber(args, BigNumberCtor, { promoteTrailingBoolean: true })
+        ...promoteBooleanScalarsForBigNumber(prepared, BigNumberCtor, {
+          promoteTrailingBoolean: true,
+        })
       ),
       BigNumberCtor
     );
+  };
   const bound = (op === 0
     ? function (...args: unknown[]) {
         return args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number'
@@ -970,6 +990,13 @@ export function create(
   };
   const unitRelational = applyUnitRelationalParity(unitRelationalBase);
 
+  const compatDivideScalarSurface = wrapCompatDivideScalarSurface(
+    mathFunctions.divideScalar as unknown as TypedFunction
+  );
+  const compatMultiplyScalarSurface = wrapFactoryScalarSkipUnitFraction(
+    mathFunctions.multiplyScalar as unknown as TypedFunction
+  );
+
   const flat: Record<string, unknown> = {
     // Full @danielsimonjr/mathts-functions namespace — det, integrate, eigs,
     // simplify, and the rest. The compat-specific shims below overlay it.
@@ -1018,11 +1045,11 @@ export function create(
     subtract: bindBinaryNumericShim(shims.subtract, 1, instanceBigNumberClass),
     multiply: bindBinaryNumericShim(shims.multiply, 2, instanceBigNumberClass),
     divide: bindShim(shims.divide, instanceBigNumberClass, { promoteTrailingBoolean: true }),
+    addScalar: factoryAddScalar1787,
+    subtractScalar: factorySubtractScalar1787,
     dotMultiply: bindShim(shims.dotMultiply, instanceBigNumberClass),
-    multiplyScalar: bindShim(
-      wrapMultiplyScalarForMathjsFraction(mathFunctions.multiplyScalar as unknown as TypedFunction),
-      instanceBigNumberClass
-    ),
+    multiplyScalar: bindShim(compatMultiplyScalarSurface, instanceBigNumberClass),
+    divideScalar: bindShim(compatDivideScalarSurface, instanceBigNumberClass),
     pow: bindShim(
       createCompatPow(() => Boolean(currentConfig.predictable)),
       instanceBigNumberClass
@@ -1039,7 +1066,9 @@ export function create(
     abs: shims.abs,
     // #1587: a Fraction argument throws the mathjs conversion error.
     exp: withMatrixMapHintOnUnary('exp', withFractionRejection(shims.exp)),
-    log: withFractionRejection(shims.log),
+    log: withFractionLogParity(
+      withCompatLogBigNumberDecimalJs(shims.log as (...args: unknown[]) => unknown)
+    ),
     log10: withCoercedNumberConfigScalar(withFractionRejection(mathFunctions.log10), currentConfig),
     log2: withCoercedNumberConfigScalar(
       withCompatLog2BigNumberExact(withFractionRejection(mathFunctions.log2)),
@@ -1507,7 +1536,9 @@ export function create(
         withCompatBitNotInfiniteBigNumber(mathFunctions.bitNot as (...args: unknown[]) => unknown)
       )
     ),
-    norm: withMathjsNormMatrixRules(mathFunctions.norm as (...args: unknown[]) => unknown),
+    norm: withMathjsNormZeroInfinity(
+      withMathjsNormMatrixRules(mathFunctions.norm as (...args: unknown[]) => unknown)
+    ),
     typeOf: withFixedArity('typeOf', 1, mathFunctions.typeOf),
     number: keepSurface(mathFunctions.number, (...args: unknown[]) => {
       if (args.length === 0) return 0;
@@ -1943,7 +1974,7 @@ export function create(
   if (localUnits) {
     // complex.js division keeps a complex magnitude to the last digit (#1784).
     const unitDivideScalar = withMathjsComplexBinary(
-      (a, b) => (instance.divideScalar as (x: unknown, y: unknown) => unknown)(a, b),
+      (a, b) => (compatDivideScalarSurface as (x: unknown, y: unknown) => unknown)(a, b),
       'div'
     );
     patchCompatUnitDenormalize(localUnits.Unit, {

@@ -8,6 +8,7 @@ import {
 } from '@danielsimonjr/mathts-core';
 import { toCompatComplex } from './mathjs-complex-prototype.js';
 import { isMathjsFraction, mathjsFractionClass } from './mathjs-fraction-class.js';
+import { isBigNumberLike } from './mathjs-parity-g02.js';
 
 /** decimal.js (and mathjs) use exponent `0`, never `-0`, in deep equality tests. */
 function fixNegativeZeroExponent(bn: CompatBigNumber): CompatBigNumber {
@@ -66,7 +67,8 @@ export function promoteBooleanScalarsForBigNumber(
     if (
       a instanceof BigNumberCtor ||
       a instanceof CompatBigNumber ||
-      (a instanceof NativeBigNumber && isBigNumber(a))
+      (a instanceof NativeBigNumber && isBigNumber(a)) ||
+      isBigNumberLike(a)
     ) {
       hasBigNumber = true;
       break;

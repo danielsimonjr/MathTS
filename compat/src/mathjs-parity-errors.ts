@@ -25,7 +25,7 @@ import {
   isOwnBigNumber,
   tooManyArgumentsError,
 } from './mathjs-parity-g02.js';
-import { isBigNumber, isFraction, type BigNumber } from '@danielsimonjr/mathts-core';
+import { isBigNumber, isComplex, isFraction, type BigNumber } from '@danielsimonjr/mathts-core';
 
 const MATHTS_SCALAR_GUARD = /^(\w+): unexpected type (.+) at index (\d+)$/;
 
@@ -129,6 +129,31 @@ export function withPublicFactoryScalar(
         }
         if (err.message.includes('Complex') && err.message.includes('Cannot parse')) {
           throw new Error(`Cannot convert ${JSON.stringify(stringArg)} to Complex`);
+        }
+        if (err.message === 'Invalid Param' || err.message.includes('Invalid Param')) {
+          const other = args[0] === stringArg ? args[1] : args[0];
+          if (isComplex(other)) {
+            throw new Error(`Cannot convert ${JSON.stringify(stringArg)} to Complex`);
+          }
+          if (
+            isFraction(other) ||
+            (typeof other === 'object' && other !== null && 'isFraction' in other)
+          ) {
+            throw new Error(`Cannot convert ${JSON.stringify(stringArg)} to Fraction`);
+          }
+        }
+        if (err.message === 'Invalid argument' || err.message.includes('Invalid argument')) {
+          const other = args[0] === stringArg ? args[1] : args[0];
+          const text = stringArg?.trim() ?? '';
+          const numericString =
+            text.length > 0 && !Number.isNaN(Number(text)) && Number.isFinite(Number(text));
+          if (
+            !numericString &&
+            (isFraction(other) ||
+              (typeof other === 'object' && other !== null && 'isFraction' in other))
+          ) {
+            throw new Error(`Cannot convert ${JSON.stringify(stringArg)} to Fraction`);
+          }
         }
       }
       if (err instanceof TypeError) {

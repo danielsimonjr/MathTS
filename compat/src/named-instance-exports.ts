@@ -23,6 +23,7 @@ import {
   type PhysicsEvaluateOptions,
 } from '@danielsimonjr/mathts-functions';
 import { createChain } from './chain-create.js';
+import { createZetaFactorial } from './mathjs-parity-1787-arithmetic.js';
 import { installParserHasInstance } from './compat-parser-api.js';
 import type { BoundInstanceConfig, CompatCreate, CompatFactoryInput } from './compat-types.js';
 import {
@@ -38,6 +39,7 @@ import {
   createMathjsSymbolicEqual,
   createMathjsZeta,
 } from './mathjs-parity-1585.js';
+import { createZetaSmallerEq } from './mathjs-parity-1787-arithmetic.js';
 import { applyUnitRelationalParity, type UnitRelationalOps } from './unit-relational.js';
 
 let createInstance:
@@ -231,18 +233,18 @@ function mathjsZetaDeps(config: () => G18ParityConfig) {
   return {
     typed: g18Typed,
     config,
-    multiply: mathFunctions.multiply,
+    multiply: mathFunctions.multiplyScalar,
     pow: mathFunctions.pow,
-    divide: mathFunctions.divide,
-    factorial: mathFunctions.factorial,
+    divide: mathFunctions.divideScalar,
+    factorial: createZetaFactorial(mathFunctions.factorial as (...args: unknown[]) => unknown),
     equal: mathFunctions.equal,
-    smallerEq: mathFunctions.smallerEq,
+    smallerEq: createZetaSmallerEq(mathFunctions.smallerEq as (a: unknown, b: unknown) => boolean),
     isBounded: parityIsBounded,
     isNegative: parityIsNegative,
     gamma: mathFunctions.gamma,
     sin: mathFunctions.sin,
-    subtract: mathFunctions.subtract,
-    add: mathFunctions.add,
+    subtract: mathFunctions.subtractScalar,
+    add: mathFunctions.addScalar,
     Complex: instanceSymbols.Complex,
     BigNumber: instanceSymbols.BigNumber,
     pi: instanceSymbols.PI,
