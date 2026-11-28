@@ -64,8 +64,9 @@ describe('G08 native zero and Complex inverse hyperbolic fixes', () => {
     expect(after.asec.im).toBe(before.asec.im);
     expect(after.acoth.re).toBe(before.acoth.re);
     expect(after.acoth.im).toBe(before.acoth.im);
+    // mathjs 15.3.0 matches native MathTS: π/2 + i∞ (see #1789).
     const compatAcsc = math.acsc(0) as Complex;
-    expect(compatAcsc.re).toBe(0);
+    expect(compatAcsc.re).toBeCloseTo(Math.PI / 2, 12);
     expect(compatAcsc.im).toBe(Infinity);
   });
 });
