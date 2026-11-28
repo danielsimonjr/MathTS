@@ -208,6 +208,40 @@ export function markSymbolicAlgebraNodes(value: unknown): unknown {
   return value;
 }
 
+function forEachExpressionNode(
+  value: unknown,
+  visit: (node: { evaluate: (...args: unknown[]) => unknown }) => void
+): void {
+  if (Array.isArray(value)) {
+    for (const entry of value) forEachExpressionNode(entry, visit);
+    return;
+  }
+  if (typeof value === 'object' && value !== null) {
+    visitMatrixLikeChildren(value, (entry) => forEachExpressionNode(entry, visit));
+    if ((value as { isMatrix?: boolean }).isMatrix === true) return;
+  }
+  if (!isExpressionNodeLike(value)) return;
+  visit(value);
+  const marker = value as { map?: (fn: (child: unknown) => unknown) => unknown };
+  if (typeof marker.map === 'function') {
+    marker.map((child) => {
+      forEachExpressionNode(child, visit);
+      return child;
+    });
+  }
+}
+
+/**
+ * Coerce `evaluate()` results on symbolic algebra trees (#1790) without stripping
+ * mathjs-shaped nodes for `toString` / resolve parity.
+ */
+export function patchSymbolicAlgebraEvaluateCoercion(
+  value: unknown,
+  instanceCtor: CompatDecimalBigNumberCtor
+): void {
+  forEachExpressionNode(value, (node) => patchNodeEvaluate(node, instanceCtor));
+}
+
 /** Give a native decimal result the compatibility display convention (deep). */
 export function compatDecimalResult(
   value: unknown,

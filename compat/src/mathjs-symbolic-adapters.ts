@@ -4,12 +4,15 @@
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
 import { factory_mathjsCompat, isNode } from '@danielsimonjr/mathts-functions';
 import type { MathJSConfig } from './index.js';
-import { markSymbolicAlgebraNodes } from './bignumber.js';
+import {
+  markSymbolicAlgebraNodes,
+  patchSymbolicAlgebraEvaluateCoercion,
+  type CompatDecimalBigNumberCtor,
+} from './bignumber.js';
 import { patchParsedTreeForMathjsCompat } from './totex-parity.js';
 import { createMathjsDerivative } from './mathjs-symbolic-algebra/derivative.js';
 import { createMathjsResolve } from './mathjs-symbolic-algebra/resolve.js';
 import { createMathjsSimplify } from './mathjs-symbolic-algebra/simplify.js';
-import { createMathjsSimplifyConstant } from './mathjs-symbolic-algebra/simplifyConstant.js';
 import { createMathjsSimplifyCore } from './mathjs-symbolic-algebra/simplifyCore.js';
 
 type SymbolicFn = (...args: unknown[]) => unknown;
@@ -57,7 +60,31 @@ export function finalizeSymbolicAlgebraResult(
   ctx?: SymbolicAlgebraContext
 ): unknown {
   const marked = markSymbolicAlgebraNodes(value);
-  return patchSymbolicTrees(marked, ctx);
+  const patched = patchSymbolicTrees(marked, ctx);
+  const scope = ctx?.mathScope;
+  if (scope && typeof scope.config === 'function') {
+    const cfg = scope.config() as { number?: string };
+    if (cfg.number === 'BigNumber' && typeof scope.evaluate === 'function') {
+      let instanceCtor: CompatDecimalBigNumberCtor | undefined;
+      try {
+        const sample = scope.evaluate('1') as { constructor?: CompatDecimalBigNumberCtor };
+        if (
+          typeof sample === 'object' &&
+          sample !== null &&
+          typeof sample.constructor === 'function' &&
+          typeof sample.constructor.prototype === 'object'
+        ) {
+          instanceCtor = sample.constructor;
+        }
+      } catch {
+        instanceCtor = undefined;
+      }
+      if (instanceCtor) {
+        patchSymbolicAlgebraEvaluateCoercion(patched, instanceCtor);
+      }
+    }
+  }
+  return patched;
 }
 
 function copySymbolicSurface(source: SymbolicFn, target: SymbolicFn): SymbolicFn {
@@ -135,18 +162,19 @@ export function buildMathjsSymbolicAlgebraScope(config: Partial<MathJSConfig>): 
     typed: factory_mathjsCompat.createCompatTyped(),
     config: () => config,
     mathWithTransform: undefined as unknown,
-    fraction: mathFunctions.fraction,
-    bignumber: mathFunctions.bignumber,
   } as Record<string, unknown>;
   scope.mathWithTransform = scope;
   installMathjsMixedAdd(scope);
   const baseEqual = scope.equal as (a: unknown, b: unknown) => boolean;
   scope.equal = (a: unknown, b: unknown) => {
+    if (a === null || b === null) return a === b;
     if (a === undefined || b === undefined) return a === b;
     if (typeof a === 'bigint' || typeof b === 'bigint') return a === b;
     return baseEqual(a, b);
   };
-  scope.simplifyConstant = createMathjsSimplifyConstant(scope) as SymbolicFn;
+  scope.simplifyConstant = factory_mathjsCompat
+    .compatFactoryExports()
+    .createSimplifyConstant(scope) as SymbolicFn;
   const simplifyCore = createMathjsSimplifyCore(scope) as SymbolicFn;
   scope.simplifyCore = simplifyCore;
   const resolve = createMathjsResolve(scope) as SymbolicFn;
@@ -276,6 +304,5 @@ export {
   createMathjsDerivative,
   createMathjsResolve,
   createMathjsSimplify,
-  createMathjsSimplifyConstant,
   createMathjsSimplifyCore,
 };
