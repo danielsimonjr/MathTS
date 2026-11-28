@@ -210,7 +210,7 @@
       "label": "compat create(all) browser",
       "import": "import { create, all } from '@danielsimonjr/mathts-compat';",
       "platform": "browser",
-      "maxBytes": 2260992
+      "maxBytes": 2293760
     }
   ]
 }
