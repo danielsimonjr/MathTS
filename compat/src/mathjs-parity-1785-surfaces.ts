@@ -661,7 +661,7 @@ export function createCompatSum(
       if (err instanceof TypeError) {
         const msg = err.message;
         if (msg.includes('Unexpected type of argument')) {
-          throw new Error(`Cannot calculate sum, unexpected type of argument (${msg})`);
+          throw new TypeError('Cannot calculate sum, unexpected type of argument');
         }
       }
       throw err;

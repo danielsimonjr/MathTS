@@ -121,6 +121,7 @@ import {
   createCompatPinv,
 } from './mathjs-parity-g06.js';
 import * as mathFunctions from '@danielsimonjr/mathts-functions';
+import { factory_compare } from '@danielsimonjr/mathts-functions';
 import {
   createCompatArg,
   createCompatErfExpression,
@@ -214,16 +215,23 @@ import {
 } from './unit-relational.js';
 import {
   compatStatisticsFactories,
+  compatMedianFactory,
   createCompatCompareNatural,
   createCompatMathjsCorr,
+  createCompatMathjsQuantileSeq,
   createCompatRelationalOps,
+  withCompareInstanceBigNumberResult,
+  withCompareNaturalBigintParity,
+  withFractionScalarOrdering,
   withCompareTextInvalidMix,
   withCompatInstanceConfig,
   withCumsumMathjsParity,
   withEqualTextBigNumberRejection,
+  withEqualTextInvalidMix,
   withMadInvalidTypeGuard,
   withMeanMathjsParity,
   withMedianBigintReturn,
+  withMedianMathjsFractionReturn,
   withMedianMathjsParity,
   withModeEmptyGuard,
   withProdDimUnsupported,
@@ -1011,10 +1019,58 @@ export function create(
     DenseMatrix: compatMatrixConstructors.DenseMatrix,
     SparseMatrix: compatMatrixConstructors.SparseMatrix,
   });
-  const compatCompareRelational = createCompatCompare(
-    unitRelational.compare,
+  const compareForNatural = keepSurface(
+    factory_compare as (...args: unknown[]) => unknown,
+    (x: unknown, y: unknown): unknown => {
+      if (typeof x === 'bigint' && typeof y === 'bigint') {
+        return x < y ? -1 : x > y ? 1 : 0;
+      }
+      return (factory_compare as (a: unknown, b: unknown) => unknown)(x, y);
+    }
+  );
+  const compatCompareForNatural = createCompatCompare(
+    compareForNatural,
     convertForeignScalar
   ) as (...args: unknown[]) => unknown;
+  const compatCompareRelational = withCompareInstanceBigNumberResult(
+    createCompatCompare(unitRelational.compare, convertForeignScalar) as (
+      ...args: unknown[]
+    ) => unknown,
+    instanceBigNumberClass
+  );
+  const compatQuantileSeq = createCompatMathjsQuantileSeq(
+    compatStatisticsFactories.quantileSeq,
+    {
+      partitionSelect: mathFunctions.partitionSelect as (arr: unknown[], k: number) => unknown,
+      compare: (a: unknown, b: unknown) => {
+        const sign = factory_compare as (x: unknown, y: unknown) => unknown;
+        const out = sign(a, b);
+        if (typeof out === 'number') return out;
+        if (
+          typeof out === 'object' &&
+          out !== null &&
+          typeof (out as { valueOf?: () => number }).valueOf === 'function'
+        ) {
+          return (out as { valueOf: () => number }).valueOf();
+        }
+        return Number(out);
+      },
+      add: mathFunctions.add as (...args: unknown[]) => unknown,
+      subtract: mathFunctions.subtract as (a: unknown, b: unknown) => unknown,
+      multiply: mathFunctions.multiply as (...args: unknown[]) => unknown,
+      smaller: mathFunctions.smaller as (a: unknown, b: unknown) => boolean,
+      smallerEq: mathFunctions.smallerEq as (a: unknown, b: unknown) => boolean,
+      larger: mathFunctions.larger as (a: unknown, b: unknown) => boolean,
+      isInteger: mathFunctions.isInteger as (x: unknown) => boolean,
+      mapSlices: mathFunctions.mapSlices as (
+        data: unknown,
+        dim: number,
+        fn: (slice: unknown) => unknown
+      ) => unknown,
+      bignumber: scopedBignumber,
+    },
+    instanceBigNumberClass
+  );
   const compatCorr = createCompatMathjsCorr({
     matrix: shims.matrix as (data: unknown) => unknown,
     add: mathFunctions.add as (...args: unknown[]) => unknown,
@@ -1045,13 +1101,25 @@ export function create(
       scopeInstanceConfig(unitRelational.deepEqual)
     ),
     compare: withRelationalBinaryArity('compare', scopeInstanceConfig(compatCompareRelational)),
-    compareNatural: scopeInstanceConfig(createCompatCompareNatural()),
+    compareNatural: withRelationalBinaryArity(
+      'compareNatural',
+      scopeInstanceConfig(
+        withCompareNaturalBigintParity(createCompatCompareNatural(compatCompareForNatural))
+      )
+    ),
     larger: withRelationalBinaryArity('larger', scopeInstanceConfig(unitRelational.larger)),
     smaller: withRelationalBinaryArity('smaller', scopeInstanceConfig(unitRelational.smaller)),
-    largerEq: withRelationalBinaryArity('largerEq', scopeInstanceConfig(unitRelational.largerEq)),
+    largerEq: withRelationalBinaryArity(
+      'largerEq',
+      scopeInstanceConfig(
+        withFractionScalarOrdering('largerEq', compatCompareForNatural, unitRelational.largerEq)
+      )
+    ),
     smallerEq: withRelationalBinaryArity(
       'smallerEq',
-      scopeInstanceConfig(unitRelational.smallerEq)
+      scopeInstanceConfig(
+        withFractionScalarOrdering('smallerEq', compatCompareForNatural, unitRelational.smallerEq)
+      )
     ),
 
     // Per-instance config — does not mutate the functions singleton; wrapped
@@ -1188,7 +1256,9 @@ export function create(
         mean: scopeInstanceConfig(withMeanMathjsParity(compatStatisticsFactories.mean)),
         median: scopeInstanceConfig(
           withMedianBigintReturn(
-            withMedianMathjsParity(mathFunctions.median as (...args: unknown[]) => unknown),
+            withMedianMathjsFractionReturn(
+              withMedianMathjsParity(compatMedianFactory)
+            ),
             () => currentConfig.number ?? 'number'
           )
         ),
@@ -1200,7 +1270,7 @@ export function create(
         mode: scopeInstanceConfig(
           withModeEmptyGuard(mathFunctions.mode as (...args: unknown[]) => unknown)
         ),
-        quantileSeq: scopeInstanceConfig(compatStatisticsFactories.quantileSeq),
+        quantileSeq: scopeInstanceConfig(compatQuantileSeq),
         std: scopeInstanceConfig(compatStd),
         variance: scopeInstanceConfig(compatVariance),
         min: withMixedTypeVariadicMaxMin(
@@ -1543,8 +1613,16 @@ export function create(
     print: namedPrint,
     string: namedCompatString,
     setUnion: namedSetUnion,
-    compareText: withCompareTextInvalidMix(namedCompareText as (...args: unknown[]) => unknown),
-    equalText: withEqualTextBigNumberRejection(namedEqualText as (...args: unknown[]) => unknown),
+    compareText: withRelationalBinaryArity(
+      'compareText',
+      withCompareTextInvalidMix(namedCompareText as (...args: unknown[]) => unknown)
+    ),
+    equalText: withRelationalBinaryArity(
+      'equalText',
+      withEqualTextInvalidMix(
+        withEqualTextBigNumberRejection(namedEqualText as (...args: unknown[]) => unknown)
+      )
+    ),
     toBest: namedToBest,
     to: compatTo,
     unit: localUnits?.unit ?? namedUnit,
