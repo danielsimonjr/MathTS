@@ -1,3 +1,0 @@
-### Fixed
-
-- **Match complex.js non-finite `Complex` arithmetic on the compat instance (#1589):** compat-only wrappers apply complex.js 2.4.3 Riemann-sphere rules for `add`/`subtract`/`multiply`/`divide`/`dotMultiply`; `freqz` and `zpk2tf` are built with those wrappers for polynomial work (including gain-type rejection under `number: 'BigNumber'`); and `evaluate` routes `zpk2tf`/`freqz` through the instance shims. Native critical packages keep IEEE `Complex` semantics. Doc sweep runs each embedded example on a fresh pair and skips stateful `config` docs so `known-gaps/` cannot mask fixed `zpk2tf` rows.

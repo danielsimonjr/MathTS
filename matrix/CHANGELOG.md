@@ -1,5 +1,25 @@
 # @danielsimonjr/mathts-matrix
 
+## 0.13.3
+
+### Patch Changes
+
+- 98ee4a0: **`eigs` mathjs 15.3.0 quirks in compat only (#1561).** The public `eigs` of `@danielsimonjr/mathts-functions` stays the native `correctEigs` orthes/hqr2 route. The mathjs 15.3.0 factory port (precision collapse, non-unit eigenvector scale, magnitude-ordered values) lives in `compat/src/mathjs-eigs/` and is bound on `create(all)` via `compat/src/eigs-mathjs.ts`. Native `eig` Rayleigh-refines a small eigenvalue beside a 1e15 diagonal (mpmath: exactly 5). BREAKING (compat): instance `eigs` matches mathjs 15.3.0 including loose `precision`; the native package export keeps unit-normalized vectors and ignores numeric-only precision.
+- c6d0432: Match the mathjs 15.3.0 behavior changes and pin the compat parity oracle at mathjs 15.3.0.
+  
+  Updated `multinomial` (varargs, zeros, 2-D Dimension mismatch throw), `catalan(bigint)` (exact bigint), sparse element-wise ops (`dotPow`/`dotDivide`/`divide` evaluate implicit zeros), and `bigintToNumber` safe-integer range checks. BREAKING: out-of-range bigint-to-number conversions and 2-D `multinomial` inputs now throw; sparse `dotPow`/`dotDivide`/`divide` with non-zero image of 0 return `DenseMatrix`. The compat parity oracle is mathjs 15.3.0 (#1574): the pin, the regenerated parity names, the scheduled mathjs-oracle workflow, and the full-instance differential harness in `compat/tests/parity/`.
+- Updated dependencies [e6f5401]
+- Updated dependencies [c77aae6]
+- Updated dependencies [37dd8a8]
+- Updated dependencies [ff586ee]
+- Updated dependencies [432a0b0]
+- Updated dependencies [2355d55]
+- Updated dependencies [41819c8]
+- Updated dependencies [c6d0432]
+- Updated dependencies [59a9656]
+  - @danielsimonjr/mathts-core@0.31.0
+  - @danielsimonjr/mathts-parallel@0.12.3
+
 ## 0.13.2
 
 ### Patch Changes
