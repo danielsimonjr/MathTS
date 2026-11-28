@@ -16,9 +16,7 @@ describe('final eight lines — index compare, G02 count/variance/reduce', () =>
     const math = create(all);
     const fr = Array.from({ length: 9 }, (_, i) => math.fraction(i + 1, 10));
     expect(math.mad(fr)).toBeDefined();
-    expect(
-      math.mad([math.fraction(1, 4), math.fraction(1, 2), math.fraction(3, 4)])
-    ).toBeDefined();
+    expect(math.mad([math.fraction(1, 4), math.fraction(1, 2), math.fraction(3, 4)])).toBeDefined();
   });
 
   it('withCountBoolean reports the first-arg error before too-many', () => {

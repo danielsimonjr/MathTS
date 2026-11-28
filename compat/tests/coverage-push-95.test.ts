@@ -126,11 +126,7 @@ describe('coverage push — matrix model, sparse, shims, parity (#1785)', () => 
     const bignumberShim = shimBignumber as (...args: unknown[]) => unknown;
     expect(() => bignumberShim(1, 2)).toThrow(/Too many arguments/);
     expect(
-      math.mad([
-        math.fraction(1, 10),
-        math.fraction(2, 10),
-        math.fraction(9, 10),
-      ])
+      math.mad([math.fraction(1, 10), math.fraction(2, 10), math.fraction(9, 10)])
     ).toBeDefined();
     expect(math.add(math.complex(1, 1), math.matrix([1]))).toBeDefined();
     expect(math.evaluate('schur([1,2;3,4])')).toBeDefined();
